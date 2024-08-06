@@ -249,50 +249,60 @@ class Foo final  {
   bool operator==(const Foo&) const;
   bool operator<(const Foo&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field_ref() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field_ref() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   ::std::int32_t get_field() const {
     return __fbthrift_field_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct", "field": "field" } */
   [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
@@ -405,48 +415,59 @@ class Bar final  {
   bool operator==(const Bar&) const;
   bool operator<(const Bar&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field_ref() const& {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field_ref() & {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field() const& {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field() & {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Bar", "kind": "struct", "field": "list_field" } */
   template <typename T_Bar_list_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_field(T_Bar_list_field_struct_setter&& list_field_) {
@@ -562,97 +583,119 @@ class Baz final  {
   bool operator==(const Baz&) const;
   bool operator<(const Baz&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field_ref() const& {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field_ref() & {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field() const& {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field() & {
     return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_list_field_ref() const& {
     return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_list_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_list_field_ref() & {
     return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_list_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_list_field() const& {
     return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_list_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_list_field() & {
     return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "list_field" } */
   template <typename T_Baz_list_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_field(T_Baz_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_Baz_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& get_nested_list_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> get_nested_list_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Baz", "kind": "struct", "field": "nested_list_field" } */
   template <typename T_Baz_nested_list_field_struct_setter = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   [[deprecated("Use `FOO.nested_list_field_ref() = BAR;` instead of `FOO.set_nested_list_field(BAR);`")]]
   ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& set_nested_list_field(T_Baz_nested_list_field_struct_setter&& nested_list_field_) {
@@ -807,561 +850,682 @@ class OpEncodeStruct final  {
   bool operator==(const OpEncodeStruct&) const;
   bool operator<(const OpEncodeStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> int_field_ref() const& {
     return {this->__fbthrift_field_int_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> int_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_int_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> int_field_ref() & {
     return {this->__fbthrift_field_int_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> int_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_int_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> int_field() const& {
     return {this->__fbthrift_field_int_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> int_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_int_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> int_field() & {
     return {this->__fbthrift_field_int_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> int_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_int_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> enum_field_ref() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enum_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_enum_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> enum_field_ref() & {
     return {this->__fbthrift_field_enum_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> enum_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_enum_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> enum_field() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enum_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_enum_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> enum_field() & {
     return {this->__fbthrift_field_enum_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Enum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> enum_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_enum_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> foo_field_ref() const& {
     return {this->__fbthrift_field_foo_field, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> foo_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_foo_field), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> foo_field_ref() & {
     return {this->__fbthrift_field_foo_field, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> foo_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_foo_field), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> foo_field() const& {
     return {this->__fbthrift_field_foo_field, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> foo_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_foo_field), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> foo_field() & {
     return {this->__fbthrift_field_foo_field, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Foo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> foo_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_foo_field), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_field_ref() const& {
     return {this->__fbthrift_field_adapted_field, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_adapted_field), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_field_ref() & {
     return {this->__fbthrift_field_adapted_field, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_adapted_field), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_field() const& {
     return {this->__fbthrift_field_adapted_field, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_adapted_field), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_field() & {
     return {this->__fbthrift_field_adapted_field, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_field" } */
   template <typename..., typename T = ::facebook::thrift::test::AdaptedFoo>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_adapted_field), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field_ref() const& {
     return {this->__fbthrift_field_list_field, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field_ref() & {
     return {this->__fbthrift_field_list_field, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field() const& {
     return {this->__fbthrift_field_list_field, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field() & {
     return {this->__fbthrift_field_list_field, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(4), __isset.bit(4)};
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE T& list_shared_ptr_field_ref() & {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE const T& list_shared_ptr_field_ref() const& {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE T&& list_shared_ptr_field_ref() && {
     return static_cast<T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE const T&& list_shared_ptr_field_ref() const&& {
     return static_cast<const T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE T& list_shared_ptr_field() & {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE const T& list_shared_ptr_field() const& {
     return __fbthrift_field_list_shared_ptr_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE T&& list_shared_ptr_field() && {
     return static_cast<T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_shared_ptr_field" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE const T&& list_shared_ptr_field() const&& {
     return static_cast<const T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_cpp_type_field_ref() const& {
     return {this->__fbthrift_field_list_cpp_type_field, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_cpp_type_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_cpp_type_field), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_cpp_type_field_ref() & {
     return {this->__fbthrift_field_list_cpp_type_field, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_cpp_type_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_cpp_type_field), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_cpp_type_field() const& {
     return {this->__fbthrift_field_list_cpp_type_field, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_cpp_type_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_cpp_type_field), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_cpp_type_field() & {
     return {this->__fbthrift_field_list_cpp_type_field, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_cpp_type_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_cpp_type_field), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> set_field_ref() const& {
     return {this->__fbthrift_field_set_field, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> set_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_set_field), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> set_field_ref() & {
     return {this->__fbthrift_field_set_field, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> set_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_set_field), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> set_field() const& {
     return {this->__fbthrift_field_set_field, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> set_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_set_field), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> set_field() & {
     return {this->__fbthrift_field_set_field, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> set_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_set_field), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> map_field_ref() const& {
     return {this->__fbthrift_field_map_field, __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> map_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_map_field), __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> map_field_ref() & {
     return {this->__fbthrift_field_map_field, __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> map_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_map_field), __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> map_field() const& {
     return {this->__fbthrift_field_map_field, __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> map_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_map_field), __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> map_field() & {
     return {this->__fbthrift_field_map_field, __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> map_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_map_field), __isset.at(7), __isset.bit(7)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_field_ref() const& {
     return {this->__fbthrift_field_nested_field, __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_nested_field), __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_field_ref() & {
     return {this->__fbthrift_field_nested_field, __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_nested_field), __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_field() const& {
     return {this->__fbthrift_field_nested_field, __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_nested_field), __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_field() & {
     return {this->__fbthrift_field_nested_field, __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_nested_field), __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> bar_field_ref() const& {
     return {this->__fbthrift_field_bar_field, __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> bar_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_bar_field), __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> bar_field_ref() & {
     return {this->__fbthrift_field_bar_field, __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> bar_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_bar_field), __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> bar_field() const& {
     return {this->__fbthrift_field_bar_field, __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> bar_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_bar_field), __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> bar_field() & {
     return {this->__fbthrift_field_bar_field, __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> bar_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_bar_field), __isset.at(9), __isset.bit(9)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_list_field_ref() const& {
     return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_list_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_list_field_ref() & {
     return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_list_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_list_field() const& {
     return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_list_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_list_field() & {
     return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "adapted_list_field" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   ::std::int32_t get_int_field() const {
     return __fbthrift_field_int_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "int_field" } */
   [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   ::facebook::thrift::test::Enum get_enum_field() const {
     return __fbthrift_field_enum_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::facebook::thrift::test::Enum& set_enum_field(::facebook::thrift::test::Enum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   const ::facebook::thrift::test::Foo& get_foo_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   ::facebook::thrift::test::Foo get_foo_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "foo_field" } */
   template <typename T_OpEncodeStruct_foo_field_struct_setter = ::facebook::thrift::test::Foo>
   [[deprecated("Use `FOO.foo_field_ref() = BAR;` instead of `FOO.set_foo_field(BAR);`")]]
   ::facebook::thrift::test::Foo& set_foo_field(T_OpEncodeStruct_foo_field_struct_setter&& foo_field_) {
     foo_field_ref() = std::forward<T_OpEncodeStruct_foo_field_struct_setter>(foo_field_);
     return __fbthrift_field_foo_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_field" } */
   template <typename T_OpEncodeStruct_list_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_field(T_OpEncodeStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_OpEncodeStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_cpp_type_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_cpp_type_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "list_cpp_type_field" } */
   template <typename T_OpEncodeStruct_list_cpp_type_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
   [[deprecated("Use `FOO.list_cpp_type_field_ref() = BAR;` instead of `FOO.set_list_cpp_type_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_cpp_type_field(T_OpEncodeStruct_list_cpp_type_field_struct_setter&& list_cpp_type_field_) {
     list_cpp_type_field_ref() = std::forward<T_OpEncodeStruct_list_cpp_type_field_struct_setter>(list_cpp_type_field_);
     return __fbthrift_field_list_cpp_type_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   const ::std::set<::facebook::thrift::test::AdaptedFoo>& get_set_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   ::std::set<::facebook::thrift::test::AdaptedFoo> get_set_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "set_field" } */
   template <typename T_OpEncodeStruct_set_field_struct_setter = ::std::set<::facebook::thrift::test::AdaptedFoo>>
   [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::facebook::thrift::test::AdaptedFoo>& set_set_field(T_OpEncodeStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_OpEncodeStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   const ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>& get_map_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> get_map_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "map_field" } */
   template <typename T_OpEncodeStruct_map_field_struct_setter = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
   [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>& set_map_field(T_OpEncodeStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_OpEncodeStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>& get_nested_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> get_nested_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "nested_field" } */
   template <typename T_OpEncodeStruct_nested_field_struct_setter = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   [[deprecated("Use `FOO.nested_field_ref() = BAR;` instead of `FOO.set_nested_field(BAR);`")]]
   ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>& set_nested_field(T_OpEncodeStruct_nested_field_struct_setter&& nested_field_) {
     nested_field_ref() = std::forward<T_OpEncodeStruct_nested_field_struct_setter>(nested_field_);
     return __fbthrift_field_nested_field;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   const ::facebook::thrift::test::Bar& get_bar_field() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   ::facebook::thrift::test::Bar get_bar_field() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "OpEncodeStruct", "kind": "struct", "field": "bar_field" } */
   template <typename T_OpEncodeStruct_bar_field_struct_setter = ::facebook::thrift::test::Bar>
   [[deprecated("Use `FOO.bar_field_ref() = BAR;` instead of `FOO.set_bar_field(BAR);`")]]
   ::facebook::thrift::test::Bar& set_bar_field(T_OpEncodeStruct_bar_field_struct_setter&& bar_field_) {

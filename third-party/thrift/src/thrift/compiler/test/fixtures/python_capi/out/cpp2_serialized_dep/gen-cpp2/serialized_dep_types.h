@@ -228,174 +228,209 @@ class SerializedStruct final  {
   bool operator==(const SerializedStruct&) const;
   bool operator<(const SerializedStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> s_ref() const& {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> s_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> s_ref() & {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> s_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> s() const& {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> s() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> s() & {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> s() && {
     return {static_cast<T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> i_ref() const& {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> i_ref() & {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> i() const& {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> i() & {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i() && {
     return {static_cast<T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os_ref() const& {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os_ref() & {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os() const& {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os() & {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs_ref() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs_ref() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs_ref() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs_ref() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   const ::std::string& get_s() const& {
     return __fbthrift_field_s;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   ::std::string get_s() && {
     return std::move(__fbthrift_field_s);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "s" } */
   template <typename T_SerializedStruct_s_struct_setter = ::std::string>
   [[deprecated("Use `FOO.s_ref() = BAR;` instead of `FOO.set_s(BAR);`")]]
   ::std::string& set_s(T_SerializedStruct_s_struct_setter&& s_) {
@@ -403,25 +438,31 @@ class SerializedStruct final  {
     return __fbthrift_field_s;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   ::std::int32_t get_i() const {
     return __fbthrift_field_i;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "i" } */
   [[deprecated("Use `FOO.i_ref() = BAR;` instead of `FOO.set_i(BAR);`")]]
   ::std::int32_t& set_i(::std::int32_t i_) {
     i_ref() = i_;
     return __fbthrift_field_i;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   const ::std::string* get_os() const& {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   ::std::string* get_os() & {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   ::std::string* get_os() && = delete;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "os" } */
   template <typename T_SerializedStruct_os_struct_setter = ::std::string>
   [[deprecated("Use `FOO.os_ref() = BAR;` instead of `FOO.set_os(BAR);`")]]
   ::std::string& set_os(T_SerializedStruct_os_struct_setter&& os_) {
@@ -429,14 +470,17 @@ class SerializedStruct final  {
     return __fbthrift_field_os;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   ::std::string get_rs() && {
     return std::move(__fbthrift_field_rs);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct", "field": "rs" } */
   template <typename T_SerializedStruct_rs_struct_setter = ::std::string>
   [[deprecated("Use `FOO.rs_ref() = BAR;` instead of `FOO.set_rs(BAR);`")]]
   ::std::string& set_rs(T_SerializedStruct_rs_struct_setter&& rs_) {
@@ -838,134 +882,161 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
   bool operator==(const SerializedError&) const;
   bool operator<(const SerializedError&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> msg_ref() const& {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> msg_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> msg_ref() & {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> msg_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> msg() const& {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> msg() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> msg() & {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> msg() && {
     return {static_cast<T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os_ref() const& {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os_ref() & {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os() const& {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os() & {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs_ref() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs_ref() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs_ref() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs_ref() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   const ::std::string& get_msg() const& {
     return __fbthrift_field_msg;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   ::std::string get_msg() && {
     return std::move(__fbthrift_field_msg);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "msg" } */
   template <typename T_SerializedError_msg_struct_setter = ::std::string>
   [[deprecated("Use `FOO.msg_ref() = BAR;` instead of `FOO.set_msg(BAR);`")]]
   ::std::string& set_msg(T_SerializedError_msg_struct_setter&& msg_) {
@@ -973,15 +1044,19 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
     return __fbthrift_field_msg;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   const ::std::string* get_os() const& {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   ::std::string* get_os() & {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   ::std::string* get_os() && = delete;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "os" } */
   template <typename T_SerializedError_os_struct_setter = ::std::string>
   [[deprecated("Use `FOO.os_ref() = BAR;` instead of `FOO.set_os(BAR);`")]]
   ::std::string& set_os(T_SerializedError_os_struct_setter&& os_) {
@@ -989,14 +1064,17 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
     return __fbthrift_field_os;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   ::std::string get_rs() && {
     return std::move(__fbthrift_field_rs);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedError", "kind": "exception", "field": "rs" } */
   template <typename T_SerializedError_rs_struct_setter = ::std::string>
   [[deprecated("Use `FOO.rs_ref() = BAR;` instead of `FOO.set_rs(BAR);`")]]
   ::std::string& set_rs(T_SerializedError_rs_struct_setter&& rs_) {
@@ -1124,174 +1202,209 @@ class MarshalStruct final  {
   bool operator==(const MarshalStruct&) const;
   bool operator<(const MarshalStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> s_ref() const& {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> s_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> s_ref() & {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> s_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> s() const& {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> s() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> s() & {
     return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> s() && {
     return {static_cast<T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> i_ref() const& {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> i_ref() & {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> i() const& {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> i() & {
     return {this->__fbthrift_field_i, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i() && {
     return {static_cast<T&&>(this->__fbthrift_field_i), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os_ref() const& {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os_ref() & {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os() const& {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os() & {
     return {this->__fbthrift_field_os, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs_ref() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs_ref() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs_ref() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs_ref() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   const ::std::string& get_s() const& {
     return __fbthrift_field_s;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   ::std::string get_s() && {
     return std::move(__fbthrift_field_s);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "s" } */
   template <typename T_MarshalStruct_s_struct_setter = ::std::string>
   [[deprecated("Use `FOO.s_ref() = BAR;` instead of `FOO.set_s(BAR);`")]]
   ::std::string& set_s(T_MarshalStruct_s_struct_setter&& s_) {
@@ -1299,25 +1412,31 @@ class MarshalStruct final  {
     return __fbthrift_field_s;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   ::std::int32_t get_i() const {
     return __fbthrift_field_i;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "i" } */
   [[deprecated("Use `FOO.i_ref() = BAR;` instead of `FOO.set_i(BAR);`")]]
   ::std::int32_t& set_i(::std::int32_t i_) {
     i_ref() = i_;
     return __fbthrift_field_i;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   const ::std::string* get_os() const& {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   ::std::string* get_os() & {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   ::std::string* get_os() && = delete;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "os" } */
   template <typename T_MarshalStruct_os_struct_setter = ::std::string>
   [[deprecated("Use `FOO.os_ref() = BAR;` instead of `FOO.set_os(BAR);`")]]
   ::std::string& set_os(T_MarshalStruct_os_struct_setter&& os_) {
@@ -1325,14 +1444,17 @@ class MarshalStruct final  {
     return __fbthrift_field_os;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   ::std::string get_rs() && {
     return std::move(__fbthrift_field_rs);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalStruct", "kind": "struct", "field": "rs" } */
   template <typename T_MarshalStruct_rs_struct_setter = ::std::string>
   [[deprecated("Use `FOO.rs_ref() = BAR;` instead of `FOO.set_rs(BAR);`")]]
   ::std::string& set_rs(T_MarshalStruct_rs_struct_setter&& rs_) {
@@ -1734,134 +1856,161 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
   bool operator==(const MarshalError&) const;
   bool operator<(const MarshalError&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> msg_ref() const& {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> msg_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> msg_ref() & {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> msg_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> msg() const& {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> msg() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> msg() & {
     return {this->__fbthrift_field_msg, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> msg() && {
     return {static_cast<T&&>(this->__fbthrift_field_msg), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os_ref() const& {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os_ref() & {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> os() const& {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> os() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> os() & {
     return {this->__fbthrift_field_os, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> os() && {
     return {static_cast<T&&>(this->__fbthrift_field_os), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs_ref() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs_ref() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs_ref() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs_ref() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> rs() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> rs() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> rs() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_rs};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> rs() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_rs)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   const ::std::string& get_msg() const& {
     return __fbthrift_field_msg;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   ::std::string get_msg() && {
     return std::move(__fbthrift_field_msg);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "msg" } */
   template <typename T_MarshalError_msg_struct_setter = ::std::string>
   [[deprecated("Use `FOO.msg_ref() = BAR;` instead of `FOO.set_msg(BAR);`")]]
   ::std::string& set_msg(T_MarshalError_msg_struct_setter&& msg_) {
@@ -1869,15 +2018,19 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
     return __fbthrift_field_msg;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   const ::std::string* get_os() const& {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   ::std::string* get_os() & {
     return os_ref() ? std::addressof(__fbthrift_field_os) : nullptr;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   ::std::string* get_os() && = delete;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "os" } */
   template <typename T_MarshalError_os_struct_setter = ::std::string>
   [[deprecated("Use `FOO.os_ref() = BAR;` instead of `FOO.set_os(BAR);`")]]
   ::std::string& set_os(T_MarshalError_os_struct_setter&& os_) {
@@ -1885,14 +2038,17 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
     return __fbthrift_field_os;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   ::std::string get_rs() && {
     return std::move(__fbthrift_field_rs);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "MarshalError", "kind": "exception", "field": "rs" } */
   template <typename T_MarshalError_rs_struct_setter = ::std::string>
   [[deprecated("Use `FOO.rs_ref() = BAR;` instead of `FOO.set_rs(BAR);`")]]
   ::std::string& set_rs(T_MarshalError_rs_struct_setter&& rs_) {

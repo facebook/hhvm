@@ -143,137 +143,167 @@ class MyStruct final  {
   bool operator==(const MyStruct&) const;
   bool operator<(const MyStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyIncludedField_ref() const& {
     return {this->__fbthrift_field_MyIncludedField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyIncludedField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyIncludedField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyIncludedField_ref() & {
     return {this->__fbthrift_field_MyIncludedField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyIncludedField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyIncludedField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyIncludedField() const& {
     return {this->__fbthrift_field_MyIncludedField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyIncludedField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyIncludedField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyIncludedField() & {
     return {this->__fbthrift_field_MyIncludedField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyIncludedField() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyIncludedField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyOtherIncludedField_ref() const& {
     return {this->__fbthrift_field_MyOtherIncludedField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyOtherIncludedField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyOtherIncludedField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyOtherIncludedField_ref() & {
     return {this->__fbthrift_field_MyOtherIncludedField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyOtherIncludedField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyOtherIncludedField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyOtherIncludedField() const& {
     return {this->__fbthrift_field_MyOtherIncludedField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyOtherIncludedField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyOtherIncludedField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyOtherIncludedField() & {
     return {this->__fbthrift_field_MyOtherIncludedField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename..., typename T = ::cpp2::Included>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyOtherIncludedField() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyOtherIncludedField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyIncludedInt_ref() const& {
     return {this->__fbthrift_field_MyIncludedInt, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyIncludedInt_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyIncludedInt), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyIncludedInt_ref() & {
     return {this->__fbthrift_field_MyIncludedInt, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyIncludedInt_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyIncludedInt), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyIncludedInt() const& {
     return {this->__fbthrift_field_MyIncludedInt, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyIncludedInt() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyIncludedInt), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyIncludedInt() & {
     return {this->__fbthrift_field_MyIncludedInt, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   template <typename..., typename T = ::cpp2::IncludedInt64>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyIncludedInt() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyIncludedInt), __isset.at(2), __isset.bit(2)};
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   const ::cpp2::Included& get_MyIncludedField() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   ::cpp2::Included get_MyIncludedField() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedField" } */
   template <typename T_MyStruct_MyIncludedField_struct_setter = ::cpp2::Included>
   [[deprecated("Use `FOO.MyIncludedField_ref() = BAR;` instead of `FOO.set_MyIncludedField(BAR);`")]]
   ::cpp2::Included& set_MyIncludedField(T_MyStruct_MyIncludedField_struct_setter&& MyIncludedField_) {
     MyIncludedField_ref() = std::forward<T_MyStruct_MyIncludedField_struct_setter>(MyIncludedField_);
     return __fbthrift_field_MyIncludedField;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   const ::cpp2::Included& get_MyOtherIncludedField() const&;
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   ::cpp2::Included get_MyOtherIncludedField() &&;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyOtherIncludedField" } */
   template <typename T_MyStruct_MyOtherIncludedField_struct_setter = ::cpp2::Included>
   [[deprecated("Use `FOO.MyOtherIncludedField_ref() = BAR;` instead of `FOO.set_MyOtherIncludedField(BAR);`")]]
   ::cpp2::Included& set_MyOtherIncludedField(T_MyStruct_MyOtherIncludedField_struct_setter&& MyOtherIncludedField_) {
@@ -281,10 +311,12 @@ class MyStruct final  {
     return __fbthrift_field_MyOtherIncludedField;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   ::cpp2::IncludedInt64 get_MyIncludedInt() const {
     return __fbthrift_field_MyIncludedInt;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "MyIncludedInt" } */
   [[deprecated("Use `FOO.MyIncludedInt_ref() = BAR;` instead of `FOO.set_MyIncludedInt(BAR);`")]]
   ::cpp2::IncludedInt64& set_MyIncludedInt(::cpp2::IncludedInt64 MyIncludedInt_) {
     MyIncludedInt_ref() = MyIncludedInt_;

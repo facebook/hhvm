@@ -177,50 +177,60 @@ class AStruct final  {
   bool operator==(const AStruct&) const;
   bool operator<(const AStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> FieldA_ref() const& {
     return {this->__fbthrift_field_FieldA, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> FieldA_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_FieldA), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> FieldA_ref() & {
     return {this->__fbthrift_field_FieldA, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> FieldA_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_FieldA), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> FieldA() const& {
     return {this->__fbthrift_field_FieldA, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> FieldA() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_FieldA), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> FieldA() & {
     return {this->__fbthrift_field_FieldA, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> FieldA() && {
     return {static_cast<T&&>(this->__fbthrift_field_FieldA), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   ::std::int32_t get_FieldA() const {
     return __fbthrift_field_FieldA;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStruct", "kind": "struct", "field": "FieldA" } */
   [[deprecated("Use `FOO.FieldA_ref() = BAR;` instead of `FOO.set_FieldA(BAR);`")]]
   ::std::int32_t& set_FieldA(::std::int32_t FieldA_) {
     FieldA_ref() = FieldA_;
@@ -327,41 +337,49 @@ class AStructB final  {
 
   bool operator==(const AStructB&) const;
   bool operator<(const AStructB&) const;
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE T& FieldA_ref() & {
     return __fbthrift_field_FieldA;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE const T& FieldA_ref() const& {
     return __fbthrift_field_FieldA;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE T&& FieldA_ref() && {
     return static_cast<T&&>(__fbthrift_field_FieldA);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE const T&& FieldA_ref() const&& {
     return static_cast<const T&&>(__fbthrift_field_FieldA);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE T& FieldA() & {
     return __fbthrift_field_FieldA;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE const T& FieldA() const& {
     return __fbthrift_field_FieldA;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE T&& FieldA() && {
     return static_cast<T&&>(__fbthrift_field_FieldA);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "AStructB", "kind": "struct", "field": "FieldA" } */
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE const T&& FieldA() const&& {
     return static_cast<const T&&>(__fbthrift_field_FieldA);

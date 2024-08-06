@@ -168,54 +168,65 @@ class Fields final  {
   bool operator==(const Fields&) const;
   bool operator<(const Fields&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field_ref() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field_ref() & {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field() & {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct", "field": "injected_field" } */
   template <typename T_Fields_injected_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.injected_field_ref() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
   ::std::string& set_injected_field(T_Fields_injected_field_struct_setter&& injected_field_) {
@@ -326,54 +337,65 @@ class FieldsInjectedToEmptyStruct final  {
   bool operator==(const FieldsInjectedToEmptyStruct&) const;
   bool operator<(const FieldsInjectedToEmptyStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field_ref() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field_ref() & {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field() & {
     return {this->__fbthrift_field_injected_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToEmptyStruct", "kind": "struct", "field": "injected_field" } */
   template <typename T_FieldsInjectedToEmptyStruct_injected_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.injected_field_ref() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
   ::std::string& set_injected_field(T_FieldsInjectedToEmptyStruct_injected_field_struct_setter&& injected_field_) {
@@ -488,94 +510,113 @@ class FieldsInjectedToStruct final  {
   bool operator==(const FieldsInjectedToStruct&) const;
   bool operator<(const FieldsInjectedToStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> string_field_ref() const& {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> string_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> string_field_ref() & {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> string_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> string_field() const& {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> string_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> string_field() & {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> string_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field_ref() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field_ref() & {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field() & {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   ::std::string get_string_field() && {
     return std::move(__fbthrift_field_string_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "string_field" } */
   template <typename T_FieldsInjectedToStruct_string_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_FieldsInjectedToStruct_string_field_struct_setter&& string_field_) {
@@ -583,14 +624,17 @@ class FieldsInjectedToStruct final  {
     return __fbthrift_field_string_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedToStruct", "kind": "struct", "field": "injected_field" } */
   template <typename T_FieldsInjectedToStruct_injected_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.injected_field_ref() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
   ::std::string& set_injected_field(T_FieldsInjectedToStruct_injected_field_struct_setter&& injected_field_) {
@@ -713,174 +757,209 @@ class FieldsInjectedWithIncludedStruct final  {
   bool operator==(const FieldsInjectedWithIncludedStruct&) const;
   bool operator<(const FieldsInjectedWithIncludedStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> string_field_ref() const& {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> string_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> string_field_ref() & {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> string_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> string_field() const& {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> string_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> string_field() & {
     return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> string_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field_ref() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field_ref() & {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> injected_field() const& {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> injected_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> injected_field() & {
     return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> injected_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> injected_structured_annotation_field_ref() const& {
     return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_injected_structured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> injected_structured_annotation_field_ref() const&& {
     return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_injected_structured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> injected_structured_annotation_field_ref() & {
     return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_injected_structured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> injected_structured_annotation_field_ref() && {
     return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_injected_structured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> injected_structured_annotation_field() const& {
     return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_injected_structured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> injected_structured_annotation_field() const&& {
     return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_injected_structured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> injected_structured_annotation_field() & {
     return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_injected_structured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_structured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> injected_structured_annotation_field() && {
     return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_injected_structured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> injected_unstructured_annotation_field_ref() const& {
     return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_injected_unstructured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> injected_unstructured_annotation_field_ref() const&& {
     return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_injected_unstructured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> injected_unstructured_annotation_field_ref() & {
     return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_injected_unstructured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> injected_unstructured_annotation_field_ref() && {
     return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_injected_unstructured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> injected_unstructured_annotation_field() const& {
     return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_injected_unstructured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> injected_unstructured_annotation_field() const&& {
     return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_injected_unstructured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> injected_unstructured_annotation_field() & {
     return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_injected_unstructured_annotation_field};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_unstructured_annotation_field" } */
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> injected_unstructured_annotation_field() && {
     return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_injected_unstructured_annotation_field)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   ::std::string get_string_field() && {
     return std::move(__fbthrift_field_string_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "string_field" } */
   template <typename T_FieldsInjectedWithIncludedStruct_string_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_FieldsInjectedWithIncludedStruct_string_field_struct_setter&& string_field_) {
@@ -888,14 +967,17 @@ class FieldsInjectedWithIncludedStruct final  {
     return __fbthrift_field_string_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithIncludedStruct", "kind": "struct", "field": "injected_field" } */
   template <typename T_FieldsInjectedWithIncludedStruct_injected_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.injected_field_ref() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
   ::std::string& set_injected_field(T_FieldsInjectedWithIncludedStruct_injected_field_struct_setter&& injected_field_) {

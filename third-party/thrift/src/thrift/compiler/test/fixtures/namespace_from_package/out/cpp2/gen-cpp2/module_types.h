@@ -125,50 +125,60 @@ class Foo final  {
   bool operator==(const Foo&) const;
   bool operator<(const Foo&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyInt_ref() const& {
     return {this->__fbthrift_field_MyInt, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyInt_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyInt), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyInt_ref() & {
     return {this->__fbthrift_field_MyInt, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyInt_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyInt), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyInt() const& {
     return {this->__fbthrift_field_MyInt, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyInt() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyInt), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyInt() & {
     return {this->__fbthrift_field_MyInt, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyInt() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyInt), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   ::std::int64_t get_MyInt() const {
     return __fbthrift_field_MyInt;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package/src/module.thrift", "name": "Foo", "kind": "struct", "field": "MyInt" } */
   [[deprecated("Use `FOO.MyInt_ref() = BAR;` instead of `FOO.set_MyInt(BAR);`")]]
   ::std::int64_t& set_MyInt(::std::int64_t MyInt_) {
     MyInt_ref() = MyInt_;

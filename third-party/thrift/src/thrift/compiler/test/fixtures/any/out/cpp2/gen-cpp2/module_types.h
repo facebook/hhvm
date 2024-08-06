@@ -141,54 +141,65 @@ class MyStruct final  {
   bool operator==(const MyStruct&) const;
   bool operator<(const MyStruct&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> myString_ref() const& {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> myString_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> myString_ref() & {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> myString_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> myString() const& {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> myString() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> myString() & {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> myString() && {
     return {static_cast<T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   const ::std::string& get_myString() const& {
     return __fbthrift_field_myString;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   ::std::string get_myString() && {
     return std::move(__fbthrift_field_myString);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyStruct", "kind": "struct", "field": "myString" } */
   template <typename T_MyStruct_myString_struct_setter = ::std::string>
   [[deprecated("Use `FOO.myString_ref() = BAR;` instead of `FOO.set_myString(BAR);`")]]
   ::std::string& set_myString(T_MyStruct_myString_struct_setter&& myString_) {
@@ -524,54 +535,65 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   bool operator==(const MyException&) const;
   bool operator<(const MyException&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> myString_ref() const& {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> myString_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> myString_ref() & {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> myString_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> myString() const& {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> myString() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> myString() & {
     return {this->__fbthrift_field_myString, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> myString() && {
     return {static_cast<T&&>(this->__fbthrift_field_myString), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   const ::std::string& get_myString() const& {
     return __fbthrift_field_myString;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   ::std::string get_myString() && {
     return std::move(__fbthrift_field_myString);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/any/src/module.thrift", "name": "MyException", "kind": "exception", "field": "myString" } */
   template <typename T_MyException_myString_struct_setter = ::std::string>
   [[deprecated("Use `FOO.myString_ref() = BAR;` instead of `FOO.set_myString(BAR);`")]]
   ::std::string& set_myString(T_MyException_myString_struct_setter&& myString_) {

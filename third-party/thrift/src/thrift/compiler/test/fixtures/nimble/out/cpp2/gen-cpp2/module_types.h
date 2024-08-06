@@ -154,210 +154,254 @@ class BasicTypes final  {
   bool operator==(const BasicTypes&) const;
   bool operator<(const BasicTypes&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> first_ref() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_first};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> first_ref() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_first)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> first_ref() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_first};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> first_ref() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_first)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> first() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->__fbthrift_field_first};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> first() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_first)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> first() & {
     return ::apache::thrift::required_field_ref<T&>{this->__fbthrift_field_first};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> first() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_first)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> second_ref() const& {
     return {this->__fbthrift_field_second, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> second_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_second), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> second_ref() & {
     return {this->__fbthrift_field_second, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> second_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_second), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> second() const& {
     return {this->__fbthrift_field_second, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> second() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_second), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> second() & {
     return {this->__fbthrift_field_second, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> second() && {
     return {static_cast<T&&>(this->__fbthrift_field_second), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> third_ref() const& {
     return {this->__fbthrift_field_third, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> third_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_third), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> third_ref() & {
     return {this->__fbthrift_field_third, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> third_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_third), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> third() const& {
     return {this->__fbthrift_field_third, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> third() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_third), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> third() & {
     return {this->__fbthrift_field_third, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> third() && {
     return {static_cast<T&&>(this->__fbthrift_field_third), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> isTrue_ref() const& {
     return {this->__fbthrift_field_isTrue, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> isTrue_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_isTrue), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> isTrue_ref() & {
     return {this->__fbthrift_field_isTrue, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> isTrue_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_isTrue), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> isTrue() const& {
     return {this->__fbthrift_field_isTrue, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> isTrue() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_isTrue), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> isTrue() & {
     return {this->__fbthrift_field_isTrue, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> isTrue() && {
     return {static_cast<T&&>(this->__fbthrift_field_isTrue), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   ::std::int32_t get_first() const {
     return __fbthrift_field_first;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "first" } */
   [[deprecated("Use `FOO.first_ref() = BAR;` instead of `FOO.set_first(BAR);`")]]
   ::std::int32_t& set_first(::std::int32_t first_) {
     first_ref() = first_;
     return __fbthrift_field_first;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   const ::std::int32_t* get_second() const& {
     return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   ::std::int32_t* get_second() & {
     return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   ::std::int32_t* get_second() && = delete;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "second" } */
   [[deprecated("Use `FOO.second_ref() = BAR;` instead of `FOO.set_second(BAR);`")]]
   ::std::int32_t& set_second(::std::int32_t second_) {
     second_ref() = second_;
     return __fbthrift_field_second;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   const ::std::int64_t* get_third() const& {
     return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   ::std::int64_t* get_third() & {
     return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
   }
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   ::std::int64_t* get_third() && = delete;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "third" } */
   [[deprecated("Use `FOO.third_ref() = BAR;` instead of `FOO.set_third(BAR);`")]]
   ::std::int64_t& set_third(::std::int64_t third_) {
     third_ref() = third_;
     return __fbthrift_field_third;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   bool get_isTrue() const {
     return __fbthrift_field_isTrue;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct", "field": "isTrue" } */
   [[deprecated("Use `FOO.isTrue_ref() = BAR;` instead of `FOO.set_isTrue(BAR);`")]]
   bool& set_isTrue(bool isTrue_) {
     isTrue_ref() = isTrue_;

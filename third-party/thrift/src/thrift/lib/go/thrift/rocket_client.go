@@ -22,10 +22,6 @@ import (
 	"maps"
 	"net"
 	"time"
-
-	rsocket "github.com/rsocket/rsocket-go"
-	"github.com/rsocket/rsocket-go/core/transport"
-	"github.com/rsocket/rsocket-go/payload"
 )
 
 type rocketClient struct {
@@ -35,11 +31,9 @@ type rocketClient struct {
 	conn net.Conn
 
 	// rsocket client state
-	ctx    context.Context
-	cancel func()
-	client rsocket.Client
+	client *rsocketClient
 
-	resultVal payload.Payload
+	resultVal *responsePayload
 	resultErr error
 
 	timeout time.Duration
@@ -97,82 +91,29 @@ func (p *rocketClient) WriteMessageEnd() error {
 
 func (p *rocketClient) Flush() (err error) {
 	dataBytes := p.wbuf.Bytes()
-	request, err := encodeRequestPayload(p.messageName, p.protoID, p.writeType, p.reqHeaders, p.persistentHeaders, p.zstd, dataBytes)
-	if err != nil {
-		return err
+	if p.client == nil {
+		p.client, err = newRsocketClient(p.conn, p.serverMetadataPush)
+		if err != nil {
+			return err
+		}
 	}
-
-	if err := p.open(); err != nil {
-		return err
-	}
-
-	// It is necessary to reset the deadline to 0.
-	// The rsocket library only sets the deadline at connection start.
-	// This means if you wait long enough, the connection will become useless.
-	// Or something else is happening, but this is very necessary.
-	p.conn.SetDeadline(time.Time{})
-
 	if p.writeType == ONEWAY {
-		p.client.FireAndForget(request)
-		return nil
+		return p.client.fireAndForget(p.messageName, p.protoID, p.writeType, p.reqHeaders, p.persistentHeaders, p.zstd, dataBytes)
 	}
 	if p.writeType != CALL {
 		return nil
 	}
-	mono := p.client.RequestResponse(request)
-
-	ctx := p.ctx
+	ctx := context.Background()
 	if p.timeout > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, p.timeout)
 		defer cancel()
 	}
-	val, err := mono.Block(ctx)
-	p.resultVal = payload.Clone(val)
-	p.resultErr = err
+	p.resultVal, p.resultErr = p.client.requestResponse(ctx, p.messageName, p.protoID, p.writeType, p.reqHeaders, p.persistentHeaders, p.zstd, dataBytes)
 	return nil
 }
 
-// Open opens the internal transport (required for Transport)
-func (p *rocketClient) open() error {
-	if p.client != nil {
-		return nil
-	}
-	setupPayload, err := newRequestSetupPayloadVersion8()
-	if err != nil {
-		return err
-	}
-	p.ctx, p.cancel = context.WithCancel(context.Background())
-	clientBuilder := rsocket.Connect()
-	// See T182939211. This copies the keep alives from Java Rocket.
-	// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
-	clientBuilder = clientBuilder.KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1)
-	clientBuilder = clientBuilder.SetupPayload(setupPayload)
-	clientBuilder = clientBuilder.OnClose(p.onClose)
-	clientStarter := clientBuilder.Acceptor(p.acceptor)
-	p.client, err = clientStarter.Transport(p.transporter).Start(p.ctx)
-	return err
-}
-
-func (p *rocketClient) transporter(_ context.Context) (*transport.Transport, error) {
-	conn := transport.NewTCPClientTransport(p.conn)
-	conn.SetLifetime(time.Millisecond * 3600000)
-	return conn, nil
-}
-
-func (p *rocketClient) onClose(_ error) {
-	p.cancel()
-}
-
-func (p *rocketClient) acceptor(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
-	return rsocket.NewAbstractSocket(rsocket.MetadataPush(p.serverMetadataPush))
-}
-
-func (p *rocketClient) serverMetadataPush(pay payload.Payload) {
-	metadata, err := decodeServerMetadataPushVersion8(pay)
-	if err != nil {
-		panic(err)
-	}
+func (p *rocketClient) serverMetadataPush(metadata *serverMetadataPayload) {
 	// zstd is only supported if both the client and the server support it.
 	p.zstd = p.zstd && metadata.zstd
 	if metadata.drain {
@@ -185,15 +126,11 @@ func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
 	if p.resultErr != nil {
 		return name, EXCEPTION, p.seqID, p.resultErr
 	}
-	response, err := decodeResponsePayload(p.resultVal)
 	p.respHeaders = make(map[string]string)
-	maps.Copy(p.respHeaders, response.Headers())
-	if err != nil {
-		return name, EXCEPTION, p.seqID, err
-	}
+	maps.Copy(p.respHeaders, p.resultVal.Headers())
 
-	p.rbuf.Init(response.Data())
-	return name, REPLY, p.seqID, err
+	p.rbuf.Init(p.resultVal.Data())
+	return name, REPLY, p.seqID, nil
 }
 
 func (p *rocketClient) ReadMessageEnd() error {
@@ -223,9 +160,6 @@ func (p *rocketClient) Close() error {
 		p.client = nil
 	} else {
 		p.conn.Close()
-	}
-	if p.cancel != nil {
-		p.cancel()
 	}
 	return nil
 }

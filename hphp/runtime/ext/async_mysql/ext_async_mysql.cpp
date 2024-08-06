@@ -1011,7 +1011,7 @@ Object AsyncMysqlConnection::query(
     int64_t timeout_micros /* = -1 */,
     const AttributeMap& queryAttributes /*  = AttributeMap() */) {
   verifyValidConnection();
-  auto* clientPtr = static_cast<am::AsyncMysqlClient*>(m_conn->client());
+  auto* clientPtr = static_cast<am::AsyncMysqlClient*>(&m_conn->client());
   auto op = am::Connection::beginQuery(std::move(m_conn), query);
 
   op->setAttributes(queryAttributes);
@@ -1091,7 +1091,7 @@ static Object HHVM_METHOD(
     const Array& queryAttributes) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
   data->verifyValidConnection();
-  auto* clientPtr = static_cast<am::AsyncMysqlClient*>(data->m_conn->client());
+  auto* clientPtr = static_cast<am::AsyncMysqlClient*>(&data->m_conn->client());
   auto op = am::Connection::beginMultiQuery(std::move(data->m_conn),
                                             transformQueries(queries));
 
@@ -1331,10 +1331,7 @@ Object AsyncMysqlResult::clientStats() {
 //
 static const db::ConnectionContextBase*
 connectionContextFromOperation(const am::Operation* operation) {
-  const db::ConnectionContextBase* context = nullptr;
-  if (auto* connection = operation->connection()) {
-    context = connection->getConnectionContext();
-  }
+  auto context = operation->connection().getConnectionContext();
   if (!context) {
     auto* connectOp = dynamic_cast<const am::ConnectOperation*>(operation);
     if (connectOp) {

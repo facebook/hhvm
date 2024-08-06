@@ -41,7 +41,7 @@ std::unique_ptr<InternalRowMetadata> InternalMysqlResult::getRowMetadata()
 }
 
 InternalMysqlConnection::InternalMysqlConnection(
-    MysqlClientBase* client,
+    MysqlClientBase& client,
     MYSQL* mysql)
     : client_(client), mysql_(mysql) {}
 
@@ -54,7 +54,7 @@ bool InternalMysqlConnection::close() {
     auto mysql = mysql_;
     mysql_ = nullptr;
     // Close our connection in the thread from which it was created.
-    if (!client_->runInThread([mysql = mysql]() {
+    if (!client_.runInThread([mysql = mysql]() {
           // Unregister server cert validation callback
           const void* callback{nullptr};
           auto ret =

@@ -130,9 +130,9 @@ std::unique_ptr<Connection> AsyncConnectionPool::connect(
 }
 
 template <>
-AsyncConnectPoolOperation* AsyncConnectPoolOperation::specializedRun() {
+AsyncConnectPoolOperation& AsyncConnectPoolOperation::specializedRun() {
   std::weak_ptr<Operation> weakSelf = getSharedPointer();
-  if (!client()->runInThread([weakSelf]() {
+  if (!client().runInThread([weakSelf]() {
         // There is a race confition that allows a cancelled or completed
         // operation getting here. The self ptr check ensures that the client
         // has not freed the reference to the operation, and the state() check
@@ -149,7 +149,7 @@ AsyncConnectPoolOperation* AsyncConnectPoolOperation::specializedRun() {
       })) {
     completeOperationInner(OperationResult::Failed);
   }
-  return this;
+  return *this;
 }
 
 std::ostream& operator<<(std::ostream& os, ExpirationPolicy policy) {
@@ -180,7 +180,7 @@ std::string AsyncConnectPoolOperation::createTimeoutErrorMessage(
     size_t per_key_limit) {
   auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(
       stopwatch_->elapsed());
-  auto cbDelayUs = client()->callbackDelayMicrosAvg();
+  auto cbDelayUs = client().callbackDelayMicrosAvg();
   bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
 
   std::vector<std::string> parts;

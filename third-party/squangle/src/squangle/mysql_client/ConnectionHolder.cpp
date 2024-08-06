@@ -12,7 +12,7 @@
 namespace facebook::common::mysql_client {
 
 ConnectionHolder::ConnectionHolder(
-    MysqlClientBase* client,
+    MysqlClientBase& client,
     std::unique_ptr<InternalConnection> internalConn,
     ConnectionKey key)
     : client_(client),
@@ -20,7 +20,7 @@ ConnectionHolder::ConnectionHolder(
       key_(std::move(key)),
       opened_(false) {
   createTime_ = std::chrono::steady_clock::now();
-  client_->activeConnectionAdded(&key_);
+  client_.activeConnectionAdded(&key_);
 }
 
 ConnectionHolder::ConnectionHolder(ConnectionHolder& other, ConnectionKey key)
@@ -31,13 +31,13 @@ ConnectionHolder::ConnectionHolder(ConnectionHolder& other, ConnectionKey key)
       opened_(other.opened_),
       createTime_(other.createTime_),
       lastActiveTime_(other.lastActiveTime_) {
-  client_->activeConnectionAdded(&key_);
+  client_.activeConnectionAdded(&key_);
 }
 
 void ConnectionHolder::updateConnectionKey(ConnectionKey key) {
-  client_->activeConnectionRemoved(&key_);
+  client_.activeConnectionRemoved(&key_);
   key_ = std::move(key);
-  client_->activeConnectionAdded(&key_);
+  client_.activeConnectionAdded(&key_);
 }
 
 ConnectionHolder::~ConnectionHolder() {
@@ -45,12 +45,12 @@ ConnectionHolder::~ConnectionHolder() {
     internalConn_->close();
     onClose();
   }
-  client_->activeConnectionRemoved(&key_);
+  client_.activeConnectionRemoved(&key_);
 }
 
 void ConnectionHolder::onClose() {
   if (opened_) {
-    client_->stats()->incrClosedConnections(context_.get());
+    client_.stats()->incrClosedConnections(context_.get());
   }
 }
 
@@ -58,7 +58,7 @@ void ConnectionHolder::connectionOpened() {
   opened_ = true;
   lastActiveTime_ = Clock::now();
 
-  client_->stats()->incrOpenedConnections(context_.get());
+  client_.stats()->incrOpenedConnections(context_.get());
 }
 
 } // namespace facebook::common::mysql_client

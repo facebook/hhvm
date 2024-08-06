@@ -55,14 +55,14 @@ bool Operation::isEventBaseSet() const {
 
 Operation::~Operation() {}
 
-void Operation::invokeSocketActionable() {
+void Operation::invokeActionable() {
   DCHECK(isInEventBaseThread());
   folly::RequestContextScopeGuard guard(
       request_context_.load(std::memory_order_relaxed));
-  socketActionable();
+  actionable();
 }
 
-void Operation::waitForSocketActionable() {
+void Operation::waitForActionable() {
   DCHECK(isInEventBaseThread());
 
   auto event_mask = conn().getReadWriteState();
@@ -121,7 +121,7 @@ void Operation::handlerReady(uint16_t /*events*/) noexcept {
   if (state() == OperationState::Cancelling) {
     cancel();
   } else {
-    invokeSocketActionable();
+    invokeActionable();
   }
 }
 

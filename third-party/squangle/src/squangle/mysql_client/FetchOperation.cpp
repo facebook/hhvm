@@ -69,7 +69,7 @@ void FetchOperation::specializedRunImpl() {
       }
     }
 
-    socketActionable();
+    actionable();
   } catch (std::invalid_argument& e) {
     setAsyncClientError(
         static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
@@ -160,7 +160,7 @@ AttributeMap FetchOperation::readResponseAttributes() {
   return conn().getResponseAttributes();
 }
 
-void FetchOperation::socketActionable() {
+void FetchOperation::actionable() {
   DCHECK(isInEventBaseThread());
   DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
 
@@ -202,7 +202,7 @@ void FetchOperation::socketActionable() {
       }
 
       if (status == PENDING) {
-        waitForSocketActionable();
+        waitForActionable();
         return;
       }
 
@@ -253,10 +253,10 @@ void FetchOperation::socketActionable() {
     // them to consume it.
     // If `pause` is called during the callback and the stream is consumed then,
     // `row_stream_` is checked and we skip to the next action `CompleteQuery`.
-    // If row_stream_ isn't ready, we wait for socket actionable.
+    // If row_stream_ isn't ready, we wait for actionable state.
     // Next Actions:
     //  - Fetch: in case it needs to fetch more rows, we break the loop and wait
-    //           for socketActionable to be called again
+    //           for actionable to be called again
     //  - CompleteQuery: an error occurred or rows finished to fetch
     //  - WaitForConsumer: in case `pause` is called during `notifyRowsReady`
     if (active_fetch_action_ == FetchAction::Fetch) {
@@ -273,7 +273,7 @@ void FetchOperation::socketActionable() {
       // When the query finished, `is_ready` is true, but there are no rows.
       bool is_ready = current_row_stream_->slurp();
       if (!is_ready) {
-        waitForSocketActionable();
+        waitForActionable();
         break;
       }
       if (current_row_stream_->hasQueryFinished()) {
@@ -370,14 +370,14 @@ void FetchOperation::resumeImpl() {
 
   // We should only allow pauses during fetch or between queries.
   // If we come back as RowsFetched and the stream has completed the query,
-  // `socketActionable` will change the `active_fetch_action_` and we will
+  // `actionable` will change the `active_fetch_action_` and we will
   // start the Query completion process.
   // When we pause between queries, the value of `paused_action_` is already
   // the value of the next states: StartQuery or CompleteOperation.
   active_fetch_action_ = paused_action_;
   // Leave timeout to be reset or checked when we hit
-  // `waitForSocketActionable`
-  socketActionable();
+  // `waitForActionable`
+  actionable();
 }
 
 void FetchOperation::resume() {

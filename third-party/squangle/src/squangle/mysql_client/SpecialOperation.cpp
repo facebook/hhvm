@@ -11,10 +11,10 @@
 
 namespace facebook::common::mysql_client {
 
-void SpecialOperation::socketActionable() {
+void SpecialOperation::actionable() {
   auto status = callMysqlHandler();
   if (status == PENDING) {
-    waitForSocketActionable();
+    waitForActionable();
   } else {
     auto result = (status == DONE) ? OperationResult::Succeeded
                                    : OperationResult::Failed; // ERROR
@@ -43,7 +43,7 @@ void SpecialOperation::specializedTimeoutTriggered() {
 
 SpecialOperation& SpecialOperation::specializedRun() {
   changeHandlerFD(folly::NetworkSocket::fromFd(conn().getSocketDescriptor()));
-  socketActionable();
+  actionable();
   return *this;
 }
 

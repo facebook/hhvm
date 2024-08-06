@@ -224,7 +224,7 @@ void ConnectOperation::specializedRunImpl() {
   if (const auto& optDscp = conn_options_.getDscp()) {
     if (!conn().setDscp(*optDscp)) {
       LOG(WARNING) << fmt::format(
-          "Failed to set DSCP {} for MySQL Client socket", *optDscp);
+          "Failed to set DSCP {} for MySQL Client", *optDscp);
     }
   }
 
@@ -247,7 +247,7 @@ void ConnectOperation::specializedRunImpl() {
   }
 
   // connect is immediately "ready" to do one loop
-  socketActionable();
+  actionable();
 }
 
 ConnectOperation& ConnectOperation::specializedRun() {
@@ -261,7 +261,7 @@ ConnectOperation::~ConnectOperation() {
   removeClientReference();
 }
 
-void ConnectOperation::socketActionable() {
+void ConnectOperation::actionable() {
   DCHECK(isInEventBaseThread());
 
   folly::stop_watch<Duration> sw;
@@ -304,7 +304,7 @@ void ConnectOperation::socketActionable() {
       attemptSucceeded(OperationResult::Succeeded);
     } else {
       changeHandlerFD(folly::NetworkSocket::fromFd(fd));
-      waitForSocketActionable();
+      waitForActionable();
     }
   }
 }

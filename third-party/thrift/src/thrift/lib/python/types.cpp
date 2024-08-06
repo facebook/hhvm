@@ -289,11 +289,51 @@ UniquePyObjectPtr getDefaultValueForField(
   return std::move(value);
 }
 
-/**
- * Returns the first element of "struct tuple" which is an array of isset flags.
+/*
+ * A policy for handling Python tuples.
  */
-const char* getIssetFlags(const PyObject* structTuple) {
-  PyObject* isset = PyTuple_GET_ITEM(structTuple, 0);
+struct TupleContainer {
+  /**
+   * Return a new tuple object of given size, or NULL on failure.
+   */
+  static PyObject* New(Py_ssize_t size) { return PyTuple_New(size); }
+
+  /**
+   * Returns a new "struct tuple" whose field elements are uninitialized, see
+   * `createStructTuple()` function.
+   */
+  static PyObject* createStructContainer(int16_t numFields) {
+    return createStructTuple(numFields);
+  }
+
+  /**
+   * Insert a reference to `object` at position `pos` of the `tuple`.
+   */
+  static void SET_ITEM(PyObject* tuple, Py_ssize_t pos, PyObject* object) {
+    PyTuple_SET_ITEM(tuple, pos, object);
+  }
+
+  /**
+   * Return the object at position `pos` in the `tuple`.
+   * The returned reference is borrowed from the `tuple` (that is: it is only
+   * valid as long as you hold a reference to `tuple`)
+   */
+  static PyObject* GET_ITEM(const PyObject* tuple, Py_ssize_t pos) {
+    return PyTuple_GET_ITEM(tuple, pos);
+  }
+
+  /**
+   * Return true if `p` is a tuple object or an instance of a subtype of the
+   * tuple type.
+   */
+  static bool Check(const PyObject* p) { return PyTuple_Check(p); }
+
+  static Py_ssize_t Size(PyObject* p) { return PyTuple_Size(p); }
+};
+
+template <typename Container>
+const char* getIssetFlags(const PyObject* container) {
+  PyObject* isset = Container::GET_ITEM(container, 0);
   const char* issetFlags = PyBytes_AsString(isset);
   if (issetFlags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
@@ -302,9 +342,16 @@ const char* getIssetFlags(const PyObject* structTuple) {
 }
 
 /**
- * Returns a new "struct tuple" with all its elements initialized.
+ * Returns the first element of "struct tuple" which is an array of isset flags.
+ */
+const char* getIssetFlags(const PyObject* structTuple) {
+  return getIssetFlags<TupleContainer>(structTuple);
+}
+
+/**
+ * Returns a new "struct container" with all its elements initialized.
  *
- * As in `createStructTuple()`, the first element of the tuple is a
+ * As in `createStructContainer()`, the first element of the tuple is a
  * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
  *
  * However, the remaining elements (1 through `numFields + 1`) are initialized
@@ -321,26 +368,27 @@ const char* getIssetFlags(const PyObject* structTuple) {
  * `getStandardMutableDefaultValueType()` functions, which are potential values
  * for the `getStandardDefaultValueForTypeFunc` parameter.
  */
-PyObject* createStructTupleWithDefaultValues(
+template <typename Container>
+PyObject* createStructContainerWithDefaultValues(
     const detail::StructInfo& structInfo,
     GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
   const int16_t numFields = structInfo.numFields;
-  UniquePyObjectPtr tuple{createStructTuple(numFields)};
-  if (tuple == nullptr) {
+  UniquePyObjectPtr container{Container::createStructContainer(numFields)};
+  if (container == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
 
-  // Initialize tuple[1:numFields+1] with default field values.
+  // Initialize container[1:numFields+1] with default field values.
   const auto& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   for (int fieldIndex = 0; fieldIndex < numFields; ++fieldIndex) {
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[fieldIndex];
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      PyTuple_SET_ITEM(tuple.get(), fieldIndex + 1, Py_None);
+      Container::SET_ITEM(container.get(), fieldIndex + 1, Py_None);
       Py_INCREF(Py_None);
     } else {
-      PyTuple_SET_ITEM(
-          tuple.get(),
+      Container::SET_ITEM(
+          container.get(),
           fieldIndex + 1,
           getDefaultValueForField(
               fieldInfo.typeInfo,
@@ -350,39 +398,50 @@ PyObject* createStructTupleWithDefaultValues(
               .release());
     }
   }
-  return tuple.release();
+  return container.release();
 }
 
 /**
- * Populates only the unset fields of a "struct tuple" with default values.
+ * Returns a new "struct tuple" with all its elements initialized.
+ */
+PyObject* createStructTupleWithDefaultValues(
+    const detail::StructInfo& structInfo,
+    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+  return createStructContainerWithDefaultValues<TupleContainer>(
+      structInfo, getStandardDefaultValueForTypeFunc);
+}
+
+/**
+ * Populates only the unset fields of a "struct container" with default values.
  *
- * The `tuple` parameter should be a valid Python `tuple` object, created by
- * the `createStructTuple()`.
+ * The `container` parameter should be a valid Python object, created by the
+ * `createStructContainer()`.
  *
  * Iterates through the elements (from 1 to `numFields + 1`). If a field
  * is unset, it is populated with the corresponding default value.
  * The mechanism for determining the default value is the same as in the
- * `createStructTupleWithDefaultValues()` function. Please see the documentation
- * of `createStructTupleWithDefaultValues()` for details on how the default
- * value is identified.
+ * `createStructContainerWithDefaultValues()` function. Please see the
+ * documentation of `createStructContainerWithDefaultValues()` for details on
+ * how the default value is identified.
  *
  * Throws on error
  */
-void populateStructTupleUnsetFieldsWithDefaultValues(
-    PyObject* tuple,
+template <typename Container>
+void populateStructContainerUnsetFieldsWithDefaultValues(
+    PyObject* container,
     const detail::StructInfo& structInfo,
     GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
-  if (tuple == nullptr) {
-    throw std::runtime_error("null tuple!");
+  if (container == nullptr) {
+    throw std::runtime_error("null container!");
   }
 
-  DCHECK(PyTuple_Check(tuple));
+  DCHECK(Container::Check(container));
   const int16_t numFields = structInfo.numFields;
-  DCHECK(PyTuple_Size(tuple) == numFields + 1);
+  DCHECK(Container::Size(container) == numFields + 1);
 
   const auto& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
-  const char* issetFlags = getIssetFlags(tuple);
+  const char* issetFlags = getIssetFlags<Container>(container);
   for (int i = 0; i < numFields; ++i) {
     // If the field is already set, this implies that the constructor has
     // already assigned a value to the field. In this case, we skip it and
@@ -392,14 +451,14 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
     }
 
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
-    PyObject* oldValue = PyTuple_GET_ITEM(tuple, i + 1);
+    PyObject* oldValue = Container::GET_ITEM(container, i + 1);
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      PyTuple_SET_ITEM(tuple, i + 1, Py_None);
+      Container::SET_ITEM(container, i + 1, Py_None);
       Py_INCREF(Py_None);
     } else {
       // getDefaultValueForField calls `Py_INCREF`
-      PyTuple_SET_ITEM(
-          tuple,
+      Container::SET_ITEM(
+          container,
           i + 1,
           getDefaultValueForField(
               fieldInfo.typeInfo,
@@ -410,6 +469,17 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
     }
     Py_DECREF(oldValue);
   }
+}
+
+/**
+ * Populates only the unset fields of a "struct tuple" with default values.
+ */
+void populateStructTupleUnsetFieldsWithDefaultValues(
+    PyObject* tuple,
+    const detail::StructInfo& structInfo,
+    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+  populateStructContainerUnsetFieldsWithDefaultValues<TupleContainer>(
+      tuple, structInfo, getStandardDefaultValueForTypeFunc);
 }
 
 void* setImmutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
@@ -653,7 +723,8 @@ PyObject* createUnionTuple() {
   return tuple.release();
 }
 
-PyObject* createStructTuple(int16_t numFields) {
+template <typename Container>
+PyObject* createStructContainer(int16_t numFields) {
   // Allocate and 0-initialize numFields bytes.
   UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
   if (issetArr == nullptr) {
@@ -667,14 +738,18 @@ PyObject* createStructTuple(int16_t numFields) {
     flags[i] = '\0';
   }
 
-  // Create tuple, with isset byte array as first element (followed by
+  // Create container, with isset byte array as first element (followed by
   // `numFields` uninitialized elements).
-  PyObject* tuple{PyTuple_New(numFields + 1)};
-  if (tuple == nullptr) {
+  PyObject* container{Container::New(numFields + 1)};
+  if (container == nullptr) {
     return nullptr;
   }
-  PyTuple_SET_ITEM(tuple, 0, issetArr.release());
-  return tuple;
+  Container::SET_ITEM(container, 0, issetArr.release());
+  return container;
+}
+
+PyObject* createStructTuple(int16_t numFields) {
+  return createStructContainer<TupleContainer>(numFields);
 }
 
 PyObject* createImmutableStructTupleWithDefaultValues(
@@ -689,28 +764,38 @@ PyObject* createMutableStructTupleWithDefaultValues(
       structInfo, getStandardMutableDefaultValueForType);
 }
 
-PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
+template <typename Container>
+PyObject* createStructContainerWithNones(const detail::StructInfo& structInfo) {
   const int16_t numFields = structInfo.numFields;
-  UniquePyObjectPtr tuple{createStructTuple(numFields)};
-  if (tuple == nullptr) {
+  UniquePyObjectPtr container{Container::createStructContainer(numFields)};
+  if (container == nullptr) {
     return nullptr;
   }
 
-  // Initialize tuple[1:numFields+1] with 'None'.
+  // Initialize container[1:numFields+1] with 'None'.
   for (int i = 0; i < numFields; ++i) {
-    PyTuple_SET_ITEM(tuple.get(), i + 1, Py_None);
+    Container::SET_ITEM(container.get(), i + 1, Py_None);
     Py_INCREF(Py_None);
   }
-  return tuple.release();
+  return container.release();
 }
 
+PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
+  return createStructContainerWithNones<TupleContainer>(structInfo);
+}
+
+template <typename Container>
 void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
-  PyObject* issetPyBytes = PyTuple_GET_ITEM(structTuple, 0);
+  PyObject* issetPyBytes = Container::GET_ITEM(structTuple, 0);
   char* flags = PyBytes_AsString(issetPyBytes);
   if (flags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
   flags[index] = value;
+}
+
+void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
+  setStructIsset<TupleContainer>(structTuple, index, value);
 }
 
 void populateImmutableStructTupleUnsetFieldsWithDefaultValues(

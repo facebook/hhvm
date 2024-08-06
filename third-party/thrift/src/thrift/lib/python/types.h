@@ -149,20 +149,16 @@ PyObject* createMutableStructTupleWithDefaultValues(
  * Sets the "isset" flag of the `index`-th field of the given struct tuple
  * `object` to the given `value`.
  *
- * @param objectPtr Pointer to a "struct tuple" (see `createStructTuple()
- *        above). This is assumed to be a `PyTupleObject`, whose memory holds
- *        the elements (starting with the "isset" bytearray) after a header
- *        consisting of `PyVarObject`. The memory immediately after the
- *        `sizeof(PyVarObject)` bytes is expected to correspond to a
- *        `PyBytesObject` that holds the isset flags bytearray (see above).
- *        If the bytearray is not properly initialized, or `index` is invalid
- *        (i.e., negative or greather than the number of fields), behavior is
- *        undefined.
+ * @param structTuple Pointer to a "struct tuple" (see `createStructTuple()`
+ *        above). This is assumed to be a `PyTupleObject`. The first element of
+ *        the tuple contains the isset bytearray. If the bytearray is not
+ *        properly initialized, or if the `index` is invalid (i.e., negative or
+ *        greater than the number of fields), the behavior is undefined.
  *
  * @throws if unable to read a bytearray from the expected isset flags bytearray
  *         (see `object` param documentation above).
  */
-void setStructIsset(void* objectPtr, int16_t index, bool value);
+void setStructIsset(PyObject* structTuple, int16_t index, bool value);
 
 /*
  * Returns a new "struct tuple" with all its elements set to `None`

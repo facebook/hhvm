@@ -438,7 +438,7 @@ bool getIsset(const void* objectPtr, ptrdiff_t offset) {
 }
 
 void setIsset(void* objectPtr, ptrdiff_t offset, bool value) {
-  return setStructIsset(objectPtr, offset, value);
+  return setStructIsset(static_cast<PyObject*>(objectPtr), offset, value);
 }
 
 /**
@@ -704,10 +704,9 @@ PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
   return tuple.release();
 }
 
-void setStructIsset(void* objectPtr, int16_t index, bool value) {
-  PyObject** issetPyBytesPtr =
-      toPyObjectPtr(static_cast<char*>(objectPtr) + kHeadOffset);
-  char* flags = PyBytes_AsString(*issetPyBytesPtr);
+void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
+  PyObject* issetPyBytes = PyTuple_GET_ITEM(structTuple, 0);
+  char* flags = PyBytes_AsString(issetPyBytes);
   if (flags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }

@@ -186,94 +186,113 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   bool operator==(const CustomException&) const;
   bool operator<(const CustomException&) const;
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> name_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> name_ref() & {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name() const& {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> name() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> name() & {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name() && {
     return {static_cast<T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result() const& {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> result() & {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   template <typename..., typename T = ::cpp2::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result() && {
     return {static_cast<T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   ::std::string get_name() && {
     return std::move(__fbthrift_field_name);
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "name" } */
   template <typename T_CustomException_name_struct_setter = ::std::string>
   [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_CustomException_name_struct_setter&& name_) {
@@ -281,10 +300,12 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
     return __fbthrift_field_name;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   ::cpp2::Result get_result() const {
     return __fbthrift_field_result;
   }
 
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "result" } */
   [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::cpp2::Result& set_result(::cpp2::Result result_) {
     result_ref() = result_;

@@ -13,8 +13,9 @@
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <gflags/gflags.h>
 #include <mysql_async.h>
+#include <squangle/mysql_client/InternalMysqlConnection.h>
+#include <squangle/mysql_client/Row.h>
 #include <atomic>
-#include <cmath>
 
 #include "squangle/base/ExceptionUtil.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
@@ -54,9 +55,6 @@ namespace mysql_client {
 
 namespace {
 const std::string kQueryChecksumKey = "checksum";
-
-using MysqlCertValidatorCallback =
-    int (*)(X509* server_cert, const void* context, const char** errptr);
 
 class OperationGuard {
  public:
@@ -145,23 +143,7 @@ void Operation::invokeSocketActionable() {
 void Operation::waitForSocketActionable() {
   DCHECK(isInEventBaseThread());
 
-  MYSQL* mysql = conn()->mysql();
-  uint16_t event_mask = 0;
-  NET_ASYNC* net_async = NET_ASYNC_DATA(&mysql->net);
-  // net_async can be null during some stages of connecting
-  auto async_blocking_state =
-      net_async ? net_async->async_blocking_state : NET_NONBLOCKING_CONNECT;
-  switch (async_blocking_state) {
-    case NET_NONBLOCKING_READ:
-      event_mask |= folly::EventHandler::READ;
-      break;
-    case NET_NONBLOCKING_WRITE:
-    case NET_NONBLOCKING_CONNECT:
-      event_mask |= folly::EventHandler::WRITE;
-      break;
-    default:
-      LOG(FATAL) << "Unknown nonblocking state " << async_blocking_state;
-  }
+  auto event_mask = conn().get()->getReadWriteState();
 
   if (stopwatch_->elapsed(timeout_)) {
     timeoutTriggered();
@@ -291,13 +273,12 @@ std::unique_ptr<Connection>&& Operation::releaseConnection() {
 }
 
 void Operation::snapshotMysqlErrors() {
-  MYSQL* mysql = conn()->mysql();
-  mysql_errno_ = ::mysql_errno(mysql);
+  mysql_errno_ = conn()->getErrno();
   if (mysql_errno_ != 0) {
     if (mysql_errno_ == CR_TLS_SERVER_NOT_FOUND) {
       mysql_error_ = "Server loadshedded the connection request.";
     } else {
-      mysql_error_ = ::mysql_error(mysql);
+      mysql_error_ = conn()->getErrorMessage();
     }
   }
 }
@@ -610,78 +591,48 @@ void ConnectOperation::specializedRunImpl() {
     conn()->initMysqlOnly();
   }
   removeClientReference();
-  MYSQL* mysql = conn()->mysql();
-  if (!mysql) {
-    setAsyncClientError(
-        static_cast<uint16_t>(SquangleErrno::SQ_INITIALIZATION_FAILED),
-        "Connection initialization failed. Ran out of Memory?");
-    attemptFailed(OperationResult::Failed);
-    return;
-  }
 
-  mysql_options(conn()->mysql(), MYSQL_OPT_CONNECT_ATTR_RESET, nullptr);
-  for (const auto& [key, value] : attributes_) {
-    mysql_options4(
-        conn()->mysql(),
-        MYSQL_OPT_CONNECT_ATTR_ADD,
-        key.c_str(),
-        value.c_str());
-  }
+  conn()->setConnectAttributes(attributes_);
 
-  const auto& compression_lib = getCompression();
-  if (compression_lib) {
-    mysql_options(mysql, MYSQL_OPT_COMPRESS, nullptr);
-    setCompressionOption(mysql, *compression_lib);
+  if (const auto& optCompressionLib = getCompression()) {
+    conn()->setCompression(*optCompressionLib);
   }
 
   auto provider = conn_options_.getSSLOptionsProviderPtr();
-  if (provider && provider->setMysqlSSLOptions(mysql)) {
-    if (connection_context_) {
-      connection_context_->isSslConnection = true;
-    }
+  if (provider && conn()->setSSLOptionsProvider(*provider) &&
+      connection_context_) {
+    connection_context_->isSslConnection = true;
   }
 
   // Set sni field for ssl connection
-  if (conn_options_.getSniServerName()) {
-    mysql_options(
-        mysql,
-        MYSQL_OPT_TLS_SNI_SERVERNAME,
-        (*conn_options_.getSniServerName()).c_str());
+  if (const auto& optSniServerName = conn_options_.getSniServerName()) {
+    conn()->setSniServerName(*optSniServerName);
   }
 
-  if (conn_options_.getDscp().has_value()) {
-    // DS field (QOS/TOS level) is 8 bits with DSCP packed into the most
-    // significant 6 bits.
-    uint dsf = *conn_options_.getDscp() << 2;
-    int ret = mysql_options(mysql, MYSQL_OPT_TOS, &dsf);
-    if (ret != 0) {
+  if (const auto& optDscp = conn_options_.getDscp()) {
+    if (!conn()->setDscp(*optDscp)) {
       LOG(WARNING) << fmt::format(
-          "Failed to set DSCP {} for MySQL Client socket",
-          *conn_options_.getDscp());
+          "Failed to set DSCP {} for MySQL Client socket", *optDscp);
     }
   }
 
   if (conn_options_.getCertValidationCallback()) {
-    MysqlCertValidatorCallback callback = mysqlCertValidator;
-    const void* self = this;
-    mysql_options(mysql, MYSQL_OPT_TLS_CERT_CALLBACK, &callback);
-    mysql_options(mysql, MYSQL_OPT_TLS_CERT_CALLBACK_CONTEXT, &self);
+    conn()->setCertValidatorCallback(mysqlCertValidator, this);
   }
 
   conn()->socketHandler()->setOperation(this);
 
   // If the tcp timeout value is not set in conn options, use the default value
-  uint timeoutInMs = chrono::duration_cast<chrono::milliseconds>(
-                         conn_options_.getConnectTcpTimeout().value_or(Duration(
-                             FLAGS_async_mysql_connect_tcp_timeout_micros)))
-                         .count();
+  auto timeout = chrono::duration_cast<chrono::milliseconds>(
+      conn_options_.getConnectTcpTimeout().value_or(
+          Duration(FLAGS_async_mysql_connect_tcp_timeout_micros)));
   // Set the connect timeout in mysql options and also on tcp_timeout_handler if
   // event base is set. Sync implmenation of MysqlClientBase may not have it
   // set. If the timeout is set to 0, skip setting any timeout
-  if (timeoutInMs != 0) {
-    mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT_MS, &timeoutInMs);
+  if (timeout.count() != 0) {
+    conn()->setConnectTimeout(timeout);
     if (isEventBaseSet()) {
-      tcp_timeout_handler_.scheduleTimeout(timeoutInMs);
+      tcp_timeout_handler_.scheduleTimeout(timeout.count());
     }
   }
 
@@ -708,12 +659,13 @@ void ConnectOperation::socketActionable() {
       std::make_unique<OperationGuard>([&]() { logThreadBlockTime(sw); });
 
   auto& handler = conn()->client()->getMysqlHandler();
-  MYSQL* mysql = conn()->mysql();
+  // MYSQL* mysql = conn()->mysql();
   const auto usingUnixSocket = !conn_key_.unixSocketPath().empty();
 
-  auto status = handler.tryConnect(mysql, conn_options_, conn_key_, flags_);
+  auto status = handler.tryConnect(
+      conn()->getInternalConnection(), conn_options_, conn_key_, flags_);
 
-  if (status == MysqlHandler::ERROR) {
+  if (status == ERROR) {
     snapshotMysqlErrors();
     logThreadBlockTimeGuard.reset();
     attemptFailed(OperationResult::Failed);
@@ -724,10 +676,10 @@ void ConnectOperation::socketActionable() {
       tcp_timeout_handler_.cancelTimeout();
     }
 
-    auto fd = mysql_get_socket_descriptor(mysql);
+    auto fd = conn()->getSocketDescriptor();
     if (fd <= 0) {
       LOG(ERROR) << "Unexpected invalid socket descriptor on completed, "
-                 << (status == MysqlHandler::DONE ? "errorless" : "pending")
+                 << (status == DONE ? "errorless" : "pending")
                  << " connect.  fd=" << fd;
       setAsyncClientError(
           static_cast<uint16_t>(SquangleErrno::SQ_INITIALIZATION_FAILED),
@@ -735,7 +687,7 @@ void ConnectOperation::socketActionable() {
           "descriptor");
       logThreadBlockTimeGuard.reset();
       attemptFailed(OperationResult::Failed);
-    } else if (status == MysqlHandler::DONE) {
+    } else if (status == DONE) {
       auto socket = folly::NetworkSocket::fromFd(fd);
       conn()->socketHandler()->changeHandlerFD(socket);
       conn()->mysqlConnection()->setConnectionContext(connection_context_);
@@ -751,8 +703,7 @@ void ConnectOperation::socketActionable() {
 }
 
 bool ConnectOperation::isDoneWithTcpHandShake() {
-  enum connect_stage stage = mysql_get_connect_stage(conn()->mysql());
-  return stage > tcpCompletionStage_;
+  return conn()->isDoneWithTcpHandShake();
 }
 
 void ConnectOperation::specializedTimeoutTriggered() {
@@ -790,9 +741,7 @@ void ConnectOperation::timeoutHandler(
       host(),
       port()));
   if (!isPoolConnection) {
-    parts.push_back(fmt::format(
-        "at stage {}",
-        connectStageString(mysql_get_connect_stage(conn()->mysql()))));
+    parts.push_back(fmt::format("at stage {}", conn()->getConnectStageName()));
   }
 
   parts.push_back(timeoutMessage(deltaMs));
@@ -868,7 +817,7 @@ void ConnectOperation::maybeStoreSSLSession() {
     return;
   }
 
-  if (provider->storeMysqlSSLSession(conn()->mysql())) {
+  if (conn()->storeSession(*provider)) {
     if (connection_context_) {
       connection_context_->sslSessionReused = true;
     }
@@ -1004,27 +953,22 @@ FetchOperation* FetchOperation::specializedRun() {
 
 void FetchOperation::specializedRunImpl() {
   try {
-    MYSQL* mysql = conn()->mysql();
-    rendered_query_ = queries_.renderQuery(mysql);
+    rendered_query_ = queries_.renderQuery(&conn()->getInternalConnection());
 
-    mysql_options(mysql, MYSQL_OPT_QUERY_ATTR_RESET, nullptr);
-    for (const auto& [key, value] : attributes_) {
-      if (int retErrCode = setQueryAttribute(key, value)) {
-        setAsyncClientError(
-            retErrCode,
-            fmt::format("Failed to set query attribute: {} = {}", key, value));
-        completeOperation(OperationResult::Failed);
-        return;
-      }
+    if (int retErrCode = conn()->setQueryAttributes(attributes_)) {
+      setAsyncClientError(retErrCode, "Failed to set query attributes");
+      completeOperation(OperationResult::Failed);
+      return;
     }
 
-    if (use_checksum_ || conn()->getConnectionOptions().getUseChecksum()) {
-      if (int retErrCode = setQueryAttribute(kQueryChecksumKey, "ON")) {
+    if ((use_checksum_ || conn()->getConnectionOptions().getUseChecksum())) {
+      if (int retErrCode = conn()->setQueryAttribute(kQueryChecksumKey, "ON")) {
         setAsyncClientError(retErrCode, "Failed to set checksum = ON");
         completeOperation(OperationResult::Failed);
         return;
       }
     }
+
     socketActionable();
   } catch (std::invalid_argument& e) {
     setAsyncClientError(
@@ -1034,20 +978,12 @@ void FetchOperation::specializedRunImpl() {
   }
 }
 
-int FetchOperation::setQueryAttribute(
-    const std::string& key,
-    const std::string& value) {
-  return mysql_options4(
-      conn()->mysql(), MYSQL_OPT_QUERY_ATTR_ADD, key.c_str(), value.c_str());
-}
-
 FetchOperation::RowStream::RowStream(
-    MYSQL_RES* mysql_query_result,
+    std::unique_ptr<InternalResult> mysql_query_result,
+    std::unique_ptr<InternalRowMetadata> metadata,
     MysqlHandler* handler)
-    : mysql_query_result_(mysql_query_result),
-      row_fields_(
-          mysql_fetch_fields(mysql_query_result),
-          mysql_num_fields(mysql_query_result)),
+    : mysql_query_result_(std::move(mysql_query_result)),
+      row_fields_(std::make_shared<EphemeralRowFields>(std::move(metadata))),
       handler_(handler) {}
 
 EphemeralRow FetchOperation::RowStream::consumeRow() {
@@ -1072,17 +1008,16 @@ bool FetchOperation::RowStream::slurp() {
   if (current_row_.has_value() || query_finished_) {
     return true;
   }
-  MYSQL_ROW row;
-  auto status = handler_->fetchRow(mysql_query_result_.get(), row);
-  if (status == MysqlHandler::PENDING) {
+  auto [result, row] = handler_->fetchRow(*mysql_query_result_);
+  if (result == PENDING) {
     return false;
   }
+
   if (row == nullptr) {
     query_finished_ = true;
     return true;
   }
-  unsigned long* field_lengths = mysql_fetch_lengths(mysql_query_result_.get());
-  current_row_.assign(EphemeralRow(row, field_lengths, &row_fields_));
+  current_row_.assign(EphemeralRow(std::move(row), row_fields_));
   query_result_size_ += current_row_->calculateRowLength();
   ++num_rows_seen_;
   return true;
@@ -1121,49 +1056,8 @@ FetchOperation::RowStream* FetchOperation::rowStream() {
   return current_row_stream_.get_pointer();
 }
 
-static folly::Optional<std::pair<std::string, std::string>>
-readFirstResponseAtribute(MYSQL* mysql) {
-  size_t len;
-  const char* data;
-
-  if (!mysql_session_track_get_first(
-          mysql, SESSION_TRACK_RESP_ATTR, &data, &len)) {
-    auto key = std::string(data, len);
-    if (!mysql_session_track_get_next(
-            mysql, SESSION_TRACK_RESP_ATTR, &data, &len)) {
-      return std::make_pair(std::move(key), std::string(data, len));
-    }
-  }
-
-  return folly::none;
-}
-
-static folly::Optional<std::pair<std::string, std::string>>
-readNextResponseAtribute(MYSQL* mysql) {
-  size_t len;
-  const char* data;
-
-  if (!mysql_session_track_get_next(
-          mysql, SESSION_TRACK_RESP_ATTR, &data, &len)) {
-    auto key = std::string(data, len);
-    if (!mysql_session_track_get_next(
-            mysql, SESSION_TRACK_RESP_ATTR, &data, &len)) {
-      return std::make_pair(std::move(key), std::string(data, len));
-    }
-  }
-
-  return folly::none;
-}
-
 AttributeMap FetchOperation::readResponseAttributes() {
-  AttributeMap attrs;
-  MYSQL* mysql = conn()->mysql();
-  for (auto attr = readFirstResponseAtribute(mysql); attr;
-       attr = readNextResponseAtribute(mysql)) {
-    attrs[std::move(attr->first)] = std::move(attr->second);
-  }
-
-  return attrs;
+  return conn()->getResponseAttributes();
 }
 
 void FetchOperation::socketActionable() {
@@ -1175,7 +1069,7 @@ void FetchOperation::socketActionable() {
       std::make_unique<OperationGuard>([&]() { logThreadBlockTime(sw); });
 
   auto& handler = conn()->client()->getMysqlHandler();
-  MYSQL* mysql = conn()->mysql();
+  auto& internalConn = conn()->getInternalConnection();
 
   // This loop runs the fetch actions required to successfully execute query,
   // request next results, fetch results, identify errors and complete operation
@@ -1195,16 +1089,16 @@ void FetchOperation::socketActionable() {
     //                       results.
     //  - InitFetch: no errors during results request, so we initiate fetch.
     if (active_fetch_action_ == FetchAction::StartQuery) {
-      auto status = MysqlHandler::PENDING;
+      auto status = PENDING;
 
       if (query_executed_) {
         ++num_current_query_;
-        status = handler.nextResult(mysql);
+        status = handler.nextResult(internalConn);
       } else {
-        status = handler.runQuery(mysql, *rendered_query_);
+        status = handler.runQuery(internalConn, *rendered_query_);
       }
 
-      if (status == MysqlHandler::PENDING) {
+      if (status == PENDING) {
         waitForSocketActionable();
         return;
       }
@@ -1213,7 +1107,7 @@ void FetchOperation::socketActionable() {
       current_affected_rows_ = 0;
       current_recv_gtid_ = std::string();
       query_executed_ = true;
-      if (status == MysqlHandler::ERROR) {
+      if (status == ERROR) {
         active_fetch_action_ = FetchAction::CompleteQuery;
       } else {
         active_fetch_action_ = FetchAction::InitFetch;
@@ -1229,8 +1123,8 @@ void FetchOperation::socketActionable() {
     //  - CompleteQuery: no rows to fetch (complete query will read rowsAffected
     //                   and lastInsertId to add to result
     if (active_fetch_action_ == FetchAction::InitFetch) {
-      auto* mysql_query_result = handler.getResult(mysql);
-      auto num_fields = mysql_field_count(mysql);
+      auto mysql_query_result = handler.getResult(internalConn);
+      auto num_fields = handler.getFieldCount(internalConn);
 
       // Check to see if this an empty query or an error
       if (!mysql_query_result && num_fields > 0) {
@@ -1238,7 +1132,11 @@ void FetchOperation::socketActionable() {
         active_fetch_action_ = FetchAction::CompleteQuery;
       } else {
         if (num_fields > 0) {
-          current_row_stream_.assign(RowStream(mysql_query_result, &handler));
+          auto row_metadata = mysql_query_result->getRowMetadata();
+          current_row_stream_.assign(RowStream(
+              std::move(mysql_query_result),
+              std::move(row_metadata),
+              &handler));
           active_fetch_action_ = FetchAction::Fetch;
         } else {
           active_fetch_action_ = FetchAction::CompleteQuery;
@@ -1302,20 +1200,16 @@ void FetchOperation::socketActionable() {
       if (mysql_errno_ != 0 || cancel_) {
         active_fetch_action_ = FetchAction::CompleteOperation;
       } else {
-        current_last_insert_id_ = mysql_insert_id(mysql);
-        current_affected_rows_ = mysql_affected_rows(mysql);
-        const char* data;
-        size_t length;
-        if (!mysql_session_track_get_first(
-                mysql, SESSION_TRACK_GTIDS, &data, &length)) {
-          current_recv_gtid_ = std::string(data, length);
+        current_last_insert_id_ = conn()->getLastInsertId();
+        current_affected_rows_ = conn()->getAffectedRows();
+        if (auto optGtid = conn()->getRecvGtid()) {
+          current_recv_gtid_ = *optGtid;
         }
-        if (!mysql_session_track_get_first(
-                mysql, SESSION_TRACK_SCHEMA, &data, &length)) {
-          conn()->setCurrentSchema(std::string_view(data, length));
+        if (auto optSchemaChanged = conn()->getSchemaChanged()) {
+          conn()->setCurrentSchema(std::move(*optSchemaChanged));
         }
         current_resp_attrs_ = readResponseAttributes();
-        more_results = mysql_more_results(mysql);
+        more_results = conn()->hasMoreResults();
         active_fetch_action_ = more_results ? FetchAction::StartQuery
                                             : FetchAction::CompleteOperation;
 
@@ -1323,13 +1217,12 @@ void FetchOperation::socketActionable() {
         // decide if it wants to change the state
 
         if (current_row_stream_ && current_row_stream_->mysql_query_result_) {
-          rows_received_ +=
-              mysql_num_rows(current_row_stream_->mysql_query_result_.get());
+          rows_received_ += current_row_stream_->mysql_query_result_->numRows();
           total_result_size_ += current_row_stream_->query_result_size_;
         }
         ++num_queries_executed_;
-        no_index_used_ |= mysql->server_status & SERVER_QUERY_NO_INDEX_USED;
-        was_slow_ |= mysql->server_status & SERVER_QUERY_WAS_SLOW;
+        no_index_used_ |= conn()->getNoIndexUsed();
+        was_slow_ |= conn()->wasSlow();
         notifyQuerySuccess(more_results);
       }
       current_row_stream_.reset();
@@ -1447,7 +1340,7 @@ void FetchOperation::specializedTimeoutTriggered() {
    * and return an error to the client.
    */
   if (rowStream() && rowStream()->mysql_query_result_) {
-    rowStream()->mysql_query_result_->handle = nullptr;
+    rowStream()->mysql_query_result_->close();
   }
 
   std::string rows;
@@ -1785,12 +1678,11 @@ MultiQueryOperation::~MultiQueryOperation() {}
 
 void SpecialOperation::socketActionable() {
   auto status = callMysqlHandler();
-  if (status == MysqlHandler::PENDING) {
+  if (status == PENDING) {
     waitForSocketActionable();
   } else {
-    auto result = (status == MysqlHandler::DONE)
-        ? OperationResult::Succeeded
-        : OperationResult::Failed; // MysqlHandler::ERROR
+    auto result = (status == DONE) ? OperationResult::Succeeded
+                                   : OperationResult::Failed; // ERROR
     completeOperation(result);
     if (callback_) {
       callback_(*this, result);
@@ -1815,23 +1707,21 @@ void SpecialOperation::specializedTimeoutTriggered() {
 }
 
 SpecialOperation* SpecialOperation::specializedRun() {
-  MYSQL* mysql = conn()->mysql();
   conn()->socketHandler()->changeHandlerFD(
-      folly::NetworkSocket::fromFd(mysql_get_socket_descriptor(mysql)));
+      folly::NetworkSocket::fromFd(conn()->getSocketDescriptor()));
   socketActionable();
   return this;
 }
 
 MysqlHandler::Status ResetOperation::callMysqlHandler() {
   auto& handler = conn()->client()->getMysqlHandler();
-  MYSQL* mysql = conn()->mysql();
-  return handler.resetConn(mysql);
+  return handler.resetConn(conn()->getInternalConnection());
 }
 
 MysqlHandler::Status ChangeUserOperation::callMysqlHandler() {
   auto& handler = conn()->client()->getMysqlHandler();
-  MYSQL* mysql = conn()->mysql();
-  return handler.changeUser(mysql, user_, password_, database_);
+  return handler.changeUser(
+      conn()->getInternalConnection(), user_, password_, database_);
 }
 
 folly::StringPiece Operation::resultString() const {
@@ -1950,46 +1840,6 @@ folly::StringPiece FetchOperation::toString(FetchAction action) {
   return "Unknown result";
 }
 
-// enum connect_stage is defined in mysql at include/mysql_com.h
-// and this provides a way to log the string version of this enum
-folly::fbstring Operation::connectStageString(connect_stage stage) {
-  static const folly::F14FastMap<connect_stage, folly::fbstring>
-      stageToStringMap = {
-          {connect_stage::CONNECT_STAGE_INVALID, "CONNECT_STAGE_INVALID"},
-          {connect_stage::CONNECT_STAGE_NOT_STARTED,
-           "CONNECT_STAGE_NOT_STARTED"},
-          {connect_stage::CONNECT_STAGE_NET_BEGIN_CONNECT,
-           "CONNECT_STAGE_NET_BEGIN_CONNECT"},
-#if MYSQL_VERSION_ID >= 80020 // csm_wait_connect added in 8.0.20
-          {connect_stage::CONNECT_STAGE_NET_WAIT_CONNECT,
-           "CONNECT_STAGE_NET_WAIT_CONNECT"},
-#endif
-          {connect_stage::CONNECT_STAGE_NET_COMPLETE_CONNECT,
-           "CONNECT_STAGE_NET_COMPLETE_CONNECT"},
-          {connect_stage::CONNECT_STAGE_READ_GREETING,
-           "CONNECT_STAGE_READ_GREETING"},
-          {connect_stage::CONNECT_STAGE_PARSE_HANDSHAKE,
-           "CONNECT_STAGE_PARSE_HANDSHAKE"},
-          {connect_stage::CONNECT_STAGE_ESTABLISH_SSL,
-           "CONNECT_STAGE_ESTABLISH_SSL"},
-          {connect_stage::CONNECT_STAGE_AUTHENTICATE,
-           "CONNECT_STAGE_AUTHENTICATE"},
-          {connect_stage::CONNECT_STAGE_PREP_SELECT_DATABASE,
-           "CONNECT_STAGE_PREP_SELECT_DATABASE"},
-          {connect_stage::CONNECT_STAGE_PREP_INIT_COMMANDS,
-           "CONNECT_STAGE_PREP_INIT_COMMANDS"},
-          {connect_stage::CONNECT_STAGE_SEND_ONE_INIT_COMMAND,
-           "CONNECT_STAGE_SEND_ONE_INIT_COMMAND"},
-          {connect_stage::CONNECT_STAGE_COMPLETE, "CONNECT_STAGE_COMPLETE"},
-      };
-
-  try {
-    return stageToStringMap.at(stage);
-  } catch (const std::out_of_range& /* ex */) {
-    return fmt::format("Unexpected connect_stage: {}", (int)stage);
-  }
-}
-
 std::unique_ptr<Connection> blockingConnectHelper(
     std::shared_ptr<ConnectOperation> conn_op) {
   conn_op->run()->wait();
@@ -2047,6 +1897,10 @@ std::string Operation::timeoutMessage(std::chrono::milliseconds delta) const {
   auto toMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeout_);
   return fmt::format(
       "(took {}ms, timeout was {}ms)", delta.count(), toMs.count());
+}
+
+/*static*/ std::string Operation::connectStageString(connect_stage stage) {
+  return InternalMysqlConnection::findConnectStageName(stage).value_or("");
 }
 
 } // namespace mysql_client

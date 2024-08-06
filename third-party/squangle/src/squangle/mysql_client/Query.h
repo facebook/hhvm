@@ -70,8 +70,7 @@
 //
 // For more details, check out queryfx in the www codebase.
 
-#ifndef COMMON_ASYNC_MYSQL_QUERY_H
-#define COMMON_ASYNC_MYSQL_QUERY_H
+#pragma once
 
 #include <folly/Memory.h>
 #include <folly/Optional.h>
@@ -89,6 +88,7 @@
 #include <tuple>
 
 #include "squangle/base/Base.h"
+#include "squangle/mysql_client/InternalConnection.h"
 
 namespace facebook {
 namespace common {
@@ -100,6 +100,7 @@ using AliasedQualifiedColumn =
 using QueryAttributes = AttributeMap;
 
 class QueryArgument;
+class InternalConnection;
 
 /*
  * This class will be responsible of passing various per query options.
@@ -208,25 +209,22 @@ class Query {
   //   return escapeString<string>(conn, folly::StringPiece(unescaped));
   // }
 
-  template <typename string>
-  static string escapeString(MYSQL* conn, folly::StringPiece unescaped) {
-    string escaped;
-    escaped.resize((2 * unescaped.size()) + 1);
-    size_t escaped_size = mysql_real_escape_string(
-        conn, &escaped[0], unescaped.data(), unescaped.size());
-    escaped.resize(escaped_size);
-    return escaped;
+  static std::string escapeString(
+      const InternalConnection& conn,
+      std::string_view unescaped) {
+    return conn.escapeString(unescaped);
   }
 
   static folly::fbstring renderMultiQuery(
-      MYSQL* conn,
+      const InternalConnection* conn,
       const std::vector<Query>& queries);
 
   // render either with the parameters to the constructor or specified
   // ones.
-  folly::fbstring render(MYSQL* conn) const;
-  folly::fbstring render(MYSQL* conn, const std::vector<QueryArgument>& params)
-      const;
+  folly::fbstring render(const InternalConnection* conn) const;
+  folly::fbstring render(
+      const InternalConnection* conn,
+      const std::vector<QueryArgument>& params) const;
 
   // render either with the parameters to the constructor or specified
   // ones.  This is mainly for testing as it does not properly escape
@@ -401,7 +399,7 @@ class MultiQuery {
     return MultiQuery{multi_query};
   }
 
-  std::shared_ptr<folly::fbstring> renderQuery(MYSQL* conn);
+  std::shared_ptr<folly::fbstring> renderQuery(const InternalConnection* conn);
 
   const Query& getQuery(size_t index) const {
     CHECK_THROW(index < queries_.size(), std::invalid_argument);
@@ -650,5 +648,3 @@ struct hash<facebook::common::mysql_client::QueryOptions> {
   }
 };
 } // namespace std
-
-#endif // COMMON_ASYNC_MYSQL_QUERY_H

@@ -15,8 +15,7 @@
 // you lose your RowBlock, any Rows or StringPieces referencing it
 // will be invalid.
 
-#ifndef COMMON_ASYNC_MYSQL_ROW_H
-#define COMMON_ASYNC_MYSQL_ROW_H
+#pragma once
 
 #include <unordered_map>
 #include <vector>
@@ -33,6 +32,8 @@
 #include <folly/container/F14Map.h>
 #include <folly/hash/Hash.h>
 #include <folly/json/dynamic.h>
+
+#include "squangle/mysql_client/InternalConnection.h"
 
 namespace facebook {
 namespace common {
@@ -409,25 +410,41 @@ class RowBlock {
 
 class EphemeralRowFields {
  public:
-  EphemeralRowFields(MYSQL_FIELD* fields, int num_fields)
-      : fields_(fields), num_fields_(num_fields) {}
+  explicit EphemeralRowFields(std::unique_ptr<InternalRowMetadata> metadata)
+      : metadata_(std::move(metadata)) {}
 
-  int numFields() const {
-    return num_fields_;
+  size_t numFields() const {
+    return metadata_->numFields();
+  }
+
+  std::optional<size_t> fieldIndexOpt(const char* field_name) const {
+    return fieldIndexOpt(std::string_view(field_name));
   }
 
   std::optional<size_t> fieldIndexOpt(folly::StringPiece field_name) const {
-    for (int i = 0; i < num_fields_; i++) {
-      auto nameSp = folly::StringPiece(fields_[i].name, fields_[i].name_length);
-      if (nameSp == field_name) {
-        return i;
+    return fieldIndexOpt(
+        std::string_view(field_name.data(), field_name.size()));
+  }
+
+  std::optional<size_t> fieldIndexOpt(std::string_view field_name) const {
+    for (size_t ii = 0; ii < numFields(); ii++) {
+      if (field_name == metadata_->getFieldName(ii)) {
+        return ii;
       }
     }
 
     return std::nullopt;
   }
 
+  size_t fieldIndex(const char* field_name) const {
+    return fieldIndex(std::string_view(field_name));
+  }
+
   size_t fieldIndex(folly::StringPiece field_name) const {
+    return fieldIndex(std::string_view(field_name.data(), field_name.size()));
+  }
+
+  size_t fieldIndex(std::string_view field_name) const {
     if (auto opt = fieldIndexOpt(field_name); opt) {
       return *opt;
     }
@@ -436,13 +453,14 @@ class EphemeralRowFields {
   }
 
   enum_field_types fieldType(size_t index) const {
-    CHECK_LT(index, num_fields_);
-    return fields_[index].type;
+    CHECK_LT(index, metadata_->numFields());
+    return metadata_->getFieldType(index);
   }
 
-  folly::StringPiece fieldName(size_t index) const {
-    CHECK_LT(index, num_fields_);
-    return folly::StringPiece(fields_[index].name, fields_[index].name_length);
+  template <typename StringLike = folly::StringPiece>
+  StringLike fieldName(size_t index) const {
+    auto res = metadata_->getFieldName(index);
+    return StringLike(res.data(), res.size());
   }
 
   std::shared_ptr<RowFields> makeBufferedFields() const;
@@ -454,19 +472,15 @@ class EphemeralRowFields {
   EphemeralRowFields& operator=(EphemeralRowFields&&) = default;
 
  private:
-  MYSQL_FIELD* fields_;
-  int num_fields_;
+  std::unique_ptr<InternalRowMetadata> metadata_;
 };
 
 class EphemeralRow {
  public:
   EphemeralRow(
-      MYSQL_ROW mysql_row,
-      unsigned long* field_lengths,
-      EphemeralRowFields* row_fields)
-      : mysql_row_(mysql_row),
-        field_lengths_(field_lengths),
-        row_fields_(row_fields) {}
+      std::unique_ptr<InternalRow> row,
+      std::shared_ptr<EphemeralRowFields> row_fields)
+      : row_(std::move(row)), row_fields_(std::move(row_fields)) {}
 
   // Beginning simple, just give the basic indexing.
   folly::StringPiece operator[](size_t col) const;
@@ -487,10 +501,8 @@ class EphemeralRow {
   EphemeralRow() = default;
 
  private:
-  MYSQL_ROW mysql_row_ = nullptr;
-  unsigned long* field_lengths_ = nullptr;
-
-  EphemeralRowFields* row_fields_ = nullptr;
+  std::unique_ptr<InternalRow> row_;
+  std::shared_ptr<EphemeralRowFields> row_fields_;
 };
 
 // Declarations of specializations and trivial implementations.
@@ -545,5 +557,3 @@ Optional<T> Row::getOptional(const L& l) const {
 } // namespace mysql_client
 } // namespace common
 } // namespace facebook
-
-#endif // COMMON_ASYNC_MYSQL_ROW_H

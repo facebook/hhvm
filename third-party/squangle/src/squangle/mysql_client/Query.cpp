@@ -6,14 +6,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/Query.h"
-#include <folly/String.h>
-
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 #include <boost/variant/get.hpp>
+#include <folly/String.h>
 #include <algorithm>
 #include <vector>
+
+#include "squangle/mysql_client/Query.h"
 
 namespace facebook {
 namespace common {
@@ -347,15 +347,16 @@ void simpleEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
 void fullEscapeString(
     folly::fbstring* dest,
     const folly::fbstring& value,
-    MYSQL* connection) {
-  if (!connection) {
+    const InternalConnection* conn) {
+  if (!conn) {
     return noEscapeString(dest, value);
   }
-  size_t old_size = dest->size();
+
+  auto old_size = dest->size();
   dest->resize(old_size + 2 * value.size() + 1);
-  size_t actual_value_size = mysql_real_escape_string(
-      connection, &(*dest)[old_size], value.data(), value.size());
-  dest->resize(old_size + actual_value_size);
+  auto* start = &(*dest)[old_size];
+  auto actual = conn->escapeString(start, value.data(), value.size());
+  dest->resize(old_size + actual);
 }
 
 } // namespace
@@ -456,7 +457,7 @@ void Query::appendValueClauses(
 }
 
 folly::fbstring Query::renderMultiQuery(
-    MYSQL* connection,
+    const InternalConnection* conn,
     const std::vector<Query>& queries) {
   auto reserve_size = 0;
   for (const Query& query : queries) {
@@ -471,18 +472,18 @@ folly::fbstring Query::renderMultiQuery(
     if (!ret.empty()) {
       ret.append(";");
     }
-    ret.append(query.render(connection));
+    ret.append(query.render(conn));
   }
 
   return ret;
 }
 
-folly::fbstring Query::render(MYSQL* conn) const {
+folly::fbstring Query::render(const InternalConnection* conn) const {
   return render(conn, params_);
 }
 
 folly::fbstring Query::render(
-    MYSQL* conn,
+    const InternalConnection* conn,
     const std::vector<QueryArgument>& params) const {
   return renderInternal(
       [&](auto* dest, const auto& value) {
@@ -666,11 +667,13 @@ folly::fbstring Query::renderInternal(
   return ret;
 }
 
-std::shared_ptr<folly::fbstring> MultiQuery::renderQuery(MYSQL* conn) {
+std::shared_ptr<folly::fbstring> MultiQuery::renderQuery(
+    const InternalConnection* conn) {
   if (!rendered_multi_query_) {
     rendered_multi_query_ = std::make_shared<folly::fbstring>(
         Query::renderMultiQuery(conn, queries_));
   }
+
   return rendered_multi_query_;
 }
 

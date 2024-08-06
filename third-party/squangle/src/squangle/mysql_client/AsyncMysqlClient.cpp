@@ -205,71 +205,30 @@ std::unique_ptr<Connection> AsyncMysqlClient::createConnection(
       this, std::move(conn_key), mysql_conn);
 }
 
-static inline MysqlHandler::Status toHandlerStatus(net_async_status status) {
-  if (status == NET_ASYNC_ERROR) {
-    return MysqlHandler::Status::ERROR;
-  } else if (status == NET_ASYNC_COMPLETE) {
-    return MysqlHandler::Status::DONE;
-  } else {
-    return MysqlHandler::Status::PENDING;
-  }
-}
-
 MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
-    MYSQL* mysql,
+    const InternalConnection& conn,
     const ConnectionOptions& /*opts*/,
     const ConnectionKey& conn_key,
     int flags) {
+  static std::string kEmptyString;
   const auto usingUnixSocket = !conn_key.unixSocketPath().empty();
 
   // When using unix socket (AF_UNIX), host/port do not matter.
-  return toHandlerStatus(mysql_real_connect_nonblocking(
-      mysql,
-      usingUnixSocket ? nullptr : conn_key.host().c_str(),
-      conn_key.user().c_str(),
-      conn_key.password().c_str(),
-      conn_key.db_name().c_str(),
+  return conn.tryConnectNonBlocking(
+      usingUnixSocket ? kEmptyString : conn_key.host(),
+      conn_key.user(),
+      conn_key.password(),
+      conn_key.db_name(),
       usingUnixSocket ? 0 : conn_key.port(),
-      usingUnixSocket ? conn_key.unixSocketPath().c_str() : nullptr,
-      flags));
+      usingUnixSocket ? conn_key.unixSocketPath() : kEmptyString,
+      flags);
 }
 
-MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::runQuery(
-    MYSQL* mysql,
-    folly::StringPiece queryStmt) {
-  return toHandlerStatus(
-      mysql_real_query_nonblocking(mysql, queryStmt.begin(), queryStmt.size()));
-}
-
-MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::resetConn(
-    MYSQL* mysql) {
-  return toHandlerStatus(mysql_reset_connection_nonblocking(mysql));
-}
-
-MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::changeUser(
-    MYSQL* mysql,
-    const std::string& user,
-    const std::string& password,
-    const std::string& database) {
-  return toHandlerStatus(mysql_change_user_nonblocking(
-      mysql, user.c_str(), password.c_str(), database.c_str()));
-}
-
-MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::nextResult(
-    MYSQL* mysql) {
-  return toHandlerStatus(mysql_next_result_nonblocking(mysql));
-}
-
-MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::fetchRow(
-    MYSQL_RES* res,
-    MYSQL_ROW& row) {
-  auto status = toHandlerStatus(mysql_fetch_row_nonblocking(res, &row));
-  DCHECK_NE(status, ERROR); // Should never be an error
-  return status;
-}
-
-MYSQL_RES* AsyncMysqlClient::AsyncMysqlHandler::getResult(MYSQL* mysql) {
-  return mysql_use_result(mysql);
+InternalResult::FetchRowRet AsyncMysqlClient::AsyncMysqlHandler::fetchRow(
+    InternalResult& result) {
+  auto res = result.fetchRowNonBlocking();
+  DCHECK_NE(res.first, InternalConnection::Status::ERROR);
+  return res;
 }
 
 AsyncConnection::~AsyncConnection() {
@@ -284,7 +243,7 @@ AsyncConnection::~AsyncConnection() {
     // callback instead points to the original callback function, which will
     // be called after COM_RESET_CONNECTION.
 
-    auto connHolder = stealMysqlConnectionHolder(true);
+    auto connHolder = stealConnectionHolder(true);
     auto conn = std::make_unique<AsyncConnection>(
         client(), getKey(), std::move(connHolder));
     conn->needToCloneConnection_ = false;

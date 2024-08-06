@@ -18,7 +18,7 @@
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/mysql_client/Connection.h"
-#include "squangle/mysql_client/MysqlConnectionHolder.h"
+#include "squangle/mysql_client/ConnectionHolder.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/PoolKey.h"
 #include "squangle/mysql_client/PoolStorage.h"
@@ -137,17 +137,15 @@ class PoolOptions {
 std::ostream& operator<<(std::ostream& os, const PoolOptions& options);
 
 template <typename Client>
-class MysqlPooledHolder : public MysqlConnectionHolder {
+class MysqlPooledHolder : public ConnectionHolder {
  public:
   // Constructed based on an already existing MysqlConnectionHolder, the
   // values are going to be copied and the old holder will be destroyed.
   MysqlPooledHolder(
-      std::unique_ptr<MysqlConnectionHolder> holder_base,
+      std::unique_ptr<ConnectionHolder> holder_base,
       std::weak_ptr<ConnectionPool<Client>> weak_pool,
       const PoolKey& pool_key)
-      : MysqlConnectionHolder(
-            std::move(holder_base),
-            pool_key.getConnectionKey()),
+      : ConnectionHolder(*holder_base, pool_key.getConnectionKey()),
         good_for_(Duration::zero()),
         weak_pool_(weak_pool),
         pool_key_(pool_key) {
@@ -528,7 +526,7 @@ class ConnectionPool
             return;
           }
           auto conn = connOp.releaseConnection();
-          auto mysql_conn = conn->stealMysqlConnectionHolder();
+          auto mysql_conn = conn->stealConnectionHolder();
           // Now we got a connection from the client, it will become a pooled
           // connection
           auto pooled_conn = std::make_unique<MysqlPooledHolder<Client>>(
@@ -568,11 +566,10 @@ class ConnectionPool
           }
 
           auto connection = op.releaseConnection();
-          auto mysqlConn = connection->stealMysqlConnectionHolder(true);
-          auto newMysqlConn = std::make_unique<MysqlConnectionHolder>(
-              std::move(mysqlConn), poolKey.getConnectionKey());
+          auto mysqlConn = connection->stealConnectionHolder(true);
+          mysqlConn->updateConnectionKey(poolKey.getConnectionKey());
           auto pooledConn = std::make_unique<MysqlPooledHolder<Client>>(
-              std::move(newMysqlConn), poolPtr, poolKey);
+              std::move(mysqlConn), poolPtr, poolKey);
           stats()->incrPoolHits();
           stats()->incrPoolHitsChangeUser();
 
@@ -658,7 +655,7 @@ class ConnectionPool
       }
 
       auto connection = op.releaseConnection();
-      auto mysqlConnHolder = connection->stealMysqlConnectionHolder(true);
+      auto mysqlConnHolder = connection->stealConnectionHolder(true);
       auto pmysqlConn = mysqlConnHolder.release();
       std::unique_ptr<MysqlPooledHolder<Client>> mysqlConnection(
           static_cast<MysqlPooledHolder<Client>*>(pmysqlConn));
@@ -702,8 +699,7 @@ class ConnectionPool
  private:
   friend class ConnectPoolOperation<Client>;
 
-  void recycleMysqlConnection(
-      std::unique_ptr<MysqlConnectionHolder> mysql_conn) {
+  void recycleMysqlConnection(std::unique_ptr<ConnectionHolder> mysql_conn) {
     // this method can run by any thread where the Connection is dying
     if (isShuttingDown()) {
       return;
@@ -942,6 +938,7 @@ class ConnectPoolOperation : public ConnectOperation {
       completeOperation(OperationResult::Failed);
       return;
     }
+
     if (mysql_errno_) {
       LOG_EVERY_N(ERROR, 1000)
           << "Connection pool callback was called with mysql err: "
@@ -950,24 +947,19 @@ class ConnectPoolOperation : public ConnectOperation {
       return;
     }
 
-    conn()->socketHandler()->changeHandlerFD(folly::NetworkSocket::fromFd(
-        mysql_get_socket_descriptor(mysql_conn->mysql())));
+    conn()->socketHandler()->changeHandlerFD(
+        folly::NetworkSocket::fromFd(mysql_conn->getSocketDescriptor()));
 
-    conn()->setMysqlConnectionHolder(std::move(mysql_conn));
+    conn()->setConnectionHolder(std::move(mysql_conn));
     conn()->setConnectionOptions(getConnectionOptions());
     conn()->setConnectionDyingCallback(
-        [pool = pool_](std::unique_ptr<MysqlConnectionHolder> mysql_conn) {
+        [pool = pool_](std::unique_ptr<ConnectionHolder> mysql_conn) {
           auto shared_pool = pool.lock();
           if (shared_pool) {
             shared_pool->recycleMysqlConnection(std::move(mysql_conn));
           }
         });
-    if (conn()->mysql()) {
-      attemptSucceeded(OperationResult::Succeeded);
-    } else {
-      VLOG(2) << "Error: Failed to acquire connection";
-      attemptFailed(OperationResult::Failed);
-    }
+    attemptSucceeded(OperationResult::Succeeded);
 
     signalWaiter();
   }

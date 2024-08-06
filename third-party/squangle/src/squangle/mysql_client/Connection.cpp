@@ -7,6 +7,7 @@
  */
 
 #include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/InternalMysqlConnection.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 
 namespace facebook::common::mysql_client {
@@ -34,20 +35,22 @@ void ConnectionSocketHandler::handlerReady(uint16_t /*events*/) noexcept {
 
 bool Connection::isSSL() const {
   CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
-  return mysql_connection_->mysql()->client_flag & CLIENT_SSL;
+  return mysql_connection_->isSSL();
 }
 
 void Connection::initMysqlOnly() {
   DCHECK(isInEventBaseThread());
   CHECK_THROW(mysql_connection_ == nullptr, db::InvalidConnectionException);
-  mysql_connection_ = std::make_unique<MysqlConnectionHolder>(
-      mysql_client_, mysql_init(nullptr), conn_key_);
+  mysql_connection_ = std::make_unique<ConnectionHolder>(
+      mysql_client_,
+      std::make_unique<InternalMysqlConnection>(mysql_client_),
+      conn_key_);
   if (!mysql_client_->supportsLocalFiles()) {
-    mysql_connection_->mysql()->options.client_flag &= ~CLIENT_LOCAL_FILES;
+    mysql_connection_->disableLocalFiles();
   }
+
   // Turn off SSL by default for tests that rely on this.
-  enum mysql_ssl_mode ssl_mode = SSL_MODE_DISABLED;
-  mysql_options(mysql_connection_->mysql(), MYSQL_OPT_SSL_MODE, &ssl_mode);
+  mysql_connection_->disableSSL();
 }
 
 void Connection::initialize(bool initMysql) {

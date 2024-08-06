@@ -643,15 +643,14 @@ end = struct
     | Kind.Option ->
       let rec candidate () =
         match mk () with
-        | (Mixed, _)
-        | (Option _, _) ->
+        | (Mixed, _) -> candidate ()
+        | (Option _, _) as res ->
+          res
           (* Due to some misguided checks the parser and the typechecker has. We
              need to eliminate these cases. *)
-          candidate ()
-        | res -> res
+        | (ty, defs) -> (Option ty, defs)
       in
-      let (ty, defs) = candidate () in
-      (Option ty, defs)
+      candidate ()
     | Kind.Classish -> mk_classish ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in

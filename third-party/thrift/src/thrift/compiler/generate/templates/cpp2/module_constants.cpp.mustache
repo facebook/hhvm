@@ -49,7 +49,7 @@ namespace {{program:name}}_constants {
   {{/value:enable_referencing}}
 {{/constant:outline_init?}}
 {{^constant:outline_init?}}{{#constant:generated?}}{{#type:binary?}}
-std::string_view {{constant:name}}() {
+::std::string_view {{constant:name}}() {
   constexpr static ::std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
   return {{constant:name}}_;
 }

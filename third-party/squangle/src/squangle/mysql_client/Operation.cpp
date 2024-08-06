@@ -166,8 +166,7 @@ void Operation::cancel() {
     // This code competes with `run()` to see who changes `state_` first,
     // since they both have the combination `check and change` this must
     // be locked
-    std::unique_lock<std::mutex> l(run_state_mutex_);
-
+    auto locked = cancel_on_run_.wlock();
     if (state_ == OperationState::Cancelling ||
         state_ == OperationState::Completed) {
       // If the cancel was already called we dont do the cancelling
@@ -176,7 +175,7 @@ void Operation::cancel() {
     }
 
     if (state_ == OperationState::Unstarted) {
-      cancel_on_run_ = true;
+      *locked = true;
       // wait the user to call "run()" to run the completeOperation
       // otherwise we will throw exception
       return;
@@ -218,10 +217,9 @@ Operation* Operation::run() {
     callbacks_.pre_operation_callback_(*this);
   }
   {
-    std::unique_lock<std::mutex> l(run_state_mutex_);
-    if (cancel_on_run_) {
+    auto locked = cancel_on_run_.wlock();
+    if (*locked) {
       state_ = OperationState::Cancelling;
-      cancel_on_run_ = false;
       connection()->runInThread(
           this, &Operation::completeOperation, OperationResult::Cancelled);
       return this;

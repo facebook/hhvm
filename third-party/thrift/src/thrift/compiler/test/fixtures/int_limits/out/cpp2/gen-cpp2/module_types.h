@@ -193,480 +193,400 @@ class Limits final  {
   bool operator==(const Limits&) const;
   bool operator<(const Limits&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_i64_field_ref() const& {
     return {this->__fbthrift_field_max_i64_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_i64_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_i64_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_i64_field_ref() & {
     return {this->__fbthrift_field_max_i64_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_i64_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_i64_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_i64_field() const& {
     return {this->__fbthrift_field_max_i64_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_i64_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_i64_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_i64_field() & {
     return {this->__fbthrift_field_max_i64_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_i64_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_i64_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_i64_field_ref() const& {
     return {this->__fbthrift_field_min_i64_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_i64_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_i64_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_i64_field_ref() & {
     return {this->__fbthrift_field_min_i64_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_i64_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_i64_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_i64_field() const& {
     return {this->__fbthrift_field_min_i64_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_i64_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_i64_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_i64_field() & {
     return {this->__fbthrift_field_min_i64_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_i64_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_i64_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_i32_field_ref() const& {
     return {this->__fbthrift_field_max_i32_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_i32_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_i32_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_i32_field_ref() & {
     return {this->__fbthrift_field_max_i32_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_i32_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_i32_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_i32_field() const& {
     return {this->__fbthrift_field_max_i32_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_i32_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_i32_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_i32_field() & {
     return {this->__fbthrift_field_max_i32_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_i32_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_i32_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_i32_field_ref() const& {
     return {this->__fbthrift_field_min_i32_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_i32_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_i32_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_i32_field_ref() & {
     return {this->__fbthrift_field_min_i32_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_i32_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_i32_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_i32_field() const& {
     return {this->__fbthrift_field_min_i32_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_i32_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_i32_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_i32_field() & {
     return {this->__fbthrift_field_min_i32_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_i32_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_i32_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_i16_field_ref() const& {
     return {this->__fbthrift_field_max_i16_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_i16_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_i16_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_i16_field_ref() & {
     return {this->__fbthrift_field_max_i16_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_i16_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_i16_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_i16_field() const& {
     return {this->__fbthrift_field_max_i16_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_i16_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_i16_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_i16_field() & {
     return {this->__fbthrift_field_max_i16_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_i16_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_i16_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_i16_field_ref() const& {
     return {this->__fbthrift_field_min_i16_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_i16_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_i16_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_i16_field_ref() & {
     return {this->__fbthrift_field_min_i16_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_i16_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_i16_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_i16_field() const& {
     return {this->__fbthrift_field_min_i16_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_i16_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_i16_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_i16_field() & {
     return {this->__fbthrift_field_min_i16_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_i16_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_i16_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_byte_field_ref() const& {
     return {this->__fbthrift_field_max_byte_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_byte_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_byte_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_byte_field_ref() & {
     return {this->__fbthrift_field_max_byte_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_byte_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_byte_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> max_byte_field() const& {
     return {this->__fbthrift_field_max_byte_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> max_byte_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_max_byte_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> max_byte_field() & {
     return {this->__fbthrift_field_max_byte_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> max_byte_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_max_byte_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_byte_field_ref() const& {
     return {this->__fbthrift_field_min_byte_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_byte_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_byte_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_byte_field_ref() & {
     return {this->__fbthrift_field_min_byte_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_byte_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_byte_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> min_byte_field() const& {
     return {this->__fbthrift_field_min_byte_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> min_byte_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_min_byte_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> min_byte_field() & {
     return {this->__fbthrift_field_min_byte_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> min_byte_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_min_byte_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   ::std::int64_t get_max_i64_field() const {
     return __fbthrift_field_max_i64_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i64_field" } */
   [[deprecated("Use `FOO.max_i64_field_ref() = BAR;` instead of `FOO.set_max_i64_field(BAR);`")]]
   ::std::int64_t& set_max_i64_field(::std::int64_t max_i64_field_) {
     max_i64_field_ref() = max_i64_field_;
     return __fbthrift_field_max_i64_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   ::std::int64_t get_min_i64_field() const {
     return __fbthrift_field_min_i64_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i64_field" } */
   [[deprecated("Use `FOO.min_i64_field_ref() = BAR;` instead of `FOO.set_min_i64_field(BAR);`")]]
   ::std::int64_t& set_min_i64_field(::std::int64_t min_i64_field_) {
     min_i64_field_ref() = min_i64_field_;
     return __fbthrift_field_min_i64_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   ::std::int32_t get_max_i32_field() const {
     return __fbthrift_field_max_i32_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i32_field" } */
   [[deprecated("Use `FOO.max_i32_field_ref() = BAR;` instead of `FOO.set_max_i32_field(BAR);`")]]
   ::std::int32_t& set_max_i32_field(::std::int32_t max_i32_field_) {
     max_i32_field_ref() = max_i32_field_;
     return __fbthrift_field_max_i32_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   ::std::int32_t get_min_i32_field() const {
     return __fbthrift_field_min_i32_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i32_field" } */
   [[deprecated("Use `FOO.min_i32_field_ref() = BAR;` instead of `FOO.set_min_i32_field(BAR);`")]]
   ::std::int32_t& set_min_i32_field(::std::int32_t min_i32_field_) {
     min_i32_field_ref() = min_i32_field_;
     return __fbthrift_field_min_i32_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   ::std::int16_t get_max_i16_field() const {
     return __fbthrift_field_max_i16_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_i16_field" } */
   [[deprecated("Use `FOO.max_i16_field_ref() = BAR;` instead of `FOO.set_max_i16_field(BAR);`")]]
   ::std::int16_t& set_max_i16_field(::std::int16_t max_i16_field_) {
     max_i16_field_ref() = max_i16_field_;
     return __fbthrift_field_max_i16_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   ::std::int16_t get_min_i16_field() const {
     return __fbthrift_field_min_i16_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_i16_field" } */
   [[deprecated("Use `FOO.min_i16_field_ref() = BAR;` instead of `FOO.set_min_i16_field(BAR);`")]]
   ::std::int16_t& set_min_i16_field(::std::int16_t min_i16_field_) {
     min_i16_field_ref() = min_i16_field_;
     return __fbthrift_field_min_i16_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   ::std::int8_t get_max_byte_field() const {
     return __fbthrift_field_max_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "max_byte_field" } */
   [[deprecated("Use `FOO.max_byte_field_ref() = BAR;` instead of `FOO.set_max_byte_field(BAR);`")]]
   ::std::int8_t& set_max_byte_field(::std::int8_t max_byte_field_) {
     max_byte_field_ref() = max_byte_field_;
     return __fbthrift_field_max_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   ::std::int8_t get_min_byte_field() const {
     return __fbthrift_field_min_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/int_limits/src/module.thrift", "name": "Limits", "kind": "struct", "field": "min_byte_field" } */
   [[deprecated("Use `FOO.min_byte_field_ref() = BAR;` instead of `FOO.set_min_byte_field(BAR);`")]]
   ::std::int8_t& set_min_byte_field(::std::int8_t min_byte_field_) {
     min_byte_field_ref() = min_byte_field_;

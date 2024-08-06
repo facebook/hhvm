@@ -131,65 +131,54 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   bool operator==(const CustomException&) const;
   bool operator<(const CustomException&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> message_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> message_ref() & {
     return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message() const& {
     return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> message() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> message() & {
     return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message() && {
     return {static_cast<T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   const ::std::string& get_message() const& {
     return __fbthrift_field_message;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   ::std::string get_message() && {
     return std::move(__fbthrift_field_message);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception", "field": "message" } */
   template <typename T_CustomException_message_struct_setter = ::std::string>
   [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_CustomException_message_struct_setter&& message_) {

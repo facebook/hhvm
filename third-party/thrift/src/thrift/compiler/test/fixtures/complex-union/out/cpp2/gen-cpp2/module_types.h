@@ -1404,161 +1404,134 @@ class Val final  {
   bool operator==(const Val&) const;
   bool operator<(const Val&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> strVal_ref() const& {
     return {this->__fbthrift_field_strVal, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> strVal_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_strVal), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> strVal_ref() & {
     return {this->__fbthrift_field_strVal, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> strVal_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_strVal), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> strVal() const& {
     return {this->__fbthrift_field_strVal, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> strVal() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_strVal), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> strVal() & {
     return {this->__fbthrift_field_strVal, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> strVal() && {
     return {static_cast<T&&>(this->__fbthrift_field_strVal), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> intVal_ref() const& {
     return {this->__fbthrift_field_intVal, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> intVal_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_intVal), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> intVal_ref() & {
     return {this->__fbthrift_field_intVal, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> intVal_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_intVal), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> intVal() const& {
     return {this->__fbthrift_field_intVal, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> intVal() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_intVal), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> intVal() & {
     return {this->__fbthrift_field_intVal, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> intVal() && {
     return {static_cast<T&&>(this->__fbthrift_field_intVal), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> typedefValue_ref() const& {
     return {this->__fbthrift_field_typedefValue, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> typedefValue_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_typedefValue), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> typedefValue_ref() & {
     return {this->__fbthrift_field_typedefValue, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> typedefValue_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_typedefValue), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> typedefValue() const& {
     return {this->__fbthrift_field_typedefValue, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> typedefValue() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_typedefValue), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> typedefValue() & {
     return {this->__fbthrift_field_typedefValue, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename..., typename T = ::cpp2::containerTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> typedefValue() && {
     return {static_cast<T&&>(this->__fbthrift_field_typedefValue), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   const ::std::string& get_strVal() const& {
     return __fbthrift_field_strVal;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   ::std::string get_strVal() && {
     return std::move(__fbthrift_field_strVal);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "strVal" } */
   template <typename T_Val_strVal_struct_setter = ::std::string>
   [[deprecated("Use `FOO.strVal_ref() = BAR;` instead of `FOO.set_strVal(BAR);`")]]
   ::std::string& set_strVal(T_Val_strVal_struct_setter&& strVal_) {
@@ -1566,23 +1539,18 @@ class Val final  {
     return __fbthrift_field_strVal;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   ::std::int32_t get_intVal() const {
     return __fbthrift_field_intVal;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "intVal" } */
   [[deprecated("Use `FOO.intVal_ref() = BAR;` instead of `FOO.set_intVal(BAR);`")]]
   ::std::int32_t& set_intVal(::std::int32_t intVal_) {
     intVal_ref() = intVal_;
     return __fbthrift_field_intVal;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   const ::cpp2::containerTypedef& get_typedefValue() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   ::cpp2::containerTypedef get_typedefValue() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "Val", "kind": "struct", "field": "typedefValue" } */
   template <typename T_Val_typedefValue_struct_setter = ::cpp2::containerTypedef>
   [[deprecated("Use `FOO.typedefValue_ref() = BAR;` instead of `FOO.set_typedefValue(BAR);`")]]
   ::cpp2::containerTypedef& set_typedefValue(T_Val_typedefValue_struct_setter&& typedefValue_) {
@@ -2270,60 +2238,50 @@ class NonCopyableStruct final  {
   bool operator==(const NonCopyableStruct&) const;
   bool operator<(const NonCopyableStruct&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> num_ref() const& {
     return {this->__fbthrift_field_num, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> num_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_num), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> num_ref() & {
     return {this->__fbthrift_field_num, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> num_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_num), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> num() const& {
     return {this->__fbthrift_field_num, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> num() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_num), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> num() & {
     return {this->__fbthrift_field_num, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> num() && {
     return {static_cast<T&&>(this->__fbthrift_field_num), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   ::std::int64_t get_num() const {
     return __fbthrift_field_num;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "NonCopyableStruct", "kind": "struct", "field": "num" } */
   [[deprecated("Use `FOO.num_ref() = BAR;` instead of `FOO.set_num(BAR);`")]]
   ::std::int64_t& set_num(::std::int64_t num_) {
     num_ref() = num_;

@@ -130,67 +130,55 @@ class B final  {
   bool operator==(const B&) const;
   bool operator<(const B&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> field_ref() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> field_ref() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> field() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> field() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> field() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   const ::std::int32_t* get_field() const& {
     return field_ref() ? std::addressof(__fbthrift_field_field) : nullptr;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   ::std::int32_t* get_field() & {
     return field_ref() ? std::addressof(__fbthrift_field_field) : nullptr;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   ::std::int32_t* get_field() && = delete;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct", "field": "field" } */
   [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
@@ -300,61 +288,49 @@ class A final  {
   bool operator==(const A&) const;
   bool operator<(const A&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> some_map_ref() const& {
     return {this->__fbthrift_field_some_map, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> some_map_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_some_map), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> some_map_ref() & {
     return {this->__fbthrift_field_some_map, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> some_map_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_some_map), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> some_map() const& {
     return {this->__fbthrift_field_some_map, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> some_map() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_some_map), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> some_map() & {
     return {this->__fbthrift_field_some_map, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename..., typename T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> some_map() && {
     return {static_cast<T&&>(this->__fbthrift_field_some_map), __isset.at(0), __isset.bit(0)};
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() &;
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() && = delete;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "A", "kind": "struct", "field": "some_map" } */
   template <typename T_A_some_map_struct_setter = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
   [[deprecated("Use `FOO.some_map_ref() = BAR;` instead of `FOO.set_some_map(BAR);`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>& set_some_map(T_A_some_map_struct_setter&& some_map_) {

@@ -1754,60 +1754,50 @@ class MyStructWithCustomDefault final  {
   bool operator==(const MyStructWithCustomDefault&) const;
   bool operator<(const MyStructWithCustomDefault&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field1_ref() const& {
     return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field1_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field1_ref() & {
     return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field1_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field1() const& {
     return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field1() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field1() & {
     return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field1() && {
     return {static_cast<T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   ::std::int64_t get_field1() const {
     return __fbthrift_field_field1;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyStructWithCustomDefault", "kind": "struct", "field": "field1" } */
   [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int64_t& set_field1(::std::int64_t field1_) {
     field1_ref() = field1_;
@@ -1972,821 +1962,684 @@ class StructLevelTerseStruct final  {
   bool operator==(const StructLevelTerseStruct&) const;
   bool operator<(const StructLevelTerseStruct&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> bool_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> bool_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> bool_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> bool_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> bool_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> bool_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> bool_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> bool_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> byte_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> byte_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> byte_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> byte_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> byte_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> byte_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> byte_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> byte_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> short_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> short_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> short_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> short_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> short_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> short_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> short_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> short_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> int_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> int_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> int_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> int_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> int_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> int_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> int_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> int_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> long_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> long_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> long_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> long_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> long_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> long_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> long_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> long_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> float_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> float_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> float_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> float_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> float_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> float_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> float_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> float_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> double_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> double_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> double_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> double_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> double_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> double_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> double_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> double_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> string_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> string_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> string_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> string_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> string_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> string_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> string_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> string_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> binary_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> binary_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> binary_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> binary_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> binary_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> binary_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> binary_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> binary_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> enum_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> enum_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> enum_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> enum_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> enum_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> enum_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> enum_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> enum_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> list_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> list_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> list_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> list_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> list_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> list_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> list_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> list_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> set_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> set_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> set_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> set_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> set_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> set_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> set_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> set_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> map_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> map_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> map_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> map_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> map_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> map_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> map_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> map_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> struct_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> struct_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> struct_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> struct_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> struct_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> struct_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> struct_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> struct_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> union_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> union_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> union_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> union_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> union_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> union_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> union_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> union_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   bool get_bool_field() const {
     return __fbthrift_field_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   ::std::int8_t get_byte_field() const {
     return __fbthrift_field_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   ::std::int16_t get_short_field() const {
     return __fbthrift_field_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   ::std::int32_t get_int_field() const {
     return __fbthrift_field_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   ::std::int64_t get_long_field() const {
     return __fbthrift_field_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   float get_float_field() const {
     return __fbthrift_field_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   double get_double_field() const {
     return __fbthrift_field_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   ::std::string get_string_field() && {
     return std::move(__fbthrift_field_string_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename T_StructLevelTerseStruct_string_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_StructLevelTerseStruct_string_field_struct_setter&& string_field_) {
@@ -2794,17 +2647,14 @@ class StructLevelTerseStruct final  {
     return __fbthrift_field_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   const ::std::string& get_binary_field() const& {
     return __fbthrift_field_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   ::std::string get_binary_field() && {
     return std::move(__fbthrift_field_binary_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename T_StructLevelTerseStruct_binary_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_StructLevelTerseStruct_binary_field_struct_setter&& binary_field_) {
@@ -2812,71 +2662,54 @@ class StructLevelTerseStruct final  {
     return __fbthrift_field_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   ::facebook::thrift::test::terse_write::MyEnum get_enum_field() const {
     return __fbthrift_field_enum_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   const ::std::vector<::std::int16_t>& get_list_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   ::std::vector<::std::int16_t> get_list_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename T_StructLevelTerseStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_StructLevelTerseStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_StructLevelTerseStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   const ::std::set<::std::int16_t>& get_set_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   ::std::set<::std::int16_t> get_set_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename T_StructLevelTerseStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
   [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_StructLevelTerseStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_StructLevelTerseStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   const ::std::map<::std::int16_t, ::std::int16_t>& get_map_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   ::std::map<::std::int16_t, ::std::int16_t> get_map_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename T_StructLevelTerseStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
   [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_StructLevelTerseStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_StructLevelTerseStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   const ::facebook::thrift::test::terse_write::MyStruct& get_struct_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   ::facebook::thrift::test::terse_write::MyStruct get_struct_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename T_StructLevelTerseStruct_struct_field_struct_setter = ::facebook::thrift::test::terse_write::MyStruct>
   [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(T_StructLevelTerseStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_StructLevelTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   const ::facebook::thrift::test::terse_write::MyUnion& get_union_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   ::facebook::thrift::test::terse_write::MyUnion get_union_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename T_StructLevelTerseStruct_union_field_struct_setter = ::facebook::thrift::test::terse_write::MyUnion>
   [[deprecated("Use `FOO.union_field_ref() = BAR;` instead of `FOO.set_union_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyUnion& set_union_field(T_StructLevelTerseStruct_union_field_struct_setter&& union_field_) {
@@ -3104,1541 +2937,1284 @@ class FieldLevelTerseStruct final  {
   bool operator==(const FieldLevelTerseStruct&) const;
   bool operator<(const FieldLevelTerseStruct&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_bool_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_bool_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_bool_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_bool_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_bool_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_bool_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_bool_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_bool_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_byte_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_byte_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_byte_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_byte_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_byte_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_byte_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_byte_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_byte_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_short_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_short_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_short_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_short_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_short_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_short_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_short_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_short_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_int_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_int_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_int_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_int_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_int_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_int_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_int_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_int_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_long_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_long_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_long_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_long_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_long_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_long_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_long_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_long_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_float_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_float_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_float_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_float_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_float_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_float_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_float_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_float_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_double_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_double_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_double_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_double_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_double_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_double_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_double_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_double_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_string_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_string_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_string_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_string_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_string_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_string_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_string_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_string_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_binary_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_binary_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_binary_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_binary_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_binary_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_binary_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_binary_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_binary_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_enum_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_enum_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_enum_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_enum_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_enum_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_enum_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_enum_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_enum_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_list_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_list_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_list_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_list_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_list_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_list_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_list_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_list_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_set_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_set_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_set_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_set_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_set_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_set_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_set_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_set_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_map_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_map_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_map_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_map_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_map_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_map_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_map_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_map_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_struct_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_struct_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_struct_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_struct_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_struct_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_struct_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_struct_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_struct_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_union_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_union_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_union_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_union_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_union_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_union_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_union_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_union_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_union_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_union_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> bool_field_ref() const& {
     return {this->__fbthrift_field_bool_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> bool_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_bool_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> bool_field_ref() & {
     return {this->__fbthrift_field_bool_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> bool_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_bool_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> bool_field() const& {
     return {this->__fbthrift_field_bool_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> bool_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_bool_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> bool_field() & {
     return {this->__fbthrift_field_bool_field, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> bool_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_bool_field), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> byte_field_ref() const& {
     return {this->__fbthrift_field_byte_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> byte_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_byte_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> byte_field_ref() & {
     return {this->__fbthrift_field_byte_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> byte_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_byte_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> byte_field() const& {
     return {this->__fbthrift_field_byte_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> byte_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_byte_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> byte_field() & {
     return {this->__fbthrift_field_byte_field, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> byte_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_byte_field), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> short_field_ref() const& {
     return {this->__fbthrift_field_short_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> short_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_short_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> short_field_ref() & {
     return {this->__fbthrift_field_short_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> short_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_short_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> short_field() const& {
     return {this->__fbthrift_field_short_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> short_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_short_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> short_field() & {
     return {this->__fbthrift_field_short_field, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> short_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_short_field), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> int_field_ref() const& {
     return {this->__fbthrift_field_int_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> int_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_int_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> int_field_ref() & {
     return {this->__fbthrift_field_int_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> int_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_int_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> int_field() const& {
     return {this->__fbthrift_field_int_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> int_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_int_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> int_field() & {
     return {this->__fbthrift_field_int_field, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> int_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_int_field), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> long_field_ref() const& {
     return {this->__fbthrift_field_long_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> long_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_long_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> long_field_ref() & {
     return {this->__fbthrift_field_long_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> long_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_long_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> long_field() const& {
     return {this->__fbthrift_field_long_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> long_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_long_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> long_field() & {
     return {this->__fbthrift_field_long_field, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> long_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_long_field), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> float_field_ref() const& {
     return {this->__fbthrift_field_float_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> float_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_float_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> float_field_ref() & {
     return {this->__fbthrift_field_float_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> float_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_float_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> float_field() const& {
     return {this->__fbthrift_field_float_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> float_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_float_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> float_field() & {
     return {this->__fbthrift_field_float_field, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> float_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_float_field), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> double_field_ref() const& {
     return {this->__fbthrift_field_double_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> double_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_double_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> double_field_ref() & {
     return {this->__fbthrift_field_double_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> double_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_double_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> double_field() const& {
     return {this->__fbthrift_field_double_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> double_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_double_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> double_field() & {
     return {this->__fbthrift_field_double_field, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> double_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_double_field), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> string_field_ref() const& {
     return {this->__fbthrift_field_string_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> string_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_string_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> string_field_ref() & {
     return {this->__fbthrift_field_string_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> string_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_string_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> string_field() const& {
     return {this->__fbthrift_field_string_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> string_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_string_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> string_field() & {
     return {this->__fbthrift_field_string_field, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> string_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_string_field), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binary_field_ref() const& {
     return {this->__fbthrift_field_binary_field, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binary_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binary_field), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binary_field_ref() & {
     return {this->__fbthrift_field_binary_field, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binary_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_binary_field), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binary_field() const& {
     return {this->__fbthrift_field_binary_field, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binary_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binary_field), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binary_field() & {
     return {this->__fbthrift_field_binary_field, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binary_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_binary_field), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> enum_field_ref() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enum_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> enum_field_ref() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> enum_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> enum_field() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enum_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> enum_field() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> enum_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field_ref() const& {
     return {this->__fbthrift_field_list_field, __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field_ref() & {
     return {this->__fbthrift_field_list_field, __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field() const& {
     return {this->__fbthrift_field_list_field, __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field() & {
     return {this->__fbthrift_field_list_field, __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(10), __isset.bit(10)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> set_field_ref() const& {
     return {this->__fbthrift_field_set_field, __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> set_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_set_field), __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> set_field_ref() & {
     return {this->__fbthrift_field_set_field, __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> set_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_set_field), __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> set_field() const& {
     return {this->__fbthrift_field_set_field, __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> set_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_set_field), __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> set_field() & {
     return {this->__fbthrift_field_set_field, __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> set_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_set_field), __isset.at(11), __isset.bit(11)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> map_field_ref() const& {
     return {this->__fbthrift_field_map_field, __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> map_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_map_field), __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> map_field_ref() & {
     return {this->__fbthrift_field_map_field, __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> map_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_map_field), __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> map_field() const& {
     return {this->__fbthrift_field_map_field, __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> map_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_map_field), __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> map_field() & {
     return {this->__fbthrift_field_map_field, __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> map_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_map_field), __isset.at(12), __isset.bit(12)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> struct_field_ref() const& {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> struct_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> struct_field_ref() & {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> struct_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> struct_field() const& {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> struct_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> struct_field() & {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> struct_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> union_field_ref() const& {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> union_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> union_field_ref() & {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> union_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> union_field() const& {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> union_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> union_field() & {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> union_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   bool get_terse_bool_field() const {
     return __fbthrift_field_terse_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_bool_field" } */
   [[deprecated("Use `FOO.terse_bool_field_ref() = BAR;` instead of `FOO.set_terse_bool_field(BAR);`")]]
   bool& set_terse_bool_field(bool terse_bool_field_) {
     terse_bool_field_ref() = terse_bool_field_;
     return __fbthrift_field_terse_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   ::std::int8_t get_terse_byte_field() const {
     return __fbthrift_field_terse_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_byte_field" } */
   [[deprecated("Use `FOO.terse_byte_field_ref() = BAR;` instead of `FOO.set_terse_byte_field(BAR);`")]]
   ::std::int8_t& set_terse_byte_field(::std::int8_t terse_byte_field_) {
     terse_byte_field_ref() = terse_byte_field_;
     return __fbthrift_field_terse_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   ::std::int16_t get_terse_short_field() const {
     return __fbthrift_field_terse_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_short_field" } */
   [[deprecated("Use `FOO.terse_short_field_ref() = BAR;` instead of `FOO.set_terse_short_field(BAR);`")]]
   ::std::int16_t& set_terse_short_field(::std::int16_t terse_short_field_) {
     terse_short_field_ref() = terse_short_field_;
     return __fbthrift_field_terse_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   ::std::int32_t get_terse_int_field() const {
     return __fbthrift_field_terse_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_int_field" } */
   [[deprecated("Use `FOO.terse_int_field_ref() = BAR;` instead of `FOO.set_terse_int_field(BAR);`")]]
   ::std::int32_t& set_terse_int_field(::std::int32_t terse_int_field_) {
     terse_int_field_ref() = terse_int_field_;
     return __fbthrift_field_terse_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   ::std::int64_t get_terse_long_field() const {
     return __fbthrift_field_terse_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_long_field" } */
   [[deprecated("Use `FOO.terse_long_field_ref() = BAR;` instead of `FOO.set_terse_long_field(BAR);`")]]
   ::std::int64_t& set_terse_long_field(::std::int64_t terse_long_field_) {
     terse_long_field_ref() = terse_long_field_;
     return __fbthrift_field_terse_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   float get_terse_float_field() const {
     return __fbthrift_field_terse_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_float_field" } */
   [[deprecated("Use `FOO.terse_float_field_ref() = BAR;` instead of `FOO.set_terse_float_field(BAR);`")]]
   float& set_terse_float_field(float terse_float_field_) {
     terse_float_field_ref() = terse_float_field_;
     return __fbthrift_field_terse_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   double get_terse_double_field() const {
     return __fbthrift_field_terse_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_double_field" } */
   [[deprecated("Use `FOO.terse_double_field_ref() = BAR;` instead of `FOO.set_terse_double_field(BAR);`")]]
   double& set_terse_double_field(double terse_double_field_) {
     terse_double_field_ref() = terse_double_field_;
     return __fbthrift_field_terse_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   const ::std::string& get_terse_string_field() const& {
     return __fbthrift_field_terse_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   ::std::string get_terse_string_field() && {
     return std::move(__fbthrift_field_terse_string_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_string_field" } */
   template <typename T_FieldLevelTerseStruct_terse_string_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.terse_string_field_ref() = BAR;` instead of `FOO.set_terse_string_field(BAR);`")]]
   ::std::string& set_terse_string_field(T_FieldLevelTerseStruct_terse_string_field_struct_setter&& terse_string_field_) {
@@ -4646,17 +4222,14 @@ class FieldLevelTerseStruct final  {
     return __fbthrift_field_terse_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   const ::std::string& get_terse_binary_field() const& {
     return __fbthrift_field_terse_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   ::std::string get_terse_binary_field() && {
     return std::move(__fbthrift_field_terse_binary_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_binary_field" } */
   template <typename T_FieldLevelTerseStruct_terse_binary_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.terse_binary_field_ref() = BAR;` instead of `FOO.set_terse_binary_field(BAR);`")]]
   ::std::string& set_terse_binary_field(T_FieldLevelTerseStruct_terse_binary_field_struct_setter&& terse_binary_field_) {
@@ -4664,71 +4237,54 @@ class FieldLevelTerseStruct final  {
     return __fbthrift_field_terse_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   ::facebook::thrift::test::terse_write::MyEnum get_terse_enum_field() const {
     return __fbthrift_field_terse_enum_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_enum_field" } */
   [[deprecated("Use `FOO.terse_enum_field_ref() = BAR;` instead of `FOO.set_terse_enum_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyEnum& set_terse_enum_field(::facebook::thrift::test::terse_write::MyEnum terse_enum_field_) {
     terse_enum_field_ref() = terse_enum_field_;
     return __fbthrift_field_terse_enum_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   const ::std::vector<::std::int16_t>& get_terse_list_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   ::std::vector<::std::int16_t> get_terse_list_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_list_field" } */
   template <typename T_FieldLevelTerseStruct_terse_list_field_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.terse_list_field_ref() = BAR;` instead of `FOO.set_terse_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_terse_list_field(T_FieldLevelTerseStruct_terse_list_field_struct_setter&& terse_list_field_) {
     terse_list_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_list_field_struct_setter>(terse_list_field_);
     return __fbthrift_field_terse_list_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   const ::std::set<::std::int16_t>& get_terse_set_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   ::std::set<::std::int16_t> get_terse_set_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_set_field" } */
   template <typename T_FieldLevelTerseStruct_terse_set_field_struct_setter = ::std::set<::std::int16_t>>
   [[deprecated("Use `FOO.terse_set_field_ref() = BAR;` instead of `FOO.set_terse_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_terse_set_field(T_FieldLevelTerseStruct_terse_set_field_struct_setter&& terse_set_field_) {
     terse_set_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_set_field_struct_setter>(terse_set_field_);
     return __fbthrift_field_terse_set_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   const ::std::map<::std::int16_t, ::std::int16_t>& get_terse_map_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   ::std::map<::std::int16_t, ::std::int16_t> get_terse_map_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_map_field" } */
   template <typename T_FieldLevelTerseStruct_terse_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
   [[deprecated("Use `FOO.terse_map_field_ref() = BAR;` instead of `FOO.set_terse_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_terse_map_field(T_FieldLevelTerseStruct_terse_map_field_struct_setter&& terse_map_field_) {
     terse_map_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_map_field_struct_setter>(terse_map_field_);
     return __fbthrift_field_terse_map_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   const ::facebook::thrift::test::terse_write::MyStruct& get_terse_struct_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   ::facebook::thrift::test::terse_write::MyStruct get_terse_struct_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_struct_field" } */
   template <typename T_FieldLevelTerseStruct_terse_struct_field_struct_setter = ::facebook::thrift::test::terse_write::MyStruct>
   [[deprecated("Use `FOO.terse_struct_field_ref() = BAR;` instead of `FOO.set_terse_struct_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyStruct& set_terse_struct_field(T_FieldLevelTerseStruct_terse_struct_field_struct_setter&& terse_struct_field_) {
     terse_struct_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_struct_field_struct_setter>(terse_struct_field_);
     return __fbthrift_field_terse_struct_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   const ::facebook::thrift::test::terse_write::MyUnion& get_terse_union_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   ::facebook::thrift::test::terse_write::MyUnion get_terse_union_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "terse_union_field" } */
   template <typename T_FieldLevelTerseStruct_terse_union_field_struct_setter = ::facebook::thrift::test::terse_write::MyUnion>
   [[deprecated("Use `FOO.terse_union_field_ref() = BAR;` instead of `FOO.set_terse_union_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyUnion& set_terse_union_field(T_FieldLevelTerseStruct_terse_union_field_struct_setter&& terse_union_field_) {
@@ -4736,101 +4292,84 @@ class FieldLevelTerseStruct final  {
     return __fbthrift_field_terse_union_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   bool get_bool_field() const {
     return __fbthrift_field_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   ::std::int8_t get_byte_field() const {
     return __fbthrift_field_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   ::std::int16_t get_short_field() const {
     return __fbthrift_field_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "short_field" } */
   [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   ::std::int32_t get_int_field() const {
     return __fbthrift_field_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "int_field" } */
   [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   ::std::int64_t get_long_field() const {
     return __fbthrift_field_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "long_field" } */
   [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   float get_float_field() const {
     return __fbthrift_field_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "float_field" } */
   [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   double get_double_field() const {
     return __fbthrift_field_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "double_field" } */
   [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   ::std::string get_string_field() && {
     return std::move(__fbthrift_field_string_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "string_field" } */
   template <typename T_FieldLevelTerseStruct_string_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_FieldLevelTerseStruct_string_field_struct_setter&& string_field_) {
@@ -4838,17 +4377,14 @@ class FieldLevelTerseStruct final  {
     return __fbthrift_field_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   const ::std::string& get_binary_field() const& {
     return __fbthrift_field_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   ::std::string get_binary_field() && {
     return std::move(__fbthrift_field_binary_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "binary_field" } */
   template <typename T_FieldLevelTerseStruct_binary_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_FieldLevelTerseStruct_binary_field_struct_setter&& binary_field_) {
@@ -4856,71 +4392,54 @@ class FieldLevelTerseStruct final  {
     return __fbthrift_field_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   ::facebook::thrift::test::terse_write::MyEnum get_enum_field() const {
     return __fbthrift_field_enum_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   const ::std::vector<::std::int16_t>& get_list_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   ::std::vector<::std::int16_t> get_list_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "list_field" } */
   template <typename T_FieldLevelTerseStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_FieldLevelTerseStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_FieldLevelTerseStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   const ::std::set<::std::int16_t>& get_set_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   ::std::set<::std::int16_t> get_set_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "set_field" } */
   template <typename T_FieldLevelTerseStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
   [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_FieldLevelTerseStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_FieldLevelTerseStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   const ::std::map<::std::int16_t, ::std::int16_t>& get_map_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   ::std::map<::std::int16_t, ::std::int16_t> get_map_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "map_field" } */
   template <typename T_FieldLevelTerseStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
   [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_FieldLevelTerseStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_FieldLevelTerseStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   const ::facebook::thrift::test::terse_write::MyStruct& get_struct_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   ::facebook::thrift::test::terse_write::MyStruct get_struct_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "struct_field" } */
   template <typename T_FieldLevelTerseStruct_struct_field_struct_setter = ::facebook::thrift::test::terse_write::MyStruct>
   [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(T_FieldLevelTerseStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_FieldLevelTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   const ::facebook::thrift::test::terse_write::MyUnion& get_union_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   ::facebook::thrift::test::terse_write::MyUnion get_union_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "FieldLevelTerseStruct", "kind": "struct", "field": "union_field" } */
   template <typename T_FieldLevelTerseStruct_union_field_struct_setter = ::facebook::thrift::test::terse_write::MyUnion>
   [[deprecated("Use `FOO.union_field_ref() = BAR;` instead of `FOO.set_union_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyUnion& set_union_field(T_FieldLevelTerseStruct_union_field_struct_setter&& union_field_) {
@@ -5082,773 +4601,644 @@ class TerseStructWithCustomDefault final  {
   bool operator==(const TerseStructWithCustomDefault&) const;
   bool operator<(const TerseStructWithCustomDefault&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> bool_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> bool_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> bool_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> bool_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> bool_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> bool_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> bool_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_bool_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> bool_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_bool_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> byte_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> byte_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> byte_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> byte_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> byte_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> byte_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> byte_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_byte_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   template <typename..., typename T = ::std::int8_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> byte_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_byte_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> short_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> short_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> short_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> short_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> short_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> short_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> short_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_short_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> short_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_short_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> int_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> int_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> int_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> int_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> int_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> int_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> int_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_int_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> int_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_int_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> long_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> long_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> long_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> long_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> long_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> long_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> long_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_long_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> long_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_long_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> float_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> float_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> float_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> float_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> float_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> float_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> float_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_float_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   template <typename..., typename T = float>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> float_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_float_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> double_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> double_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> double_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> double_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> double_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> double_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> double_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_double_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   template <typename..., typename T = double>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> double_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_double_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> string_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> string_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> string_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> string_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> string_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> string_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> string_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_string_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> string_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_string_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> binary_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> binary_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> binary_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> binary_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> binary_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> binary_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> binary_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_binary_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> binary_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binary_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> enum_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> enum_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> enum_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> enum_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> enum_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> enum_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> enum_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_enum_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> enum_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_enum_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> list_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> list_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> list_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> list_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> list_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> list_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> list_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_list_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> list_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_list_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> set_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> set_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> set_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> set_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> set_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> set_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> set_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_set_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename..., typename T = ::std::set<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> set_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_set_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> map_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> map_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> map_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> map_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> map_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> map_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> map_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_map_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> map_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_map_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> struct_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> struct_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> struct_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> struct_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> struct_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> struct_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> struct_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_struct_field};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> struct_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_struct_field)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   bool get_bool_field() const {
     return __fbthrift_field_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   ::std::int8_t get_byte_field() const {
     return __fbthrift_field_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   ::std::int16_t get_short_field() const {
     return __fbthrift_field_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "short_field" } */
   [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   ::std::int32_t get_int_field() const {
     return __fbthrift_field_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "int_field" } */
   [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   ::std::int64_t get_long_field() const {
     return __fbthrift_field_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "long_field" } */
   [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   float get_float_field() const {
     return __fbthrift_field_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "float_field" } */
   [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   double get_double_field() const {
     return __fbthrift_field_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "double_field" } */
   [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   ::std::string get_string_field() && {
     return std::move(__fbthrift_field_string_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "string_field" } */
   template <typename T_TerseStructWithCustomDefault_string_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_TerseStructWithCustomDefault_string_field_struct_setter&& string_field_) {
@@ -5856,17 +5246,14 @@ class TerseStructWithCustomDefault final  {
     return __fbthrift_field_string_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   const ::std::string& get_binary_field() const& {
     return __fbthrift_field_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   ::std::string get_binary_field() && {
     return std::move(__fbthrift_field_binary_field);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "binary_field" } */
   template <typename T_TerseStructWithCustomDefault_binary_field_struct_setter = ::std::string>
   [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_TerseStructWithCustomDefault_binary_field_struct_setter&& binary_field_) {
@@ -5874,59 +5261,45 @@ class TerseStructWithCustomDefault final  {
     return __fbthrift_field_binary_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   ::facebook::thrift::test::terse_write::MyEnum get_enum_field() const {
     return __fbthrift_field_enum_field;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   const ::std::vector<::std::int16_t>& get_list_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   ::std::vector<::std::int16_t> get_list_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "list_field" } */
   template <typename T_TerseStructWithCustomDefault_list_field_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_TerseStructWithCustomDefault_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_TerseStructWithCustomDefault_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   const ::std::set<::std::int16_t>& get_set_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   ::std::set<::std::int16_t> get_set_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "set_field" } */
   template <typename T_TerseStructWithCustomDefault_set_field_struct_setter = ::std::set<::std::int16_t>>
   [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_TerseStructWithCustomDefault_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_TerseStructWithCustomDefault_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   const ::std::map<::std::int16_t, ::std::int16_t>& get_map_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   ::std::map<::std::int16_t, ::std::int16_t> get_map_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "map_field" } */
   template <typename T_TerseStructWithCustomDefault_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
   [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_TerseStructWithCustomDefault_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_TerseStructWithCustomDefault_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& get_struct_field() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   ::facebook::thrift::test::terse_write::MyStructWithCustomDefault get_struct_field() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseStructWithCustomDefault", "kind": "struct", "field": "struct_field" } */
   template <typename T_TerseStructWithCustomDefault_struct_field_struct_setter = ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& set_struct_field(T_TerseStructWithCustomDefault_struct_field_struct_setter&& struct_field_) {
@@ -6046,145 +5419,121 @@ class AdaptedFields final  {
   bool operator==(const AdaptedFields&) const;
   bool operator<(const AdaptedFields&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field1_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field1_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field1_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field1_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field1() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field1() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field1() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::facebook::thrift::test::terse_write::MyInteger>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field1() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field2_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field2};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field2_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field2_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field2};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field2_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field2() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field2};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field2() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field2() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field2};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field2" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field2() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field3_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field3};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field3_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field3_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field3};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field3_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field3() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field3};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field3() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field3() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field3};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "AdaptedFields", "kind": "struct", "field": "field3" } */
   template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field3() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field3)};
@@ -6291,60 +5640,50 @@ class WrappedFields final  {
   bool operator==(const WrappedFields&) const;
   bool operator<(const WrappedFields&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field1_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field1_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field1_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field1_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field1() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field1() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field1() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field1};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field1() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   ::std::int32_t get_field1() const {
     return __fbthrift_field_field1;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "WrappedFields", "kind": "struct", "field": "field1" } */
   [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int32_t& set_field1(::std::int32_t field1_) {
     field1_ref() = field1_;
@@ -6460,65 +5799,54 @@ class FOLLY_EXPORT TerseException : public virtual apache::thrift::TException {
   bool operator==(const TerseException&) const;
   bool operator<(const TerseException&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> msg_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_msg};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> msg_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_msg)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> msg_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_msg};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> msg_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_msg)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> msg() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_msg};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> msg() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_msg)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> msg() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_msg};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> msg() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_msg)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   const ::std::string& get_msg() const& {
     return __fbthrift_field_msg;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   ::std::string get_msg() && {
     return std::move(__fbthrift_field_msg);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "TerseException", "kind": "exception", "field": "msg" } */
   template <typename T_TerseException_msg_struct_setter = ::std::string>
   [[deprecated("Use `FOO.msg_ref() = BAR;` instead of `FOO.set_msg(BAR);`")]]
   ::std::string& set_msg(T_TerseException_msg_struct_setter&& msg_) {

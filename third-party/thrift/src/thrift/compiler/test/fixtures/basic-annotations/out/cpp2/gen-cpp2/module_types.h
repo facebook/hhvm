@@ -407,461 +407,384 @@ class YourStruct final  {
   bool operator==(const YourStruct&) const;
   bool operator<(const YourStruct&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> majorVer_ref() const& {
     return {this->__fbthrift_field_majorVer, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> majorVer_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_majorVer), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> majorVer_ref() & {
     return {this->__fbthrift_field_majorVer, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> majorVer_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_majorVer), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> majorVer() const& {
     return {this->__fbthrift_field_majorVer, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> majorVer() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_majorVer), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> majorVer() & {
     return {this->__fbthrift_field_majorVer, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> majorVer() && {
     return {static_cast<T&&>(this->__fbthrift_field_majorVer), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> abstract_ref() const& {
     return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> abstract_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> abstract_ref() & {
     return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> abstract_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> abstract() const& {
     return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> abstract() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> abstract() & {
     return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> abstract() && {
     return {static_cast<T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> annotation_with_quote_ref() const& {
     return {this->__fbthrift_field_annotation_with_quote, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> annotation_with_quote_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_annotation_with_quote), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> annotation_with_quote_ref() & {
     return {this->__fbthrift_field_annotation_with_quote, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> annotation_with_quote_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_annotation_with_quote), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> annotation_with_quote() const& {
     return {this->__fbthrift_field_annotation_with_quote, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> annotation_with_quote() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_annotation_with_quote), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> annotation_with_quote() & {
     return {this->__fbthrift_field_annotation_with_quote, __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> annotation_with_quote() && {
     return {static_cast<T&&>(this->__fbthrift_field_annotation_with_quote), __isset.at(2), __isset.bit(2)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> class__ref() const& {
     return {this->__fbthrift_field_class_, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> class__ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_class_), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> class__ref() & {
     return {this->__fbthrift_field_class_, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> class__ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_class_), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> class_() const& {
     return {this->__fbthrift_field_class_, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> class_() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_class_), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> class_() & {
     return {this->__fbthrift_field_class_, __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> class_() && {
     return {static_cast<T&&>(this->__fbthrift_field_class_), __isset.at(3), __isset.bit(3)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> annotation_with_trailing_comma_ref() const& {
     return {this->__fbthrift_field_annotation_with_trailing_comma, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> annotation_with_trailing_comma_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_annotation_with_trailing_comma), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> annotation_with_trailing_comma_ref() & {
     return {this->__fbthrift_field_annotation_with_trailing_comma, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> annotation_with_trailing_comma_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_annotation_with_trailing_comma), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> annotation_with_trailing_comma() const& {
     return {this->__fbthrift_field_annotation_with_trailing_comma, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> annotation_with_trailing_comma() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_annotation_with_trailing_comma), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> annotation_with_trailing_comma() & {
     return {this->__fbthrift_field_annotation_with_trailing_comma, __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> annotation_with_trailing_comma() && {
     return {static_cast<T&&>(this->__fbthrift_field_annotation_with_trailing_comma), __isset.at(4), __isset.bit(4)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> empty_annotations_ref() const& {
     return {this->__fbthrift_field_empty_annotations, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> empty_annotations_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_empty_annotations), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> empty_annotations_ref() & {
     return {this->__fbthrift_field_empty_annotations, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> empty_annotations_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_empty_annotations), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> empty_annotations() const& {
     return {this->__fbthrift_field_empty_annotations, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> empty_annotations() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_empty_annotations), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> empty_annotations() & {
     return {this->__fbthrift_field_empty_annotations, __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> empty_annotations() && {
     return {static_cast<T&&>(this->__fbthrift_field_empty_annotations), __isset.at(5), __isset.bit(5)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> my_enum_ref() const& {
     return {this->__fbthrift_field_my_enum, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> my_enum_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_my_enum), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> my_enum_ref() & {
     return {this->__fbthrift_field_my_enum, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> my_enum_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_my_enum), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> my_enum() const& {
     return {this->__fbthrift_field_my_enum, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> my_enum() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_my_enum), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> my_enum() & {
     return {this->__fbthrift_field_my_enum, __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   template <typename..., typename T = ::cpp2::YourEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> my_enum() && {
     return {static_cast<T&&>(this->__fbthrift_field_my_enum), __isset.at(6), __isset.bit(6)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> cpp_type_annotation_ref() const& {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> cpp_type_annotation_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> cpp_type_annotation_ref() & {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> cpp_type_annotation_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> cpp_type_annotation() const& {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> cpp_type_annotation() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> cpp_type_annotation() & {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> cpp_type_annotation() && {
     return {static_cast<T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> my_union_ref() const& {
     return {this->__fbthrift_field_my_union, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> my_union_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_my_union), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> my_union_ref() & {
     return {this->__fbthrift_field_my_union, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> my_union_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_my_union), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> my_union() const& {
     return {this->__fbthrift_field_my_union, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> my_union() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_my_union), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> my_union() & {
     return {this->__fbthrift_field_my_union, __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_union" } */
   template <typename..., typename T = ::cpp2::YourUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> my_union() && {
     return {static_cast<T&&>(this->__fbthrift_field_my_union), __isset.at(8), __isset.bit(8)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   ::std::int64_t get_majorVer() const {
     return __fbthrift_field_majorVer;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "majorVer" } */
   [[deprecated("Use `FOO.majorVer_ref() = BAR;` instead of `FOO.set_majorVer(BAR);`")]]
   ::std::int64_t& set_majorVer(::std::int64_t majorVer_) {
     majorVer_ref() = majorVer_;
     return __fbthrift_field_majorVer;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   const ::std::string& get_abstract() const& {
     return __fbthrift_field_abstract;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   ::std::string get_abstract() && {
     return std::move(__fbthrift_field_abstract);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "abstract" } */
   template <typename T_YourStruct_abstract_struct_setter = ::std::string>
   [[deprecated("Use `FOO.abstract_ref() = BAR;` instead of `FOO.set_abstract(BAR);`")]]
   ::std::string& set_abstract(T_YourStruct_abstract_struct_setter&& abstract_) {
@@ -869,17 +792,14 @@ class YourStruct final  {
     return __fbthrift_field_abstract;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   const ::std::string& get_annotation_with_quote() const& {
     return __fbthrift_field_annotation_with_quote;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   ::std::string get_annotation_with_quote() && {
     return std::move(__fbthrift_field_annotation_with_quote);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_quote" } */
   template <typename T_YourStruct_annotation_with_quote_struct_setter = ::std::string>
   [[deprecated("Use `FOO.annotation_with_quote_ref() = BAR;` instead of `FOO.set_annotation_with_quote(BAR);`")]]
   ::std::string& set_annotation_with_quote(T_YourStruct_annotation_with_quote_struct_setter&& annotation_with_quote_) {
@@ -887,17 +807,14 @@ class YourStruct final  {
     return __fbthrift_field_annotation_with_quote;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   const ::std::string& get_class_() const& {
     return __fbthrift_field_class_;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   ::std::string get_class_() && {
     return std::move(__fbthrift_field_class_);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "class_" } */
   template <typename T_YourStruct_class__struct_setter = ::std::string>
   [[deprecated("Use `FOO.class__ref() = BAR;` instead of `FOO.set_class_(BAR);`")]]
   ::std::string& set_class_(T_YourStruct_class__struct_setter&& class__) {
@@ -905,17 +822,14 @@ class YourStruct final  {
     return __fbthrift_field_class_;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   const ::std::string& get_annotation_with_trailing_comma() const& {
     return __fbthrift_field_annotation_with_trailing_comma;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   ::std::string get_annotation_with_trailing_comma() && {
     return std::move(__fbthrift_field_annotation_with_trailing_comma);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "annotation_with_trailing_comma" } */
   template <typename T_YourStruct_annotation_with_trailing_comma_struct_setter = ::std::string>
   [[deprecated("Use `FOO.annotation_with_trailing_comma_ref() = BAR;` instead of `FOO.set_annotation_with_trailing_comma(BAR);`")]]
   ::std::string& set_annotation_with_trailing_comma(T_YourStruct_annotation_with_trailing_comma_struct_setter&& annotation_with_trailing_comma_) {
@@ -923,17 +837,14 @@ class YourStruct final  {
     return __fbthrift_field_annotation_with_trailing_comma;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   const ::std::string& get_empty_annotations() const& {
     return __fbthrift_field_empty_annotations;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   ::std::string get_empty_annotations() && {
     return std::move(__fbthrift_field_empty_annotations);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "empty_annotations" } */
   template <typename T_YourStruct_empty_annotations_struct_setter = ::std::string>
   [[deprecated("Use `FOO.empty_annotations_ref() = BAR;` instead of `FOO.set_empty_annotations(BAR);`")]]
   ::std::string& set_empty_annotations(T_YourStruct_empty_annotations_struct_setter&& empty_annotations_) {
@@ -941,23 +852,18 @@ class YourStruct final  {
     return __fbthrift_field_empty_annotations;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   ::cpp2::YourEnum get_my_enum() const {
     return __fbthrift_field_my_enum;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "my_enum" } */
   [[deprecated("Use `FOO.my_enum_ref() = BAR;` instead of `FOO.set_my_enum(BAR);`")]]
   ::cpp2::YourEnum& set_my_enum(::cpp2::YourEnum my_enum_) {
     my_enum_ref() = my_enum_;
     return __fbthrift_field_my_enum;
   }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   const ::cpp2::list_string_6884& get_cpp_type_annotation() const&;
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   ::cpp2::list_string_6884 get_cpp_type_annotation() &&;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourStruct", "kind": "struct", "field": "cpp_type_annotation" } */
   template <typename T_YourStruct_cpp_type_annotation_struct_setter = ::cpp2::list_string_6884>
   [[deprecated("Use `FOO.cpp_type_annotation_ref() = BAR;` instead of `FOO.set_cpp_type_annotation(BAR);`")]]
   ::cpp2::list_string_6884& set_cpp_type_annotation(T_YourStruct_cpp_type_annotation_struct_setter&& cpp_type_annotation_) {
@@ -1075,65 +981,54 @@ class MyStructNestedAnnotation final  {
   bool operator==(const MyStructNestedAnnotation&) const;
   bool operator<(const MyStructNestedAnnotation&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> name_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> name_ref() & {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> name() const& {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> name() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> name() & {
     return {this->__fbthrift_field_name, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name() && {
     return {static_cast<T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   ::std::string get_name() && {
     return std::move(__fbthrift_field_name);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "MyStructNestedAnnotation", "kind": "struct", "field": "name" } */
   template <typename T_MyStructNestedAnnotation_name_struct_setter = ::std::string>
   [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_MyStructNestedAnnotation_name_struct_setter&& name_) {
@@ -1359,125 +1254,104 @@ class SecretStruct final  {
   bool operator==(const SecretStruct&) const;
   bool operator<(const SecretStruct&) const;
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> id_ref() const& {
     return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> id_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_id), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> id_ref() & {
     return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> id_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_id), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> id() const& {
     return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> id() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_id), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> id() & {
     return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> id() && {
     return {static_cast<T&&>(this->__fbthrift_field_id), __isset.at(0), __isset.bit(0)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> password_ref() const& {
     return {this->__fbthrift_field_password, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> password_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_password), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> password_ref() & {
     return {this->__fbthrift_field_password, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> password_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_password), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> password() const& {
     return {this->__fbthrift_field_password, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> password() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_password), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> password() & {
     return {this->__fbthrift_field_password, __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> password() && {
     return {static_cast<T&&>(this->__fbthrift_field_password), __isset.at(1), __isset.bit(1)};
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   ::std::int64_t get_id() const {
     return __fbthrift_field_id;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "id" } */
   [[deprecated("Use `FOO.id_ref() = BAR;` instead of `FOO.set_id(BAR);`")]]
   ::std::int64_t& set_id(::std::int64_t id_) {
     id_ref() = id_;
     return __fbthrift_field_id;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   const ::std::string& get_password() const& {
     return __fbthrift_field_password;
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   ::std::string get_password() && {
     return std::move(__fbthrift_field_password);
   }
 
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "SecretStruct", "kind": "struct", "field": "password" } */
   template <typename T_SecretStruct_password_struct_setter = ::std::string>
   [[deprecated("Use `FOO.password_ref() = BAR;` instead of `FOO.set_password(BAR);`")]]
   ::std::string& set_password(T_SecretStruct_password_struct_setter&& password_) {

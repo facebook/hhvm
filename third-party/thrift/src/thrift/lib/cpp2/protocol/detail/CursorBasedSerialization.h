@@ -115,6 +115,8 @@ class BaseCursorReader {
             return "Child reader not passed to endRead";
           case State::Done:
             return "Reader already finalized";
+          default:
+            return "State is unknown";
         }
       }());
     }
@@ -169,6 +171,8 @@ class BaseCursorWriter {
             return "Child writer not passed to endWrite";
           case State::Done:
             return "Writer already finalized";
+          default:
+            return "State is unknown";
         }
       }());
     }

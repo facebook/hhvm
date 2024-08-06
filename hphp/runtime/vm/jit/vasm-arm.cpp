@@ -1433,10 +1433,62 @@ void lower(const VLS& /*env*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum ImmediateStyle : uint16_t {
+  kUnscaledSignedImmediate9 = 0,
+  kXPositiveImmediate12,
+  kWPositiveImmediate12,
+  kHPositiveImmediate12,
+  kBPositiveImmediate12,
+  kLegacyStyle = kUnscaledSignedImmediate9,
+};
+
+static const struct {
+  const int16_t immMin;
+  const int16_t immMax;
+  const uint8_t immStep;
+  const bool assertOnOutOfRange;
+} ImmediateCharacteristics[] = {
+  // kUnscaledSignedImmediate9
+  {
+    .immMin = -256,
+    .immMax = 255,
+    .immStep = 1,
+    .assertOnOutOfRange = false,
+  },
+  // kXPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 32760,
+    .immStep = 8,
+    .assertOnOutOfRange = false,
+  },
+  // kWPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 16380,
+    .immStep = 4,
+    .assertOnOutOfRange = false,
+  },
+  // kHPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 8190,
+    .immStep = 2,
+    .assertOnOutOfRange = false,
+  },
+  // kBPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 4095,
+    .immStep = 1,
+    .assertOnOutOfRange = false,
+  },
+};
+
 /*
  * TODO: Using load size (ldr[bh]?), apply scaled address if 'disp' is unsigned
  */
-void lowerVptr(Vptr& p, Vout& v) {
+void lowerVptr(Vptr& p, Vout& v, ImmediateStyle is = kLegacyStyle, ImmediateStyle alt = kLegacyStyle) {
   enum {
     BASE = 1,
     INDEX = 2,
@@ -1474,9 +1526,19 @@ void lowerVptr(Vptr& p, Vout& v) {
       break;
 
     case BASE | DISP: {
-      // ldr/str allow [base, #imm], where #imm is [-256 .. 255].
-      if (p.disp >= -256 && p.disp <= 255)
+      // if the immediate value can be directly encoded we have nothing to do
+      if (p.disp >= ImmediateCharacteristics[is].immMin &&
+          p.disp <= ImmediateCharacteristics[is].immMax &&
+          (p.disp % ImmediateCharacteristics[is].immStep) == 0)
         break;
+      if (is != alt &&
+          p.disp >= ImmediateCharacteristics[alt].immMin &&
+          p.disp <= ImmediateCharacteristics[alt].immMax &&
+          (p.disp % ImmediateCharacteristics[alt].immStep) == 0)
+        break;
+      if (ImmediateCharacteristics[is].assertOnOutOfRange) {
+        always_assert(!"Immediate value out of range");
+      }
 
       // #imm is out of range, convert to [base, index]
       auto index = v.makeReg();
@@ -1537,6 +1599,74 @@ void lowerVptr(Vptr& p, Vout& v) {
   }
 }
 
+#define Y(vasm_opc, m, n)                                   \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    if (i.n.isGP())                                         \
+      lowerVptr(i.m, v, kXPositiveImmediate12,              \
+          kUnscaledSignedImmediate9);                       \
+    else                                                    \
+      lowerVptr(i.m, v, kUnscaledSignedImmediate9,          \
+          kUnscaledSignedImmediate9);                       \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(load, s, d)
+Y(store, d, s)
+
+#undef Y
+
+#define Y(vasm_opc, m)                                      \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v, kWPositiveImmediate12,                \
+        kUnscaledSignedImmediate9);                         \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(loadl, s)
+Y(loadtql, s)
+Y(loadzlq, s)
+Y(storel, m)
+
+#undef Y
+
+#define Y(vasm_opc, m)                                      \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v, kBPositiveImmediate12,                \
+        kUnscaledSignedImmediate9);                         \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(loadb, s)
+Y(loadtqb, s)
+Y(loadzbl, s)
+Y(loadzbq, s)
+Y(storeb, m)
+Y(loadsbq, s)
+Y(loadsbl, s)
+
+#undef Y
+
+#define Y(vasm_opc, m)                                      \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v, kHPositiveImmediate12,                \
+        kUnscaledSignedImmediate9);                         \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(loadw, s)
+Y(loadzwq, s)
+Y(storew, m)
+
+#undef Y
+
 #define Y(vasm_opc, m)                                      \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
@@ -1548,24 +1678,10 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
 Y(decqmlock, m)
 Y(decqmlocknosf, m)
 Y(lea, s)
-Y(load, s)
-Y(loadb, s)
-Y(loadl, s)
 Y(loadsd, s)
-Y(loadtqb, s)
-Y(loadtql, s)
 Y(loadups, s)
-Y(loadw, s)
-Y(loadzbl, s)
-Y(loadzbq, s)
-Y(loadzwq, s)
-Y(loadzlq, s)
-Y(store, d)
-Y(storeb, m)
-Y(storel, m)
 Y(storesd, m)
 Y(storeups, m)
-Y(storew, m)
 
 #undef Y
 

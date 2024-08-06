@@ -130,6 +130,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       return;
     }
 
+    DCHECK(data_.prepend()->empty()) << "Prepend in ListPatch is disallowed.";
     v.prepend(*data_.prepend());
     v.append(*data_.append());
   }

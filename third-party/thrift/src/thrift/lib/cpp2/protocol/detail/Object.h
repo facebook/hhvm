@@ -802,16 +802,8 @@ std::unique_ptr<folly::IOBuf> serializeValue(const Value& val) {
 
 type::Type toType(const protocol::Value& value);
 
-template <class ProtocolWriter>
 type::AnyData toAny(
-    const Value& value,
-    type::Protocol protocol = get_standard_protocol<ProtocolWriter>) {
-  type::SemiAny data;
-  data.type() = toType(value);
-  data.protocol() = protocol;
-  data.data() = std::move(*serializeValue<ProtocolWriter>(value));
-  return type::AnyData{data};
-}
+    const Value& value, type::Type type, type::Protocol protocol);
 
 /**
  * Schemaless conversion from any -> value contained within

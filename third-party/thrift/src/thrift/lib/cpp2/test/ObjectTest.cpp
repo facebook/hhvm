@@ -1368,12 +1368,15 @@ TEST(ToAnyTest, simple) {
   Value value;
   value.ensure_object() =
       parseObject<CompactSerializer::ProtocolReader>(*serialized);
-  EXPECT_THROW(
-      toAny<CompactSerializer::ProtocolWriter>(value), std::runtime_error);
-  value.as_object().type() = apache::thrift::uri<Bar>();
+  auto newAny = toAny(
+      value,
+      type::Type::create<type::struct_t<Bar>>(),
+      type::StandardProtocol::Compact);
+  EXPECT_EQ(newAny.type(), any.type());
+  EXPECT_EQ(newAny.protocol(), type::StandardProtocol::Compact);
   EXPECT_EQ(
-      toType(value),
-      type::Type::create<type::struct_c>(apache::thrift::uri<Bar>()));
+      parseObject<CompactSerializer::ProtocolReader>(newAny.data()),
+      value.as_object());
   // TODO(dokwon): Enable this when we wrap Thrift Any with Adapter.
   // EXPECT_EQ(any, toAny<CompactSerializer::ProtocolWriter>(value));
 }

@@ -71,6 +71,24 @@ type::Type toType(const protocol::Value& value) {
   }
 }
 
+type::AnyData toAny(
+    const Value& value, type::Type type, type::Protocol protocol) {
+  type::SemiAny semiAny;
+  if (protocol == type::StandardProtocol::Binary) {
+    semiAny.data() = std::move(
+        *serializeValue<::apache::thrift::BinaryProtocolWriter>(value));
+  } else if (protocol == type::StandardProtocol::Compact) {
+    semiAny.data() = std::move(
+        *serializeValue<::apache::thrift::CompactProtocolWriter>(value));
+  } else {
+    folly::throw_exception<std::runtime_error>(
+        "Unsupported protocol when constructing Any");
+  }
+  semiAny.type() = std::move(type);
+  semiAny.protocol() = std::move(protocol);
+  return type::AnyData{std::move(semiAny)};
+}
+
 Value parseValueFromAny(const type::AnyData& any) {
   if (any.protocol() == type::StandardProtocol::Binary) {
     BinaryProtocolReader reader;

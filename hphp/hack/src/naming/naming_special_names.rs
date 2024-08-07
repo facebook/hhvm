@@ -560,11 +560,7 @@ pub mod pseudo_functions {
 }
 
 pub mod std_lib_functions {
-    pub const IS_ARRAY: &str = "\\is_array";
-
     pub const GET_CLASS: &str = "\\get_class";
-
-    pub const ARRAY_FILTER: &str = "\\array_filter";
 
     pub const TYPE_STRUCTURE: &str = "\\HH\\type_structure";
 

@@ -969,11 +969,7 @@ module PseudoFunctions = struct
 end
 
 module StdlibFunctions = struct
-  let is_array = "\\is_array"
-
   let get_class = "\\get_class"
-
-  let array_filter = "\\array_filter"
 
   let type_structure = "\\HH\\type_structure"
 

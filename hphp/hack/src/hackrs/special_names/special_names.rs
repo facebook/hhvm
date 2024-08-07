@@ -442,9 +442,7 @@ pub mod pseudo_functions {
 pub mod stdlib_functions {
     use super::*;
 
-    pub static is_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_ARRAY);
     pub static get_class: Lazy<FunName> = lazy!(sn::std_lib_functions::GET_CLASS);
-    pub static array_filter: Lazy<FunName> = lazy!(sn::std_lib_functions::ARRAY_FILTER);
     pub static type_structure: Lazy<FunName> = lazy!(sn::std_lib_functions::TYPE_STRUCTURE);
     pub static array_mark_legacy: Lazy<FunName> = lazy!(sn::std_lib_functions::ARRAY_MARK_LEGACY);
     pub static array_unmark_legacy: Lazy<FunName> =
@@ -456,9 +454,7 @@ pub mod stdlib_functions {
 
     pub fn iter() -> impl Iterator<Item = FunName> {
         [
-            *is_array,
             *get_class,
-            *array_filter,
             *type_structure,
             *array_mark_legacy,
             *array_unmark_legacy,

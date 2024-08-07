@@ -1,0 +1,10 @@
+[packages]
+
+[packages.pkg1]
+include_paths=["./*"]
+
+[packages.pkg2]
+include_paths=[
+    "include_paths_bad1.php--foo.php",
+    "include_paths_bad4.php--__tests__.php"
+]

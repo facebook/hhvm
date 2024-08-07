@@ -1,6 +1,6 @@
 error: Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
--> This is from package_access/include_paths_bad4.php--__tests__.php, which belongs to package pkg2 [2]
--> But package_access/include_paths_bad4.php--foo.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
+-> This is from include_paths_bad4.php--__tests__.php, which belongs to package pkg2 [2]
+-> But include_paths_bad4.php--foo.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 
 include_paths_bad4.php--foo.php:3:24
 1 | <?hh
@@ -12,11 +12,11 @@ include_paths_bad4.php--__tests__.php:3:10
 2 | // package pkg2
 [2] 3 | function test(): void {}
 
-../PACKAGES.toml:3:11
+PACKAGES.toml:3:11
 1 | [packages]
 2 |
 [3] 3 | [packages.pkg1]
-4 | include_paths=["./package_access/*"]
+4 | include_paths=["./*"]
 5 |
 
 1 error found.

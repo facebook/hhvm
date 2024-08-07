@@ -1669,6 +1669,9 @@ void RuntimeOption::Load(
       EvalEnableNuma = false;
     }
 
+    // Fast method intercept is currently unsupported on ARM.
+    if (arch() == Arch::ARM) EvalFastMethodIntercept = false;
+
     if (!Cfg::Server::ForkingEnabled && ServerExecutionMode()) {
       // Only use hugetlb pages when we don't fork().
       low_2m_pages(EvalMaxLowMemHugePages);

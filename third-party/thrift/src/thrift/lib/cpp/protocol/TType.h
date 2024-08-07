@@ -50,6 +50,10 @@ enum TType : uint8_t {
   T_FLOAT = 19,
 };
 
+inline uint8_t format_as(TType type) {
+  return type;
+}
+
 } // namespace protocol
 } // namespace thrift
 } // namespace apache

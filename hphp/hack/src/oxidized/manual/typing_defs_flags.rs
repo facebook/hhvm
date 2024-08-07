@@ -35,7 +35,7 @@ bitflags! {
     impl FunParamFlags: u16 {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;
-        const HAS_DEFAULT            = 1 << 2;
+        const IS_OPTIONAL            = 1 << 2;
         const READONLY               = 1 << 8;
         const IGNORE_READONLY_ERROR  = 1 << 3;
     }
@@ -349,8 +349,8 @@ impl FunParamFlags {
     pub fn is_inout(&self) -> bool {
         self.contains(Self::INOUT)
     }
-    pub fn has_default(&self) -> bool {
-        self.contains(Self::HAS_DEFAULT)
+    pub fn is_optional(&self) -> bool {
+        self.contains(Self::IS_OPTIONAL)
     }
     pub fn is_readonly(&self) -> bool {
         self.contains(Self::READONLY)

@@ -141,6 +141,9 @@ impl<R: Reason, TY: Display> Display for Tparam<R, TY> {
 
 impl<R: Reason, TY: Display> Display for FunParam<R, TY> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if self.flags.contains(FunParamFlags::IS_OPTIONAL) {
+            write!(f, "optional ")?;
+        }
         if self.flags.contains(FunParamFlags::INOUT) {
             write!(f, "inout ")?;
         }
@@ -156,9 +159,6 @@ impl<R: Reason, TY: Display> Display for FunParam<R, TY> {
                     _ => write!(f, "{} {}", self.ty, name)?,
                 }
             }
-        }
-        if self.flags.contains(FunParamFlags::HAS_DEFAULT) {
-            write!(f, "=_")?;
         }
         Ok(())
     }

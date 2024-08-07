@@ -2052,7 +2052,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             };
 
                             if optional || initializer.is_present() {
-                                flags |= FunParamFlags::HAS_DEFAULT;
+                                flags |= FunParamFlags::IS_OPTIONAL;
                             }
                             if variadic {
                                 ft_variadic = true;
@@ -5799,7 +5799,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             };
 
             if fp.optional {
-                flags |= FunParamFlags::HAS_DEFAULT;
+                flags |= FunParamFlags::IS_OPTIONAL;
             }
             if fp.readonly {
                 flags |= FunParamFlags::READONLY;

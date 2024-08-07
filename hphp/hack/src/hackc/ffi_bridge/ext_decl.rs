@@ -327,7 +327,7 @@ fn get_method_params(params: &FunParams<'_>) -> Vec<ExtDeclMethodParam> {
             type_: extract_type_name(p.type_),
             accept_disposable: p.flags.accepts_disposable(),
             is_inout: p.flags.is_inout(),
-            has_default: p.flags.has_default(),
+            has_default: p.flags.is_optional(),
             is_readonly: p.flags.is_readonly(),
             def_value: str_or_empty(p.def_value),
         })

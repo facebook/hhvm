@@ -115,9 +115,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     struct Visitor {
       type::AnyStruct& v;
       void assign(const type::AnyStruct& b) { v = b; }
-      void clear() {
-        // TODO: Implement
-      }
+      void clear() { apache::thrift::clear(v); }
       void patchIfTypeIsPrior(const type::Type&, const type::AnyStruct&) {
         // TODO: Implement
       }

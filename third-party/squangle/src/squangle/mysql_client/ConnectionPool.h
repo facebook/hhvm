@@ -868,8 +868,8 @@ class ConnectPoolOperation : public ConnectOperation {
       return;
     }
 
-    unregisterHandler();
-    cancelTimeout();
+    conn()->socketHandler()->unregisterHandler();
+    conn()->socketHandler()->cancelTimeout();
 
     // Adjust timeout
     std::chrono::duration<uint64_t, std::micro> timeout_attempt_based =
@@ -894,6 +894,7 @@ class ConnectPoolOperation : public ConnectOperation {
     if (attempts_made_ == 0) {
       conn()->initialize(false);
     }
+    conn()->socketHandler()->setOperation(this);
 
     if (conn_options_.getSSLOptionsProviderPtr() && connection_context_) {
       connection_context_->isSslConnection = true;
@@ -907,9 +908,10 @@ class ConnectPoolOperation : public ConnectOperation {
     }
 
     if constexpr (uses_one_thread_v<Client>) {
-      scheduleTimeout(std::chrono::duration_cast<std::chrono::milliseconds>(
-                          timeout_ - elapsed)
-                          .count());
+      conn()->socketHandler()->scheduleTimeout(
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              timeout_ - elapsed)
+              .count());
     }
 
     // Remove before to not count against itself
@@ -945,7 +947,7 @@ class ConnectPoolOperation : public ConnectOperation {
       return;
     }
 
-    changeHandlerFD(
+    conn()->socketHandler()->changeHandlerFD(
         folly::NetworkSocket::fromFd(mysql_conn->getSocketDescriptor()));
 
     conn()->setConnectionHolder(std::move(mysql_conn));

@@ -69,6 +69,9 @@ pub(crate) fn lower_func(mut func: Func, func_info: &mut FuncInfo<'_>) -> Func {
         FuncInfo::Method(mi) if mi.name.is_86sinit() => {
             rewrite_86sinit(&mut builder, mi);
         }
+        FuncInfo::Method(mi) if mi.name.is_86constinit() => {
+            rewrite_86constinit(&mut builder, mi);
+        }
         _ => {}
     }
 
@@ -169,6 +172,72 @@ fn rewrite_86pinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     builder.cur_block_mut().iids.extend(saved);
 }
 
+fn rewrite_86constinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
+    // this just initializes the constants, it's a separate function so we can run it more than once
+    builder.start_block(IrRepr::ENTRY_BID);
+    let saved = std::mem::take(&mut builder.cur_block_mut().iids);
+    let loc = builder.add_loc(SrcLoc::from_span(&builder.func.span));
+
+    call_base_func(builder, method_info, loc);
+
+    let class = &method_info.class;
+
+    let infer_const = ir::ClassName::intern(crate::lower::class::INFER_CONSTANT);
+    let cls_name = builder.emit_imm(Immediate::String(class.name.as_bytes_id()));
+    let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(
+        cls_name,
+        ClassGetCMode::Normal,
+        loc,
+    )));
+    // Now emit the constants
+    for prop in &class.properties {
+        let is_const = prop.attributes.iter().any(|attr| attr.name == infer_const);
+
+        if !is_const {
+            continue; // we'll deal with mutable fields in 86sinit
+        }
+
+        let vid = match prop {
+            ir::Property {
+                name,
+                initial_value: ir::Maybe::Just(TypedValue::Uninit),
+                ..
+            } => {
+                // This is a "complex" constant - we need to call 86cinit to get
+                // the value.
+                let clsref = SpecialClsRef::SelfCls;
+                let method = MethodName::_86cinit();
+                let name = builder.emit_imm(Immediate::String(name.as_bytes_id()));
+                builder.emit(Instr::method_call_special(clsref, method, &[name], loc))
+            }
+            ir::Property {
+                initial_value: ir::Maybe::Nothing,
+                ..
+            } => {
+                // This is an abstract constant - its value will be overwritten
+                // in a subclass's init - so just skip it.
+                continue;
+            }
+            ir::Property {
+                initial_value: ir::Maybe::Just(initial_value),
+                ..
+            } => {
+                //  a normal constant
+                builder.emit_imm(initial_value.clone().into())
+            }
+        };
+
+        let prop_name = builder.emit_imm(Immediate::String(prop.name.as_bytes_id()));
+        builder.emit(Instr::Hhbc(Hhbc::SetS(
+            [prop_name, cls, vid],
+            ReadonlyOp::Any,
+            loc,
+        )));
+    }
+
+    builder.cur_block_mut().iids.extend(saved);
+}
+
 fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     // In HHVM 86sinit is only used to initialize "complex" static properties
     // (and doesn't exist if there aren't any). For textual we change that to
@@ -185,7 +254,14 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
 
     let infer_const = ir::ClassName::intern(crate::lower::class::INFER_CONSTANT);
 
+    // emit a call to constinit so we do initialize both mutable and non-mutable fields
+    let clsref = SpecialClsRef::SelfCls;
+    let method = MethodName::_86constinit();
+    //let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
+    builder.emit(Instr::method_call_special(clsref, method, &[], loc));
+
     // Now emit the static properties.
+    // TODO: This ClassGetC instruction (always? usually?) ends up as dead code, 'cos we statically evaluate it later
     let cls_name = builder.emit_imm(Immediate::String(class.name.as_bytes_id()));
     let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(
         cls_name,
@@ -198,32 +274,16 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
         }
         let is_const = prop.attributes.iter().any(|attr| attr.name == infer_const);
 
+        if is_const {
+            continue; // we'll deal with these in 86constinit
+        }
+
         let vid = match prop {
-            ir::Property {
-                name,
-                initial_value: ir::Maybe::Just(TypedValue::Uninit),
-                ..
-            } if is_const => {
-                // This is a "complex" constant - we need to call 86cinit to get
-                // the value.
-                let clsref = SpecialClsRef::SelfCls;
-                let method = MethodName::_86cinit();
-                let name = builder.emit_imm(Immediate::String(name.as_bytes_id()));
-                Some(builder.emit(Instr::method_call_special(clsref, method, &[name], loc)))
-            }
-            ir::Property {
-                initial_value: ir::Maybe::Nothing,
-                ..
-            } if is_const => {
-                // This is an abstract constant - its value will be overwritten
-                // in a subclass's init - so just skip it.
-                continue;
-            }
             ir::Property {
                 initial_value: ir::Maybe::Just(initial_value),
                 ..
             } => {
-                // Either a normal property or non-complex constant.
+                //  a normal mutable property
                 Some(builder.emit_imm(initial_value.clone().into()))
             }
             _ => None,

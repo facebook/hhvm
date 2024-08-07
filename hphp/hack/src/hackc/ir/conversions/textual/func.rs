@@ -399,6 +399,9 @@ fn write_func(
             name if name.is_86sinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::StaticInit(mi.class.name))
             }
+            name if name.is_86constinit() => {
+                mangle::FunctionName::Intrinsic(Intrinsic::StaticConstInit(mi.class.name))
+            }
             _ => mangle::FunctionName::method(mi.class.name, mi.is_static, mi.name),
         },
         FuncInfo::Function(ref fi) => mangle::FunctionName::Function(fi.name),
@@ -487,6 +490,9 @@ pub(crate) fn write_func_decl(
                 mangle::FunctionName::Intrinsic(Intrinsic::PropInit(mi.class.name))
             }
             name if name.is_86sinit() => {
+                mangle::FunctionName::Intrinsic(Intrinsic::StaticConstInit(mi.class.name))
+            }
+            name if name.is_86constinit() => {
                 mangle::FunctionName::Intrinsic(Intrinsic::StaticInit(mi.class.name))
             }
             _ => mangle::FunctionName::method(mi.class.name, mi.is_static, mi.name),

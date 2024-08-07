@@ -416,50 +416,41 @@ impl TextualFile<'_> {
             is_abstract: false,
             is_wrapper: false,
         };
-        self.define_function(
-            &method,
-            None,
-            &attrs,
-            &vec![],
-            &params,
-            &ret_ty,
-            &[],
-            |fb| {
-                let this_id = ir::intern(THIS_NAME);
-                let this = fb.load(&this_ty_ptr, Expr::deref(LocalId::Named(this_id)))?;
+        self.define_function(&method, None, &attrs, &[], &params, &ret_ty, &[], |fb| {
+            let this_id = ir::intern(THIS_NAME);
+            let this = fb.load(&this_ty_ptr, Expr::deref(LocalId::Named(this_id)))?;
 
-                let mut args = Vec::new();
+            let mut args = Vec::new();
 
-                for (idx, ty) in curry.arg_tys.iter().enumerate() {
-                    let field = FieldName::raw(format!("arg{idx}"));
-                    let arg = fb.load(ty, Expr::field(this, this_ty.clone(), field))?;
-                    args.push(arg);
-                }
+            for (idx, ty) in curry.arg_tys.iter().enumerate() {
+                let field = FieldName::raw(format!("arg{idx}"));
+                let arg = fb.load(ty, Expr::field(this, this_ty.clone(), field))?;
+                args.push(arg);
+            }
 
-                let varargs_id = ir::intern(VARARGS_NAME);
-                let varargs = fb.load(&args_ty, Expr::deref(LocalId::Named(varargs_id)))?;
-                args.push(hack::call_builtin(fb, hack::Builtin::SilSplat, [varargs])?);
+            let varargs_id = ir::intern(VARARGS_NAME);
+            let varargs = fb.load(&args_ty, Expr::deref(LocalId::Named(varargs_id)))?;
+            args.push(hack::call_builtin(fb, hack::Builtin::SilSplat, [varargs])?);
 
-                let result = if curry.virtual_call {
-                    let captured_this_ty = match &curry.name {
-                        FunctionName::Method(captured_this_ty, _) => captured_this_ty,
-                        _ => {
-                            unreachable!();
-                        }
-                    };
-                    let captured_this = fb.load(
-                        &Ty::named_type_ptr(captured_this_ty.clone()),
-                        Expr::field(this, this_ty.clone(), FieldName::raw("this")),
-                    )?;
-                    fb.call_virtual(&curry.name, captured_this.into(), args)?
-                } else {
-                    fb.call_static(&curry.name, Expr::null(), args)?
+            let result = if curry.virtual_call {
+                let captured_this_ty = match &curry.name {
+                    FunctionName::Method(captured_this_ty, _) => captured_this_ty,
+                    _ => {
+                        unreachable!();
+                    }
                 };
+                let captured_this = fb.load(
+                    &Ty::named_type_ptr(captured_this_ty.clone()),
+                    Expr::field(this, this_ty.clone(), FieldName::raw("this")),
+                )?;
+                fb.call_virtual(&curry.name, captured_this.into(), args)?
+            } else {
+                fb.call_static(&curry.name, Expr::null(), args)?
+            };
 
-                fb.ret(result)?;
-                Ok(())
-            },
-        )?;
+            fb.ret(result)?;
+            Ok(())
+        })?;
 
         Ok(())
     }

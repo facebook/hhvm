@@ -22,6 +22,14 @@
 // CHECK:   ret n0
 // CHECK: }
 
+// TEST-CHECK-BAL: define C$static._86constinit
+// CHECK: define C$static._86constinit($this: .notnull *C$static) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
+// CHECK:   n1 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("MY_CONSTANT"), $builtins.hack_int(7))
+// CHECK:   ret null
+// CHECK: }
+
 // TEST-CHECK-BAL: define C._86pinit
 // CHECK: define C._86pinit($this: .notnull *C) : *HackMixed {
 // CHECK: #b0:
@@ -47,10 +55,11 @@
 // TEST-CHECK-BAL: define C$static._86sinit
 // CHECK: define C$static._86sinit($this: .notnull *C$static) : *HackMixed {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
-// CHECK:   n1 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop3"), $builtins.hack_float(3.14))
-// CHECK:   n2 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop4"), null)
-// CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("MY_CONSTANT"), $builtins.hack_int(7))
+// CHECK:   n0: *C$static = load &$this
+// CHECK:   n1 = C$static._86constinit(n0)
+// CHECK:   n2 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
+// CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop3"), $builtins.hack_float(3.14))
+// CHECK:   n4 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop4"), null)
 // CHECK:   ret null
 // CHECK: }
 

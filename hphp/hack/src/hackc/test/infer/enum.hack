@@ -4,13 +4,24 @@
 // CHECK: type A extends HH::BuiltinEnum = .kind="class" {
 // CHECK: }
 
+// TEST-CHECK-BAL: define A$static._86constinit
+// CHECK: define A$static._86constinit($this: .notnull *A$static) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0: *A$static = load &$this
+// CHECK:   n1 = HH::BuiltinEnum$static._86constinit(n0)
+// CHECK:   n2 = $builtins.hhbc_class_get_c($builtins.hack_string("A"))
+// CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("A"), $builtins.hack_string("V"), $builtins.hack_int(1))
+// CHECK:   ret null
+// CHECK: }
+
 // TEST-CHECK-BAL: define A$static._86sinit
 // CHECK: define A$static._86sinit($this: .notnull *A$static) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *A$static = load &$this
 // CHECK:   n1 = HH::BuiltinEnum$static._86sinit(n0)
-// CHECK:   n2 = $builtins.hhbc_class_get_c($builtins.hack_string("A"))
-// CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("A"), $builtins.hack_string("V"), $builtins.hack_int(1))
+// CHECK:   n2: *A$static = load &$this
+// CHECK:   n3 = A$static._86constinit(n2)
+// CHECK:   n4 = $builtins.hhbc_class_get_c($builtins.hack_string("A"))
 // CHECK:   ret null
 // CHECK: }
 

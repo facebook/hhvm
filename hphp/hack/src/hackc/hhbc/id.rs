@@ -199,6 +199,10 @@ impl MethodName {
         Self::intern(_86CINIT)
     }
 
+    pub fn _86constinit() -> Self {
+        Self::intern(_86CONSTINIT)
+    }
+
     pub fn _86pinit() -> Self {
         Self::intern(_86PINIT)
     }
@@ -219,6 +223,10 @@ impl MethodName {
         self.as_str() == _86CINIT
     }
 
+    pub fn is_86constinit(&self) -> bool {
+        self.as_str() == _86CONSTINIT
+    }
+
     pub fn is_86pinit(&self) -> bool {
         self.as_str() == _86PINIT
     }
@@ -234,6 +242,7 @@ impl MethodName {
 
 const __FACTORY: &str = "__factory";
 const _86CINIT: &str = "86cinit";
+const _86CONSTINIT: &str = "86constinit"; // just for textual/infer
 const _86PINIT: &str = "86pinit";
 const _86SINIT: &str = "86sinit";
 

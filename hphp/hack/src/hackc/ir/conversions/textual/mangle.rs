@@ -92,6 +92,7 @@ pub(crate) enum Intrinsic {
     Factory(ir::ClassName),
     Invoke(TypeName),
     PropInit(ir::ClassName),
+    StaticConstInit(ir::ClassName),
     StaticInit(ir::ClassName),
 }
 
@@ -102,6 +103,7 @@ impl Intrinsic {
             | Intrinsic::Construct(_)
             | Intrinsic::Factory(_)
             | Intrinsic::PropInit(_)
+            | Intrinsic::StaticConstInit(_)
             | Intrinsic::StaticInit(_) => false,
             Intrinsic::Invoke(name) => *name == TypeName::Unknown,
         }
@@ -215,6 +217,10 @@ impl fmt::Display for FmtFunctionName<'_> {
                     Intrinsic::PropInit(cid) => {
                         tn = TypeName::Class(*cid);
                         (Some(&tn), "_86pinit")
+                    }
+                    Intrinsic::StaticConstInit(cid) => {
+                        tn = TypeName::StaticClass(*cid);
+                        (Some(&tn), "_86constinit")
                     }
                     Intrinsic::StaticInit(cid) => {
                         tn = TypeName::StaticClass(*cid);

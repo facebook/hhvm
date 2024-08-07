@@ -152,6 +152,7 @@ pub(crate) fn lower_class(mut class: Class) -> Class {
     // lowering).
     create_method_if_missing(&mut class, MethodName::_86pinit(), IsStatic::NonStatic);
     create_method_if_missing(&mut class, MethodName::_86sinit(), IsStatic::Static);
+    create_method_if_missing(&mut class, MethodName::_86constinit(), IsStatic::Static);
 
     if class.flags.contains(Attr::AttrIsClosureClass) {
         create_default_closure_constructor(&mut class);

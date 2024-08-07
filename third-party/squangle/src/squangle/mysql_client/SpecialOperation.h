@@ -31,7 +31,7 @@ class SpecialOperation : public Operation {
   }
 
  protected:
-  void actionable() override;
+  void socketActionable() override;
   void specializedCompleteOperation() override;
   void specializedTimeoutTriggered() override;
   SpecialOperation& specializedRun() override;

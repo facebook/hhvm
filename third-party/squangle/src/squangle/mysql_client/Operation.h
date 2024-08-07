@@ -351,13 +351,14 @@ class Operation : public folly::EventHandler,
   // Connection before the user wants this information).
   void snapshotMysqlErrors();
 
-  // Called when an Operation needs to wait for the data to be readable or
-  // writable (aka actionable).
-  void waitForActionable();
+  // Called when an Operation needs to wait for the socket to become
+  // readable or writable (aka actionable).
+  void waitForSocketActionable();
 
-  // Overridden in child classes and invoked when the status is actionable. This
-  // function should either completeOperation or waitForActionable.
-  virtual void actionable() = 0;
+  // Overridden in child classes and invoked when the socket is
+  // actionable.  This function should either completeOperation or
+  // waitForSocketActionable.
+  virtual void socketActionable() = 0;
 
   // EventHandler override
   void handlerReady(uint16_t /*events*/) noexcept override;
@@ -476,8 +477,8 @@ class Operation : public folly::EventHandler,
       folly::Promise<std::pair<ReturnType, AsyncPostQueryCallback>>& promise);
 
  private:
-  // Restore folly::RequestContext and also invoke actionable()
-  void invokeActionable();
+  // Restore folly::RequestContext and also invoke socketActionable()
+  void invokeSocketActionable();
 
   folly::atomic_shared_ptr<folly::RequestContext> request_context_;
 

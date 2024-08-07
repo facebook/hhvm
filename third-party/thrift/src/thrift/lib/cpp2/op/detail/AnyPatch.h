@@ -93,7 +93,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   ///     struct Visitor {
   ///       void assign(cosnt AnyStruct&);
   ///       void clear();
-  ///       void patchIfTypeIsPrior(const Type&, const AnyStruct&);
+  ///       void patchIfTypeIs(const Type&, const AnyStruct&);
   ///       void ensureAny(cosnt AnyStruct&);
   ///     }
   ///
@@ -103,14 +103,23 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       // Test whether the required methods exist in Visitor
       v.assign(type::AnyStruct{});
       v.clear();
-      v.patchIfTypeIsPrior(type::Type{}, type::AnyStruct{});
+      v.patchIfTypeIs(type::Type{}, std::vector<type::AnyStruct>{});
       v.ensureAny(type::AnyStruct{});
     }
     if (!Base::template customVisitAssignAndClear(v)) {
-      // TODO: Implement patchIfTypeIsPrior and patchIfTypeIsAfter
+      // patchIfTypeIsPrior
+      for (const auto& [type, patches] : data_.patchIfTypeIsPrior().value()) {
+        v.patchIfTypeIs(type, patches);
+      }
+
       // ensureAny
       if (data_.ensureAny().has_value()) {
         v.ensureAny(data_.ensureAny().value());
+      }
+
+      // patchIfTypeIsAfter
+      for (const auto& [type, patches] : data_.patchIfTypeIsAfter().value()) {
+        v.patchIfTypeIs(type, patches);
       }
     }
   }
@@ -120,8 +129,18 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       type::AnyStruct& v;
       void assign(const type::AnyStruct& b) { v = b; }
       void clear() { apache::thrift::clear(v); }
-      void patchIfTypeIsPrior(const type::Type&, const type::AnyStruct&) {
-        // TODO: Implement
+      void patchIfTypeIs(
+          const type::Type& type, const std::vector<type::AnyStruct>& patches) {
+        if (v.type() != type) {
+          return;
+        }
+        auto val = protocol::detail::parseValueFromAny(v);
+        for (const auto& p : patches) {
+          auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
+          protocol::applyPatch(dynPatch, val);
+        }
+        v = protocol::detail::toAny(val, v.type().value(), v.protocol().value())
+                .toThrift();
       }
       void ensureAny(const type::AnyStruct& any) {
         if (v.type() == any.type()) {
@@ -136,6 +155,25 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   void ensureAny(type::AnyStruct ensureAny) {
     data_.ensureAny() = std::move(ensureAny);
+  }
+
+  template <typename VPatch>
+  void patchIfTypeIs(const VPatch& patch) {
+    static_assert(std::is_base_of_v<
+                  BasePatch<typename VPatch::underlying_type, VPatch>,
+                  VPatch>);
+    // TODO: Add ensurePatchable
+    auto type =
+        type::Type::create<type::infer_tag<typename VPatch::value_type>>();
+    auto anyStruct =
+        type::AnyData::toAny<type::infer_tag<VPatch>>(patch).toThrift();
+    if (ensures(type)) {
+      data_.patchIfTypeIsAfter().value()[std::move(type)].push_back(
+          std::move(anyStruct));
+    } else {
+      data_.patchIfTypeIsPrior().value()[std::move(type)].push_back(
+          std::move(anyStruct));
+    }
   }
 
  private:

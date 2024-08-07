@@ -107,7 +107,11 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       v.ensureAny(type::AnyStruct{});
     }
     if (!Base::template customVisitAssignAndClear(v)) {
-      // TODO: Implement
+      // TODO: Implement patchIfTypeIsPrior and patchIfTypeIsAfter
+      // ensureAny
+      if (data_.ensureAny().has_value()) {
+        v.ensureAny(data_.ensureAny().value());
+      }
     }
   }
 
@@ -119,12 +123,19 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       void patchIfTypeIsPrior(const type::Type&, const type::AnyStruct&) {
         // TODO: Implement
       }
-      void ensureAny(const type::AnyStruct&) {
-        // TODO: Implement
+      void ensureAny(const type::AnyStruct& any) {
+        if (v.type() == any.type()) {
+          return;
+        }
+        v = any;
       }
     };
 
     return customVisit(Visitor{val});
+  }
+
+  void ensureAny(type::AnyStruct ensureAny) {
+    data_.ensureAny() = std::move(ensureAny);
   }
 
  private:

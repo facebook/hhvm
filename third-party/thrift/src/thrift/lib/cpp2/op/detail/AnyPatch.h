@@ -141,6 +141,16 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
  private:
   using Base::assignOr;
   using Base::data_;
+
+  bool ensures(const type::Type& type) {
+    return data_.ensureAny().has_value() &&
+        data_.ensureAny().value().type() == type;
+  }
+
+  template <typename Tag>
+  bool ensures() {
+    return ensures(type::Type::create<Tag>());
+  }
 };
 
 } // namespace detail

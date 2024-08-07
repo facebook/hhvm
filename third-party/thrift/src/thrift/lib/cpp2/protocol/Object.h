@@ -24,6 +24,8 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/detail/FieldMaskUtil.h>
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 

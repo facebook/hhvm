@@ -4599,7 +4599,10 @@ let handle_client_message
         id
         (DocumentRangeFormattingResult result);
       Lwt.return_some (make_result_telemetry (List.length result))
-    (* textDocument/onTypeFormatting. TODO(T155870670): remove this *)
+    (* textDocument/onTypeFormatting.
+        - The Meta Hack extension does not use this, instead uses hackfmt directly (D46758283)
+        - We keep this implementation for non-VSCode extension clients (notebooks, Vim, etc.)
+    *)
     | (_, RequestMessage (id, DocumentOnTypeFormattingRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let result = do_documentOnTypeFormatting editor_open_files params in

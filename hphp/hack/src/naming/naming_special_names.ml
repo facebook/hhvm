@@ -975,8 +975,6 @@ module StdlibFunctions = struct
 
   let array_filter = "\\array_filter"
 
-  let call_user_func = "\\call_user_func"
-
   let type_structure = "\\HH\\type_structure"
 
   let array_mark_legacy = "\\HH\\array_mark_legacy"

@@ -30,54 +30,6 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
              unpacked_arg
       in
       (Ok call, errs)
-    | Aast.(Call { func = (_, fn_expr_pos, Id (_, fn_name)); targs; args; _ })
-      when String.equal fn_name SN.StdlibFunctions.call_user_func ->
-      let errs =
-        [
-          Naming_phase_error.naming
-            Naming_error.(Deprecated_use { pos = fn_expr_pos; fn_name });
-        ]
-      in
-      begin
-        match args with
-        | [] ->
-          let args_err =
-            Naming_phase_error.naming
-            @@ Naming_error.Too_few_arguments fn_expr_pos
-          in
-          (Error fn_expr_pos, args_err :: errs)
-        | (Ast_defs.Pnormal, fn_expr) :: fn_param_exprs ->
-          (* TODO[mjt] why are we dropping the unpacked variadic arg here? *)
-          ( Ok
-              Aast.(
-                Call
-                  {
-                    func = fn_expr;
-                    targs;
-                    args = fn_param_exprs;
-                    unpacked_arg = None;
-                  }),
-            errs )
-        | (Ast_defs.Pinout pk_pos, fn_expr) :: fn_param_exprs ->
-          let (_, fn_expr_pos, _) = fn_expr in
-          let pos = Pos.merge pk_pos fn_expr_pos in
-          let inout_err =
-            Naming_phase_error.nast_check
-            @@ Nast_check_error.Inout_in_transformed_pseudofunction
-                 { pos; fn_name = "call_user_func" }
-          in
-          (* TODO[mjt] why are we dropping the unpacked variadic arg here? *)
-          ( Ok
-              Aast.(
-                Call
-                  {
-                    func = fn_expr;
-                    targs;
-                    args = fn_param_exprs;
-                    unpacked_arg = None;
-                  }),
-            inout_err :: errs )
-      end
     | Aast.(
         Call { func = (_, fn_expr_pos, Id (_, fn_name)); args; unpacked_arg; _ })
       when String.equal fn_name SN.AutoimportedFunctions.meth_caller ->

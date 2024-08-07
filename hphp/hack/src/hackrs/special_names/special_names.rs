@@ -445,7 +445,6 @@ pub mod stdlib_functions {
     pub static is_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_ARRAY);
     pub static get_class: Lazy<FunName> = lazy!(sn::std_lib_functions::GET_CLASS);
     pub static array_filter: Lazy<FunName> = lazy!(sn::std_lib_functions::ARRAY_FILTER);
-    pub static call_user_func: Lazy<FunName> = lazy!(sn::std_lib_functions::CALL_USER_FUNC);
     pub static type_structure: Lazy<FunName> = lazy!(sn::std_lib_functions::TYPE_STRUCTURE);
     pub static array_mark_legacy: Lazy<FunName> = lazy!(sn::std_lib_functions::ARRAY_MARK_LEGACY);
     pub static array_unmark_legacy: Lazy<FunName> =
@@ -460,7 +459,6 @@ pub mod stdlib_functions {
             *is_array,
             *get_class,
             *array_filter,
-            *call_user_func,
             *type_structure,
             *array_mark_legacy,
             *array_unmark_legacy,

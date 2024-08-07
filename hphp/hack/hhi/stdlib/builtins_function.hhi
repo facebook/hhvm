@@ -33,11 +33,6 @@ namespace {
     HH\FIXME\MISSING_PARAM_TYPE $function,
     Container<mixed> $params,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__Deprecated('Use direct invocation instead.')>>
-  function call_user_func(
-    HH\FIXME\MISSING_PARAM_TYPE $function,
-    HH\FIXME\MISSING_PARAM_TYPE ...$args
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function register_postsend_function<T>((function(): T) $function): void;
   <<__PHPStdLib>>

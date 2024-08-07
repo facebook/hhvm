@@ -566,8 +566,6 @@ pub mod std_lib_functions {
 
     pub const ARRAY_FILTER: &str = "\\array_filter";
 
-    pub const CALL_USER_FUNC: &str = "\\call_user_func";
-
     pub const TYPE_STRUCTURE: &str = "\\HH\\type_structure";
 
     pub const ARRAY_MARK_LEGACY: &str = "\\HH\\array_mark_legacy";

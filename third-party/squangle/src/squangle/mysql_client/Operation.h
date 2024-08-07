@@ -33,31 +33,70 @@
 // result() etc must occur either in the callback or after wait() has
 // returned.
 
-#pragma once
+#ifndef COMMON_ASYNC_MYSQL_OPERATION_H
+#define COMMON_ASYNC_MYSQL_OPERATION_H
 
+#include <condition_variable>
+#include <memory>
+#include <queue>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include <folly/Exception.h>
 #include <folly/Function.h>
+#include <folly/Memory.h>
+#include <folly/String.h>
+#include <folly/Unit.h>
 #include <folly/concurrency/AtomicSharedPtr.h>
 #include <folly/futures/Future.h>
+#include <folly/io/async/AsyncTimeout.h>
+#include <folly/io/async/EventHandler.h>
+#include <folly/io/async/Request.h>
+#include <folly/io/async/SSLContext.h>
+#include <folly/json/dynamic.h>
+#include <folly/ssl/OpenSSLPtrTypes.h>
 #include <folly/stop_watch.h>
-#include <functional>
-#include <memory>
-#include <string>
-#include <variant>
-
+#include "squangle/logger/DBEventLogger.h"
+#include "squangle/mysql_client/Compression.h"
 #include "squangle/mysql_client/DbResult.h"
+#include "squangle/mysql_client/MysqlHandler.h"
+#include "squangle/mysql_client/Query.h"
+#include "squangle/mysql_client/Row.h"
 
-namespace facebook::common::mysql_client {
+DECLARE_int64(async_mysql_max_connect_timeout_micros);
+namespace facebook {
+namespace common {
+namespace mysql_client {
 
 class MysqlClientBase;
+class QueryResult;
 class ConnectOperation;
+class FetchOperation;
+class MultiQueryStreamOperation;
 class QueryOperation;
+class MultiQueryOperation;
+class ResetOperation;
+class SpecialOperation;
+class ChangeUserOperation;
 class Operation;
+class Connection;
+class ConnectionKey;
+class ConnectionHolder;
+class ConnectionOptions;
+class SSLOptionsProviderBase;
+class SyncConnection;
+class MultiQueryStreamHandler;
+
+using ConnectionDyingCallback =
+    std::function<void(std::unique_ptr<ConnectionHolder>)>;
 
 enum class QueryCallbackReason;
 
+enum class StreamState;
+
 // Simplify some std::chrono types.
-using Clock = std::chrono::steady_clock;
-using Timepoint = std::chrono::time_point<Clock>;
+typedef std::chrono::time_point<std::chrono::steady_clock> Timepoint;
 
 // Callbacks for connecting and querying, respectively.  A
 // ConnectCallback is invoked when a connection succeeds or fails.  A
@@ -82,6 +121,14 @@ using AsyncPreQueryCallback =
 using AsyncPostQueryCallback =
     std::function<folly::SemiFuture<AsyncPostQueryResult>(
         AsyncPostQueryResult&&)>;
+using QueryCallback =
+    std::function<void(QueryOperation&, QueryResult*, QueryCallbackReason)>;
+using MultiQueryCallback = std::function<
+    void(MultiQueryOperation&, QueryResult*, QueryCallbackReason)>;
+using CertValidatorCallback = std::function<
+    bool(X509* server_cert, const void* context, folly::StringPiece& errMsg)>;
+using SpecialOperationCallback =
+    std::function<void(SpecialOperation&, OperationResult)>;
 
 enum class SquangleErrno : uint16_t {
   SQ_ERRNO_CONN_TIMEOUT = 7000,
@@ -126,10 +173,251 @@ enum class OperationResult {
 // overload of operator<< for OperationResult
 std::ostream& operator<<(std::ostream& os, OperationResult result);
 
+// For control flows in callbacks. This indicates the reason a callback was
+// fired. When a pack of rows if fetched it is used RowsFetched to
+// indicate that new rows are available. QueryBoundary means that the
+// fetching for current query has completed successfully, and if any
+// query failed (OperationResult is Failed) we use Failure. Success is for
+// indicating that all queries have been successfully fetched.
+enum class QueryCallbackReason { RowsFetched, QueryBoundary, Failure, Success };
+
+// overload of operator<< for QueryCallbackReason
+std::ostream& operator<<(std::ostream& os, QueryCallbackReason reason);
+
 enum class StreamState { InitQuery, RowsReady, QueryEnded, Failure, Success };
 
 // overload of operator<< for StreamState
 std::ostream& operator<<(std::ostream& os, StreamState state);
+
+class ConnectionOptions {
+ public:
+  ConnectionOptions();
+
+  // Each attempt to acquire a connection will take at maximum this duration.
+  // Use setTotalTimeout if you want to limit the timeout for all attempts.
+  ConnectionOptions& setTimeout(Duration dur) {
+    connection_timeout_ = dur;
+    return *this;
+  }
+
+  Duration getTimeout() const {
+    return connection_timeout_;
+  }
+
+  // This time out is used for each connect attempt and this is the maximum
+  // time allowed for client<->server tcp handshake. This timeout allows client
+  // to failfast in case the MYSQL server is not reachable, where we don't want
+  // to wait for the entire connection_timeout_ which also includes time buffer
+  // for ssl and MYSQL protocol exchange
+  ConnectionOptions& setConnectTcpTimeout(Duration dur) {
+    connection_tcp_timeout_ = dur;
+    return *this;
+  }
+
+  const folly::Optional<Duration>& getConnectTcpTimeout() const {
+    return connection_tcp_timeout_;
+  }
+
+  // The connection created by these options will apply this query timeout
+  // to all statements executed
+  ConnectionOptions& setQueryTimeout(Duration dur) {
+    query_timeout_ = dur;
+    return *this;
+  }
+
+  Duration getQueryTimeout() const {
+    return query_timeout_;
+  }
+
+  // Used to provide an SSLContext and SSL_Session provider
+  ConnectionOptions& setSSLOptionsProvider(
+      std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider) {
+    ssl_options_provider_ = ssl_options_provider;
+    return *this;
+  }
+
+  std::shared_ptr<SSLOptionsProviderBase> getSSLOptionsProvider() const {
+    return ssl_options_provider_;
+  }
+
+  template <typename Func>
+  void withPossibleSSLOptionsProvider(Func&& func) {
+    if (ssl_options_provider_) {
+      func(*ssl_options_provider_);
+    }
+  }
+
+  // Provide a Connection Attribute to be passed in the connection handshake
+  ConnectionOptions& setAttribute(std::string_view attr, std::string value) {
+    attributes_[attr] = std::move(value);
+    return *this;
+  }
+
+  // MySQL 5.6 connection attributes.  Sent at time of connect.
+  const AttributeMap& getAttributes() const {
+    return attributes_;
+  }
+
+  ConnectionOptions& setAttributes(const AttributeMap& attributes) {
+    for (auto& [key, value] : attributes) {
+      attributes_[key] = value;
+    }
+    return *this;
+  }
+
+  // Sorry for the weird API, there is no enum for compression = None
+  ConnectionOptions& setCompression(
+      folly::Optional<CompressionAlgorithm> comp_lib) {
+    compression_lib_ = std::move(comp_lib);
+    return *this;
+  }
+
+  const folly::Optional<CompressionAlgorithm>& getCompression() const {
+    return compression_lib_;
+  }
+
+  ConnectionOptions& setUseChecksum(bool useChecksum) noexcept {
+    use_checksum_ = useChecksum;
+    return *this;
+  }
+
+  FOLLY_NODISCARD bool getUseChecksum() const noexcept {
+    return use_checksum_;
+  }
+
+  // Sets the amount of attempts that will be tried in order to acquire the
+  // connection. Each attempt will take at maximum the given timeout. To set
+  // a global timeout that the operation shouldn't take more than, use
+  // setTotalTimeout.
+  //
+  // This is no longer recommended for use, due to higher level retries
+  ConnectionOptions& setConnectAttempts(uint32_t max_attempts) {
+    max_attempts_ = max_attempts;
+    return *this;
+  }
+
+  uint32_t getConnectAttempts() const {
+    return max_attempts_;
+  }
+
+  // Sets the differentiated service code point (DSCP) on the underlying
+  // connection, which has the effect of embedding it into outgoing packet ip
+  // headers. The value may be used to classify and prioritize said traffic.
+  //
+  // Note: A DSCP value is 6 bits and is packed into an 8 bit field. Users must
+  // specify the unpacked (unshifted) 6-bit value.
+  //
+  // Note: This implementation only supports IPv6.
+  //
+  // Also known as "Quality of Service" (QoS), "Type of Service", "Class of
+  // Service" (COS).
+  //
+  // See also RFC 2474 [0] and RFC 3542 6.5 (IPv6 sockopt) [1]
+  // [0]: https://tools.ietf.org/html/rfc2474
+  // [1]: https://tools.ietf.org/html/rfc3542#section-6.5
+  ConnectionOptions& setDscp(uint8_t dscp) {
+    CHECK_THROW((dscp & 0b11000000) == 0, std::invalid_argument);
+    dscp_ = dscp;
+    return *this;
+  }
+
+  folly::Optional<uint8_t> getDscp() const {
+    return dscp_;
+  }
+
+  // If this is not set, but regular timeout was, the TotalTimeout for the
+  // operation will be the number of attempts times the primary timeout.
+  // Set this if you have strict timeout needs.
+  //
+  // This should generally not be set, as connectAttempts is 1
+  ConnectionOptions& setTotalTimeout(Duration dur) {
+    total_timeout_ = dur;
+    return *this;
+  }
+
+  Duration getTotalTimeout() const {
+    return total_timeout_;
+  }
+
+  std::string getDisplayString() const;
+
+  ConnectionOptions& setSniServerName(const std::string& sniName) {
+    sni_servername_ = sniName;
+    return *this;
+  }
+
+  const folly::Optional<std::string>& getSniServerName() const {
+    return sni_servername_;
+  }
+
+  ConnectionOptions& enableResetConnBeforeClose() {
+    reset_conn_before_close_ = true;
+    return *this;
+  }
+
+  bool isEnableResetConnBeforeClose() const {
+    return reset_conn_before_close_;
+  }
+
+  ConnectionOptions& enableDelayedResetConn() {
+    delayed_reset_conn_ = true;
+    return *this;
+  }
+
+  bool isEnableDelayedResetConn() const {
+    return delayed_reset_conn_;
+  }
+
+  ConnectionOptions& enableChangeUser() {
+    change_user_ = true;
+    return *this;
+  }
+
+  bool isEnableChangeUser() const {
+    return change_user_;
+  }
+
+  ConnectionOptions& setCertValidationCallback(
+      CertValidatorCallback callback,
+      const void* context,
+      bool opPtrAsContext) {
+    certValidationCallback_ = std::move(callback);
+    opPtrAsCertValidationContext_ = opPtrAsContext;
+    certValidationContext_ = opPtrAsCertValidationContext_ ? nullptr : context;
+    return *this;
+  }
+
+  const CertValidatorCallback& getCertValidationCallback() const {
+    return certValidationCallback_;
+  }
+
+  const void* getCertValidationContext() const {
+    return certValidationContext_;
+  }
+
+  bool isOpPtrAsValidationContext() const {
+    return opPtrAsCertValidationContext_;
+  }
+
+ private:
+  Duration connection_timeout_;
+  folly::Optional<Duration> connection_tcp_timeout_;
+  Duration total_timeout_;
+  Duration query_timeout_;
+  std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider_;
+  AttributeMap attributes_;
+  folly::Optional<CompressionAlgorithm> compression_lib_;
+  bool use_checksum_ = false;
+  uint32_t max_attempts_ = 1;
+  folly::Optional<uint8_t> dscp_;
+  folly::Optional<std::string> sni_servername_;
+  bool reset_conn_before_close_ = false;
+  bool delayed_reset_conn_ = false;
+  bool change_user_ = false;
+  CertValidatorCallback certValidationCallback_{nullptr};
+  const void* certValidationContext_{nullptr};
+  bool opPtrAsCertValidationContext_{false};
+};
 
 // The abstract base for our available Operations.  Subclasses share
 // intimate knowledge with the Operation class (most member variables
@@ -219,6 +507,7 @@ class Operation : public folly::EventHandler,
 
   static folly::StringPiece toString(OperationState state);
   static folly::StringPiece toString(OperationResult result);
+  static folly::StringPiece toString(QueryCallbackReason reason);
   static folly::StringPiece toString(StreamState state);
 
   static std::string connectStageString(connect_stage stage);
@@ -498,10 +787,798 @@ class Operation : public folly::EventHandler,
   friend class SyncConnectionPool;
 };
 
+// Timeout used for controlling early timeout of just the tcp handshake phase
+// before doing heavy lifting like ssl and other mysql protocol for connection
+// establishment
+class ConnectTcpTimeoutHandler : public folly::AsyncTimeout {
+ public:
+  ConnectTcpTimeoutHandler(
+      folly::EventBase* base,
+      ConnectOperation* connect_operation)
+      : folly::AsyncTimeout(base), op_(connect_operation) {}
+
+  void timeoutExpired() noexcept override;
+
+ private:
+  ConnectOperation* op_;
+
+  ConnectTcpTimeoutHandler() = delete;
+  ConnectTcpTimeoutHandler(const ConnectTcpTimeoutHandler&) = delete;
+  ConnectTcpTimeoutHandler& operator=(const ConnectTcpTimeoutHandler&) = delete;
+};
+
+// An operation representing a pending connection.  Constructed via
+// AsyncMysqlClient::beginConnection.
+class ConnectOperation : public Operation {
+ public:
+  ~ConnectOperation() override;
+
+  void setCallback(ConnectCallback cb) {
+    connect_callback_ = std::move(cb);
+  }
+
+  const std::string& database() const {
+    return conn_key_.db_name();
+  }
+  const std::string& user() const {
+    return conn_key_.user();
+  }
+
+  const ConnectionKey& getConnectionKey() const {
+    return conn_key_;
+  }
+  const ConnectionOptions& getConnectionOptions() const;
+  const ConnectionKey& getKey() const {
+    return conn_key_;
+  }
+
+  ConnectOperation& setSSLOptionsProviderBase(
+      std::unique_ptr<SSLOptionsProviderBase> ssl_options_provider);
+  ConnectOperation& setSSLOptionsProvider(
+      std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider);
+
+  // Default timeout for queries created by the connection this
+  // operation will create.
+  ConnectOperation& setDefaultQueryTimeout(Duration t);
+  ConnectOperation& setConnectionContext(
+      std::shared_ptr<db::ConnectionContextBase> e) {
+    CHECK_THROW(
+        state_ == OperationState::Unstarted, db::OperationStateException);
+    connection_context_ = std::move(e);
+    return *this;
+  }
+  ConnectOperation& setSniServerName(const std::string& sni_servername);
+  ConnectOperation& enableResetConnBeforeClose();
+  ConnectOperation& enableDelayedResetConn();
+  ConnectOperation& enableChangeUser();
+  ConnectOperation& setCertValidationCallback(
+      CertValidatorCallback callback,
+      const void* context = nullptr,
+      bool opPtrAsContext = false);
+  const CertValidatorCallback& getCertValidationCallback() const {
+    return conn_options_.getCertValidationCallback();
+  }
+
+  db::ConnectionContextBase* getConnectionContext() {
+    CHECK_THROW(
+        state_ == OperationState::Unstarted, db::OperationStateException);
+    return connection_context_.get();
+  }
+
+  const db::ConnectionContextBase* getConnectionContext() const {
+    CHECK_THROW(
+        state_ == OperationState::Unstarted ||
+            state_ == OperationState::Completed,
+        db::OperationStateException);
+    return connection_context_.get();
+  }
+
+  void reportServerCertContent(
+      const std::string& sslCertCn,
+      const std::vector<std::string>& sslCertSan,
+      const std::vector<std::string>& sslCertIdentities,
+      bool isValidated) {
+    if (connection_context_) {
+      if (!sslCertCn.empty()) {
+        connection_context_->sslCertCn = sslCertCn;
+      }
+      if (!sslCertSan.empty()) {
+        connection_context_->sslCertSan = sslCertSan;
+      }
+      if (!sslCertIdentities.empty()) {
+        connection_context_->sslCertIdentities = sslCertIdentities;
+      }
+      connection_context_->isServerCertValidated = isValidated;
+    }
+  }
+
+  // Don't call this; it's public strictly for AsyncMysqlClient to be
+  // able to call make_shared.
+  ConnectOperation(MysqlClientBase* mysql_client, ConnectionKey conn_key);
+
+  void mustSucceed() override;
+
+  // Overriding to narrow the return type
+  // Each connect attempt will take at most this timeout to retry to acquire
+  // the connection.
+  ConnectOperation& setTimeout(Duration timeout);
+
+  // This timeout allows for clients to fail fast when tcp handshake
+  // latency is high . This method allows to override the tcp timeout
+  // connection options. These timeouts can either be set directly or by
+  // passing in connection options.
+  ConnectOperation& setTcpTimeout(Duration timeout);
+
+  const folly::Optional<Duration>& getTcpTimeout() const {
+    return conn_options_.getConnectTcpTimeout();
+  }
+
+  // Sets the total timeout that the connect operation will use.
+  // Each attempt will take at most `setTimeout`. Use this in case
+  // you have strong timeout restrictions but still want the connection to
+  // retry.
+  ConnectOperation& setTotalTimeout(Duration total_timeout);
+
+  // Sets the number of attempts this operation will try to acquire a mysql
+  // connection.
+  ConnectOperation& setConnectAttempts(uint32_t max_attempts);
+
+  // Sets the DSCP (QoS) value associated with this connection
+  //
+  // See Also ConnectionOptions::setDscp
+  ConnectOperation& setDscp(uint8_t dscp);
+
+  folly::Optional<uint8_t> getDscp() const {
+    return conn_options_.getDscp();
+  }
+
+  uint32_t attemptsMade() const {
+    return attempts_made_;
+  }
+
+  Duration getAttemptTimeout() const {
+    return conn_options_.getTimeout();
+  }
+
+  // Set if we should open a new connection to kill a timed out query
+  // Should not be used when connecting through a proxy
+  ConnectOperation& setKillOnQueryTimeout(bool killOnQueryTimeout);
+
+  bool getKillOnQueryTimeout() const {
+    return killOnQueryTimeout_;
+  }
+
+  ConnectOperation& setCompression(
+      folly::Optional<CompressionAlgorithm> compression_lib) {
+    conn_options_.setCompression(std::move(compression_lib));
+    return *this;
+  }
+
+  const folly::Optional<CompressionAlgorithm>& getCompression() const {
+    return conn_options_.getCompression();
+  }
+
+  ConnectOperation& setConnectionOptions(const ConnectionOptions& conn_options);
+
+  static constexpr Duration kMinimumViableConnectTimeout =
+      std::chrono::microseconds(50);
+
+  db::OperationType getOperationType() const override {
+    return db::OperationType::Connect;
+  }
+
+  bool isActive() const {
+    return active_in_client_;
+  }
+
+ protected:
+  virtual void attemptFailed(OperationResult result);
+  virtual void attemptSucceeded(OperationResult result);
+
+  ConnectOperation& specializedRun() override;
+  void socketActionable() override;
+  void specializedTimeoutTriggered() override;
+  void specializedCompleteOperation() override;
+
+  // Called when tcp timeout is triggered
+  void tcpConnectTimeoutTriggered();
+
+  // Removes the Client ref, it can be called by child classes without needing
+  // to add them as friend classes of AsyncMysqlClient
+  virtual void removeClientReference();
+
+  bool shouldCompleteOperation(OperationResult result);
+
+  folly::ssl::SSLSessionUniquePtr getSSLSession();
+
+  // Implementation of timeout handling for tcpTimeout and overall connect
+  // timeout
+  void timeoutHandler(bool isTcpTimeout, bool isPool = false);
+
+  uint32_t attempts_made_ = 0;
+  bool killOnQueryTimeout_ = false;
+  ConnectionOptions conn_options_;
+
+  // Context information for logging purposes.
+  std::shared_ptr<db::ConnectionContextBase> connection_context_;
+
+ private:
+  void specializedRunImpl();
+
+  void logConnectCompleted(OperationResult result);
+
+  void maybeStoreSSLSession();
+
+  bool isDoneWithTcpHandShake();
+
+  static int mysqlCertValidator(
+      X509* server_cert,
+      const void* context,
+      const char** errptr);
+
+  const ConnectionKey conn_key_;
+
+  int flags_;
+
+  ConnectCallback connect_callback_;
+  bool active_in_client_;
+  ConnectTcpTimeoutHandler tcp_timeout_handler_;
+
+  friend class AsyncMysqlClient;
+  friend class MysqlClientBase;
+  friend class ConnectTcpTimeoutHandler;
+};
+
+// A fetching operation (query or multiple queries) use the same primary
+// actions. This is an abstract base for this kind of operation.
+// FetchOperation controls the flow of fetching a result:
+//  - When there are rows to be read, it will identify it and call the
+//  subclasses
+// for them to consume the state;
+//  - When there are no rows to be read or an error happened, proper
+//  notifications
+// will be made as well.
+// This is the only Operation that can be paused, and the pause should only be
+// called from within `notify` calls. That will allow another thread to read
+// the state.
+class FetchOperation : public Operation {
+ public:
+  using RespAttrs = AttributeMap;
+  ~FetchOperation() override = default;
+  void mustSucceed() override;
+
+  // Number of queries that succeed to execute
+  int numQueriesExecuted() {
+    CHECK_THROW(state_ != OperationState::Pending, db::OperationStateException);
+    return num_queries_executed_;
+  }
+
+  uint64_t resultSize() const {
+    CHECK_THROW(
+        state_ != OperationState::Unstarted, db::OperationStateException);
+    return total_result_size_;
+  }
+
+  FetchOperation& setUseChecksum(bool useChecksum) noexcept;
+
+  // This class encapsulates the operations and access to the MySQL ResultSet.
+  // When the consumer receives a notification for RowsFetched, it should
+  // consume `rowStream`:
+  //   while (rowStream->hasNext()) {
+  //     EphemeralRow row = consumeRow();
+  //   }
+  // The state within RowStream is also used for FetchOperation to know
+  // whether or not to go to next query.
+  class RowStream {
+   public:
+    RowStream(
+        std::unique_ptr<InternalResult> mysql_query_result,
+        std::unique_ptr<InternalRowMetadata> metadata,
+        MysqlHandler* handler);
+
+    EphemeralRow consumeRow();
+
+    bool hasNext();
+
+    EphemeralRowFields* getEphemeralRowFields() {
+      return &*row_fields_;
+    }
+
+    ~RowStream() = default;
+    RowStream(RowStream&&) = default;
+    RowStream& operator=(RowStream&&) = default;
+
+   private:
+    friend class FetchOperation;
+    bool slurp();
+    // user shouldn't take information from this
+    bool hasQueryFinished() {
+      return query_finished_;
+    }
+    uint64_t numRowsSeen() const {
+      return num_rows_seen_;
+    }
+
+    bool query_finished_ = false;
+    uint64_t num_rows_seen_ = 0;
+    uint64_t query_result_size_ = 0;
+
+    // All memory lifetime is guaranteed by FetchOperation.
+    std::unique_ptr<InternalResult> mysql_query_result_;
+    folly::Optional<EphemeralRow> current_row_;
+    std::shared_ptr<EphemeralRowFields> row_fields_;
+    MysqlHandler* handler_ = nullptr;
+  };
+
+  // Streaming calls. Should only be called when using the StreamCallback.
+  // TODO#10716355: We shouldn't let these functions visible for non-stream
+  // mode. Leaking for tests.
+  uint64_t currentLastInsertId() const;
+  uint64_t currentAffectedRows() const;
+  const std::string& currentRecvGtid() const;
+  const RespAttrs& currentRespAttrs() const;
+
+  bool noIndexUsed() const {
+    return no_index_used_;
+  }
+
+  bool wasSlow() const {
+    return was_slow_;
+  }
+
+  int numCurrentQuery() const {
+    return num_current_query_;
+  }
+
+  RowStream* rowStream();
+
+  // Stalls the FetchOperation until `resume` is called.
+  // This is used to allow another thread to access the socket functions.
+  void pauseForConsumer();
+
+  // Resumes the operation to the action it was before `pause` was called.
+  // Should only be called after pause.
+  void resume();
+
+  int rows_received_ = 0;
+
+ protected:
+  MultiQuery queries_;
+
+  FetchOperation& specializedRun() override;
+
+  FetchOperation(
+      std::unique_ptr<ConnectionProxy> conn,
+      std::vector<Query>&& queries);
+  FetchOperation(
+      std::unique_ptr<ConnectionProxy> conn,
+      MultiQuery&& multi_query);
+
+  enum class FetchAction {
+    StartQuery,
+    InitFetch,
+    Fetch,
+    WaitForConsumer,
+    CompleteQuery,
+    CompleteOperation
+  };
+
+  void setFetchAction(FetchAction action);
+  static folly::StringPiece toString(FetchAction action);
+
+  // In socket actionable it is analyzed the action that is required to
+  // continue the operation. For example, if the fetch action is StartQuery,
+  // it runs query or requests more results depending if it had already ran or
+  // not the query. The same process happens for the other FetchActions. The
+  // action member can be changed in other member functions called in
+  // socketActionable to keep the fetching flow running.
+  void socketActionable() override;
+  void specializedTimeoutTriggered() override;
+  void specializedCompleteOperation() override;
+
+  // Overridden in child classes and invoked when the Query fetching
+  // has done specific actions that might be needed for report (callbacks,
+  // store fetched data, initialize data).
+  virtual void notifyInitQuery() = 0;
+  virtual void notifyRowsReady() = 0;
+  virtual void notifyQuerySuccess(bool more_results) = 0;
+  virtual void notifyFailure(OperationResult result) = 0;
+  virtual void notifyOperationCompleted(OperationResult result) = 0;
+
+  bool cancel_ = false;
+
+ private:
+  friend class MultiQueryStreamHandler;
+  void specializedRunImpl();
+
+  void resumeImpl();
+  // Checks if the current thread has access to stream, or result data.
+  bool isStreamAccessAllowed() const;
+  bool isPaused() const;
+
+  // Read the response attributes
+  RespAttrs readResponseAttributes();
+
+  // Asynchronously kill a currently running query, returns
+  // before the query is killed
+  void killRunningQuery();
+
+  // Current query data
+  folly::Optional<RowStream> current_row_stream_;
+  bool query_executed_ = false;
+  bool no_index_used_ = false;
+  bool use_checksum_ = false;
+  bool was_slow_ = false;
+  // TODO: Rename `executed` to `succeeded`
+  int num_queries_executed_ = 0;
+  // During a `notify` call, the consumer might want to know the index of the
+  // current query, that's what `num_current_query_` is counting.
+  int num_current_query_ = 0;
+  // Best effort attempt to calculate the size of the result set in bytes.
+  // Only counts the actual data in rows, not bytes sent over the wire, and
+  // doesn't include column/table metadata or mysql packet overhead
+  uint64_t total_result_size_ = 0;
+
+  uint64_t current_affected_rows_ = 0;
+  uint64_t current_last_insert_id_ = 0;
+  std::string current_recv_gtid_;
+  RespAttrs current_resp_attrs_;
+
+  // When the Fetch gets paused, active fetch action moves to
+  // `WaitForConsumer` and the action that got paused gets saved so tat
+  // `resume` can set it properly afterwards.
+  FetchAction active_fetch_action_ = FetchAction::StartQuery;
+  FetchAction paused_action_ = FetchAction::StartQuery;
+
+  std::shared_ptr<folly::fbstring> rendered_query_;
+};
+
+// This operation only supports one mode: streaming callback. This is a
+// simple layer on top of FetchOperation to adapt from `notify` to
+// StreamCallback.
+// This is an experimental class. Please don't use directly.
+class MultiQueryStreamOperation : public FetchOperation {
+ public:
+  ~MultiQueryStreamOperation() override = default;
+
+  using Callback = std::function<void(FetchOperation&, StreamState)>;
+  using StreamCallback = boost::variant<MultiQueryStreamHandler*, Callback>;
+
+  void notifyInitQuery() override;
+  void notifyRowsReady() override;
+  void notifyQuerySuccess(bool more_results) override;
+  void notifyFailure(OperationResult result) override;
+  void notifyOperationCompleted(OperationResult result) override;
+
+  // Overriding to narrow the return type
+  MultiQueryStreamOperation& setTimeout(Duration timeout) {
+    Operation::setTimeout(timeout);
+    return *this;
+  }
+
+  MultiQueryStreamOperation(
+      std::unique_ptr<ConnectionProxy> connection,
+      MultiQuery&& multi_query);
+
+  MultiQueryStreamOperation(
+      std::unique_ptr<ConnectionProxy> connection,
+      std::vector<Query>&& queries);
+
+  db::OperationType getOperationType() const override {
+    return db::OperationType::MultiQueryStream;
+  }
+
+  template <typename C>
+  void setCallback(C cb) {
+    stream_callback_ = std::move(cb);
+  }
+
+ private:
+  // wrapper to construct CallbackVistor and invoke the
+  // right callback
+  void invokeCallback(StreamState state);
+
+  // Vistor to invoke the right callback depending on the type stored
+  // in the variant 'stream_callback_'
+  struct CallbackVisitor : public boost::static_visitor<> {
+    CallbackVisitor(MultiQueryStreamOperation& op, StreamState state)
+        : op_(op), state_(state) {}
+
+    void operator()(MultiQueryStreamHandler* handler) const {
+      if (handler != nullptr) {
+        handler->streamCallback(op_, state_);
+      }
+    }
+
+    void operator()(Callback cb) const {
+      if (cb != nullptr) {
+        cb(op_, state_);
+      }
+    }
+
+   private:
+    MultiQueryStreamOperation& op_;
+    StreamState state_;
+  };
+
+  StreamCallback stream_callback_;
+};
+
+// An operation representing a query.  If a callback is set, it
+// invokes the callback as rows arrive.  If there is no callback, it
+// buffers all results into memory and makes them available as a
+// RowBlock.  This is inefficient for large results.
+//
+// Constructed via Connection::beginQuery.
+class QueryOperation : public FetchOperation {
+ public:
+  ~QueryOperation() override = default;
+
+  void setCallback(QueryCallback cb) {
+    buffered_query_callback_ = std::move(cb);
+  }
+  void chainCallback(QueryCallback cb) {
+    auto origCb = std::move(buffered_query_callback_);
+    if (origCb) {
+      cb = [origCb = std::move(origCb), cb = std::move(cb)](
+               QueryOperation& op,
+               QueryResult* result,
+               QueryCallbackReason reason) {
+        origCb(op, result, reason);
+        cb(op, result, reason);
+      };
+    }
+    setCallback(cb);
+  }
+
+  // Steal all rows.  Only valid if there is no callback.  Inefficient
+  // for large result sets.
+  QueryResult&& stealQueryResult() {
+    CHECK_THROW(ok(), db::OperationStateException);
+    return std::move(*query_result_);
+  }
+
+  const QueryResult& queryResult() const {
+    CHECK_THROW(ok(), db::OperationStateException);
+    return *query_result_;
+  }
+
+  // Returns the Query of this operation
+  const Query& getQuery() const {
+    return queries_.getQuery(0);
+  }
+
+  // Steal all rows.  Only valid if there is no callback.  Inefficient
+  // for large result sets.
+  std::vector<RowBlock>&& stealRows() {
+    return query_result_->stealRows();
+  }
+
+  const std::vector<RowBlock>& rows() const {
+    return query_result_->rows();
+  }
+
+  // Last insert id (aka mysql_insert_id).
+  uint64_t lastInsertId() const {
+    return query_result_->lastInsertId();
+  }
+
+  // Number of rows affected (aka mysql_affected_rows).
+  uint64_t numRowsAffected() const {
+    return query_result_->numRowsAffected();
+  }
+
+  // Received gtid.
+  const std::string& recvGtid() const {
+    return query_result_->recvGtid();
+  }
+
+  void setQueryResult(QueryResult query_result) {
+    query_result_ = std::make_unique<QueryResult>(std::move(query_result));
+  }
+
+  // Don't call this; it's public strictly for Connection to be able
+  // to call make_shared.
+  QueryOperation(std::unique_ptr<ConnectionProxy> connection, Query&& query);
+
+  // Overriding to narrow the return type
+  QueryOperation& setTimeout(Duration timeout) {
+    Operation::setTimeout(timeout);
+    return *this;
+  }
+
+  db::OperationType getOperationType() const override {
+    return db::OperationType::Query;
+  }
+
+ protected:
+  void notifyInitQuery() override;
+  void notifyRowsReady() override;
+  void notifyQuerySuccess(bool more_results) override;
+  void notifyFailure(OperationResult result) override;
+  void notifyOperationCompleted(OperationResult result) override;
+
+ private:
+  QueryCallback buffered_query_callback_;
+  std::unique_ptr<QueryResult> query_result_;
+  friend class Connection;
+};
+
+// An operation representing a query with multiple statements.
+// If a callback is set, it invokes the callback as rows arrive.
+// If there is no callback, it buffers all results into memory
+// and makes them available as a RowBlock.
+// This is inefficient for large results.
+//
+// Constructed via Connection::beginMultiQuery.
+class MultiQueryOperation : public FetchOperation {
+ public:
+  ~MultiQueryOperation() override;
+
+  // Set our callback.  This is invoked multiple times -- once for
+  // every RowBatch and once, with nullptr for the RowBatch,
+  // indicating the query is complete.
+  void setCallback(MultiQueryCallback cb) {
+    buffered_query_callback_ = std::move(cb);
+  }
+  void chainCallback(MultiQueryCallback cb) {
+    auto origCb = std::move(buffered_query_callback_);
+    if (origCb) {
+      cb = [origCb = std::move(origCb), cb = std::move(cb)](
+               MultiQueryOperation& op,
+               QueryResult* result,
+               QueryCallbackReason reason) {
+        origCb(op, result, reason);
+        cb(op, result, reason);
+      };
+    }
+    setCallback(cb);
+  }
+
+  // Steal all rows. Only valid if there is no callback. Inefficient
+  // for large result sets.
+  // Only call after the query has finished, don't use it inside callbacks
+  std::vector<QueryResult>&& stealQueryResults() {
+    CHECK_THROW(done(), db::OperationStateException);
+    return std::move(query_results_);
+  }
+
+  // Only call this after the query has finished and don't use it inside
+  // callbacks
+  const std::vector<QueryResult>& queryResults() const {
+    CHECK_THROW(done(), db::OperationStateException);
+    return query_results_;
+  }
+
+  // Returns the Query for a query index.
+  const Query& getQuery(int index) const {
+    return queries_.getQuery(index);
+  }
+
+  // Returns the list of Queries
+  const std::vector<Query>& getQueries() const {
+    return queries_.getQueries();
+  }
+
+  void setQueryResults(std::vector<QueryResult> query_results) {
+    query_results_ = std::move(query_results);
+  }
+
+  // Don't call this; it's public strictly for Connection to be able
+  // to call make_shared.
+  MultiQueryOperation(
+      std::unique_ptr<ConnectionProxy> connection,
+      std::vector<Query>&& queries);
+
+  // Overriding to narrow the return type
+  MultiQueryOperation& setTimeout(Duration timeout) {
+    Operation::setTimeout(timeout);
+    return *this;
+  }
+
+  db::OperationType getOperationType() const override {
+    return db::OperationType::MultiQuery;
+  }
+
+ protected:
+  void notifyInitQuery() override;
+  void notifyRowsReady() override;
+  void notifyQuerySuccess(bool more_results) override;
+  void notifyFailure(OperationResult result) override;
+  void notifyOperationCompleted(OperationResult result) override;
+
+  // Calls the FetchOperation specializedCompleteOperation and then does
+  // callbacks if needed
+
+ private:
+  MultiQueryCallback buffered_query_callback_;
+
+  // Storage fields for every statement in the query
+  // Only to be used if there is no callback set.
+  std::vector<QueryResult> query_results_;
+  // Buffer to trans to `query_results_` and for buffered callback.
+  std::unique_ptr<QueryResult> current_query_result_;
+
+  int num_current_query_ = 0;
+
+  friend class Connection;
+};
+
+// SpecialOperation means operations like COM_RESET_CONNECTION,
+// COM_CHANGE_USER, etc.
+class SpecialOperation : public Operation {
+ public:
+  explicit SpecialOperation(std::unique_ptr<ConnectionProxy> conn)
+      : Operation(std::move(conn)) {}
+  void setCallback(SpecialOperationCallback callback) {
+    callback_ = std::move(callback);
+  }
+
+ protected:
+  void socketActionable() override;
+  void specializedCompleteOperation() override;
+  void specializedTimeoutTriggered() override;
+  SpecialOperation& specializedRun() override;
+  void mustSucceed() override;
+  SpecialOperationCallback callback_{nullptr};
+  friend class Connection;
+
+ private:
+  virtual MysqlHandler::Status callMysqlHandler() = 0;
+  virtual const char* getErrorMsg() const = 0;
+};
+
+// This is for sending COM_RESET_CONNECTION command before returning an idle
+// connection back to connection pool
+class ResetOperation : public SpecialOperation {
+ public:
+  explicit ResetOperation(std::unique_ptr<ConnectionProxy> conn)
+      : SpecialOperation(std::move(conn)) {}
+
+ private:
+  MysqlHandler::Status callMysqlHandler() override;
+  db::OperationType getOperationType() const override {
+    return db::OperationType::Reset;
+  }
+  const char* getErrorMsg() const override {
+    return errorMsg;
+  }
+  static constexpr const char* errorMsg = "Reset connection failed: ";
+};
+
+class ChangeUserOperation : public SpecialOperation {
+ public:
+  explicit ChangeUserOperation(
+      std::unique_ptr<ConnectionProxy> conn,
+      const std::string& user,
+      const std::string& password,
+      const std::string& database)
+      : SpecialOperation(std::move(conn)),
+        user_(user),
+        password_(password),
+        database_(database) {}
+
+ private:
+  MysqlHandler::Status callMysqlHandler() override;
+  db::OperationType getOperationType() const override {
+    return db::OperationType::ChangeUser;
+  }
+  const char* getErrorMsg() const override {
+    return errorMsg;
+  }
+  const std::string user_;
+  const std::string password_;
+  const std::string database_;
+  static constexpr const char* errorMsg = "Change user failed: ";
+};
+
 // Helper function to build the result for a ConnectOperation in the sync
 // mode. It will block the thread and return the acquired connection, in case
 // of error, it will throw MysqlException as expected in the sync mode.
 std::unique_ptr<Connection> blockingConnectHelper(
     std::shared_ptr<ConnectOperation> conn_op);
+} // namespace mysql_client
+} // namespace common
+} // namespace facebook
 
-} // namespace facebook::common::mysql_client
+#endif // COMMON_ASYNC_MYSQL_OPERATION_H

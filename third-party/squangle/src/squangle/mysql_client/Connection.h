@@ -15,20 +15,17 @@
 
 #include "squangle/base/Base.h"
 #include "squangle/mysql_client/ConnectionHolder.h"
-#include "squangle/mysql_client/ConnectionOptions.h"
 #include "squangle/mysql_client/InternalMysqlConnection.h"
-#include "squangle/mysql_client/MultiQueryOperation.h"
-#include "squangle/mysql_client/MultiQueryStreamOperation.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/QueryGenerator.h"
-#include "squangle/mysql_client/QueryOperation.h"
 
 namespace facebook::common::mysql_client {
 
-class ChangeUserOperation;
-class ResetOperation;
+class QueryOperation;
+class MultiQueryOperation;
+class MultiQueryStreamOperation;
 
 using ConnectionDyingCallback =
     std::function<void(std::unique_ptr<ConnectionHolder>)>;

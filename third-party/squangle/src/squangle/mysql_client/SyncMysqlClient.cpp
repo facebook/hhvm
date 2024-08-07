@@ -7,8 +7,8 @@
  */
 
 #include <folly/Singleton.h>
+#include <squangle/mysql_client/SyncMysqlClient.h>
 
-#include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SyncMysqlClient.h"
 
 namespace facebook {

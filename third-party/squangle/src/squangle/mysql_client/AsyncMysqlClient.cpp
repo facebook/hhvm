@@ -19,9 +19,10 @@
 
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/mysql_client/ConnectOperation.h"
-#include "squangle/mysql_client/ResetOperation.h"
+#include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
+
+DECLARE_int64(mysql_mysql_timeout_micros);
 
 namespace facebook {
 namespace common {

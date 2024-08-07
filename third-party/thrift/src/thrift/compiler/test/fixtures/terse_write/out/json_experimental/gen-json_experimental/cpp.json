@@ -586,6 +586,31 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 347
+      },
+      "GenerateDeprecatedHeaderClientMethods" : {
+        "name" : "GenerateDeprecatedHeaderClientMethods",
+        "structured_annotations": {
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Given either of the following Thrift service definitions:\n\n    @cpp.GenerateDeprecatedHeaderClientMethods\n    service Foo {\n      void bar();\n    }\n\n    service Foo {\n      @cpp.GenerateDeprecatedHeaderClientMethods\n      void bar();\n    }\n\nThis annotation instructs the compiler to generate the following (now deprecated) client method variants:\n  - apache::thrift::Client<Foo>::header_future_bar\n  - apache::thrift::Client<Foo>::header_semifuture_bar\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 371
       }
       },
   "source_path" : "thrift/annotation/cpp",

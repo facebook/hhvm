@@ -350,3 +350,24 @@ struct RuntimeAnnotation {}
 @scope.Transitive
 @Adapter{name = "::apache::thrift::CursorSerializationAdapter"}
 struct UseCursorSerialization {}
+
+/**
+ * Given either of the following Thrift service definitions:
+ *
+ *     @cpp.GenerateDeprecatedHeaderClientMethods
+ *     service Foo {
+ *       void bar();
+ *     }
+ *
+ *     service Foo {
+ *       @cpp.GenerateDeprecatedHeaderClientMethods
+ *       void bar();
+ *     }
+ *
+ * This annotation instructs the compiler to generate the following (now deprecated) client method variants:
+ *   - apache::thrift::Client<Foo>::header_future_bar
+ *   - apache::thrift::Client<Foo>::header_semifuture_bar
+ */
+@scope.Service
+@scope.Function
+struct GenerateDeprecatedHeaderClientMethods {}

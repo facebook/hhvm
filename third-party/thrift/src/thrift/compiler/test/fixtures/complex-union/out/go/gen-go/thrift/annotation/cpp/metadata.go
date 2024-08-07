@@ -196,6 +196,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("cpp.UseCursorSerialization").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("cpp.GenerateDeprecatedHeaderClientMethods").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

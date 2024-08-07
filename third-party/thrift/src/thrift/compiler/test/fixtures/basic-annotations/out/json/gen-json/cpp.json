@@ -636,6 +636,28 @@
           "column" : 33
         }
       }
+    },
+    "GenerateDeprecatedHeaderClientMethods" : {
+      "lineno" : 371,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Service" : {  },
+        "scope.Function" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 371,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 373,
+          "column" : 48
+        }
+      }
     }
   }
 }

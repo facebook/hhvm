@@ -57,6 +57,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     TestStructAllThriftContainerTypes as MutableTestStructAllThriftContainerTypes,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
+    TestStructCopy as TestStructCopyMutable,
     TestStructEmpty as TestStructEmptyMutable,
     TestStructEmptyAlias as TestStructEmptyAliasMutable,
     TestStructNested_0 as TestStructNested_0_Mutable,
@@ -400,23 +401,21 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         )
 
     def test_call(self) -> None:
-        # DO_BEFORE(aristidis,20240520): Support call operator for mutable types
-        with self.assertRaises(TypeError):
-            w = TestStructMutable(unqualified_string="hello, world!")
+        w = TestStructMutable(unqualified_string="hello, world!")
 
-            # Call operator: create a (deep) copy, with new values.
-            # Original instance is unchanged.
-            w2 = w(unqualified_string="foobar")
-            self.assertIsNot(w, w2)
-            self.assertEqual(w2.unqualified_string, "foobar")
-            self.assertEqual(w.unqualified_string, "hello, world!")
-            self.assertNotEqual(w, w2)
+        # Call operator: create a (deep) copy, with new values.
+        # Original instance is unchanged.
+        w2 = w(unqualified_string="foobar")
+        self.assertIsNot(w, w2)
+        self.assertEqual(w2.unqualified_string, "foobar")
+        self.assertEqual(w.unqualified_string, "hello, world!")
+        self.assertNotEqual(w, w2)
 
-            # Call operator with no values given: returns (deep) copy of self
-            # Note the difference with immutable types (which return self).
-            w3 = w()
-            self.assertIsNot(w, w3)
-            self.assertEqual(w, w3)
+        # Call operator with no values given: returns (deep) copy of self
+        # Note the difference with immutable types (which return self).
+        w3 = w()
+        self.assertIsNot(w, w3)
+        self.assertEqual(w, w3)
 
     def test_default_values(self) -> None:
         # Intrinsic default values:
@@ -1461,3 +1460,57 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
     )
     def test_exception_serialization_round_trip(self, struct_or_exception) -> None:
         _thrift_serialization_round_trip(self, mutable_serializer, struct_or_exception)
+
+    def test_call_as_deepcopy(self) -> None:
+        """
+        struct TestStructCopy {
+          1: i32 unqualified_i32;
+          2: optional i32 optional_i32;
+
+          3: string unqualified_string;
+          4: optional string optional_string;
+
+          5: list<i32> unqualified_list_i32;
+          6: set<string> unqualified_set_string;
+          7: map<string, i32> unqualified_map_string_i32;
+
+          8: optional TestStructCopy recursive_struct;
+        }
+        """
+        s = TestStructCopyMutable(
+            unqualified_i32=2,
+            optional_i32=3,
+            unqualified_string="thrift",
+            optional_string="python",
+            unqualified_list_i32=[1, 2, 3],
+            unqualified_set_string={"1", "2", "3"},
+            unqualified_map_string_i32={"a": 1, "b": 2, "c": 3},
+        )
+        s_clone = s()
+
+        self.assertIsNot(s, s_clone)
+
+        self.assertEqual(s.unqualified_list_i32, s_clone.unqualified_list_i32)
+        self.assertIsNot(s.unqualified_list_i32, s_clone.unqualified_list_i32)
+
+        # Although `assertIsNot()` appears to check the deepcopy result, the
+        # best way to test it is to mutate `s_clone` (due to implementation
+        # details) and verify that it doesn't affect `s`.
+        s_clone.unqualified_list_i32.append(4)
+        self.assertNotEqual(s.unqualified_list_i32, s_clone.unqualified_list_i32)
+
+        self.assertEqual(s.unqualified_set_string, s_clone.unqualified_set_string)
+        self.assertIsNot(s.unqualified_set_string, s_clone.unqualified_set_string)
+        s_clone.unqualified_set_string.add("4")
+        self.assertNotEqual(s.unqualified_set_string, s_clone.unqualified_set_string)
+
+        self.assertEqual(
+            s.unqualified_map_string_i32, s_clone.unqualified_map_string_i32
+        )
+        self.assertIsNot(
+            s.unqualified_map_string_i32, s_clone.unqualified_map_string_i32
+        )
+        s_clone.unqualified_map_string_i32["d"] = 4
+        self.assertNotEqual(
+            s.unqualified_map_string_i32, s_clone.unqualified_map_string_i32
+        )

@@ -192,3 +192,17 @@ struct TestStructWithExceptionField {
   1: i32 i32_field;
   2: TestExceptionAllThriftPrimitiveTypes exception_field;
 }
+
+struct TestStructCopy {
+  1: i32 unqualified_i32;
+  2: optional i32 optional_i32;
+
+  3: string unqualified_string;
+  4: optional string optional_string;
+
+  5: list<i32> unqualified_list_i32;
+  6: set<string> unqualified_set_string;
+  7: map<string, i32> unqualified_map_string_i32;
+
+  8: optional TestStructCopy recursive_struct;
+}

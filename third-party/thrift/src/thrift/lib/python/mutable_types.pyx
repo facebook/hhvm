@@ -22,6 +22,7 @@ from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM
 from cpython.unicode cimport PyUnicode_AsUTF8String
 
 import enum
+import copy
 
 from thrift.python.mutable_exceptions cimport MutableGeneratedError
 from thrift.python.mutable_serializer cimport cserialize, cdeserialize
@@ -194,6 +195,17 @@ cdef class MutableStruct(MutableStructOrUnion):
 
     def __init__(self, **kwargs):
         pass
+
+    def __call__(self, **kwargs):
+        self_copy = self._fbthrift_create(copy.deepcopy(self._fbthrift_data))
+
+        for field_name, value in kwargs.items():
+            if value is None:
+                self_copy._do_not_use_resetFieldToStandardDefault(field_name)
+            else:
+                setattr(self_copy, field_name, value)
+
+        return self_copy
 
     cdef _initStructListWithValues(self, kwargs) except *:
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info

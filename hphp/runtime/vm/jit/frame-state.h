@@ -522,7 +522,7 @@ private:
   /*
    * LocationState update helpers.
    */
-  void setValue(Location l, SSATmp* value);
+  void setValue(Location l, SSATmp* value, bool forLoad = false);
   void setType(Location l, Type type);
   void widenType(Location l, Type type);
   void refineType(Location l, Type type, Optional<TypeSource> typeSrc);

@@ -1783,11 +1783,12 @@ void FrameStateMgr::pointerRefine(SSATmp* ptr, Type type) {
 template<LTag tag>
 static void setValueImpl(Location l,
                          LocationState<tag>& state,
-                         SSATmp* value) {
+                         SSATmp* value,
+                         bool forLoad) {
   ITRACE(2, "{} := {}\n", jit::show(l), value ? value->toString() : "<>");
   state.value = value;
   state.type = value ? value->type() : LocationState<tag>::default_type();
-  state.maybeChanged = true;
+  if (!forLoad) state.maybeChanged = true;
 
   state.typeSrcs.clear();
   if (value) {
@@ -1798,15 +1799,15 @@ static void setValueImpl(Location l,
 /*
  * Update the value (and type) for `l'.
  */
-void FrameStateMgr::setValue(Location l, SSATmp* value) {
+void FrameStateMgr::setValue(Location l, SSATmp* value, bool forLoad) {
   switch (l.tag()) {
     case LTag::Local:
-      return setValueImpl(l, localState(l), value);
+      return setValueImpl(l, localState(l), value, forLoad);
     case LTag::Stack:
       cur().stackModified = true;
-      return setValueImpl(l, stackState(l), value);
+      return setValueImpl(l, stackState(l), value, forLoad);
     case LTag::MBase:
-      return setValueImpl(l, cur().mbase, value);
+      return setValueImpl(l, cur().mbase, value, forLoad);
   }
   not_reached();
 }
@@ -1860,7 +1861,7 @@ void FrameStateMgr::setValueAndSyncMBase(Location l,
 
   // NB: Do this after the mbase check, since it might consult the
   // type in the location being modified.
-  setValue(l, value);
+  setValue(l, value, forLoad);
 }
 
 template<LTag tag>

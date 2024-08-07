@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/any_rep.thrift"
-include "thrift/lib/thrift/type.thrift"
+include "thrift/lib/thrift/any_patch_detail.thrift"
+
+cpp_include "thrift/lib/cpp2/op/detail/AnyPatch.h"
 
 @thrift.TerseWrite
 @thrift.Experimental
@@ -30,14 +33,6 @@ namespace js apache.thrift.op
 namespace py.asyncio apache_thrift_asyncio.any_patch
 namespace go thrift.lib.thrift.any_patch
 namespace py thrift.lib.thrift.any_patch
-
-// Since Thrift discourages structured keys, we leverage 'list<TypeToPatchInternalDoNotUse>'
-// to represent on wire for 'map<type.Type, list<any_rep.AnyStruct>>'.
-struct TypeToPatchInternalDoNotUse {
-  @python.Py3Hidden
-  1: type.Type type;
-  2: list<any_rep.AnyStruct> patches;
-}
 
 /** A patch for Thrift Any. */
 struct AnyPatchStruct {
@@ -58,7 +53,9 @@ struct AnyPatchStruct {
    *   - The value of the map should store valid Thrift Patch.
    *   - The key of the map should be value type for stored Thrift Patch in the map value.
    */
-  10: list<TypeToPatchInternalDoNotUse> patchIfTypeIsPrior;
+  @cpp.Adapter{name = "::apache::thrift::op::detail::TypeToPatchMapAdapter"}
+  @python.Py3Hidden
+  10: list<any_patch_detail.TypeToPatchInternalDoNotUse> patchIfTypeIsPrior;
 
   /** Sets to the specified Thrift Any if the stored value's type does not match. */
   11: optional any_rep.AnyStruct ensureAny;
@@ -70,5 +67,7 @@ struct AnyPatchStruct {
    *   - The value of the map should store valid Thrift Patch.
    *   - The key of the map should be value type for stored Thrift Patch in the map value.
    */
-  12: list<TypeToPatchInternalDoNotUse> patchIfTypeIsAfter;
+  @cpp.Adapter{name = "::apache::thrift::op::detail::TypeToPatchMapAdapter"}
+  @python.Py3Hidden
+  12: list<any_patch_detail.TypeToPatchInternalDoNotUse> patchIfTypeIsAfter;
 }

@@ -55,13 +55,10 @@ ArrayIterProfile::Result profileIterInit(IRGS& env, SSATmp* base) {
   return result.value_type == TBottom ? generic : result;
 }
 
-// `doneOffset` is the relative offset to jump to if the base has no elements.
+// `doneOffset` is the absolute offset to jump to if the base has no elements.
 // `result` is a TBool that is true if the iterator has more items.
 void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result,
                      uint32_t iterId) {
-  auto const targetOffset = bcOff(env) + doneOffset;
-  auto const target = getBlock(env, targetOffset);
-  assertx(target != nullptr);
   ifThen(
     env,
     [&] (Block* taken) {
@@ -70,31 +67,27 @@ void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result,
     [&] {
       // Empty iteration- the iterator is dead
       gen(env, KillIter, IterId{iterId}, fp(env));
-      gen(env, Jmp, target);
+      gen(env, Jmp, getBlock(env, doneOffset));
     }
   );
 }
 
-// `loopOffset` is the relative offset to jump to if the base has more elements.
+// `bodyOffset` is the absolute offset to jump to if the base has more elements.
 // `result` is a TBool that is true if the iterator has more items.
-void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result,
+void implIterNextJmp(IRGS& env, Offset bodyOffset, SSATmp* result,
                      uint32_t iterId) {
-  auto const targetOffset = bcOff(env) + loopOffset;
-  auto const target = getBlock(env, targetOffset);
-  assertx(target != nullptr);
-
-  if (loopOffset <= 0) {
+  if (bodyOffset <= bcOff(env)) {
     ifThen(env,
       [&](Block* taken) {
         gen(env, JmpNZero, taken, result);
       },
       [&]{
-        surpriseCheckWithTarget(env, targetOffset);
-        gen(env, Jmp, target);
+        surpriseCheckWithTarget(env, bodyOffset);
+        gen(env, Jmp, getBlock(env, bodyOffset));
       }
     );
   } else {
-    gen(env, JmpNZero, target, result);
+    gen(env, JmpNZero, getBlock(env, bodyOffset), result);
   }
 
   // Fallthrough to next block the iterator is dead
@@ -107,10 +100,7 @@ bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base) {
   auto const empty = base->hasConstVal(TArrLike) && base->arrLikeVal()->empty();
   if (!empty) return false;
 
-  auto const targetOffset = bcOff(env) + doneOffset;
-  auto const target = getBlock(env, targetOffset);
-  assertx(target != nullptr);
-  gen(env, Jmp, target);
+  gen(env, Jmp, getBlock(env, doneOffset));
   return true;
 }
 
@@ -167,7 +157,8 @@ void emitIterBase(IRGS& env) {
 }
 
 void emitIterInit(IRGS& env, IterArgs ita,
-                   int32_t baseLocalId, Offset doneOffset) {
+                   int32_t baseLocalId, Offset doneRelOffset) {
+  auto const doneOffset = bcOff(env) + doneRelOffset;
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(IterInit);
   if (iterInitEmptyBase(env, doneOffset, base)) return;
@@ -186,18 +177,19 @@ void emitIterInit(IRGS& env, IterArgs ita,
 }
 
 void emitIterNext(IRGS& env, IterArgs ita,
-                   int32_t baseLocalId, Offset loopOffset) {
+                   int32_t baseLocalId, Offset bodyRelOffset) {
+  auto const bodyOffset = bcOff(env) + bodyRelOffset;
   auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(IterNext);
 
-  if (specializeIterNext(env, loopOffset, ita, base, baseLocalId)) return;
+  if (specializeIterNext(env, bodyOffset, ita, base, baseLocalId)) return;
 
   auto const op = base->isA(TArrLike)
     ? ita.hasKey() ? IterNextArrK : IterNextArr
     : ita.hasKey() ? IterNextObjK : IterNextObj;
   auto const result = gen(env, op, IterData(ita), base, fp(env));
   widenLocalIterBase(env, baseLocalId);
-  implIterNextJmp(env, loopOffset, result, ita.iterId);
+  implIterNextJmp(env, bodyOffset, result, ita.iterId);
 }
 
 void emitIterFree(IRGS& env, int32_t iterId) {

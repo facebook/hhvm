@@ -640,7 +640,7 @@ SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
 
 void emitSpecializedInit(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, Block* header,
-                         Block* done, SSATmp* base) {
+                         Offset doneOffset, SSATmp* base) {
   // We don't need to specialize on key type for value-only iterators.
   // However, we still need to call accessor.check to rule out tombstones.
   auto const arr = accessor.checkBase(env, base, makeExit(env));
@@ -648,7 +648,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
 
   ifThen(env,
     [&](Block* taken) { gen(env, JmpZero, taken, size); },
-    [&]{ gen(env, Jmp, done); }
+    [&]{ gen(env, Jmp, getBlock(env, doneOffset)); }
   );
 
   iterClear(env, data.valId);
@@ -685,8 +685,11 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
 
 Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
                              const IterArgs& data, const Type& value_type,
-                             Block* body, uint32_t baseLocalId) {
-  auto const header = env.unit.defBlock(body->profCount());
+                             SrcKey bodySk, uint32_t baseLocalId) {
+  auto const bodyProfCount = env.irb->hasBlock(bodySk)
+    ? getBlock(env, bodySk)->profCount()
+    : curProfCount(env);
+  auto const header = env.unit.defBlock(bodyProfCount);
   BlockPusher bp(*env.irb, env.irb->curMarker(), header);
 
   auto const pos = phiIterPos(env, accessor);
@@ -709,17 +712,22 @@ Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
   auto const guardable = relaxToGuardable(value_type);
   always_assert(guardable <= TCell);
 
-  iterIfThen(env,
-    [&](Block* taken) {
-      guarded_val = gen(env, CheckType, guardable, taken, val);
-    },
-    [&]{
-      finish(elm, val);
-      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-    }
-  );
+  if (guardable != TCell) {
+    iterIfThen(env,
+      [&](Block* taken) {
+        guarded_val = gen(env, CheckType, guardable, taken, val);
+      },
+      [&] {
+        finish(elm, val);
+        gen(env, Jmp, makeExit(env, bodySk));
+      }
+    );
+  } else {
+    guarded_val = val;
+  }
+
   finish(elm, guarded_val);
-  gen(env, Jmp, body);
+  gen(env, Jmp, getBlock(env, bodySk));
 
   return header;
 }
@@ -768,8 +776,10 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
   }
 
   env.irb->appendBlock(done);
-  auto const next = getBlock(env, nextSrcKey(env));
-  env.irb->curBlock()->setProfCount(next->profCount());
+  auto const nextProfCount = env.irb->hasBlock(nextSrcKey(env))
+    ? getBlock(env, nextSrcKey(env))->profCount()
+    : curProfCount(env);
+  env.irb->curBlock()->setProfCount(nextProfCount);
   gen(env, KillIter, id, fp(env));
 }
 
@@ -810,8 +820,10 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   profileDecRefs(env, data, /*init=*/true);
   if (base->isA(TObj)) return false;
 
-  auto const body = getBlock(env, nextSrcKey(env));
-  auto const done = getBlock(env, bcOff(env) + doneOffset);
+  auto const bodySk = nextSrcKey(env);
+  auto const bodyKey = env.irb->hasBlock(bodySk)
+    ? getBlock(env, bodySk)
+    : nullptr;
   auto const keyTypes = profiledResult.key_types;
   auto const layout = getBaseLayout(base);
 
@@ -825,43 +837,56 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   // We're committing to the specialization.
   TRACE(2, "Success! Generating specialized code.\n");
 
-  // Record the first profile for this DataType specialization. We should almost
-  // always have just one, but in case regionizeFunc() did something weird and
-  // produced multiple IterInits of the same base DataType pointing to the same
-  // body block, the first one likely has the highest weight, so we pick that
-  // one as a hint for IterNext.
+  // If the body block is part of this translation, record the first profile
+  // for this DataType specialization. We should almost always have just one,
+  // but in case regionizeFunc() did something weird and produced multiple
+  // IterInits of the same base DataType pointing to the same body block,
+  // the first one likely has the highest weight, so we pick that one as
+  // a hint for IterNext.
   auto const baseDT = dt_modulo_persistence(base->type().toDataType());
-  auto const iterProfileKey = std::make_pair(body, baseDT);
-  env.iterProfiles.emplace(iterProfileKey, IterProfileInfo{layout, keyTypes});
+  if (bodyKey != nullptr) {
+    auto const iterProfileKey = std::make_pair(bodyKey, baseDT);
+    env.iterProfiles.emplace(iterProfileKey, IterProfileInfo{layout, keyTypes});
+  }
 
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
   assertx(base->type().maybe(accessor->arrType()));
 
-  auto const iterKey = std::make_tuple(
-    body, baseDT, layout.toUint16(), keyTypes.toBits());
   auto const header = [&] {
+    auto const emitHeader = [&] {
+      return emitSpecializedHeader(
+        env, *accessor, data, profiledResult.value_type, bodySk, baseLocalId);
+    };
+
+    if (bodyKey == nullptr) return emitHeader();
+
+    auto const iterKey = std::make_tuple(
+      bodyKey, baseDT, layout.toUint16(), keyTypes.toBits());
     if (env.iters.contains(iterKey)) return env.iters[iterKey].header;
-    auto const res = emitSpecializedHeader(
-      env, *accessor, data, profiledResult.value_type, body, baseLocalId);
+
+    auto const res = emitHeader();
     env.iters.emplace(iterKey, IterSpecInfo{res, nullptr});
     return res;
   }();
 
-  emitSpecializedInit(env, *accessor, data, header, done, base);
+  emitSpecializedInit(env, *accessor, data, header, doneOffset, base);
   return true;
 }
 
 // `baseLocalId` is only valid for local iters. Returns true on specialization.
-bool specializeIterNext(IRGS& env, Offset loopOffset,
+bool specializeIterNext(IRGS& env, Offset bodyOffset,
                         const IterArgs& data, SSATmp* base,
                         uint32_t baseLocalId) {
   assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
   profileDecRefs(env, data, /*init=*/false);
   if (base->isA(TObj)) return false;
 
-  auto const body = getBlock(env, bcOff(env) + loopOffset);
+  auto const bodySk = SrcKey{curSrcKey(env), bodyOffset};
+  auto const bodyKey = env.irb->hasBlock(bodySk)
+    ? getBlock(env, bodySk)
+    : nullptr;
   auto const baseDT = dt_modulo_persistence(base->type().toDataType());
-  auto const iterProfileKey = std::make_pair(body, baseDT);
+  auto const iterProfileKey = std::make_pair(bodyKey, baseDT);
   auto const it = env.iterProfiles.find(iterProfileKey);
   auto const keyTypes = it != env.iterProfiles.end()
     ? it->second.keyTypes
@@ -886,20 +911,24 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
   assertx(base->type().maybe(accessor->arrType()));
 
-  auto const iterKey = std::make_tuple(
-    body, baseDT, layout.toUint16(), keyTypes.toBits());
+  auto iterSpecInfoUncached = IterSpecInfo{nullptr, nullptr};
+  auto& iterSpecInfo = [&]() -> IterSpecInfo& {
+    if (bodyKey == nullptr) return iterSpecInfoUncached;
+    auto const iterKey = std::make_tuple(
+      bodyKey, baseDT, layout.toUint16(), keyTypes.toBits());
+    return env.iters[iterKey];
+  }();
   auto const header = [&] {
-    if (env.iters.contains(iterKey)) return env.iters[iterKey].header;
+    if (iterSpecInfo.header != nullptr) return iterSpecInfo.header;
     auto const res = emitSpecializedHeader(
-      env, *accessor, data, TInitCell, body, baseLocalId);
-    env.iters.emplace(iterKey, IterSpecInfo{res, nullptr});
+      env, *accessor, data, TInitCell, bodySk, baseLocalId);
+    iterSpecInfo.header = res;
     return res;
   }();
   auto const footer = [&] {
-    assertx(env.iters.contains(iterKey));
-    if (auto const f = env.iters[iterKey].footer) return f;
+    if (iterSpecInfo.footer != nullptr) return iterSpecInfo.footer;
     auto const res = emitSpecializedFooter(env, *accessor, data, header);
-    env.iters[iterKey].footer = res;
+    iterSpecInfo.footer = res;
     return res;
   }();
 

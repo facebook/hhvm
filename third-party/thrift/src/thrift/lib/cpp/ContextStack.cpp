@@ -372,7 +372,7 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
         std::move(exceptions)));
   }
 }
-#endif
+#endif // FOLLY_HAS_COROUTINES
 
 void*& ContextStack::contextAt(size_t i) {
   return serviceContexts_[i];

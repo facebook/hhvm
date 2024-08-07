@@ -106,7 +106,7 @@ class ContextStack {
   }
   folly::coro::Task<void> processClientInterceptorsOnRequest();
   folly::coro::Task<void> processClientInterceptorsOnResponse();
-#endif
+#endif // FOLLY_HAS_COROUTINES
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>

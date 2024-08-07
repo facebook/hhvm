@@ -20,6 +20,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/any_rep.thrift"
 include "thrift/lib/thrift/any_patch_detail.thrift"
 
+cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
 cpp_include "thrift/lib/cpp2/op/detail/AnyPatch.h"
 
 @thrift.TerseWrite
@@ -35,7 +36,11 @@ namespace go thrift.lib.thrift.any_patch
 namespace py thrift.lib.thrift.any_patch
 
 /** A patch for Thrift Any. */
-struct AnyPatchStruct {
+@cpp.Adapter{
+  underlyingName = "AnyPatchStruct",
+  name = "::apache::thrift::op::detail::AnyPatchAdapter<::apache::thrift::op::AnyPatchStruct>",
+}
+struct AnyPatch {
   /**
    * Assigns to the specified Thrift Any.
    *

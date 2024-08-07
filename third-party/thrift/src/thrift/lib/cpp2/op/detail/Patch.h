@@ -22,6 +22,7 @@
 
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Adapter.h>
+#include <thrift/lib/cpp2/op/detail/AnyPatch.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/op/detail/ContainerPatch.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
@@ -67,6 +68,10 @@ template <typename T>
 using SetPatchAdapter = InlineAdapter<SetPatch<T>>;
 template <typename T>
 using MapPatchAdapter = InlineAdapter<MapPatch<T>>;
+
+// Adapters for Thrift Any
+template <typename T>
+using AnyPatchAdapter = InlineAdapter<AnyPatch<T>>;
 
 } // namespace detail
 } // namespace op

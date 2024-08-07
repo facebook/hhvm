@@ -70,6 +70,70 @@ struct TypeToPatchMapAdapter {
   // TODO(dokwon): Add customizations to optimize operators in adapted type.
 };
 
+/// Patch for Thrift Any.
+/// * `optional AnyStruct assign`
+/// * `terse bool clear`
+/// * `terse map<Type, AnyStruct> patchIfTypeIsPrior`
+/// * `optional AnyStruct ensureAny`
+/// * `terse map<Type, AnyStruct> patchIfTypeIsAfter`
+template <typename Patch>
+class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
+  using Base = BaseClearPatch<Patch, AnyPatch>;
+
+ public:
+  using Base::apply;
+  using Base::Base;
+  using Base::operator=;
+  using Base::clear;
+
+  /// @copybrief AssignPatch::customVisit
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(cosnt AnyStruct&);
+  ///       void clear();
+  ///       void patchIfTypeIsPrior(const Type&, const AnyStruct&);
+  ///       void ensureAny(cosnt AnyStruct&);
+  ///     }
+  ///
+  template <typename Visitor>
+  void customVisit(Visitor&& v) const {
+    if (false) {
+      // Test whether the required methods exist in Visitor
+      v.assign(type::AnyStruct{});
+      v.clear();
+      v.patchIfTypeIsPrior(type::Type{}, type::AnyStruct{});
+      v.ensureAny(type::AnyStruct{});
+    }
+    if (!Base::template customVisitAssignAndClear(v)) {
+      // TODO: Implement
+    }
+  }
+
+  void apply(type::AnyStruct& val) const {
+    struct Visitor {
+      type::AnyStruct& v;
+      void assign(const type::AnyStruct& b) { v = b; }
+      void clear() {
+        // TODO: Implement
+      }
+      void patchIfTypeIsPrior(const type::Type&, const type::AnyStruct&) {
+        // TODO: Implement
+      }
+      void ensureAny(const type::AnyStruct&) {
+        // TODO: Implement
+      }
+    };
+
+    return customVisit(Visitor{val});
+  }
+
+ private:
+  using Base::assignOr;
+  using Base::data_;
+};
+
 } // namespace detail
 } // namespace op
 } // namespace thrift

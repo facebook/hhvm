@@ -9,11 +9,16 @@
 #include <proxygen/lib/http/codec/compress/Huffman.h>
 
 #include <folly/Indestructible.h>
+#include <folly/container/Reserve.h>
 #include <folly/portability/Sockets.h>
 
 using std::pair;
 
 namespace proxygen { namespace huffman {
+
+// These constants were decided upon empirically
+constexpr static uint32_t kHuffmanDecodeSpaceNumerator = 3;
+constexpr static uint32_t kHuffmanDecodeSpaceDenominator = 2;
 
 HuffTree::HuffTree(const uint32_t* codes, const uint8_t* bits)
     : codes_(codes), bits_(bits) {
@@ -28,6 +33,9 @@ HuffTree::HuffTree(const HuffTree& tree)
 bool HuffTree::decode(const uint8_t* buf,
                       uint32_t size,
                       folly::fbstring& literal) const {
+  folly::grow_capacity_by(
+      literal,
+      (size * kHuffmanDecodeSpaceNumerator) / kHuffmanDecodeSpaceDenominator);
   const SuperHuffNode* snode = &table_[0];
   uint32_t w = 0;
   uint32_t wbits = 0;

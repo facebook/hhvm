@@ -1796,8 +1796,10 @@ module Json = struct
                   (List.map
                      ~f:(fun (field, { sfp_predicate }) ->
                        obj
-                       @@ [("name", shape_field_name_to_json field)]
-                       @ predicate_json sfp_predicate)
+                       @@ [
+                            ("name", shape_field_name_to_json field);
+                            ("predicate", obj @@ predicate_json sfp_predicate);
+                          ])
                      (TShapeMap.bindings sp_fields)) );
             ]
         (* TODO: T196048813 optional, open, fuel? *)

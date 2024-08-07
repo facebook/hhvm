@@ -38,6 +38,7 @@
 
 #include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
@@ -740,6 +741,10 @@ class Operation : public folly::EventHandler,
   bool isInEventBaseThread() const;
   bool isEventBaseSet() const;
 
+  bool isCancelledOnRun() const {
+    return cancel_on_run_;
+  }
+
   std::string threadOverloadMessage(double cbDelayUs) const;
   std::string timeoutMessage(std::chrono::milliseconds delta) const;
 
@@ -767,6 +772,11 @@ class Operation : public folly::EventHandler,
 
   // Connection or query attributes (depending on the Operation type)
   AttributeMap attributes_;
+
+  // This mutex protects the operation cancel process when the state
+  // is being checked in `run` and the operation is being cancelled in other
+  // thread.
+  std::mutex run_state_mutex_;
 
   struct Callbacks {
     Callbacks()
@@ -806,7 +816,7 @@ class Operation : public folly::EventHandler,
 
   MysqlClientBase* mysql_client_;
 
-  folly::Synchronized<bool> cancel_on_run_{false};
+  bool cancel_on_run_ = false;
 
   Operation() = delete;
   Operation(const Operation&) = delete;

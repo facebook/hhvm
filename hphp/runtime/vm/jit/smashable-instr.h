@@ -48,10 +48,10 @@ struct CGMeta;
  *      - jcc
  *      - jcc_jmp:  A jcc followed contiguously by a jmp, both of which have
  *                  independently smashable targets.  Used for bindjcc1st.
- *      - interceptjcc:  A jcc instruction that can be smashed into a sequence
- *                       of nop; jmp instructions; the target is preserved.
- *      - interceptjmp:  A sequence of nop; jmp instructions that can be smashed
- *                       into a jcc instruction to the same target.
+ *      - interceptjcc:  A jcc instruction that can be smashed into a
+ *                       jmp instruction to the same target.
+ *      - interceptjmp:  A jmp instruction that can be smashed into a
+ *                       jcc instruction to the same target.
  *
  * Smashable instructions must have a statically known length (though they may
  * require nop-gap realignment when they are emitted).
@@ -131,4 +131,3 @@ bool optimizeSmashedJcc(TCA inst);
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

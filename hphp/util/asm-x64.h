@@ -2045,15 +2045,15 @@ public:
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
   }
 
-  // rewrites jae into nop; jmp, preserving the target address
+  // rewrites jae into rex.r jmp, preserving the target address
   static void patchInterceptJcc(CodeAddress inst) {
     assertx(inst[0] == 0x0f && inst[1] == 0x83);
-    *reinterpret_cast<uint16_t*>(inst) = 0xe990;
+    *reinterpret_cast<uint16_t*>(inst) = 0xe944;
   }
 
-  // rewrites nop; jmp into jae, preserving the target address
+  // rewrites rex.r jmp into jae, preserving the target address
   static void patchInterceptJmp(CodeAddress inst) {
-    assertx(inst[0] == 0x90 && inst[1] == 0xe9);
+    assertx(inst[0] == 0x44 && inst[1] == 0xe9);
     *reinterpret_cast<uint16_t*>(inst) = 0x830f;
   }
 

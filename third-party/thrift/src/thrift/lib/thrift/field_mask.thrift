@@ -120,8 +120,8 @@ union Mask {
   @cpp.Ref{type = cpp.RefType.Unique}
   6: MapStringToMask includes_string_map; // String map fields that will be included.
 
-  7: MapTypeToMask includes_type; // types to be included for thrift.Any
-  8: MapTypeToMask excludes_type; // types to be excluded for thrift.Any
+  7: MapTypeToMask excludes_type; // types to be excluded for thrift.Any
+  8: MapTypeToMask includes_type; // types to be included for thrift.Any
 }
 
 const Mask allMask = {"excludes": {}}; // Masks all fields.

@@ -44,6 +44,10 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
         &[
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -150,6 +154,10 @@ impl ::fbthrift::ThriftEnum for MyEnum {
             Self::ONE,
             Self::TWO,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 
@@ -333,6 +341,10 @@ impl ::fbthrift::ThriftEnum for MyBigEnum {
             Self::EIGHTEEN,
             Self::NINETEEN,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 

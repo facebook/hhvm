@@ -122,4 +122,7 @@ pub trait ThriftEnum: Sized {
     fn variants() -> &'static [&'static str];
 
     fn variant_values() -> &'static [Self];
+
+    /// The numerical representation of this variant.
+    fn inner_value(&self) -> i32;
 }

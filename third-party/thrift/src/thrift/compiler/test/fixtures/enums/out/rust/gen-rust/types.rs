@@ -73,6 +73,10 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
             Self::BAX,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -210,6 +214,10 @@ impl ::fbthrift::ThriftEnum for MyEnum1 {
             Self::ME1_6,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -338,6 +346,10 @@ impl ::fbthrift::ThriftEnum for MyEnum2 {
             Self::ME2_1,
             Self::ME2_2,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 
@@ -474,6 +486,10 @@ impl ::fbthrift::ThriftEnum for MyEnum3 {
             Self::ME3_10,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -607,6 +623,10 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
             Self::ME4_D,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -732,6 +752,10 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
             Self::FOUR,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -854,6 +878,10 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
             Self::TWO,
             Self::FOUR,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 

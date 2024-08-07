@@ -488,6 +488,10 @@ impl ::fbthrift::ThriftEnum for has_bitwise_ops {
             Self::three,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -611,6 +615,10 @@ impl ::fbthrift::ThriftEnum for is_unscoped {
             Self::world,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -727,6 +735,10 @@ impl ::fbthrift::ThriftEnum for MyForwardRefEnum {
             Self::ZERO,
             Self::NONZERO,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 

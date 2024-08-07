@@ -92,6 +92,10 @@ impl ::fbthrift::ThriftEnum for Animal {
             Self::TARANTULA,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]

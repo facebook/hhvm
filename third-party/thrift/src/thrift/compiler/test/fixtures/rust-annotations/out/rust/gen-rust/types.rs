@@ -256,6 +256,10 @@ impl ::fbthrift::ThriftEnum for E1 {
             Self::B1,
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -358,6 +362,10 @@ impl ::fbthrift::ThriftEnum for F2 {
     fn variant_values() -> &'static [Self] {
         &[
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 
@@ -465,6 +473,10 @@ impl ::fbthrift::ThriftEnum for EnumWithDerives {
             Self::UNKNOWN,
             Self::STUFF,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 

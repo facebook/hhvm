@@ -135,6 +135,10 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
         &[
         ]
     }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -249,6 +253,10 @@ impl ::fbthrift::ThriftEnum for City {
             Self::SEA,
             Self::LON,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 
@@ -372,6 +380,10 @@ impl ::fbthrift::ThriftEnum for Company {
             Self::OCULUS,
             Self::INSTAGRAM,
         ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
     }
 }
 

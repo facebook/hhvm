@@ -12,11 +12,3 @@ val go_ide :
   action:ServerFormatTypes.ide_action ->
   options:Lsp.DocumentFormatting.formattingOptions ->
   ServerFormatTypes.ide_result
-
-val go :
-  ?filename_for_logging:string ->
-  content:string ->
-  int ->
-  int ->
-  Lsp.DocumentFormatting.formattingOptions ->
-  (string, string) result

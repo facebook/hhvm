@@ -321,14 +321,6 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         ^ "; use ExplicitClass instead of Class to exclude references via self/static/parent"
       );
       Common_argspecs.force_dormant_start force_dormant_start;
-      ( "--format",
-        (let format_from = ref 0 in
-         Arg.Tuple
-           [
-             Arg.Int (( := ) format_from);
-             Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)));
-           ]),
-        "" );
       Common_argspecs.from from;
       ( "--from-arc-diff",
         Arg.Unit (set_from "arc_diff"),

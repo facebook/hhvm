@@ -32,7 +32,6 @@ let debug_describe_t : type a. a t -> string = function
   | SAVE_NAMING _ -> "SAVE_NAMING"
   | SAVE_STATE _ -> "SAVE_STATE"
   | STATS -> "STATS"
-  | FORMAT _ -> "FORMAT"
   | DUMP_FULL_FIDELITY_PARSE _ -> "DUMP_FULL_FIDELITY_PARSE"
   | RAGE -> "RAGE"
   | CST_SEARCH _ -> "CST_SEARCH"

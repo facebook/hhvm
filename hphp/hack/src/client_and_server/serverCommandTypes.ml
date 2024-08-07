@@ -391,7 +391,6 @@ type _ t =
   | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
   | LINT_ALL : int -> ServerLintTypes.result t
   | STATS : Stats.t t
-  | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
   | RAGE : ServerRageTypes.result t
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
@@ -485,7 +484,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | LINT _ -> false
   | LINT_STDIN _ -> false
   | LINT_ALL _ -> false
-  | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
   | RAGE -> false
   | CST_SEARCH _ -> false

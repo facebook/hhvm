@@ -340,11 +340,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerLint.lint_all genv ctx code)
   | STATS -> (env, Stats.get_stats ())
-  | FORMAT (content, from, to_) ->
-    let legacy_format_options =
-      { Lsp.DocumentFormatting.tabSize = 2; insertSpaces = true }
-    in
-    (env, ServerFormat.go ~content from to_ legacy_format_options)
   | DUMP_FULL_FIDELITY_PARSE file -> (env, FullFidelityParseService.go file)
   | RAGE -> (env, ServerRage.go genv env)
   | CST_SEARCH { sort_results; input; files_to_search } -> begin

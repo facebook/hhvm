@@ -877,13 +877,6 @@ let main_internal
     else
       apply_patches patches;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_FORMAT (from, to_) ->
-    let content = Sys_utils.read_stdin_to_string () in
-    let%lwt (result, telemetry) =
-      rpc args @@ ServerCommandTypes.FORMAT (content, from, to_)
-    in
-    ClientFormat.go result args.output_json;
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_FULL_FIDELITY_PARSE file ->
     (* We can cheaply do this on the client today, but we might want to
        do it on the server and cache the results in the future. *)

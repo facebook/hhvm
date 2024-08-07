@@ -54,10 +54,33 @@ std::unique_ptr<folly::IOBuf> serialize(
     const PyObject* object,
     PROTOCOL_TYPES protocol);
 
+/**
+ * It receives an `object` which should be a valid Python list object, and it
+ * calls `serialize()` function above with a pointer to the beginning of the
+ * 'item' array in the PyListObject, where memory is allocated for the members.
+ * (see `getListObjectItemBase()`)
+ */
+std::unique_ptr<folly::IOBuf> mutable_serialize(
+    const DynamicStructInfo& dynamicStructInfo,
+    const void* object,
+    PROTOCOL_TYPES protocol);
+
 size_t deserialize(
     const DynamicStructInfo& dynamicStructInfo,
     const folly::IOBuf* buf,
     PyObject* object,
+    PROTOCOL_TYPES protocol);
+
+/**
+ * It receives an `object` which should be a valid Python list object, and it
+ * calls `deserialize()` function above with a pointer to the beginning of the
+ * 'item' array in the PyListObject, where memory is allocated for the members.
+ * (see `getListObjectItemBase()`)
+ */
+size_t mutable_deserialize(
+    const DynamicStructInfo& dynamicStructInfo,
+    const folly::IOBuf* buf,
+    void* object,
     PROTOCOL_TYPES protocol);
 
 } // namespace python

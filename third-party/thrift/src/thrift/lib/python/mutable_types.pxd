@@ -55,19 +55,20 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         cDynamicStructInfo(const char* name, int16_t numFields, bint isUnion)
         const cStructInfo& getStructInfo()
         void addFieldInfo(int16_t id, FieldQualifier qualifier, const char* name, const cTypeInfo* typeInfo) except+
+        void addMutableFieldInfo(int16_t id, FieldQualifier qualifier, const char* name, const cTypeInfo* typeInfo) except+
         void addFieldValue(int16_t index, object fieldValue) except+
         bint isUnion()
 
-    cdef object createMutableStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
-    cdef object createStructTupleWithNones(const cStructInfo& structInfo)
-    cdef void populateMutableStructTupleUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
+    cdef object createMutableStructListWithDefaultValues(const cStructInfo& structInfo) except+
+    cdef object createStructListWithNones(const cStructInfo& structInfo)
+    cdef void populateMutableStructListUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
     cdef void resetFieldToStandardDefault(object, const cStructInfo& structInfo, int index) except+
-    cdef void setStructIsset(object, int index, bint set) except+
+    cdef void setMutableStructIsset(object, int index, bint set) except+
 
     cdef object createUnionTuple() except+
 
 cdef class MutableStructOrUnion:
-    cdef tuple _fbthrift_data
+    cdef object _fbthrift_data
     cdef IOBuf _fbthrift_serialize(MutableStructOrUnion self, Protocol proto)
     cdef uint32_t _fbthrift_deserialize(MutableStructOrUnion self, IOBuf buf, Protocol proto) except? 0
     cdef _fbthrift_get_field_value(self, int16_t index)
@@ -76,7 +77,7 @@ cdef class MutableStruct(MutableStructOrUnion):
     cdef IOBuf _fbthrift_serialize(MutableStruct self, Protocol proto)
     cdef uint32_t _fbthrift_deserialize(MutableStruct self, IOBuf buf, Protocol proto) except? 0
     cdef _fbthrift_get_field_value(MutableStruct self, int16_t index)
-    cdef _initStructTupleWithValues(MutableStruct self, object kwargs) except *
+    cdef _initStructListWithValues(MutableStruct self, object kwargs) except *
     cdef _fbthrift_set_field_value(self, int16_t index, object value) except *
     cdef _fbthrift_reset_field_to_standard_default(self, int16_t index) except *
     cdef _fbthrift_get_cached_field_value(MutableStruct self, int16_t index) except *
@@ -119,3 +120,4 @@ cdef class MutableUnion(MutableStructOrUnion):
     cdef object _fbthrift_get_field_value(self, int16_t field_id)
 
 cdef object _mutable_struct_meta_new(object cls, object cls_name, object bases, object dct)
+cdef void set_mutable_struct_field(list struct_list, int16_t index, value) except *

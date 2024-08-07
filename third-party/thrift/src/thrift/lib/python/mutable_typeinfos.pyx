@@ -67,7 +67,7 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         Args:
             value: should be an instance of `self._mutable_struct_class`, Otherwise, raises `TypeError`.
 
-        Returns: The "mutable struct tuple" of the given value (see `createMutableStructTupleWithDefaultValues()`).
+        Returns: The "mutable struct list" of the given value (see `createMutableStructListWithDefaultValues()`).
 
         Raises:
             TypeError if `value` is not an instance of `self._mutable_struct_class`
@@ -85,8 +85,8 @@ cdef class MutableStructTypeInfo(TypeInfoBase):
         raise TypeError(f"MutableStructInfo cannot convert {self._mutable_struct_class} to internal data")
 
     # convert deserialized data to user format
-    cdef to_python_value(self, object struct_tuple):
-        return self._mutable_struct_class._fbthrift_create(struct_tuple)
+    cdef to_python_value(self, object struct_list):
+        return self._mutable_struct_class._fbthrift_create(struct_list)
 
     def to_container_value(self, object value not None):
         """

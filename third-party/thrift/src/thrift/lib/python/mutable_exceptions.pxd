@@ -25,19 +25,19 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
         pass
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
-    cdef object createMutableStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
-    cdef object createStructTupleWithNones(const cStructInfo& structInfo)
-    cdef void populateMutableStructTupleUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
+    cdef object createMutableStructListWithDefaultValues(const cStructInfo& structInfo) except+
+    cdef object createStructListWithNones(const cStructInfo& structInfo)
+    cdef void populateMutableStructListUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
     cdef void resetFieldToStandardDefault(object, const cStructInfo& structInfo, int index) except+
 
 
 # Base class for all generated (mutable) exceptions defined in Thrift IDL
 cdef class MutableGeneratedError(Error):
-    cdef tuple _fbthrift_data
+    cdef list _fbthrift_data
     cdef IOBuf _fbthrift_serialize(MutableGeneratedError self, Protocol proto)
     cdef uint32_t _fbthrift_deserialize(MutableGeneratedError self, IOBuf buf, Protocol proto) except? 0
     cdef _fbthrift_get_field_value(MutableGeneratedError self, int16_t index)
-    cdef _initStructTupleWithValues(MutableGeneratedError self, object kwargs) except *
+    cdef _initStructListWithValues(MutableGeneratedError self, object kwargs) except *
     cdef _fbthrift_set_field_value(self, int16_t index, object value) except *
     cdef _fbthrift_reset_field_to_standard_default(self, int16_t index) except *
     cdef _fbthrift_get_cached_field_value(MutableGeneratedError self, int16_t index) except *

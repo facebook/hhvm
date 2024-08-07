@@ -48,6 +48,13 @@ std::unique_ptr<folly::IOBuf> serialize(
   }
 }
 
+std::unique_ptr<folly::IOBuf> mutable_serialize(
+    const DynamicStructInfo& dynamicStructInfo,
+    const void* object,
+    PROTOCOL_TYPES protocol) {
+  return serialize(dynamicStructInfo, getListObjectItemBase(object), protocol);
+}
+
 size_t deserialize(
     const DynamicStructInfo& dynamicStructInfo,
     const folly::IOBuf* buf,
@@ -67,6 +74,15 @@ size_t deserialize(
       throw TProtocolException(
           TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");
   }
+}
+
+size_t mutable_deserialize(
+    const DynamicStructInfo& dynamicStructInfo,
+    const folly::IOBuf* buf,
+    void* object,
+    PROTOCOL_TYPES protocol) {
+  return deserialize(
+      dynamicStructInfo, buf, getListObjectItemBase(object), protocol);
 }
 
 } // namespace python

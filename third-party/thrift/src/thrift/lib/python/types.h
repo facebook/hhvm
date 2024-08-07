@@ -99,6 +99,18 @@ PyObject* createUnionTuple();
 PyObject* createStructTuple(int16_t numFields);
 
 /**
+ * Returns a new "struct list" whose field elements are uninitialized.
+ *
+ * There are function pairs such as *StructTuple* and *StructList*. These
+ * functions offer similar functionalities. The key distinction is the type of
+ * underlying container used: `StructTuple` uses a Python `tuple`, while
+ * `StructList` uses a Python `list`. The use of a `list` in `StructList`
+ * specific to mutable types, enabling modifications to the elements and
+ * supporting deep-copy operations.
+ */
+PyObject* createStructList(int16_t numFields);
+
+/**
  * Returns a new "struct tuple" associated with an immutable Thrift struct,
  * all elements initialized with default values.
  *
@@ -131,7 +143,7 @@ PyObject* createImmutableStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo);
 
 /**
- * Returns a new "struct tuple" associated with an mutable Thrift struct,
+ * Returns a new "struct list" associated with an mutable Thrift struct,
  * all elements initialized with default values.
  *
  * This function is very similar to its immutable counterpart. Please see the
@@ -142,7 +154,7 @@ PyObject* createImmutableStructTupleWithDefaultValues(
  * for the corresponding type:
  *   * In the mutable version, the standard value for lists is an empty `list`.
  */
-PyObject* createMutableStructTupleWithDefaultValues(
+PyObject* createMutableStructListWithDefaultValues(
     const detail::StructInfo& structInfo);
 
 /**
@@ -160,6 +172,14 @@ PyObject* createMutableStructTupleWithDefaultValues(
  */
 void setStructIsset(PyObject* structTuple, int16_t index, bool value);
 
+/**
+ * Sets the "isset" flag of the `index`-th field of the given 'struct list'
+ * `object` to the given `value`.
+ *
+ * Please see `createStructList()`.
+ */
+void setMutableStructIsset(PyObject* structList, int16_t index, bool value);
+
 /*
  * Returns a new "struct tuple" with all its elements set to `None`
  * (i.e., `Py_None`).
@@ -171,6 +191,14 @@ void setStructIsset(PyObject* structTuple, int16_t index, bool value);
  *
  */
 PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo);
+
+/*
+ * Returns a new "struct list" with all its elements set to `None`
+ * (i.e., `Py_None`).
+ *
+ * Please see `createStructList()`.
+ */
+PyObject* createStructListWithNones(const detail::StructInfo& structInfo);
 
 /**
  * Populates unset fields of a immutable Thrift struct's "struct tuple" with
@@ -188,7 +216,7 @@ void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
     PyObject* object, const detail::StructInfo& structInfo);
 
 /**
- * Populates unset fields of a mutable Thrift struct's "struct tuple" with
+ * Populates unset fields of a mutable Thrift struct's "struct list" with
  * default values.
  *
  * This function is very similar to its immutable counterpart. Please see the
@@ -199,16 +227,16 @@ void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
  *
  * Throws on error
  */
-void populateMutableStructTupleUnsetFieldsWithDefaultValues(
+void populateMutableStructListUnsetFieldsWithDefaultValues(
     PyObject* object, const detail::StructInfo& structInfo);
 
 /**
- * Resets the field at `index` of the "struct tuple" with the default value.
+ * Resets the field at `index` of the "struct list" with the default value.
  *
  * Throws on error
  */
 void resetFieldToStandardDefault(
-    PyObject* tuple, const detail::StructInfo& structInfo, int index);
+    PyObject* structList, const detail::StructInfo& structInfo, int index);
 
 struct PyObjectDeleter {
   void operator()(PyObject* p) { Py_XDECREF(p); }
@@ -834,7 +862,11 @@ using FieldValueMap = std::unordered_map<int16_t, PyObject*>;
  */
 class DynamicStructInfo {
  public:
-  DynamicStructInfo(const char* name, int16_t numFields, bool isUnion = false);
+  DynamicStructInfo(
+      const char* name,
+      int16_t numFields,
+      bool isUnion = false,
+      bool isMutable = false);
 
   // DynamicStructInfo is non-copyable
   DynamicStructInfo(const DynamicStructInfo&) = delete;
@@ -860,6 +892,12 @@ class DynamicStructInfo {
    * behavior.
    */
   void addFieldInfo(
+      detail::FieldID id,
+      detail::FieldQualifier qualifier,
+      const char* name,
+      const detail::TypeInfo* typeInfo);
+
+  void addMutableFieldInfo(
       detail::FieldID id,
       detail::FieldQualifier qualifier,
       const char* name,
@@ -927,6 +965,17 @@ detail::TypeInfo createImmutableStructTypeInfo(
 
 detail::TypeInfo createMutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
+
+/**
+ * Retrieves the start address of the array that holds pointers to the elements
+ * in a `PyListObject`.
+ */
+inline PyObject* getListObjectItemBase(void* pyList) {
+  return reinterpret_cast<PyObject*>(&PyList_GET_ITEM(pyList, 0));
+}
+inline const PyObject* getListObjectItemBase(const void* pyList) {
+  return reinterpret_cast<PyObject*>(&PyList_GET_ITEM(pyList, 0));
+}
 
 } // namespace apache::thrift::python
 

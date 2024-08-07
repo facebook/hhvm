@@ -36,7 +36,6 @@ from thrift.python.types cimport (
     StringTypeInfo,
     TypeInfoBase,
     getCTypeInfo,
-    set_struct_field,
     _fbthrift_compare_struct_less,
     _validate_union_init_kwargs,
 )
@@ -132,6 +131,25 @@ class _MutableStructCachedField:
         obj._fbthrift_field_cache[self._field_index] = None
 
 
+cdef void set_mutable_struct_field(list struct_list, int16_t index, value) except *:
+    """
+    Updates the given `struct_list` to have the given `value` for the field at
+    the given `index`.
+
+    The "isset" byte for the corresponding field (i.e., the `index`-th byte of
+     the first element of `struct_list` is set to 1.
+
+     Args:
+        struct_list: see `createImmutableStructListWithDefaultValues()`
+        index: field index, as defined by its insertion order in the parent
+            `StructInfo` (this is not the field id).
+        value: new value for this field, in "internal data" represntation (as
+            opposed to "Python value" representation - see `*TypeInfo` classes).
+    """
+    setMutableStructIsset(struct_list, index, 1)
+    struct_list[index + 1] = value
+
+
 cdef class MutableStructOrUnion:
     cdef IOBuf _fbthrift_serialize(self, Protocol proto):
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
@@ -147,8 +165,8 @@ cdef class MutableStruct(MutableStructOrUnion):
     struct in thrift-python.
 
     Instance variables:
-        _fbthrift_data: "mutable struct tuple" that holds the "isset" flag array and
-            values for all fields. See `createMutableStructTupleWithDefaultValues()`.
+        _fbthrift_data: "mutable struct list" that holds the "isset" flag array and
+            values for all fields. See `createMutableStructListWithDefaultValues()`.
 
         _fbthrift_field_cache: This is a list that stores instances of a field's
             Python value. It is especially useful when creating a Python value is
@@ -170,27 +188,27 @@ cdef class MutableStruct(MutableStructOrUnion):
                  "Python value" representation, as opposed to "internal data"
                  representation (see `*TypeInfo` classes).
         """
-        self._initStructTupleWithValues(kwargs)
+        self._initStructListWithValues(kwargs)
         cdef MutableStructInfo mutable_struct_info = type(self)._fbthrift_mutable_struct_info
         self._fbthrift_field_cache = [None] * len(mutable_struct_info.fields)
 
     def __init__(self, **kwargs):
         pass
 
-    cdef _initStructTupleWithValues(self, kwargs) except *:
+    cdef _initStructListWithValues(self, kwargs) except *:
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
 
         # If no keyword arguments are provided, initialize the Struct with
         # default values.
         if not kwargs:
-            self._fbthrift_data = createMutableStructTupleWithDefaultValues(
+            self._fbthrift_data = createMutableStructListWithDefaultValues(
                 mutable_struct_info.cpp_obj.get().getStructInfo()
             )
             return
 
-        # Instantiate a tuple with 'None' values, then assign the provided
+        # Instantiate a list with 'None' values, then assign the provided
         # keyword arguments to the respective fields.
-        self._fbthrift_data = createStructTupleWithNones(
+        self._fbthrift_data = createStructListWithNones(
             mutable_struct_info.cpp_obj.get().getStructInfo()
         )
         for name, value in kwargs.items():
@@ -208,7 +226,7 @@ cdef class MutableStruct(MutableStructOrUnion):
 
         # If any fields remain unset, initialize them with their respective
         # default values.
-        populateMutableStructTupleUnsetFieldsWithDefaultValues(
+        populateMutableStructListUnsetFieldsWithDefaultValues(
                 self._fbthrift_data,
                 mutable_struct_info.cpp_obj.get().getStructInfo()
         )
@@ -227,7 +245,7 @@ cdef class MutableStruct(MutableStructOrUnion):
                     transitive_annotation=transitive_annotation(),
                 )
 
-            set_struct_field(
+            set_mutable_struct_field(
                 self._fbthrift_data,
                 index,
                 (
@@ -361,6 +379,7 @@ cdef class MutableStructInfo:
             PyUnicode_AsUTF8(name),
             num_fields,
             False, # isUnion
+            True, # isMutable
         )
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
@@ -399,7 +418,7 @@ cdef class MutableStructInfo:
             PyTuple_SET_ITEM(type_infos, idx, field_type_info)
             field_info.type_info = field_type_info
             self.name_to_index[field_info.py_name] = idx
-            dynamic_struct_info.addFieldInfo(
+            dynamic_struct_info.addMutableFieldInfo(
                 field_info.id,
                 field_info.qualifier,
                 PyUnicode_AsUTF8(field_info.name),

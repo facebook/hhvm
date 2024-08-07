@@ -18,12 +18,12 @@ from libcpp.utility cimport move as std_move
 from thrift.python.mutable_serializer cimport cserialize, cdeserialize
 from thrift.python.mutable_types cimport (
     MutableStructInfo,
+    set_mutable_struct_field,
     _mutable_struct_meta_new,
 )
 from thrift.python.types cimport (
     FieldInfo,
     TypeInfoBase,
-    set_struct_field,
     _fbthrift_compare_struct_less,
 )
 
@@ -65,8 +65,8 @@ cdef class MutableGeneratedError(Error):
       and `BaseException`.
 
     Instance variables:
-        _fbthrift_data: "mutable struct tuple" that holds the "isset" flag array and
-            values for all fields. See `createMutableStructTupleWithDefaultValues()`.
+        _fbthrift_data: "mutable struct list" that holds the "isset" flag array and
+            values for all fields. See `createMutableStructListWithDefaultValues()`.
 
         _fbthrift_field_cache: This is a list that stores instances of a field's
             Python value. It is especially useful when creating a Python value is
@@ -100,24 +100,24 @@ cdef class MutableGeneratedError(Error):
                 raise TypeError(f"__init__() got multiple values for argument '{name}'")
             kwargs[name] = value
 
-        self._initStructTupleWithValues(kwargs)
+        self._initStructListWithValues(kwargs)
         self._fbthrift_field_cache = [None] * len(struct_info.fields)
 
     def __init__(self, *args, **kwargs):
         pass
 
-    cdef _initStructTupleWithValues(self, kwargs) except *:
+    cdef _initStructListWithValues(self, kwargs) except *:
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
 
         # If no keyword arguments are provided, initialize the Exception with
         # default values.
         if not kwargs:
-            self._fbthrift_data = createMutableStructTupleWithDefaultValues(mutable_struct_info.cpp_obj.get().getStructInfo())
+            self._fbthrift_data = createMutableStructListWithDefaultValues(mutable_struct_info.cpp_obj.get().getStructInfo())
             return
 
-        # Instantiate a tuple with 'None' values, then assign the provided
+        # Instantiate a list with 'None' values, then assign the provided
         # keyword arguments to the respective fields.
-        self._fbthrift_data = createStructTupleWithNones(mutable_struct_info.cpp_obj.get().getStructInfo())
+        self._fbthrift_data = createStructListWithNones(mutable_struct_info.cpp_obj.get().getStructInfo())
         for name, value in kwargs.items():
             field_index = mutable_struct_info.name_to_index.get(name)
             if field_index is None:
@@ -127,7 +127,7 @@ cdef class MutableGeneratedError(Error):
 
         # If any fields remain unset, initialize them with their respective
         # default values.
-        populateMutableStructTupleUnsetFieldsWithDefaultValues(
+        populateMutableStructListUnsetFieldsWithDefaultValues(
                 self._fbthrift_data,
                 mutable_struct_info.cpp_obj.get().getStructInfo()
         )
@@ -145,7 +145,7 @@ cdef class MutableGeneratedError(Error):
                 transitive_annotation=transitive_annotation(),
             )
 
-        set_struct_field(
+        set_mutable_struct_field(
             self._fbthrift_data,
             index,
             (<TypeInfoBase>mutable_struct_info.type_infos[index]).to_internal_data(value),

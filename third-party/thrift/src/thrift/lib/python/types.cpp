@@ -63,6 +63,9 @@ using GetStandardDefaultValueForTypeFunc =
 PyObject* createStructTupleWithDefaultValues(
     const detail::StructInfo&, GetStandardDefaultValueForTypeFunc);
 
+PyObject* createStructListWithDefaultValues(
+    const detail::StructInfo&, GetStandardDefaultValueForTypeFunc);
+
 /**
  * Returns the appropriate standard immutable default value for the given
  * `typeInfo`, along with a boolean indicating whether it should be added to
@@ -229,7 +232,7 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
       value = UniquePyObjectPtr(
           structInfo->unionExt != nullptr
               ? createUnionTuple()
-              : createStructTupleWithDefaultValues(
+              : createStructListWithDefaultValues(
                     *structInfo, getStandardMutableDefaultValueForType));
       break;
     }
@@ -292,7 +295,7 @@ UniquePyObjectPtr getDefaultValueForField(
 /*
  * A policy for handling Python tuples.
  */
-struct TupleContainer {
+struct TupleContainer final {
   /**
    * Return a new tuple object of given size, or NULL on failure.
    */
@@ -329,6 +332,48 @@ struct TupleContainer {
   static bool Check(const PyObject* p) { return PyTuple_Check(p); }
 
   static Py_ssize_t Size(PyObject* p) { return PyTuple_Size(p); }
+};
+
+/*
+ * A policy for handling Python lists.
+ */
+struct ListContainer final {
+  /**
+   * Return a new list object of given size, or NULL on failure.
+   */
+  static PyObject* New(Py_ssize_t size) { return PyList_New(size); }
+
+  /**
+   * Returns a new "struct list" whose field elements are uninitialized, see
+   * `createStructList()` function.
+   */
+  static PyObject* createStructContainer(int16_t numFields) {
+    return createStructList(numFields);
+  }
+
+  /**
+   * Insert a reference to `object` at position `pos` of the `list`.
+   */
+  static void SET_ITEM(PyObject* list, Py_ssize_t pos, PyObject* object) {
+    PyList_SET_ITEM(list, pos, object);
+  }
+
+  /**
+   * Return the object at position `pos` in the `list`.
+   * The returned reference is borrowed from the `list` (that is: it is only
+   * valid as long as you hold a reference to `list`)
+   */
+  static PyObject* GET_ITEM(const PyObject* p, Py_ssize_t pos) {
+    return PyList_GET_ITEM(p, pos);
+  }
+
+  /**
+   * Return true if `p` is a list object or an instance of a subtype of the
+   * list type.
+   */
+  static bool Check(const PyObject* p) { return PyList_Check(p); }
+
+  static Py_ssize_t Size(PyObject* p) { return PyList_Size(p); }
 };
 
 template <typename Container>
@@ -399,6 +444,16 @@ PyObject* createStructContainerWithDefaultValues(
     }
   }
   return container.release();
+}
+
+/**
+ * Returns a new "struct list" with all its elements initialized.
+ */
+PyObject* createStructListWithDefaultValues(
+    const detail::StructInfo& structInfo,
+    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+  return createStructContainerWithDefaultValues<ListContainer>(
+      structInfo, getStandardDefaultValueForTypeFunc);
 }
 
 /**
@@ -482,6 +537,17 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
       tuple, structInfo, getStandardDefaultValueForTypeFunc);
 }
 
+/**
+ * Populates only the unset fields of a "struct list" with default values.
+ */
+void populateStructListUnsetFieldsWithDefaultValues(
+    PyObject* tuple,
+    const detail::StructInfo& structInfo,
+    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+  populateStructContainerUnsetFieldsWithDefaultValues<ListContainer>(
+      tuple, structInfo, getStandardDefaultValueForTypeFunc);
+}
+
 void* setImmutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
   return setPyObject(
       objectPtr,
@@ -491,11 +557,13 @@ void* setImmutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
 }
 
 void* setMutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
-  return setPyObject(
+  PyObject* list = setPyObject(
       objectPtr,
-      UniquePyObjectPtr{createStructTupleWithDefaultValues(
+      UniquePyObjectPtr{createStructListWithDefaultValues(
           *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
           getStandardMutableDefaultValueForType)});
+
+  return getListObjectItemBase(list);
 }
 
 void* setUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
@@ -507,8 +575,37 @@ bool getIsset(const void* objectPtr, ptrdiff_t offset) {
   return flags[offset];
 }
 
+/**
+ * Gets the "isset" flag of the `index`-th field of the 'struct list'
+ *
+ * The `objectPtr` is double pointer to the allocated memory in PyListObject,
+ * please see `DynamicStructInfo::addMutableFieldInfo()`
+ */
+bool getMutableIsset(const void* objectPtr, ptrdiff_t offset) {
+  const char* issetFlags =
+      PyBytes_AsString(*static_cast<PyObject* const*>(objectPtr));
+  if (issetFlags == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return issetFlags[offset];
+}
+
 void setIsset(void* objectPtr, ptrdiff_t offset, bool value) {
   return setStructIsset(static_cast<PyObject*>(objectPtr), offset, value);
+}
+
+/**
+ * Sets the "isset" flag of the `index`-th field of the 'struct list'
+ *
+ * The `objectPtr` is double pointer to the allocated memory in PyListObject,
+ * please see `DynamicStructInfo::addMutableFieldInfo()`
+ */
+void setMutableIsset(void* objectPtr, ptrdiff_t offset, bool value) {
+  char* flags = PyBytes_AsString(*static_cast<PyObject**>(objectPtr));
+  if (flags == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  flags[offset] = value;
 }
 
 /**
@@ -595,7 +692,8 @@ detail::StructInfo* newStructInfo(
     const char* namePtr,
     int16_t numFields,
     bool isUnion,
-    FieldValueMap& fieldValues) {
+    FieldValueMap& fieldValues,
+    bool isMutable) {
   auto structInfo = static_cast<detail::StructInfo*>(folly::operator_new(
       sizeof(detail::StructInfo) + sizeof(detail::FieldInfo) * numFields,
       std::align_val_t{alignof(detail::StructInfo)}));
@@ -603,8 +701,8 @@ detail::StructInfo* newStructInfo(
   structInfo->name = namePtr;
   structInfo->unionExt =
       isUnion ? reinterpret_cast<const detail::UnionExt*>(&kUnionExt) : nullptr;
-  structInfo->getIsset = getIsset;
-  structInfo->setIsset = setIsset;
+  structInfo->getIsset = isMutable ? getMutableIsset : getIsset;
+  structInfo->setIsset = isMutable ? setMutableIsset : setIsset;
   structInfo->customExt = &fieldValues;
   return structInfo;
 }
@@ -752,15 +850,19 @@ PyObject* createStructTuple(int16_t numFields) {
   return createStructContainer<TupleContainer>(numFields);
 }
 
+PyObject* createStructList(int16_t numFields) {
+  return createStructContainer<ListContainer>(numFields);
+}
+
 PyObject* createImmutableStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo) {
   return createStructTupleWithDefaultValues(
       structInfo, getStandardImmutableDefaultValueForType);
 }
 
-PyObject* createMutableStructTupleWithDefaultValues(
+PyObject* createMutableStructListWithDefaultValues(
     const detail::StructInfo& structInfo) {
-  return createStructTupleWithDefaultValues(
+  return createStructListWithDefaultValues(
       structInfo, getStandardMutableDefaultValueForType);
 }
 
@@ -784,6 +886,10 @@ PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
   return createStructContainerWithNones<TupleContainer>(structInfo);
 }
 
+PyObject* createStructListWithNones(const detail::StructInfo& structInfo) {
+  return createStructContainerWithNones<ListContainer>(structInfo);
+}
+
 template <typename Container>
 void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
   PyObject* issetPyBytes = Container::GET_ITEM(structTuple, 0);
@@ -798,41 +904,45 @@ void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
   setStructIsset<TupleContainer>(structTuple, index, value);
 }
 
+void setMutableStructIsset(PyObject* structTuple, int16_t index, bool value) {
+  setStructIsset<ListContainer>(structTuple, index, value);
+}
+
 void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
     PyObject* tuple, const detail::StructInfo& structInfo) {
   populateStructTupleUnsetFieldsWithDefaultValues(
       tuple, structInfo, getStandardImmutableDefaultValueForType);
 }
 
-void populateMutableStructTupleUnsetFieldsWithDefaultValues(
+void populateMutableStructListUnsetFieldsWithDefaultValues(
     PyObject* tuple, const detail::StructInfo& structInfo) {
-  populateStructTupleUnsetFieldsWithDefaultValues(
+  populateStructListUnsetFieldsWithDefaultValues(
       tuple, structInfo, getStandardMutableDefaultValueForType);
 }
 
 void resetFieldToStandardDefault(
-    PyObject* tuple, const detail::StructInfo& structInfo, int index) {
-  if (tuple == nullptr) {
+    PyObject* structList, const detail::StructInfo& structInfo, int index) {
+  if (structList == nullptr) {
     throw std::runtime_error(fmt::format(
-        "Received null tuple while resetting struct:`{}`, field-index:'{}'",
+        "Received null list while resetting struct:`{}`, field-index:'{}'",
         structInfo.name,
         index));
   }
 
-  DCHECK(PyTuple_Check(tuple));
+  DCHECK(PyList_Check(structList));
   DCHECK(index < structInfo.numFields);
 
   const auto& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[index];
-  PyObject* oldValue = PyTuple_GET_ITEM(tuple, index + 1);
+  PyObject* oldValue = PyList_GET_ITEM(structList, index + 1);
   if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-    PyTuple_SET_ITEM(tuple, index + 1, Py_None);
+    PyList_SET_ITEM(structList, index + 1, Py_None);
     Py_INCREF(Py_None);
   } else {
     // getDefaultValueForField calls `Py_INCREF`
-    PyTuple_SET_ITEM(
-        tuple,
+    PyList_SET_ITEM(
+        structList,
         index + 1,
         getDefaultValueForField(
             fieldInfo.typeInfo,
@@ -844,7 +954,7 @@ void resetFieldToStandardDefault(
   Py_DECREF(oldValue);
   // DO_BEFORE(alperyoney,20240515): Figure out whether isset flag should be
   // cleared for non-optional fields.
-  setStructIsset(tuple, index, false);
+  setMutableStructIsset(structList, index, false);
 }
 
 detail::OptionalThriftValue getStruct(
@@ -865,11 +975,17 @@ detail::TypeInfo createImmutableStructTypeInfo(
   };
 }
 
+detail::OptionalThriftValue getMutableStruct(
+    const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+  return folly::make_optional<detail::ThriftValue>(
+      getListObjectItemBase(*static_cast<PyObject* const*>(objectPtr)));
+}
+
 detail::TypeInfo createMutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo) {
   return {
       /* .type */ protocol::TType::T_STRUCT,
-      /* .get */ getStruct,
+      /* .get */ getMutableStruct,
       /* .set */
       reinterpret_cast<detail::VoidFuncPtr>(
           dynamicStructInfo.isUnion() ? setUnion : setMutableStruct),
@@ -1113,10 +1229,10 @@ void MutableMapTypeInfo::consumeElem(
 }
 
 DynamicStructInfo::DynamicStructInfo(
-    const char* name, int16_t numFields, bool isUnion)
+    const char* name, int16_t numFields, bool isUnion, bool isMutable)
     : name_{name},
-      tableBasedSerializerStructInfo_{
-          newStructInfo(name_.c_str(), numFields, isUnion, fieldValues_)} {
+      tableBasedSerializerStructInfo_{newStructInfo(
+          name_.c_str(), numFields, isUnion, fieldValues_, isMutable)} {
   // reserve vector as we are assigning const char* from the string in
   // vector
   fieldNames_.reserve(numFields);
@@ -1178,6 +1294,50 @@ void DynamicStructInfo::addFieldInfo(
       /* .memberOffset */
       static_cast<ptrdiff_t>(
           kHeadOffset + kFieldOffset * (isUnion() ? 1 : idx + 1)),
+      /* .issetOffset */ isUnion() ? 0 : idx,
+      /* .typeInfo */ typeInfo};
+}
+
+void DynamicStructInfo::addMutableFieldInfo(
+    detail::FieldID id,
+    detail::FieldQualifier qualifier,
+    const char* name,
+    const detail::TypeInfo* typeInfo) {
+  const std::string& fieldName = fieldNames_.emplace_back(name);
+  int16_t idx = fieldNames_.size() - 1;
+
+  // In mutable thrift-python, lists are used as the internal representation
+  // of structs. The first member of the list contains the isset flags, while
+  // the remaining members represent each field. PyListObject roughly lays out
+  // as follow:
+  //
+  // +-------------------------------+
+  // |         PyListObject          |
+  // +-------------------------------+
+  // |  HEADER                       |
+  // +-------------------------------+      +-------------------------------+
+  // |  items (PyObject **)          |----->|  PyObject *item0 (issetFlags) |
+  // +-------------------------------+      +-------------------------------+
+  // |  ...                          |      |  ...                          |
+  // +-------------------------------+      +-------------------------------+
+  //                                        |  PyObject *itemN              |
+  //                                        +-------------------------------+
+  //
+  // When passing a PyListObject to TableBasedSerializer, fields are expected
+  // to be identified by their offset from the start address of the struct.
+  // Therefore, we do not pass PyListObject to the TableBasedSerializer but
+  // we pass the allocated memory pointed by `items` and the following
+  // calculates the offset:
+  //
+  // memberOffset = (field-order + 1) * sizeof(PyObject*)
+  // (+1 accounts for the isset flags at the beginning of the list)
+
+  tableBasedSerializerStructInfo_->fieldInfos[idx] = detail::FieldInfo{
+      /* .id */ id,
+      /* .qualifier */ qualifier,
+      /* .name */ fieldName.c_str(),
+      /* .memberOffset */
+      static_cast<ptrdiff_t>(kFieldOffset * (isUnion() ? 1 : idx + 1)),
       /* .issetOffset */ isUnion() ? 0 : idx,
       /* .typeInfo */ typeInfo};
 }

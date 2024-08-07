@@ -25,7 +25,7 @@ class ConnectionHolder : public InternalConnection {
   using Clock = std::chrono::steady_clock;
 
   ConnectionHolder(
-      MysqlClientBase& client,
+      MysqlClientBase* client,
       std::unique_ptr<InternalConnection> internalConn,
       ConnectionKey key);
 
@@ -42,7 +42,7 @@ class ConnectionHolder : public InternalConnection {
     return std::move(internalConn_);
   }
 
-  [[nodiscard]] MysqlClientBase& getMysqlClient() const {
+  [[nodiscard]] MysqlClientBase* getMysqlClient() const {
     return client_;
   }
 
@@ -91,7 +91,7 @@ class ConnectionHolder : public InternalConnection {
     return key_;
   }
 
-  [[nodiscard]] MysqlClientBase& getClient() const {
+  [[nodiscard]] MysqlClientBase* getClient() const {
     return client_;
   }
 
@@ -382,7 +382,7 @@ class ConnectionHolder : public InternalConnection {
   friend class ConnectionPool;
 
  private:
-  MysqlClientBase& client_;
+  MysqlClientBase* client_;
   std::unique_ptr<InternalConnection> internalConn_;
   std::shared_ptr<db::ConnectionContextBase> context_;
   ConnectionKey key_;

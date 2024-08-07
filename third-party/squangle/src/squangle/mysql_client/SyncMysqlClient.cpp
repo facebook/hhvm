@@ -27,7 +27,7 @@ std::unique_ptr<Connection> SyncMysqlClient::createConnection(
     ConnectionKey conn_key,
     MYSQL* mysql_conn) {
   return std::make_unique<SyncConnection>(
-      *this, std::move(conn_key), mysql_conn);
+      this, std::move(conn_key), mysql_conn);
 }
 
 SyncConnection::~SyncConnection() {
@@ -52,8 +52,8 @@ SyncConnection::~SyncConnection() {
     auto resetOp = Connection::resetConn(std::move(conn));
     // addOperation() is necessary here for proper cancelling of reset
     // operation in case of sudden SyncMysqlClient shutdown
-    resetOp->connection().client().addOperation(resetOp);
-    resetOp->run().wait();
+    resetOp->connection()->client()->addOperation(resetOp);
+    resetOp->run()->wait();
   }
 }
 

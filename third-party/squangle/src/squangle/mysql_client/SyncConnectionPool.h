@@ -86,7 +86,7 @@ class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
       const ConnectionKey& conn_key,
       std::unique_ptr<MysqlPooledHolder<SyncMysqlClient>> mysqlConn) override {
     return std::make_unique<SyncConnection>(
-        *mysql_client_, conn_key, std::move(mysqlConn));
+        mysql_client_.get(), conn_key, std::move(mysqlConn));
   }
 
   void openNewConnectionPrep(SyncConnectPoolOperation& pool_op) override;

@@ -121,7 +121,7 @@ class InternalMysqlRowMetadata : public InternalRowMetadata {
 class InternalMysqlConnection : public InternalConnection {
  public:
   explicit InternalMysqlConnection(
-      MysqlClientBase& client,
+      MysqlClientBase* client,
       MYSQL* mysql = createMysql());
 
   // Closes the connection in hold
@@ -309,7 +309,7 @@ class InternalMysqlConnection : public InternalConnection {
   [[nodiscard]] bool ping() const override;
 
  private:
-  MysqlClientBase& client_;
+  MysqlClientBase* client_;
   // Our MYSQL handle.
   MYSQL* mysql_;
   std::optional<std::string> current_schema_;

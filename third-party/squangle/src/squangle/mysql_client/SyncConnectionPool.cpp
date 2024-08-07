@@ -80,10 +80,10 @@ std::string SyncConnectPoolOperation::createTimeoutErrorMessage(
 }
 
 template <>
-SyncConnectPoolOperation& SyncConnectPoolOperation::specializedRun() {
+SyncConnectPoolOperation* SyncConnectPoolOperation::specializedRun() {
   // No special thread manipulation needed for sync client
   ConnectPoolOperation::specializedRunImpl();
-  return *this;
+  return this;
 }
 
 } // namespace facebook::common::mysql_client

@@ -395,13 +395,13 @@ class AsyncMysqlClient : public MysqlClientBase {
 class AsyncConnection : public Connection {
  public:
   AsyncConnection(
-      MysqlClientBase& mysql_client,
+      MysqlClientBase* mysql_client,
       ConnectionKey conn_key,
       std::unique_ptr<ConnectionHolder> conn)
       : Connection(mysql_client, conn_key, std::move(conn)) {}
 
   AsyncConnection(
-      MysqlClientBase& mysql_client,
+      MysqlClientBase* mysql_client,
       ConnectionKey conn_key,
       MYSQL* existing_connection)
       : Connection(mysql_client, std::move(conn_key), existing_connection) {}
@@ -417,7 +417,7 @@ class AsyncConnection : public Connection {
     actionableBaton_.post();
   }
 
-  void wait() const override {
+  void wait() override {
     CHECK_THROW(
         folly::fibers::onFiber() || !isInEventBaseThread(), std::runtime_error);
     actionableBaton_.wait();
@@ -429,7 +429,7 @@ class AsyncConnection : public Connection {
   }
 
  private:
-  mutable folly::fibers::Baton actionableBaton_;
+  folly::fibers::Baton actionableBaton_;
 };
 
 } // namespace mysql_client

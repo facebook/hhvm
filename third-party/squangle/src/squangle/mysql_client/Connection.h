@@ -39,7 +39,7 @@ using ConnectionDyingCallback =
 class Connection {
  public:
   Connection(
-      MysqlClientBase& mysql_client,
+      MysqlClientBase* mysql_client,
       ConnectionKey conn_key,
       std::unique_ptr<ConnectionHolder> conn)
       : mysql_connection_(std::move(conn)),
@@ -48,7 +48,7 @@ class Connection {
         initialized_(false) {}
 
   Connection(
-      MysqlClientBase& mysql_client,
+      MysqlClientBase* mysql_client,
       ConnectionKey conn_key,
       MYSQL* existing_conn)
       : conn_key_(std::move(conn_key)),
@@ -146,13 +146,14 @@ class Connection {
       std::shared_ptr<QueryOperation>& op,
       Args&&... args) {
     CHECK_THROW(op->done(), db::OperationStateException);
-    op = beginQuery(op->releaseConnection(), std::forward<Args>(args)...);
+    auto conn = std::move(op->releaseConnection());
+    op = beginQuery(std::move(conn), std::forward<Args>(args)...);
     return op;
   }
 
   // Experimental
   virtual std::shared_ptr<MultiQueryStreamOperation> createOperation(
-      std::unique_ptr<Operation::ConnectionProxy> proxy,
+      Operation::ConnectionProxy&& proxy,
       MultiQuery&& multi_query) {
     return std::make_shared<MultiQueryStreamOperation>(
         std::move(proxy), std::move(multi_query));
@@ -307,7 +308,7 @@ class Connection {
     return getKey().password();
   }
 
-  MysqlClientBase& client() const {
+  MysqlClientBase* client() const {
     return mysql_client_;
   }
 
@@ -407,11 +408,11 @@ class Connection {
   }
 
   const folly::EventBase* getEventBase() const {
-    return client().getEventBase();
+    return client()->getEventBase();
   }
 
   folly::EventBase* getEventBase() {
-    return client().getEventBase();
+    return client()->getEventBase();
   }
 
   bool isInEventBaseThread() const {
@@ -420,7 +421,7 @@ class Connection {
   }
 
   virtual bool runInThread(folly::Cob&& fn) {
-    return client().runInThread(std::move(fn));
+    return client()->runInThread(std::move(fn));
   }
 
   template <typename TOp, typename... F, typename... T>
@@ -437,7 +438,7 @@ class Connection {
   // Operations call these methods as the operation becomes unblocked, as
   // callers want to wait for completion, etc.
   virtual void notify() = 0;
-  virtual void wait() const = 0;
+  virtual void wait() = 0;
   // Called when a new operation is being started.
   virtual void resetActionable() = 0;
 
@@ -524,7 +525,7 @@ class Connection {
   // that both need to do.
   template <typename QueryType, typename QueryArg>
   static std::shared_ptr<QueryType> beginAnyQuery(
-      std::unique_ptr<Operation::ConnectionProxy> conn_proxy,
+      Operation::ConnectionProxy&& conn_proxy,
       QueryArg&& query);
 
   void checkOperationInProgress() {
@@ -695,7 +696,7 @@ class Connection {
   std::shared_ptr<db::ConnectionContextBase> connection_context_;
 
   // Unowned pointer to the client we're from.
-  MysqlClientBase& mysql_client_;
+  MysqlClientBase* mysql_client_;
 
   ConnectionDyingCallback conn_dying_callback_;
 

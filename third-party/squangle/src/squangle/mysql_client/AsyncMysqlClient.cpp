@@ -202,7 +202,7 @@ std::unique_ptr<Connection> AsyncMysqlClient::createConnection(
     ConnectionKey conn_key,
     MYSQL* mysql_conn) {
   return std::make_unique<AsyncConnection>(
-      *this, std::move(conn_key), mysql_conn);
+      this, std::move(conn_key), mysql_conn);
 }
 
 MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
@@ -255,7 +255,7 @@ AsyncConnection::~AsyncConnection() {
     runInThread([resetOp = std::move(resetOp)] {
       // addOperation() is necessary here for proper cancelling of reset
       // operation in case of sudden AsyncMysqlClient shutdown
-      resetOp->connection().client().addOperation(resetOp);
+      resetOp->connection()->client()->addOperation(resetOp);
       resetOp->run();
     });
   }

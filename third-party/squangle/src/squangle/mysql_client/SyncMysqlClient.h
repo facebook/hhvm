@@ -127,12 +127,12 @@ class SyncMysqlClient : public MysqlClientBase {
 class SyncConnection : public Connection {
  public:
   SyncConnection(
-      MysqlClientBase& client,
+      MysqlClientBase* client,
       ConnectionKey conn_key,
       std::unique_ptr<ConnectionHolder> conn)
       : Connection(client, conn_key, std::move(conn)) {}
 
-  SyncConnection(MysqlClientBase& client, ConnectionKey conn_key, MYSQL* conn)
+  SyncConnection(MysqlClientBase* client, ConnectionKey conn_key, MYSQL* conn)
       : Connection(client, conn_key, conn) {}
 
   ~SyncConnection();
@@ -143,7 +143,7 @@ class SyncConnection : public Connection {
     // Nop
   }
 
-  void wait() const override {
+  void wait() override {
     // Nop
   }
 
@@ -158,7 +158,7 @@ class SyncConnection : public Connection {
   }
 
   std::shared_ptr<MultiQueryStreamOperation> createOperation(
-      std::unique_ptr<Operation::ConnectionProxy> proxy,
+      Operation::ConnectionProxy&& proxy,
       MultiQuery&& multi_query) override {
     return std::make_shared<MultiQueryStreamOperation>(
         std::move(proxy), std::move(multi_query));

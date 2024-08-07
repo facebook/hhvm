@@ -616,7 +616,7 @@ class MultiQueryStreamHandler {
   // escapeString will the connection is running a query.  Please do not use
   // this for other purposes.
   template <typename Func>
-  auto& accessConn(Func func) const {
+  auto accessConn(Func func) const {
     return func(connection());
   }
 
@@ -633,7 +633,7 @@ class MultiQueryStreamHandler {
   // process
   void start();
 
-  void streamCallback(FetchOperation& op, StreamState state);
+  void streamCallback(FetchOperation* op, StreamState state);
 
   std::atomic<State> state_{State::RunQuery};
 
@@ -650,7 +650,7 @@ class MultiQueryStreamHandler {
   // sanity checks on StreamedQueryResult
   void checkStreamedQueryResult(StreamedQueryResult* result);
 
-  Connection& connection() const;
+  Connection* connection() const;
 
   folly::exception_wrapper exception_wrapper_;
 

@@ -223,7 +223,7 @@ folly::Optional<StreamedQueryResult> MultiQueryStreamHandler::nextQuery() {
   }
 
   // Runs in User thread
-  connection().wait();
+  connection()->wait();
   DCHECK(operation_->isPaused() || operation_->done());
 
   folly::Optional<StreamedQueryResult> res;
@@ -244,7 +244,7 @@ folly::Optional<StreamedQueryResult> MultiQueryStreamHandler::nextQuery() {
 
 std::unique_ptr<Connection> MultiQueryStreamHandler::releaseConnection() {
   // Runs in User thread
-  connection().wait();
+  connection()->wait();
   if (state_ == State::OperationSucceeded || state_ == State::OperationFailed) {
     return operation_->releaseConnection();
   }
@@ -271,37 +271,37 @@ const std::string& MultiQueryStreamHandler::mysql_error() const {
 }
 
 void MultiQueryStreamHandler::streamCallback(
-    FetchOperation& op,
+    FetchOperation* op,
     StreamState op_state) {
   // Runs in IO Thread
   if (op_state == StreamState::InitQuery) {
-    op.pauseForConsumer();
+    op->pauseForConsumer();
     state_ = State::InitResult;
   } else if (op_state == StreamState::RowsReady) {
-    op.pauseForConsumer();
+    op->pauseForConsumer();
     state_ = State::ReadRows;
   } else if (op_state == StreamState::QueryEnded) {
-    op.pauseForConsumer();
+    op->pauseForConsumer();
     state_ = State::ReadResult;
   } else if (op_state == StreamState::Success) {
     state_ = State::OperationSucceeded;
   } else {
     exception_wrapper_ = folly::make_exception_wrapper<QueryException>(
-        op.numCurrentQuery(),
-        op.result(),
-        op.mysql_errno(),
-        op.mysql_error(),
-        op.connection().getKey(),
-        op.elapsed());
+        op->numCurrentQuery(),
+        op->result(),
+        op->mysql_errno(),
+        op->mysql_error(),
+        op->connection()->getKey(),
+        op->elapsed());
     state_ = State::OperationFailed;
   }
-  op.connection().notify();
+  op->connection()->notify();
 }
 
 folly::Optional<EphemeralRow> MultiQueryStreamHandler::fetchOneRow(
     StreamedQueryResult* result) {
   checkStreamedQueryResult(result);
-  connection().wait();
+  connection()->wait();
   // Accepted states: ReadRows, ReadResult, OperationFailed
   if (state_ == State::ReadRows) {
     if (!operation_->rowStream()->hasNext()) {
@@ -327,7 +327,7 @@ folly::Optional<EphemeralRow> MultiQueryStreamHandler::fetchOneRow(
 
 void MultiQueryStreamHandler::fetchQueryEnd(StreamedQueryResult* result) {
   checkStreamedQueryResult(result);
-  connection().wait();
+  connection()->wait();
   // Accepted states: ReadResult, OperationFailed
   if (state_ == State::ReadResult) {
     handleQueryEnded(result);
@@ -341,7 +341,7 @@ void MultiQueryStreamHandler::fetchQueryEnd(StreamedQueryResult* result) {
 }
 
 void MultiQueryStreamHandler::resumeOperation() {
-  connection().resetActionable();
+  connection()->resetActionable();
   operation_->resume();
 }
 
@@ -425,7 +425,7 @@ MultiQueryStreamHandler::~MultiQueryStreamHandler() {
   }
 }
 
-Connection& MultiQueryStreamHandler::connection() const {
+Connection* MultiQueryStreamHandler::connection() const {
   return operation_->connection();
 }
 

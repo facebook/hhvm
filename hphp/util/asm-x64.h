@@ -2047,13 +2047,13 @@ public:
 
   // rewrites jae into rex.r jmp, preserving the target address
   static void patchInterceptJcc(CodeAddress inst) {
-    assertx(inst[0] == 0x0f && inst[1] == 0x83);
+    always_assert(inst[0] == 0x0f && inst[1] == 0x83);
     *reinterpret_cast<uint16_t*>(inst) = 0xe944;
   }
 
   // rewrites rex.r jmp into jae, preserving the target address
   static void patchInterceptJmp(CodeAddress inst) {
-    assertx(inst[0] == 0x44 && inst[1] == 0xe9);
+    always_assert(inst[0] == 0x44 && inst[1] == 0xe9);
     *reinterpret_cast<uint16_t*>(inst) = 0x830f;
   }
 

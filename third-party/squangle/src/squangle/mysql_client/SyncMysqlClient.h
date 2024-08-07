@@ -85,38 +85,63 @@ class SyncMysqlClient : public MysqlClientBase {
   // Sync implementation of mysql handler interface
   class SyncMysqlHandler : public MysqlHandler {
     Status tryConnect(
-        const InternalConnection& conn,
+        MYSQL* mysql,
         const ConnectionOptions& opts,
         const ConnectionKey& key,
-        int flags) override;
+        int flags) override {
+      auto qtmo = std::chrono::duration_cast<std::chrono::milliseconds>(
+                      opts.getQueryTimeout())
+                      .count();
+      auto ctmo = std::chrono::duration_cast<std::chrono::milliseconds>(
+                      opts.getTimeout())
+                      .count();
 
-    Status runQuery(const InternalConnection& conn, std::string_view queryStmt)
-        override {
-      return conn.runQueryBlocking(queryStmt);
-    }
-    Status nextResult(const InternalConnection& conn) override {
-      return conn.nextResultBlocking();
-    }
-    size_t getFieldCount(const InternalConnection& conn) override {
-      return conn.getFieldCount();
-    }
-    InternalResult::FetchRowRet fetchRow(InternalResult& result) override {
-      return result.fetchRowBlocking();
-    }
-    std::unique_ptr<InternalResult> getResult(
-        const InternalConnection& conn) override {
-      return conn.storeResult();
+      mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT_MS, &ctmo);
+      mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT_MS, &qtmo);
+      mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT_MS, &qtmo);
+
+      const auto usingUnixSocket = !key.unixSocketPath().empty();
+
+      // When using unix socket (AF_UNIX), host/port do not matter.
+      const auto rv = mysql_real_connect(
+          mysql,
+          usingUnixSocket ? nullptr : key.host().c_str(),
+          key.user().c_str(),
+          key.password().c_str(),
+          key.db_name().c_str(),
+          usingUnixSocket ? 0 : key.port(),
+          usingUnixSocket ? key.unixSocketPath().c_str() : nullptr,
+          flags);
+      return rv == nullptr ? ERROR : DONE;
     }
 
-    Status resetConn(const InternalConnection& conn) override {
-      return conn.resetConnBlocking();
+    Status runQuery(MYSQL* mysql, folly::StringPiece queryStmt) override {
+      return mysql_real_query(mysql, queryStmt.begin(), queryStmt.size())
+          ? ERROR
+          : DONE;
+    }
+    Status nextResult(MYSQL* mysql) override {
+      return mysql_next_result(mysql) ? ERROR : DONE;
+    }
+    Status fetchRow(MYSQL_RES* res, MYSQL_ROW& row) override {
+      row = mysql_fetch_row(res);
+      return DONE;
+    }
+    MYSQL_RES* getResult(MYSQL* mysql) override {
+      return mysql_store_result(mysql);
+    }
+    Status resetConn(MYSQL* mysql) override {
+      return mysql_reset_connection(mysql) ? ERROR : DONE;
     }
     Status changeUser(
-        const InternalConnection& conn,
+        MYSQL* mysql,
         const std::string& user,
         const std::string& password,
         const std::string& database) override {
-      return conn.changeUserBlocking(user, password, database);
+      return mysql_change_user(
+                 mysql, user.c_str(), password.c_str(), database.c_str())
+          ? ERROR
+          : DONE;
     }
   } mysql_handler_;
 };
@@ -129,7 +154,7 @@ class SyncConnection : public Connection {
   SyncConnection(
       MysqlClientBase* client,
       ConnectionKey conn_key,
-      std::unique_ptr<ConnectionHolder> conn)
+      std::unique_ptr<MysqlConnectionHolder> conn)
       : Connection(client, conn_key, std::move(conn)) {}
 
   SyncConnection(MysqlClientBase* client, ConnectionKey conn_key, MYSQL* conn)

@@ -6,12 +6,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef COMMON_ASYNC_MYSQL_HANDLER_H
+#define COMMON_ASYNC_MYSQL_HANDLER_H
 
-#include "squangle/base/ConnectionKey.h"
-#include "squangle/mysql_client/InternalConnection.h"
-
-namespace facebook::common::mysql_client {
+namespace facebook {
+namespace common {
+namespace mysql_client {
 
 class ConnectionOptions;
 
@@ -19,27 +19,32 @@ class ConnectionOptions;
 // clients appropriately.
 class MysqlHandler {
  public:
-  using Status = InternalConnection::Status;
+  enum Status {
+    PENDING,
+    DONE,
+    ERROR,
+  };
   virtual ~MysqlHandler() = default;
   virtual Status tryConnect(
-      const InternalConnection& conn,
+      MYSQL* mysql,
       const ConnectionOptions& opts,
       const ConnectionKey& key,
       int flags) = 0;
-  virtual Status runQuery(
-      const InternalConnection& conn,
-      std::string_view query) = 0;
-  virtual std::unique_ptr<InternalResult> getResult(
-      const InternalConnection& conn) = 0;
-  virtual size_t getFieldCount(const InternalConnection& conn) = 0;
-  virtual Status nextResult(const InternalConnection& conn) = 0;
-  virtual InternalResult::FetchRowRet fetchRow(InternalResult& res) = 0;
-  virtual Status resetConn(const InternalConnection& conn) = 0;
+
+  virtual Status runQuery(MYSQL* mysql, folly::StringPiece queryStmt) = 0;
+  virtual MYSQL_RES* getResult(MYSQL* mysql) = 0;
+  virtual Status nextResult(MYSQL* mysql) = 0;
+  virtual Status fetchRow(MYSQL_RES* res, MYSQL_ROW& row) = 0;
+  virtual Status resetConn(MYSQL* mysql) = 0;
   virtual Status changeUser(
-      const InternalConnection& conn,
+      MYSQL* mysql,
       const std::string& user,
       const std::string& password,
       const std::string& database) = 0;
 };
 
-} // namespace facebook::common::mysql_client
+} // namespace mysql_client
+} // namespace common
+} // namespace facebook
+
+#endif // COMMON_ASYNC_MYSQL_HANDLER_H

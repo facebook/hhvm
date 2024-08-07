@@ -130,7 +130,7 @@ class MysqlClientBase {
   friend class SpecialOperation;
   friend class ResetOperation;
   friend class ChangeUserOperation;
-  friend class ConnectionHolder;
+  friend class MysqlConnectionHolder;
   friend class AsyncConnection;
   friend class SyncConnection;
   virtual db::SquangleLoggingData makeSquangleLoggingData(

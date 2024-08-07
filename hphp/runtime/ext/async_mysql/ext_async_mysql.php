@@ -491,6 +491,19 @@ final class AsyncMysqlConnection {
   public function close(): void;
 
   /**
+   * Releases the current connection and returns a synchronous MySQL connection.
+   *
+   * This method will destroy the current `AsyncMysqlConnection` object and give
+   * you back a vanilla, synchronous MySQL resource.
+   *
+   * @return - A `resource` representing a
+   *           [MySQL](http://php.net/manual/en/book.mysql.php) resource, or
+   *           `false` on failure.
+   */
+  <<__Native>>
+  public function releaseConnection(): mixed;
+
+  /**
    * Checks if the data inside `AsyncMysqlConnection` object is valid. For
    * example, during a timeout in a query, the MySQL connection gets closed.
    *

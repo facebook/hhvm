@@ -17,54 +17,52 @@ namespace common {
 namespace mysql_client {
 
 std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
-  auto num_fields = metadata_->numFields();
-  if (num_fields == 0) {
+  if (num_fields_ == 0) {
     return nullptr;
   }
   std::vector<std::string> field_names;
   std::vector<std::string> table_names;
   folly::F14NodeMap<std::string, int> field_name_map;
-  std::vector<uint64_t> field_flags;
-  std::vector<enum_field_types> field_types;
+  std::vector<uint64_t> mysql_field_flags;
+  std::vector<enum_field_types> mysql_field_types;
 
-  field_names.reserve(num_fields);
-  table_names.reserve(num_fields);
-  field_flags.reserve(num_fields);
-  field_types.reserve(num_fields);
-  for (int i = 0; i < num_fields; ++i) {
-    std::string field_name(metadata_->getFieldName(i));
-    field_name_map[field_name] = i;
-    field_names.push_back(field_name);
-    table_names.emplace_back(metadata_->getTableName(i));
-    field_flags.push_back(metadata_->getFieldFlags(i));
-    field_types.push_back(metadata_->getFieldType(i));
+  field_names.reserve(num_fields_);
+  table_names.reserve(num_fields_);
+  mysql_field_flags.reserve(num_fields_);
+  mysql_field_types.reserve(num_fields_);
+  for (int i = 0; i < num_fields_; ++i) {
+    MYSQL_FIELD* mysql_field = &fields_[i];
+    field_names.emplace_back(mysql_field->name, mysql_field->name_length);
+    table_names.emplace_back(mysql_field->table, mysql_field->table_length);
+    mysql_field_flags.push_back(mysql_field->flags);
+    mysql_field_types.push_back(mysql_field->type);
+    field_name_map[mysql_field->name] = i;
   }
   return std::make_shared<RowFields>(
       std::move(field_name_map),
       std::move(field_names),
       std::move(table_names),
-      std::move(field_flags),
-      std::move(field_types));
+      std::move(mysql_field_flags),
+      std::move(mysql_field_types));
 }
 
 folly::StringPiece EphemeralRow::operator[](size_t col) const {
-  return row_->column(col);
+  DCHECK_LT(col, row_fields_->numFields());
+  auto length = field_lengths_[col];
+  return folly::StringPiece(mysql_row_[col], mysql_row_[col] + length);
 }
 
 bool EphemeralRow::isNull(size_t col) const {
-  return row_->isNull(col);
+  DCHECK_LT(col, row_fields_->numFields());
+  return (mysql_row_[col] == nullptr);
 }
 
 int EphemeralRow::numFields() const {
   return row_fields_->numFields();
 }
 
-size_t EphemeralRow::calculateRowLength() const {
-  size_t rowLength = 0;
-  for (int i = 0; i < numFields(); ++i) {
-    rowLength += row_->columnLength(i);
-  }
-  return rowLength;
+uint64_t EphemeralRow::calculateRowLength() const {
+  return std::reduce(field_lengths_, field_lengths_ + numFields());
 }
 
 Row::Row(const RowBlock* row_block, size_t row_number)

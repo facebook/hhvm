@@ -49,9 +49,9 @@
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/Connection.h"
-#include "squangle/mysql_client/ConnectionHolder.h"
 #include "squangle/mysql_client/DbResult.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/MysqlConnectionHolder.h"
 #include "squangle/mysql_client/MysqlHandler.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/Query.h"
@@ -85,6 +85,7 @@ class SyncMysqlClient;
 class Operation;
 class ConnectOperation;
 class ConnectionKey;
+class MysqlConnectionHolder;
 
 // The client itself.  As mentioned above, in general, it isn't
 // necessary to create a client; instead, simply call defaultClient()
@@ -204,10 +205,10 @@ class AsyncMysqlClient : public MysqlClientBase {
     ++connection_references_[*key];
   }
 
-  // Called in ConnectionHolder and ConnectOperation. The ref count should
+  // Called in MysqlConnectionHolder and ConnectOperation. The ref count should
   // be in incremented when a connection exists or is about to exist.
   // ConnectOperation decrements it when the connection is acquired.
-  // ConnectionHolder is counted during its lifetime.
+  // MysqlConnectionHolder is counted during its lifetime.
   void activeConnectionRemoved(const ConnectionKey* key) override {
     std::unique_lock<std::mutex> l(counters_mutex_);
     // Sanity check, if the old value was 0, then the counter overflowed
@@ -263,42 +264,21 @@ class AsyncMysqlClient : public MysqlClientBase {
   // implementation of MysqlHandler interface
   class AsyncMysqlHandler : public MysqlHandler {
     Status tryConnect(
-        const InternalConnection& conn,
+        MYSQL* mysql,
         const ConnectionOptions& /*opts*/,
         const ConnectionKey& conn_key,
         int flags) override;
 
-    Status runQuery(const InternalConnection& conn, std::string_view query)
-        override {
-      return conn.runQueryNonBlocking(query);
-    }
-
-    Status nextResult(const InternalConnection& conn) override {
-      return conn.nextResultNonBlocking();
-    }
-
-    size_t getFieldCount(const InternalConnection& conn) override {
-      return conn.getFieldCount();
-    }
-
-    InternalResult::FetchRowRet fetchRow(InternalResult& res) override;
-
-    Status resetConn(const InternalConnection& conn) override {
-      return conn.resetConnNonBlocking();
-    }
-
+    Status runQuery(MYSQL* mysql, folly::StringPiece queryStmt) override;
+    Status nextResult(MYSQL* mysql) override;
+    Status fetchRow(MYSQL_RES* res, MYSQL_ROW& row) override;
+    Status resetConn(MYSQL* mysql) override;
     Status changeUser(
-        const InternalConnection& conn,
+        MYSQL* mysql,
         const std::string& user,
         const std::string& password,
-        const std::string& database) override {
-      return conn.changeUserNonBlocking(user, password, database);
-    }
-
-    std::unique_ptr<InternalResult> getResult(
-        const InternalConnection& conn) override {
-      return conn.getResult();
-    }
+        const std::string& database) override;
+    MYSQL_RES* getResult(MYSQL* mysql) override;
   } mysql_handler_;
 
   // Private methods, primarily used by Operations and its subclasses.
@@ -397,7 +377,7 @@ class AsyncConnection : public Connection {
   AsyncConnection(
       MysqlClientBase* mysql_client,
       ConnectionKey conn_key,
-      std::unique_ptr<ConnectionHolder> conn)
+      std::unique_ptr<MysqlConnectionHolder> conn)
       : Connection(mysql_client, conn_key, std::move(conn)) {}
 
   AsyncConnection(

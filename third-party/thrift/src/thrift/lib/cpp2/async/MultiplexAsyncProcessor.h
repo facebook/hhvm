@@ -104,6 +104,8 @@ class MultiplexAsyncProcessorFactory final : public AsyncProcessorFactory {
     std::optional<std::size_t> wildcardIndex() const;
   };
 
+  bool isThriftGenerated() const override final;
+
  private:
   const std::vector<std::shared_ptr<AsyncProcessorFactory>> processorFactories_;
   const CompositionMetadata compositionMetadata_;

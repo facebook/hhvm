@@ -500,4 +500,11 @@ MultiplexAsyncProcessorFactory::CompositionMetadata::wildcardIndex() const {
       [](auto&& wildcard) -> Result { return wildcard.index; });
 }
 
+bool MultiplexAsyncProcessorFactory::isThriftGenerated() const {
+  return std::all_of(
+      processorFactories_.begin(),
+      processorFactories_.end(),
+      [](const auto& fac) { return fac->isThriftGenerated(); });
+}
+
 } // namespace apache::thrift

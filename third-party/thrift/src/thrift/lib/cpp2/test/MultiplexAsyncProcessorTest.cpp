@@ -752,4 +752,17 @@ TEST_F(MultiplexAsyncProcessorServerTest, InteractionConflict) {
       ThrowsMessage<TApplicationException>("ConflictsInteraction1"));
 }
 
+TEST_F(MultiplexAsyncProcessorTest, ThriftGenerated) {
+  auto generated = multiplex(
+      {std::make_shared<FirstHandler>(),
+       std::make_shared<SecondHandler>(),
+       multiplex({std::make_shared<ThirdHandler>()})});
+  auto notGenerated = multiplex(
+      {std::make_shared<ThriftServerAsyncProcessorFactory<FirstHandler>>(
+           std::make_shared<FirstHandler>()),
+       std::make_shared<SecondHandler>()});
+  EXPECT_TRUE(generated->isThriftGenerated());
+  EXPECT_FALSE(notGenerated->isThriftGenerated());
+}
+
 } // namespace apache::thrift::test

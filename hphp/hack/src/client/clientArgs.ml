@@ -119,6 +119,15 @@ let parse_without_command options usage command =
 
 let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal
 
+let validate_check_args ~invalid_warning_codes =
+  if not (List.is_empty invalid_warning_codes) then (
+    Printf.printf
+      "Unknown warning codes: %s"
+      (String.concat ~sep:", "
+      @@ List.map invalid_warning_codes ~f:Int.to_string);
+    exit 2
+  )
+
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
  * if you are making significant changes you need to update the manpage as
@@ -161,6 +170,8 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let watchman_debug_logging = ref false in
   let allow_non_opt_build = ref false in
   let preexisting_warnings = ref false in
+  let warning_switches = ref [] in
+  let invalid_warning_codes = ref [] in
   let desc = ref (ClientCommand.command_name cmd) in
   (* custom behaviors *)
   let current_option = ref None in
@@ -176,6 +187,12 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
     end
   in
   let add_single x = single_files := x :: !single_files in
+  let add_warning_switch switch =
+    warning_switches := switch :: !warning_switches
+  in
+  let add_invalid_warning_code i =
+    invalid_warning_codes := i :: !invalid_warning_codes
+  in
   let set_mode_from_single_files (show_tast : bool) preexisting_warnings =
     match !single_files with
     | [] -> ()
@@ -670,6 +687,37 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE false)),
         " (mode) turn off verbose server log" );
       ("--version", Arg.Set version, " (mode) show version and exit");
+      ( "-Wall",
+        Arg.Unit
+          (fun () -> add_warning_switch ClientCheckStatusFilterWarnings.WAll),
+        " show all warnings" );
+      ( "-Wnone",
+        Arg.Unit
+          (fun () -> add_warning_switch ClientCheckStatusFilterWarnings.WNone),
+        " hide all warnings" );
+      ( "-W",
+        Arg.Int
+          (fun code ->
+            match ClientCheckStatusFilterWarnings.Code.of_enum code with
+            | None -> add_invalid_warning_code code
+            | Some code ->
+              add_warning_switch @@ ClientCheckStatusFilterWarnings.Code_on code),
+        " show all warnings with a given code, e.g. -W 12001" );
+      ( "-Wno",
+        Arg.Int
+          (fun code ->
+            match ClientCheckStatusFilterWarnings.Code.of_enum code with
+            | None -> add_invalid_warning_code code
+            | Some code ->
+              add_warning_switch
+              @@ ClientCheckStatusFilterWarnings.Code_off code),
+        " hide all warnings with a given code, e.g. -Wno 12001" );
+      ( "-Wignore-files",
+        Arg.String
+          (fun regexp ->
+            add_warning_switch
+              (ClientCheckStatusFilterWarnings.Ignored_files (Str.regexp regexp))),
+        " hide warnings in files matching a regexp" );
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
       (* Please keep these sorted in the alphabetical order *)
     ]
@@ -708,6 +756,9 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   let args =
     parse_without_command options usage (ClientCommand.command_name cmd)
   in
+
+  validate_check_args ~invalid_warning_codes:!invalid_warning_codes;
+
   if !version then (
     if !output_json then
       ServerArgs.print_json_version ()
@@ -768,7 +819,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
 
   let is_interactive = is_interactive !from in
   {
-    autostart = !autostart;
+    ClientEnv.autostart = !autostart;
     config = !config;
     custom_hhi_path = !custom_hhi_path;
     custom_telemetry_data = !custom_telemetry_data;
@@ -803,6 +854,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     allow_non_opt_build = !allow_non_opt_build;
     desc = !desc;
     is_interactive;
+    warning_switches = List.rev !warning_switches;
   }
 
 let parse_start_env command ~from_default =

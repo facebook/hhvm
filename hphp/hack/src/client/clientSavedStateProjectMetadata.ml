@@ -6,10 +6,20 @@
  *
  *)
 
+(** This module executes the CLI command `hh saved-state-project-metadata` which
+  computes and prints the project metadata for querying saved states. *)
+
 exception GetProjectMetadataError of string
 
 let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     Exit_status.t Lwt.t =
+  (* Command `hh saved-state-project-metadata` can accept the same flags as `hh`
+     (even though most flags will be ignored),
+     which is why we take a ClientEnv.client_check_env as parameter.
+     The project metadata for querying saved state depends on:
+     - the current binary version
+     - the content of .hhconfig
+     - saved state flags from Saved_state_rollouts *)
   let {
     ClientEnv.root;
     ignore_hh_version;
@@ -41,6 +51,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     allow_non_opt_build = _;
     desc = _;
     is_interactive = _;
+    warning_switches = _;
   } =
     env
   in

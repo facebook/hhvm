@@ -15,6 +15,7 @@ val go_streaming :
 val go :
   ServerCommandTypes.Server_status.t ->
   Errors.format option ->
+  ClientCheckStatusFilterWarnings.switch list ->
   is_interactive:bool ->
   output_json:bool ->
   max_errors:int option ->

@@ -11,6 +11,8 @@
   (modules
     error_codes
   )
+  (libraries
+   utils_core)
 )
 
 (library

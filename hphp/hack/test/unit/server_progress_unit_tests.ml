@@ -544,6 +544,7 @@ let env =
       desc = "testing";
       preexisting_warnings = false;
       is_interactive = false;
+      warning_switches = [];
     }
 
 let test_check_success () : bool Lwt.t =

@@ -129,6 +129,7 @@ let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
     stdin_name = _;
     desc = _;
     is_interactive = _;
+    warning_switches = _;
   } =
     args
   in
@@ -690,6 +691,7 @@ let main_internal
         ClientCheckStatus.go
           status
           args.error_format
+          args.warning_switches
           ~output_json:args.output_json
           ~max_errors:args.max_errors
           ~is_interactive:args.is_interactive
@@ -748,6 +750,7 @@ let main_internal
       ClientCheckStatus.go
         status
         args.error_format
+        args.warning_switches
         ~is_interactive:args.is_interactive
         ~output_json:args.output_json
         ~max_errors:args.max_errors

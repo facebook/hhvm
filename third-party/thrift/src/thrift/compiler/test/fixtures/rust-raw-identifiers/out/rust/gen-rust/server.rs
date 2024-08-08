@@ -227,7 +227,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "Foo.return", exception = ?exn);
+                ::tracing::error!(method = "Foo.return", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -289,7 +289,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "Foo.super", exception = ?exn);
+                ::tracing::error!(method = "Foo.super", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {

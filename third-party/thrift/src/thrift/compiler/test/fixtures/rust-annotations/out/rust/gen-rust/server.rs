@@ -191,7 +191,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "S1.r", exception = ?exn);
+                ::tracing::error!(method = "S1.r", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -535,7 +535,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "S2.r", exception = ?exn);
+                ::tracing::error!(method = "S2.r", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -925,7 +925,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "AllMethods.foo", exception = ?exn);
+                ::tracing::error!(method = "AllMethods.foo", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -986,7 +986,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "AllMethods.bar", exception = ?exn);
+                ::tracing::error!(method = "AllMethods.bar", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1381,7 +1381,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "OneMethod.foo", exception = ?exn);
+                ::tracing::error!(method = "OneMethod.foo", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1442,7 +1442,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "OneMethod.bar", exception = ?exn);
+                ::tracing::error!(method = "OneMethod.bar", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1837,7 +1837,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "OneMethodOptOut.foo", exception = ?exn);
+                ::tracing::error!(method = "OneMethodOptOut.foo", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1898,7 +1898,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "OneMethodOptOut.bar", exception = ?exn);
+                ::tracing::error!(method = "OneMethodOptOut.bar", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {

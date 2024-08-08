@@ -171,7 +171,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "TestService.init", exception = ?exn);
+                ::tracing::error!(method = "TestService.init", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {

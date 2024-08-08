@@ -172,7 +172,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyInteraction.ping", exception = ?exn);
+                ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1078,7 +1078,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyService.ping", exception = ?exn);
+                ::tracing::error!(method = "MyService.ping", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1140,7 +1140,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyService.getRandomData", exception = ?exn);
+                ::tracing::error!(method = "MyService.getRandomData", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1203,7 +1203,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyService.hasDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.hasDataById", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1266,7 +1266,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyService.getDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.getDataById", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1330,7 +1330,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyService.putDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.putDataById", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1394,7 +1394,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyService.lobDataById", exception = ?exn);
+                ::tracing::error!(method = "MyService.lobDataById", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -1767,7 +1767,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "MyService.startPingInteraction", exception = ?exn);
+                ::tracing::error!(method = "MyService.startPingInteraction", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {

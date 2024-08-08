@@ -304,7 +304,7 @@ where
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                 {{!TODO: Remove this once debug for stream is implemented.}}
                 {{^function:stream?}}
-                ::tracing::info!(method = "{{service:name}}.{{function:name}}", exception = ?exn);
+                ::tracing::error!(method = "{{service:name}}.{{function:name}}", exception = ?exn);
                 {{/function:stream?}}
                 ::std::result::Result::Err(exn)
             }

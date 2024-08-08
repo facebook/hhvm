@@ -227,7 +227,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "SomeService.bounce_map", exception = ?exn);
+                ::tracing::error!(method = "SomeService.bounce_map", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {
@@ -289,7 +289,7 @@ where
                 ::std::result::Result::Ok(res)
             }
             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::info!(method = "SomeService.binary_keyed_map", exception = ?exn);
+                ::tracing::error!(method = "SomeService.binary_keyed_map", exception = ?exn);
                 ::std::result::Result::Err(exn)
             }
             ::std::result::Result::Err(exn) => {

@@ -250,7 +250,7 @@ class MockFactory : public ::fizz::DefaultFactory {
   MOCK_METHOD(
       std::unique_ptr<KeyExchange>,
       makeKeyExchange,
-      (NamedGroup group, Factory::KeyExchangeMode mode),
+      (NamedGroup group, KeyExchangeRole role),
       (const));
   MOCK_METHOD(std::unique_ptr<Aead>, makeAead, (CipherSuite cipher), (const));
   MOCK_METHOD(Random, makeRandom, (), (const));
@@ -343,7 +343,7 @@ class MockAsyncKexFactory : public ::fizz::DefaultFactory {
   MOCK_METHOD(
       std::unique_ptr<KeyExchange>,
       makeKeyExchange,
-      (NamedGroup group, Factory::KeyExchangeMode mode),
+      (NamedGroup group, KeyExchangeRole role),
       (const));
 };
 

@@ -9,7 +9,6 @@
 #pragma once
 
 #include <fizz/crypto/exchange/KeyExchange.h>
-#include <fizz/protocol/Factory.h>
 #include <folly/Memory.h>
 #include <oqs/kem.h>
 
@@ -17,7 +16,7 @@ namespace fizz {
 class OQSKeyExchange : public KeyExchange {
  public:
   static std::unique_ptr<OQSKeyExchange> createOQSKeyExchange(
-      Factory::KeyExchangeMode mode,
+      KeyExchangeRole role,
       const std::string& algorithm);
 
   ~OQSKeyExchange() override = default;

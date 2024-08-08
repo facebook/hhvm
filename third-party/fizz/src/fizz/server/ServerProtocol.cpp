@@ -1512,7 +1512,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
           // The exceptions in SemiFutures will be processed in
           // detail::processEvent.
           kex = state.context()->getFactory()->makeKeyExchange(
-              *group, Factory::KeyExchangeMode::Server);
+              *group, KeyExchangeRole::Server);
           kexResultFuture =
               doKexFuture(kex.get(), std::move(clientShare.value()));
         } else {

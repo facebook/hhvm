@@ -54,4 +54,10 @@ class KeyExchange {
    */
   virtual std::size_t getExpectedKeyShareSize() const = 0;
 };
+
+/**
+ * `KeyExchangeRole` indicates that the role of the party that is performing
+ * the key exchange.
+ */
+enum class KeyExchangeRole { Server, Client };
 } // namespace fizz

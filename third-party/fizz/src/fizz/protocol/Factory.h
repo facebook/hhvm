@@ -40,10 +40,7 @@ class PeerCert;
  */
 class Factory {
  public:
-  enum class KeyExchangeMode { Server, Client };
-
   virtual ~Factory();
-
   /**
    * Should not be overridden *unless* for testing.
    */
@@ -82,7 +79,7 @@ class Factory {
 
   virtual std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,
-      KeyExchangeMode mode) const = 0;
+      KeyExchangeRole role) const = 0;
 
   virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const = 0;
 

@@ -32,7 +32,7 @@ class MultiBackendFactory : public Factory {
  public:
   [[nodiscard]] std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,
-      KeyExchangeMode mode) const override;
+      KeyExchangeRole role) const override;
 
   [[nodiscard]] std::unique_ptr<Aead> makeAead(
       CipherSuite cipher) const override;

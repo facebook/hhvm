@@ -10,9 +10,9 @@
 
 namespace fizz {
 std::unique_ptr<OQSKeyExchange> OQSKeyExchange::createOQSKeyExchange(
-    Factory::KeyExchangeMode mode,
+    KeyExchangeRole role,
     const std::string& algorithm) {
-  if (mode == Factory::KeyExchangeMode::Server) {
+  if (role == KeyExchangeRole::Server) {
     return std::make_unique<OQSServerKeyExchange>(algorithm);
   } else {
     return std::make_unique<OQSClientKeyExchange>(algorithm);

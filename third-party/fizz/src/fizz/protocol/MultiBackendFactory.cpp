@@ -27,8 +27,8 @@ namespace fizz {
 
 std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(
     NamedGroup group,
-    KeyExchangeMode mode) const {
-  (void)mode;
+    KeyExchangeRole role) const {
+  (void)role;
   switch (group) {
     case NamedGroup::secp256r1:
       return fizz::openssl::makeKeyExchange<fizz::P256>();
@@ -43,26 +43,26 @@ std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(
     case NamedGroup::x25519_kyber512_experimental:
       return std::make_unique<HybridKeyExchange>(
           std::make_unique<X25519KeyExchange>(),
-          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512));
+          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_512));
     case NamedGroup::secp256r1_kyber512:
       return std::make_unique<HybridKeyExchange>(
           fizz::openssl::makeKeyExchange<fizz::P256>(),
-          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512));
+          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_512));
     case NamedGroup::kyber512:
-      return OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_512);
+      return OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_512);
     case NamedGroup::x25519_kyber768_draft00:
     case NamedGroup::x25519_kyber768_experimental:
       return std::make_unique<HybridKeyExchange>(
           std::make_unique<X25519KeyExchange>(),
-          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
+          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_768));
     case NamedGroup::secp256r1_kyber768_draft00:
       return std::make_unique<HybridKeyExchange>(
           fizz::openssl::makeKeyExchange<fizz::P256>(),
-          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
+          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_768));
     case NamedGroup::secp384r1_kyber768:
       return std::make_unique<HybridKeyExchange>(
           fizz::openssl::makeKeyExchange<fizz::P384>(),
-          OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_kyber_768));
+          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_768));
 #endif
     default:
       throw std::runtime_error("ke: not implemented");

@@ -329,34 +329,55 @@ class StructTests(unittest.TestCase):
             e.name = "foo"
 
 
+@parameterized_class(
+    ("test_types", "serializer_module"),
+    [
+        (immutable_test_types, immutable_serializer),
+        (mutable_test_types, mutable_serializer),
+    ],
+)
 class NumericalConversionsTests(unittest.TestCase):
+    def setUp(self) -> None:
+        """
+        The `setUp` method performs these assignments with type hints to enable
+        pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
+        behind `test_types`.
+        """
+        # pyre-ignore[16]: has no attribute `test_types`
+        self.numerical: Type[numerical] = self.test_types.numerical
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+        # pyre-ignore[16]: has no attribute `serializer_module`
+        self.serializer: types.ModuleType = self.serializer_module
+
     def test_overflow(self) -> None:
         with self.assertRaises(OverflowError):
-            numerical(float_val=5, int_val=2**63 - 1)
+            self.numerical(float_val=5, int_val=2**63 - 1)
 
         with self.assertRaises(OverflowError):
-            numerical(float_val=5, int_val=2, int_list=[5, 2**32])
+            self.numerical(float_val=5, int_val=2, int_list=[5, 2**32])
 
     def test_int_to_float(self) -> None:
-        x = numerical(int_val=5, float_val=5, float_list=[1, 5, 6])
+        x = self.numerical(int_val=5, float_val=5, float_list=[1, 5, 6])
         x(float_val=10)
         x(float_list=[6, 7, 8])
 
     def test_int_to_i64(self) -> None:
         large = 2**63 - 1
-        numerical(int_val=5, float_val=5, i64_val=int(large))
+        self.numerical(int_val=5, float_val=5, i64_val=int(large))
         too_large = 2**65 - 1
         with self.assertRaises(OverflowError):
-            numerical(int_val=5, float_val=5, i64_val=int(too_large))
+            self.numerical(int_val=5, float_val=5, i64_val=int(too_large))
 
     def test_float_to_int_required_field(self) -> None:
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: for test
-            numerical(int_val=math.pi, float_val=math.pi)
+            self.numerical(int_val=math.pi, float_val=math.pi)
 
     def test_float_to_int_unqualified_field(self) -> None:
         with self.assertRaises(TypeError):
-            numerical(
+            self.numerical(
                 float_val=math.pi,
                 # pyre-ignore[6]: for test
                 int_val=math.pi,
@@ -364,7 +385,7 @@ class NumericalConversionsTests(unittest.TestCase):
 
     def test_float_to_int_list(self) -> None:
         with self.assertRaises(TypeError):
-            numerical(
+            self.numerical(
                 int_val=5,
                 float_val=math.pi,
                 # pyre-ignore[6]: for test

@@ -315,6 +315,7 @@ module Subtype_env = struct
     ignore_likes: bool;
         (** We're ignoring likes because we had a goal of the form `t <: ~u`
             for t <:D dynamic *)
+    recursion_tracker: Subtype_recursion_tracker.t;
   }
 
   let set_on_error t on_error = { t with on_error }
@@ -360,6 +361,7 @@ module Subtype_env = struct
       log_level;
       in_transitive_closure;
       ignore_likes;
+      recursion_tracker = Subtype_recursion_tracker.empty;
     }
 
   let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
@@ -437,6 +439,13 @@ module Subtype_env = struct
                 ~on_error:
                   Reasons_callback.(prepend_on_apply on_error secondary_error)
                 suffix)
+
+  let check_infinite_recursion (subtype_env : t) op =
+    Subtype_recursion_tracker.add_op_and_check_infinite_recursion
+      subtype_env.recursion_tracker
+      op
+    |> Result.map ~f:(fun recursion_tracker ->
+           { subtype_env with recursion_tracker })
 end
 
 module Logging = struct
@@ -4705,58 +4714,37 @@ end = struct
         (* x <: case_type *)
         (match Env.get_typedef env name_super with
         | Decl_entry.Found
-            { td_vis = Aast.CaseType as td_vis; td_type = lower; td_tparams; _ }
+            { td_type = lower; td_vis = Aast.CaseType as td_vis; td_tparams; _ }
         | Decl_entry.Found
             { td_super_constraint = Some lower; td_tparams; td_vis; _ } ->
-          let try_lower_bound env =
-            let ((env, cycle), lower_bound) =
-              let ety_env =
-                (* The this_ty does not need to be set because newtypes
-                 * & case types cannot appear within classes thus cannot us
-                 * the this type. If we ever change that this could needs to
-                 * be changed *)
-                {
-                  empty_expand_env with
-                  type_expansions =
-                    (* Subtyping can be called when localizing
-                       a union type, since we attempt to simplify it.
-                       Since case types are encoded as union types,
-                       a cyclic reference to the same case type will
-                       lead to infinite looping. The chain is:
-                         localize -> simplify_union -> sub_type -> localize
-
-                       The expand environment is not threaded through the
-                       whole way, so we won't be able to tell we entered a cycle.
-
-                       For this reason we want to report cycles on the
-                       case type we are currently expanding. If a cycle
-                       occurs we say the proposition is invalid, but
-                       don't report an error, since that will be done
-                       during well-formedness checks on type defs *)
-                    Type_expansions.empty_w_cycle_report
-                      ~report_cycle:
-                        (Some
-                           ( Pos.none,
-                             Type_expansions.Expandable.Type_alias name_super ));
-                  substs =
-                    (if List.is_empty lty_supers then
-                      SMap.empty
-                    else
-                      Decl_subst.make_locl td_tparams lty_supers);
-                }
+          let try_lower_bound subtype_env env =
+            match
+              Subtype_env.check_infinite_recursion
+                subtype_env
+                { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
+            with
+            | Error _ -> invalid env ~fail
+            | Ok subtype_env ->
+              let ((env, _err), lower_bound) =
+                let ety_env =
+                  (* The this_ty cannot does not need to be set because newtypes
+                   * & case types cannot appear within classes thus cannot us
+                   * the this type. If we ever change that this could needs to
+                   * be changed *)
+                  {
+                    empty_expand_env with
+                    substs =
+                      (if List.is_empty lty_supers then
+                        SMap.empty
+                      else
+                        Decl_subst.make_locl td_tparams lty_supers);
+                  }
+                in
+                match td_vis with
+                | Aast.CaseType ->
+                  Phase.localize_disjoint_union ~ety_env env lower
+                | _ -> Phase.localize ~ety_env env lower
               in
-              match td_vis with
-              | Aast.CaseType ->
-                Phase.localize_disjoint_union ~ety_env env lower
-              | _ -> Phase.localize ~ety_env env lower
-            in
-            (* If a cycle is detected, consider the case type as
-               uninhabited and thus an alias for the bottom type.
-               Handling of the bottom will be done as part of
-               [default_subtype] so we can consider this as invalid *)
-            if Option.is_some cycle then
-              invalid env ~fail
-            else
               simplify
                 ~subtype_env
                 ~this_ty:None
@@ -4777,7 +4765,7 @@ end = struct
             ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ super_like; super_supportdyn = false; ty_super }
             env
-          ||| try_lower_bound
+          ||| try_lower_bound subtype_env
         | _ ->
           default_subtype
             ~subtype_env
@@ -4937,6 +4925,7 @@ end = struct
           Tclass ((_pos_super, class_nm_super), exact_super, tyargs_super) ) )
       -> begin
       match deref ty_sub with
+      (* Enums... *)
       | (_, Tnewtype (enum_name, _, _))
         when String.equal enum_name class_nm_super
              && is_nonexact exact_super

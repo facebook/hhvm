@@ -1,4 +1,14 @@
 (library
+ (name recursion_tracker)
+ (modules
+  recursion_tracker)
+ (libraries
+  utils_core)
+ (preprocess
+  (pps
+   ppx_deriving.std)))
+
+(library
  (name format_helpers)
  (wrapped false)
  (modules format_helpers)
@@ -322,6 +332,7 @@
  (name typing_algebra)
  (wrapped false)
  (modules
+  subtype_recursion_tracker
   typing_algebra
   typing_case_types
   typing_coeffects
@@ -349,6 +360,7 @@
   typing_type_member
   typing_union)
  (libraries
+  recursion_tracker
   type_mapper
   typing_dependent_type
   typing_disposable

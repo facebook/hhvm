@@ -1992,6 +1992,29 @@ module Log = struct
       (env : env)
       (v : Tvid.t) =
     Inf.Log.tyvar_to_json p_locl_ty p_internal_type env.inference_env v
+
+  let expand_env
+      env
+      {
+        Typing_defs.type_expansions;
+        make_internal_opaque;
+        expand_visible_newtype;
+        substs = _;
+        this_ty;
+        on_error = _;
+        wildcard_action = _;
+        ish_weakening;
+      } =
+    if Typing_env_types.get_log_level env "expand_env" |> Int.( = ) 0 then
+      []
+    else
+      [
+        ("expand_visible_newtype", Bool.to_string expand_visible_newtype);
+        ("this_ty", Typing_print.debug env this_ty);
+        ("type_expansions", Type_expansions.to_log_string type_expansions);
+        ("make_internal_opaque", Bool.to_string make_internal_opaque);
+        ("ish_weakening", Bool.to_string ish_weakening);
+      ]
 end
 
 let update_reason { genv = { tcopt; _ }; _ } ty ~f =

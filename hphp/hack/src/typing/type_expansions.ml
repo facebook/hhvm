@@ -80,6 +80,19 @@ let add_and_check_cycles ({ report_cycle; expansions; _ } as t : t) expansion :
     else
       Ok (add t expansion)
 
+let to_log_string { report_cycle; expansions; cyclic_expansion = _ } =
+  let report_cycle_s =
+    match report_cycle with
+    | None -> ""
+    | Some (_p, exp) ->
+      Printf.sprintf "report on %s; " (Expandable.to_string exp)
+  in
+  let expansions_s =
+    List.rev_map expansions ~f:(fun x -> Expandable.to_string x.name)
+    |> String.concat ~sep:" -> "
+  in
+  Printf.sprintf "%sexpansions: %s" report_cycle_s expansions_s
+
 let report (cycles : cycle_reporter list) : Typing_error.t option =
   List.filter_map cycles ~f:(fun (cycle, on_error) ->
       match cycle with

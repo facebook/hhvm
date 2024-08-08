@@ -170,14 +170,8 @@ module Log = struct
       (get_pos decl_ty)
       ~function_name:"Typing_phase.localize"
       ~arguments:
-        [
-          ( "expand_visible_newtype",
-            if ety_env.expand_visible_newtype then
-              "true"
-            else
-              "false" );
-          ("decl ty", Typing_print.debug_decl env decl_ty);
-        ]
+        (("decl ty", Typing_print.debug_decl env decl_ty)
+        :: Typing_env.Log.expand_env env ety_env)
       ~result:(fun ((env, _, _), ty) ->
         let (env, ty) = Typing_env.expand_type env ty in
         Some (Typing_print.debug env ty))

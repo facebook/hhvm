@@ -51,3 +51,7 @@ val def_positions : t -> Pos_or_decl.t list
 
 (** Returns true if there was an attempt to add a cycle to the expansion list. *)
 val cyclic_expansion : t -> bool
+
+(** Build a string like `report on C; A -> B::T -> C` where `A`, `B::T` and `C`
+  are the successive expansions seen so far. *)
+val to_log_string : t -> string

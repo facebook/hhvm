@@ -587,6 +587,8 @@ module Log : sig
     env ->
     Tvid.t ->
     Hh_json.json
+
+  val expand_env : Typing_env_types.env -> expand_env -> (string * string) list
 end
 
 val make_expression_id : env -> Expression_id.t

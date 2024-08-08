@@ -22,3 +22,6 @@ maplit = "1.0"
 [features]
 debug_bytes = []
 default = []
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(fbcode_build)"] }

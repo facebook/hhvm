@@ -4738,7 +4738,7 @@ end = struct
                         ~report_cycle:
                           (Some
                              ( Pos.none,
-                               Type_expansions.Expansion.Type_alias name_super
+                               Type_expansions.Expandable.Type_alias name_super
                              ));
                     substs =
                       (if List.is_empty lty_supers then

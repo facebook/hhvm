@@ -195,19 +195,40 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   env
 
-(* Check an enum declaration of the form
- *    enum E : <ty_exp> as <ty_constraint>
- * or
- *    class E extends Enum<ty_exp>
- * where the absence of <ty_constraint> is assumed to default to arraykey.
- *
- * Check that <ty_exp> is int or string, and that
- *   ty_exp <: ty_constraint <: arraykey
- * Also that each type constant is of type ty_exp.
- *)
-let enum_class_check env tc consts const_types =
+let check_cyclic_constraint env (p, enum_name) constraint_ty =
+  let ((env, _ty_err1, cycles), _) =
+    Phase.localize_no_subst_report_cycles
+      env
+      ~ignore_errors:false
+      constraint_ty
+      ~report_cycle:(p, Type_expansions.Expandable.Enum enum_name)
+  in
+  Type_expansions.report cycles
+  |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env)
+
+(** Check an enum declaration of the form
+
+     enum E : <ty_exp> as <ty_constraint>
+
+  or
+
+     class E extends Enum<ty_exp>
+
+  where the absence of `<ty_constraint>` is assumed to default to arraykey.
+
+  Check that `<ty_exp>` is int or string, and that
+
+    ty_exp <: ty_constraint <: arraykey
+
+  Also that each type constant is of type `ty_exp`. *)
+let enum_class_check
+    env
+    ~name_pos
+    (tc : Cls.t)
+    (consts : Nast.class_const list)
+    (const_types : locl_ty list) =
   let pos = Cls.pos tc in
-  let enum_info_opt =
+  let (enum_info_opt : Decl_enum.t option) =
     Decl_enum.enum_kind
       (pos, Cls.name tc)
       ~is_enum_class:(Ast_defs.is_c_enum_class (Cls.kind tc))
@@ -261,6 +282,7 @@ let enum_class_check env tc consts const_types =
         match ty_constraint with
         | None -> (env, None)
         | Some ty ->
+          check_cyclic_constraint env (name_pos, Cls.name tc) ty;
           let ((env, ty_err1), ty) =
             Phase.localize_no_subst env ~ignore_errors:false ty
           in

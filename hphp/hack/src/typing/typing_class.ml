@@ -968,7 +968,7 @@ let typeconst_def
         primary
         @@ Primary.Cannot_declare_constant { pos; class_pos; class_name }));
   let expansion =
-    Type_expansions.Expansion.Type_constant
+    Type_expansions.Expandable.Type_constant
       { receiver_name = snd cls.c_name; type_const_name = snd id }
   in
   (* Check constraints and report cycles through the definition *)
@@ -979,14 +979,16 @@ let typeconst_def
       let (env, ty_default_opt) =
         match c_atc_default with
         | Some ty ->
-          let ((env, ty_err_opt1), ty) =
-            Phase.localize_hint_no_subst
+          let ((env, ty_err_opt1, cycles), ty) =
+            Phase.localize_hint_no_subst_report_cycles
               ~ignore_errors:false
               ~report_cycle:(pos, expansion)
               env
               ty
           in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
+          Type_expansions.report cycles
+          |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
           (env, Some ty)
         | None -> (env, None)
       in
@@ -1037,13 +1039,15 @@ let typeconst_def
       in
       (env, ty_err_opt)
     | TCConcrete { c_tc_type = ty } ->
-      let ((env, ty_err_opt), _ty) =
-        Phase.localize_hint_no_subst
+      let ((env, ty_err_opt, cycles), _ty) =
+        Phase.localize_hint_no_subst_report_cycles
           ~ignore_errors:false
           ~report_cycle:(pos, expansion)
           env
           ty
       in
+      Type_expansions.report cycles
+      |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
       (env, ty_err_opt)
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -1829,7 +1833,14 @@ let check_class_members env c tc =
     List.map_env env c.c_consts ~f:(class_const_def ~in_enum_class c tc)
   in
   let (typed_consts, const_types) = List.unzip consts in
-  let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
+  let env =
+    Typing_enum.enum_class_check
+      ~name_pos:(fst c.c_name)
+      env
+      tc
+      c.c_consts
+      const_types
+  in
   let typed_constructor = class_constr_def ~is_disposable env tc constructor in
   let env = Env.set_static env in
   let (env, typed_static_vars) =

@@ -13,7 +13,10 @@ type expand_typedef =
   Typing_reason.t ->
   string ->
   Typing_defs.locl_ty list ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+  (Typing_env_types.env
+  * Typing_error.t option
+  * Type_expansions.cycle_reporter list)
+  * Typing_defs.locl_ty
 
 val expand_typedef_ref : expand_typedef ref
 
@@ -228,20 +231,15 @@ type expand_typeconst =
   Typing_defs.locl_ty ->
   Typing_defs.pos_id ->
   allow_abstract_tconst:bool ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+  (Typing_env_types.env
+  * Typing_error.t option
+  * Type_expansions.cycle_reporter list)
+  * Typing_defs.locl_ty
 
 val expand_typeconst_ref : expand_typeconst ref
 
 (** Expands a type constant access like A::T to its definition. *)
-val expand_typeconst :
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  ?ignore_errors:bool ->
-  ?as_tyvar_with_cnstr:Pos.t option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.pos_id ->
-  allow_abstract_tconst:bool ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+val expand_typeconst : expand_typeconst
 
 type union =
   Typing_env_types.env ->

@@ -163,24 +163,29 @@ module DataTypeReason = struct
 
   let append ~(trail : 'ph trail) ~(reason : Reason.t) (kind : trail_kind) :
       ('ph trail, _) result =
-    let (expansions, cycle) =
-      match kind with
-      | VariantOfCaseType name
-      | GenericUpperbound name
-      | UpperboundOfNewType name
-      | UpperboundOfEnum name
-      | SealedInterface name
-      | Requirement name ->
-        Type_expansions.add_and_check_cycles
-          trail.expansions
-          (Reason.to_pos reason, Type_expansions.Expansion.Type_alias name)
-      | ExpansionOfTypeConstant _ -> (trail.expansions, None)
-    in
-    match cycle with
-    | None ->
-      Result.Ok
-        { trail with instances = (kind, reason) :: trail.instances; expansions }
-    | Some cycle -> Result.Error (reason, trail, cycle)
+    match kind with
+    | VariantOfCaseType name
+    | GenericUpperbound name
+    | UpperboundOfNewType name
+    | UpperboundOfEnum name
+    | SealedInterface name
+    | Requirement name ->
+      Type_expansions.add_and_check_cycles
+        trail.expansions
+        {
+          Type_expansions.name = Type_expansions.Expandable.Type_alias name;
+          use_pos = Reason.to_pos reason;
+          def_pos = None;
+        }
+      |> Result.map ~f:(fun expansions ->
+             {
+               trail with
+               instances = (kind, reason) :: trail.instances;
+               expansions;
+             })
+      |> Result.map_error ~f:(fun _cycle -> trail)
+    | ExpansionOfTypeConstant _ ->
+      Ok { trail with instances = (kind, reason) :: trail.instances }
 
   let case_type ~trail reason name =
     append ~trail ~reason @@ VariantOfCaseType name
@@ -288,25 +293,11 @@ module DataType = struct
       ~(env : env)
       ~(f : env -> 'ph DataTypeReason.trail -> 'res)
       ~(default : reason:'ph DataTypeReason.t -> 'res)
-      ~(trail :
-         ( 'ph DataTypeReason.trail,
-           Reason.t * 'ph DataTypeReason.trail * Pos.t option )
-         result) : 'res =
-    let report_cycle_error reason = function
-      | Some def_pos ->
-        Typing_error_utils.add_typing_error
-          ~env
-          Typing_error.(
-            primary
-            @@ Primary.Cyclic_typedef
-                 { def_pos; use_pos = Reason.to_pos reason })
-      | None -> ()
-    in
+      ~(trail : ('ph DataTypeReason.trail, 'ph DataTypeReason.trail) result) : _
+      =
     match trail with
     | Result.Ok trail -> f env trail
-    | Result.Error (reason, trail, pos_opt) ->
-      report_cycle_error reason pos_opt;
-      default ~reason:DataTypeReason.(make Cyclic trail)
+    | Result.Error trail -> default ~reason:DataTypeReason.(make Cyclic trail)
 
   let prim_to_datatypes ~trail (prim : Aast.tprim) : 'phase t =
     let open Tag in
@@ -614,7 +605,7 @@ module DataType = struct
     | Tvec_or_dict _ -> (env, Set.of_list ~reason [Tag.VecData; Tag.DictData])
     | Taccess (root_ty, id) ->
       let ety_env = empty_expand_env in
-      let ((env, _), ty) =
+      let ((env, _, _cycles), ty) =
         Typing_utils.expand_typeconst
           ety_env
           env

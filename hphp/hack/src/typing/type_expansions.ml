@@ -8,7 +8,7 @@
 
 open Hh_prelude
 
-module Expansion = struct
+module Expandable = struct
   type t =
     | Enum of string
     | Type_alias of string
@@ -26,18 +26,34 @@ module Expansion = struct
       Printf.sprintf "%s::%s" receiver_name type_const_name
 end
 
+type expansion = {
+  name: Expandable.t;
+  use_pos: Pos_or_decl.t;
+  def_pos: Pos_or_decl.t option;
+}
+
 type t = {
-  report_cycle: (Pos.t * Expansion.t) option;
+  report_cycle: (Pos.t * Expandable.t) option;
       (** If we are expanding the RHS of a type definition, [report_cycle] contains
-            the position and id of the LHS. This way, if the RHS expands at some point
-            to the LHS id, we are able to report a cycle. *)
-  expansions: (Pos_or_decl.t * Expansion.t) list;
+          the position and id of the LHS. This way, if the RHS expands at some point
+          to the LHS id, we are able to report a cycle. *)
+  expansions: expansion list;
       (** The type defs and type access we have expanded thus far, at what position. Used
-            to prevent entering into a cycle when expanding these types.
-            We preserve order (i.e. use a list instead of set) for error reporting. *)
+          to prevent entering into a cycle when expanding these types.
+          We preserve order (i.e. use a list instead of set) for error reporting. *)
   cyclic_expansion: bool;
       (** true if we've ever detected a cycle during add_and_check_cycles *)
 }
+
+type cycle =
+  | Not_to_report  (** There was a cycle but not a cycle we want to report. *)
+  | To_report of {
+      report_cycle: Pos.t * Expandable.t;
+      expansions: expansion list;
+      last_expansion: expansion;
+    }
+
+type cycle_reporter = cycle * Typing_error.Reasons_callback.t option
 
 let empty_w_cycle_report ~report_cycle =
   { report_cycle; expansions = []; cyclic_expansion = false }
@@ -47,37 +63,60 @@ let empty = empty_w_cycle_report ~report_cycle:None
 let add ({ expansions; _ } as exps) exp =
   { exps with expansions = exp :: expansions }
 
-(** Whether we've already expanded [x] *)
-let has_expanded { report_cycle; expansions; _ } (x : Expansion.t) =
+let add_and_check_cycles ({ report_cycle; expansions; _ } as t : t) expansion :
+    (t, cycle) result =
   match report_cycle with
-  | Some (p, x') when Expansion.equal x x' -> Some (Some p)
+  | Some (p', x) when Expandable.equal expansion.name x ->
+    Error
+      (To_report
+         { report_cycle = (p', x); expansions; last_expansion = expansion })
   | Some _
   | None ->
-    List.find_map expansions ~f:(function
-        | (_, x') when Expansion.equal x x' -> Some None
-        | _ -> None)
-
-let add_and_check_cycles (exps : t) (p, (id : Expansion.t)) :
-    t * Pos.t option option =
-  let has_cycle = has_expanded exps id in
-  let exps =
-    if Option.is_some has_cycle then
-      { exps with cyclic_expansion = true }
+    if
+      List.exists expansions ~f:(function exp ->
+          Expandable.equal expansion.name exp.name)
+    then
+      Error Not_to_report
     else
-      exps
-  in
-  let exps = add exps (p, id) in
-  (exps, has_cycle)
+      Ok (add t expansion)
 
-let as_list { report_cycle; expansions; _ } =
-  (report_cycle
-  |> Option.map ~f:(Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos)
+let report (cycles : cycle_reporter list) : Typing_error.t option =
+  List.filter_map cycles ~f:(fun (cycle, on_error) ->
+      match cycle with
+      | Not_to_report -> None
+      | To_report
+          { report_cycle = (pos, first_exp); expansions; last_expansion } ->
+        (match first_exp with
+        | Expandable.Enum _name ->
+          Option.map
+            on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Cyclic_enum_constraint
+                       (Pos_or_decl.of_raw_pos pos)
+                (* TODO remove Pos_or_decl.of_raw_pos *))
+        | Expandable.Type_alias _name ->
+          Some
+            Typing_error.(
+              primary
+              @@ Primary.Cyclic_typedef
+                   { def_pos = pos; use_pos = last_expansion.use_pos })
+        | Expandable.Type_constant _ ->
+          let seen =
+            (last_expansion :: expansions |> List.map ~f:(fun x -> x.name))
+            @ [first_exp]
+            |> List.map ~f:Expandable.to_string
+          in
+          Some
+            Typing_error.(
+              primary @@ Primary.Cyclic_typeconst { pos; tyconst_names = seen })))
+  |> Typing_error.multiple_opt
+
+let def_positions { report_cycle; expansions; _ } =
+  (Option.map report_cycle ~f:(fun (p, _) -> Pos_or_decl.of_raw_pos p)
   |> Option.to_list)
-  @ List.rev expansions
-
-let to_string_list exps =
-  as_list exps |> List.map ~f:(fun x -> x |> snd |> Expansion.to_string)
-
-let positions exps = as_list exps |> List.map ~f:fst
+  @ List.rev_filter_map expansions ~f:(fun x -> x.def_pos)
 
 let cyclic_expansion exps = exps.cyclic_expansion

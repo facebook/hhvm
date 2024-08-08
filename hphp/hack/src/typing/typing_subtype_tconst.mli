@@ -22,4 +22,4 @@ val get_tyvar_type_const :
   Tvid.t ->
   pos_id ->
   on_error:Typing_error.Reasons_callback.t option ->
-  (env * Typing_error.t option) * locl_ty
+  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty

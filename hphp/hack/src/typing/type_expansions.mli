@@ -10,7 +10,11 @@
       to prevent entering into a cycle when expanding these types. *)
 type t
 
-module Expansion : sig
+type cycle
+
+type cycle_reporter = cycle * Typing_error.Reasons_callback.t option
+
+module Expandable : sig
   type t =
     | Enum of string
     | Type_alias of string
@@ -20,27 +24,30 @@ module Expansion : sig
       }
 end
 
+type expansion = {
+  name: Expandable.t;
+  use_pos: Pos_or_decl.t;
+      (** Position of the reference to the thing to expand. *)
+  def_pos: Pos_or_decl.t option;
+      (** Position of the definition of the type alias or type constant. Optionally populated. *)
+}
+
 val empty : t
 
 (** If we are expanding the RHS of a type definition, [report_cycle] contains
-      the position and id of the LHS. This way, if the RHS expands at some point
-      to the LHS id, we are able to report a cycle. *)
-val empty_w_cycle_report : report_cycle:(Pos.t * Expansion.t) option -> t
+    the position and id of the LHS. This way, if the RHS expands at some point
+    to the LHS id, we are able to report a cycle. *)
+val empty_w_cycle_report : report_cycle:(Pos.t * Expandable.t) option -> t
 
-(** Returns:
-    - [None] if there was no cycle
-    - [Some None] if there was a cycle which did not involve the first
-      type expansion, i.e. error reporting should be done elsewhere
-    - [Some (Some pos)] if there was a cycle involving the first type
-      expansion in which case an error should be reported at [pos]. *)
-val add_and_check_cycles :
-  t -> Pos_or_decl.t * Expansion.t -> t * Pos.t option option
+(** [add_and_check_cycles expansions expansion] adds and [expansion] to [expansions]
+  and check that that [expansion] hasn't already been done, ;
+  i.e. wasn't already in [expansions]. *)
+val add_and_check_cycles : t -> expansion -> (t, cycle) result
 
-(** The list of expanded type aliases or type constants as string,
-      in the order they have been expanded. Useful for error reporting. *)
-val to_string_list : t -> string list
+val report : cycle_reporter list -> Typing_error.t option
 
-val positions : t -> Pos_or_decl.t list
+(** Positions of the definitions of the type aliases or type constants that were successively expanded. *)
+val def_positions : t -> Pos_or_decl.t list
 
 (** Returns true if there was an attempt to add a cycle to the expansion list. *)
 val cyclic_expansion : t -> bool

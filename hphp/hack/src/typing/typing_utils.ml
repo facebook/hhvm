@@ -30,7 +30,7 @@ type expand_typedef =
   Reason.t ->
   string ->
   locl_ty list ->
-  (env * Typing_error.t option) * locl_ty
+  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
 
 let (expand_typedef_ref : expand_typedef ref) =
   ref (not_implemented "expand_typedef")
@@ -131,7 +131,7 @@ type expand_typeconst =
   locl_ty ->
   pos_id ->
   allow_abstract_tconst:bool ->
-  (env * Typing_error.t option) * locl_ty
+  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
 
 let (expand_typeconst_ref : expand_typeconst ref) =
   ref (not_implemented "expand_typeconst")

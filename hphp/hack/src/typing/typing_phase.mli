@@ -49,6 +49,12 @@ val localize :
   decl_ty ->
   (env * Typing_error.t option) * locl_ty
 
+val localize_rec :
+  ety_env:expand_env ->
+  env ->
+  decl_ty ->
+  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
+
 (**
  Transform a declaration phase type into a localized type, with no substitution
  for generic parameters and [this].
@@ -61,6 +67,13 @@ val localize_no_subst :
   decl_ty ->
   (env * Typing_error.t option) * locl_ty
 
+val localize_no_subst_report_cycles :
+  env ->
+  ignore_errors:bool ->
+  report_cycle:Pos.t * Type_expansions.Expandable.t ->
+  decl_phase ty ->
+  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
+
 (** Transform a type hint into a localized type, with no substitution for generic
   parameters and [this].
 
@@ -69,9 +82,20 @@ val localize_no_subst :
 val localize_hint_no_subst :
   env ->
   ignore_errors:bool ->
-  ?report_cycle:Pos.t * Type_expansions.Expansion.t ->
   Aast.hint ->
   (env * Typing_error.t option) * locl_ty
+
+(** Transform a type hint into a localized type, with no substitution for generic
+  parameters and [this]. Report cycles on provided [report_cycle] expansion.
+
+  [ignore_errors] silences errors because those errors have already fired
+  and/or are not appropriate at the time we call localize. *)
+val localize_hint_no_subst_report_cycles :
+  env ->
+  ignore_errors:bool ->
+  report_cycle:Pos.t * Type_expansions.Expandable.t ->
+  Aast.hint ->
+  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
 
 val localize_hint_for_refinement :
   env -> Aast.hint -> (env * Typing_error.t option) * locl_ty
@@ -202,3 +226,10 @@ val localize_and_add_ast_generic_parameters_and_where_constraints :
   Nast.tparam list ->
   (Aast.hint * Ast_defs.constraint_kind * Aast.hint) list ->
   env * Typing_error.t option
+
+val list_map_env_err_cycles :
+  'env ->
+  'x list ->
+  combine_ty_errs:('err list -> 'errs) ->
+  f:('env -> 'x -> ('env * 'err option * 'cycle list) * 'res) ->
+  ('env * 'errs * 'cycle list) * 'res list

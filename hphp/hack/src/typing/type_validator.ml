@@ -78,19 +78,22 @@ class virtual type_validator =
                 let (id_pos, type_const_name) = id in
                 Folded_class.get_typeconst class_ type_const_name
                 >>= fun typeconst ->
-                let (ety_env, has_cycle) =
+                match
                   Typing_defs.add_type_expansion_check_cycles
                     { acc.ety_env with this_ty = ty }
-                    ( id_pos,
-                      Type_expansions.Expansion.Type_constant
-                        { receiver_name; type_const_name } )
-                in
-                match has_cycle with
-                | Some _ ->
+                    {
+                      Type_expansions.name =
+                        Type_expansions.Expandable.Type_constant
+                          { receiver_name; type_const_name };
+                      use_pos = id_pos;
+                      def_pos = None;
+                    }
+                with
+                | Error _ ->
                   (* This type is cyclic, give up checking it. We've
                      already reported an error. *)
                   None
-                | None ->
+                | Ok ety_env ->
                   Some (this#on_typeconst { acc with ety_env } class_ typeconst)
               )
           | _ -> acc)

@@ -144,14 +144,16 @@ let typedef_def ctx typedef =
   Typing_variance.typedef env typedef;
 
   let env =
-    let ((env, ty_err_opt2), ty) =
+    let ((env, ty_err_opt2, cycles), ty) =
       (* This also detects cyclic definitions *)
-      Phase.localize_hint_no_subst
+      Phase.localize_hint_no_subst_report_cycles
         env
         ~ignore_errors:false
-        ~report_cycle:(t_pos, Type_expansions.Expansion.Type_alias t_name_)
+        ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name_)
         t_kind
     in
+    Type_expansions.report cycles
+    |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
     let env = casetype_def env typedef in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
 

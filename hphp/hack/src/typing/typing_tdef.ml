@@ -44,26 +44,21 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
   } =
     td
   in
-  let (ety_env, has_cycle) =
+  match
     Typing_defs.add_type_expansion_check_cycles
       ety_env
-      (td_pos, Type_expansions.Expansion.Type_alias x)
-  in
-  match has_cycle with
-  | Some initial_taccess_pos_opt ->
-    (* Only report a cycle if it's through the specified definition *)
-    let ty_err_opt =
-      Option.map initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
-          Typing_error.(
-            primary
-            @@ Primary.Cyclic_typedef
-                 { def_pos = initial_taccess_pos; use_pos = pos }))
-    in
+      {
+        Type_expansions.name = Type_expansions.Expandable.Type_alias x;
+        use_pos = pos;
+        def_pos = Some td_pos;
+      }
+  with
+  | Error cycle ->
     let (env, ty) =
       Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos pos)
     in
-    ((env, ty_err_opt), (ety_env, ty))
-  | None ->
+    ((env, None, [cycle]), (ety_env, ty))
+  | Ok ety_env ->
     let should_expand =
       force_expand
       || Env.is_typedef_visible
@@ -82,9 +77,9 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
           None;
       }
     in
-    let (env, expanded_ty) =
+    let ((env, err, cycles), expanded_ty) =
       if should_expand then
-        Phase.localize ~ety_env env td_type
+        Phase.localize_rec ~ety_env env td_type
       else
         let (env, td_as_constraint) =
           match td_as_constraint with
@@ -93,19 +88,19 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
               Reason.implicit_upper_bound (Reason.to_pos r, "?nonnull")
             in
             let cstr = MakeType.mixed r_cstr in
-            ((env, None), cstr)
+            ((env, None, []), cstr)
           | Some cstr ->
             (* Special case for supportdyn<T> defined with "as T" in order to
              * avoid supportdynamic.hhi appearing in reason *)
             if String.equal x SN.Classes.cSupportDyn then
-              ((env, None), List.hd_exn argl)
+              ((env, None, []), List.hd_exn argl)
             else
-              Phase.localize ~ety_env env cstr
+              Phase.localize_rec ~ety_env env cstr
         in
         (* TODO: update Tnewtype and pass in super constraint as well *)
         (env, mk (r, Tnewtype (x, argl, td_as_constraint)))
     in
-    (env, (ety_env, with_reason expanded_ty r))
+    ((env, err, cycles), (ety_env, with_reason expanded_ty r))
 
 let expand_typedef ety_env env r type_name argl =
   let (env, (_ety_env, ty)) =
@@ -121,7 +116,7 @@ let expand_typedef ety_env env r type_name argl =
 let force_expand_typedef ~ety_env env (t : locl_ty) =
   let rec aux e1 ety_env env t =
     let default () =
-      ((env, e1), t, Type_expansions.positions ety_env.type_expansions)
+      ((env, e1), t, Type_expansions.def_positions ety_env.type_expansions)
     in
     match deref t with
     | (_, Tnewtype (x, _, _)) when String.equal SN.Classes.cEnumClassLabel x ->
@@ -132,7 +127,7 @@ let force_expand_typedef ~ety_env env (t : locl_ty) =
       default ()
     | (r, Tnewtype (x, argl, _))
       when not (Env.is_enum env x || Env.is_enum_class env x) ->
-      let ((env, e2), (ety_env, ty)) =
+      let ((env, e2, _cycles), (ety_env, ty)) =
         expand_typedef_ ~force_expand:true ety_env env r x argl
       in
       aux (Option.merge e1 e2 ~f:Typing_error.both) ety_env env ty

@@ -307,12 +307,13 @@ let empty_expand_env =
 let empty_expand_env_with_on_error on_error =
   { empty_expand_env with on_error = Some on_error }
 
-let add_type_expansion_check_cycles ety_env exp =
-  let (type_expansions, has_cycle) =
-    Type_expansions.add_and_check_cycles ety_env.type_expansions exp
-  in
-  let ety_env = { ety_env with type_expansions } in
-  (ety_env, has_cycle)
+let add_type_expansion_check_cycles ety_env exp :
+    ( expand_env,
+      Type_expansions.cycle * Typing_error.Reasons_callback.t option )
+    result =
+  Type_expansions.add_and_check_cycles ety_env.type_expansions exp
+  |> Result.map ~f:(fun type_expansions -> { ety_env with type_expansions })
+  |> Result.map_error ~f:(fun cycle -> (cycle, ety_env.on_error))
 
 let cyclic_expansion env = Type_expansions.cyclic_expansion env.type_expansions
 

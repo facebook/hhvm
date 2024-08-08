@@ -212,16 +212,14 @@ val empty_expand_env : expand_env
 val empty_expand_env_with_on_error :
   Typing_error.Reasons_callback.t -> expand_env
 
-(** Returns:
-    - [None] if there was no cycle
-    - [Some None] if there was a cycle which did not involve the first
-      type expansion, i.e. error reporting should be done elsewhere
-    - [Some (Some pos)] if there was a cycle involving the first type
-      expansion in which case an error should be reported at [pos]. *)
+(** [add_type_expansion_check_cycles ety_env expansion] adds
+  and [expansion] to [ety_env.expansions] and
+  checks that that [expansion] hasn't already been done,
+  i.e. wasn't already in ety_env.expansions. *)
 val add_type_expansion_check_cycles :
   expand_env ->
-  Pos_or_decl.t * Type_expansions.Expansion.t ->
-  expand_env * Pos.t option option
+  Type_expansions.expansion ->
+  (expand_env, Type_expansions.cycle_reporter) result
 
 (** Returns whether there was an attempt at expanding a cyclic type. *)
 val cyclic_expansion : expand_env -> bool

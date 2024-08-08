@@ -60,7 +60,7 @@ let rex_member =
   Pcre.regexp
     ~flags:[`MULTILINE]
     (Printf.sprintf
-       "Original thrift (field|definition):-%s%s%s%s"
+       "Original thrift (field|definition|constant):-%s%s%s%s"
        rex_sp
        rex_ty
        rex_sp
@@ -174,14 +174,19 @@ let make_member_decl member_name container_qname kind =
             { enum_ = NamedType.{ name; kind = NamedKind.Enum_ }; name = mname }))
 
 let get_thrift_from_member t ~doc =
-  t.cur_container >>= fun { name; kind } ->
   try
     let substrings = Pcre.exec ~rex:rex_member doc in
     let member_name = Pcre.get_substring substrings 2 in
-    let name = Identifier.Key name in
     let file = File.Key (Src.File.Key t.thrift_path) in
-    let container_qname = QualName.(Key { file; name }) in
-    Some (make_member_decl member_name container_qname kind)
+    match t.cur_container with
+    | Some { name; kind } ->
+      let name = Identifier.Key name in
+      let container_qname = QualName.(Key { file; name }) in
+      Some (make_member_decl member_name container_qname kind)
+    | None ->
+      let member_name = Identifier.Key member_name in
+      let name = QualName.(Key { file; name = member_name }) in
+      Some XRefTarget.(Constant Constant.(Key { name }))
   with
   | _ ->
     Hh_logger.log "Couldn't parse thrift comment %s" doc;

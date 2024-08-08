@@ -176,7 +176,7 @@ let process_container_decl
             id
             const
             const.cc_doc_comment
-            None
+            thrift_ctx
             fa
         in
         (Declaration.ClassConst (ClassConstDeclaration.Id decl_id) :: decls, fa))

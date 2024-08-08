@@ -15,3 +15,4 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/Perform.tcc"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types_custom_protocol.h"

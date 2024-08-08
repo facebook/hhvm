@@ -27,6 +27,8 @@ from thrift.py3.client cimport cClientWrapper
 cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
+cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.clients_wrapper as _test_fixtures_another_interactions_shared_clients_wrapper
 
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient "::cpp2::MyServiceAsyncClient":
@@ -72,6 +74,21 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_cli
 
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cPerformClientWrapper] move(unique_ptr[cPerformClientWrapper])
+
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
+  cdef cppclass cInteractWithSharedAsyncClient "::cpp2::InteractWithSharedAsyncClient":
+      pass
+
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
+  cdef cppclass cInteractWithSharedAsyncClient_SharedInteraction "::cpp2::InteractWithSharedAsyncClient::SharedInteraction":
+      pass
+
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
+  cdef cppclass cInteractWithSharedAsyncClient_MyInteraction "::cpp2::InteractWithSharedAsyncClient::MyInteraction":
+      pass
+
+cdef extern from "<utility>" namespace "std":
+  cdef unique_ptr[cInteractWithSharedClientWrapper] move(unique_ptr[cInteractWithSharedClientWrapper])
 
 cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::thrift":
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
@@ -155,4 +172,29 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/clie
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
     cFollyFuture[cFollyUnit] frobnicate(cRpcOptions, )
+
+
+  cdef cppclass cInteractWithSharedClientWrapper "::cpp2::InteractWithSharedClientWrapper":
+    void setPersistentHeader(const string& key, const string& value)
+    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
+
+    cFollyFuture[_test_fixtures_another_interactions_shared_types.cDoSomethingResult] do_some_similar_things(cRpcOptions, )
+    cFollyFuture[unique_ptr[cClientWrapper]]& createSharedInteraction()
+    cFollyFuture[unique_ptr[cClientWrapper]]& createMyInteraction()
+
+  cdef cppclass cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper "::cpp2::InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper"(cClientWrapper):
+    void setPersistentHeader(const string& key, const string& value)
+    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
+
+    cFollyFuture[cint32_t] init(cRpcOptions, )
+    cFollyFuture[_test_fixtures_another_interactions_shared_types.cDoSomethingResult] do_something(cRpcOptions, )
+    cFollyFuture[cFollyUnit] tear_down(cRpcOptions, )
+
+  cdef cppclass cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper "::cpp2::InteractWithSharedClientWrapper::MyInteractionInteractionWrapper"(cClientWrapper):
+    void setPersistentHeader(const string& key, const string& value)
+    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
+
+    cFollyFuture[cint32_t] frobnicate(cRpcOptions, )
+    cFollyFuture[cFollyUnit] ping(cRpcOptions, )
+    cFollyFuture[cClientBufferedStream[cbool]] truthify(cRpcOptions, )
 

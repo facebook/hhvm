@@ -401,6 +401,69 @@ where
     }
 }
 
+pub struct InteractWithShared<'mock> {
+    pub do_some_similar_things: r#impl::interact_with_shared::do_some_similar_things<'mock>,
+    _marker: ::std::marker::PhantomData<&'mock ()>,
+}
+
+impl crate::DynClient for dyn ::::InteractWithShared {
+    type Mock<'mock> = InteractWithShared<'mock>;
+    fn mock<'mock>() -> Self::Mock<'mock> {
+        InteractWithShared {
+            do_some_similar_things: r#impl::interact_with_shared::do_some_similar_things::unimplemented(),
+            _marker: ::std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'mock> ::::InteractWithShared for InteractWithShared<'mock> {
+    fn do_some_similar_things(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        let mut closure = self.do_some_similar_things.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+
+    fn createMyInteraction(
+        &self,
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
+        unimplemented!("Mocking interactions is not yet implemented");
+    }
+
+    fn createshared.SharedInteraction(
+        &self,
+    ) -> ::std::result::Result<crate::client::SharedInteractionClient, ::anyhow::Error> {
+        unimplemented!("Mocking interactions is not yet implemented");
+    }
+}
+
+impl<'mock, T> ::::InteractWithSharedExt<T> for InteractWithShared<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn do_some_similar_things_with_rpc_opts(
+        &self,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        <Self as ::::InteractWithShared>::do_some_similar_things(
+            self,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for InteractWithShared<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("InteractWithSharedExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod my_service {
 
@@ -818,5 +881,54 @@ pub mod r#impl {
                 *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
             }
         }
+    }
+    pub mod interact_with_shared {
+
+        pub struct do_some_similar_things<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    shared__types::DoSomethingResult,
+                    ::::errors::interact_with_shared::DoSomeSimilarThingsError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> do_some_similar_things<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "InteractWithShared",
+                        "do_some_similar_things",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, value: shared__types::DoSomethingResult) {
+                self.mock(move || value.clone());
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> shared__types::DoSomethingResult + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<shared__types::DoSomethingResult, ::::errors::interact_with_shared::DoSomeSimilarThingsError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::interact_with_shared::DoSomeSimilarThingsError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
+
+
     }
 }

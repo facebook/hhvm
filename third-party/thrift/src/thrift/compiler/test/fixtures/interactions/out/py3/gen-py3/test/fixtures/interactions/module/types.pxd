@@ -33,6 +33,7 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (

@@ -17,6 +17,7 @@ from collections.abc import Sequence
 """
 
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 def get_types_reflection():
     return importlib.import_module(

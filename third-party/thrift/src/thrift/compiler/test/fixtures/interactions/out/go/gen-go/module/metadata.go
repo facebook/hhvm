@@ -6,6 +6,7 @@
 package module
 
 import (
+    shared "shared"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
@@ -18,6 +19,7 @@ func mapsCopy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) {
 	}
 }
 
+var _ = shared.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
 // TODO: uncomment when can safely upgrade to Go 1.21 without requiring any rollback.
@@ -31,6 +33,10 @@ var (
             )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
+            )
+    premadeThriftType_shared_DoSomethingResult = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("shared.DoSomethingResult"),
             )
 )
 
@@ -85,6 +91,16 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetReturnType(premadeThriftType_void),
         },
     ),
+    metadata.NewThriftService().
+    SetName("module.InteractWithShared").
+    SetFunctions(
+        []*metadata.ThriftFunction{
+            metadata.NewThriftFunction().
+    SetName("do_some_similar_things").
+    SetIsOneway(false).
+    SetReturnType(premadeThriftType_shared_DoSomethingResult),
+        },
+    ),
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
@@ -111,6 +127,7 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     }
 
     // ...now add enum metadatas from recursively included programs.
+    mapsCopy(allEnumsMap, shared.GetEnumsMetadata())
 
     return allEnumsMap
 }
@@ -125,6 +142,7 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     }
 
     // ...now add struct metadatas from recursively included programs.
+    mapsCopy(allStructsMap, shared.GetStructsMetadata())
 
     return allStructsMap
 }
@@ -139,6 +157,7 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     }
 
     // ...now add exception metadatas from recursively included programs.
+    mapsCopy(allExceptionsMap, shared.GetExceptionsMetadata())
 
     return allExceptionsMap
 }
@@ -153,6 +172,7 @@ func GetServicesMetadata() map[string]*metadata.ThriftService {
     }
 
     // ...now add service metadatas from recursively included programs.
+    mapsCopy(allServicesMap, shared.GetServicesMetadata())
 
     return allServicesMap
 }

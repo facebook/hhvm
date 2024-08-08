@@ -9,6 +9,7 @@ import typing as __T
 from thrift import Thrift
 from thrift.protocol.TProtocol import TProtocolBase
 
+import test.fixtures.another_interactions.ttypes
 from test.fixtures.interactions.ttypes import *
 
 

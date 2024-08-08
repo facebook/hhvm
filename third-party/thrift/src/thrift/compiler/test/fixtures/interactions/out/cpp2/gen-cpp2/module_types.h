@@ -9,6 +9,7 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 
 namespace apache {
 namespace thrift {

@@ -14,6 +14,7 @@ from thrift.py3.reflection import (
 
 import folly.iobuf as _fbthrift_iobuf
 
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 
@@ -180,6 +181,30 @@ def get_reflection__Perform(for_clients: bool):
             arguments=(
             ),
             result=None,
+            result_kind=__NumberType.NOT_A_NUMBER,
+            exceptions=(
+            ),
+            annotations={
+            },
+        )
+    )
+    return spec
+
+
+def get_reflection__InteractWithShared(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
+        name="InteractWithShared",
+        methods=None,
+        annotations={
+        },
+    )
+    spec.add_method(
+        __MethodSpec.__new__(
+            __MethodSpec,
+            name="do_some_similar_things",
+            arguments=(
+            ),
+            result=_test_fixtures_another_interactions_shared_types.DoSomethingResult,
             result_kind=__NumberType.NOT_A_NUMBER,
             exceptions=(
             ),

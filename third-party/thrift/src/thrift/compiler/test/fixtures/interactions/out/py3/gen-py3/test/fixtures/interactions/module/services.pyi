@@ -11,6 +11,8 @@ from thrift.py3.server import RequestContext, ServiceInterface
 from abc import abstractmethod, ABCMeta
 
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+import test.fixtures.another_interactions.shared.services as _test_fixtures_another_interactions_shared_services
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 _MyServiceInterfaceT = _typing.TypeVar('_MyServiceInterfaceT', bound='MyServiceInterface')
 
@@ -107,6 +109,22 @@ class PerformInterface(
     async def foo(
         self
     ) -> None: ...
+    pass
+
+
+_InteractWithSharedInterfaceT = _typing.TypeVar('_InteractWithSharedInterfaceT', bound='InteractWithSharedInterface')
+
+
+class InteractWithSharedInterface(
+    ServiceInterface,
+    metaclass=ABCMeta,
+):
+
+
+    @abstractmethod
+    async def do_some_similar_things(
+        self
+    ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
     pass
 
 

@@ -254,6 +254,45 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::gen_do_some_similar_things([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "do_some_similar_things";
+  auto func_ret_type = std::make_unique<Struct<::thrift::shared_interactions::DoSomethingResult>>("shared.DoSomethingResult");
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
+  DCHECK(self != nullptr);
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
+  ::apache::thrift::metadata::ThriftServiceContext context;
+  context.module() = *self->module();
+  context.service_info() = response.metadata()->services()->at(*self->service_name());
+  response.context() = std::move(context);
+}
+
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService module_InteractWithShared;
+  module_InteractWithShared.name() = "module.InteractWithShared";
+  static const ThriftFunctionGenerator functions[] = {
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::gen_do_some_similar_things,
+  };
+  for (auto& function_gen : functions) {
+    function_gen(metadata, module_InteractWithShared);
+  }
+  // We need to keep the index around because a reference or iterator could be invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+  ThriftServiceContextRef& context = services[selfIndex];
+  metadata.services()->emplace("module.InteractWithShared", std::move(module_InteractWithShared));
+  context.service_name() = "module.InteractWithShared";
+  ::apache::thrift::metadata::ThriftModuleContext module;
+  module.name() = "module";
+  context.module() = std::move(module);
+  return &context;
+}
 } // namespace md
 } // namespace detail
 } // namespace thrift

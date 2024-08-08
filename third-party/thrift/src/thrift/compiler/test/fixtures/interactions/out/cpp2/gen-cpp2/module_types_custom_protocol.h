@@ -16,3 +16,4 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.tcc"
 
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types_custom_protocol.h"

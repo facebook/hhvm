@@ -7,6 +7,7 @@
 
 from thrift.py3.server cimport ServiceInterface
 
+cimport test.fixtures.another_interactions.shared.services as _test_fixtures_another_interactions_shared_services
 
 cdef class MyServiceInterface(ServiceInterface):
     # these are to avoid weird Cython multiple inheritance issue
@@ -27,5 +28,10 @@ cdef class FactoriesInterface(ServiceInterface):
 cdef class PerformInterface(ServiceInterface):
     # these are to avoid weird Cython multiple inheritance issue
     cdef bint _for_cython_foo
+    pass
+
+cdef class InteractWithSharedInterface(ServiceInterface):
+    # these are to avoid weird Cython multiple inheritance issue
+    cdef bint _for_cython_do_some_similar_things
     pass
 

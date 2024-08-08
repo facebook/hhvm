@@ -13,6 +13,8 @@ import typing as _typing
 from types import TracebackType
 
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+import test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
 
 
 _MyServiceT = _typing.TypeVar('_MyServiceT', bound='MyService')
@@ -198,4 +200,62 @@ class Perform_SerialInteraction(thrift.py3.client.Client):
         self,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
+
+
+
+_InteractWithSharedT = _typing.TypeVar('_InteractWithSharedT', bound='InteractWithShared')
+
+
+class InteractWithShared(thrift.py3.client.Client):
+
+    async def do_some_similar_things(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
+
+    def createSharedInteraction(self) -> InteractWithShared_SharedInteraction: ...
+    def async_createSharedInteraction(self) -> InteractWithShared_SharedInteraction: ...
+    def createMyInteraction(self) -> InteractWithShared_MyInteraction: ...
+    def async_createMyInteraction(self) -> InteractWithShared_MyInteraction: ...
+
+_InteractWithShared_SharedInteraction = _typing.TypeVar('_InteractWithShared_SharedInteraction', bound='InteractWithShared_SharedInteraction')
+
+
+class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
+
+    async def init(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> int: ...
+
+    async def do_something(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
+
+    async def tear_down(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> None: ...
+
+
+_InteractWithShared_MyInteraction = _typing.TypeVar('_InteractWithShared_MyInteraction', bound='InteractWithShared_MyInteraction')
+
+
+class InteractWithShared_MyInteraction(thrift.py3.client.Client):
+
+    async def frobnicate(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> int: ...
+
+    async def ping(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> None: ...
+
+    async def truthify(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
 

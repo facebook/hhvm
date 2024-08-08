@@ -18,6 +18,8 @@ from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import test.fixtures.interactions.module.thrift_types
 import test.fixtures.interactions.module.thrift_metadata
+import test.fixtures.another_interactions.shared.thrift_services
+import test.fixtures.another_interactions.shared.thrift_types
 
 class MyServiceInterface(
     ServiceInterface,
@@ -249,6 +251,48 @@ class PerformInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_args, args, protocol)
         value = await self.foo()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_result()
+        
+
+        return serialize_iobuf(return_struct, protocol)
+
+class InteractWithSharedInterface(
+    ServiceInterface,
+    metaclass=ABCMeta
+):
+
+    @staticmethod
+    def service_name() -> bytes:
+        return b"InteractWithShared"
+
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+        functionTable = {
+            b"do_some_similar_things": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_some_similar_things),
+        }
+        return {**super().getFunctionTable(), **functionTable}
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.InteractWithShared"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return test.fixtures.interactions.module.thrift_metadata._fbthrift_metadata_service_response_InteractWithShared()
+
+
+
+    async def do_some_similar_things(
+            self
+        ) -> test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult:
+        raise NotImplementedError("async def do_some_similar_things is not implemented")
+
+    async def _fbthrift__handler_do_some_similar_things(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_InteractWithShared_do_some_similar_things_args, args, protocol)
+        value = await self.do_some_similar_things()
+        return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_InteractWithShared_do_some_similar_things_result(success=value)
         
 
         return serialize_iobuf(return_struct, protocol)

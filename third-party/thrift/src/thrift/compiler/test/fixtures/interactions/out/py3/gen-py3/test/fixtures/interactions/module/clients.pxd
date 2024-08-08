@@ -6,6 +6,7 @@
 #
 cimport thrift.py3.client
 
+cimport test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
 
 cdef class MyService(thrift.py3.client.Client):
     pass
@@ -32,5 +33,14 @@ cdef class Perform_MyInteractionFast(thrift.py3.client.Client):
     pass
 
 cdef class Perform_SerialInteraction(thrift.py3.client.Client):
+    pass
+
+cdef class InteractWithShared(thrift.py3.client.Client):
+    pass
+
+cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
+    pass
+
+cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
     pass
 

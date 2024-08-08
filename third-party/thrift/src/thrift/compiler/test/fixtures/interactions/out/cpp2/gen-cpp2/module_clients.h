@@ -9,3 +9,4 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/MyServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/FactoriesAsyncClient.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/PerformAsyncClient.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractWithSharedAsyncClient.h"

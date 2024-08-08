@@ -38,6 +38,7 @@ from thrift.py3.types cimport (
 from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
+cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 

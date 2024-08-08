@@ -9,9 +9,11 @@ import (
     "fmt"
     "strings"
 
+    shared "shared"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
+var _ = shared.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = strings.Split

@@ -10,6 +10,8 @@ from __future__ import annotations
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 
+import test.fixtures.another_interactions.shared.thrift_metadata
+
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
 def _fbthrift_gen_metadata_exception_CustomException(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
@@ -639,6 +641,146 @@ def _fbthrift_metadata_service_response_Perform() -> _fbthrift_metadata.ThriftSe
     return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
 
 
+def gen_metadata_service_InteractWithShared() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_InteractWithShared(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_InteractWithShared(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.InteractWithShared"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="do_some_similar_things", return_type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="shared.DoSomethingResult")), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    
+    new_struct = test.fixtures.another_interactions.shared.thrift_metadata._fbthrift_gen_metadata_struct_DoSomethingResult(new_struct) # return value
+    
+    
+    return new_struct
+def gen_metadata_service_InteractWithShared_MyInteraction() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_InteractWithShared_MyInteraction(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_InteractWithShared_MyInteraction(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyInteraction"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="frobnicate", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), arguments=[
+        ], exceptions = [
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.CustomException")), name="ex", is_optional=False, structured_annotations=[
+            ]),
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="ping", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
+        ], exceptions = [
+        ], is_oneway=True, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="truthify", return_type=_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType(elemType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE))), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="encode", return_type=_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType(elemType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),finalResponseType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE),initialResponseType=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE))))), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    new_struct = _fbthrift_gen_metadata_exception_CustomException(new_struct) # ex
+    
+     # return value
+    
+    
+    
+    
+     # return value
+    
+    
+    
+    
+     # elem
+     # response  # return value
+    
+    
+    
+    
+     # elem
+     # final response
+     # first response  # return value
+    
+    
+    return new_struct
+def gen_metadata_service_InteractWithShared_SharedInteraction() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_InteractWithShared_SharedInteraction(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_InteractWithShared_SharedInteraction(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.SharedInteraction"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="init", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="do_something", return_type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="shared.DoSomethingResult")), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="tear_down", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    
+     # return value
+    
+    
+    
+    
+    new_struct = test.fixtures.another_interactions.shared.thrift_metadata._fbthrift_gen_metadata_struct_DoSomethingResult(new_struct) # return value
+    
+    
+    
+    
+     # return value
+    
+    
+    return new_struct
+
+def _fbthrift_metadata_service_response_InteractWithShared() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_InteractWithShared()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["module.InteractWithShared"], module=_fbthrift_metadata.ThriftModuleContext(name="module"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
@@ -647,4 +789,5 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_service_MyService(meta)
     meta = _fbthrift_gen_metadata_service_Factories(meta)
     meta = _fbthrift_gen_metadata_service_Perform(meta)
+    meta = _fbthrift_gen_metadata_service_InteractWithShared(meta)
     return meta

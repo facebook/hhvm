@@ -9,3 +9,4 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/MyService.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/Factories.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/Perform.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractWithShared.h"

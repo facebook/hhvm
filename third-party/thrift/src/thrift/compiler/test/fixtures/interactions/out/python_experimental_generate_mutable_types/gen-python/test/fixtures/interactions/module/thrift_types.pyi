@@ -14,6 +14,8 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
+import test.fixtures.another_interactions.shared.thrift_types
+
 
 class _fbthrift_compatible_with_CustomException:
     pass
@@ -799,6 +801,182 @@ class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct)
 
 
 class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_InteractWithShared_do_some_similar_things_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_InteractWithShared_do_some_similar_things_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult]
+
+    def __init__(
+        self, *, success: _typing.Optional[test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult,
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[int]
+    ex: _typing.Final[CustomException]
+
+    def __init__(
+        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[CustomException]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            int,
+            CustomException,
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+
+    def __init__(
+        self, *, success: _typing.Optional[bool] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            bool,
+        ]]]: ...
+
+
+class _fbthrift_SharedInteraction_init_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SharedInteraction_init_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[int]
+
+    def __init__(
+        self, *, success: _typing.Optional[int] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            int,
+        ]]]: ...
+
+
+class _fbthrift_SharedInteraction_do_something_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SharedInteraction_do_something_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult]
+
+    def __init__(
+        self, *, success: _typing.Optional[test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult,
+        ]]]: ...
+
+
+class _fbthrift_SharedInteraction_tear_down_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SharedInteraction_tear_down_result(_fbthrift_python_types.Struct):
     success: _typing.Final[None]
 
     def __init__(

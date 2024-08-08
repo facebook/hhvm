@@ -21,6 +21,11 @@
 #else
 #include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractWithShared.h>)
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractWithShared.h>
+#else
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h>
+#endif
 
 #include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
@@ -163,6 +168,47 @@ class PerformClientWrapper : public ::thrift::py3::ClientWrapper {
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createMyInteraction();
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createMyInteractionFast();
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createSerialInteraction();
+};
+
+
+class InteractWithSharedClientWrapper : public ::thrift::py3::ClientWrapper {
+  public:
+    using ::thrift::py3::ClientWrapper::ClientWrapper;
+
+    folly::Future<::thrift::shared_interactions::DoSomethingResult> do_some_similar_things(
+      apache::thrift::RpcOptions& rpcOptions);
+
+    class SharedInteractionInteractionWrapper : public ClientWrapper {
+      public:
+        SharedInteractionInteractionWrapper(
+          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
+           std::shared_ptr<apache::thrift::RequestChannel> channel)
+           : ClientWrapper(std::move(async_client), channel) {}
+
+        folly::Future<int32_t> init(
+          apache::thrift::RpcOptions& rpcOptions);
+        folly::Future<::thrift::shared_interactions::DoSomethingResult> do_something(
+          apache::thrift::RpcOptions& rpcOptions);
+        folly::Future<folly::Unit> tear_down(
+          apache::thrift::RpcOptions& rpcOptions);
+    };
+
+    class MyInteractionInteractionWrapper : public ClientWrapper {
+      public:
+        MyInteractionInteractionWrapper(
+          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
+           std::shared_ptr<apache::thrift::RequestChannel> channel)
+           : ClientWrapper(std::move(async_client), channel) {}
+
+        folly::Future<int32_t> frobnicate(
+          apache::thrift::RpcOptions& rpcOptions);
+        folly::Future<folly::Unit> ping(
+          apache::thrift::RpcOptions& rpcOptions);
+        folly::Future<apache::thrift::ClientBufferedStream<bool>> truthify(
+          apache::thrift::RpcOptions& rpcOptions);
+    };
+    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createSharedInteraction();
+    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createMyInteraction();
 };
 
 

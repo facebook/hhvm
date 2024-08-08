@@ -52,6 +52,10 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
+cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
+import test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
 
 import test.fixtures.interactions.module.services_reflection as _services_reflection
 cimport test.fixtures.interactions.module.services_reflection as _services_reflection
@@ -65,6 +69,9 @@ from test.fixtures.interactions.module.clients_wrapper cimport cPerformAsyncClie
 from test.fixtures.interactions.module.clients_wrapper cimport cPerformClientWrapper_MyInteractionInteractionWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cPerformClientWrapper_MyInteractionFastInteractionWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cPerformClientWrapper_SerialInteractionInteractionWrapper
+from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedAsyncClient, cInteractWithSharedClientWrapper
+from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper
+from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper
 
 
 cdef void MyService_foo_callback(
@@ -466,6 +473,104 @@ cdef void Perform_MyInteractionFast_truthify_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void Perform_SerialInteraction_frobnicate_callback(
+    cFollyTry[cFollyUnit]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(None)
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void InteractWithShared_do_some_similar_things_callback(
+    cFollyTry[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](cmove(result.value()))))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void InteractWithShared_MyInteraction_frobnicate_callback(
+    cFollyTry[cint32_t]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
+        try:
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+        else:
+            pyfuture.set_exception(exc)
+    elif result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(result.value())
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void InteractWithShared_MyInteraction_ping_callback(
+    cFollyTry[cFollyUnit]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(None)
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void InteractWithShared_MyInteraction_truthify_callback(
+    cFollyTry[cClientBufferedStream[cbool]]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(_test_fixtures_interactions_module_types.ClientBufferedStream__bool._fbthrift_create(result.value(), options))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void InteractWithShared_SharedInteraction_init_callback(
+    cFollyTry[cint32_t]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(result.value())
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void InteractWithShared_SharedInteraction_do_something_callback(
+    cFollyTry[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](cmove(result.value()))))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void InteractWithShared_SharedInteraction_tear_down_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
 ) noexcept:
@@ -1160,6 +1265,217 @@ cdef class Perform_SerialInteraction(thrift.py3.client.Client):
             down_cast_ptr[cPerformClientWrapper_SerialInteractionInteractionWrapper, cClientWrapper](self._client.get()).frobnicate(rpc_options._cpp_obj, 
             ),
             Perform_SerialInteraction_frobnicate_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+cdef object _InteractWithShared_annotations = _py_types.MappingProxyType({
+})
+
+
+@cython.auto_pickle(False)
+cdef class InteractWithShared(thrift.py3.client.Client):
+    annotations = _InteractWithShared_annotations
+
+    cdef const type_info* _typeid(InteractWithShared self):
+        return &typeid(cInteractWithSharedAsyncClient)
+
+    cdef bind_client(InteractWithShared self, cRequestChannel_ptr&& channel):
+        self._client = makeClientWrapper[cInteractWithSharedAsyncClient, cInteractWithSharedClientWrapper](
+            cmove(channel)
+        )
+
+    @cython.always_allow_keywords(True)
+    def do_some_similar_things(
+            InteractWithShared self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper, cClientWrapper](self._client.get()).do_some_similar_things(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_do_some_similar_things_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+
+    def createSharedInteraction(
+            InteractWithShared self
+    ):
+        interaction = InteractWithShared_SharedInteraction()
+        bridgeFutureWith[unique_ptr[cClientWrapper]](
+            interaction._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper, cClientWrapper](self._client.get()).createSharedInteraction(),
+            thrift.py3.client.interactions_callback,
+            <PyObject *> interaction
+        )
+        return interaction
+
+    async def async_createSharedInteraction(
+            InteractWithShared self
+    ):
+        return self.createSharedInteraction()
+
+    def createMyInteraction(
+            InteractWithShared self
+    ):
+        interaction = InteractWithShared_MyInteraction()
+        bridgeFutureWith[unique_ptr[cClientWrapper]](
+            interaction._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper, cClientWrapper](self._client.get()).createMyInteraction(),
+            thrift.py3.client.interactions_callback,
+            <PyObject *> interaction
+        )
+        return interaction
+
+    async def async_createMyInteraction(
+            InteractWithShared self
+    ):
+        return self.createMyInteraction()
+
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__InteractWithShared(for_clients=True)
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftServiceMetadataResponse response
+        ServiceMetadata[_services_reflection.cInteractWithSharedSvIf].gen(response)
+        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.InteractWithShared"
+
+@cython.auto_pickle(False)
+cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
+
+    @cython.always_allow_keywords(True)
+    def init(
+            InteractWithShared_SharedInteraction self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cint32_t](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).init(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_SharedInteraction_init_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def do_something(
+            InteractWithShared_SharedInteraction self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).do_something(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_SharedInteraction_do_something_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def tear_down(
+            InteractWithShared_SharedInteraction self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cFollyUnit](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).tear_down(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_SharedInteraction_tear_down_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+@cython.auto_pickle(False)
+cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
+
+    @cython.always_allow_keywords(True)
+    def frobnicate(
+            InteractWithShared_MyInteraction self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cint32_t](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper, cClientWrapper](self._client.get()).frobnicate(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_MyInteraction_frobnicate_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def ping(
+            InteractWithShared_MyInteraction self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cFollyUnit](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper, cClientWrapper](self._client.get()).ping(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_MyInteraction_ping_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def truthify(
+            InteractWithShared_MyInteraction self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cClientBufferedStream[cbool]](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper, cClientWrapper](self._client.get()).truthify(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_MyInteraction_truthify_callback,
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)

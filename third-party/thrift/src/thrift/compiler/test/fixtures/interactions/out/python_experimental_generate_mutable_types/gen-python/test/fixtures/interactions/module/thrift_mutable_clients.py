@@ -25,6 +25,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.interactions.module.thrift_mutable_types
 import test.fixtures.interactions.module.thrift_metadata
+import test.fixtures.another_interactions.shared.thrift_mutable_types
+import test.fixtures.another_interactions.shared.thrift_clients
 
 class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     @staticmethod
@@ -1314,4 +1316,331 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
+    
+
+class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "InteractWithShared.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.InteractWithShared"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.InteractWithShared"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+    
+        async def do_some_similar_things(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "do_some_similar_things",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_InteractWithShared_do_some_similar_things_args(),
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_InteractWithShared_do_some_similar_things_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uri_or_name="InteractWithShared",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        def createMyInteraction(
+            self #InteractWithShared
+        ) -> InteractWithShared_MyInteraction.Async:
+            return self._create_interaction("MyInteraction", InteractWithShared_MyInteraction.Async)
+        async def async_createMyInteraction(
+            self #InteractWithShared
+        ) -> InteractWithShared_MyInteraction.Async:
+            return self.createMyInteraction()
+        def createSharedInteraction(
+            self #InteractWithShared
+        ) -> InteractWithShared_SharedInteraction.Async:
+            return self._create_interaction("SharedInteraction", InteractWithShared_SharedInteraction.Async)
+        async def async_createSharedInteraction(
+            self #InteractWithShared
+        ) -> InteractWithShared_SharedInteraction.Async:
+            return self.createSharedInteraction()
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.InteractWithShared"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared()
+    
+        def do_some_similar_things(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult:
+            _fbthrift_resp = self._send_request(
+                "InteractWithShared",
+                "do_some_similar_things",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_InteractWithShared_do_some_similar_things_args(),
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_InteractWithShared_do_some_similar_things_result,
+                uri_or_name="InteractWithShared",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShared_MyInteraction.Async", "InteractWithShared_MyInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
+    
+        async def frobnicate(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> int:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "MyInteraction.frobnicate",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_MyInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            if _fbthrift_resp.ex is not None:
+                raise _fbthrift_resp.ex
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def ping(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "MyInteraction.ping",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_MyInteraction_ping_args(),
+                None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+    
+        async def truthify(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.AsyncGenerator[bool, None]:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "MyInteraction.truthify",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_MyInteraction_truthify_args(),
+                (test.fixtures.interactions.module.thrift_mutable_types._fbthrift_MyInteraction_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+                uri_or_name="MyInteraction",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            return _fbthrift_stream
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
+    
+class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWithShared_SharedInteraction.Async", "InteractWithShared_SharedInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.SharedInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SharedInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
+    
+        async def init(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> int:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "SharedInteraction.init",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_SharedInteraction_init_args(),
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_SharedInteraction_init_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="SharedInteraction",
+                uri_or_name="SharedInteraction",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def do_something(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "SharedInteraction.do_something",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_SharedInteraction_do_something_args(),
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_SharedInteraction_do_something_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="SharedInteraction",
+                uri_or_name="SharedInteraction",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def tear_down(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "InteractWithShared",
+                "SharedInteraction.tear_down",
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_SharedInteraction_tear_down_args(),
+                test.fixtures.interactions.module.thrift_mutable_types._fbthrift_SharedInteraction_tear_down_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="SharedInteraction",
+                uri_or_name="SharedInteraction",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SharedInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
     

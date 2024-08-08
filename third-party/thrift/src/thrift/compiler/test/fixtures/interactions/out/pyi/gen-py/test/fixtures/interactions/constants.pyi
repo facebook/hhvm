@@ -6,5 +6,6 @@
 #
 import typing as __T
 
+import test.fixtures.another_interactions.ttypes
 from test.fixtures.interactions.ttypes import *
 

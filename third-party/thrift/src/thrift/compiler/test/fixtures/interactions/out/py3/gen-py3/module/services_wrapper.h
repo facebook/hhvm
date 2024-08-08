@@ -21,6 +21,11 @@
 #else
 #include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractWithShared.h>)
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractWithShared.h>
+#else
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h>
+#endif
 #include <folly/python/futures.h>
 #include <Python.h>
 
@@ -84,4 +89,20 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> PerformInterface(PyObject *if_object, folly::Executor *exc);
+
+
+class InteractWithSharedWrapper : virtual public InteractWithSharedSvIf {
+  protected:
+    PyObject *if_object;
+    folly::Executor *executor;
+  public:
+    explicit InteractWithSharedWrapper(PyObject *if_object, folly::Executor *exc);
+    void async_tm_do_some_similar_things(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>> callback) override;
+    std::unique_ptr<SharedInteractionIf> createSharedInteraction() override;
+    std::unique_ptr<MyInteractionIf> createMyInteraction() override;
+folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
+folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
+};
+
+std::shared_ptr<apache::thrift::ServerInterface> InteractWithSharedInterface(PyObject *if_object, folly::Executor *exc);
 } // namespace cpp2

@@ -9,6 +9,7 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 

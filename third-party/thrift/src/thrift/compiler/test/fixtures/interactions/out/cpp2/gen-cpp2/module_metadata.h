@@ -10,6 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_metadata.h"
 
 namespace cpp2 {
 class MyService;
@@ -19,6 +20,9 @@ class Factories;
 } // namespace cpp2
 namespace cpp2 {
 class Perform;
+} // namespace cpp2
+namespace cpp2 {
+class InteractWithShared;
 } // namespace cpp2
 
 namespace apache {
@@ -77,6 +81,18 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>> {
   friend class ServiceMetadata;
 
   static void gen_foo(ThriftMetadata& metadata, ThriftService& context);
+};
+template <>
+class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>> {
+ public:
+  static void gen(ThriftServiceMetadataResponse& response);
+ private:
+  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
+
+  template <typename T>
+  friend class ServiceMetadata;
+
+  static void gen_do_some_similar_things(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

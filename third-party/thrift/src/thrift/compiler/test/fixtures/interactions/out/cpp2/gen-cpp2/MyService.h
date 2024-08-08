@@ -10,6 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/MyServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 

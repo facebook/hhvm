@@ -11,10 +11,12 @@ import (
     "fmt"
     "strings"
 
+    shared "shared"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
+var _ = shared.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
@@ -999,6 +1001,409 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.St
         return x, x
     }
 
+    return result, nil
+}
+
+
+
+
+type InteractWithShared interface {
+    DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
+}
+
+type InteractWithSharedChannelClientInterface interface {
+    thrift.ClientInterface
+    InteractWithShared
+}
+
+type InteractWithSharedClientInterface interface {
+    thrift.ClientInterface
+    DoSomeSimilarThings() (*shared.DoSomethingResult, error)
+}
+
+type InteractWithSharedContextClientInterface interface {
+    InteractWithSharedClientInterface
+    DoSomeSimilarThingsContext(ctx context.Context) (*shared.DoSomethingResult, error)
+}
+
+type InteractWithSharedChannelClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ InteractWithSharedChannelClientInterface = (*InteractWithSharedChannelClient)(nil)
+
+func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) *InteractWithSharedChannelClient {
+    return &InteractWithSharedChannelClient{
+        ch: channel,
+    }
+}
+
+func (c *InteractWithSharedChannelClient) Close() error {
+    return c.ch.Close()
+}
+
+type InteractWithSharedClient struct {
+    chClient *InteractWithSharedChannelClient
+}
+// Compile time interface enforcer
+var _ InteractWithSharedClientInterface = (*InteractWithSharedClient)(nil)
+var _ InteractWithSharedContextClientInterface = (*InteractWithSharedClient)(nil)
+
+func NewInteractWithSharedClient(prot thrift.Protocol) *InteractWithSharedClient {
+    return &InteractWithSharedClient{
+        chClient: NewInteractWithSharedChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+func (c *InteractWithSharedClient) Close() error {
+    return c.chClient.Close()
+}
+
+func (c *InteractWithSharedChannelClient) DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error) {
+    in := &reqInteractWithSharedDoSomeSimilarThings{
+    }
+    out := newRespInteractWithSharedDoSomeSimilarThings()
+    err := c.ch.Call(ctx, "do_some_similar_things", in, out)
+    if err != nil {
+        return nil, err
+    }
+    return out.GetSuccess(), nil
+}
+
+func (c *InteractWithSharedClient) DoSomeSimilarThings() (*shared.DoSomethingResult, error) {
+    return c.chClient.DoSomeSimilarThings(context.Background())
+}
+
+func (c *InteractWithSharedClient) DoSomeSimilarThingsContext(ctx context.Context) (*shared.DoSomethingResult, error) {
+    return c.chClient.DoSomeSimilarThings(ctx)
+}
+
+type reqInteractWithSharedDoSomeSimilarThings struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqInteractWithSharedDoSomeSimilarThings)(nil)
+
+// Deprecated: InteractWithSharedDoSomeSimilarThingsArgsDeprecated is deprecated, since it is supposed to be internal.
+type InteractWithSharedDoSomeSimilarThingsArgsDeprecated = reqInteractWithSharedDoSomeSimilarThings
+
+func newReqInteractWithSharedDoSomeSimilarThings() *reqInteractWithSharedDoSomeSimilarThings {
+    return (&reqInteractWithSharedDoSomeSimilarThings{})
+}
+
+
+
+func (x *reqInteractWithSharedDoSomeSimilarThings) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqInteractWithSharedDoSomeSimilarThings"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqInteractWithSharedDoSomeSimilarThings) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqInteractWithSharedDoSomeSimilarThings) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqInteractWithSharedDoSomeSimilarThings({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respInteractWithSharedDoSomeSimilarThings struct {
+    Success *shared.DoSomethingResult `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respInteractWithSharedDoSomeSimilarThings)(nil)
+var _ thrift.WritableResult = (*respInteractWithSharedDoSomeSimilarThings)(nil)
+
+// Deprecated: InteractWithSharedDoSomeSimilarThingsResultDeprecated is deprecated, since it is supposed to be internal.
+type InteractWithSharedDoSomeSimilarThingsResultDeprecated = respInteractWithSharedDoSomeSimilarThings
+
+func newRespInteractWithSharedDoSomeSimilarThings() *respInteractWithSharedDoSomeSimilarThings {
+    return (&respInteractWithSharedDoSomeSimilarThings{})
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) GetSuccess() *shared.DoSomethingResult {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    return x.Success
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) SetSuccessNonCompat(value shared.DoSomethingResult) *respInteractWithSharedDoSomeSimilarThings {
+    x.Success = &value
+    return x
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) SetSuccess(value *shared.DoSomethingResult) *respInteractWithSharedDoSomeSimilarThings {
+    x.Success = value
+    return x
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) readField0(p thrift.Decoder) error {  // Success
+    result := *shared.NewDoSomethingResult()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.Success = &result
+    return nil
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.Success)
+}
+
+// Deprecated: Use newRespInteractWithSharedDoSomeSimilarThings().GetSuccess() instead.
+func (x *respInteractWithSharedDoSomeSimilarThings) DefaultGetSuccess() *shared.DoSomethingResult {
+    if !x.IsSetSuccess() {
+        return shared.NewDoSomethingResult()
+    }
+    return x.Success
+}
+
+
+
+func (x *respInteractWithSharedDoSomeSimilarThings) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respInteractWithSharedDoSomeSimilarThings"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.STRUCT)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respInteractWithSharedDoSomeSimilarThings) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respInteractWithSharedDoSomeSimilarThings({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+
+type InteractWithSharedProcessor struct {
+    processorMap       map[string]thrift.ProcessorFunction
+    functionServiceMap map[string]string
+    handler            InteractWithShared
+}
+// Compile time interface enforcer
+var _ thrift.Processor = (*InteractWithSharedProcessor)(nil)
+
+func NewInteractWithSharedProcessor(handler InteractWithShared) *InteractWithSharedProcessor {
+    p := &InteractWithSharedProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunction),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("do_some_similar_things", &procFuncInteractWithSharedDoSomeSimilarThings{handler: handler})
+    p.AddToFunctionServiceMap("do_some_similar_things", "InteractWithShared")
+
+    return p
+}
+
+func (p *InteractWithSharedProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+    p.processorMap[key] = processor
+}
+
+func (p *InteractWithSharedProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *InteractWithSharedProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+    return p.processorMap[key]
+}
+
+func (p *InteractWithSharedProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+    return p.processorMap
+}
+
+func (p *InteractWithSharedProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *InteractWithSharedProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.InteractWithShared")
+}
+
+
+type procFuncInteractWithSharedDoSomeSimilarThings struct {
+    handler InteractWithShared
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncInteractWithSharedDoSomeSimilarThings)(nil)
+
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+    args := newReqInteractWithSharedDoSomeSimilarThings()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("do_some_similar_things", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    result := newRespInteractWithSharedDoSomeSimilarThings()
+    retval, err := p.handler.DoSomeSimilarThings(ctx)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoSomeSimilarThings: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = retval
     return result, nil
 }
 

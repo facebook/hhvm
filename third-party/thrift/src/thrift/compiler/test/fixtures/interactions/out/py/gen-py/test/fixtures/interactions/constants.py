@@ -16,6 +16,8 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
+import test.fixtures.another_interactions.ttypes
+
 
 from .ttypes import UTF8STRINGS, CustomException
 

@@ -15,6 +15,7 @@ namespace cpp2 {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(response);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen(response);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::gen(response);
   return metadata;
 }
 } // namespace cpp2

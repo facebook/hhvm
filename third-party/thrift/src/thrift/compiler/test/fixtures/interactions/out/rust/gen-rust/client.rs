@@ -5589,3 +5589,1318 @@ impl ::fbthrift::ClientFactory for make_Perform {
     }
 }
 
+
+/// Client definitions for `MyInteraction`.
+pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+impl<P, T, S> MyInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+    ) -> Self {
+        Self {
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+
+    fn _frobnicate_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.frobnicate";
+        let args = self::Args_MyInteraction_frobnicate {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.frobnicate", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::FrobnicateReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction::FrobnicateError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteraction.frobnicate"))
+        .boxed()
+    }
+
+    fn _ping_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.ping";
+        let args = self::Args_MyInteraction_ping {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
+        .boxed()
+    }
+
+    fn _truthify_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+
+        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.truthify";
+        let args = self::Args_MyInteraction_truthify {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.truthify", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_stream = transport
+            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
+
+        async move {
+            let (initial, stream) = call_stream.await?;
+
+            let new_stream = stream.then(|item_res| {
+                async move {
+                    match item_res {
+                        ::std::result::Result::Err(err) =>
+                            ::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::from(err)),
+                        ::std::result::Result::Ok(item_enc) => {
+                            S::spawn(move || {
+                                match item_enc {
+                                    ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::my_interaction::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
+                                    ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
+                                    }
+                                }
+                            }).await.map_err(::anyhow::Error::from)??
+                        }
+                    }
+                }
+            })
+            .boxed();
+
+            let de = P::deserializer(initial);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::TruthifyReader, S>(de)
+                .await??
+                .map(move |_| new_stream);
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+pub trait MyInteraction: ::std::marker::Send {
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
+
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
+
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
+
+}
+
+pub trait MyInteractionExt<T>: MyInteraction
+where
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
+
+    fn transport(&self) -> &T;
+}
+
+struct Args_MyInteraction_frobnicate<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_frobnicate<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.frobnicate"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_MyInteraction_ping<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_MyInteraction_truthify<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_truthify<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.truthify"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._ping_impl(
+            rpc_options,
+        )
+    }
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._truthify_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        self._ping_impl(
+            rpc_options,
+        )
+    }
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        self._truthify_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S> MyInteraction for S
+where
+    S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
+    S: ::std::marker::Send,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        self.as_ref().frobnicate(
+        )
+    }
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        self.as_ref().ping(
+        )
+    }
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        self.as_ref().truthify(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> MyInteractionExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).ping_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).truthify_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+#[derive(Clone)]
+pub struct make_MyInteraction;
+
+/// To be called by user directly setting up a client. Avoids
+/// needing ClientFactory trait in scope, avoids unidiomatic
+/// make_Trait name.
+///
+/// ```
+/// # const _: &str = stringify! {
+/// use bgs::client::BuckGraphService;
+///
+/// let protocol = BinaryProtocol::new();
+/// let transport = HttpClient::new();
+/// let client = <dyn BuckGraphService>::new(protocol, transport);
+/// # };
+/// ```
+impl dyn MyInteraction {
+    pub fn new<P, T>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, T, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(MyInteractionImpl::<P, T, S>::new(transport))
+    }
+}
+
+impl<T> dyn MyInteractionExt<T>
+where
+    T: ::fbthrift::Transport,
+{
+    pub fn new<P>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl MyInteractionExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl MyInteractionExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(MyInteractionImpl::<P, T, S>::new(transport))
+    }
+}
+
+pub type MyInteractionDynClient = <make_MyInteraction as ::fbthrift::ClientFactory>::Api;
+pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
+
+/// The same thing, but to be called from generic contexts where we are
+/// working with a type parameter `C: ClientFactory` to produce clients.
+impl ::fbthrift::ClientFactory for make_MyInteraction {
+    type Api = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+    fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        <dyn MyInteraction>::with_spawner(protocol, transport, spawner)
+    }
+}
+
+
+/// Client definitions for `SharedInteraction`.
+pub struct SharedInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+impl<P, T, S> SharedInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+    ) -> Self {
+        Self {
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+
+    fn _init_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.init";
+        let args = self::Args_SharedInteraction_init {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SharedInteraction.init", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "SharedInteraction.init"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::shared_interaction::InitReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::shared_interaction::InitError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SharedInteraction.init"))
+        .boxed()
+    }
+
+    fn _do_something_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.do_something";
+        let args = self::Args_SharedInteraction_do_something {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SharedInteraction.do_something", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "SharedInteraction.do_something"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::shared_interaction::DoSomethingReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::shared_interaction::DoSomethingError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SharedInteraction.do_something"))
+        .boxed()
+    }
+
+    fn _tear_down_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.tear_down";
+        let args = self::Args_SharedInteraction_tear_down {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SharedInteraction.tear_down", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "SharedInteraction.tear_down"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::shared_interaction::TearDownReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::shared_interaction::TearDownError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SharedInteraction.tear_down"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for SharedInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+pub trait SharedInteraction: ::std::marker::Send {
+    fn init(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>>;
+
+    fn do_something(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>>;
+
+    fn tear_down(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>>;
+}
+
+pub trait SharedInteractionExt<T>: SharedInteraction
+where
+    T: ::fbthrift::Transport,
+{
+    fn init_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>>;
+    fn do_something_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>>;
+    fn tear_down_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>>;
+
+    fn transport(&self) -> &T;
+}
+
+struct Args_SharedInteraction_init<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SharedInteraction_init<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SharedInteraction.init"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SharedInteraction_do_something<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SharedInteraction_do_something<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SharedInteraction.do_something"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_SharedInteraction_tear_down<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SharedInteraction_tear_down<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SharedInteraction.tear_down"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> SharedInteraction for SharedInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn init(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._init_impl(
+            rpc_options,
+        )
+    }
+    fn do_something(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._do_something_impl(
+            rpc_options,
+        )
+    }
+    fn tear_down(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._tear_down_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> SharedInteractionExt<T> for SharedInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn init_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
+        self._init_impl(
+            rpc_options,
+        )
+    }
+    fn do_something_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
+        self._do_something_impl(
+            rpc_options,
+        )
+    }
+    fn tear_down_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
+        self._tear_down_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S> SharedInteraction for S
+where
+    S: ::std::convert::AsRef<dyn SharedInteraction + 'a>,
+    S: ::std::marker::Send,
+{
+    fn init(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
+        self.as_ref().init(
+        )
+    }
+    fn do_something(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
+        self.as_ref().do_something(
+        )
+    }
+    fn tear_down(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
+        self.as_ref().tear_down(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> SharedInteractionExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn SharedInteraction + 'a> + ::std::convert::AsRef<dyn SharedInteractionExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn init_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
+        <Self as ::std::convert::AsRef<dyn SharedInteractionExt<T>>>::as_ref(self).init_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn do_something_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
+        <Self as ::std::convert::AsRef<dyn SharedInteractionExt<T>>>::as_ref(self).do_something_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn tear_down_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
+        <Self as ::std::convert::AsRef<dyn SharedInteractionExt<T>>>::as_ref(self).tear_down_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+#[derive(Clone)]
+pub struct make_SharedInteraction;
+
+/// To be called by user directly setting up a client. Avoids
+/// needing ClientFactory trait in scope, avoids unidiomatic
+/// make_Trait name.
+///
+/// ```
+/// # const _: &str = stringify! {
+/// use bgs::client::BuckGraphService;
+///
+/// let protocol = BinaryProtocol::new();
+/// let transport = HttpClient::new();
+/// let client = <dyn BuckGraphService>::new(protocol, transport);
+/// # };
+/// ```
+impl dyn SharedInteraction {
+    pub fn new<P, T>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl SharedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, T, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl SharedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(SharedInteractionImpl::<P, T, S>::new(transport))
+    }
+}
+
+impl<T> dyn SharedInteractionExt<T>
+where
+    T: ::fbthrift::Transport,
+{
+    pub fn new<P>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl SharedInteractionExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl SharedInteractionExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(SharedInteractionImpl::<P, T, S>::new(transport))
+    }
+}
+
+pub type SharedInteractionDynClient = <make_SharedInteraction as ::fbthrift::ClientFactory>::Api;
+pub type SharedInteractionClient = ::std::sync::Arc<SharedInteractionDynClient>;
+
+/// The same thing, but to be called from generic contexts where we are
+/// working with a type parameter `C: ClientFactory` to produce clients.
+impl ::fbthrift::ClientFactory for make_SharedInteraction {
+    type Api = dyn SharedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+    fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        <dyn SharedInteraction>::with_spawner(protocol, transport, spawner)
+    }
+}
+
+
+/// Client definitions for `InteractWithShared`.
+pub struct InteractWithSharedImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+impl<P, T, S> InteractWithSharedImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+    ) -> Self {
+        Self {
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+
+    fn _do_some_similar_things_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.do_some_similar_things";
+        let args = self::Args_InteractWithShared_do_some_similar_things {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("do_some_similar_things", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "InteractWithShared.do_some_similar_things"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::interact_with_shared::DoSomeSimilarThingsReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::interact_with_shared::DoSomeSimilarThingsError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "InteractWithShared.do_some_similar_things"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for InteractWithSharedImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+pub trait InteractWithShared: ::std::marker::Send {
+    fn do_some_similar_things(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>>;
+
+    fn createMyInteraction(
+        &self,
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
+
+    fn createshared.SharedInteraction(
+        &self,
+    ) -> ::std::result::Result<SharedInteractionClient, ::anyhow::Error>;
+}
+
+pub trait InteractWithSharedExt<T>: InteractWithShared
+where
+    T: ::fbthrift::Transport,
+{
+    fn do_some_similar_things_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>>;
+
+    fn transport(&self) -> &T;
+}
+
+struct Args_InteractWithShared_do_some_similar_things<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_InteractWithShared_do_some_similar_things<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "InteractWithShared.do_some_similar_things"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> InteractWithShared for InteractWithSharedImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn do_some_similar_things(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._do_some_similar_things_impl(
+            rpc_options,
+        )
+    }
+
+    fn createMyInteraction(
+        &self,
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
+        ::std::result::Result::Ok(
+            ::std::sync::Arc::new(
+                MyInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"MyInteraction")?
+                )
+            )
+        )
+    }
+
+    fn createshared.SharedInteraction(
+        &self,
+    ) -> ::std::result::Result<SharedInteractionClient, ::anyhow::Error> {
+        ::std::result::Result::Ok(
+            ::std::sync::Arc::new(
+                SharedInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"SharedInteraction")?
+                )
+            )
+        )
+    }
+}
+
+impl<P, T, S> InteractWithSharedExt<T> for InteractWithSharedImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn do_some_similar_things_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        self._do_some_similar_things_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S> InteractWithShared for S
+where
+    S: ::std::convert::AsRef<dyn InteractWithShared + 'a>,
+    S: ::std::marker::Send,
+{
+    fn do_some_similar_things(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        self.as_ref().do_some_similar_things(
+        )
+    }
+    fn createMyInteraction(
+        &self,
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
+        self.as_ref().createMyInteraction()
+    }
+    fn createshared.SharedInteraction(
+        &self,
+    ) -> ::std::result::Result<SharedInteractionClient, ::anyhow::Error> {
+        self.as_ref().createshared.SharedInteraction()
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> InteractWithSharedExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn InteractWithShared + 'a> + ::std::convert::AsRef<dyn InteractWithSharedExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn do_some_similar_things_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        <Self as ::std::convert::AsRef<dyn InteractWithSharedExt<T>>>::as_ref(self).do_some_similar_things_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+#[derive(Clone)]
+pub struct make_InteractWithShared;
+
+/// To be called by user directly setting up a client. Avoids
+/// needing ClientFactory trait in scope, avoids unidiomatic
+/// make_Trait name.
+///
+/// ```
+/// # const _: &str = stringify! {
+/// use bgs::client::BuckGraphService;
+///
+/// let protocol = BinaryProtocol::new();
+/// let transport = HttpClient::new();
+/// let client = <dyn BuckGraphService>::new(protocol, transport);
+/// # };
+/// ```
+impl dyn InteractWithShared {
+    pub fn new<P, T>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl InteractWithShared + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, T, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl InteractWithShared + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(InteractWithSharedImpl::<P, T, S>::new(transport))
+    }
+}
+
+impl<T> dyn InteractWithSharedExt<T>
+where
+    T: ::fbthrift::Transport,
+{
+    pub fn new<P>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl InteractWithSharedExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl InteractWithSharedExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(InteractWithSharedImpl::<P, T, S>::new(transport))
+    }
+}
+
+pub type InteractWithSharedDynClient = <make_InteractWithShared as ::fbthrift::ClientFactory>::Api;
+pub type InteractWithSharedClient = ::std::sync::Arc<InteractWithSharedDynClient>;
+
+/// The same thing, but to be called from generic contexts where we are
+/// working with a type parameter `C: ClientFactory` to produce clients.
+impl ::fbthrift::ClientFactory for make_InteractWithShared {
+    type Api = dyn InteractWithShared + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+    fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        <dyn InteractWithShared>::with_spawner(protocol, transport, spawner)
+    }
+}
+

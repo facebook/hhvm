@@ -60,6 +60,8 @@ import builtins as _builtins
 import importlib
 import asyncio
 from folly.coro cimport bridgeCoroTaskWith
+cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 
 

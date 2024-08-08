@@ -281,4 +281,56 @@ folly::SemiFuture<folly::Unit> PerformWrapper::semifuture_onStopRequested() {
   );
   return std::move(future);
 }
+
+
+InteractWithSharedWrapper::InteractWithSharedWrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
+  {
+    import_test__fixtures__interactions__module__services();
+  }
+
+
+void InteractWithSharedWrapper::async_tm_do_some_similar_things(
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>> callback) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback)    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>();
+        call_cy_InteractWithShared_do_some_similar_things(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
+std::unique_ptr<InteractWithSharedSvIf::SharedInteractionIf> InteractWithSharedWrapper::createSharedInteraction() {
+  throw std::runtime_error("Py3 server doesn't support interactions.");
+}
+std::unique_ptr<InteractWithSharedSvIf::MyInteractionIf> InteractWithSharedWrapper::createMyInteraction() {
+  throw std::runtime_error("Py3 server doesn't support interactions.");
+}
+std::shared_ptr<apache::thrift::ServerInterface> InteractWithSharedInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<InteractWithSharedWrapper>(if_object, exc);
+}
+folly::SemiFuture<folly::Unit> InteractWithSharedWrapper::semifuture_onStartServing() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_InteractWithShared_onStartServing(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
+folly::SemiFuture<folly::Unit> InteractWithSharedWrapper::semifuture_onStopRequested() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_InteractWithShared_onStopRequested(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
 } // namespace cpp2

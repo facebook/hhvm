@@ -14,6 +14,7 @@
 #include <thrift/compiler/test/fixtures/interactions/gen-python-capi/module/thrift_types_api.h>
 #include <thrift/compiler/test/fixtures/interactions/gen-python-capi/module/thrift_types_capi.h>
 
+#include "thrift/compiler/test/fixtures/interactions/gen-python-capi/shared/thrift_types_capi.h"
 
 namespace apache {
 namespace thrift {

@@ -15,6 +15,7 @@ from typing_extensions import Final
 import sys
 import itertools
 import thrift.py3.stream
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 
 __property__ = property

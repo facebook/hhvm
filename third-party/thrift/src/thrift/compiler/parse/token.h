@@ -54,7 +54,7 @@ enum class tok {
   plus,      // "+"
   minus,     // "-"
   at,        // "@"
-  // clang-format om
+  // clang-format on
 
   // Basic types:
   kw_void,
@@ -115,6 +115,7 @@ namespace detail {
 // Converts a character to the corresponding single-character token kind or
 // returns tok::error if there isn't one.
 constexpr tok to_tok(char c) {
+  // clang-format off
   switch (c) {
     case ',': return tok::comma;
     case ';': return tok::semi;
@@ -132,6 +133,7 @@ constexpr tok to_tok(char c) {
     case '-': return tok::minus;
     case '@': return tok::at;
   }
+  // clang-format on
   return tok::error;
 }
 } // namespace detail
@@ -167,23 +169,15 @@ struct token_kind {
 
  private:
   // These are private friends to reduce overload sets.
-  friend bool operator==(tok lhs, token_kind rhs) {
-    return lhs == rhs.value;
-  }
+  friend bool operator==(tok lhs, token_kind rhs) { return lhs == rhs.value; }
   friend bool operator==(token_kind lhs, token_kind rhs) {
     return lhs.value == rhs.value;
   }
 
   // The following overloads are only for compatibility with pre-C++20.
-  friend bool operator==(token_kind lhs, tok rhs) {
-    return lhs.value == rhs;
-  }
-  friend bool operator!=(tok lhs, token_kind rhs) {
-    return lhs != rhs.value;
-  }
-  friend bool operator!=(token_kind lhs, tok rhs) {
-    return lhs.value != rhs;
-  }
+  friend bool operator==(token_kind lhs, tok rhs) { return lhs.value == rhs; }
+  friend bool operator!=(tok lhs, token_kind rhs) { return lhs != rhs.value; }
+  friend bool operator!=(token_kind lhs, tok rhs) { return lhs.value != rhs; }
   friend bool operator!=(token_kind lhs, token_kind rhs) {
     return lhs.value != rhs.value;
   }
@@ -227,8 +221,7 @@ class token {
     return make_string_token(tok::identifier, r, value);
   }
 
-  static token make_inline_doc(
-      const source_range& r, std::string_view value) {
+  static token make_inline_doc(const source_range& r, std::string_view value) {
     return make_string_token(tok::inline_doc, r, value);
   }
 

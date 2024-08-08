@@ -508,6 +508,12 @@ where
     {{/service:extendedClients}}
 }
 
+{{#service:interaction?}}
+pub type {{service:rust_name}}DynClient = dyn {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type {{service:rust_name}}Client = ::std::sync::Arc<{{service:rust_name}}DynClient>;
+
+{{/service:interaction?}}
+{{^service:interaction?}}
 #[derive(Clone)]
 pub struct make_{{service:rust_name}};
 
@@ -610,5 +616,6 @@ impl ::fbthrift::ClientFactory for make_{{service:rust_name}} {
         <dyn {{service:rust_name}}>::with_spawner(protocol, transport, spawner)
     }
 }
+{{/service:interaction?}}
 
 {{!newline}}

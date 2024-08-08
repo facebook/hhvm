@@ -127,10 +127,10 @@ RocketClient::RocketClient(
 }
 
 RocketClient::~RocketClient() {
-  closeNow(transport::TTransportException("Destroying RocketClient"));
   if (keepAliveWatcher_) {
     keepAliveWatcher_->stop();
   }
+  closeNow(transport::TTransportException("Destroying RocketClient"));
   eventBaseDestructionCallback_.cancel();
   detachableLoopCallback_.cancelLoopCallback();
 

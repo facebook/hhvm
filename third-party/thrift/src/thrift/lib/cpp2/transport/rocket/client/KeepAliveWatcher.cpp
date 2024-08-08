@@ -82,7 +82,9 @@ void KeepAliveWatcher::handleKeepaliveFrame(
 void KeepAliveWatcher::sendKeepAliveFrame(SetupFrame* setupFrame) {
   DestructorGuard dg(this);
   evb_->dcheckIsInEventBaseThread();
-  socket_->writeChain(this, makeKeepAliveFrame(setupFrame));
+  if (socket_ && socket_->good()) {
+    socket_->writeChain(this, makeKeepAliveFrame(setupFrame));
+  }
 }
 
 void KeepAliveWatcher::checkTimeoutToCloseOrSchedule() {

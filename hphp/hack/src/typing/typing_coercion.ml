@@ -41,6 +41,26 @@ open Typing_env_types
 *
 *)
 
+module Log = struct
+  let should_log_coerce_type env =
+    Typing_log.should_log env ~category:"typing" ~level:2
+
+  let log_coerce_type env p ~ty_have ~ty_expect =
+    Typing_log.log_function
+      (Pos_or_decl.of_raw_pos p)
+      ~function_name:"Typing_coercion.coerce_type"
+      ~arguments:
+        [
+          ("ty_expect", Typing_print.debug env ty_expect);
+          ("ty_have", Typing_print.debug env ty_have);
+        ]
+      ~result:(fun (_env, err_opt) ->
+        Some
+          (match err_opt with
+          | None -> "ok"
+          | Some _ -> "error"))
+end
+
 (* does coercion, including subtyping *)
 let coerce_type_impl
     ~coerce_for_op
@@ -102,9 +122,9 @@ let coerce_type_impl
     | _ -> Typing_utils.sub_type env ty_have ty_expect on_error
 
 let coerce_type
-    ?(coerce_for_op = false)
-    ?(coerce = None)
-    ?(ignore_readonly = false)
+    ~coerce_for_op
+    ~coerce
+    ~ignore_readonly
     p
     ur
     env
@@ -112,19 +132,6 @@ let coerce_type
     ty_expect
     ty_expect_enforced
     (on_error : Typing_error.Callback.t) =
-  Typing_log.(
-    log_with_level env "typing" ~level:2 (fun () ->
-        log_types
-          (Pos_or_decl.of_raw_pos p)
-          env
-          [
-            Log_head
-              ( "Typing_coercion.coerce_type ",
-                [
-                  Log_type ("ty_expect", ty_expect);
-                  Log_type ("ty_have", ty_have);
-                ] );
-          ]));
   coerce_type_impl
     ~coerce_for_op
     ~coerce
@@ -137,6 +144,43 @@ let coerce_type
        (Typing_error.Reasons_callback.with_claim
           on_error
           ~claim:(lazy (p, Reason.string_of_ureason ur)))
+
+let coerce_type
+    ?(coerce_for_op = false)
+    ?(coerce = None)
+    ?(ignore_readonly = false)
+    p
+    ur
+    env
+    ty_have
+    ty_expect
+    ty_expect_enforced
+    (on_error : Typing_error.Callback.t) =
+  if Log.should_log_coerce_type env then
+    Log.log_coerce_type env p ~ty_have ~ty_expect @@ fun () ->
+    coerce_type
+      ~coerce_for_op
+      ~coerce
+      ~ignore_readonly
+      p
+      ur
+      env
+      ty_have
+      ty_expect
+      ty_expect_enforced
+      on_error
+  else
+    coerce_type
+      ~coerce_for_op
+      ~coerce
+      ~ignore_readonly
+      p
+      ur
+      env
+      ty_have
+      ty_expect
+      ty_expect_enforced
+      on_error
 
 let coerce_type_like_strip
     p ur env ty_have ty_expect (on_error : Typing_error.Callback.t) =

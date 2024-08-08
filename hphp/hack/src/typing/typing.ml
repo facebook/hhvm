@@ -59,6 +59,24 @@ type dyn_func_kind =
 
 type branch_info = { pkgs: SSet.t }
 
+module Log = struct
+  let should_log_check_expected_ty env =
+    Typing_log.should_log env ~category:"typing" ~level:1
+
+  let log_check_expected_ty env p ~message ~inferred_ty ~ty =
+    Typing_log.log_function
+      (Pos_or_decl.of_raw_pos p)
+      ~function_name:(Printf.sprintf "Typing.check_expected_ty_res %s" message)
+      ~arguments:
+        [
+          ("inferred_ty", Typing_print.debug env inferred_ty);
+          ("expected_ty", Typing_print.debug env ty);
+        ]
+      ~result:(function
+        | Ok _ -> Some "ok"
+        | Error _ -> Some "error")
+end
+
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -488,12 +506,46 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
             env
         | _ -> env)
 
-(** Do a subtype check of inferred type against expected type.
-   * The optional coerce_for_op parameter controls whether any arguments of type
-   * dynamic can be coerced to enforceable types because they are arguments to a
-   * built-in operator.
- *)
 let check_expected_ty_res
+    ~(coerce_for_op : bool)
+    (env : env)
+    (inferred_ty : locl_ty)
+    (ExpectedTy.{ pos = p; reason = ur; ty; coerce } : ExpectedTy.t) :
+    (env, env) result =
+  let (env, ty_err_opt) =
+    Typing_coercion.coerce_type
+      ~coerce_for_op
+      ~coerce
+      p
+      ur
+      env
+      inferred_ty
+      ty
+      Enforced (* TODO AKENN: flow this in *)
+      Typing_error.Callback.unify_error
+  in
+  Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+  Option.value_map ~default:(Ok env) ~f:(fun _ -> Error env) ty_err_opt
+
+let check_expected_ty_res
+    ~(coerce_for_op : bool)
+    (message : string)
+    (env : env)
+    (inferred_ty : locl_ty)
+    (expected_ty : ExpectedTy.t) : (env, env) result =
+  if Log.should_log_check_expected_ty env then
+    let ExpectedTy.{ pos; ty; reason = _; coerce = _ } = expected_ty in
+    Log.log_check_expected_ty env pos ~message ~inferred_ty ~ty @@ fun () ->
+    check_expected_ty_res ~coerce_for_op env inferred_ty expected_ty
+  else
+    check_expected_ty_res ~coerce_for_op env inferred_ty expected_ty
+
+(** Do a subtype check of inferred type against expected type.
+    The optional coerce_for_op parameter controls whether any arguments of type
+    dynamic can be coerced to enforceable types because they are arguments to a
+    built-in operator.
+ *)
+let check_expected_ty_opt_res
     ~(coerce_for_op : bool)
     (message : string)
     (env : env)
@@ -501,38 +553,17 @@ let check_expected_ty_res
     (expected : ExpectedTy.t option) : (env, env) result =
   match expected with
   | None -> Ok env
-  | Some ExpectedTy.{ pos = p; reason = ur; ty; coerce } ->
-    Typing_log.(
-      log_with_level env "typing" ~level:1 (fun () ->
-          log_types
-            (Pos_or_decl.of_raw_pos p)
-            env
-            [
-              Log_head
-                ( Printf.sprintf "Typing.check_expected_ty %s" message,
-                  [
-                    Log_type ("inferred_ty", inferred_ty);
-                    Log_type ("expected_ty", ty);
-                  ] );
-            ]));
-    let (env, ty_err_opt) =
-      Typing_coercion.coerce_type
-        ~coerce_for_op
-        ~coerce
-        p
-        ur
-        env
-        inferred_ty
-        ty
-        Enforced (* TODO AKENN: flow this in *)
-        Typing_error.Callback.unify_error
-    in
-    Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-    Option.value_map ~default:(Ok env) ~f:(fun _ -> Error env) ty_err_opt
+  | Some expected_ty ->
+    check_expected_ty_res ~coerce_for_op message env inferred_ty expected_ty
 
 let check_expected_ty message env inferred_ty expected =
   Result.fold ~ok:Fn.id ~error:Fn.id
-  @@ check_expected_ty_res ~coerce_for_op:false message env inferred_ty expected
+  @@ check_expected_ty_opt_res
+       ~coerce_for_op:false
+       message
+       env
+       inferred_ty
+       expected
 
 (* Set a local; must not be already assigned if it is a using variable *)
 let set_local ?(is_using_clause = false) ~is_defined ~bound_ty env (pos, x) ty =
@@ -2312,6 +2343,25 @@ end = struct
       }
   end
 
+  module Log = struct
+    let should_log_expr env =
+      Typing_log.should_log env ~category:"typing" ~level:1
+
+    let log_expr env expected ctxt p =
+      let (ureason_string, expected_ty_log) =
+        match expected with
+        | None -> ("", [])
+        | Some ExpectedTy.{ reason = r; ty; _ } ->
+          ( " " ^ Reason.string_of_ureason r,
+            [("expected_ty", Typing_print.debug env ty)] )
+      in
+      Typing_log.log_function
+        (Pos_or_decl.of_raw_pos p)
+        ~function_name:("Typing.expr " ^ ureason_string)
+        ~arguments:(("ctxt", Context.show ctxt) :: expected_ty_log)
+        ~result:(fun (env, _expr, ty) -> Some (Typing_print.debug env ty))
+  end
+
   (* Compute an expected type for a labmda that is being called with the
      given args. Where the type of the argument isn't obvious (without actual
      type checking, just use a fresh tyvar *)
@@ -2481,26 +2531,14 @@ end = struct
     end
 
   let rec expr ~(expected : ExpectedTy.t option) ~ctxt env ((_, p, _) as e) =
-    begin
-      let (ureason_string, log_list) =
-        match expected with
-        | None -> ("", [])
-        | Some ExpectedTy.{ reason = r; ty; _ } ->
-          ( " " ^ Reason.string_of_ureason r,
-            [Typing_log.Log_type ("expected_ty", ty)] )
-      in
-      Typing_log.(
-        log_with_level env "typing" ~level:1 (fun () ->
-            log_types
-              (Pos_or_decl.of_raw_pos p)
-              env
-              [
-                Log_head
-                  ( "Typing.expr" ^ ureason_string,
-                    Log_head ("ctxt :" ^ Context.show ctxt, []) :: log_list );
-              ]))
-    end;
-    let (_, p, _) = e in
+    if Log.should_log_expr env then
+      Log.log_expr env expected ctxt p @@ fun () ->
+      expr_handle_inconsistent_type_var_state ~expected ~ctxt env e
+    else
+      expr_handle_inconsistent_type_var_state ~expected ~ctxt env e
+
+  and expr_handle_inconsistent_type_var_state
+      ~expected ~ctxt env ((_, p, _) as e) =
     debug_last_pos := p;
     try expr_ ~expected ~ctxt env e with
     | Inf.InconsistentTypeVarState _ as exn ->

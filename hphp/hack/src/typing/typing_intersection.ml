@@ -18,6 +18,24 @@ module Utils = Typing_utils
 
 exception Nothing
 
+module Log = struct
+  let should_log env ~level =
+    Typing_log.should_log env ~category:"intersection" ~level
+
+  let log_intersection env r ty1 ty2 =
+    Typing_log.log_function
+      (Reason.to_pos r)
+      ~function_name:"Typing_intersection.intersect"
+      ~arguments:
+        [
+          ("ty1", Typing_print.debug env ty1);
+          ("ty2", Typing_print.debug env ty2);
+        ]
+      ~result:(fun (env, ty) ->
+        let (env, ty) = Typing_env.expand_type env ty in
+        Some (Typing_print.debug env ty))
+end
+
 (** Computes the negation of a type when it is known, which is currently the case
 for null, nonnull, mixed, nothing, primitives, and classes.
 Otherwise approximate up or down according to
@@ -150,11 +168,17 @@ let make_intersection env r tyl =
   let (env, ty) = Utils.wrap_union_inter_ty_in_var env r ty in
   (env, ty)
 
+let rec intersect env ~r ty1 ty2 =
+  if Log.should_log env ~level:2 then
+    Log.log_intersection env r ty1 ty2 @@ fun () -> intersect_ env ~r ty1 ty2
+  else
+    intersect_ env ~r ty1 ty2
+
 (** Computes the intersection (greatest lower bound) of two types.
 For the intersection of unions, attempt to simplify by using the distributivity
 of intersection over union. Uses the the `collapses` test function to make sure
 the resulting type is no greater in size than the trivial `Tintersection [ty1; ty2]`. *)
-let rec intersect env ~r ty1 ty2 =
+and intersect_ env ~r ty1 ty2 =
   if ty_equal ty1 ty2 then
     (env, ty1)
   else
@@ -164,11 +188,9 @@ let rec intersect env ~r ty1 ty2 =
       (env, ty1)
     else if Utils.is_sub_type_for_union env ty2 ty1 then
       (env, ty2)
-    else if Utils.is_type_disjoint env ty1 ty2 then (
-      let inter_ty = MkType.nothing r in
-      Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
-      (env, inter_ty)
-    ) else
+    else if Utils.is_type_disjoint env ty1 ty2 then
+      (env, MkType.nothing r)
+    else
       (* Attempt to simplify any case types involved in the intersection.
          If simplification occurs we re-run [intersect] with the simplified type
          until no more simplications can be performed.
@@ -308,7 +330,6 @@ let rec intersect env ~r ty1 ty2 =
           with
           | Nothing -> (env, MkType.nothing r)
         in
-        Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
         (env, inter_ty)
 
 (** Attempts to simplify an intersection involving a case type and another type. If [case_type]
@@ -537,9 +558,10 @@ let simplify_intersections env ?on_tyvar ty =
   intersect_list env r (TySet.elements tys)
 
 let intersect env ~r ty1 ty2 =
-  let (env, inter_ty) = intersect env ~r ty1 ty2 in
-  Typing_log.log_intersection ~level:1 env r ty1 ty2 ~inter_ty;
-  (env, inter_ty)
+  if Log.should_log env ~level:1 then
+    Log.log_intersection env r ty1 ty2 @@ fun () -> intersect env ~r ty1 ty2
+  else
+    intersect env ~r ty1 ty2
 
 let () = Utils.negate_type_ref := negate_type
 

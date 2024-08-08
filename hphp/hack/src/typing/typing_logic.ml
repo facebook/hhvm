@@ -22,6 +22,14 @@ type subtype_prop =
   | Disj of Typing_error.t option * subtype_prop list
 [@@deriving show]
 
+let rec print print_ty = function
+  | IsSubtype (_coercion_direction, sub, super) ->
+    Printf.sprintf "%s <: %s" (print_ty sub) (print_ty super)
+  | Conj [] -> "true"
+  | Conj l -> String.concat ~sep:" & " @@ List.map l ~f:(print print_ty)
+  | Disj (_, []) -> "false"
+  | Disj (_, l) -> String.concat ~sep:" | " @@ List.map l ~f:(print print_ty)
+
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with
   | (IsSubtype (c1, ty1, ty1'), IsSubtype (c2, ty2, ty2')) ->

@@ -27,6 +27,8 @@ type subtype_prop =
         wraps the error that should be produced in this case. *)
 [@@deriving show]
 
+val print : (internal_type -> string) -> subtype_prop -> string
+
 val equal_subtype_prop : subtype_prop -> subtype_prop -> bool
 
 val size : subtype_prop -> int

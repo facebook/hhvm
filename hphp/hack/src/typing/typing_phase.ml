@@ -161,6 +161,45 @@ end = struct
     find alias cache
 end
 
+module Log = struct
+  let should_log_localize env =
+    Typing_log.should_log env ~category:"localize" ~level:1
+
+  let log_localize env ety_env (decl_ty : decl_ty) =
+    Typing_log.log_function
+      (get_pos decl_ty)
+      ~function_name:"Typing_phase.localize"
+      ~arguments:
+        [
+          ( "expand_visible_newtype",
+            if ety_env.expand_visible_newtype then
+              "true"
+            else
+              "false" );
+          ("decl ty", Typing_print.debug_decl env decl_ty);
+        ]
+      ~result:(fun ((env, _), ty) ->
+        let (env, ty) = Typing_env.expand_type env ty in
+        Some (Typing_print.debug env ty))
+
+  let should_log_check_tparams_constraints env =
+    Typing_log.should_log env ~category:"generics" ~level:1
+
+  let log_check_tparams_constraints env use_pos cstr_ty ty =
+    Typing_log.log_function
+      (Pos_or_decl.of_raw_pos use_pos)
+      ~function_name:"Typing_phase.check_tparams_constraints"
+      ~arguments:
+        [
+          ("cstr_ty", Typing_print.debug env cstr_ty);
+          ("ty", Typing_print.debug env ty);
+        ]
+      ~result:(fun (_env, err) ->
+        Some (Printf.sprintf "%d error(s)" (List.length err)))
+
+  let log_tparam_instantiation = Typing_log.log_tparam_instantiation
+end
+
 (* Since the typechecker options defining the cache parameters will be
  * available only when we have an environment, the add/get functions are
  * stored in references initially set to stubs that update themselves
@@ -201,10 +240,14 @@ and setup_cache env =
 (*****************************************************************************)
 
 let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
-  (fun ((env, ty_err_opt), ty) ->
-    let (env, ty) = Typing_log.log_localize ~level:1 ety_env dty (env, ty) in
-    ((env, ty_err_opt), ty))
-  @@
+  if Log.should_log_localize env then
+    Log.log_localize env ety_env dty @@ fun () -> localize_ ~ety_env env dty
+  else
+    (* This path should be fast, so we make sure not to create a closure unlike the other path. *)
+    localize_ ~ety_env env dty
+
+and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
+    (env * Typing_error.t option) * locl_phase ty =
   let rec find_origin dty =
     match get_node dty with
     | Taccess (root_ty, (_pos, id)) ->
@@ -1145,6 +1188,22 @@ and localize_ft
  *   I is a supertype of C
  *)
 and check_tparams_constraints ~use_pos ~ety_env env tparams =
+  let check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty =
+    let (env, e2) =
+      TGenConstraint.check_tparams_constraint env ~use_pos ck ~cstr_ty ty
+    in
+    let ty_errs =
+      Option.value_map ~default:ty_errs ~f:(fun e -> e :: ty_errs) e2
+    in
+    (env, ty_errs)
+  in
+  let check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty =
+    if Log.should_log_check_tparams_constraints env then
+      Log.log_check_tparams_constraints env use_pos cstr_ty ty @@ fun () ->
+      check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty
+    else
+      check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty
+  in
   let check_tparam_constraints (env, ty_errs) t =
     match SMap.find_opt (snd t.tp_name) ety_env.substs with
     | Some ty ->
@@ -1155,27 +1214,10 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
           let ((env, e1), cstr_ty) =
             localize_cstr_ty ~ety_env env cstr_ty t.tp_name
           in
-          Typing_log.(
-            log_with_level env "generics" ~level:1 (fun () ->
-                log_types
-                  (Pos_or_decl.of_raw_pos use_pos)
-                  env
-                  [
-                    Log_head
-                      ( "check_tparams_constraints: check_tparams_constraint",
-                        [Log_type ("cstr_ty", cstr_ty); Log_type ("ty", ty)] );
-                  ]));
-          let (env, e2) =
-            TGenConstraint.check_tparams_constraint env ~use_pos ck ~cstr_ty ty
-          in
-          let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
           let ty_errs =
-            Option.value_map
-              ~default:ty_errs
-              ~f:(fun e -> e :: ty_errs)
-              ty_err_opt
+            Option.value_map ~default:ty_errs ~f:(fun e -> e :: ty_errs) e1
           in
-          (env, ty_errs))
+          check_tparam_constraint (env, ty_errs) (ck, cstr_ty) ty)
     | None -> (env, ty_errs)
   in
   let (env, ty_errs) =
@@ -1450,7 +1492,7 @@ let localize_targs_with_kinds
             use_pos
             (Reason.type_variable_generics (use_pos, snd kind_name, use_name))
         in
-        Typing_log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
+        Log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
         ((env, None), (tvar, wildcard_hint))
     in
     List.map_env_ty_err_opt

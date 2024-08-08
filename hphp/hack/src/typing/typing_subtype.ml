@@ -469,28 +469,45 @@ module Logging = struct
    *     we record this in the failed field of the result.
    *)
 
-  let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
-    Typing_log.(
-      log_with_level env "sub" ~level (fun () ->
-          let types =
-            [Log_type_i ("ty_sub", ty_sub); Log_type_i ("ty_super", ty_super)]
-          in
-          let types =
-            Option.value_map this_ty ~default:types ~f:(fun ty ->
-                Log_type ("this_ty", ty) :: types)
-          in
-          if
-            level >= 3
-            || not
-                 (TUtils.is_capability_i ty_sub
-                 || TUtils.is_capability_i ty_super)
-          then
-            log_types
-              (Reason.to_pos (reason ty_sub))
-              env
-              [Log_head (function_name, types)]
-          else
-            ()))
+  let log_subtype_i_
+      ~(this_ty : locl_ty option) ~function_name ~result env ty_sub ty_super =
+    Typing_log.log_function
+      (Reason.to_pos (reason ty_sub))
+      ~function_name
+      ~arguments:
+        [
+          ("ty_sub", Typing_print.debug_i env ty_sub);
+          ("ty_super", Typing_print.debug_i env ty_super);
+          ( "this_ty",
+            match this_ty with
+            | None -> "None"
+            | Some ty -> Typing_print.debug env ty );
+        ]
+      ~result
+
+  let log_subtype_i_prop =
+    log_subtype_i_ ~result:(fun (env, prop) ->
+        Some (TL.print (Typing_print.debug_i env) prop))
+
+  let log_subtype_prop env ty_sub ty_super =
+    log_subtype_i_prop env (LoclType ty_sub) (LoclType ty_super)
+
+  let should_log_subtype_i env ~level ty_sub ty_super =
+    let level =
+      if
+        (TUtils.is_capability_i ty_sub || TUtils.is_capability_i ty_super)
+        && level < 3
+      then
+        3
+      else
+        level
+    in
+    Typing_log.should_log env ~category:"sub" ~level
+
+  let log_subtype_i = log_subtype_i_ ~result:(fun _ -> None)
+
+  let should_log_subtype env ~level ty_sub ty_super =
+    should_log_subtype_i env ~level (LoclType ty_sub) (LoclType ty_super)
 
   let log_subtype ~this_ty ~function_name env ty_sub ty_super =
     log_subtype_i
@@ -764,41 +781,63 @@ end = struct
     ty_super: locl_ty;
   }
 
-  let log_simplify
-      subtype_env
-      this_ty
-      ~lhs:{ sub_supportdyn; ty_sub }
-      ~rhs:{ super_like; super_supportdyn; ty_super }
-      env =
-    Logging.log_subtype_i
-      ~level:subtype_env.Subtype_env.log_level
-      ~this_ty
-      ~function_name:
-        ("simplify_subtype"
-        ^ (match subtype_env.Subtype_env.coerce with
-          | None -> ""
-          | Some TL.CoerceToDynamic -> " <:D"
-          | Some TL.CoerceFromDynamic -> " D<:")
-        ^
-        let flag str = function
-          | true -> str
-          | false -> ""
-        in
-        flag " sub_supportdyn" (Option.is_some sub_supportdyn)
-        ^ flag " super_supportdyn" super_supportdyn
-        ^ flag " super_like" super_like
-        ^ flag " ignore_likes" subtype_env.Subtype_env.ignore_likes
-        ^ flag " require_soundness" subtype_env.Subtype_env.require_soundness
-        ^ flag
-            " require_completeness"
-            subtype_env.Subtype_env.require_completeness
-        ^ flag " ignore_readonly" subtype_env.Subtype_env.ignore_readonly
-        ^ flag
-            " in_transitive_closure"
-            subtype_env.Subtype_env.in_transitive_closure)
-      env
-      (LoclType ty_sub)
-      (LoclType ty_super)
+  module Log = struct
+    let level subtype_env ~ty_sub ~ty_super =
+      let level = subtype_env.Subtype_env.log_level in
+      if
+        (TUtils.is_capability ty_sub || TUtils.is_capability ty_super)
+        && level < 3
+      then
+        3
+      else
+        level
+
+    let should_log env subtype_env ~lhs ~rhs =
+      Typing_log.should_log
+        env
+        ~category:"sub"
+        ~level:(level subtype_env ~ty_sub:lhs.ty_sub ~ty_super:rhs.ty_super)
+
+    let function_name subtype_env ~sub_supportdyn ~super_like ~super_supportdyn
+        =
+      "Typing_subtype.Subtype.simplify"
+      ^ (match subtype_env.Subtype_env.coerce with
+        | None -> ""
+        | Some TL.CoerceToDynamic -> " <:D"
+        | Some TL.CoerceFromDynamic -> " D<:")
+      ^
+      let flag str = function
+        | true -> str
+        | false -> ""
+      in
+      flag " sub_supportdyn" (Option.is_some sub_supportdyn)
+      ^ flag " super_supportdyn" super_supportdyn
+      ^ flag " super_like" super_like
+      ^ flag " ignore_likes" subtype_env.Subtype_env.ignore_likes
+      ^ flag " require_soundness" subtype_env.Subtype_env.require_soundness
+      ^ flag
+          " require_completeness"
+          subtype_env.Subtype_env.require_completeness
+      ^ flag " ignore_readonly" subtype_env.Subtype_env.ignore_readonly
+      ^ flag
+          " in_transitive_closure"
+          subtype_env.Subtype_env.in_transitive_closure
+
+    let log env subtype_env ~this_ty ~lhs ~rhs =
+      let { sub_supportdyn; ty_sub } = lhs in
+      let { super_like; super_supportdyn; ty_super } = rhs in
+      Logging.log_subtype_prop
+        ~this_ty
+        ~function_name:
+          (function_name
+             subtype_env
+             ~sub_supportdyn
+             ~super_like
+             ~super_supportdyn)
+        env
+        ty_sub
+        ty_super
+  end
 
   let is_final_and_invariant env id =
     let class_def = Env.get_class env id in
@@ -2878,7 +2917,14 @@ end = struct
 
   (* == Entry point ========================================================= *)
   and simplify ~subtype_env ~this_ty ~lhs ~rhs env =
-    let (_ : unit) = log_simplify subtype_env this_ty ~lhs ~rhs env in
+    if Log.should_log env subtype_env ~lhs ~rhs then
+      Log.log env subtype_env ~this_ty ~lhs ~rhs @@ fun () ->
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+    else
+      (* This path should be fast, so we make sure not to create a closure unlike the other path. *)
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+
+  and simplify_ ~subtype_env ~this_ty ~lhs ~rhs env =
     let { sub_supportdyn; ty_sub } = lhs
     and { super_supportdyn; super_like; ty_super } = rhs in
     simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
@@ -5596,7 +5642,27 @@ end = struct
     in
     subty_prop_val env &&& subty_prop_key
 
-  let rec simplify
+  let rec simplify ~subtype_env ~this_ty ~lhs ~rhs env =
+    let { sub_supportdyn = _; ty_sub } = lhs in
+    let { reason_super; can_traverse } = rhs in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
+    let ty_sub = LoclType ty_sub in
+    let ty_super =
+      ConstraintType
+        (mk_constraint_type (reason_super, Tcan_traverse can_traverse))
+    in
+    if Logging.should_log_subtype_i env ~level:2 ty_sub ty_super then
+      Logging.log_subtype_i
+        ~this_ty
+        ~function_name:"Typing_subtype.Can_traverse.simplify"
+        env
+        ty_sub
+        ty_super
+      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+    else
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+
+  and simplify_
       ~subtype_env
       ~this_ty
       ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
@@ -5615,14 +5681,6 @@ end = struct
         ~ty_sub:(LoclType lty_sub)
         ~ty_super:(ConstraintType (mk_constraint_type (r, Tcan_traverse ct)))
     in
-    Logging.log_subtype_i
-      ~level:2
-      ~this_ty
-      ~function_name:"simplify_subtype_can_traverse"
-      env
-      (LoclType lty_sub)
-      (ConstraintType (mk_constraint_type (r, Tcan_traverse ct)));
-
     if TUtils.is_tyvar_error env lty_sub then
       let trav_ty = can_traverse_to_iface ct in
       Subtype.(
@@ -5791,7 +5849,27 @@ end = struct
     has_type_member: has_type_member;
   }
 
-  let rec simplify
+  let rec simplify ~subtype_env ~this_ty ~lhs ~rhs env =
+    let { sub_supportdyn = _; ty_sub } = lhs in
+    let { reason_super; has_type_member } = rhs in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
+    let ty_sub = LoclType ty_sub in
+    let ty_super =
+      ConstraintType
+        (mk_constraint_type (reason_super, Thas_type_member has_type_member))
+    in
+    if Logging.should_log_subtype_i env ~level:2 ty_sub ty_super then
+      Logging.log_subtype_i
+        ~this_ty
+        ~function_name:"Typing_subtype.Has_type_member.simplify"
+        env
+        ty_sub
+        ty_super
+      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+    else
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+
+  and simplify_
       ~subtype_env
       ~this_ty
       ~lhs:{ sub_supportdyn; ty_sub }
@@ -5799,15 +5877,7 @@ end = struct
       env =
     let { htm_id = memid; htm_lower = memloty; htm_upper = memupty } = htm in
     let htmty = ConstraintType (mk_constraint_type (r, Thas_type_member htm)) in
-    Logging.log_subtype_i
-      ~level:2
-      ~this_ty
-      ~function_name:"simplify_subtype_has_type_member"
-      env
-      (LoclType ty_sub)
-      htmty;
     let (env, ty_sub) = Env.expand_type env ty_sub in
-
     let subtype_env =
       Subtype_env.possibly_add_violated_constraint
         subtype_env
@@ -6133,7 +6203,26 @@ end = struct
                 ty_super = member_ty;
               })
 
-  let rec simplify
+  let rec simplify ~subtype_env ~this_ty ~lhs ~rhs env =
+    let { sub_supportdyn = _; ty_sub } = lhs in
+    let { reason_super = r; has_member = has_member_ty } = rhs in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
+    let ty_sub = LoclType ty_sub in
+    let ty_super =
+      ConstraintType (mk_constraint_type (r, Thas_member has_member_ty))
+    in
+    if Logging.should_log_subtype_i env ~level:2 ty_sub ty_super then
+      Logging.log_subtype_i
+        ~this_ty
+        ~function_name:"Typing_subtype.Has_member.simplify"
+        env
+        ty_sub
+        ty_super
+      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+    else
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+
+  and simplify_
       ~subtype_env
       ~this_ty
       ~lhs:{ sub_supportdyn; ty_sub }
@@ -6150,14 +6239,6 @@ end = struct
     let is_method = Option.is_some explicit_targs in
     let cty_super = mk_constraint_type (r, Thas_member has_member_ty) in
     let ity_super = ConstraintType cty_super in
-
-    Logging.log_subtype_i
-      ~level:2
-      ~this_ty
-      ~function_name:"simplify_subtype_has_member"
-      env
-      (LoclType ty_sub)
-      ity_super;
     let (env, ty_sub) = Env.expand_type env ty_sub in
 
     let subtype_env =
@@ -6294,7 +6375,27 @@ end = struct
     ty: locl_ty;
   }
 
-  let rec simplify
+  let rec simplify ~subtype_env ~this_ty ~lhs ~rhs env =
+    let { sub_supportdyn = _; ty_sub } = lhs in
+    let { reason_super = r; name; ty = member_ty } = rhs in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
+    let ty_sub = LoclType ty_sub in
+    let ty_super =
+      ConstraintType
+        (mk_constraint_type (r, Thas_const { name; ty = member_ty }))
+    in
+    if Logging.should_log_subtype_i env ~level:2 ty_sub ty_super then
+      Logging.log_subtype_i
+        ~this_ty
+        ~function_name:"Typing_subtype.Has_const.simplify"
+        env
+        ty_sub
+        ty_super
+      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+    else
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+
+  and simplify_
       ~subtype_env
       ~(this_ty : locl_ty option)
       ~lhs:{ sub_supportdyn; ty_sub }
@@ -6304,14 +6405,6 @@ end = struct
       mk_constraint_type (r, Thas_const { name; ty = member_ty })
     in
     let ity_super = ConstraintType cty_super in
-
-    Logging.log_subtype_i
-      ~level:2
-      ~this_ty
-      ~function_name:"simplify_subtype_has_const"
-      env
-      (LoclType ty_sub)
-      ity_super;
     let fail =
       Subtype_env.fail subtype_env ~ty_sub:(LoclType ty_sub) ~ty_super:ity_super
     in
@@ -6531,7 +6624,28 @@ end = struct
     ty_false: locl_ty;
   }
 
-  let rec simplify
+  let rec simplify ~subtype_env ~this_ty ~lhs ~rhs env =
+    let { sub_supportdyn = _; ty_sub } = lhs in
+    let { super_like = _; reason_super; predicate; ty_true; ty_false } = rhs in
+    let (env, ty_sub) = Env.expand_type env ty_sub in
+    let ty_sub = LoclType ty_sub in
+    let ty_super =
+      ConstraintType
+        (mk_constraint_type
+           (reason_super, Ttype_switch { predicate; ty_true; ty_false }))
+    in
+    if Logging.should_log_subtype_i env ~level:2 ty_sub ty_super then
+      Logging.log_subtype_i
+        ~this_ty
+        ~function_name:"Typing_subtype.Type_switch.simplify"
+        env
+        ty_sub
+        ty_super
+      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+    else
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+
+  and simplify_
       ~subtype_env
       ~this_ty
       ~lhs:{ ty_sub; sub_supportdyn }
@@ -6542,13 +6656,6 @@ end = struct
         (reason_super, Ttype_switch { predicate; ty_true; ty_false })
     in
     let ty_super = ConstraintType cty in
-    Logging.log_subtype_i
-      ~level:2
-      ~this_ty
-      ~function_name:"simplify_subtype_type_switch"
-      env
-      (LoclType ty_sub)
-      ty_super;
     let (env, ty_sub) = Env.expand_type env ty_sub in
     match get_node ty_sub with
     | Tvar _ ->
@@ -8083,19 +8190,6 @@ end = struct
       ~(this_ty : locl_ty option)
       (ity_sub : internal_type)
       (ity_super : internal_type) : env * Typing_error.t option =
-    Logging.log_subtype_i
-      ~level:1
-      ~this_ty
-      ~function_name:
-        ("sub_type_inner"
-        ^
-        match subtype_env.Subtype_env.coerce with
-        | Some TL.CoerceToDynamic -> " (dynamic aware)"
-        | Some TL.CoerceFromDynamic -> " (treat dynamic as bottom)"
-        | None -> "")
-      env
-      ity_sub
-      ity_super;
     let (env, prop) =
       Common.dispatch_constraint
         ~subtype_env
@@ -8118,6 +8212,31 @@ end = struct
       env
       prop
       subtype_env.Subtype_env.on_error
+
+  let sub_type_inner
+      (env : env)
+      ~(subtype_env : Subtype_env.t)
+      ~(sub_supportdyn : Reason.t option)
+      ~(this_ty : locl_ty option)
+      (ity_sub : internal_type)
+      (ity_super : internal_type) : env * Typing_error.t option =
+    if Logging.should_log_subtype_i env ~level:1 ity_sub ity_super then
+      Logging.log_subtype_i
+        ~this_ty
+        ~function_name:
+          ("Typing_subtype.Subtype_tell.sub_type_inner"
+          ^
+          match subtype_env.Subtype_env.coerce with
+          | Some TL.CoerceToDynamic -> " (dynamic aware)"
+          | Some TL.CoerceFromDynamic -> " (treat dynamic as bottom)"
+          | None -> "")
+        env
+        ity_sub
+        ity_super
+      @@ fun () ->
+      sub_type_inner env ~subtype_env ~sub_supportdyn ~this_ty ity_sub ity_super
+    else
+      sub_type_inner env ~subtype_env ~sub_supportdyn ~this_ty ity_sub ity_super
 end
 
 (* == API =================================================================== *)
@@ -8201,13 +8320,6 @@ let decompose_subtype_add_bound
     let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
-    Logging.log_subtype
-      ~level:2
-      ~this_ty:None
-      ~function_name:"decompose_subtype_add_bound"
-      env
-      ty_sub
-      ty_super;
     let tys = Env.get_upper_bounds env name_sub targs in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then
@@ -8222,13 +8334,6 @@ let decompose_subtype_add_bound
   | (_, Tgeneric (name_super, targs)) when not (phys_equal ty_sub ty_super) ->
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_lower_bound call must be adapted *)
-    Logging.log_subtype
-      ~level:2
-      ~this_ty:None
-      ~function_name:"decompose_subtype_add_bound"
-      env
-      ty_sub
-      ty_super;
     let tys = Env.get_lower_bounds env name_super targs in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_sub tys then
@@ -8240,6 +8345,20 @@ let decompose_subtype_add_bound
         name_super
         ty_sub
   | (_, _) -> env
+
+let decompose_subtype_add_bound ~coerce env ty_sub ty_super =
+  let (env, ty_sub) = Env.expand_type env ty_sub in
+  let (env, ty_super) = Env.expand_type env ty_super in
+  if Logging.should_log_subtype env ~level:2 ty_sub ty_super then
+    Logging.log_subtype
+      ~this_ty:None
+      ~function_name:"Typing_subtype.decompose_subtype_add_bound"
+      env
+      ty_sub
+      ty_super
+    @@ fun () -> decompose_subtype_add_bound ~coerce env ty_sub ty_super
+  else
+    decompose_subtype_add_bound ~coerce env ty_sub ty_super
 
 let rec decompose_subtype_add_prop env prop =
   match prop with
@@ -8290,13 +8409,6 @@ let decompose_subtype
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
     (on_error : Typing_error.Reasons_callback.t option) : env =
-  Logging.log_subtype
-    ~level:2
-    ~this_ty:None
-    ~function_name:"decompose_subtype"
-    env
-    ty_sub
-    ty_super;
   let (env, prop) =
     Subtype.(
       simplify
@@ -8312,6 +8424,24 @@ let decompose_subtype
         env)
   in
   decompose_subtype_add_prop env prop
+
+let decompose_subtype
+    (env : env)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    (on_error : Typing_error.Reasons_callback.t option) : env =
+  let (env, ty_sub) = Env.expand_type env ty_sub in
+  let (env, ty_super) = Env.expand_type env ty_super in
+  if Logging.should_log_subtype env ~level:2 ty_sub ty_super then
+    Logging.log_subtype
+      ~this_ty:None
+      ~function_name:"Typing_subtype.decompose_subtype"
+      env
+      ty_sub
+      ty_super
+    @@ fun () -> decompose_subtype env ty_sub ty_super on_error
+  else
+    decompose_subtype env ty_sub ty_super on_error
 
 (* Decompose a general constraint *)
 let decompose_constraint
@@ -8356,13 +8486,6 @@ let add_constraint
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
     on_error : env =
-  Logging.log_subtype
-    ~level:1
-    ~this_ty:None
-    ~function_name:"add_constraint"
-    env
-    ty_sub
-    ty_super;
   let oldsize = Env.get_tpenv_size env in
   let env = decompose_constraint env ck ty_sub ty_super on_error in
   let ( = ) = Int.equal in
@@ -8398,6 +8521,25 @@ let add_constraint
     in
     iter 0 env
 
+let add_constraint
+    (env : env)
+    (ck : Ast_defs.constraint_kind)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    on_error : env =
+  let (env, ty_sub) = Env.expand_type env ty_sub in
+  let (env, ty_super) = Env.expand_type env ty_super in
+  if Logging.should_log_subtype env ~level:1 ty_sub ty_super then
+    Logging.log_subtype
+      ~this_ty:None
+      ~function_name:"Typing_subtype.add_constraint"
+      env
+      ty_sub
+      ty_super
+    @@ fun () -> add_constraint env ck ty_sub ty_super on_error
+  else
+    add_constraint env ck ty_sub ty_super on_error
+
 let add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) =
     add_constraint env ck ty1 ty2
@@ -8407,13 +8549,6 @@ let add_constraints p env constraints =
 
 (* -- sub_type_with_dynamic_as_bottom entry point --------------------------- *)
 let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
-  Logging.log_subtype
-    ~level:1
-    ~this_ty:None
-    ~function_name:"coercion"
-    env
-    ty_sub
-    ty_super;
   let old_env = env in
   let subtype_env =
     Subtype_env.create ~coerce:(Some TL.CoerceFromDynamic) ~log_level:2 on_error
@@ -8433,6 +8568,20 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
     else
       env),
     ty_err )
+
+let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
+  let (env, ty_sub) = Env.expand_type env ty_sub in
+  let (env, ty_super) = Env.expand_type env ty_super in
+  if Logging.should_log_subtype env ~level:1 ty_sub ty_super then
+    Logging.log_subtype
+      ~this_ty:None
+      ~function_name:"Typing_subtype.sub_type_with_dynamic_as_bottom"
+      env
+      ty_sub
+      ty_super
+    @@ fun () -> sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error
+  else
+    sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error
 
 (* -- subtype_funs entry point ---------------------------------------------- *)
 let subtype_funs

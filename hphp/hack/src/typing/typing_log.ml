@@ -26,10 +26,14 @@ let out_channel = ref stdout
 
 let logBuffer = ref []
 
+(** Controls the current indentation *)
 let indentLevel = ref 0
 
 let accumulatedLength = ref 0
 
+(** Writes what's in `logBuffer` on a new line, respecting
+  the current identation from `indentLevel`.
+  Flush the channel and reset `logBuffer` *)
 let lnewline () =
   match !logBuffer with
   | [] -> ()
@@ -43,6 +47,8 @@ let lnewline () =
     accumulatedLength := 0;
     logBuffer := []
 
+(** Accumulate input format string into logBuffer,
+  possibly printing a line if the buffer gets to big. *)
 let lprintf c =
   Printf.ksprintf (fun s ->
       let len = String.length s in
@@ -52,20 +58,26 @@ let lprintf c =
       else
         accumulatedLength := !accumulatedLength + len)
 
+(** Prints a new line and ident *)
 let lnewline_open () =
   lnewline ();
   indentLevel := !indentLevel + 1
 
+(** Prints a new line and unident *)
 let lnewline_close () =
   lnewline ();
   indentLevel := !indentLevel - 1
 
+let with_indent f =
+  lnewline_open ();
+  let res = f () in
+  lnewline_close ();
+  res
+
 let indentEnv ?(color = Normal Yellow) message f =
   lnewline ();
   lprintf color "%s" message;
-  lnewline_open ();
-  f ();
-  lnewline_close ()
+  with_indent f
 
 (* Most recent environment. We only display diffs *)
 let lastenv =
@@ -235,9 +247,7 @@ and log_key_value env prefix k v =
     lnewline ();
     lprintf (Normal Green) "%s" prefix;
     log_key k;
-    lnewline_open ();
-    log_value env v;
-    lnewline_close ()
+    with_indent @@ fun () -> log_value env v
   )
 
 let is_leaf_delta d =
@@ -279,9 +289,7 @@ and log_key_delta env k d =
     lnewline ();
     log_key k;
     lprintf (Normal Yellow) " ";
-    lnewline_open ();
-    log_delta env d;
-    lnewline_close ()
+    with_indent @@ fun () -> log_delta env d
   )
 
 let type_as_value env ty = Atom (Pr.debug env ty)
@@ -444,7 +452,7 @@ let log_pos_or_decl p ?function_name f =
   (* If we've hit this many iterations then something must have gone wrong
    * so let's not bother spewing to the log *)
   if n > 10000 then
-    ()
+    f ()
   else
     indentEnv
       ~color:(Bold Yellow)
@@ -459,8 +467,11 @@ let log_pos_or_decl p ?function_name f =
       | Some n -> " {" ^ n ^ "}")
       f
 
-let log_with_level env key ~level log_f =
-  if Typing_env_types.get_log_level env key >= level then
+let should_log env ~category ~level =
+  Typing_env_types.get_log_level env category >= level
+
+let log_with_level env category ~level log_f =
+  if should_log env ~category ~level then
     log_f ()
   else
     ()
@@ -661,6 +672,11 @@ type log_structure =
   | Log_decl_type of string * Typing_defs.decl_ty
   | Log_type_i of string * Typing_defs.internal_type
 
+let print_key_value (key, value) =
+  lprintf (Bold Green) "%s: " key;
+  lprintf (Normal Green) "%s" value;
+  lnewline ()
+
 let log_types p env items =
   log_pos_or_decl p (fun () ->
       let rec go items =
@@ -669,22 +685,29 @@ let log_types p env items =
             | Log_head (message, items) ->
               indentEnv ~color:(Normal Yellow) message (fun () -> go items)
             | Log_type (message, ty) ->
-              let s = Pr.debug env ty in
-              lprintf (Bold Green) "%s: " message;
-              lprintf (Normal Green) "%s" s;
-              lnewline ()
+              print_key_value (message, Pr.debug env ty)
             | Log_decl_type (message, ty) ->
-              let s = Pr.debug_decl env ty in
-              lprintf (Bold Green) "%s: " message;
-              lprintf (Normal Green) "%s" s;
-              lnewline ()
+              print_key_value (message, Pr.debug_decl env ty)
             | Log_type_i (message, ty) ->
-              let s = Pr.debug_i env ty in
-              lprintf (Bold Green) "%s: " message;
-              lprintf (Normal Green) "%s" s;
-              lnewline ())
+              print_key_value (message, Pr.debug_i env ty))
       in
       go items)
+
+let log_function
+    (type res)
+    p
+    ~function_name
+    ~arguments
+    ~(result : res -> string option)
+    (f : unit -> res) : res =
+  log_pos_or_decl p @@ fun () ->
+  indentEnv ~color:(Normal Yellow) function_name @@ fun () ->
+  List.iter arguments ~f:print_key_value;
+  let res = with_indent f in
+  (match result res with
+  | None -> ()
+  | Some res -> print_key_value (Printf.sprintf "%s result" function_name, res));
+  res
 
 let log_escape ?(level = 1) p env msg vars =
   log_with_level env "escape" ~level (fun () ->
@@ -736,21 +759,6 @@ let log_new_tvar_for_tconst_access env p tvar class_name (_p, tconst) =
   in
   log_new_tvar env p tvar message
 
-let log_intersection ~level env r ty1 ty2 ~inter_ty =
-  log_with_level env "inter" ~level (fun () ->
-      log_types
-        (Reason.to_pos r)
-        env
-        [
-          Log_head
-            ( "Intersecting",
-              [
-                Log_type ("ty1", ty1);
-                Log_type ("ty2", ty2);
-                Log_type ("intersection", inter_ty);
-              ] );
-        ])
-
 let log_type_access ~level root (p, type_const_name) (env, result_ty) =
   ( log_with_level env "tyconst" ~level @@ fun () ->
     log_types
@@ -760,26 +768,6 @@ let log_type_access ~level root (p, type_const_name) (env, result_ty) =
         Log_head
           ( "Accessing type constant " ^ type_const_name ^ " of",
             [Log_type ("type", root); Log_type ("result", result_ty)] );
-      ] );
-  (env, result_ty)
-
-let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
-  ( log_with_level env "localize" ~level @@ fun () ->
-    log_types
-      (get_pos result_ty)
-      env
-      [
-        Log_head
-          ( "Localizing",
-            [
-              Log_head
-                ( Printf.sprintf
-                    "expand_visible_newtype: %b"
-                    ety_env.expand_visible_newtype,
-                  [] );
-              Log_decl_type ("decl type", decl_ty);
-              Log_type ("result", result_ty);
-            ] );
       ] );
   (env, result_ty)
 
@@ -843,19 +831,3 @@ let log_sd_pass ?(level = 1) env pos =
 let increment_feature_count env s =
   if TypecheckerOptions.language_feature_logging env.genv.tcopt then
     Measure.sample s 1.0
-
-module GlobalInference = struct
-  let log_cat = "gi"
-
-  let log_merging_subgraph env pos =
-    log_with_level env log_cat ~level:1 (fun () ->
-        log_position pos (fun () ->
-            log_key "merging subgraph for function at this position"))
-
-  let log_merging_var env pos var =
-    log_with_level env log_cat ~level:1 (fun () ->
-        log_position pos (fun () ->
-            log_key (Printf.sprintf "merging type variable #%s" (Tvid.show var))))
-end
-
-module GI = GlobalInference

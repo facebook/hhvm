@@ -407,7 +407,6 @@ static Variant call_intercept_handler(
   par.append(called_on);
   par.append(args);
 
-  ImplicitContext::Saver s;
   auto ret = Variant::attach(
     g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
                           RuntimeCoeffects::defaults(), callCtx.dynamic)
@@ -464,7 +463,6 @@ static Variant call_intercept_handler_callback(
     assertx(tvIsVec(generics));
     return Array(val(generics).parr);
   }();
-  ImplicitContext::Saver s;
   return Variant::attach(
     g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls,
                           RuntimeCoeffects::defaults(),

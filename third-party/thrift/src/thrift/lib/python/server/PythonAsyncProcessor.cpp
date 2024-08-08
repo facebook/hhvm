@@ -36,13 +36,17 @@ std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
   return getSerializedPythonMetadata(python_server_);
 }
 
-void PythonAsyncProcessor::handlePythonServerCallback(
+folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
     apache::thrift::ProtocolType protocol,
     apache::thrift::Cpp2RequestContext* context,
-    folly::Promise<std::unique_ptr<folly::IOBuf>> promise,
     apache::thrift::SerializedRequest serializedRequest,
-    apache::thrift::RpcKind kind) {
+    apache::thrift::RpcKind kind,
+    std::unique_ptr<
+        apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>>
+        callback) {
   [[maybe_unused]] static bool done = (do_import(), false);
+  auto [promise, future] =
+      folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
   handleServerCallback(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
@@ -51,17 +55,26 @@ void PythonAsyncProcessor::handlePythonServerCallback(
       std::move(serializedRequest),
       protocol,
       kind);
+  return std::move(future).defer([callback = std::move(callback)](auto&& t) {
+    callback->complete(std::move(t));
+  });
 }
 
-void PythonAsyncProcessor::handlePythonServerCallbackStreaming(
+folly::SemiFuture<folly::Unit>
+PythonAsyncProcessor::handlePythonServerCallbackStreaming(
     apache::thrift::ProtocolType protocol,
     apache::thrift::Cpp2RequestContext* context,
-    folly::Promise<::apache::thrift::ResponseAndServerStream<
-        std::unique_ptr<::folly::IOBuf>,
-        std::unique_ptr<::folly::IOBuf>>> promise,
     apache::thrift::SerializedRequest serializedRequest,
-    apache::thrift::RpcKind kind) {
+    apache::thrift::RpcKind kind,
+    std::unique_ptr<::apache::thrift::HandlerCallback<
+        ::apache::thrift::ResponseAndServerStream<
+            std::unique_ptr<::folly::IOBuf>,
+            std::unique_ptr<::folly::IOBuf>>>> callback) {
   [[maybe_unused]] static bool done = (do_import(), false);
+  auto [promise, future] =
+      folly::makePromiseContract<::apache::thrift::ResponseAndServerStream<
+          std::unique_ptr<::folly::IOBuf>,
+          std::unique_ptr<::folly::IOBuf>>>();
   handleServerStreamCallback(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
@@ -70,15 +83,20 @@ void PythonAsyncProcessor::handlePythonServerCallbackStreaming(
       std::move(serializedRequest),
       protocol,
       kind);
+  return std::move(future).defer([callback = std::move(callback)](auto&& t) {
+    callback->complete(std::move(t));
+  });
 }
 
-void PythonAsyncProcessor::handlePythonServerCallbackOneway(
+folly::SemiFuture<folly::Unit>
+PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::ProtocolType protocol,
     apache::thrift::Cpp2RequestContext* context,
-    folly::Promise<folly::Unit> promise,
     apache::thrift::SerializedRequest serializedRequest,
-    apache::thrift::RpcKind kind) {
+    apache::thrift::RpcKind kind,
+    std::unique_ptr<apache::thrift::HandlerCallbackBase>&& callback) {
   [[maybe_unused]] static bool done = (do_import(), false);
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
   handleServerCallbackOneway(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
@@ -87,6 +105,7 @@ void PythonAsyncProcessor::handlePythonServerCallbackOneway(
       std::move(serializedRequest),
       protocol,
       kind);
+  return std::move(future).defer([callback = std::move(callback)](auto&&) {});
 }
 
 } // namespace python

@@ -55,6 +55,13 @@ val localize_rec :
   decl_ty ->
   (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
 
+(** Localize a type that we know to be a union of disjoint types. *)
+val localize_disjoint_union :
+  ety_env:expand_env ->
+  env ->
+  decl_ty ->
+  (env * Typing_error.t option) * locl_phase ty
+
 (**
  Transform a declaration phase type into a localized type, with no substitution
  for generic parameters and [this].

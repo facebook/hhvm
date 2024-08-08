@@ -804,7 +804,7 @@ let get_variant_tys env name ty_args :
   | Decl_entry.Found
       { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
     let ((env, _ty_err_opt), variants) =
-      Typing_utils.localize
+      Typing_utils.localize_disjoint_union
         ~ety_env:
           {
             empty_expand_env with

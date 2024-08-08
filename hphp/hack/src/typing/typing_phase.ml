@@ -1603,6 +1603,25 @@ let localize_targs_with_kinds
   in
   ((env, ty_err_opt), explicit_targs @ implicit_targs)
 
+(** Localize a type that we know to be a union of disjoint types. *)
+let localize_disjoint_union ~(ety_env : expand_env) env (dty : decl_ty) =
+  let r = get_reason dty |> Typing_reason.localize in
+  match get_node dty with
+  | Tunion tyl ->
+    let ((env, ty_err_opt, _cycles), tyl) =
+      list_map_env_err_cycles
+        env
+        tyl
+        ~f:(localize ~ety_env)
+        ~combine_ty_errs:Typing_error.union_opt
+    in
+    (* We know the types to be disjoint, so we don't simplify the union *)
+    let ty = MakeType.union r tyl in
+    ((env, ty_err_opt), ty)
+  | _ ->
+    let ((env, err, _cycles), ty) = localize ~ety_env env dty in
+    ((env, err), ty)
+
 let localize_targs
     ~check_well_kinded
     ~is_method
@@ -1907,3 +1926,5 @@ let check_where_constraints
 let () = TUtils.localize_no_subst_ref := localize_no_subst
 
 let () = TUtils.localize_ref := localize
+
+let () = TUtils.localize_disjoint_union_ref := localize_disjoint_union

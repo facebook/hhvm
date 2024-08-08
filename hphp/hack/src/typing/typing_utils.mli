@@ -134,11 +134,11 @@ type localize =
 
 val localize_ref : localize ref
 
-val localize :
-  Typing_env_types.env ->
-  ety_env:Typing_defs.expand_env ->
-  Typing_defs.decl_ty ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+val localize : localize
+
+val localize_disjoint_union_ref : localize ref
+
+val localize_disjoint_union : localize
 
 val is_class_i : Typing_defs.internal_type -> bool
 

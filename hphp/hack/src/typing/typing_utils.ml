@@ -235,7 +235,12 @@ type localize =
 let (localize_ref : localize ref) =
   ref (fun ~ety_env:_ -> not_implemented "localize")
 
-let localize x = !localize_ref x
+let localize ~ety_env = !localize_ref ~ety_env
+
+let (localize_disjoint_union_ref : localize ref) =
+  ref (fun ~ety_env:_ -> not_implemented "localize_disjoint_union")
+
+let localize_disjoint_union ~ety_env = !localize_disjoint_union_ref ~ety_env
 
 (*****************************************************************************)
 (* Checking properties of types *)

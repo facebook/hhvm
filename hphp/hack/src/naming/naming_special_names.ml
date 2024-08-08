@@ -1198,25 +1198,6 @@ module Hips = struct
   let inspect = "\\inspect"
 end
 
-module Superglobals = struct
-  let globals = "$GLOBALS"
-
-  let is_superglobal =
-    let superglobals =
-      HashSet.of_list
-        [
-          "$_SERVER";
-          "$_GET";
-          "$_POST";
-          "$_FILES";
-          "$_COOKIE";
-          "$_REQUEST";
-          "$_ENV";
-        ]
-    in
-    (fun x -> HashSet.mem superglobals x)
-end
-
 module Regex = struct
   let tPattern = "\\HH\\Lib\\Regex\\Pattern"
 end

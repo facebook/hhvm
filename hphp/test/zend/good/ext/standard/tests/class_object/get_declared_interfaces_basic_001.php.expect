@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(120) {
+vec(121) {
   string(26) "HH\Lib\IO\SeekableFDHandle"
   string(11) "HH\Iterator"
   string(18) "HH\Lib\IO\FDHandle"
@@ -56,6 +56,7 @@ vec(120) {
   string(44) "HH\Lib\IO\CloseableSeekableReadWriteFDHandle"
   string(31) "HH\Lib\File\CloseableReadHandle"
   string(19) "HH\KeyedTraversable"
+  string(19) "HH\GenericEnumClass"
   string(9) "Throwable"
   string(21) "HH\TypeAliasAttribute"
   string(31) "HH\Lib\IO\SeekableWriteFDHandle"

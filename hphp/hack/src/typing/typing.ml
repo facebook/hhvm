@@ -2142,77 +2142,6 @@ let refine_for_equality pos env te ty =
     set_local ~is_defined:true ~bound_ty env locl_ivar refined_ty
   | None -> env
 
-type legacy_arrays =
-  | HackDictOrDArray
-  | HackVecOrVArray
-
-(* Refine type for is_array, is_vec, is_keyset and is_dict tests
- * `pred_name` is the function name itself (e.g. 'is_vec')
- * `p` is position of the function name in the source
- * `arg_expr` is the argument to the function
- *)
-let safely_refine_is_array env ty p pred_name arg_expr =
-  refine_lvalue_type env arg_expr ~refine:(fun env arg_ty ->
-      let r = Reason.predicated (p, pred_name) in
-      let (env, tarrkey_name) =
-        Env.add_fresh_generic_parameter
-          env
-          (Pos_or_decl.of_raw_pos p)
-          "Tk"
-          ~reified:Erased
-          ~enforceable:false
-          ~newable:false
-      in
-      (* TODO(T69551141) handle type arguments for Tgeneric *)
-      let tarrkey = MakeType.generic r tarrkey_name in
-      let env =
-        SubType.add_constraint
-          env
-          Ast_defs.Constraint_as
-          tarrkey
-          (MakeType.arraykey r)
-        @@ Some (Typing_error.Reasons_callback.unify_error_at p)
-      in
-      let (env, tfresh_name) =
-        Env.add_fresh_generic_parameter
-          env
-          (Pos_or_decl.of_raw_pos p)
-          "T"
-          ~reified:Erased
-          ~enforceable:false
-          ~newable:false
-      in
-      (* TODO(T69551141) handle type arguments for Tgeneric *)
-      let tfresh = MakeType.generic r tfresh_name in
-      (* This is the refined type of e inside the branch *)
-      let hint_ty =
-        match ty with
-        | HackDictOrDArray -> MakeType.dict r tarrkey tfresh
-        | HackVecOrVArray -> MakeType.vec r tfresh
-      in
-      let (_, arg_pos, _) = arg_expr in
-      let (env, (refined_ty, _)) =
-        class_for_refinement env p r arg_pos arg_ty hint_ty
-      in
-      (* Add constraints on generic parameters that must
-       * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
-       * and refined_ty is keyset<T#1> then we know T#1 <: T.
-       * See analogous code in safely_refine_class_type.
-       *)
-      let (env, supertypes) =
-        TUtils.get_concrete_supertypes
-          ~expand_supportdyn:false
-          ~abstract_enum:true
-          env
-          arg_ty
-      in
-      let env =
-        List.fold_left supertypes ~init:env ~f:(fun env ty ->
-            SubType.add_constraint env Ast_defs.Constraint_as hint_ty ty
-            @@ Some (Typing_error.Reasons_callback.unify_error_at p))
-      in
-      Inter.intersect ~r env refined_ty arg_ty)
-
 let key_exists env tparamet pos shape field =
   let field = Tast.to_nast_expr field in
   refine_lvalue_type env shape ~refine:(fun env shape_ty ->
@@ -7103,26 +7032,6 @@ end = struct
         env
         (not tparamet)
         (ty, p, Aast.Binop { bop = op; lhs = e1; rhs = e2 })
-    | Aast.Call
-        {
-          func = (_, p, Aast.Id (_, f));
-          args = [(_, lv)];
-          unpacked_arg = None;
-          _;
-        }
-      when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
-      let env = safely_refine_is_array env HackDictOrDArray p f lv in
-      (env, { pkgs = SSet.empty })
-    | Aast.Call
-        {
-          func = (_, p, Aast.Id (_, f));
-          args = [(_, lv)];
-          unpacked_arg = None;
-          _;
-        }
-      when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
-      let env = safely_refine_is_array env HackVecOrVArray p f lv in
-      (env, { pkgs = SSet.empty })
     | Aast.Call
         {
           func = (_, p, Aast.Id (_, f));

@@ -122,8 +122,4 @@ namespace HH {
 
   function is_php_array(readonly mixed $input)[]: bool;
 
-  function is_vec_or_varray(readonly mixed $input)[]: bool;
-
-  function is_dict_or_darray(readonly mixed $input)[]: bool;
-
 }

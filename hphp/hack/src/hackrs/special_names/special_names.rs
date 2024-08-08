@@ -449,8 +449,6 @@ pub mod stdlib_functions {
         lazy!(sn::std_lib_functions::ARRAY_UNMARK_LEGACY);
     pub static is_php_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_PHP_ARRAY);
     pub static is_any_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_ANY_ARRAY);
-    pub static is_dict_or_darray: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_DICT_OR_DARRAY);
-    pub static is_vec_or_varray: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_VEC_OR_VARRAY);
 
     pub fn iter() -> impl Iterator<Item = FunName> {
         [
@@ -460,8 +458,6 @@ pub mod stdlib_functions {
             *array_unmark_legacy,
             *is_php_array,
             *is_any_array,
-            *is_dict_or_darray,
-            *is_vec_or_varray,
         ]
         .into_iter()
     }

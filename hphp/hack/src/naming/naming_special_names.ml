@@ -979,10 +979,6 @@ module StdlibFunctions = struct
 
   let is_any_array = "\\HH\\is_any_array"
 
-  let is_dict_or_darray = "\\HH\\is_dict_or_darray"
-
-  let is_vec_or_varray = "\\HH\\is_vec_or_varray"
-
   (* All Id funcions that Typing.dispatch_call handles specially *)
   let special_dispatch =
     String.Hash_set.of_list

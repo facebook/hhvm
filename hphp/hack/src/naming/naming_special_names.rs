@@ -571,10 +571,6 @@ pub mod std_lib_functions {
     pub const IS_PHP_ARRAY: &str = "\\HH\\is_php_array";
 
     pub const IS_ANY_ARRAY: &str = "\\HH\\is_any_array";
-
-    pub const IS_DICT_OR_DARRAY: &str = "\\HH\\is_dict_or_darray";
-
-    pub const IS_VEC_OR_VARRAY: &str = "\\HH\\is_vec_or_varray";
 }
 
 pub mod typehints {

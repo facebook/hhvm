@@ -41,7 +41,7 @@ void KeepAliveWatcher::start(SetupFrame* setupFrame) {
     DCHECK(setupFrame == nullptr);
     return;
   }
-  if (!evb_) {
+  if (!evb_ || !socket_ || !socket_->good()) {
     return;
   }
   started_ = true;
@@ -82,9 +82,7 @@ void KeepAliveWatcher::handleKeepaliveFrame(
 void KeepAliveWatcher::sendKeepAliveFrame(SetupFrame* setupFrame) {
   DestructorGuard dg(this);
   evb_->dcheckIsInEventBaseThread();
-  if (socket_ && socket_->good()) {
-    socket_->writeChain(this, makeKeepAliveFrame(setupFrame));
-  }
+  socket_->writeChain(this, makeKeepAliveFrame(setupFrame));
 }
 
 void KeepAliveWatcher::checkTimeoutToCloseOrSchedule() {
@@ -101,6 +99,10 @@ void KeepAliveWatcher::checkTimeoutToCloseOrSchedule() {
 }
 
 void KeepAliveWatcher::timeoutExpired() noexcept {
+  if (!socket_ || !socket_->good()) {
+    stop();
+    return;
+  }
   sendKeepAliveFrame(nullptr);
   checkTimeoutToCloseOrSchedule();
 }

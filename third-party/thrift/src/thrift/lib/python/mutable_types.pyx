@@ -197,7 +197,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         pass
 
     def __call__(self, **kwargs):
-        self_copy = self._fbthrift_create(copy.deepcopy(self._fbthrift_data))
+        self_copy = copy.deepcopy(self)
 
         for field_name, value in kwargs.items():
             if value is None:
@@ -206,6 +206,9 @@ cdef class MutableStruct(MutableStructOrUnion):
                 setattr(self_copy, field_name, value)
 
         return self_copy
+
+    def __deepcopy__(self, memo):
+        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data, memo))
 
     cdef _initStructListWithValues(self, kwargs) except *:
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info

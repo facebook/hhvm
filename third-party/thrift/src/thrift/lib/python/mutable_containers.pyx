@@ -22,6 +22,7 @@ from collections.abc import (
     Set
 )
 from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
+import copy
 import itertools
 
 from thrift.python.types cimport (
@@ -130,6 +131,9 @@ cdef class MutableList:
         lst = MutableList(self._val_typeinfo, self._list_data[:])
         lst.extend(other)
         return lst
+
+    def __deepcopy__(self, memo):
+        return MutableList(self._val_typeinfo, copy.deepcopy(self._list_data, memo))
 
     def count(self, value):
         try:
@@ -281,6 +285,9 @@ cdef class MutableSet:
 
         return True
 
+    def __deepcopy__(self, memo):
+        return MutableSet(self._val_typeinfo, copy.deepcopy(self._set_data, memo))
+
     def union(MutableSet self, other):
         return self | other
 
@@ -425,6 +432,9 @@ cdef class MutableMap:
         internal_key = self._key_typeinfo.to_internal_data(key)
         internal_value = self._val_typeinfo.to_internal_data(value)
         self._map_data[internal_key] = internal_value
+
+    def __deepcopy__(self, memo):
+        return MutableMap(self._key_typeinfo, self._val_typeinfo, copy.deepcopy(self._map_data, memo))
 
     def _is_same_type_of_map(MutableMap self, other):
         """

@@ -19,10 +19,20 @@ from __future__ import annotations
 
 import copy
 import math
+import types
 import unittest
+from typing import Type
 from unittest import mock
 
+import testing.thrift_mutable_types as mutable_test_types
+import testing.thrift_types as immutable_test_types
+
+import thrift.python.mutable_serializer as mutable_serializer
+import thrift.python.serializer as immutable_serializer
+
 from folly.iobuf import IOBuf
+
+from parameterized import parameterized_class
 
 from testing.thrift_types import (
     __Reserved as DoubleUnderscoreReserved,
@@ -362,44 +372,104 @@ class NumericalConversionsTests(unittest.TestCase):
             )
 
 
+@parameterized_class(
+    ("test_types", "serializer_module"),
+    [
+        (immutable_test_types, immutable_serializer),
+        (mutable_test_types, mutable_serializer),
+    ],
+)
 class StructDeepcopyTests(unittest.TestCase):
+    def setUp(self) -> None:
+        """
+        The `setUp` method performs these assignments with type hints to enable
+        pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
+        behind `test_types`.
+        """
+        # pyre-ignore[16]: has no attribute `test_types`
+        self.easy: Type[easy] = self.test_types.easy
+        self.Integers: Type[Integers] = self.test_types.Integers
+        self.customized: Type[customized] = self.test_types.customized
+        self.ComplexRef: Type[ComplexRef] = self.test_types.ComplexRef
+        self.ListTypes: Type[ListTypes] = self.test_types.ListTypes
+        self.File: Type[File] = self.test_types.File
+        self.Perm: Type[Perm] = self.test_types.Perm
+        self.Kind: Type[Kind] = self.test_types.Kind
+        self.IOBufListStruct: Type[IOBufListStruct] = self.test_types.IOBufListStruct
+        self.StringBucket: Type[StringBucket] = self.test_types.StringBucket
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+        # pyre-ignore[16]: has no attribute `serializer_module`
+        self.serializer: types.ModuleType = self.serializer_module
+
     def test_deepcopy(self) -> None:
-        x = easy(val=1, an_int=Integers(small=300), name="bar", val_list=[1, 2, 3, 4])
+        x = self.easy(
+            val=1, an_int=self.Integers(small=300), name="bar", val_list=[1, 2, 3, 4]
+        )
         dif = copy.deepcopy(x)
-        self.assertIs(x, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(x, dif)
+            self.assertEqual(x, dif)
+        else:
+            self.assertIs(x, dif)
 
     def test_nested_in_python_types(self) -> None:
-        x = easy(val=1, an_int=Integers(small=300), name="bar", val_list=[1, 2, 3, 4])
+        x = self.easy(
+            val=1, an_int=self.Integers(small=300), name="bar", val_list=[1, 2, 3, 4]
+        )
         nested_in_py = {"a": {"b": {"c": x}}}
         dif = copy.deepcopy(nested_in_py)
         self.assertEqual(nested_in_py, dif)
 
     def test_list_set_map_types_copy(self) -> None:
-        custom = customized(
+        custom = self.customized(
             list_template=[1, 2, 3, 4],
             set_template={1, 2, 3},
             map_template={0: 1, 2: 3},
         )
         dif = copy.deepcopy(custom)
-        self.assertIs(custom, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(custom, dif)
+            self.assertEqual(custom, dif)
+        else:
+            self.assertIs(custom, dif)
 
         # test copying just the map/list field in the thrift object
         dif = copy.deepcopy(custom.list_template)
-        self.assertIs(custom.list_template, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(custom.list_template, dif)
+            self.assertEqual(custom.list_template, dif)
+        else:
+            self.assertIs(custom.list_template, dif)
 
         dif = copy.deepcopy(custom.set_template)
-        self.assertIs(custom.set_template, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(custom.set_template, dif)
+            self.assertEqual(custom.set_template, dif)
+        else:
+            self.assertIs(custom.set_template, dif)
 
         dif = copy.deepcopy(custom.map_template)
-        self.assertIs(custom.map_template, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(custom.map_template, dif)
+            self.assertEqual(custom.map_template, dif)
+        else:
+            self.assertIs(custom.map_template, dif)
 
     def test_list_ref_copy(self) -> None:
-        obj = ComplexRef(name="outer", list_recursive_ref=[ComplexRef(name="inner")])
+        obj = self.ComplexRef(
+            name="outer", list_recursive_ref=[self.ComplexRef(name="inner")]
+        )
         dif = copy.deepcopy(obj)
-        self.assertIs(obj, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(obj, dif)
+            self.assertEqual(obj, dif)
+        else:
+            self.assertIs(obj, dif)
 
     def test_list_string_copy(self) -> None:
-        obj = ListTypes(
+        obj = self.ListTypes(
             first=["one", "two", "three"],
             second=[1, 2, 3],
             third=[[1, 2], [3, 4]],
@@ -407,21 +477,33 @@ class StructDeepcopyTests(unittest.TestCase):
             fifth=[{1: 2}, {3: 4}],
         )
         dif = copy.deepcopy(obj)
-        self.assertIs(obj, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(obj, dif)
+            self.assertEqual(obj, dif)
+        else:
+            self.assertIs(obj, dif)
 
     def test_enum_values_copy(self) -> None:
-        file = File(name="test.txt", permissions=Perm.read, type=Kind.REGULAR)
+        file = self.File(
+            name="test.txt", permissions=self.Perm.read, type=self.Kind.REGULAR
+        )
         dif = copy.deepcopy(file)
-        self.assertIs(file, dif)
+        if self.is_mutable_run:
+            self.assertIsNot(file, dif)
+            self.assertEqual(file, dif)
+        else:
+            self.assertIs(file, dif)
 
     def test_binary_values_copy(self) -> None:
-        obj = IOBufListStruct(iobufs=[IOBuf(b"one"), IOBuf(b"two")])
-        dif = copy.deepcopy(obj)
-        self.assertIs(obj, dif)
+        obj = self.IOBufListStruct(iobufs=[IOBuf(b"one"), IOBuf(b"two")])
+        # IOBuf does not support deepcopy
+        if not self.is_mutable_run:
+            dif = copy.deepcopy(obj)
+            self.assertIs(obj, dif)
 
     def test_compare_optional(self) -> None:
-        x = StringBucket()
-        y = StringBucket()
+        x = self.StringBucket()
+        y = self.StringBucket()
 
         # Both are default so they are equal and neither are greater
         self.assertFalse(x < y)
@@ -429,7 +511,7 @@ class StructDeepcopyTests(unittest.TestCase):
         self.assertTrue(x <= y)
         self.assertTrue(x >= y)
 
-        x = StringBucket(one="one")
+        x = self.StringBucket(one="one")
 
         # x has a field set so it's greater
         self.assertFalse(x < y)
@@ -438,20 +520,20 @@ class StructDeepcopyTests(unittest.TestCase):
         self.assertTrue(x >= y)
 
         # x has an optional field set so even though it's empty string, "" > None
-        x = StringBucket(two="")
+        x = self.StringBucket(two="")
         self.assertFalse(x < y)
         self.assertTrue(x > y)
         self.assertFalse(x <= y)
         self.assertTrue(x >= y)
 
         # comparisons happen in field order so because y.one > x.one, y > x
-        y = StringBucket(one="one")
+        y = self.StringBucket(one="one")
         self.assertTrue(x < y)
         self.assertFalse(x > y)
         self.assertTrue(x <= y)
         self.assertFalse(x >= y)
 
-        z = easy()
+        z = self.easy()
         with self.assertRaises(TypeError):
             # TODO(ffrancet): pyre should complain about this
             z < y  # noqa: B015

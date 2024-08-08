@@ -94,7 +94,6 @@ where
     }
 }
 
-
 /// Processor for Foo's methods.
 #[derive(Clone, Debug)]
 pub struct FooProcessor<P, H, R, RS> {

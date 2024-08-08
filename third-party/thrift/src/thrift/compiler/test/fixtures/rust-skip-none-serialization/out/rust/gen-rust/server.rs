@@ -202,7 +202,6 @@ where
     }
 }
 
-
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {

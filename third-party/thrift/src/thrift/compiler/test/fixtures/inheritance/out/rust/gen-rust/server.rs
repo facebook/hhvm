@@ -74,7 +74,6 @@ where
     }
 }
 
-
 /// Processor for MyRoot's methods.
 #[derive(Clone, Debug)]
 pub struct MyRootProcessor<P, H, R, RS> {
@@ -417,7 +416,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for MyNode's methods.
 #[derive(Clone, Debug)]
@@ -775,7 +773,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for MyLeaf's methods.
 #[derive(Clone, Debug)]

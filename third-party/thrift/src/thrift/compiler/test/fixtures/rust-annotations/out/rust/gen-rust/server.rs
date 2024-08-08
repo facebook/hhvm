@@ -92,7 +92,6 @@ where
     }
 }
 
-
 /// Processor for Service1's methods.
 #[derive(Clone, Debug)]
 pub struct Service1Processor<P, H, R, RS> {
@@ -436,7 +435,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for S2's methods.
 #[derive(Clone, Debug)]
@@ -802,7 +800,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for AllMethods's methods.
 #[derive(Clone, Debug)]
@@ -1259,7 +1256,6 @@ where
     }
 }
 
-
 /// Processor for OneMethod's methods.
 #[derive(Clone, Debug)]
 pub struct OneMethodProcessor<P, H, R, RS> {
@@ -1714,7 +1710,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for OneMethodOptOut's methods.
 #[derive(Clone, Debug)]

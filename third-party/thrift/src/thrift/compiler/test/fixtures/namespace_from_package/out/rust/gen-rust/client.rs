@@ -16,6 +16,65 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+pub trait TestService: ::std::marker::Send {
+    fn init(
+        &self,
+        arg_int1: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>>;
+}
+
+pub trait TestServiceExt<T>: TestService
+where
+    T: ::fbthrift::Transport,
+{
+    fn init_with_rpc_opts(
+        &self,
+        arg_int1: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> TestService for S
+where
+    S: ::std::convert::AsRef<dyn TestService + 'a>,
+    S: ::std::marker::Send,
+{
+    fn init(
+        &self,
+        arg_int1: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>> {
+        self.as_ref().init(
+            arg_int1,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> TestServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn TestService + 'a> + ::std::convert::AsRef<dyn TestServiceExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn init_with_rpc_opts(
+        &self,
+        arg_int1: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>> {
+        <Self as ::std::convert::AsRef<dyn TestServiceExt<T>>>::as_ref(self).init_with_rpc_opts(
+            arg_int1,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `TestService`.
 pub struct TestServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -100,25 +159,7 @@ where
     }
 }
 
-pub trait TestService: ::std::marker::Send {
-    fn init(
-        &self,
-        arg_int1: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>>;
-}
 
-pub trait TestServiceExt<T>: TestService
-where
-    T: ::fbthrift::Transport,
-{
-    fn init_with_rpc_opts(
-        &self,
-        arg_int1: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_TestService_init<'a> {
     int1: ::std::primitive::i64,
@@ -181,45 +222,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> TestService for S
-where
-    S: ::std::convert::AsRef<dyn TestService + 'a>,
-    S: ::std::marker::Send,
-{
-    fn init(
-        &self,
-        arg_int1: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>> {
-        self.as_ref().init(
-            arg_int1,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> TestServiceExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn TestService + 'a> + ::std::convert::AsRef<dyn TestServiceExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn init_with_rpc_opts(
-        &self,
-        arg_int1: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>> {
-        <Self as ::std::convert::AsRef<dyn TestServiceExt<T>>>::as_ref(self).init_with_rpc_opts(
-            arg_int1,
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

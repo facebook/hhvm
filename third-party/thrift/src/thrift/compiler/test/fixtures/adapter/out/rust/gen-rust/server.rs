@@ -83,7 +83,6 @@ where
     }
 }
 
-
 /// Processor for Service's methods.
 #[derive(Clone, Debug)]
 pub struct ServiceProcessor<P, H, R, RS> {
@@ -471,7 +470,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for AdapterService's methods.
 #[derive(Clone, Debug)]

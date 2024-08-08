@@ -15,6 +15,251 @@ pub mod errors;
 pub(crate) use crate as client;
 pub(crate) use ::::services;
 
+pub trait MyInteraction: ::std::marker::Send {
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
+
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
+
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
+
+}
+
+pub trait MyInteractionExt<T>: MyInteraction
+where
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> MyInteraction for S
+where
+    S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
+    S: ::std::marker::Send,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        self.as_ref().frobnicate(
+        )
+    }
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        self.as_ref().ping(
+        )
+    }
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        self.as_ref().truthify(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> MyInteractionExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).ping_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).truthify_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}pub trait MyInteractionFast: ::std::marker::Send {
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
+
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
+
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
+
+}
+
+pub trait MyInteractionFastExt<T>: MyInteractionFast
+where
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> MyInteractionFast for S
+where
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a>,
+    S: ::std::marker::Send,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
+        self.as_ref().frobnicate(
+        )
+    }
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
+        self.as_ref().ping(
+        )
+    }
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
+        self.as_ref().truthify(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> MyInteractionFastExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).ping_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
+        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).truthify_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}pub trait SerialInteraction: ::std::marker::Send {
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
+}
+
+pub trait SerialInteractionExt<T>: SerialInteraction
+where
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> SerialInteraction for S
+where
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'a>,
+    S: ::std::marker::Send,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
+        self.as_ref().frobnicate(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> SerialInteractionExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn SerialInteraction + 'a> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
+        <Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
 
 /// Client definitions for `MyInteraction`.
 pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
@@ -206,40 +451,7 @@ where
     }
 }
 
-pub trait MyInteraction: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
 
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-}
-
-pub trait MyInteractionExt<T>: MyInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyInteraction_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -357,71 +569,9 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyInteraction for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
-    S: ::std::marker::Send,
-{
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        self.as_ref().frobnicate(
-        )
-    }
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        self.as_ref().truthify(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyInteractionExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
+
 
 
 
@@ -615,40 +765,7 @@ where
     }
 }
 
-pub trait MyInteractionFast: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
 
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
-
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
-
-}
-
-pub trait MyInteractionFastExt<T>: MyInteractionFast
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyInteractionFast_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -766,71 +883,9 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyInteractionFast for S
-where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a>,
-    S: ::std::marker::Send,
-{
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        self.as_ref().frobnicate(
-        )
-    }
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        self.as_ref().truthify(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyInteractionFastExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
+
 
 
 
@@ -916,23 +971,7 @@ where
     }
 }
 
-pub trait SerialInteraction: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
-}
 
-pub trait SerialInteractionExt<T>: SerialInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_SerialInteraction_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -990,32 +1029,154 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> SerialInteraction for S
+pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
+
+
+
+pub trait MyService: ::std::marker::Send {
+    fn createMyInteraction(
+        &self,
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
+
+    fn createMyInteractionFast(
+        &self,
+    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error>;
+
+    fn createSerialInteraction(
+        &self,
+    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error>;
+
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>>;
+
+    fn interact(
+        &self,
+        arg_arg: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>>;
+
+    fn interactFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
+
+    fn serialize(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
+}
+
+pub trait MyServiceExt<T>: MyService
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'a>,
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>>;
+    fn interact_with_rpc_opts(
+        &self,
+        arg_arg: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>>;
+    fn interactFast_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
+    fn serialize_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> MyService for S
+where
+    S: ::std::convert::AsRef<dyn MyService + 'a>,
     S: ::std::marker::Send,
 {
-    fn frobnicate(
+    fn createMyInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        self.as_ref().frobnicate(
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
+        self.as_ref().createMyInteraction()
+    }
+    fn createMyInteractionFast(
+        &self,
+    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
+        self.as_ref().createMyInteractionFast()
+    }
+    fn createSerialInteraction(
+        &self,
+    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
+        self.as_ref().createSerialInteraction()
+    }
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>> {
+        self.as_ref().foo(
+        )
+    }
+    fn interact(
+        &self,
+        arg_arg: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
+        self.as_ref().interact(
+            arg_arg,
+        )
+    }
+    fn interactFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+        self.as_ref().interactFast(
+        )
+    }
+    fn serialize(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+        self.as_ref().serialize(
         )
     }
 }
 
 #[allow(deprecated)]
-impl<'a, S, T> SerialInteractionExt<T> for S
+impl<'a, S, T> MyServiceExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'a> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
+    S: ::std::convert::AsRef<dyn MyService + 'a> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
-    fn frobnicate_with_rpc_opts(
+    fn foo_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).foo_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn interact_with_rpc_opts(
+        &self,
+        arg_arg: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).interact_with_rpc_opts(
+            arg_arg,
+            rpc_options,
+        )
+    }
+    fn interactFast_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).interactFast_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn serialize_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).serialize_with_rpc_opts(
             rpc_options,
         )
     }
@@ -1024,12 +1185,6 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 }
-
-pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
-
-
-
 /// Client definitions for `MyService`.
 pub struct MyServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -1287,61 +1442,7 @@ where
     }
 }
 
-pub trait MyService: ::std::marker::Send {
-    fn createMyInteraction(
-        &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
 
-    fn createMyInteractionFast(
-        &self,
-    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error>;
-
-    fn createSerialInteraction(
-        &self,
-    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error>;
-
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>>;
-
-    fn interact(
-        &self,
-        arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>>;
-
-    fn interactFast(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
-
-    fn serialize(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
-}
-
-pub trait MyServiceExt<T>: MyService
-where
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>>;
-    fn interact_with_rpc_opts(
-        &self,
-        arg_arg: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>>;
-    fn interactFast_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
-    fn serialize_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyService_foo<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -1533,102 +1634,6 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyService for S
-where
-    S: ::std::convert::AsRef<dyn MyService + 'a>,
-    S: ::std::marker::Send,
-{
-    fn createMyInteraction(
-        &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        self.as_ref().createMyInteraction()
-    }
-    fn createMyInteractionFast(
-        &self,
-    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
-        self.as_ref().createMyInteractionFast()
-    }
-    fn createSerialInteraction(
-        &self,
-    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
-        self.as_ref().createSerialInteraction()
-    }
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>> {
-        self.as_ref().foo(
-        )
-    }
-    fn interact(
-        &self,
-        arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
-        self.as_ref().interact(
-            arg_arg,
-        )
-    }
-    fn interactFast(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
-        self.as_ref().interactFast(
-        )
-    }
-    fn serialize(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
-        self.as_ref().serialize(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyServiceExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyService + 'a> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::FooError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).foo_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn interact_with_rpc_opts(
-        &self,
-        arg_arg: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).interact_with_rpc_opts(
-            arg_arg,
-            rpc_options,
-        )
-    }
-    fn interactFast_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).interactFast_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn serialize_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).serialize_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 #[derive(Clone)]
 pub struct make_MyService;
 
@@ -1726,6 +1731,7 @@ impl ::fbthrift::ClientFactory for make_MyService {
         <dyn MyService>::with_spawner(protocol, transport, spawner)
     }
 }
+
 
 
 /// Client definitions for `MyInteraction`.
@@ -1918,40 +1924,7 @@ where
     }
 }
 
-pub trait MyInteraction: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
 
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-}
-
-pub trait MyInteractionExt<T>: MyInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyInteraction_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -2069,71 +2042,9 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyInteraction for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
-    S: ::std::marker::Send,
-{
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        self.as_ref().frobnicate(
-        )
-    }
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        self.as_ref().truthify(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyInteractionExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
+
 
 
 
@@ -2327,40 +2238,7 @@ where
     }
 }
 
-pub trait MyInteractionFast: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
 
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
-
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
-
-}
-
-pub trait MyInteractionFastExt<T>: MyInteractionFast
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyInteractionFast_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -2478,71 +2356,9 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyInteractionFast for S
-where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a>,
-    S: ::std::marker::Send,
-{
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        self.as_ref().frobnicate(
-        )
-    }
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        self.as_ref().truthify(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyInteractionFastExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
+
 
 
 
@@ -2628,23 +2444,7 @@ where
     }
 }
 
-pub trait SerialInteraction: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
-}
 
-pub trait SerialInteractionExt<T>: SerialInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_SerialInteraction_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -2702,32 +2502,127 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> SerialInteraction for S
+pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
+
+
+
+pub trait Factories: ::std::marker::Send {
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>>;
+
+    fn interact(
+        &self,
+        arg_arg: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>>;
+
+    fn interactFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
+
+    fn serialize(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
+}
+
+pub trait FactoriesExt<T>: Factories
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'a>,
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>>;
+    fn interact_with_rpc_opts(
+        &self,
+        arg_arg: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>>;
+    fn interactFast_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
+    fn serialize_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> Factories for S
+where
+    S: ::std::convert::AsRef<dyn Factories + 'a>,
     S: ::std::marker::Send,
 {
-    fn frobnicate(
+    fn foo(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        self.as_ref().frobnicate(
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>> {
+        self.as_ref().foo(
+        )
+    }
+    fn interact(
+        &self,
+        arg_arg: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
+        self.as_ref().interact(
+            arg_arg,
+        )
+    }
+    fn interactFast(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+        self.as_ref().interactFast(
+        )
+    }
+    fn serialize(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+        self.as_ref().serialize(
         )
     }
 }
 
 #[allow(deprecated)]
-impl<'a, S, T> SerialInteractionExt<T> for S
+impl<'a, S, T> FactoriesExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'a> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
+    S: ::std::convert::AsRef<dyn Factories + 'a> + ::std::convert::AsRef<dyn FactoriesExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
-    fn frobnicate_with_rpc_opts(
+    fn foo_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>> {
+        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).foo_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn interact_with_rpc_opts(
+        &self,
+        arg_arg: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
+        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).interact_with_rpc_opts(
+            arg_arg,
+            rpc_options,
+        )
+    }
+    fn interactFast_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).interactFast_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn serialize_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).serialize_with_rpc_opts(
             rpc_options,
         )
     }
@@ -2736,12 +2631,6 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 }
-
-pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
-
-
-
 /// Client definitions for `Factories`.
 pub struct FactoriesImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -2999,49 +2888,7 @@ where
     }
 }
 
-pub trait Factories: ::std::marker::Send {
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>>;
 
-    fn interact(
-        &self,
-        arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>>;
-
-    fn interactFast(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
-
-    fn serialize(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
-}
-
-pub trait FactoriesExt<T>: Factories
-where
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>>;
-    fn interact_with_rpc_opts(
-        &self,
-        arg_arg: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>>;
-    fn interactFast_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
-    fn serialize_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_Factories_foo<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -3197,87 +3044,6 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> Factories for S
-where
-    S: ::std::convert::AsRef<dyn Factories + 'a>,
-    S: ::std::marker::Send,
-{
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>> {
-        self.as_ref().foo(
-        )
-    }
-    fn interact(
-        &self,
-        arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
-        self.as_ref().interact(
-            arg_arg,
-        )
-    }
-    fn interactFast(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
-        self.as_ref().interactFast(
-        )
-    }
-    fn serialize(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
-        self.as_ref().serialize(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> FactoriesExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn Factories + 'a> + ::std::convert::AsRef<dyn FactoriesExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::factories::FooError>> {
-        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).foo_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn interact_with_rpc_opts(
-        &self,
-        arg_arg: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
-        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).interact_with_rpc_opts(
-            arg_arg,
-            rpc_options,
-        )
-    }
-    fn interactFast_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
-        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).interactFast_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn serialize_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
-        <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).serialize_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 #[derive(Clone)]
 pub struct make_Factories;
 
@@ -3375,6 +3141,7 @@ impl ::fbthrift::ClientFactory for make_Factories {
         <dyn Factories>::with_spawner(protocol, transport, spawner)
     }
 }
+
 
 
 /// Client definitions for `MyInteraction`.
@@ -3567,40 +3334,7 @@ where
     }
 }
 
-pub trait MyInteraction: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
 
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-}
-
-pub trait MyInteractionExt<T>: MyInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyInteraction_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -3718,71 +3452,9 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyInteraction for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
-    S: ::std::marker::Send,
-{
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        self.as_ref().frobnicate(
-        )
-    }
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        self.as_ref().truthify(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyInteractionExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
+
 
 
 
@@ -3976,40 +3648,7 @@ where
     }
 }
 
-pub trait MyInteractionFast: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
 
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
-
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
-
-}
-
-pub trait MyInteractionFastExt<T>: MyInteractionFast
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>>;
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyInteractionFast_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -4127,71 +3766,9 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyInteractionFast for S
-where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a>,
-    S: ::std::marker::Send,
-{
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        self.as_ref().frobnicate(
-        )
-    }
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        self.as_ref().truthify(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyInteractionFastExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyInteractionFast + 'a> + ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
+
 
 
 
@@ -4277,23 +3854,7 @@ where
     }
 }
 
-pub trait SerialInteraction: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
-}
 
-pub trait SerialInteractionExt<T>: SerialInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_SerialInteraction_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -4351,32 +3912,82 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> SerialInteraction for S
+pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
+
+
+
+pub trait Perform: ::std::marker::Send {
+    fn createMyInteraction(
+        &self,
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
+
+    fn createMyInteractionFast(
+        &self,
+    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error>;
+
+    fn createSerialInteraction(
+        &self,
+    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error>;
+
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>>;
+}
+
+pub trait PerformExt<T>: Perform
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'a>,
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> Perform for S
+where
+    S: ::std::convert::AsRef<dyn Perform + 'a>,
     S: ::std::marker::Send,
 {
-    fn frobnicate(
+    fn createMyInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        self.as_ref().frobnicate(
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
+        self.as_ref().createMyInteraction()
+    }
+    fn createMyInteractionFast(
+        &self,
+    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
+        self.as_ref().createMyInteractionFast()
+    }
+    fn createSerialInteraction(
+        &self,
+    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
+        self.as_ref().createSerialInteraction()
+    }
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>> {
+        self.as_ref().foo(
         )
     }
 }
 
 #[allow(deprecated)]
-impl<'a, S, T> SerialInteractionExt<T> for S
+impl<'a, S, T> PerformExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SerialInteraction + 'a> + ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
+    S: ::std::convert::AsRef<dyn Perform + 'a> + ::std::convert::AsRef<dyn PerformExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
-    fn frobnicate_with_rpc_opts(
+    fn foo_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>> {
+        <Self as ::std::convert::AsRef<dyn PerformExt<T>>>::as_ref(self).foo_with_rpc_opts(
             rpc_options,
         )
     }
@@ -4385,12 +3996,6 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 }
-
-pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
-
-
-
 /// Client definitions for `Perform`.
 pub struct PerformImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -4473,35 +4078,7 @@ where
     }
 }
 
-pub trait Perform: ::std::marker::Send {
-    fn createMyInteraction(
-        &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
 
-    fn createMyInteractionFast(
-        &self,
-    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error>;
-
-    fn createSerialInteraction(
-        &self,
-    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error>;
-
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>>;
-}
-
-pub trait PerformExt<T>: Perform
-where
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_Perform_foo<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -4592,56 +4169,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> Perform for S
-where
-    S: ::std::convert::AsRef<dyn Perform + 'a>,
-    S: ::std::marker::Send,
-{
-    fn createMyInteraction(
-        &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        self.as_ref().createMyInteraction()
-    }
-    fn createMyInteractionFast(
-        &self,
-    ) -> ::std::result::Result<MyInteractionFastClient, ::anyhow::Error> {
-        self.as_ref().createMyInteractionFast()
-    }
-    fn createSerialInteraction(
-        &self,
-    ) -> ::std::result::Result<SerialInteractionClient, ::anyhow::Error> {
-        self.as_ref().createSerialInteraction()
-    }
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>> {
-        self.as_ref().foo(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> PerformExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn Perform + 'a> + ::std::convert::AsRef<dyn PerformExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::perform::FooError>> {
-        <Self as ::std::convert::AsRef<dyn PerformExt<T>>>::as_ref(self).foo_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -4742,6 +4269,7 @@ impl ::fbthrift::ClientFactory for make_Perform {
         <dyn Perform>::with_spawner(protocol, transport, spawner)
     }
 }
+
 
 
 /// Client definitions for `MyInteraction`.
@@ -4934,40 +4462,7 @@ where
     }
 }
 
-pub trait MyInteraction: ::std::marker::Send {
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
 
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-}
-
-pub trait MyInteractionExt<T>: MyInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>>;
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyInteraction_frobnicate<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -5085,71 +4580,9 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyInteraction for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
-    S: ::std::marker::Send,
-{
-    fn frobnicate(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        self.as_ref().frobnicate(
-        )
-    }
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn truthify(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        self.as_ref().truthify(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyInteractionExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyInteraction + 'a> + ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn frobnicate_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn truthify_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
+
 
 
 
@@ -5321,39 +4754,7 @@ where
     }
 }
 
-pub trait SharedInteraction: ::std::marker::Send {
-    fn init(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>>;
 
-    fn do_something(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>>;
-
-    fn tear_down(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>>;
-}
-
-pub trait SharedInteractionExt<T>: SharedInteraction
-where
-    T: ::fbthrift::Transport,
-{
-    fn init_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>>;
-    fn do_something_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>>;
-    fn tear_down_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_SharedInteraction_init<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -5471,60 +4872,73 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> SharedInteraction for S
+pub type SharedInteractionDynClient = dyn SharedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type SharedInteractionClient = ::std::sync::Arc<SharedInteractionDynClient>;
+
+
+
+pub trait InteractWithShared: ::std::marker::Send {
+    fn do_some_similar_things(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>>;
+
+    fn createMyInteraction(
+        &self,
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
+
+    fn createshared.SharedInteraction(
+        &self,
+    ) -> ::std::result::Result<SharedInteractionClient, ::anyhow::Error>;
+}
+
+pub trait InteractWithSharedExt<T>: InteractWithShared
 where
-    S: ::std::convert::AsRef<dyn SharedInteraction + 'a>,
+    T: ::fbthrift::Transport,
+{
+    fn do_some_similar_things_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> InteractWithShared for S
+where
+    S: ::std::convert::AsRef<dyn InteractWithShared + 'a>,
     S: ::std::marker::Send,
 {
-    fn init(
+    fn do_some_similar_things(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
-        self.as_ref().init(
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        self.as_ref().do_some_similar_things(
         )
     }
-    fn do_something(
+    fn createMyInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
-        self.as_ref().do_something(
-        )
+    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
+        self.as_ref().createMyInteraction()
     }
-    fn tear_down(
+    fn createshared.SharedInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
-        self.as_ref().tear_down(
-        )
+    ) -> ::std::result::Result<SharedInteractionClient, ::anyhow::Error> {
+        self.as_ref().createshared.SharedInteraction()
     }
 }
 
 #[allow(deprecated)]
-impl<'a, S, T> SharedInteractionExt<T> for S
+impl<'a, S, T> InteractWithSharedExt<T> for S
 where
-    S: ::std::convert::AsRef<dyn SharedInteraction + 'a> + ::std::convert::AsRef<dyn SharedInteractionExt<T> + 'a>,
+    S: ::std::convert::AsRef<dyn InteractWithShared + 'a> + ::std::convert::AsRef<dyn InteractWithSharedExt<T> + 'a>,
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
-    fn init_with_rpc_opts(
+    fn do_some_similar_things_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
-        <Self as ::std::convert::AsRef<dyn SharedInteractionExt<T>>>::as_ref(self).init_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn do_something_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
-        <Self as ::std::convert::AsRef<dyn SharedInteractionExt<T>>>::as_ref(self).do_something_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn tear_down_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
-        <Self as ::std::convert::AsRef<dyn SharedInteractionExt<T>>>::as_ref(self).tear_down_with_rpc_opts(
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
+        <Self as ::std::convert::AsRef<dyn InteractWithSharedExt<T>>>::as_ref(self).do_some_similar_things_with_rpc_opts(
             rpc_options,
         )
     }
@@ -5533,12 +4947,6 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 }
-
-pub type SharedInteractionDynClient = dyn SharedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-pub type SharedInteractionClient = ::std::sync::Arc<SharedInteractionDynClient>;
-
-
-
 /// Client definitions for `InteractWithShared`.
 pub struct InteractWithSharedImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -5621,31 +5029,7 @@ where
     }
 }
 
-pub trait InteractWithShared: ::std::marker::Send {
-    fn do_some_similar_things(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>>;
 
-    fn createMyInteraction(
-        &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
-
-    fn createshared.SharedInteraction(
-        &self,
-    ) -> ::std::result::Result<SharedInteractionClient, ::anyhow::Error>;
-}
-
-pub trait InteractWithSharedExt<T>: InteractWithShared
-where
-    T: ::fbthrift::Transport,
-{
-    fn do_some_similar_things_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_InteractWithShared_do_some_similar_things<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -5724,51 +5108,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> InteractWithShared for S
-where
-    S: ::std::convert::AsRef<dyn InteractWithShared + 'a>,
-    S: ::std::marker::Send,
-{
-    fn do_some_similar_things(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
-        self.as_ref().do_some_similar_things(
-        )
-    }
-    fn createMyInteraction(
-        &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
-        self.as_ref().createMyInteraction()
-    }
-    fn createshared.SharedInteraction(
-        &self,
-    ) -> ::std::result::Result<SharedInteractionClient, ::anyhow::Error> {
-        self.as_ref().createshared.SharedInteraction()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> InteractWithSharedExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn InteractWithShared + 'a> + ::std::convert::AsRef<dyn InteractWithSharedExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn do_some_similar_things_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::interact_with_shared::DoSomeSimilarThingsError>> {
-        <Self as ::std::convert::AsRef<dyn InteractWithSharedExt<T>>>::as_ref(self).do_some_similar_things_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

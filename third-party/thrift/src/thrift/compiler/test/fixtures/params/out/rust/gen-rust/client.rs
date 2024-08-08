@@ -16,6 +16,177 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+pub trait NestedContainers: ::std::marker::Send {
+    fn mapList(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>>;
+
+    fn mapSet(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>>;
+
+    fn listMap(
+        &self,
+        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>>;
+
+    fn listSet(
+        &self,
+        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>>;
+
+    fn turtles(
+        &self,
+        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>>;
+}
+
+pub trait NestedContainersExt<T>: NestedContainers
+where
+    T: ::fbthrift::Transport,
+{
+    fn mapList_with_rpc_opts(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>>;
+    fn mapSet_with_rpc_opts(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>>;
+    fn listMap_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>>;
+    fn listSet_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>>;
+    fn turtles_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> NestedContainers for S
+where
+    S: ::std::convert::AsRef<dyn NestedContainers + 'a>,
+    S: ::std::marker::Send,
+{
+    fn mapList(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>> {
+        self.as_ref().mapList(
+            arg_foo,
+        )
+    }
+    fn mapSet(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>> {
+        self.as_ref().mapSet(
+            arg_foo,
+        )
+    }
+    fn listMap(
+        &self,
+        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>> {
+        self.as_ref().listMap(
+            arg_foo,
+        )
+    }
+    fn listSet(
+        &self,
+        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>> {
+        self.as_ref().listSet(
+            arg_foo,
+        )
+    }
+    fn turtles(
+        &self,
+        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>> {
+        self.as_ref().turtles(
+            arg_foo,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> NestedContainersExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn NestedContainers + 'a> + ::std::convert::AsRef<dyn NestedContainersExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn mapList_with_rpc_opts(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>> {
+        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).mapList_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn mapSet_with_rpc_opts(
+        &self,
+        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>> {
+        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).mapSet_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn listMap_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>> {
+        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).listMap_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn listSet_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>> {
+        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).listSet_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn turtles_with_rpc_opts(
+        &self,
+        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>> {
+        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).turtles_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `NestedContainers`.
 pub struct NestedContainersImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -280,65 +451,7 @@ where
     }
 }
 
-pub trait NestedContainers: ::std::marker::Send {
-    fn mapList(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>>;
 
-    fn mapSet(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>>;
-
-    fn listMap(
-        &self,
-        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>>;
-
-    fn listSet(
-        &self,
-        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>>;
-
-    fn turtles(
-        &self,
-        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>>;
-}
-
-pub trait NestedContainersExt<T>: NestedContainers
-where
-    T: ::fbthrift::Transport,
-{
-    fn mapList_with_rpc_opts(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>>;
-    fn mapSet_with_rpc_opts(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>>;
-    fn listMap_with_rpc_opts(
-        &self,
-        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>>;
-    fn listSet_with_rpc_opts(
-        &self,
-        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>>;
-    fn turtles_with_rpc_opts(
-        &self,
-        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_NestedContainers_mapList<'a> {
     foo: &'a ::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
@@ -553,117 +666,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> NestedContainers for S
-where
-    S: ::std::convert::AsRef<dyn NestedContainers + 'a>,
-    S: ::std::marker::Send,
-{
-    fn mapList(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>> {
-        self.as_ref().mapList(
-            arg_foo,
-        )
-    }
-    fn mapSet(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>> {
-        self.as_ref().mapSet(
-            arg_foo,
-        )
-    }
-    fn listMap(
-        &self,
-        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>> {
-        self.as_ref().listMap(
-            arg_foo,
-        )
-    }
-    fn listSet(
-        &self,
-        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>> {
-        self.as_ref().listSet(
-            arg_foo,
-        )
-    }
-    fn turtles(
-        &self,
-        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>> {
-        self.as_ref().turtles(
-            arg_foo,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> NestedContainersExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn NestedContainers + 'a> + ::std::convert::AsRef<dyn NestedContainersExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn mapList_with_rpc_opts(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapListError>> {
-        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).mapList_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn mapSet_with_rpc_opts(
-        &self,
-        arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::MapSetError>> {
-        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).mapSet_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn listMap_with_rpc_opts(
-        &self,
-        arg_foo: &[::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListMapError>> {
-        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).listMap_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn listSet_with_rpc_opts(
-        &self,
-        arg_foo: &[::std::collections::BTreeSet<::std::primitive::i32>],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::ListSetError>> {
-        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).listSet_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn turtles_with_rpc_opts(
-        &self,
-        arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>> {
-        <Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self).turtles_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

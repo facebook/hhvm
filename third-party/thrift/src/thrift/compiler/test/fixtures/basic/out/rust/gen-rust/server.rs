@@ -80,7 +80,6 @@ where
     }
 }
 
-
 /// Processor for FooService's methods.
 #[derive(Clone, Debug)]
 pub struct FooServiceProcessor<P, H, R, RS> {
@@ -428,7 +427,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for FB303Service's methods.
 #[derive(Clone, Debug)]
@@ -1016,7 +1014,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
@@ -2250,7 +2247,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for DbMixedStackArguments's methods.
 #[derive(Clone, Debug)]

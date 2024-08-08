@@ -16,6 +16,125 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+pub trait Raiser: ::std::marker::Send {
+    fn doBland(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>>;
+
+    fn doRaise(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>>;
+
+    fn get200(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>>;
+
+    fn get500(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>>;
+}
+
+pub trait RaiserExt<T>: Raiser
+where
+    T: ::fbthrift::Transport,
+{
+    fn doBland_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>>;
+    fn doRaise_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>>;
+    fn get200_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>>;
+    fn get500_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> Raiser for S
+where
+    S: ::std::convert::AsRef<dyn Raiser + 'a>,
+    S: ::std::marker::Send,
+{
+    fn doBland(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>> {
+        self.as_ref().doBland(
+        )
+    }
+    fn doRaise(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>> {
+        self.as_ref().doRaise(
+        )
+    }
+    fn get200(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>> {
+        self.as_ref().get200(
+        )
+    }
+    fn get500(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>> {
+        self.as_ref().get500(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> RaiserExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn Raiser + 'a> + ::std::convert::AsRef<dyn RaiserExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn doBland_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>> {
+        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).doBland_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn doRaise_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>> {
+        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).doRaise_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn get200_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>> {
+        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).get200_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn get500_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>> {
+        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).get500_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `Raiser`.
 pub struct RaiserImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -227,47 +346,7 @@ where
     }
 }
 
-pub trait Raiser: ::std::marker::Send {
-    fn doBland(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>>;
 
-    fn doRaise(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>>;
-
-    fn get200(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>>;
-
-    fn get500(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>>;
-}
-
-pub trait RaiserExt<T>: Raiser
-where
-    T: ::fbthrift::Transport,
-{
-    fn doBland_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>>;
-    fn doRaise_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>>;
-    fn get200_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>>;
-    fn get500_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_Raiser_doBland<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -412,83 +491,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> Raiser for S
-where
-    S: ::std::convert::AsRef<dyn Raiser + 'a>,
-    S: ::std::marker::Send,
-{
-    fn doBland(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>> {
-        self.as_ref().doBland(
-        )
-    }
-    fn doRaise(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>> {
-        self.as_ref().doRaise(
-        )
-    }
-    fn get200(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>> {
-        self.as_ref().get200(
-        )
-    }
-    fn get500(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>> {
-        self.as_ref().get500(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> RaiserExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn Raiser + 'a> + ::std::convert::AsRef<dyn RaiserExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn doBland_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoBlandError>> {
-        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).doBland_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn doRaise_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::raiser::DoRaiseError>> {
-        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).doRaise_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn get200_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get200Error>> {
-        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).get200_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn get500_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>> {
-        <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).get500_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

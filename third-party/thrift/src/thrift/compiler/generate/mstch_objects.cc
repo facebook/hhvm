@@ -667,6 +667,10 @@ mstch::node mstch_program::services() {
       id);
 }
 
+mstch::node mstch_program::interactions() {
+  return make_mstch_interactions(program_->interactions(), nullptr);
+}
+
 mstch::node mstch_program::typedefs() {
   return make_mstch_typedefs(program_->typedefs());
 }

@@ -16,63 +16,18 @@ pub mod errors {
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::my_service::*;
-    #[doc(inline)]
-    pub use ::::services::my_interaction;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::my_interaction::*;
-    #[doc(inline)]
-    pub use ::::services::my_interaction_fast;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::my_interaction_fast::*;
-    #[doc(inline)]
-    pub use ::::services::serial_interaction;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::serial_interaction::*;
 
     #[doc(inline)]
     pub use ::::services::factories;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::factories::*;
-    #[doc(inline)]
-    pub use ::::services::my_interaction;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::my_interaction::*;
-    #[doc(inline)]
-    pub use ::::services::my_interaction_fast;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::my_interaction_fast::*;
-    #[doc(inline)]
-    pub use ::::services::serial_interaction;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::serial_interaction::*;
 
     #[doc(inline)]
     pub use ::::services::perform;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::perform::*;
-    #[doc(inline)]
-    pub use ::::services::my_interaction;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::my_interaction::*;
-    #[doc(inline)]
-    pub use ::::services::my_interaction_fast;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::my_interaction_fast::*;
-    #[doc(inline)]
-    pub use ::::services::serial_interaction;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::serial_interaction::*;
 
     #[doc(inline)]
     pub use ::::services::interact_with_shared;
@@ -85,15 +40,19 @@ pub mod errors {
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::my_interaction::*;
     #[doc(inline)]
-    pub use ::::services::shared_interaction;
+    pub use ::::services::my_interaction_fast;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::shared_interaction::*;
+    pub use ::::services::my_interaction_fast::*;
+    #[doc(inline)]
+    pub use ::::services::serial_interaction;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::serial_interaction::*;
 }
 
 pub(crate) use crate as server;
 pub(crate) use ::::services;
-
 
 #[::async_trait::async_trait]
 pub trait MyInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
@@ -182,6 +141,143 @@ where
     ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
 , crate::services::my_interaction::TruthifyExn> {
         (**self).truthify(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}#[::async_trait::async_trait]
+pub trait MyInteractionFast: ::std::marker::Send + ::std::marker::Sync + 'static {
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
+        ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(
+            ::fbthrift::ApplicationException::unimplemented_method(
+                "MyInteractionFast",
+                "frobnicate",
+            ),
+        ))
+    }
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
+        ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(
+            ::fbthrift::ApplicationException::unimplemented_method(
+                "MyInteractionFast",
+                "ping",
+            ),
+        ))
+    }
+    async fn truthify(
+        &self,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+, crate::services::my_interaction_fast::TruthifyExn> {
+        ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(
+            ::fbthrift::ApplicationException::unimplemented_method(
+                "MyInteractionFast",
+                "truthify",
+            ),
+        ))
+    }
+    async fn on_termination(&self) {}
+}
+
+#[::async_trait::async_trait]
+impl<T> MyInteractionFast for ::std::boxed::Box<T>
+where
+    T: MyInteractionFast + Send + Sync + ?Sized,
+{
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
+        (**self).frobnicate(
+        ).await
+    }
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn truthify(
+        &self,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+, crate::services::my_interaction_fast::TruthifyExn> {
+        (**self).truthify(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+#[::async_trait::async_trait]
+impl<T> MyInteractionFast for ::std::sync::Arc<T>
+where
+    T: MyInteractionFast + Send + Sync + ?Sized,
+{
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
+        (**self).frobnicate(
+        ).await
+    }
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn truthify(
+        &self,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+, crate::services::my_interaction_fast::TruthifyExn> {
+        (**self).truthify(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}#[::async_trait::async_trait]
+pub trait SerialInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
+        ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(
+            ::fbthrift::ApplicationException::unimplemented_method(
+                "SerialInteraction",
+                "frobnicate",
+            ),
+        ))
+    }
+    async fn on_termination(&self) {}
+}
+
+#[::async_trait::async_trait]
+impl<T> SerialInteraction for ::std::boxed::Box<T>
+where
+    T: SerialInteraction + Send + Sync + ?Sized,
+{
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
+        (**self).frobnicate(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+#[::async_trait::async_trait]
+impl<T> SerialInteraction for ::std::sync::Arc<T>
+where
+    T: SerialInteraction + Send + Sync + ?Sized,
+{
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
+        (**self).frobnicate(
         ).await
     }
     async fn on_termination(&self) {
@@ -679,99 +775,6 @@ where
 }
 
 
-#[::async_trait::async_trait]
-pub trait MyInteractionFast: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "ping",
-            ),
-        ))
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "truthify",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteractionFast for ::std::boxed::Box<T>
-where
-    T: MyInteractionFast + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteractionFast for ::std::sync::Arc<T>
-where
-    T: MyInteractionFast + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for MyInteractionFast's methods.
@@ -1263,52 +1266,6 @@ where
 }
 
 
-#[::async_trait::async_trait]
-pub trait SerialInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "SerialInteraction",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> SerialInteraction for ::std::boxed::Box<T>
-where
-    T: SerialInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> SerialInteraction for ::std::sync::Arc<T>
-where
-    T: SerialInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for SerialInteraction's methods.
@@ -1754,7 +1711,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
@@ -2424,99 +2380,6 @@ where
     }
 }
 
-#[::async_trait::async_trait]
-pub trait MyInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "ping",
-            ),
-        ))
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "truthify",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteraction for ::std::boxed::Box<T>
-where
-    T: MyInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteraction for ::std::sync::Arc<T>
-where
-    T: MyInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for MyInteraction's methods.
@@ -3008,99 +2871,6 @@ where
 }
 
 
-#[::async_trait::async_trait]
-pub trait MyInteractionFast: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "ping",
-            ),
-        ))
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "truthify",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteractionFast for ::std::boxed::Box<T>
-where
-    T: MyInteractionFast + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteractionFast for ::std::sync::Arc<T>
-where
-    T: MyInteractionFast + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for MyInteractionFast's methods.
@@ -3592,52 +3362,6 @@ where
 }
 
 
-#[::async_trait::async_trait]
-pub trait SerialInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "SerialInteraction",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> SerialInteraction for ::std::boxed::Box<T>
-where
-    T: SerialInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> SerialInteraction for ::std::sync::Arc<T>
-where
-    T: SerialInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for SerialInteraction's methods.
@@ -4038,7 +3762,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for Factories's methods.
 #[derive(Clone, Debug)]
@@ -4672,99 +4395,6 @@ where
     }
 }
 
-#[::async_trait::async_trait]
-pub trait MyInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "ping",
-            ),
-        ))
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "truthify",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteraction for ::std::boxed::Box<T>
-where
-    T: MyInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteraction for ::std::sync::Arc<T>
-where
-    T: MyInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for MyInteraction's methods.
@@ -5256,99 +4886,6 @@ where
 }
 
 
-#[::async_trait::async_trait]
-pub trait MyInteractionFast: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "ping",
-            ),
-        ))
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteractionFast",
-                "truthify",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteractionFast for ::std::boxed::Box<T>
-where
-    T: MyInteractionFast + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteractionFast for ::std::sync::Arc<T>
-where
-    T: MyInteractionFast + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
-, crate::services::my_interaction_fast::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for MyInteractionFast's methods.
@@ -5840,52 +5377,6 @@ where
 }
 
 
-#[::async_trait::async_trait]
-pub trait SerialInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "SerialInteraction",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> SerialInteraction for ::std::boxed::Box<T>
-where
-    T: SerialInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> SerialInteraction for ::std::sync::Arc<T>
-where
-    T: SerialInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for SerialInteraction's methods.
@@ -6249,7 +5740,6 @@ where
     }
 }
 
-
 /// Processor for Perform's methods.
 #[derive(Clone, Debug)]
 pub struct PerformProcessor<P, H, R, RS> {
@@ -6598,99 +6088,6 @@ where
     }
 }
 
-#[::async_trait::async_trait]
-pub trait MyInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "frobnicate",
-            ),
-        ))
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "ping",
-            ),
-        ))
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "MyInteraction",
-                "truthify",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteraction for ::std::boxed::Box<T>
-where
-    T: MyInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> MyInteraction for ::std::sync::Arc<T>
-where
-    T: MyInteraction + Send + Sync + ?Sized,
-{
-    async fn frobnicate(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
-        (**self).frobnicate(
-        ).await
-    }
-    async fn ping(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
-        (**self).ping(
-        ).await
-    }
-    async fn truthify(
-        &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
-, crate::services::my_interaction::TruthifyExn> {
-        (**self).truthify(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for MyInteraction's methods.
@@ -7182,96 +6579,6 @@ where
 }
 
 
-#[::async_trait::async_trait]
-pub trait SharedInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn init(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::shared_interaction::InitExn> {
-        ::std::result::Result::Err(crate::services::shared_interaction::InitExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "SharedInteraction",
-                "init",
-            ),
-        ))
-    }
-    async fn do_something(
-        &self,
-    ) -> ::std::result::Result<shared__types::DoSomethingResult, crate::services::shared_interaction::DoSomethingExn> {
-        ::std::result::Result::Err(crate::services::shared_interaction::DoSomethingExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "SharedInteraction",
-                "do_something",
-            ),
-        ))
-    }
-    async fn tear_down(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::shared_interaction::TearDownExn> {
-        ::std::result::Result::Err(crate::services::shared_interaction::TearDownExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "SharedInteraction",
-                "tear_down",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> SharedInteraction for ::std::boxed::Box<T>
-where
-    T: SharedInteraction + Send + Sync + ?Sized,
-{
-    async fn init(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::shared_interaction::InitExn> {
-        (**self).init(
-        ).await
-    }
-    async fn do_something(
-        &self,
-    ) -> ::std::result::Result<shared__types::DoSomethingResult, crate::services::shared_interaction::DoSomethingExn> {
-        (**self).do_something(
-        ).await
-    }
-    async fn tear_down(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::shared_interaction::TearDownExn> {
-        (**self).tear_down(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> SharedInteraction for ::std::sync::Arc<T>
-where
-    T: SharedInteraction + Send + Sync + ?Sized,
-{
-    async fn init(
-        &self,
-    ) -> ::std::result::Result<::std::primitive::i32, crate::services::shared_interaction::InitExn> {
-        (**self).init(
-        ).await
-    }
-    async fn do_something(
-        &self,
-    ) -> ::std::result::Result<shared__types::DoSomethingResult, crate::services::shared_interaction::DoSomethingExn> {
-        (**self).do_something(
-        ).await
-    }
-    async fn tear_down(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::shared_interaction::TearDownExn> {
-        (**self).tear_down(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for SharedInteraction's methods.
@@ -7797,7 +7104,6 @@ where
         (**self).createshared.SharedInteraction()
     }
 }
-
 
 /// Processor for InteractWithShared's methods.
 #[derive(Clone, Debug)]

@@ -16,6 +16,59 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+pub trait FooService: ::std::marker::Send {
+    fn simple_rpc(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>>;
+}
+
+pub trait FooServiceExt<T>: FooService
+where
+    T: ::fbthrift::Transport,
+{
+    fn simple_rpc_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> FooService for S
+where
+    S: ::std::convert::AsRef<dyn FooService + 'a>,
+    S: ::std::marker::Send,
+{
+    fn simple_rpc(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>> {
+        self.as_ref().simple_rpc(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> FooServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn FooService + 'a> + ::std::convert::AsRef<dyn FooServiceExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn simple_rpc_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>> {
+        <Self as ::std::convert::AsRef<dyn FooServiceExt<T>>>::as_ref(self).simple_rpc_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `FooService`.
 pub struct FooServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -98,23 +151,7 @@ where
     }
 }
 
-pub trait FooService: ::std::marker::Send {
-    fn simple_rpc(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>>;
-}
 
-pub trait FooServiceExt<T>: FooService
-where
-    T: ::fbthrift::Transport,
-{
-    fn simple_rpc_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_FooService_simple_rpc<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -169,41 +206,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> FooService for S
-where
-    S: ::std::convert::AsRef<dyn FooService + 'a>,
-    S: ::std::marker::Send,
-{
-    fn simple_rpc(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>> {
-        self.as_ref().simple_rpc(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> FooServiceExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn FooService + 'a> + ::std::convert::AsRef<dyn FooServiceExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn simple_rpc_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>> {
-        <Self as ::std::convert::AsRef<dyn FooServiceExt<T>>>::as_ref(self).simple_rpc_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -306,6 +308,64 @@ impl ::fbthrift::ClientFactory for make_FooService {
 }
 
 
+pub trait FB303Service: ::std::marker::Send {
+    fn simple_rpc(
+        &self,
+        arg_int_parameter: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>>;
+}
+
+pub trait FB303ServiceExt<T>: FB303Service
+where
+    T: ::fbthrift::Transport,
+{
+    fn simple_rpc_with_rpc_opts(
+        &self,
+        arg_int_parameter: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> FB303Service for S
+where
+    S: ::std::convert::AsRef<dyn FB303Service + 'a>,
+    S: ::std::marker::Send,
+{
+    fn simple_rpc(
+        &self,
+        arg_int_parameter: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>> {
+        self.as_ref().simple_rpc(
+            arg_int_parameter,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> FB303ServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn FB303Service + 'a> + ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn simple_rpc_with_rpc_opts(
+        &self,
+        arg_int_parameter: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>> {
+        <Self as ::std::convert::AsRef<dyn FB303ServiceExt<T>>>::as_ref(self).simple_rpc_with_rpc_opts(
+            arg_int_parameter,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `FB303Service`.
 pub struct FB303ServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -390,25 +450,7 @@ where
     }
 }
 
-pub trait FB303Service: ::std::marker::Send {
-    fn simple_rpc(
-        &self,
-        arg_int_parameter: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>>;
-}
 
-pub trait FB303ServiceExt<T>: FB303Service
-where
-    T: ::fbthrift::Transport,
-{
-    fn simple_rpc_with_rpc_opts(
-        &self,
-        arg_int_parameter: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_FB303Service_simple_rpc<'a> {
     int_parameter: ::std::primitive::i32,
@@ -471,45 +513,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> FB303Service for S
-where
-    S: ::std::convert::AsRef<dyn FB303Service + 'a>,
-    S: ::std::marker::Send,
-{
-    fn simple_rpc(
-        &self,
-        arg_int_parameter: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>> {
-        self.as_ref().simple_rpc(
-            arg_int_parameter,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> FB303ServiceExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn FB303Service + 'a> + ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn simple_rpc_with_rpc_opts(
-        &self,
-        arg_int_parameter: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>> {
-        <Self as ::std::convert::AsRef<dyn FB303ServiceExt<T>>>::as_ref(self).simple_rpc_with_rpc_opts(
-            arg_int_parameter,
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -612,6 +615,304 @@ impl ::fbthrift::ClientFactory for make_FB303Service {
 }
 
 
+pub trait MyService: ::std::marker::Send {
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>>;
+
+    fn getRandomData(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>>;
+
+    fn sink(
+        &self,
+        arg_sink: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>>;
+
+    fn putDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>>;
+
+    fn hasDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>>;
+
+    fn getDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>>;
+
+    fn deleteDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>>;
+
+    fn lobDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>>;
+
+    fn invalid_return_for_hack(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>>;
+
+    fn rpc_skipped_codegen(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>>;
+}
+
+pub trait MyServiceExt<T>: MyService
+where
+    T: ::fbthrift::Transport,
+{
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>>;
+    fn getRandomData_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>>;
+    fn sink_with_rpc_opts(
+        &self,
+        arg_sink: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>>;
+    fn putDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>>;
+    fn hasDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>>;
+    fn getDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>>;
+    fn deleteDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>>;
+    fn lobDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>>;
+    fn invalid_return_for_hack_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>>;
+    fn rpc_skipped_codegen_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> MyService for S
+where
+    S: ::std::convert::AsRef<dyn MyService + 'a>,
+    S: ::std::marker::Send,
+{
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
+        self.as_ref().ping(
+        )
+    }
+    fn getRandomData(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
+        self.as_ref().getRandomData(
+        )
+    }
+    fn sink(
+        &self,
+        arg_sink: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>> {
+        self.as_ref().sink(
+            arg_sink,
+        )
+    }
+    fn putDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
+        self.as_ref().putDataById(
+            arg_id,
+            arg_data,
+        )
+    }
+    fn hasDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
+        self.as_ref().hasDataById(
+            arg_id,
+        )
+    }
+    fn getDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
+        self.as_ref().getDataById(
+            arg_id,
+        )
+    }
+    fn deleteDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>> {
+        self.as_ref().deleteDataById(
+            arg_id,
+        )
+    }
+    fn lobDataById(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
+        self.as_ref().lobDataById(
+            arg_id,
+            arg_data,
+        )
+    }
+    fn invalid_return_for_hack(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>> {
+        self.as_ref().invalid_return_for_hack(
+        )
+    }
+    fn rpc_skipped_codegen(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>> {
+        self.as_ref().rpc_skipped_codegen(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> MyServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn MyService + 'a> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).ping_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn getRandomData_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).getRandomData_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn sink_with_rpc_opts(
+        &self,
+        arg_sink: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).sink_with_rpc_opts(
+            arg_sink,
+            rpc_options,
+        )
+    }
+    fn putDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).putDataById_with_rpc_opts(
+            arg_id,
+            arg_data,
+            rpc_options,
+        )
+    }
+    fn hasDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).hasDataById_with_rpc_opts(
+            arg_id,
+            rpc_options,
+        )
+    }
+    fn getDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).getDataById_with_rpc_opts(
+            arg_id,
+            rpc_options,
+        )
+    }
+    fn deleteDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).deleteDataById_with_rpc_opts(
+            arg_id,
+            rpc_options,
+        )
+    }
+    fn lobDataById_with_rpc_opts(
+        &self,
+        arg_id: ::std::primitive::i64,
+        arg_data: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).lobDataById_with_rpc_opts(
+            arg_id,
+            arg_data,
+            rpc_options,
+        )
+    }
+    fn invalid_return_for_hack_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).invalid_return_for_hack_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn rpc_skipped_codegen_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>> {
+        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).rpc_skipped_codegen_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `MyService`.
 pub struct MyServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -1097,111 +1398,7 @@ where
     }
 }
 
-pub trait MyService: ::std::marker::Send {
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>>;
 
-    fn getRandomData(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>>;
-
-    fn sink(
-        &self,
-        arg_sink: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>>;
-
-    fn putDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>>;
-
-    fn hasDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>>;
-
-    fn getDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>>;
-
-    fn deleteDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>>;
-
-    fn lobDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>>;
-
-    fn invalid_return_for_hack(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>>;
-
-    fn rpc_skipped_codegen(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>>;
-}
-
-pub trait MyServiceExt<T>: MyService
-where
-    T: ::fbthrift::Transport,
-{
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>>;
-    fn getRandomData_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>>;
-    fn sink_with_rpc_opts(
-        &self,
-        arg_sink: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>>;
-    fn putDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>>;
-    fn hasDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>>;
-    fn getDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>>;
-    fn deleteDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>>;
-    fn lobDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>>;
-    fn invalid_return_for_hack_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>>;
-    fn rpc_skipped_codegen_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_MyService_ping<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -1593,199 +1790,6 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<'a, S> MyService for S
-where
-    S: ::std::convert::AsRef<dyn MyService + 'a>,
-    S: ::std::marker::Send,
-{
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
-        self.as_ref().ping(
-        )
-    }
-    fn getRandomData(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
-        self.as_ref().getRandomData(
-        )
-    }
-    fn sink(
-        &self,
-        arg_sink: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>> {
-        self.as_ref().sink(
-            arg_sink,
-        )
-    }
-    fn putDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
-        self.as_ref().putDataById(
-            arg_id,
-            arg_data,
-        )
-    }
-    fn hasDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
-        self.as_ref().hasDataById(
-            arg_id,
-        )
-    }
-    fn getDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
-        self.as_ref().getDataById(
-            arg_id,
-        )
-    }
-    fn deleteDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>> {
-        self.as_ref().deleteDataById(
-            arg_id,
-        )
-    }
-    fn lobDataById(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
-        self.as_ref().lobDataById(
-            arg_id,
-            arg_data,
-        )
-    }
-    fn invalid_return_for_hack(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>> {
-        self.as_ref().invalid_return_for_hack(
-        )
-    }
-    fn rpc_skipped_codegen(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>> {
-        self.as_ref().rpc_skipped_codegen(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> MyServiceExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn MyService + 'a> + ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PingError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).ping_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn getRandomData_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetRandomDataError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).getRandomData_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn sink_with_rpc_opts(
-        &self,
-        arg_sink: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::SinkError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).sink_with_rpc_opts(
-            arg_sink,
-            rpc_options,
-        )
-    }
-    fn putDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::PutDataByIdError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).putDataById_with_rpc_opts(
-            arg_id,
-            arg_data,
-            rpc_options,
-        )
-    }
-    fn hasDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_service::HasDataByIdError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).hasDataById_with_rpc_opts(
-            arg_id,
-            rpc_options,
-        )
-    }
-    fn getDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::my_service::GetDataByIdError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).getDataById_with_rpc_opts(
-            arg_id,
-            rpc_options,
-        )
-    }
-    fn deleteDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DeleteDataByIdError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).deleteDataById_with_rpc_opts(
-            arg_id,
-            rpc_options,
-        )
-    }
-    fn lobDataById_with_rpc_opts(
-        &self,
-        arg_id: ::std::primitive::i64,
-        arg_data: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).lobDataById_with_rpc_opts(
-            arg_id,
-            arg_data,
-            rpc_options,
-        )
-    }
-    fn invalid_return_for_hack_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::errors::my_service::InvalidReturnForHackError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).invalid_return_for_hack_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn rpc_skipped_codegen_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>> {
-        <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).rpc_skipped_codegen_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-}
-
 #[derive(Clone)]
 pub struct make_MyService;
 
@@ -1885,6 +1889,92 @@ impl ::fbthrift::ClientFactory for make_MyService {
 }
 
 
+pub trait DbMixedStackArguments: ::std::marker::Send {
+    fn getDataByKey0(
+        &self,
+        arg_key: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>>;
+
+    fn getDataByKey1(
+        &self,
+        arg_key: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>>;
+}
+
+pub trait DbMixedStackArgumentsExt<T>: DbMixedStackArguments
+where
+    T: ::fbthrift::Transport,
+{
+    fn getDataByKey0_with_rpc_opts(
+        &self,
+        arg_key: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>>;
+    fn getDataByKey1_with_rpc_opts(
+        &self,
+        arg_key: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> DbMixedStackArguments for S
+where
+    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'a>,
+    S: ::std::marker::Send,
+{
+    fn getDataByKey0(
+        &self,
+        arg_key: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>> {
+        self.as_ref().getDataByKey0(
+            arg_key,
+        )
+    }
+    fn getDataByKey1(
+        &self,
+        arg_key: &::std::primitive::str,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>> {
+        self.as_ref().getDataByKey1(
+            arg_key,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> DbMixedStackArgumentsExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'a> + ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn getDataByKey0_with_rpc_opts(
+        &self,
+        arg_key: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>> {
+        <Self as ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T>>>::as_ref(self).getDataByKey0_with_rpc_opts(
+            arg_key,
+            rpc_options,
+        )
+    }
+    fn getDataByKey1_with_rpc_opts(
+        &self,
+        arg_key: &::std::primitive::str,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>> {
+        <Self as ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T>>>::as_ref(self).getDataByKey1_with_rpc_opts(
+            arg_key,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `DbMixedStackArguments`.
 pub struct DbMixedStackArgumentsImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -2014,35 +2104,7 @@ where
     }
 }
 
-pub trait DbMixedStackArguments: ::std::marker::Send {
-    fn getDataByKey0(
-        &self,
-        arg_key: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>>;
 
-    fn getDataByKey1(
-        &self,
-        arg_key: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>>;
-}
-
-pub trait DbMixedStackArgumentsExt<T>: DbMixedStackArguments
-where
-    T: ::fbthrift::Transport,
-{
-    fn getDataByKey0_with_rpc_opts(
-        &self,
-        arg_key: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>>;
-    fn getDataByKey1_with_rpc_opts(
-        &self,
-        arg_key: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_DbMixedStackArguments_getDataByKey0<'a> {
     key: &'a ::std::primitive::str,
@@ -2143,63 +2205,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> DbMixedStackArguments for S
-where
-    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'a>,
-    S: ::std::marker::Send,
-{
-    fn getDataByKey0(
-        &self,
-        arg_key: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>> {
-        self.as_ref().getDataByKey0(
-            arg_key,
-        )
-    }
-    fn getDataByKey1(
-        &self,
-        arg_key: &::std::primitive::str,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>> {
-        self.as_ref().getDataByKey1(
-            arg_key,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> DbMixedStackArgumentsExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'a> + ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn getDataByKey0_with_rpc_opts(
-        &self,
-        arg_key: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey0Error>> {
-        <Self as ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T>>>::as_ref(self).getDataByKey0_with_rpc_opts(
-            arg_key,
-            rpc_options,
-        )
-    }
-    fn getDataByKey1_with_rpc_opts(
-        &self,
-        arg_key: &::std::primitive::str,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>> {
-        <Self as ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T>>>::as_ref(self).getDataByKey1_with_rpc_opts(
-            arg_key,
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

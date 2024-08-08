@@ -94,7 +94,6 @@ where
     }
 }
 
-
 /// Processor for SomeService's methods.
 #[derive(Clone, Debug)]
 pub struct SomeServiceProcessor<P, H, R, RS> {

@@ -16,6 +16,128 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+#[doc = "Detailed overview of service"]
+pub trait C: ::std::marker::Send {
+    #[doc = "Function doctext."]
+    fn f(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>>;
+
+    #[doc = "Streaming function"]
+    fn numbers(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>>;
+
+    #[doc = ""]
+    fn thing(
+        &self,
+        arg_a: ::std::primitive::i32,
+        arg_b: &::std::primitive::str,
+        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>>;
+}
+
+pub trait CExt<T>: C
+where
+    T: ::fbthrift::Transport,
+{
+    #[doc = "Function doctext."]
+    fn f_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>>;
+    #[doc = "Streaming function"]
+    fn numbers_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>>;
+    #[doc = ""]
+    fn thing_with_rpc_opts(
+        &self,
+        arg_a: ::std::primitive::i32,
+        arg_b: &::std::primitive::str,
+        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> C for S
+where
+    S: ::std::convert::AsRef<dyn C + 'a>,
+    S: ::std::marker::Send,
+{
+    fn f(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>> {
+        self.as_ref().f(
+        )
+    }
+    fn numbers(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>> {
+        self.as_ref().numbers(
+        )
+    }
+    fn thing(
+        &self,
+        arg_a: ::std::primitive::i32,
+        arg_b: &::std::primitive::str,
+        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>> {
+        self.as_ref().thing(
+            arg_a,
+            arg_b,
+            arg_c,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> CExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn C + 'a> + ::std::convert::AsRef<dyn CExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn f_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>> {
+        <Self as ::std::convert::AsRef<dyn CExt<T>>>::as_ref(self).f_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn numbers_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>> {
+        <Self as ::std::convert::AsRef<dyn CExt<T>>>::as_ref(self).numbers_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn thing_with_rpc_opts(
+        &self,
+        arg_a: ::std::primitive::i32,
+        arg_b: &::std::primitive::str,
+        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>> {
+        <Self as ::std::convert::AsRef<dyn CExt<T>>>::as_ref(self).thing_with_rpc_opts(
+            arg_a,
+            arg_b,
+            arg_c,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `C`.
 pub struct CImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -212,52 +334,7 @@ where
     }
 }
 
-#[doc = "Detailed overview of service"]
-pub trait C: ::std::marker::Send {
-    #[doc = "Function doctext."]
-    fn f(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>>;
 
-    #[doc = "Streaming function"]
-    fn numbers(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>>;
-
-    #[doc = ""]
-    fn thing(
-        &self,
-        arg_a: ::std::primitive::i32,
-        arg_b: &::std::primitive::str,
-        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>>;
-}
-
-pub trait CExt<T>: C
-where
-    T: ::fbthrift::Transport,
-{
-    #[doc = "Function doctext."]
-    fn f_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>>;
-    #[doc = "Streaming function"]
-    fn numbers_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>>;
-    #[doc = ""]
-    fn thing_with_rpc_opts(
-        &self,
-        arg_a: ::std::primitive::i32,
-        arg_b: &::std::primitive::str,
-        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_C_f<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -396,81 +473,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> C for S
-where
-    S: ::std::convert::AsRef<dyn C + 'a>,
-    S: ::std::marker::Send,
-{
-    fn f(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>> {
-        self.as_ref().f(
-        )
-    }
-    fn numbers(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>> {
-        self.as_ref().numbers(
-        )
-    }
-    fn thing(
-        &self,
-        arg_a: ::std::primitive::i32,
-        arg_b: &::std::primitive::str,
-        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>> {
-        self.as_ref().thing(
-            arg_a,
-            arg_b,
-            arg_c,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> CExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn C + 'a> + ::std::convert::AsRef<dyn CExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn f_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::c::FError>> {
-        <Self as ::std::convert::AsRef<dyn CExt<T>>>::as_ref(self).f_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn numbers_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>, crate::errors::c::NumbersError>> {
-        <Self as ::std::convert::AsRef<dyn CExt<T>>>::as_ref(self).numbers_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn thing_with_rpc_opts(
-        &self,
-        arg_a: ::std::primitive::i32,
-        arg_b: &::std::primitive::str,
-        arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>> {
-        <Self as ::std::convert::AsRef<dyn CExt<T>>>::as_ref(self).thing_with_rpc_opts(
-            arg_a,
-            arg_b,
-            arg_c,
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

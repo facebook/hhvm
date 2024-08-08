@@ -16,6 +16,93 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+pub trait SomeService: ::std::marker::Send {
+    fn bounce_map(
+        &self,
+        arg_m: &included__types::SomeMap,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>>;
+
+    fn binary_keyed_map(
+        &self,
+        arg_r: &[::std::primitive::i64],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>>;
+}
+
+pub trait SomeServiceExt<T>: SomeService
+where
+    T: ::fbthrift::Transport,
+{
+    fn bounce_map_with_rpc_opts(
+        &self,
+        arg_m: &included__types::SomeMap,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>>;
+    fn binary_keyed_map_with_rpc_opts(
+        &self,
+        arg_r: &[::std::primitive::i64],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> SomeService for S
+where
+    S: ::std::convert::AsRef<dyn SomeService + 'a>,
+    S: ::std::marker::Send,
+{
+    fn bounce_map(
+        &self,
+        arg_m: &included__types::SomeMap,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        self.as_ref().bounce_map(
+            arg_m,
+        )
+    }
+    fn binary_keyed_map(
+        &self,
+        arg_r: &[::std::primitive::i64],
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>> {
+        self.as_ref().binary_keyed_map(
+            arg_r,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> SomeServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn SomeService + 'a> + ::std::convert::AsRef<dyn SomeServiceExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn bounce_map_with_rpc_opts(
+        &self,
+        arg_m: &included__types::SomeMap,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        <Self as ::std::convert::AsRef<dyn SomeServiceExt<T>>>::as_ref(self).bounce_map_with_rpc_opts(
+            arg_m,
+            rpc_options,
+        )
+    }
+    fn binary_keyed_map_with_rpc_opts(
+        &self,
+        arg_r: &[::std::primitive::i64],
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>> {
+        <Self as ::std::convert::AsRef<dyn SomeServiceExt<T>>>::as_ref(self).binary_keyed_map_with_rpc_opts(
+            arg_r,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `SomeService`.
 pub struct SomeServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -145,35 +232,7 @@ where
     }
 }
 
-pub trait SomeService: ::std::marker::Send {
-    fn bounce_map(
-        &self,
-        arg_m: &included__types::SomeMap,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>>;
 
-    fn binary_keyed_map(
-        &self,
-        arg_r: &[::std::primitive::i64],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>>;
-}
-
-pub trait SomeServiceExt<T>: SomeService
-where
-    T: ::fbthrift::Transport,
-{
-    fn bounce_map_with_rpc_opts(
-        &self,
-        arg_m: &included__types::SomeMap,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>>;
-    fn binary_keyed_map_with_rpc_opts(
-        &self,
-        arg_r: &[::std::primitive::i64],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_SomeService_bounce_map<'a> {
     m: &'a included__types::SomeMap,
@@ -274,63 +333,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> SomeService for S
-where
-    S: ::std::convert::AsRef<dyn SomeService + 'a>,
-    S: ::std::marker::Send,
-{
-    fn bounce_map(
-        &self,
-        arg_m: &included__types::SomeMap,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
-        self.as_ref().bounce_map(
-            arg_m,
-        )
-    }
-    fn binary_keyed_map(
-        &self,
-        arg_r: &[::std::primitive::i64],
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>> {
-        self.as_ref().binary_keyed_map(
-            arg_r,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> SomeServiceExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn SomeService + 'a> + ::std::convert::AsRef<dyn SomeServiceExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn bounce_map_with_rpc_opts(
-        &self,
-        arg_m: &included__types::SomeMap,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
-        <Self as ::std::convert::AsRef<dyn SomeServiceExt<T>>>::as_ref(self).bounce_map_with_rpc_opts(
-            arg_m,
-            rpc_options,
-        )
-    }
-    fn binary_keyed_map_with_rpc_opts(
-        &self,
-        arg_r: &[::std::primitive::i64],
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>> {
-        <Self as ::std::convert::AsRef<dyn SomeServiceExt<T>>>::as_ref(self).binary_keyed_map_with_rpc_opts(
-            arg_r,
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

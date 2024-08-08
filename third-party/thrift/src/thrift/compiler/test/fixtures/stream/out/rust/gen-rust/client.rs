@@ -16,6 +16,301 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+pub trait PubSubStreamingService: ::std::marker::Send {
+    fn returnstream(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>>;
+
+    fn streamthrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>>;
+
+    fn servicethrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>>;
+
+    fn servicethrows2(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>>;
+
+    fn boththrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>>;
+
+    fn responseandstreamstreamthrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>>;
+
+    fn responseandstreamservicethrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>>;
+
+    fn responseandstreamboththrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>>;
+
+    fn returnstreamFast(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>>;
+}
+
+pub trait PubSubStreamingServiceExt<T>: PubSubStreamingService
+where
+    T: ::fbthrift::Transport,
+{
+    fn returnstream_with_rpc_opts(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>>;
+    fn streamthrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>>;
+    fn servicethrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>>;
+    fn servicethrows2_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>>;
+    fn boththrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>>;
+    fn responseandstreamstreamthrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>>;
+    fn responseandstreamservicethrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>>;
+    fn responseandstreamboththrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>>;
+    fn returnstreamFast_with_rpc_opts(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> PubSubStreamingService for S
+where
+    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'a>,
+    S: ::std::marker::Send,
+{
+    fn returnstream(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>> {
+        self.as_ref().returnstream(
+            arg_i32_from,
+            arg_i32_to,
+        )
+    }
+    fn streamthrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>> {
+        self.as_ref().streamthrows(
+            arg_foo,
+        )
+    }
+    fn servicethrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
+        self.as_ref().servicethrows(
+            arg_foo,
+        )
+    }
+    fn servicethrows2(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+        self.as_ref().servicethrows2(
+            arg_foo,
+        )
+    }
+    fn boththrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>> {
+        self.as_ref().boththrows(
+            arg_foo,
+        )
+    }
+    fn responseandstreamstreamthrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>> {
+        self.as_ref().responseandstreamstreamthrows(
+            arg_foo,
+        )
+    }
+    fn responseandstreamservicethrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>> {
+        self.as_ref().responseandstreamservicethrows(
+            arg_foo,
+        )
+    }
+    fn responseandstreamboththrows(
+        &self,
+        arg_foo: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>> {
+        self.as_ref().responseandstreamboththrows(
+            arg_foo,
+        )
+    }
+    fn returnstreamFast(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>> {
+        self.as_ref().returnstreamFast(
+            arg_i32_from,
+            arg_i32_to,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> PubSubStreamingServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'a> + ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn returnstream_with_rpc_opts(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).returnstream_with_rpc_opts(
+            arg_i32_from,
+            arg_i32_to,
+            rpc_options,
+        )
+    }
+    fn streamthrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).streamthrows_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn servicethrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).servicethrows_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn servicethrows2_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).servicethrows2_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn boththrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).boththrows_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn responseandstreamstreamthrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).responseandstreamstreamthrows_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn responseandstreamservicethrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).responseandstreamservicethrows_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn responseandstreamboththrows_with_rpc_opts(
+        &self,
+        arg_foo: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).responseandstreamboththrows_with_rpc_opts(
+            arg_foo,
+            rpc_options,
+        )
+    }
+    fn returnstreamFast_with_rpc_opts(
+        &self,
+        arg_i32_from: ::std::primitive::i32,
+        arg_i32_to: ::std::primitive::i32,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>> {
+        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).returnstreamFast_with_rpc_opts(
+            arg_i32_from,
+            arg_i32_to,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `PubSubStreamingService`.
 pub struct PubSubStreamingServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -662,109 +957,7 @@ where
     }
 }
 
-pub trait PubSubStreamingService: ::std::marker::Send {
-    fn returnstream(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>>;
 
-    fn streamthrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>>;
-
-    fn servicethrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>>;
-
-    fn servicethrows2(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>>;
-
-    fn boththrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>>;
-
-    fn responseandstreamstreamthrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>>;
-
-    fn responseandstreamservicethrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>>;
-
-    fn responseandstreamboththrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>>;
-
-    fn returnstreamFast(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>>;
-}
-
-pub trait PubSubStreamingServiceExt<T>: PubSubStreamingService
-where
-    T: ::fbthrift::Transport,
-{
-    fn returnstream_with_rpc_opts(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>>;
-    fn streamthrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>>;
-    fn servicethrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>>;
-    fn servicethrows2_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>>;
-    fn boththrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>>;
-    fn responseandstreamstreamthrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>>;
-    fn responseandstreamservicethrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>>;
-    fn responseandstreamboththrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>>;
-    fn returnstreamFast_with_rpc_opts(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_PubSubStreamingService_returnstream<'a> {
     i32_from: ::std::primitive::i32,
@@ -1147,197 +1340,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> PubSubStreamingService for S
-where
-    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'a>,
-    S: ::std::marker::Send,
-{
-    fn returnstream(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>> {
-        self.as_ref().returnstream(
-            arg_i32_from,
-            arg_i32_to,
-        )
-    }
-    fn streamthrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>> {
-        self.as_ref().streamthrows(
-            arg_foo,
-        )
-    }
-    fn servicethrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
-        self.as_ref().servicethrows(
-            arg_foo,
-        )
-    }
-    fn servicethrows2(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
-        self.as_ref().servicethrows2(
-            arg_foo,
-        )
-    }
-    fn boththrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>> {
-        self.as_ref().boththrows(
-            arg_foo,
-        )
-    }
-    fn responseandstreamstreamthrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>> {
-        self.as_ref().responseandstreamstreamthrows(
-            arg_foo,
-        )
-    }
-    fn responseandstreamservicethrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>> {
-        self.as_ref().responseandstreamservicethrows(
-            arg_foo,
-        )
-    }
-    fn responseandstreamboththrows(
-        &self,
-        arg_foo: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>> {
-        self.as_ref().responseandstreamboththrows(
-            arg_foo,
-        )
-    }
-    fn returnstreamFast(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>> {
-        self.as_ref().returnstreamFast(
-            arg_i32_from,
-            arg_i32_to,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> PubSubStreamingServiceExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn PubSubStreamingService + 'a> + ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn returnstream_with_rpc_opts(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).returnstream_with_rpc_opts(
-            arg_i32_from,
-            arg_i32_to,
-            rpc_options,
-        )
-    }
-    fn streamthrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).streamthrows_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn servicethrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).servicethrows_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn servicethrows2_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).servicethrows2_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn boththrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).boththrows_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn responseandstreamstreamthrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).responseandstreamstreamthrows_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn responseandstreamservicethrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).responseandstreamservicethrows_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn responseandstreamboththrows_with_rpc_opts(
-        &self,
-        arg_foo: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).responseandstreamboththrows_with_rpc_opts(
-            arg_foo,
-            rpc_options,
-        )
-    }
-    fn returnstreamFast_with_rpc_opts(
-        &self,
-        arg_i32_from: ::std::primitive::i32,
-        arg_i32_to: ::std::primitive::i32,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>> {
-        <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).returnstreamFast_with_rpc_opts(
-            arg_i32_from,
-            arg_i32_to,
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

@@ -34,23 +34,68 @@ pub mod errors {
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::bad_service::*;
-    #[doc(inline)]
-    pub use ::::services::bad_interaction;
-    #[doc(inline)]
-    #[allow(ambiguous_glob_reexports)]
-    pub use ::::services::bad_interaction::*;
 
     #[doc(inline)]
     pub use ::::services::foo_bar_baz_service;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::foo_bar_baz_service::*;
+    #[doc(inline)]
+    pub use ::::services::bad_interaction;
+    #[doc(inline)]
+    #[allow(ambiguous_glob_reexports)]
+    pub use ::::services::bad_interaction::*;
 }
 
 pub(crate) use crate as server;
 pub(crate) use ::::services;
 
+#[::async_trait::async_trait]
+pub trait BadInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
+        ::std::result::Result::Err(crate::services::bad_interaction::FooExn::ApplicationException(
+            ::fbthrift::ApplicationException::unimplemented_method(
+                "BadInteraction",
+                "foo",
+            ),
+        ))
+    }
+    async fn on_termination(&self) {}
+}
 
+#[::async_trait::async_trait]
+impl<T> BadInteraction for ::std::boxed::Box<T>
+where
+    T: BadInteraction + Send + Sync + ?Sized,
+{
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+#[::async_trait::async_trait]
+impl<T> BadInteraction for ::std::sync::Arc<T>
+where
+    T: BadInteraction + Send + Sync + ?Sized,
+{
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
 #[::async_trait::async_trait]
 pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn ping(
@@ -252,7 +297,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
@@ -1195,7 +1239,6 @@ where
     }
 }
 
-
 /// Processor for MyServicePrioParent's methods.
 #[derive(Clone, Debug)]
 pub struct MyServicePrioParentProcessor<P, H, R, RS> {
@@ -1629,7 +1672,6 @@ where
     }
 }
 
-
 /// Processor for MyServicePrioChild's methods.
 #[derive(Clone, Debug)]
 pub struct MyServicePrioChildProcessor<P, H, R, RS, SS> {
@@ -1948,52 +1990,6 @@ where
     }
 }
 
-#[::async_trait::async_trait]
-pub trait BadInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
-    async fn foo(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
-        ::std::result::Result::Err(crate::services::bad_interaction::FooExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "BadInteraction",
-                "foo",
-            ),
-        ))
-    }
-    async fn on_termination(&self) {}
-}
-
-#[::async_trait::async_trait]
-impl<T> BadInteraction for ::std::boxed::Box<T>
-where
-    T: BadInteraction + Send + Sync + ?Sized,
-{
-    async fn foo(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
-        (**self).foo(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
-
-#[::async_trait::async_trait]
-impl<T> BadInteraction for ::std::sync::Arc<T>
-where
-    T: BadInteraction + Send + Sync + ?Sized,
-{
-    async fn foo(
-        &self,
-    ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
-        (**self).foo(
-        ).await
-    }
-    async fn on_termination(&self) {
-        (**self).on_termination().await;
-    }
-}
 
 
 /// Processor for BadInteraction's methods.
@@ -2326,7 +2322,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for BadService's methods.
 #[derive(Clone, Debug)]
@@ -2727,7 +2722,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for FooBarBazService's methods.
 #[derive(Clone, Debug)]

@@ -3,6 +3,65 @@
 
 //! Thrift error definitions for `module`.
 
+/// Error definitions for `BadInteraction`.
+pub mod bad_interaction {
+
+    pub type FooError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum FooReader {}
+
+    impl ::fbthrift::help::DeserializeExn for FooReader {
+        type Success = ();
+        type Error = FooError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::result::Result::Ok(());
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Void, 0i32), false) => {
+                        once = true;
+                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "FooError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(alt)
+        }
+    }
+
+}
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::bad_interaction::*;
+
 /// Error definitions for `MyService`.
 pub mod my_service {
 
@@ -674,65 +733,6 @@ pub mod my_service_prio_child {
 #[doc(inline)]
 #[allow(ambiguous_glob_reexports)]
 pub use self::my_service_prio_child::*;
-
-/// Error definitions for `BadInteraction`.
-pub mod bad_interaction {
-
-    pub type FooError = ::fbthrift::NonthrowingFunctionError;
-
-
-    pub(crate) enum FooReader {}
-
-    impl ::fbthrift::help::DeserializeExn for FooReader {
-        type Success = ();
-        type Error = FooError;
-
-        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
-        where
-            P: ::fbthrift::ProtocolReader,
-        {
-            static RETURNS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
-            ];
-            let _ = p.read_struct_begin(|_| ())?;
-            let mut once = false;
-            let mut alt = ::std::result::Result::Ok(());
-            loop {
-                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
-                match ((fty, fid as ::std::primitive::i32), once) {
-                    ((::fbthrift::TType::Stop, _), _) => {
-                        p.read_field_end()?;
-                        break;
-                    }
-                    ((::fbthrift::TType::Void, 0i32), false) => {
-                        once = true;
-                        alt = ::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?);
-                    }
-                    ((ty, _id), false) => p.skip(ty)?,
-                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
-                        ::fbthrift::ApplicationException::new(
-                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                            format!(
-                                "unwanted extra union {} field ty {:?} id {}",
-                                "FooError",
-                                badty,
-                                badid,
-                            ),
-                        )
-                    )),
-                }
-                p.read_field_end()?;
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(alt)
-        }
-    }
-
-}
-
-#[doc(inline)]
-#[allow(ambiguous_glob_reexports)]
-pub use self::bad_interaction::*;
 
 /// Error definitions for `BadService`.
 pub mod bad_service {

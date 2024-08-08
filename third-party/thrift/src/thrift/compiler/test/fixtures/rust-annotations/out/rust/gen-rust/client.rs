@@ -16,6 +16,59 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
+
+pub trait Service1: ::std::marker::Send {
+    fn r(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>>;
+}
+
+pub trait Service1Ext<T>: Service1
+where
+    T: ::fbthrift::Transport,
+{
+    fn r_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> Service1 for S
+where
+    S: ::std::convert::AsRef<dyn Service1 + 'a>,
+    S: ::std::marker::Send,
+{
+    fn r(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
+        self.as_ref().r(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> Service1Ext<T> for S
+where
+    S: ::std::convert::AsRef<dyn Service1 + 'a> + ::std::convert::AsRef<dyn Service1Ext<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn r_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
+        <Self as ::std::convert::AsRef<dyn Service1Ext<T>>>::as_ref(self).r_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `Service1`.
 pub struct Service1Impl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -98,23 +151,7 @@ where
     }
 }
 
-pub trait Service1: ::std::marker::Send {
-    fn r(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>>;
-}
 
-pub trait Service1Ext<T>: Service1
-where
-    T: ::fbthrift::Transport,
-{
-    fn r_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_Service1_r<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -169,41 +206,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> Service1 for S
-where
-    S: ::std::convert::AsRef<dyn Service1 + 'a>,
-    S: ::std::marker::Send,
-{
-    fn r(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
-        self.as_ref().r(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> Service1Ext<T> for S
-where
-    S: ::std::convert::AsRef<dyn Service1 + 'a> + ::std::convert::AsRef<dyn Service1Ext<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn r_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
-        <Self as ::std::convert::AsRef<dyn Service1Ext<T>>>::as_ref(self).r_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -306,6 +308,58 @@ impl ::fbthrift::ClientFactory for make_Service1 {
 }
 
 
+pub trait S2: ::std::marker::Send {
+    fn s(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>>;
+}
+
+pub trait S2Ext<T>: S2
+where
+    T: ::fbthrift::Transport,
+{
+    fn s_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> S2 for S
+where
+    S: ::std::convert::AsRef<dyn S2 + 'a>,
+    S: ::std::marker::Send,
+{
+    fn s(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
+        self.as_ref().s(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> S2Ext<T> for S
+where
+    S: ::std::convert::AsRef<dyn S2 + 'a> + ::std::convert::AsRef<dyn S2Ext<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn s_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
+        <Self as ::std::convert::AsRef<dyn S2Ext<T>>>::as_ref(self).s_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `S2`.
 pub struct S2Impl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -388,23 +442,7 @@ where
     }
 }
 
-pub trait S2: ::std::marker::Send {
-    fn s(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>>;
-}
 
-pub trait S2Ext<T>: S2
-where
-    T: ::fbthrift::Transport,
-{
-    fn s_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_S2_r<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -459,41 +497,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> S2 for S
-where
-    S: ::std::convert::AsRef<dyn S2 + 'a>,
-    S: ::std::marker::Send,
-{
-    fn s(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
-        self.as_ref().s(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> S2Ext<T> for S
-where
-    S: ::std::convert::AsRef<dyn S2 + 'a> + ::std::convert::AsRef<dyn S2Ext<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn s_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2_proxy::RError>> {
-        <Self as ::std::convert::AsRef<dyn S2Ext<T>>>::as_ref(self).s_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -596,6 +599,80 @@ impl ::fbthrift::ClientFactory for make_S2 {
 }
 
 
+pub trait AllMethods: ::std::marker::Send {
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>>;
+
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>>;
+}
+
+pub trait AllMethodsExt<T>: AllMethods
+where
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>>;
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> AllMethods for S
+where
+    S: ::std::convert::AsRef<dyn AllMethods + 'a>,
+    S: ::std::marker::Send,
+{
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+        self.as_ref().foo(
+        )
+    }
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+        self.as_ref().bar(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> AllMethodsExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn AllMethods + 'a> + ::std::convert::AsRef<dyn AllMethodsExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
+        <Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self).foo_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
+        <Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self).bar_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `AllMethods`.
 pub struct AllMethodsImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -721,31 +798,7 @@ where
     }
 }
 
-pub trait AllMethods: ::std::marker::Send {
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>>;
 
-    fn bar(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>>;
-}
-
-pub trait AllMethodsExt<T>: AllMethods
-where
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>>;
-    fn bar_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_AllMethods_foo<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -830,55 +883,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> AllMethods for S
-where
-    S: ::std::convert::AsRef<dyn AllMethods + 'a>,
-    S: ::std::marker::Send,
-{
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
-        self.as_ref().foo(
-        )
-    }
-    fn bar(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
-        self.as_ref().bar(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> AllMethodsExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn AllMethods + 'a> + ::std::convert::AsRef<dyn AllMethodsExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::all_methods::FooError>> {
-        <Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self).foo_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn bar_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::all_methods::BarError>> {
-        <Self as ::std::convert::AsRef<dyn AllMethodsExt<T>>>::as_ref(self).bar_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -981,6 +985,80 @@ impl ::fbthrift::ClientFactory for make_AllMethods {
 }
 
 
+pub trait OneMethod: ::std::marker::Send {
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>>;
+
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>>;
+}
+
+pub trait OneMethodExt<T>: OneMethod
+where
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>>;
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> OneMethod for S
+where
+    S: ::std::convert::AsRef<dyn OneMethod + 'a>,
+    S: ::std::marker::Send,
+{
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+        self.as_ref().foo(
+        )
+    }
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+        self.as_ref().bar(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> OneMethodExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn OneMethod + 'a> + ::std::convert::AsRef<dyn OneMethodExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
+        <Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self).foo_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
+        <Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self).bar_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `OneMethod`.
 pub struct OneMethodImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -1106,31 +1184,7 @@ where
     }
 }
 
-pub trait OneMethod: ::std::marker::Send {
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>>;
 
-    fn bar(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>>;
-}
-
-pub trait OneMethodExt<T>: OneMethod
-where
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>>;
-    fn bar_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_OneMethod_foo<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -1215,55 +1269,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> OneMethod for S
-where
-    S: ::std::convert::AsRef<dyn OneMethod + 'a>,
-    S: ::std::marker::Send,
-{
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
-        self.as_ref().foo(
-        )
-    }
-    fn bar(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
-        self.as_ref().bar(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> OneMethodExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn OneMethod + 'a> + ::std::convert::AsRef<dyn OneMethodExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method::FooError>> {
-        <Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self).foo_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn bar_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method::BarError>> {
-        <Self as ::std::convert::AsRef<dyn OneMethodExt<T>>>::as_ref(self).bar_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 
@@ -1366,6 +1371,80 @@ impl ::fbthrift::ClientFactory for make_OneMethod {
 }
 
 
+pub trait OneMethodOptOut: ::std::marker::Send {
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>>;
+
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>>;
+}
+
+pub trait OneMethodOptOutExt<T>: OneMethodOptOut
+where
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>>;
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> OneMethodOptOut for S
+where
+    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'a>,
+    S: ::std::marker::Send,
+{
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+        self.as_ref().foo(
+        )
+    }
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+        self.as_ref().bar(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> OneMethodOptOutExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'a> + ::std::convert::AsRef<dyn OneMethodOptOutExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
+        <Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self).foo_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
+        <Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self).bar_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
 /// Client definitions for `OneMethodOptOut`.
 pub struct OneMethodOptOutImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
@@ -1491,31 +1570,7 @@ where
     }
 }
 
-pub trait OneMethodOptOut: ::std::marker::Send {
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>>;
 
-    fn bar(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>>;
-}
-
-pub trait OneMethodOptOutExt<T>: OneMethodOptOut
-where
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>>;
-    fn bar_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>>;
-
-    fn transport(&self) -> &T;
-}
 
 struct Args_OneMethodOptOut_foo<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
@@ -1600,55 +1655,6 @@ where
 
     fn transport(&self) -> &T {
         self.transport()
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S> OneMethodOptOut for S
-where
-    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'a>,
-    S: ::std::marker::Send,
-{
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
-        self.as_ref().foo(
-        )
-    }
-    fn bar(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
-        self.as_ref().bar(
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl<'a, S, T> OneMethodOptOutExt<T> for S
-where
-    S: ::std::convert::AsRef<dyn OneMethodOptOut + 'a> + ::std::convert::AsRef<dyn OneMethodOptOutExt<T> + 'a>,
-    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
-    T: ::fbthrift::Transport,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::one_method_opt_out::FooError>> {
-        <Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self).foo_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn bar_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::one_method_opt_out::BarError>> {
-        <Self as ::std::convert::AsRef<dyn OneMethodOptOutExt<T>>>::as_ref(self).bar_with_rpc_opts(
-            rpc_options,
-        )
-    }
-
-    fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
     }
 }
 

@@ -347,7 +347,6 @@ where
     }
 }
 
-
 /// Processor for PubSubStreamingService's methods.
 #[derive(Clone, Debug)]
 pub struct PubSubStreamingServiceProcessor<P, H, R, RS> {

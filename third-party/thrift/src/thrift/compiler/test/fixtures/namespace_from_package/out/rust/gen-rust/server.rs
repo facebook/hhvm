@@ -67,7 +67,6 @@ where
     }
 }
 
-
 /// Processor for TestService's methods.
 #[derive(Clone, Debug)]
 pub struct TestServiceProcessor<P, H, R, RS> {

@@ -432,12 +432,14 @@ class mstch_program : public mstch_base {
             {"program:structs", &mstch_program::structs},
             {"program:enums", &mstch_program::enums},
             {"program:services", &mstch_program::services},
+            {"program:interactions", &mstch_program::interactions},
             {"program:typedefs", &mstch_program::typedefs},
             {"program:constants", &mstch_program::constants},
             {"program:enums?", &mstch_program::has_enums},
             {"program:structs?", &mstch_program::has_structs},
             {"program:unions?", &mstch_program::has_unions},
             {"program:services?", &mstch_program::has_services},
+            {"program:interactions?", &mstch_program::has_interactions},
             {"program:typedefs?", &mstch_program::has_typedefs},
             {"program:constants?", &mstch_program::has_constants},
             {"program:thrift_uris?", &mstch_program::has_thrift_uris},
@@ -464,6 +466,7 @@ class mstch_program : public mstch_base {
         !program_->exceptions().empty();
   }
   mstch::node has_services() { return !program_->services().empty(); }
+  mstch::node has_interactions() { return !program_->interactions().empty(); }
   mstch::node has_typedefs() { return !program_->typedefs().empty(); }
   mstch::node has_constants() { return !program_->consts().empty(); }
   mstch::node has_unions() {
@@ -476,6 +479,7 @@ class mstch_program : public mstch_base {
   mstch::node structs();
   mstch::node enums();
   mstch::node services();
+  mstch::node interactions();
   mstch::node typedefs();
   mstch::node constants();
 
@@ -495,7 +499,7 @@ class mstch_service : public mstch_base {
       : mstch_base(ctx, pos),
         service_(s),
         containing_service_(containing_service) {
-    assert(!service_->is_interaction() == !containing_service);
+    assert(containing_service_ == nullptr || service_->is_interaction());
 
     register_cached_methods(
         this,

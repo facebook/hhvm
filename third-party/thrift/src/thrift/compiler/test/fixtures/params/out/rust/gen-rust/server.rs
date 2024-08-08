@@ -175,7 +175,6 @@ where
     }
 }
 
-
 /// Processor for NestedContainers's methods.
 #[derive(Clone, Debug)]
 pub struct NestedContainersProcessor<P, H, R, RS> {

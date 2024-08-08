@@ -26,7 +26,6 @@ pub mod errors {
 pub(crate) use crate as server;
 pub(crate) use ::::services;
 
-
 #[::async_trait::async_trait]
 pub trait MyInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn ping(
@@ -717,7 +716,6 @@ where
         ).await
     }
 }
-
 
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]

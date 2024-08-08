@@ -4,6 +4,99 @@
 //! Thrift service definitions for `module`.
 
 
+/// Service definitions for `BadInteraction`.
+pub mod bad_interaction {
+    #[derive(Clone, Debug)]
+    pub enum FooExn {
+
+        ApplicationException(::fbthrift::ApplicationException),
+    }
+
+    impl ::std::convert::From<FooExn> for ::fbthrift::NonthrowingFunctionError {
+        fn from(err: FooExn) -> Self {
+            match err {
+                FooExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for FooExn {
+        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
+            match err {
+                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => FooExn::ApplicationException(aexn),
+                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => FooExn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for FooExn {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for FooExn {
+        fn exn_name(&self) -> &'static ::std::primitive::str {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for FooExn {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+            }
+        }
+    }
+
+    impl ::fbthrift::help::SerializeExn for FooExn {
+        type Success = ();
+
+        fn write_result<P>(
+            res: ::std::result::Result<&Self::Success, &Self>,
+            p: &mut P,
+            function_name: &'static ::std::primitive::str,
+        )
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
+                ::fbthrift::Serialize::write(aexn, p);
+                return;
+            }
+            p.write_struct_begin(function_name);
+            match res {
+                ::std::result::Result::Ok(_success) => {
+                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
+                    ::fbthrift::Serialize::write(_success, p);
+                    p.write_field_end();
+                }
+
+                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+}
+
 /// Service definitions for `MyService`.
 pub mod my_service {
     #[derive(Clone, Debug)]
@@ -912,99 +1005,6 @@ pub mod my_service_prio_child {
     }
 }
 
-
-/// Service definitions for `BadInteraction`.
-pub mod bad_interaction {
-    #[derive(Clone, Debug)]
-    pub enum FooExn {
-
-        ApplicationException(::fbthrift::ApplicationException),
-    }
-
-    impl ::std::convert::From<FooExn> for ::fbthrift::NonthrowingFunctionError {
-        fn from(err: FooExn) -> Self {
-            match err {
-                FooExn::ApplicationException(aexn) => ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn),
-            }
-        }
-    }
-
-    impl ::std::convert::From<::fbthrift::NonthrowingFunctionError> for FooExn {
-        fn from(err: ::fbthrift::NonthrowingFunctionError) -> Self {
-            match err {
-                ::fbthrift::NonthrowingFunctionError::ApplicationException(aexn) => FooExn::ApplicationException(aexn),
-                ::fbthrift::NonthrowingFunctionError::ThriftError(err) => FooExn::ApplicationException(::fbthrift::ApplicationException {
-                    message: err.to_string(),
-                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                }),
-            }
-        }
-    }
-
-    impl ::std::convert::From<::fbthrift::ApplicationException> for FooExn {
-        fn from(exn: ::fbthrift::ApplicationException) -> Self {
-            Self::ApplicationException(exn)
-        }
-    }
-
-    impl ::fbthrift::ExceptionInfo for FooExn {
-        fn exn_name(&self) -> &'static ::std::primitive::str {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_name(),
-            }
-        }
-
-        fn exn_value(&self) -> String {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_value(),
-            }
-        }
-
-        fn exn_is_declared(&self) -> bool {
-            match self {
-                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
-            }
-        }
-    }
-
-    impl ::fbthrift::ResultInfo for FooExn {
-        fn result_type(&self) -> ::fbthrift::ResultType {
-            match self {
-                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
-            }
-        }
-    }
-
-    impl ::fbthrift::help::SerializeExn for FooExn {
-        type Success = ();
-
-        fn write_result<P>(
-            res: ::std::result::Result<&Self::Success, &Self>,
-            p: &mut P,
-            function_name: &'static ::std::primitive::str,
-        )
-        where
-            P: ::fbthrift::ProtocolWriter,
-        {
-            if let ::std::result::Result::Err(Self::ApplicationException(aexn)) = res {
-                ::fbthrift::Serialize::write(aexn, p);
-                return;
-            }
-            p.write_struct_begin(function_name);
-            match res {
-                ::std::result::Result::Ok(_success) => {
-                    p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
-                    ::fbthrift::Serialize::write(_success, p);
-                    p.write_field_end();
-                }
-
-                ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
-            }
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-}
 /// Service definitions for `BadService`.
 pub mod bad_service {
     #[derive(Clone, Debug)]

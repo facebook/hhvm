@@ -128,7 +128,6 @@ where
     }
 }
 
-
 /// Processor for C's methods.
 #[derive(Clone, Debug)]
 pub struct CProcessor<P, H, R, RS> {

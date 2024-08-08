@@ -128,7 +128,6 @@ where
     }
 }
 
-
 /// Processor for Raiser's methods.
 #[derive(Clone, Debug)]
 pub struct RaiserProcessor<P, H, R, RS> {

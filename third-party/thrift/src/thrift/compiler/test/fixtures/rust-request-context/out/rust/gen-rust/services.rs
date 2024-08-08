@@ -4,7 +4,6 @@
 //! Thrift service definitions for `module`.
 
 
-
 /// Service definitions for `MyInteraction`.
 pub mod my_interaction {
     #[derive(Clone, Debug)]
@@ -97,6 +96,7 @@ pub mod my_interaction {
         }
     }
 }
+
 /// Service definitions for `MyService`.
 pub mod my_service {
     #[derive(Clone, Debug)]

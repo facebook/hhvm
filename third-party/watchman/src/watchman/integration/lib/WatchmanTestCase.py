@@ -83,11 +83,14 @@ class TempDirPerTestMixin(unittest.TestCase):
         return name
 
 
-# pyre-ignore[13]: `WatchmanTestCase` has no attribute `transport`.
 class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
+    # pyre-fixme[13]: Attribute `transport` is never initialized.
     transport: str
+    # pyre-fixme[13]: Attribute `encoding` is never initialized.
     encoding: str
+    # pyre-fixme[13]: Attribute `parallelCrawl` is never initialized.
     parallelCrawl: bool
+    # pyre-fixme[13]: Attribute `splitWatcher` is never initialized.
     splitWatcher: bool
 
     def __init__(self, methodName: str = "run") -> None:

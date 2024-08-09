@@ -68,151 +68,156 @@ where
     }
 }
 
-
-/// Client definitions for `MyInteraction`.
-pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    transport: T,
-    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-}
-
-impl<P, T, S> MyInteractionImpl<P, T, S>
-where
-    P: ::fbthrift::Protocol,
-    T: ::fbthrift::Transport,
-    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-    P::Deserializer: ::std::marker::Send,
-    S: ::fbthrift::help::Spawner,
-{
-    pub fn new(
+pub mod my_service {
+    use super::*;
+    
+    
+    /// Client definitions for `MyInteraction`.
+    pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
         transport: T,
-    ) -> Self {
-        Self {
-            transport,
-            _phantom: ::std::marker::PhantomData,
+        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+    }
+    
+    impl<P, T, S> MyInteractionImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        pub fn new(
+            transport: T,
+        ) -> Self {
+            Self {
+                transport,
+                _phantom: ::std::marker::PhantomData,
+            }
         }
-    }
-
-    pub fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-
-
-    fn _ping_impl(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        use ::tracing::Instrument as _;
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.ping";
-        let args = self::Args_MyInteraction_ping {
-            _phantom: ::std::marker::PhantomData,
-        };
-
-        let transport = self.transport();
-
-        // need to do call setup outside of async block because T: Transport isn't Send
-        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
-            ::std::result::Result::Ok(res) => res,
-            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-        };
-
-        let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
-
-        async move {
-            let reply_env = call.await?;
-
-            let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
-
-            let res = match res {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(aexn) => {
-                    ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
-                }
+    
+        pub fn transport(&self) -> &T {
+            ::fbthrift::help::GetTransport::transport(self)
+        }
+    
+    
+        fn _ping_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.ping";
+            let args = self::Args_MyInteraction_ping {
+                _phantom: ::std::marker::PhantomData,
             };
-            res
+    
+            let transport = self.transport();
+    
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+    
+            let call = transport
+                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
+    
+            async move {
+                let reply_env = call.await?;
+    
+                let de = P::deserializer(reply_env);
+                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
+    
+                let res = match res {
+                    ::std::result::Result::Ok(res) => res,
+                    ::std::result::Result::Err(aexn) => {
+                        ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
+                    }
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
+            .boxed()
         }
-        .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
-        .boxed()
     }
-}
-
-impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
-where
-    T: ::fbthrift::Transport,
-{
-    fn transport(&self) -> &T {
-        &self.transport
+    
+    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
+    where
+        T: ::fbthrift::Transport,
+    {
+        fn transport(&self) -> &T {
+            &self.transport
+        }
     }
-}
-
-
-
-struct Args_MyInteraction_ping<'a> {
-    _phantom: ::std::marker::PhantomData<&'a ()>,
-}
-
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
-    fn write(&self, p: &mut P) {
-        p.write_struct_begin("args");
-        p.write_field_stop();
-        p.write_struct_end();
+    
+    
+    
+    struct Args_MyInteraction_ping<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
     }
-}
-
-impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
-where
-    P: ::fbthrift::Protocol,
-    T: ::fbthrift::Transport,
-    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-    P::Deserializer: ::std::marker::Send,
-    S: ::fbthrift::help::Spawner,
-{
-    fn ping(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        let rpc_options = T::RpcOptions::default();
-        self._ping_impl(
-            rpc_options,
-        )
+    
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
     }
-}
-
-impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
-where
-    P: ::fbthrift::Protocol,
-    T: ::fbthrift::Transport,
-    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-    P::Deserializer: ::std::marker::Send,
-    S: ::fbthrift::help::Spawner,
-{
-    fn ping_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-        self._ping_impl(
-            rpc_options,
-        )
+    
+    impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn ping(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._ping_impl(
+                rpc_options,
+            )
+        }
     }
-
-    fn transport(&self) -> &T {
-        self.transport()
+    
+    impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn ping_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+            self._ping_impl(
+                rpc_options,
+            )
+        }
+    
+        fn transport(&self) -> &T {
+            self.transport()
+        }
     }
+    
+    pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+    pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
+    
+    
+    
 }
-
-pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
-
-
 
 pub trait MyService: ::std::marker::Send {
     fn ping(
@@ -262,11 +267,11 @@ pub trait MyService: ::std::marker::Send {
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error>;
 
     fn startPingInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>>;
 }
 
 pub trait MyServiceExt<T>: MyService
@@ -321,7 +326,7 @@ where
     fn startPingInteraction_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>>;
 
     fn transport(&self) -> &T;
 }
@@ -406,12 +411,12 @@ where
     }
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error> {
         self.as_ref().createMyInteraction()
     }
     fn startPingInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
         self.as_ref().startPingInteraction(
         )
     }
@@ -517,7 +522,7 @@ where
     fn startPingInteraction_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
         <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).startPingInteraction_with_rpc_opts(
             rpc_options,
         )
@@ -1030,7 +1035,7 @@ where
     fn _startPingInteraction_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
@@ -1045,7 +1050,7 @@ where
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = MyInteractionImpl::<P, T, S>::new(interaction_transport);
+        let interaction_impl = crate::my_service::MyInteractionImpl::<P, T, S>::new(interaction_transport);
         let transport = interaction_impl.transport();
 
         // need to do call setup outside of async block because T: Transport isn't Send
@@ -1070,7 +1075,7 @@ where
                     ::std::result::Result::Err(crate::errors::my_service::StartPingInteractionError::ApplicationException(aexn))
                 }
             };
-            let interaction_client: crate::client::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
+            let interaction_client: crate::client::my_service::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
             res?;
             ::std::result::Result::Ok(interaction_client)
         }
@@ -1368,10 +1373,10 @@ where
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                MyInteractionImpl::<P, T, S>::new(
+                crate::client::my_service::MyInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"MyInteraction")?
                 )
             )
@@ -1379,7 +1384,7 @@ where
     }
     fn startPingInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
         let rpc_options = T::RpcOptions::default();
         self._startPingInteraction_impl(
             rpc_options,
@@ -1489,7 +1494,7 @@ where
     fn startPingInteraction_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
         self._startPingInteraction_impl(
             rpc_options,
         )

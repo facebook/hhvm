@@ -1723,156 +1723,161 @@ impl ::fbthrift::ClientFactory for make_MyServicePrioChild {
 }
 
 
-
-/// Client definitions for `BadInteraction`.
-pub struct BadInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    transport: T,
-    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-}
-
-impl<P, T, S> BadInteractionImpl<P, T, S>
-where
-    P: ::fbthrift::Protocol,
-    T: ::fbthrift::Transport,
-    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-    P::Deserializer: ::std::marker::Send,
-    S: ::fbthrift::help::Spawner,
-{
-    pub fn new(
+pub mod bad_service {
+    use super::*;
+    
+    
+    /// Client definitions for `BadInteraction`.
+    pub struct BadInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
         transport: T,
-    ) -> Self {
-        Self {
-            transport,
-            _phantom: ::std::marker::PhantomData,
+        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+    }
+    
+    impl<P, T, S> BadInteractionImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        pub fn new(
+            transport: T,
+        ) -> Self {
+            Self {
+                transport,
+                _phantom: ::std::marker::PhantomData,
+            }
         }
-    }
-
-    pub fn transport(&self) -> &T {
-        ::fbthrift::help::GetTransport::transport(self)
-    }
-
-
-    fn _foo_impl(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bad_interaction::FooError>> {
-        use ::tracing::Instrument as _;
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"BadService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"BadService.BadInteraction.foo";
-        let args = self::Args_BadInteraction_foo {
-            _phantom: ::std::marker::PhantomData,
-        };
-
-        let transport = self.transport();
-
-        // need to do call setup outside of async block because T: Transport isn't Send
-        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("BadInteraction.foo", &args) {
-            ::std::result::Result::Ok(res) => res,
-            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-        };
-
-        let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call", method = "BadInteraction.foo"));
-
-        async move {
-            let reply_env = call.await?;
-
-            let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bad_interaction::FooReader, S>(de).await?;
-
-            let res = match res {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(aexn) => {
-                    ::std::result::Result::Err(crate::errors::bad_interaction::FooError::ApplicationException(aexn))
-                }
+    
+        pub fn transport(&self) -> &T {
+            ::fbthrift::help::GetTransport::transport(self)
+        }
+    
+    
+        fn _foo_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bad_interaction::FooError>> {
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"BadService";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"BadService.BadInteraction.foo";
+            let args = self::Args_BadInteraction_foo {
+                _phantom: ::std::marker::PhantomData,
             };
-            res
+    
+            let transport = self.transport();
+    
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("BadInteraction.foo", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+    
+            let call = transport
+                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", method = "BadInteraction.foo"));
+    
+            async move {
+                let reply_env = call.await?;
+    
+                let de = P::deserializer(reply_env);
+                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bad_interaction::FooReader, S>(de).await?;
+    
+                let res = match res {
+                    ::std::result::Result::Ok(res) => res,
+                    ::std::result::Result::Err(aexn) => {
+                        ::std::result::Result::Err(crate::errors::bad_interaction::FooError::ApplicationException(aexn))
+                    }
+                };
+                res
+            }
+            .instrument(::tracing::info_span!("stream", method = "BadInteraction.foo"))
+            .boxed()
         }
-        .instrument(::tracing::info_span!("stream", method = "BadInteraction.foo"))
-        .boxed()
     }
-}
-
-impl<P, T, S> ::fbthrift::help::GetTransport<T> for BadInteractionImpl<P, T, S>
-where
-    T: ::fbthrift::Transport,
-{
-    fn transport(&self) -> &T {
-        &self.transport
+    
+    impl<P, T, S> ::fbthrift::help::GetTransport<T> for BadInteractionImpl<P, T, S>
+    where
+        T: ::fbthrift::Transport,
+    {
+        fn transport(&self) -> &T {
+            &self.transport
+        }
     }
-}
-
-
-
-struct Args_BadInteraction_foo<'a> {
-    _phantom: ::std::marker::PhantomData<&'a ()>,
-}
-
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_BadInteraction_foo<'a> {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "BadInteraction.foo"))]
-    fn write(&self, p: &mut P) {
-        p.write_struct_begin("args");
-        p.write_field_stop();
-        p.write_struct_end();
+    
+    
+    
+    struct Args_BadInteraction_foo<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
     }
-}
-
-impl<P, T, S> BadInteraction for BadInteractionImpl<P, T, S>
-where
-    P: ::fbthrift::Protocol,
-    T: ::fbthrift::Transport,
-    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-    P::Deserializer: ::std::marker::Send,
-    S: ::fbthrift::help::Spawner,
-{
-    fn foo(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bad_interaction::FooError>> {
-        let rpc_options = T::RpcOptions::default();
-        self._foo_impl(
-            rpc_options,
-        )
+    
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_BadInteraction_foo<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "BadInteraction.foo"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
     }
-}
-
-impl<P, T, S> BadInteractionExt<T> for BadInteractionImpl<P, T, S>
-where
-    P: ::fbthrift::Protocol,
-    T: ::fbthrift::Transport,
-    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-    P::Deserializer: ::std::marker::Send,
-    S: ::fbthrift::help::Spawner,
-{
-    fn foo_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bad_interaction::FooError>> {
-        self._foo_impl(
-            rpc_options,
-        )
+    
+    impl<P, T, S> BadInteraction for BadInteractionImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bad_interaction::FooError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._foo_impl(
+                rpc_options,
+            )
+        }
     }
-
-    fn transport(&self) -> &T {
-        self.transport()
+    
+    impl<P, T, S> BadInteractionExt<T> for BadInteractionImpl<P, T, S>
+    where
+        P: ::fbthrift::Protocol,
+        T: ::fbthrift::Transport,
+        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        fn foo_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bad_interaction::FooError>> {
+            self._foo_impl(
+                rpc_options,
+            )
+        }
+    
+        fn transport(&self) -> &T {
+            self.transport()
+        }
     }
+    
+    pub type BadInteractionDynClient = dyn BadInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+    pub type BadInteractionClient = ::std::sync::Arc<BadInteractionDynClient>;
+    
+    
+    
 }
-
-pub type BadInteractionDynClient = dyn BadInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-pub type BadInteractionClient = ::std::sync::Arc<BadInteractionDynClient>;
-
-
 
 pub trait BadService: ::std::marker::Send {
     fn createBadInteraction(
         &self,
-    ) -> ::std::result::Result<BadInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::bad_service::BadInteractionClient, ::anyhow::Error>;
 
     fn bar(
         &self,
@@ -1899,7 +1904,7 @@ where
 {
     fn createBadInteraction(
         &self,
-    ) -> ::std::result::Result<BadInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::bad_service::BadInteractionClient, ::anyhow::Error> {
         self.as_ref().createBadInteraction()
     }
     fn bar(
@@ -2040,10 +2045,10 @@ where
 
     fn createBadInteraction(
         &self,
-    ) -> ::std::result::Result<BadInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::bad_service::BadInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                BadInteractionImpl::<P, T, S>::new(
+                crate::client::bad_service::BadInteractionImpl::<P, T, S>::new(
                     self.transport().create_interaction(c"BadInteraction")?
                 )
             )

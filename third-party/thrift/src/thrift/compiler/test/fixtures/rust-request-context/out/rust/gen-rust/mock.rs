@@ -219,13 +219,13 @@ impl<'mock> ::::MyService for MyService<'mock> {
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn startPingInteraction(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 }
@@ -326,7 +326,7 @@ where
     fn startPingInteraction_with_rpc_opts(
         &self,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
         <Self as ::::MyService>::startPingInteraction(
             self,
         )

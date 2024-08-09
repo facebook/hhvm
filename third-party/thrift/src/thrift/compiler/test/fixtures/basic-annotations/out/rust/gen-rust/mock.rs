@@ -435,7 +435,7 @@ impl<'mock> ::::BadService for BadService<'mock> {
 
     fn createBadInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::BadInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::bad_service::BadInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
     fn bar(

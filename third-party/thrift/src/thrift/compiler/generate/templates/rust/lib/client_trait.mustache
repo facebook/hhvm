@@ -37,7 +37,7 @@ pub trait {{service:rust_name}}: {{!
     fn {{function:rust_name}}(
         &self,
     ) -> ::std::result::Result<{{!
-    }}{{function:interaction_name}}Client, {{!
+    }}{{program:crate}}::client::{{service:snake}}::{{function:interaction_name}}Client, {{!
     }}::anyhow::Error>;
     {{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
@@ -97,7 +97,7 @@ where
     fn {{function:rust_name}}(
         &self,
     ) -> ::std::result::Result<{{!
-    }}{{function:interaction_name}}Client, {{!
+    }}{{program:crate}}::client::{{service:snake}}::{{function:interaction_name}}Client, {{!
     }}::anyhow::Error> {
         self.as_ref().{{function:rust_name}}()
     }

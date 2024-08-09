@@ -462,1091 +462,1100 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Se
 }
 
 
+pub mod my_service {
+    use super::*;
 
-/// Processor for MyInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+    
+    
+    
+    /// Processor for MyInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct MyInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+    }
+    
+    impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
         }
-    }
-
-    pub fn into_inner(self) -> H {
-        self.service
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
-    async fn handle_ping<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.ping";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.ping(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
+        async fn handle_ping<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.ping";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.ping(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.ping", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
-            "ping",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
-    async fn handle_truthify<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.truthify";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.truthify(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.ping", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
+                "ping",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
+        async fn handle_truthify<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.truthify";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.truthify(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.truthify", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
-            }
-        };
-
-        use ::futures::StreamExt as _;
-
-        let (response, stream) = match res {
-            ::std::result::Result::Ok(res) => {
-                let response = ::std::result::Result::Ok(());
-                let stream = res;
-
-                let stream = ::std::panic::AssertUnwindSafe(stream)
-                    .catch_unwind()
-                    .map(|item| {
-                        match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
-                                    ::std::result::Result::Ok(success),
-                                    "truthify",
-                                );
-                                ::fbthrift::SerializedStreamElement::Success(payload)
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.truthify", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
+                }
+            };
+    
+            use ::futures::StreamExt as _;
+    
+            let (response, stream) = match res {
+                ::std::result::Result::Ok(res) => {
+                    let response = ::std::result::Result::Ok(());
+                    let stream = res;
+    
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
+                                        ::std::result::Result::Ok(success),
+                                        "truthify",
+                                    );
+                                    ::fbthrift::SerializedStreamElement::Success(payload)
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
                             }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
-                                tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                            ::std::result::Result::Err(exn) => {
-                                tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
-                                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                        }
-                    })
-                    .boxed();
-                (response, ::std::option::Option::Some(stream))
-            },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
-        };
-
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
-            "truthify",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            response,
-        )?;
-
-        let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
-            b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
-            b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+                        })
+                        .boxed();
+                    (response, ::std::option::Option::Some(stream))
+                },
+                ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
+            };
+    
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
+                "truthify",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                response,
+            )?;
+    
+            let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
+                b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
+                b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.MyInteraction:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.MyInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
-    }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
-}
-
-
-
-/// Processor for MyInteractionFast's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionFastProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteractionFast,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
-
-    pub fn into_inner(self) -> H {
-        self.service
+    
+        
+    
+    
+    /// Processor for MyInteractionFast's methods.
+    #[derive(Clone, Debug)]
+    pub struct MyInteractionFastProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+    impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteractionFast,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
-                ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.ping"))]
-    async fn handle_ping<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.ping";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.ping(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.ping"))]
+        async fn handle_ping<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.ping";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.ping(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.ping", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
-                ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::PingExn>(
-            "ping",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.truthify"))]
-    async fn handle_truthify<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.truthify";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.truthify(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.ping", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::PingExn>(
+                "ping",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.truthify"))]
+        async fn handle_truthify<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.truthify";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.truthify(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.truthify", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
-            }
-        };
-
-        use ::futures::StreamExt as _;
-
-        let (response, stream) = match res {
-            ::std::result::Result::Ok(res) => {
-                let response = ::std::result::Result::Ok(());
-                let stream = res;
-
-                let stream = ::std::panic::AssertUnwindSafe(stream)
-                    .catch_unwind()
-                    .map(|item| {
-                        match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::TruthifyStreamExn>(
-                                    ::std::result::Result::Ok(success),
-                                    "truthify",
-                                );
-                                ::fbthrift::SerializedStreamElement::Success(payload)
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.truthify", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
+                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
+                }
+            };
+    
+            use ::futures::StreamExt as _;
+    
+            let (response, stream) = match res {
+                ::std::result::Result::Ok(res) => {
+                    let response = ::std::result::Result::Ok(());
+                    let stream = res;
+    
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::TruthifyStreamExn>(
+                                        ::std::result::Result::Ok(success),
+                                        "truthify",
+                                    );
+                                    ::fbthrift::SerializedStreamElement::Success(payload)
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteractionFast.truthify", "Streaming ApplicationException");
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteractionFast.truthify", "Streaming unwind");
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
                             }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn))) => {
-                                tracing::info!(?aexn, method="MyInteractionFast.truthify", "Streaming ApplicationException");
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                            ::std::result::Result::Err(exn) => {
-                                tracing::error!(?exn, method="MyInteractionFast.truthify", "Streaming unwind");
-                                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                        }
-                    })
-                    .boxed();
-                (response, ::std::option::Option::Some(stream))
-            },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
-        };
-
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyExn>(
-            "truthify",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            response,
-        )?;
-
-        let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteractionFast,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"MyInteractionFast.frobnicate" => ::std::result::Result::Ok(0usize),
-            b"MyInteractionFast.ping" => ::std::result::Result::Ok(1usize),
-            b"MyInteractionFast.truthify" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+                        })
+                        .boxed();
+                    (response, ::std::option::Option::Some(stream))
+                },
+                ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
+            };
+    
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyExn>(
+                "truthify",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                response,
+            )?;
+    
+            let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteractionFast,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"MyInteractionFast.frobnicate" => ::std::result::Result::Ok(0usize),
+                b"MyInteractionFast.ping" => ::std::result::Result::Ok(1usize),
+                b"MyInteractionFast.truthify" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionFastProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionFastProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionFastProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionFastProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: MyInteractionFast,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteractionFast"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: MyInteractionFast,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteractionFast"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.MyInteractionFast:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.MyInteractionFast:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
-    }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
-}
-
-
-
-/// Processor for SerialInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct SerialInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SerialInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
-
-    pub fn into_inner(self) -> H {
-        self.service
+    
+        
+    
+    
+    /// Processor for SerialInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct SerialInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "SerialInteraction.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.SerialInteraction.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+    impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SerialInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SerialInteraction.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
+            const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.SerialInteraction.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "SerialInteraction.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
-                ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::serial_interaction::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SerialInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"SerialInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "SerialInteraction.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::serial_interaction::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SerialInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"SerialInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SerialInteractionProcessor",
-                bad
-            ),
         }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SerialInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: SerialInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "SerialInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SerialInteractionProcessor",
+                    bad
+                ),
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-        };
-        self.handle_create_interaction(idx)
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SerialInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
+        }
     }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.SerialInteraction:
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: SerialInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "SerialInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
+            }
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.SerialInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
     }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
+    
+    
 }
-
 
 #[::async_trait::async_trait]
 pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
@@ -1970,7 +1979,7 @@ where
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "MyService.interact", "success");
                 let (interaction_handler, res) = (res, ());
-                let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
+                let interaction_processor = ::std::sync::Arc::new(crate::server::my_service::MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
                 reply_state.set_interaction_processor(interaction_processor)?;
                 ::std::result::Result::Ok(res)
             }
@@ -2034,7 +2043,7 @@ where
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "MyService.interactFast", "success");
                 let (interaction_handler, res) = res;
-                let interaction_processor = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
+                let interaction_processor = ::std::sync::Arc::new(crate::server::my_service::MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
                 reply_state.set_interaction_processor(interaction_processor)?;
                 ::std::result::Result::Ok(res)
             }
@@ -2098,7 +2107,7 @@ where
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "MyService.serialize", "success");
                 let (interaction_handler, res) = res;
-                let interaction_processor = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
+                let interaction_processor = ::std::sync::Arc::new(crate::server::my_service::SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
                 reply_state.set_interaction_processor(interaction_processor)?;
                 ::std::result::Result::Ok(res)
             }
@@ -2241,17 +2250,17 @@ where
         match idx {
             0usize => {
                 let handler = self.handle_createMyInteraction()?;
-                let server = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::my_service::MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             1usize => {
                 let handler = self.handle_createMyInteractionFast()?;
-                let server = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::my_service::MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             2usize => {
                 let handler = self.handle_createSerialInteraction()?;
-                let server = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::my_service::SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             bad => panic!(
@@ -2386,1091 +2395,1100 @@ where
     }
 }
 
+pub mod factories {
+    use super::*;
 
-/// Processor for MyInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+    
+    
+    
+    /// Processor for MyInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct MyInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+    }
+    
+    impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
         }
-    }
-
-    pub fn into_inner(self) -> H {
-        self.service
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
-    async fn handle_ping<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.ping";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.ping(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
+        async fn handle_ping<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.ping";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.ping(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.ping", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
-            "ping",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
-    async fn handle_truthify<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.truthify";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.truthify(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.ping", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
+                "ping",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
+        async fn handle_truthify<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.truthify";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.truthify(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.truthify", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
-            }
-        };
-
-        use ::futures::StreamExt as _;
-
-        let (response, stream) = match res {
-            ::std::result::Result::Ok(res) => {
-                let response = ::std::result::Result::Ok(());
-                let stream = res;
-
-                let stream = ::std::panic::AssertUnwindSafe(stream)
-                    .catch_unwind()
-                    .map(|item| {
-                        match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
-                                    ::std::result::Result::Ok(success),
-                                    "truthify",
-                                );
-                                ::fbthrift::SerializedStreamElement::Success(payload)
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.truthify", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
+                }
+            };
+    
+            use ::futures::StreamExt as _;
+    
+            let (response, stream) = match res {
+                ::std::result::Result::Ok(res) => {
+                    let response = ::std::result::Result::Ok(());
+                    let stream = res;
+    
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
+                                        ::std::result::Result::Ok(success),
+                                        "truthify",
+                                    );
+                                    ::fbthrift::SerializedStreamElement::Success(payload)
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
                             }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
-                                tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                            ::std::result::Result::Err(exn) => {
-                                tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
-                                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                        }
-                    })
-                    .boxed();
-                (response, ::std::option::Option::Some(stream))
-            },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
-        };
-
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
-            "truthify",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            response,
-        )?;
-
-        let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
-            b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
-            b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+                        })
+                        .boxed();
+                    (response, ::std::option::Option::Some(stream))
+                },
+                ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
+            };
+    
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
+                "truthify",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                response,
+            )?;
+    
+            let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
+                b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
+                b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.MyInteraction:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.MyInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
-    }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
-}
-
-
-
-/// Processor for MyInteractionFast's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionFastProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteractionFast,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
-
-    pub fn into_inner(self) -> H {
-        self.service
+    
+        
+    
+    
+    /// Processor for MyInteractionFast's methods.
+    #[derive(Clone, Debug)]
+    pub struct MyInteractionFastProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+    impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteractionFast,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
-                ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.ping"))]
-    async fn handle_ping<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.ping";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.ping(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.ping"))]
+        async fn handle_ping<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.ping";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.ping(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.ping", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
-                ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::PingExn>(
-            "ping",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.truthify"))]
-    async fn handle_truthify<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.truthify";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.truthify(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.ping", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::PingExn>(
+                "ping",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.truthify"))]
+        async fn handle_truthify<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.truthify";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.truthify(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.truthify", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
-            }
-        };
-
-        use ::futures::StreamExt as _;
-
-        let (response, stream) = match res {
-            ::std::result::Result::Ok(res) => {
-                let response = ::std::result::Result::Ok(());
-                let stream = res;
-
-                let stream = ::std::panic::AssertUnwindSafe(stream)
-                    .catch_unwind()
-                    .map(|item| {
-                        match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::TruthifyStreamExn>(
-                                    ::std::result::Result::Ok(success),
-                                    "truthify",
-                                );
-                                ::fbthrift::SerializedStreamElement::Success(payload)
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.truthify", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
+                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
+                }
+            };
+    
+            use ::futures::StreamExt as _;
+    
+            let (response, stream) = match res {
+                ::std::result::Result::Ok(res) => {
+                    let response = ::std::result::Result::Ok(());
+                    let stream = res;
+    
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::TruthifyStreamExn>(
+                                        ::std::result::Result::Ok(success),
+                                        "truthify",
+                                    );
+                                    ::fbthrift::SerializedStreamElement::Success(payload)
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteractionFast.truthify", "Streaming ApplicationException");
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteractionFast.truthify", "Streaming unwind");
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
                             }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn))) => {
-                                tracing::info!(?aexn, method="MyInteractionFast.truthify", "Streaming ApplicationException");
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                            ::std::result::Result::Err(exn) => {
-                                tracing::error!(?exn, method="MyInteractionFast.truthify", "Streaming unwind");
-                                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                        }
-                    })
-                    .boxed();
-                (response, ::std::option::Option::Some(stream))
-            },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
-        };
-
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyExn>(
-            "truthify",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            response,
-        )?;
-
-        let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteractionFast,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"MyInteractionFast.frobnicate" => ::std::result::Result::Ok(0usize),
-            b"MyInteractionFast.ping" => ::std::result::Result::Ok(1usize),
-            b"MyInteractionFast.truthify" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+                        })
+                        .boxed();
+                    (response, ::std::option::Option::Some(stream))
+                },
+                ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
+            };
+    
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyExn>(
+                "truthify",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                response,
+            )?;
+    
+            let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteractionFast,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"MyInteractionFast.frobnicate" => ::std::result::Result::Ok(0usize),
+                b"MyInteractionFast.ping" => ::std::result::Result::Ok(1usize),
+                b"MyInteractionFast.truthify" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionFastProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionFastProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionFastProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionFastProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: MyInteractionFast,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteractionFast"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: MyInteractionFast,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteractionFast"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.MyInteractionFast:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.MyInteractionFast:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
-    }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
-}
-
-
-
-/// Processor for SerialInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct SerialInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SerialInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
-
-    pub fn into_inner(self) -> H {
-        self.service
+    
+        
+    
+    
+    /// Processor for SerialInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct SerialInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "SerialInteraction.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.SerialInteraction.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+    impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SerialInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SerialInteraction.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
+            const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.SerialInteraction.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "SerialInteraction.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
-                ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::serial_interaction::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SerialInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"SerialInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "SerialInteraction.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::serial_interaction::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SerialInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"SerialInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SerialInteractionProcessor",
-                bad
-            ),
         }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SerialInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: SerialInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "SerialInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SerialInteractionProcessor",
+                    bad
+                ),
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-        };
-        self.handle_create_interaction(idx)
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SerialInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
+        }
     }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.SerialInteraction:
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: SerialInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "SerialInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
+            }
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.SerialInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
     }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
+    
+    
 }
-
 
 #[::async_trait::async_trait]
 pub trait Factories: ::std::marker::Send + ::std::marker::Sync + 'static {
@@ -3831,7 +3849,7 @@ where
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Factories.interact", "success");
                 let (interaction_handler, res) = (res, ());
-                let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
+                let interaction_processor = ::std::sync::Arc::new(crate::server::factories::MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
                 reply_state.set_interaction_processor(interaction_processor)?;
                 ::std::result::Result::Ok(res)
             }
@@ -3895,7 +3913,7 @@ where
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Factories.interactFast", "success");
                 let (interaction_handler, res) = res;
-                let interaction_processor = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
+                let interaction_processor = ::std::sync::Arc::new(crate::server::factories::MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
                 reply_state.set_interaction_processor(interaction_processor)?;
                 ::std::result::Result::Ok(res)
             }
@@ -3959,7 +3977,7 @@ where
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "Factories.serialize", "success");
                 let (interaction_handler, res) = res;
-                let interaction_processor = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
+                let interaction_processor = ::std::sync::Arc::new(crate::server::factories::SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
                 reply_state.set_interaction_processor(interaction_processor)?;
                 ::std::result::Result::Ok(res)
             }
@@ -4229,1091 +4247,1100 @@ where
     }
 }
 
+pub mod perform {
+    use super::*;
 
-/// Processor for MyInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+    
+    
+    
+    /// Processor for MyInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct MyInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+    }
+    
+    impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
         }
-    }
-
-    pub fn into_inner(self) -> H {
-        self.service
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
-    async fn handle_ping<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.ping";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.ping(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
+        async fn handle_ping<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.ping";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.ping(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.ping", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
-            "ping",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
-    async fn handle_truthify<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.truthify";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.truthify(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.ping", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
+                "ping",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
+        async fn handle_truthify<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.truthify";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.truthify(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.truthify", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
-            }
-        };
-
-        use ::futures::StreamExt as _;
-
-        let (response, stream) = match res {
-            ::std::result::Result::Ok(res) => {
-                let response = ::std::result::Result::Ok(());
-                let stream = res;
-
-                let stream = ::std::panic::AssertUnwindSafe(stream)
-                    .catch_unwind()
-                    .map(|item| {
-                        match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
-                                    ::std::result::Result::Ok(success),
-                                    "truthify",
-                                );
-                                ::fbthrift::SerializedStreamElement::Success(payload)
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.truthify", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
+                }
+            };
+    
+            use ::futures::StreamExt as _;
+    
+            let (response, stream) = match res {
+                ::std::result::Result::Ok(res) => {
+                    let response = ::std::result::Result::Ok(());
+                    let stream = res;
+    
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
+                                        ::std::result::Result::Ok(success),
+                                        "truthify",
+                                    );
+                                    ::fbthrift::SerializedStreamElement::Success(payload)
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
                             }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
-                                tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                            ::std::result::Result::Err(exn) => {
-                                tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
-                                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                        }
-                    })
-                    .boxed();
-                (response, ::std::option::Option::Some(stream))
-            },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
-        };
-
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
-            "truthify",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            response,
-        )?;
-
-        let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
-            b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
-            b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+                        })
+                        .boxed();
+                    (response, ::std::option::Option::Some(stream))
+                },
+                ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
+            };
+    
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
+                "truthify",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                response,
+            )?;
+    
+            let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
+                b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
+                b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.MyInteraction:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.MyInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
-    }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
-}
-
-
-
-/// Processor for MyInteractionFast's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionFastProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteractionFast,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
-
-    pub fn into_inner(self) -> H {
-        self.service
+    
+        
+    
+    
+    /// Processor for MyInteractionFast's methods.
+    #[derive(Clone, Debug)]
+    pub struct MyInteractionFastProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+    impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteractionFast,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
-                ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.ping"))]
-    async fn handle_ping<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.ping";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.ping(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.ping"))]
+        async fn handle_ping<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.ping";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.ping";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_ping = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.ping(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.ping", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
-                ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::PingExn>(
-            "ping",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.truthify"))]
-    async fn handle_truthify<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.truthify";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.truthify(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.ping", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::PingExn>(
+                "ping",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.truthify"))]
+        async fn handle_truthify<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteractionFast.truthify";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.truthify";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteractionFast_truthify = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.truthify(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteractionFast.truthify", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
-            }
-        };
-
-        use ::futures::StreamExt as _;
-
-        let (response, stream) = match res {
-            ::std::result::Result::Ok(res) => {
-                let response = ::std::result::Result::Ok(());
-                let stream = res;
-
-                let stream = ::std::panic::AssertUnwindSafe(stream)
-                    .catch_unwind()
-                    .map(|item| {
-                        match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::TruthifyStreamExn>(
-                                    ::std::result::Result::Ok(success),
-                                    "truthify",
-                                );
-                                ::fbthrift::SerializedStreamElement::Success(payload)
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteractionFast.truthify", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
+                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn))
+                }
+            };
+    
+            use ::futures::StreamExt as _;
+    
+            let (response, stream) = match res {
+                ::std::result::Result::Ok(res) => {
+                    let response = ::std::result::Result::Ok(());
+                    let stream = res;
+    
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::TruthifyStreamExn>(
+                                        ::std::result::Result::Ok(success),
+                                        "truthify",
+                                    );
+                                    ::fbthrift::SerializedStreamElement::Success(payload)
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteractionFast.truthify", "Streaming ApplicationException");
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteractionFast.truthify", "Streaming unwind");
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
                             }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn))) => {
-                                tracing::info!(?aexn, method="MyInteractionFast.truthify", "Streaming ApplicationException");
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                            ::std::result::Result::Err(exn) => {
-                                tracing::error!(?exn, method="MyInteractionFast.truthify", "Streaming unwind");
-                                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                        }
-                    })
-                    .boxed();
-                (response, ::std::option::Option::Some(stream))
-            },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
-        };
-
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyExn>(
-            "truthify",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            response,
-        )?;
-
-        let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteractionFast,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"MyInteractionFast.frobnicate" => ::std::result::Result::Ok(0usize),
-            b"MyInteractionFast.ping" => ::std::result::Result::Ok(1usize),
-            b"MyInteractionFast.truthify" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+                        })
+                        .boxed();
+                    (response, ::std::option::Option::Some(stream))
+                },
+                ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
+            };
+    
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction_fast::TruthifyExn>(
+                "truthify",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                response,
+            )?;
+    
+            let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteractionFast,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"MyInteractionFast.frobnicate" => ::std::result::Result::Ok(0usize),
+                b"MyInteractionFast.ping" => ::std::result::Result::Ok(1usize),
+                b"MyInteractionFast.truthify" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionFastProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionFastProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionFastProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionFastProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionFastProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: MyInteractionFast,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteractionFast"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionFastProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: MyInteractionFast,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteractionFast"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.MyInteractionFast:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.MyInteractionFast:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
-    }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
-}
-
-
-
-/// Processor for SerialInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct SerialInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SerialInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
-
-    pub fn into_inner(self) -> H {
-        self.service
+    
+        
+    
+    
+    /// Processor for SerialInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct SerialInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "SerialInteraction.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.SerialInteraction.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+    impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SerialInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SerialInteraction.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
+            const METHOD_NAME: &::std::ffi::CStr = c"SerialInteraction.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.SerialInteraction.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_SerialInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "SerialInteraction.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
-                ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::serial_interaction::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SerialInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"SerialInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "SerialInteraction.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::serial_interaction::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SerialInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"SerialInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SerialInteractionProcessor",
-                bad
-            ),
         }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SerialInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SerialInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: SerialInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "SerialInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SerialInteractionProcessor",
+                    bad
+                ),
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-        };
-        self.handle_create_interaction(idx)
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SerialInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
+        }
     }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.SerialInteraction:
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SerialInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: SerialInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "SerialInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
+            }
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.SerialInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
     }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
+    
+    
 }
-
 
 #[::async_trait::async_trait]
 pub trait Perform: ::std::marker::Send + ::std::marker::Sync + 'static {
@@ -5605,17 +5632,17 @@ where
         match idx {
             0usize => {
                 let handler = self.handle_createMyInteraction()?;
-                let server = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::perform::MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             1usize => {
                 let handler = self.handle_createMyInteractionFast()?;
-                let server = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::perform::MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             2usize => {
                 let handler = self.handle_createSerialInteraction()?;
-                let server = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::perform::SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             bad => panic!(
@@ -5747,804 +5774,812 @@ where
     }
 }
 
+pub mod interact_with_shared {
+    use super::*;
 
-/// Processor for MyInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+    
+    
+    
+    /// Processor for MyInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct MyInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+    }
+    
+    impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
         }
-    }
-
-    pub fn into_inner(self) -> H {
-        self.service
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
-    async fn handle_frobnicate<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.frobnicate";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.frobnicate(
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
+        async fn handle_frobnicate<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.frobnicate";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.frobnicate";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_frobnicate = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.frobnicate(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
-                ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
-            "frobnicate",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
-    async fn handle_ping<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.ping";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.ping(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::FrobnicateExn>(
+                "frobnicate",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
+        async fn handle_ping<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.ping";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.ping";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_ping = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.ping(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.ping", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
-                ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
-            "ping",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
-    async fn handle_truthify<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-        const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.truthify";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.truthify(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.ping", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::PingExn>(
+                "ping",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
+        async fn handle_truthify<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+            const METHOD_NAME: &::std::ffi::CStr = c"MyInteraction.truthify";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.truthify";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyInteraction_truthify = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.truthify(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "MyInteraction.truthify", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
-            }
-        };
-
-        use ::futures::StreamExt as _;
-
-        let (response, stream) = match res {
-            ::std::result::Result::Ok(res) => {
-                let response = ::std::result::Result::Ok(());
-                let stream = res;
-
-                let stream = ::std::panic::AssertUnwindSafe(stream)
-                    .catch_unwind()
-                    .map(|item| {
-                        match item {
-                            ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
-                                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
-                                    ::std::result::Result::Ok(success),
-                                    "truthify",
-                                );
-                                ::fbthrift::SerializedStreamElement::Success(payload)
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "MyInteraction.truthify", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(aexn))
+                }
+            };
+    
+            use ::futures::StreamExt as _;
+    
+            let (response, stream) = match res {
+                ::std::result::Result::Ok(res) => {
+                    let response = ::std::result::Result::Ok(());
+                    let stream = res;
+    
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(success)) => {
+                                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::TruthifyStreamExn>(
+                                        ::std::result::Result::Ok(success),
+                                        "truthify",
+                                    );
+                                    ::fbthrift::SerializedStreamElement::Success(payload)
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
                             }
-                            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
-                                tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                            ::std::result::Result::Err(exn) => {
-                                tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
-                                let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
-                                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
-                            }
-                        }
-                    })
-                    .boxed();
-                (response, ::std::option::Option::Some(stream))
-            },
-            ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
-        };
-
-        let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
-            "truthify",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            response,
-        )?;
-
-        let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: MyInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
-            b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
-            b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+                        })
+                        .boxed();
+                    (response, ::std::option::Option::Some(stream))
+                },
+                ::std::result::Result::Err(exn) => (::std::result::Result::Err(exn), ::std::option::Option::None),
+            };
+    
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::my_interaction::TruthifyExn>(
+                "truthify",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                response,
+            )?;
+    
+            let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: MyInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"MyInteraction.frobnicate" => ::std::result::Result::Ok(0usize),
+                b"MyInteraction.ping" => ::std::result::Result::Ok(1usize),
+                b"MyInteraction.truthify" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_frobnicate(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_ping(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_truthify(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "MyInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "MyInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: MyInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for MyInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: MyInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "MyInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From module.MyInteraction:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From module.MyInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
-    }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
-}
-
-
-
-/// Processor for SharedInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct SharedInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
-impl<P, H, R, RS> SharedInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Frame: ::std::marker::Send + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SharedInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    pub fn new(service: H) -> Self {
-        Self {
-            service,
-            supa: ::fbthrift::NullServiceProcessor::new(),
-            _phantom: ::std::marker::PhantomData,
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
-
-    pub fn into_inner(self) -> H {
-        self.service
+    
+        
+    
+    
+    /// Processor for SharedInteraction's methods.
+    #[derive(Clone, Debug)]
+    pub struct SharedInteractionProcessor<P, H, R, RS> {
+        service: H,
+        supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+        _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
     }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "SharedInteraction.init"))]
-    async fn handle_init<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-        const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.init";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.init";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SharedInteraction_init = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.init(
+    
+    impl<P, H, R, RS> SharedInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SharedInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        pub fn new(service: H) -> Self {
+            Self {
+                service,
+                supa: ::fbthrift::NullServiceProcessor::new(),
+                _phantom: ::std::marker::PhantomData,
+            }
+        }
+    
+        pub fn into_inner(self) -> H {
+            self.service
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SharedInteraction.init"))]
+        async fn handle_init<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+            const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.init";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.init";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_SharedInteraction_init = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.init(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "SharedInteraction.init", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SharedInteraction.init", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.init", exn);
-                ::tracing::error!(method = "SharedInteraction.init", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::shared_interaction::InitExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::shared_interaction::InitExn>(
-            "init",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "SharedInteraction.do_something"))]
-    async fn handle_do_something<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-        const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.do_something";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.do_something";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SharedInteraction_do_something = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.do_something(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "SharedInteraction.init", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "SharedInteraction.init", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.init", exn);
+                    ::tracing::error!(method = "SharedInteraction.init", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::shared_interaction::InitExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::shared_interaction::InitExn>(
+                "init",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SharedInteraction.do_something"))]
+        async fn handle_do_something<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+            const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.do_something";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.do_something";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_SharedInteraction_do_something = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.do_something(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "SharedInteraction.do_something", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SharedInteraction.do_something", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.do_something", exn);
-                ::tracing::error!(method = "SharedInteraction.do_something", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::shared_interaction::DoSomethingExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::shared_interaction::DoSomethingExn>(
-            "do_something",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-
-    #[::tracing::instrument(skip_all, name = "handler", fields(method = "SharedInteraction.tear_down"))]
-    async fn handle_tear_down<'a>(
-        &'a self,
-        p: &'a mut P::Deserializer,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        use ::futures::FutureExt as _;
-
-        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-        const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.tear_down";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.tear_down";
-        let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
-        ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_SharedInteraction_tear_down = ::fbthrift::Deserialize::read(p)?;
-        let bytes_read = ::fbthrift::help::buf_len(&req)?;
-        ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
-            protocol: P::PROTOCOL_ID,
-            method_name: METHOD_NAME,
-            buffer: req,
-        })?;
-        ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
-
-        let res = ::std::panic::AssertUnwindSafe(
-            self.service.tear_down(
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "SharedInteraction.do_something", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "SharedInteraction.do_something", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.do_something", exn);
+                    ::tracing::error!(method = "SharedInteraction.do_something", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::shared_interaction::DoSomethingExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::shared_interaction::DoSomethingExn>(
+                "do_something",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
+        }
+    
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SharedInteraction.tear_down"))]
+        async fn handle_tear_down<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::futures::FutureExt as _;
+    
+            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
+            const METHOD_NAME: &::std::ffi::CStr = c"SharedInteraction.tear_down";
+            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.tear_down";
+            let mut ctx_stack = req_ctxt.get_context_stack(SERVICE_NAME, SERVICE_METHOD_NAME)?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_SharedInteraction_tear_down = ::fbthrift::Deserialize::read(p)?;
+            let bytes_read = ::fbthrift::help::buf_len(&req)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME,
+                buffer: req,
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, bytes_read)?;
+    
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.tear_down(
+                )
             )
-        )
-        .catch_unwind()
-        .await;
-
-        // nested results - panic catch on the outside, method on the inside
-        let res = match res {
-            ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                ::tracing::trace!(method = "SharedInteraction.tear_down", "success");
-                ::std::result::Result::Ok(res)
-            }
-            ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                ::tracing::error!(method = "SharedInteraction.tear_down", exception = ?exn);
-                ::std::result::Result::Err(exn)
-            }
-            ::std::result::Result::Err(exn) => {
-                let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.tear_down", exn);
-                ::tracing::error!(method = "SharedInteraction.tear_down", panic = ?aexn);
-                ::std::result::Result::Err(crate::services::shared_interaction::TearDownExn::ApplicationException(aexn))
-            }
-        };
-
-        let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::shared_interaction::TearDownExn>(
-            "tear_down",
-            METHOD_NAME,
-            _seqid,
-            req_ctxt,
-            &mut ctx_stack,
-            res,
-        )?;
-        reply_state.send_reply(env);
-        ::std::result::Result::Ok(())
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SharedInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    H: SharedInteraction,
-    P::Frame: ::std::marker::Send + 'static,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[inline]
-    fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {
-            b"SharedInteraction.init" => ::std::result::Result::Ok(0usize),
-            b"SharedInteraction.do_something" => ::std::result::Result::Ok(1usize),
-            b"SharedInteraction.tear_down" => ::std::result::Result::Ok(2usize),
-            _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
+            .catch_unwind()
+            .await;
+    
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::trace!(method = "SharedInteraction.tear_down", "success");
+                    ::std::result::Result::Ok(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "SharedInteraction.tear_down", exception = ?exn);
+                    ::std::result::Result::Err(exn)
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("SharedInteraction.tear_down", exn);
+                    ::tracing::error!(method = "SharedInteraction.tear_down", panic = ?aexn);
+                    ::std::result::Result::Err(crate::services::shared_interaction::TearDownExn::ApplicationException(aexn))
+                }
+            };
+    
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, crate::services::shared_interaction::TearDownExn>(
+                "tear_down",
+                METHOD_NAME,
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res,
+            )?;
+            reply_state.send_reply(env);
+            ::std::result::Result::Ok(())
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    async fn handle_method(
-        &self,
-        idx: ::std::primitive::usize,
-        _p: &mut P::Deserializer,
-        _req: ::fbthrift::ProtocolDecoded<P>,
-        _req_ctxt: &R,
-        _reply_state: ::std::sync::Arc<RS>,
-        _seqid: ::std::primitive::u32,
-    ) -> ::anyhow::Result<()> {
-        match idx {
-            0usize => {
-                self.handle_init(_p, _req, _req_ctxt, _reply_state, _seqid).await
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for SharedInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        H: SharedInteraction,
+        P::Frame: ::std::marker::Send + 'static,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[inline]
+        fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
+            match name {
+                b"SharedInteraction.init" => ::std::result::Result::Ok(0usize),
+                b"SharedInteraction.do_something" => ::std::result::Result::Ok(1usize),
+                b"SharedInteraction.tear_down" => ::std::result::Result::Ok(2usize),
+                _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
-            1usize => {
-                self.handle_do_something(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        async fn handle_method(
+            &self,
+            idx: ::std::primitive::usize,
+            _p: &mut P::Deserializer,
+            _req: ::fbthrift::ProtocolDecoded<P>,
+            _req_ctxt: &R,
+            _reply_state: ::std::sync::Arc<RS>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            match idx {
+                0usize => {
+                    self.handle_init(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                1usize => {
+                    self.handle_do_something(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                2usize => {
+                    self.handle_tear_down(_p, _req, _req_ctxt, _reply_state, _seqid).await
+                }
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SharedInteractionProcessor",
+                    bad
+                ),
             }
-            2usize => {
-                self.handle_tear_down(_p, _req, _req_ctxt, _reply_state, _seqid).await
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        #[inline]
+        fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
+            match name {
+                _ => ::anyhow::bail!("Unknown interaction"),
             }
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SharedInteractionProcessor",
-                bad
-            ),
+        }
+    
+        #[allow(clippy::match_single_binding)]
+        fn handle_create_interaction(
+            &self,
+            idx: ::std::primitive::usize,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
+        > {
+            match idx {
+                bad => panic!(
+                    "{}: unexpected method idx {}",
+                    "SharedInteractionProcessor",
+                    bad
+                ),
+            }
+        }
+    
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
         }
     }
-
-    #[allow(clippy::match_single_binding)]
-    #[inline]
-    fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {
-            _ => ::anyhow::bail!("Unknown interaction"),
-        }
-    }
-
-    #[allow(clippy::match_single_binding)]
-    fn handle_create_interaction(
-        &self,
-        idx: ::std::primitive::usize,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
-    > {
-        match idx {
-            bad => panic!(
-                "{}: unexpected method idx {}",
-                "SharedInteractionProcessor",
-                bad
-            ),
-        }
-    }
-
-    async fn handle_on_termination(&self) {
-        self.service.on_termination().await
-    }
-}
-
-#[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SharedInteractionProcessor<P, H, R, RS>
-where
-    P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
-    P::Deserializer: ::std::marker::Send,
-    P::Frame: ::std::marker::Send + 'static,
-    H: SharedInteraction,
-    R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
-        + ::std::marker::Send + ::std::marker::Sync + 'static,
-    RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
-    ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
-    ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
-{
-    // Interactions have () as their handler associated type
-    // to make `create_interaction` have a common return type.
-    type Handler = ();
-    type RequestContext = R;
-    type ReplyState = RS;
-
-    #[tracing::instrument(level="trace", skip_all, fields(service = "SharedInteraction"))]
-    async fn call(
-        &self,
-        req: ::fbthrift::ProtocolDecoded<P>,
-        req_ctxt: &R,
-        reply_state: ::std::sync::Arc<RS>,
-    ) -> ::anyhow::Result<()> {
-        use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
-        let mut p = P::deserializer(req.clone());
-        let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
-        if mty != ::fbthrift::MessageType::Call {
-            return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
-                format!("message type {:?} not handled", mty)
-            )));
-        }
-        let idx = match idx {
-            ::std::result::Result::Ok(idx) => idx,
-            ::std::result::Result::Err(_) => {
-                return self.supa.call(req, req_ctxt, reply_state).await;
+    
+    #[::async_trait::async_trait]
+    impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for SharedInteractionProcessor<P, H, R, RS>
+    where
+        P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Deserializer: ::std::marker::Send,
+        P::Frame: ::std::marker::Send + 'static,
+        H: SharedInteraction,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
+            + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
+        ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
+    {
+        // Interactions have () as their handler associated type
+        // to make `create_interaction` have a common return type.
+        type Handler = ();
+        type RequestContext = R;
+        type ReplyState = RS;
+    
+        #[tracing::instrument(level="trace", skip_all, fields(service = "SharedInteraction"))]
+        async fn call(
+            &self,
+            req: ::fbthrift::ProtocolDecoded<P>,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<RS>,
+        ) -> ::anyhow::Result<()> {
+            use ::fbthrift::{ProtocolReader as _, ServiceProcessor as _};
+            let mut p = P::deserializer(req.clone());
+            let (idx, mty, seqid) = p.read_message_begin(|name| self.method_idx(name))?;
+            if mty != ::fbthrift::MessageType::Call {
+                return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::InvalidMessageType,
+                    format!("message type {:?} not handled", mty)
+                )));
             }
-        };
-        self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
-        p.read_message_end()?;
-
-        ::std::result::Result::Ok(())
-    }
-
-    fn create_interaction(
-        &self,
-        name: &::std::primitive::str,
-    ) -> ::anyhow::Result<
-        ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
-    > {
-        use ::fbthrift::{ServiceProcessor as _};
-        let idx = self.create_interaction_idx(name);
-        let idx = match idx {
-            ::anyhow::Result::Ok(idx) => idx,
-            ::anyhow::Result::Err(_) => {
-                return self.supa.create_interaction(name);
-            }
-        };
-        self.handle_create_interaction(idx)
-    }
-
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
-        &[
-            // From shared.SharedInteraction:
+            let idx = match idx {
+                ::std::result::Result::Ok(idx) => idx,
+                ::std::result::Result::Err(_) => {
+                    return self.supa.call(req, req_ctxt, reply_state).await;
+                }
+            };
+            self.handle_method(idx, &mut p, req, req_ctxt, reply_state, seqid).await?;
+            p.read_message_end()?;
+    
+            ::std::result::Result::Ok(())
+        }
+    
+        fn create_interaction(
+            &self,
+            name: &::std::primitive::str,
+        ) -> ::anyhow::Result<
+            ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>
+        > {
+            use ::fbthrift::{ServiceProcessor as _};
+            let idx = self.create_interaction_idx(name);
+            let idx = match idx {
+                ::anyhow::Result::Ok(idx) => idx,
+                ::anyhow::Result::Err(_) => {
+                    return self.supa.create_interaction(name);
+                }
+            };
+            self.handle_create_interaction(idx)
+        }
+    
+        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+            &[
+                // From shared.SharedInteraction:
             // Interaction's method names are never queried directly.
             // They are always queried from the "main" processor.
         ]
+        }
+    
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
     }
-
-    async fn on_termination(&self) {
-        use ::fbthrift::{ServiceProcessor as _};
-        self.handle_on_termination().await
-    }
+    
+    
 }
-
 
 #[::async_trait::async_trait]
 pub trait InteractWithShared: ::std::marker::Send + ::std::marker::Sync + 'static {
@@ -6814,12 +6849,12 @@ where
         match idx {
             1usize => {
                 let handler = self.handle_createMyInteraction()?;
-                let server = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::interact_with_shared::MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             2usize => {
                 let handler = self.handle_createshared.SharedInteraction()?;
-                let server = ::std::sync::Arc::new(SharedInteractionProcessor::<P, ::std::boxed::Box<dyn SharedInteraction>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new(crate::server::interact_with_shared::SharedInteractionProcessor::<P, ::std::boxed::Box<dyn SharedInteraction>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }
             bad => panic!(

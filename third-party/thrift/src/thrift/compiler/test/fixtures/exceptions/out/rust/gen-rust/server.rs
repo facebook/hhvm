@@ -22,6 +22,7 @@ pub(crate) use crate as server;
 pub(crate) use ::::services;
 
 
+
 #[::async_trait::async_trait]
 pub trait Raiser: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn doBland(

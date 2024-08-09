@@ -15,8 +15,17 @@
   limitations under the License.
 
 }}
-{{#service:interactions}}{{>lib/server}}
-{{/service:interactions}}
+
+{{#service:interactions?}}{{!
+}}pub mod {{service:snake}} {{>lib/block}}
+    use super::*;
+
+    {{#service:interactions}}
+    {{>lib/server}}
+    {{/service:interactions}}
+
+}
+{{/service:interactions?}}
 
 {{^service:interaction?}}
 {{>lib/server_trait}}
@@ -129,7 +138,7 @@ where
                 {{/type:void?}}{{^type:void?}}
                 let (interaction_handler, res) = res;
                 {{/type:void?}}{{/function:return_type}}
-                let interaction_processor = ::std::sync::Arc::new({{function:interaction_name}}Processor::<P, ::std::boxed::Box<dyn {{function:interaction_name}}>, R, RS>::new(interaction_handler));
+                let interaction_processor = ::std::sync::Arc::new({{program:crate}}::server::{{service:snake}}::{{function:interaction_name}}Processor::<P, ::std::boxed::Box<dyn {{function:interaction_name}}>, R, RS>::new(interaction_handler));
                 reply_state.set_interaction_processor(interaction_processor)?;
                 {{/function:creates_interaction?}}
                 ::std::result::Result::Ok(res)
@@ -320,7 +329,7 @@ where
             }}{{#service:rustFunctions}}{{#function:starts_interaction?}}
             {{function:index}}usize => {
                 let handler = self.handle_{{function:name}}()?;
-                let server = ::std::sync::Arc::new({{function:interaction_name}}Processor::<P, ::std::boxed::Box<dyn {{function:interaction_name}}>, R, RS>::new(handler));
+                let server = ::std::sync::Arc::new({{program:crate}}::server::{{service:snake}}::{{function:interaction_name}}Processor::<P, ::std::boxed::Box<dyn {{function:interaction_name}}>, R, RS>::new(handler));
                 ::std::result::Result::Ok(server)
             }{{!
             }}{{/function:starts_interaction?}}{{/service:rustFunctions}}

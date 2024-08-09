@@ -28,6 +28,7 @@ pub(crate) use crate as server;
 pub(crate) use ::::services;
 
 
+
 #[::async_trait::async_trait]
 pub trait Service: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn func(
@@ -402,6 +403,7 @@ where
         }
     }
 }
+
 
 #[::async_trait::async_trait]
 pub trait AdapterService: ::std::marker::Send + ::std::marker::Sync + 'static {

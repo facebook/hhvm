@@ -34,6 +34,7 @@ pub(crate) use crate as server;
 pub(crate) use ::::services;
 
 
+
 #[::async_trait::async_trait]
 pub trait MyRoot: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn do_root(
@@ -375,6 +376,7 @@ where
         }
     }
 }
+
 
 #[::async_trait::async_trait]
 pub trait MyNode: ::std::marker::Send + ::std::marker::Sync + 'static {
@@ -731,6 +733,7 @@ where
         }
     }
 }
+
 
 #[::async_trait::async_trait]
 pub trait MyLeaf: ::std::marker::Send + ::std::marker::Sync + 'static {

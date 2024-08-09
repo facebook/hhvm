@@ -46,6 +46,7 @@ pub(crate) use crate as server;
 pub(crate) use ::::services;
 
 
+
 #[::async_trait::async_trait]
 pub trait Service1: ::std::marker::Send + ::std::marker::Sync + 'static {
     type RequestContext: ::std::marker::Sync;
@@ -395,6 +396,7 @@ where
     }
 }
 
+
 #[::async_trait::async_trait]
 pub trait S2: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn s(
@@ -736,6 +738,7 @@ where
         }
     }
 }
+
 
 #[::async_trait::async_trait]
 pub trait AllMethods: ::std::marker::Send + ::std::marker::Sync + 'static {
@@ -1192,6 +1195,7 @@ where
     }
 }
 
+
 #[::async_trait::async_trait]
 pub trait OneMethod: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn foo(
@@ -1646,6 +1650,7 @@ where
         }
     }
 }
+
 
 #[::async_trait::async_trait]
 pub trait OneMethodOptOut: ::std::marker::Send + ::std::marker::Sync + 'static {

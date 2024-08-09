@@ -22,6 +22,7 @@ pub(crate) use crate as server;
 pub(crate) use ::::services;
 
 
+
 #[doc = "Detailed overview of service"]
 #[::async_trait::async_trait]
 pub trait C: ::std::marker::Send + ::std::marker::Sync + 'static {

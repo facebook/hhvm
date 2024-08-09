@@ -43,6 +43,7 @@ let is_stale_msg liveness =
 let go
     status
     error_format
+    ~warnings_default_all
     warning_switches
     ~is_interactive
     ~output_json
@@ -53,7 +54,12 @@ let go
   in
   let stale_msg = is_stale_msg liveness in
   let error_list =
-    ClientCheckStatusFilterWarnings.filter warning_switches error_list
+    let filter =
+      ClientCheckStatusFilterWarnings.Filter.make
+        warning_switches
+        ~default_all:warnings_default_all
+    in
+    ClientCheckStatusFilterWarnings.filter filter error_list
   in
   if
     output_json
@@ -98,6 +104,7 @@ let go_streaming_on_fd
     ~(pid : int)
     (fd : Unix.file_descr)
     (args : ClientEnv.client_check_env)
+    ~warnings_default_all
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(progress_callback : string option -> unit) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -143,6 +150,12 @@ let go_streaming_on_fd
     show_progress ()
   in
 
+  let warning_filter =
+    ClientCheckStatusFilterWarnings.Filter.make
+      ~default_all:warnings_default_all
+      args.ClientEnv.warning_switches
+  in
+
   (* this lwt process consumes errors from the errors.bin file by polling
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
@@ -170,6 +183,11 @@ let go_streaming_on_fd
       progress_callback None;
       let found_new = ref 0 in
       let error_format = Errors.format_or_default error_format in
+      let errors =
+        Relative_path.Map.map
+          errors
+          ~f:(ClientCheckStatusFilterWarnings.filter warning_filter)
+      in
       begin
         try
           Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
@@ -583,6 +601,7 @@ let rec keep_trying_to_open
     Errors are printed soon after they are known instead of all at once at the end. *)
 let go_streaming
     (args : ClientEnv.client_check_env)
+    ~warnings_default_all
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -605,6 +624,12 @@ let go_streaming
       ~root
   in
   let%lwt (exit_status, telemetry) =
-    go_streaming_on_fd ~pid fd args ~partial_telemetry_ref ~progress_callback
+    go_streaming_on_fd
+      ~pid
+      fd
+      args
+      ~warnings_default_all
+      ~partial_telemetry_ref
+      ~progress_callback
   in
   Lwt.return (exit_status, telemetry)

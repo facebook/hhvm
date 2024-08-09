@@ -679,6 +679,8 @@ let main_internal
       let%lwt (exit_status, telemetry) =
         ClientCheckStatus.go_streaming
           args
+          ~warnings_default_all:
+            local_config.ServerLocalConfig.warnings_default_all
           ~partial_telemetry_ref
           ~connect_then_close:(fun () -> connect_then_close args)
       in
@@ -692,6 +694,8 @@ let main_internal
           status
           args.error_format
           args.warning_switches
+          ~warnings_default_all:
+            local_config.ServerLocalConfig.warnings_default_all
           ~output_json:args.output_json
           ~max_errors:args.max_errors
           ~is_interactive:args.is_interactive
@@ -751,6 +755,8 @@ let main_internal
         status
         args.error_format
         args.warning_switches
+        ~warnings_default_all:
+          local_config.ServerLocalConfig.warnings_default_all
         ~is_interactive:args.is_interactive
         ~output_json:args.output_json
         ~max_errors:args.max_errors

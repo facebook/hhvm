@@ -8,6 +8,7 @@
 
 val go_streaming :
   ClientEnv.client_check_env ->
+  warnings_default_all:bool ->
   partial_telemetry_ref:Telemetry.t option ref ->
   connect_then_close:(unit -> unit Lwt.t) ->
   (Exit_status.t * Telemetry.t) Lwt.t
@@ -15,6 +16,7 @@ val go_streaming :
 val go :
   ServerCommandTypes.Server_status.t ->
   Errors.format option ->
+  warnings_default_all:bool ->
   ClientCheckStatusFilterWarnings.switch list ->
   is_interactive:bool ->
   output_json:bool ->

@@ -15,5 +15,13 @@ type switch =
   | Code_off of Code.t
   | Ignored_files of Str.regexp
 
+module Filter : sig
+  type t
+
+  (** [default_all] controls wether an empty list of switches is equivalent to [WAll]
+    as opposed to [WNone] *)
+  val make : default_all:bool -> switch list -> t
+end
+
 val filter :
-  switch list -> Errors.finalized_error list -> Errors.finalized_error list
+  Filter.t -> Errors.finalized_error list -> Errors.finalized_error list

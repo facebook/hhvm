@@ -565,6 +565,7 @@ let test_check_success () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
+            ~warnings_default_all:true
             ~partial_telemetry_ref
             ~connect_then_close
         in
@@ -596,6 +597,7 @@ let test_check_errors () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
+            ~warnings_default_all:true
             ~partial_telemetry_ref
             ~connect_then_close
         in
@@ -636,6 +638,7 @@ let test_check_connect_success () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
+            ~warnings_default_all:true
             ~partial_telemetry_ref
             ~connect_then_close
         in
@@ -683,6 +686,7 @@ let test_check_connect_failure () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
+            ~warnings_default_all:true
             ~partial_telemetry_ref
             ~connect_then_close
         in

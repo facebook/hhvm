@@ -62,7 +62,7 @@ type code = int
 module Filter : sig
   type t
 
-  val make : switch list -> t
+  val make : default_all:bool -> switch list -> t
 
   val pass : t -> code * path -> bool
 end = struct
@@ -94,7 +94,13 @@ end = struct
     | Code_off code -> remove_code code filter
     | Ignored_files re -> add_ignored_files re filter
 
-  let make switches =
+  let make ~default_all switches =
+    let switches =
+      if default_all then
+        WAll :: switches
+      else
+        WNone :: switches
+    in
     (* TODO: consider reordering switches to put all the -Wall and -Wnone first *)
     List.fold switches ~init:empty ~f:apply_switch
 
@@ -124,8 +130,7 @@ end = struct
     pass_code codes code && pass_path ignore_files file_path
 end
 
-let filter switches (error_list : Errors.finalized_error list) =
-  let filter = Filter.make switches in
+let filter filter (error_list : Errors.finalized_error list) =
   List.filter error_list ~f:(fun error ->
       Filter.pass
         filter

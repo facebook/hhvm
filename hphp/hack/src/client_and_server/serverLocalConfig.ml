@@ -254,6 +254,9 @@ type t = {
       (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
   hack_warnings: int GlobalOptions.all_or_some;
       (** POC: @catg - turn on hack warnings. *)
+  warnings_default_all: bool;
+      (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.
+        Otherwise, `hh` is equivalent to `hh -Wnone`, i.e. warnings are not shown. *)
 }
 
 let default =
@@ -341,6 +344,7 @@ let default =
     lsp_invalidation = false;
     autocomplete_sort_text = false;
     hack_warnings = GlobalOptions.ASome [];
+    warnings_default_all = false;
   }
 
 let system_config_path =
@@ -1035,6 +1039,9 @@ let load_
         GlobalOptions.(default_saved_state_loading.zstd_decompress_by_file)
       config
   in
+  let warnings_default_all =
+    bool_ "warnings_default_all" ~default:default.warnings_default_all config
+  in
   {
     saved_state =
       {
@@ -1141,11 +1148,12 @@ let load_
     lsp_invalidation;
     autocomplete_sort_text;
     hack_warnings;
+    warnings_default_all;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
-On top of that, applies [config_overrides]. If [silent] then prints what it's doing
-to stderr. *)
+  On top of that, applies [config_overrides]. If [silent] then prints what it's doing
+  to stderr. *)
 let load :
     silent:bool ->
     current_version:Config_file_version.version ->

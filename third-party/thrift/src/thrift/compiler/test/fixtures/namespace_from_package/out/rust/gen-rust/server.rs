@@ -66,7 +66,6 @@ where
         ).await
     }
 }
-
 /// Processor for TestService's methods.
 #[derive(Clone, Debug)]
 pub struct TestServiceProcessor<P, H, R, RS> {
@@ -74,6 +73,7 @@ pub struct TestServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_TestService_init {
     int1: ::std::primitive::i64,
@@ -103,7 +103,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Te
         })
     }
 }
-
 
 impl<P, H, R, RS> TestServiceProcessor<P, H, R, RS>
 where

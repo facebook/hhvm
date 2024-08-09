@@ -127,7 +127,6 @@ where
         ).await
     }
 }
-
 /// Processor for Raiser's methods.
 #[derive(Clone, Debug)]
 pub struct RaiserProcessor<P, H, R, RS> {
@@ -135,6 +134,7 @@ pub struct RaiserProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_Raiser_doBland {
 }
@@ -160,6 +160,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
     }
 }
 
+
 struct Args_Raiser_doRaise {
 }
 
@@ -183,6 +184,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
         })
     }
 }
+
 
 struct Args_Raiser_get200 {
 }
@@ -208,6 +210,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
     }
 }
 
+
 struct Args_Raiser_get500 {
 }
 
@@ -231,7 +234,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ra
         })
     }
 }
-
 
 impl<P, H, R, RS> RaiserProcessor<P, H, R, RS>
 where

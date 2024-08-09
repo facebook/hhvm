@@ -49,11 +49,14 @@ pub mod errors {{>lib/block}}{{#program:services}}
 pub(crate) use {{program:crate}} as server;
 pub(crate) use {{program:types}}::services;
 
-{{#program:interactions}}{{>lib/server_trait}}{{!
-}}{{/program:interactions}}{{!
-}}{{#program:services}}{{>lib/server}}{{!
-}}{{/program:services}}
-{{/program:services?}}
+{{#program:interactions}}
+{{>lib/server_trait}}
+
+{{>lib/server_arg}}
+{{/program:interactions}}
+{{#program:services}}{{>lib/server}}{{!
+}}{{/program:services}}{{!
+}}{{/program:services?}}
 {{^program:services?}}
 #![doc(hidden)]
 {{^program:multifile?}}

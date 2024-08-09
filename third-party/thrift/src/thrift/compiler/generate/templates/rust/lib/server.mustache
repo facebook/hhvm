@@ -22,7 +22,6 @@
 {{>lib/server_trait}}
 {{/service:interaction?}}
 
-
 /// Processor for {{service:rust_name}}'s methods.
 #[derive(Clone, Debug)]
 pub struct {{service:rust_name}}Processor<P, H, R, RS{{!
@@ -39,54 +38,9 @@ pub struct {{service:rust_name}}Processor<P, H, R, RS{{!
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
 
-{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
-struct Args_{{service:rust_name}}_{{function:name}} {
-    {{#function:args}}
-    {{field:rust_name}}: {{>lib/fieldtype}},
-    {{/function:args}}
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{service:rust_name}}_{{function:name}} {
-    #[inline]{{! No cost because there's only one caller; with luck will mitigate move cost of args. }}
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "{{service:name}}.{{function:name}}"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-            {{#function:args_by_name}}
-            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
-            {{/function:args_by_name}}
-        ];
-        {{#function:args}}
-        let mut field_{{field:name}} = ::std::option::Option::None;
-        {{/function:args}}
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,{{!
-                }}{{#function:args}}
-                ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
-                    }}field_{{field:name}} = ::std::option::Option::Some({{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
-                    }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
-                    }}),{{!
-                }}{{/function:args}}
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        {{! Use formatting in errors to try to maximize string sharing }}
-        ::std::result::Result::Ok(Self {{>lib/block}}{{!
-            }}{{#function:args}}
-            {{field:rust_name}}: field_{{field:name}}.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "{{service:name}}.{{function:name}}", "{{field:name}}"))?,{{!
-            }}{{/function:args}}
-        })
-    }
-}
-
-{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
-
+{{^service:interaction?}}
+{{>lib/server_arg}}
+{{/service:interaction?}}
 impl<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
 }}> {{service:rust_name}}Processor<P, H, R, RS{{!

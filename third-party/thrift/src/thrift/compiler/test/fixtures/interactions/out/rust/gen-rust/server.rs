@@ -146,7 +146,83 @@ where
     async fn on_termination(&self) {
         (**self).on_termination().await;
     }
-}#[::async_trait::async_trait]
+}
+
+struct Args_MyInteraction_frobnicate {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_frobnicate {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.frobnicate"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+
+struct Args_MyInteraction_ping {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_ping {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.ping"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+
+struct Args_MyInteraction_truthify {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_truthify {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.truthify"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+#[::async_trait::async_trait]
 pub trait MyInteractionFast: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn frobnicate(
         &self,
@@ -238,7 +314,83 @@ where
     async fn on_termination(&self) {
         (**self).on_termination().await;
     }
-}#[::async_trait::async_trait]
+}
+
+struct Args_MyInteractionFast_frobnicate {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_frobnicate {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.frobnicate"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+
+struct Args_MyInteractionFast_ping {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_ping {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.ping"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+
+struct Args_MyInteractionFast_truthify {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_truthify {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.truthify"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+#[::async_trait::async_trait]
 pub trait SerialInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn frobnicate(
         &self,
@@ -285,6 +437,31 @@ where
     }
 }
 
+struct Args_SerialInteraction_frobnicate {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SerialInteraction_frobnicate {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SerialInteraction.frobnicate"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+
 
 /// Processor for MyInteraction's methods.
 #[derive(Clone, Debug)]
@@ -293,79 +470,6 @@ pub struct MyInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_MyInteraction_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_ping {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_ping {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_truthify {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_truthify {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
 where
@@ -776,7 +880,6 @@ where
 
 
 
-
 /// Processor for MyInteractionFast's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionFastProcessor<P, H, R, RS> {
@@ -784,79 +887,6 @@ pub struct MyInteractionFastProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_MyInteractionFast_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteractionFast_ping {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_ping {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteractionFast_truthify {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_truthify {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
 where
@@ -1267,7 +1297,6 @@ where
 
 
 
-
 /// Processor for SerialInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct SerialInteractionProcessor<P, H, R, RS> {
@@ -1275,31 +1304,6 @@ pub struct SerialInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_SerialInteraction_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SerialInteraction_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SerialInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
 where
@@ -1711,7 +1715,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {
@@ -1719,6 +1722,7 @@ pub struct MyServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyService_foo {
 }
@@ -1743,6 +1747,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_interact {
     arg: ::std::primitive::i32,
@@ -1773,6 +1778,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_interactFast {
 }
 
@@ -1797,6 +1803,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_serialize {
 }
 
@@ -1820,7 +1827,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS> MyServiceProcessor<P, H, R, RS>
 where
@@ -2381,7 +2387,6 @@ where
 }
 
 
-
 /// Processor for MyInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -2389,79 +2394,6 @@ pub struct MyInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_MyInteraction_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_ping {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_ping {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_truthify {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_truthify {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
 where
@@ -2872,7 +2804,6 @@ where
 
 
 
-
 /// Processor for MyInteractionFast's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionFastProcessor<P, H, R, RS> {
@@ -2880,79 +2811,6 @@ pub struct MyInteractionFastProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_MyInteractionFast_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteractionFast_ping {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_ping {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteractionFast_truthify {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_truthify {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
 where
@@ -3363,7 +3221,6 @@ where
 
 
 
-
 /// Processor for SerialInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct SerialInteractionProcessor<P, H, R, RS> {
@@ -3371,31 +3228,6 @@ pub struct SerialInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_SerialInteraction_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SerialInteraction_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SerialInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
 where
@@ -3762,7 +3594,6 @@ where
         ).await
     }
 }
-
 /// Processor for Factories's methods.
 #[derive(Clone, Debug)]
 pub struct FactoriesProcessor<P, H, R, RS> {
@@ -3770,6 +3601,7 @@ pub struct FactoriesProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_Factories_foo {
 }
@@ -3794,6 +3626,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fa
         })
     }
 }
+
 
 struct Args_Factories_interact {
     arg: ::std::primitive::i32,
@@ -3824,6 +3657,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fa
     }
 }
 
+
 struct Args_Factories_interactFast {
 }
 
@@ -3848,6 +3682,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fa
     }
 }
 
+
 struct Args_Factories_serialize {
 }
 
@@ -3871,7 +3706,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fa
         })
     }
 }
-
 
 impl<P, H, R, RS> FactoriesProcessor<P, H, R, RS>
 where
@@ -4396,7 +4230,6 @@ where
 }
 
 
-
 /// Processor for MyInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -4404,79 +4237,6 @@ pub struct MyInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_MyInteraction_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_ping {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_ping {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_truthify {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_truthify {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
 where
@@ -4887,7 +4647,6 @@ where
 
 
 
-
 /// Processor for MyInteractionFast's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionFastProcessor<P, H, R, RS> {
@@ -4895,79 +4654,6 @@ pub struct MyInteractionFastProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_MyInteractionFast_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteractionFast_ping {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_ping {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteractionFast_truthify {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteractionFast_truthify {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteractionFast.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> MyInteractionFastProcessor<P, H, R, RS>
 where
@@ -5378,7 +5064,6 @@ where
 
 
 
-
 /// Processor for SerialInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct SerialInteractionProcessor<P, H, R, RS> {
@@ -5386,31 +5071,6 @@ pub struct SerialInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_SerialInteraction_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SerialInteraction_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SerialInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> SerialInteractionProcessor<P, H, R, RS>
 where
@@ -5739,7 +5399,6 @@ where
         ).await
     }
 }
-
 /// Processor for Perform's methods.
 #[derive(Clone, Debug)]
 pub struct PerformProcessor<P, H, R, RS> {
@@ -5747,6 +5406,7 @@ pub struct PerformProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_Perform_foo {
 }
@@ -5771,7 +5431,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Pe
         })
     }
 }
-
 
 impl<P, H, R, RS> PerformProcessor<P, H, R, RS>
 where
@@ -6089,7 +5748,6 @@ where
 }
 
 
-
 /// Processor for MyInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -6097,79 +5755,6 @@ pub struct MyInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_MyInteraction_frobnicate {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_frobnicate {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.frobnicate"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_ping {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_ping {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.ping"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_MyInteraction_truthify {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyInteraction_truthify {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyInteraction.truthify"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
 where
@@ -6580,7 +6165,6 @@ where
 
 
 
-
 /// Processor for SharedInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct SharedInteractionProcessor<P, H, R, RS> {
@@ -6588,79 +6172,6 @@ pub struct SharedInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_SharedInteraction_init {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SharedInteraction_init {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SharedInteraction.init"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_SharedInteraction_do_something {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SharedInteraction_do_something {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SharedInteraction.do_something"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
-struct Args_SharedInteraction_tear_down {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SharedInteraction_tear_down {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "SharedInteraction.tear_down"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> SharedInteractionProcessor<P, H, R, RS>
 where
@@ -7104,7 +6615,6 @@ where
         (**self).createshared.SharedInteraction()
     }
 }
-
 /// Processor for InteractWithShared's methods.
 #[derive(Clone, Debug)]
 pub struct InteractWithSharedProcessor<P, H, R, RS> {
@@ -7112,6 +6622,7 @@ pub struct InteractWithSharedProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_InteractWithShared_do_some_similar_things {
 }
@@ -7136,7 +6647,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_In
         })
     }
 }
-
 
 impl<P, H, R, RS> InteractWithSharedProcessor<P, H, R, RS>
 where

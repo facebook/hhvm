@@ -127,7 +127,6 @@ where
         ).await
     }
 }
-
 /// Processor for C's methods.
 #[derive(Clone, Debug)]
 pub struct CProcessor<P, H, R, RS> {
@@ -135,6 +134,7 @@ pub struct CProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_C_f {
 }
@@ -160,6 +160,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_C_
     }
 }
 
+
 struct Args_C_numbers {
 }
 
@@ -183,6 +184,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_C_
         })
     }
 }
+
 
 struct Args_C_thing {
     a: ::std::primitive::i32,
@@ -222,7 +224,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_C_
         })
     }
 }
-
 
 impl<P, H, R, RS> CProcessor<P, H, R, RS>
 where

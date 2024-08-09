@@ -91,7 +91,6 @@ where
         ).await
     }
 }
-
 /// Processor for Service1's methods.
 #[derive(Clone, Debug)]
 pub struct Service1Processor<P, H, R, RS> {
@@ -99,6 +98,7 @@ pub struct Service1Processor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_Service1_r {
 }
@@ -123,7 +123,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Se
         })
     }
 }
-
 
 impl<P, H, R, RS> Service1Processor<P, H, R, RS>
 where
@@ -435,7 +434,6 @@ where
         ).await
     }
 }
-
 /// Processor for S2's methods.
 #[derive(Clone, Debug)]
 pub struct S2Processor<P, H, R, RS> {
@@ -443,6 +441,7 @@ pub struct S2Processor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_S2_r {
 }
@@ -467,7 +466,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_S2
         })
     }
 }
-
 
 impl<P, H, R, RS> S2Processor<P, H, R, RS>
 where
@@ -800,7 +798,6 @@ where
         ).await
     }
 }
-
 /// Processor for AllMethods's methods.
 #[derive(Clone, Debug)]
 pub struct AllMethodsProcessor<P, H, R, RS> {
@@ -808,6 +805,7 @@ pub struct AllMethodsProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_AllMethods_foo {
 }
@@ -833,6 +831,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Al
     }
 }
 
+
 struct Args_AllMethods_bar {
 }
 
@@ -856,7 +855,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Al
         })
     }
 }
-
 
 impl<P, H, R, RS> AllMethodsProcessor<P, H, R, RS>
 where
@@ -1255,7 +1253,6 @@ where
         ).await
     }
 }
-
 /// Processor for OneMethod's methods.
 #[derive(Clone, Debug)]
 pub struct OneMethodProcessor<P, H, R, RS> {
@@ -1263,6 +1260,7 @@ pub struct OneMethodProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_OneMethod_foo {
 }
@@ -1288,6 +1286,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_On
     }
 }
 
+
 struct Args_OneMethod_bar {
 }
 
@@ -1311,7 +1310,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_On
         })
     }
 }
-
 
 impl<P, H, R, RS> OneMethodProcessor<P, H, R, RS>
 where
@@ -1710,7 +1708,6 @@ where
         ).await
     }
 }
-
 /// Processor for OneMethodOptOut's methods.
 #[derive(Clone, Debug)]
 pub struct OneMethodOptOutProcessor<P, H, R, RS> {
@@ -1718,6 +1715,7 @@ pub struct OneMethodOptOutProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_OneMethodOptOut_foo {
 }
@@ -1743,6 +1741,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_On
     }
 }
 
+
 struct Args_OneMethodOptOut_bar {
 }
 
@@ -1766,7 +1765,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_On
         })
     }
 }
-
 
 impl<P, H, R, RS> OneMethodOptOutProcessor<P, H, R, RS>
 where

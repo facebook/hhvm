@@ -73,7 +73,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyRoot's methods.
 #[derive(Clone, Debug)]
 pub struct MyRootProcessor<P, H, R, RS> {
@@ -81,6 +80,7 @@ pub struct MyRootProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyRoot_do_root {
 }
@@ -105,7 +105,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS> MyRootProcessor<P, H, R, RS>
 where
@@ -416,7 +415,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyNode's methods.
 #[derive(Clone, Debug)]
 pub struct MyNodeProcessor<P, H, R, RS, SS> {
@@ -424,6 +422,7 @@ pub struct MyNodeProcessor<P, H, R, RS, SS> {
     supa: SS,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyNode_do_mid {
 }
@@ -448,7 +447,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS, SS> MyNodeProcessor<P, H, R, RS, SS>
 where
@@ -773,7 +771,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyLeaf's methods.
 #[derive(Clone, Debug)]
 pub struct MyLeafProcessor<P, H, R, RS, SS> {
@@ -781,6 +778,7 @@ pub struct MyLeafProcessor<P, H, R, RS, SS> {
     supa: SS,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyLeaf_do_leaf {
 }
@@ -805,7 +803,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS, SS> MyLeafProcessor<P, H, R, RS, SS>
 where

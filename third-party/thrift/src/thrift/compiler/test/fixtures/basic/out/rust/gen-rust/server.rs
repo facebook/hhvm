@@ -79,7 +79,6 @@ where
         ).await
     }
 }
-
 /// Processor for FooService's methods.
 #[derive(Clone, Debug)]
 pub struct FooServiceProcessor<P, H, R, RS> {
@@ -87,6 +86,7 @@ pub struct FooServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_FooService_simple_rpc {
 }
@@ -111,7 +111,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fo
         })
     }
 }
-
 
 impl<P, H, R, RS> FooServiceProcessor<P, H, R, RS>
 where
@@ -427,7 +426,6 @@ where
         ).await
     }
 }
-
 /// Processor for FB303Service's methods.
 #[derive(Clone, Debug)]
 pub struct FB303ServiceProcessor<P, H, R, RS> {
@@ -435,6 +433,7 @@ pub struct FB303ServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_FB303Service_simple_rpc {
     int_parameter: ::std::primitive::i32,
@@ -464,7 +463,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_FB
         })
     }
 }
-
 
 impl<P, H, R, RS> FB303ServiceProcessor<P, H, R, RS>
 where
@@ -1014,7 +1012,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {
@@ -1022,6 +1019,7 @@ pub struct MyServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyService_ping {
 }
@@ -1047,6 +1045,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_getRandomData {
 }
 
@@ -1070,6 +1069,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_sink {
     sink: ::std::primitive::i64,
@@ -1099,6 +1099,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_putDataById {
     id: ::std::primitive::i64,
@@ -1134,6 +1135,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_hasDataById {
     id: ::std::primitive::i64,
 }
@@ -1162,6 +1164,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_getDataById {
     id: ::std::primitive::i64,
@@ -1192,6 +1195,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_deleteDataById {
     id: ::std::primitive::i64,
 }
@@ -1220,6 +1224,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_lobDataById {
     id: ::std::primitive::i64,
@@ -1255,6 +1260,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_invalid_return_for_hack {
 }
 
@@ -1279,6 +1285,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_rpc_skipped_codegen {
 }
 
@@ -1302,7 +1309,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS> MyServiceProcessor<P, H, R, RS>
 where
@@ -2247,7 +2253,6 @@ where
         ).await
     }
 }
-
 /// Processor for DbMixedStackArguments's methods.
 #[derive(Clone, Debug)]
 pub struct DbMixedStackArgumentsProcessor<P, H, R, RS> {
@@ -2255,6 +2260,7 @@ pub struct DbMixedStackArgumentsProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_DbMixedStackArguments_getDataByKey0 {
     key: ::std::string::String,
@@ -2285,6 +2291,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Db
     }
 }
 
+
 struct Args_DbMixedStackArguments_getDataByKey1 {
     key: ::std::string::String,
 }
@@ -2313,7 +2320,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Db
         })
     }
 }
-
 
 impl<P, H, R, RS> DbMixedStackArgumentsProcessor<P, H, R, RS>
 where

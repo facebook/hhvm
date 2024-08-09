@@ -96,6 +96,32 @@ where
         (**self).on_termination().await;
     }
 }
+
+struct Args_BadInteraction_foo {
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_BadInteraction_foo {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "BadInteraction.foo"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+        })
+    }
+}
+
+
 #[::async_trait::async_trait]
 pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn ping(
@@ -297,7 +323,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {
@@ -305,6 +330,7 @@ pub struct MyServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyService_ping {
 }
@@ -330,6 +356,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_getRandomData {
 }
 
@@ -353,6 +380,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_hasDataById {
     id: ::std::primitive::i64,
@@ -383,6 +411,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_getDataById {
     id: ::std::primitive::i64,
 }
@@ -411,6 +440,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_putDataById {
     id: ::std::primitive::i64,
@@ -446,6 +476,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_lobDataById {
     id: ::std::primitive::i64,
     data: ::std::string::String,
@@ -480,6 +511,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_doNothing {
 }
 
@@ -503,7 +535,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS> MyServiceProcessor<P, H, R, RS>
 where
@@ -1238,7 +1269,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyServicePrioParent's methods.
 #[derive(Clone, Debug)]
 pub struct MyServicePrioParentProcessor<P, H, R, RS> {
@@ -1246,6 +1276,7 @@ pub struct MyServicePrioParentProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyServicePrioParent_ping {
 }
@@ -1271,6 +1302,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyServicePrioParent_pong {
 }
 
@@ -1294,7 +1326,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS> MyServicePrioParentProcessor<P, H, R, RS>
 where
@@ -1671,7 +1702,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyServicePrioChild's methods.
 #[derive(Clone, Debug)]
 pub struct MyServicePrioChildProcessor<P, H, R, RS, SS> {
@@ -1679,6 +1709,7 @@ pub struct MyServicePrioChildProcessor<P, H, R, RS, SS> {
     supa: SS,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyServicePrioChild_pang {
 }
@@ -1703,7 +1734,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS, SS> MyServicePrioChildProcessor<P, H, R, RS, SS>
 where
@@ -1991,7 +2021,6 @@ where
 }
 
 
-
 /// Processor for BadInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct BadInteractionProcessor<P, H, R, RS> {
@@ -1999,31 +2028,6 @@ pub struct BadInteractionProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
-
-struct Args_BadInteraction_foo {
-}
-
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_BadInteraction_foo {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "BadInteraction.foo"))]
-    fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        static ARGS: &[::fbthrift::Field] = &[
-        ];
-        let _ = p.read_struct_begin(|_| ())?;
-        loop {
-            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
-            match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,
-                (fty, _) => p.skip(fty)?,
-            }
-            p.read_field_end()?;
-        }
-        p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-        })
-    }
-}
-
 
 impl<P, H, R, RS> BadInteractionProcessor<P, H, R, RS>
 where
@@ -2322,7 +2326,6 @@ where
         ).await
     }
 }
-
 /// Processor for BadService's methods.
 #[derive(Clone, Debug)]
 pub struct BadServiceProcessor<P, H, R, RS> {
@@ -2330,6 +2333,7 @@ pub struct BadServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_BadService_bar {
 }
@@ -2354,7 +2358,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ba
         })
     }
 }
-
 
 impl<P, H, R, RS> BadServiceProcessor<P, H, R, RS>
 where
@@ -2722,7 +2725,6 @@ where
         ).await
     }
 }
-
 /// Processor for FooBarBazService's methods.
 #[derive(Clone, Debug)]
 pub struct FooBarBazServiceProcessor<P, H, R, RS> {
@@ -2730,6 +2732,7 @@ pub struct FooBarBazServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_FooBarBazService_foo {
 }
@@ -2755,6 +2758,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fo
     }
 }
 
+
 struct Args_FooBarBazService_bar {
 }
 
@@ -2779,6 +2783,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fo
     }
 }
 
+
 struct Args_FooBarBazService_baz {
 }
 
@@ -2802,7 +2807,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fo
         })
     }
 }
-
 
 impl<P, H, R, RS> FooBarBazServiceProcessor<P, H, R, RS>
 where

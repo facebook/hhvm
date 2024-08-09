@@ -1,0 +1,65 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+
+struct Args_{{service:rust_name}}_{{function:name}} {
+    {{#function:args}}
+    {{field:rust_name}}: {{>lib/fieldtype}},
+    {{/function:args}}
+}
+
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{service:rust_name}}_{{function:name}} {
+    #[inline]{{! No cost because there's only one caller; with luck will mitigate move cost of args. }}
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "{{service:name}}.{{function:name}}"))]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static ARGS: &[::fbthrift::Field] = &[
+            {{#function:args_by_name}}
+            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+            {{/function:args_by_name}}
+        ];
+        {{#function:args}}
+        let mut field_{{field:name}} = ::std::option::Option::None;
+        {{/function:args}}
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,{{!
+                }}{{#function:args}}
+                ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
+                    }}field_{{field:name}} = ::std::option::Option::Some({{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/field:has_adapter?}}{{!
+                    }}{{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
+                    }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
+                    }}),{{!
+                }}{{/function:args}}
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        {{! Use formatting in errors to try to maximize string sharing }}
+        ::std::result::Result::Ok(Self {{>lib/block}}{{!
+            }}{{#function:args}}
+            {{field:rust_name}}: field_{{field:name}}.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "{{service:name}}.{{function:name}}", "{{field:name}}"))?,{{!
+            }}{{/function:args}}
+        })
+    }
+}
+
+{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}

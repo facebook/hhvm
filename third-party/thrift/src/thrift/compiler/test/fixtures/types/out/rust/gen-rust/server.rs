@@ -93,7 +93,6 @@ where
         ).await
     }
 }
-
 /// Processor for SomeService's methods.
 #[derive(Clone, Debug)]
 pub struct SomeServiceProcessor<P, H, R, RS> {
@@ -101,6 +100,7 @@ pub struct SomeServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_SomeService_bounce_map {
     m: included__types::SomeMap,
@@ -131,6 +131,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_So
     }
 }
 
+
 struct Args_SomeService_binary_keyed_map {
     r: ::std::vec::Vec<::std::primitive::i64>,
 }
@@ -159,7 +160,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_So
         })
     }
 }
-
 
 impl<P, H, R, RS> SomeServiceProcessor<P, H, R, RS>
 where

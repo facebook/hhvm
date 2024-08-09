@@ -93,7 +93,6 @@ where
         ).await
     }
 }
-
 /// Processor for Foo's methods.
 #[derive(Clone, Debug)]
 pub struct FooProcessor<P, H, R, RS> {
@@ -101,6 +100,7 @@ pub struct FooProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_Foo_return {
     bar: crate::types::ThereAreNoPascalCaseKeywords,
@@ -131,6 +131,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fo
     }
 }
 
+
 struct Args_Foo_super {
     bar: crate::types::ThereAreNoPascalCaseKeywords,
 }
@@ -159,7 +160,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Fo
         })
     }
 }
-
 
 impl<P, H, R, RS> FooProcessor<P, H, R, RS>
 where

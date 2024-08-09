@@ -82,7 +82,6 @@ where
         ).await
     }
 }
-
 /// Processor for Service's methods.
 #[derive(Clone, Debug)]
 pub struct ServiceProcessor<P, H, R, RS> {
@@ -90,6 +89,7 @@ pub struct ServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_Service_func {
     arg1: <crate::types::adapters::StringWithAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
@@ -129,7 +129,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Se
         })
     }
 }
-
 
 impl<P, H, R, RS> ServiceProcessor<P, H, R, RS>
 where
@@ -470,7 +469,6 @@ where
         ).await
     }
 }
-
 /// Processor for AdapterService's methods.
 #[derive(Clone, Debug)]
 pub struct AdapterServiceProcessor<P, H, R, RS> {
@@ -478,6 +476,7 @@ pub struct AdapterServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_AdapterService_count {
 }
@@ -502,6 +501,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ad
         })
     }
 }
+
 
 struct Args_AdapterService_adaptedTypes {
     arg: crate::types::HeapAllocated,
@@ -531,7 +531,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Ad
         })
     }
 }
-
 
 impl<P, H, R, RS> AdapterServiceProcessor<P, H, R, RS>
 where

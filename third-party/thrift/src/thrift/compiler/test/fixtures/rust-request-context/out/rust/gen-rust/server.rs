@@ -73,15 +73,6 @@ where
     }
 }
 
-
-/// Processor for MyInteraction's methods.
-#[derive(Clone, Debug)]
-pub struct MyInteractionProcessor<P, H, R, RS> {
-    service: H,
-    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
-    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
-}
-
 struct Args_MyInteraction_ping {
 }
 
@@ -106,6 +97,15 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
+
+/// Processor for MyInteraction's methods.
+#[derive(Clone, Debug)]
+pub struct MyInteractionProcessor<P, H, R, RS> {
+    service: H,
+    supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
+    _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
+}
 
 impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
 where
@@ -716,7 +716,6 @@ where
         ).await
     }
 }
-
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {
@@ -724,6 +723,7 @@ pub struct MyServiceProcessor<P, H, R, RS> {
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
+
 
 struct Args_MyService_ping {
 }
@@ -749,6 +749,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_getRandomData {
 }
 
@@ -772,6 +773,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_hasDataById {
     id: ::std::primitive::i64,
@@ -802,6 +804,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_getDataById {
     id: ::std::primitive::i64,
 }
@@ -830,6 +833,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_putDataById {
     id: ::std::primitive::i64,
@@ -865,6 +869,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_lobDataById {
     id: ::std::primitive::i64,
     data: ::std::string::String,
@@ -899,6 +904,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_streamById {
     id: ::std::primitive::i64,
 }
@@ -927,6 +933,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
+
 
 struct Args_MyService_streamByIdWithException {
     id: ::std::primitive::i64,
@@ -957,6 +964,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_streamByIdWithResponse {
     id: ::std::primitive::i64,
 }
@@ -986,6 +994,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
     }
 }
 
+
 struct Args_MyService_startPingInteraction {
 }
 
@@ -1009,7 +1018,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
         })
     }
 }
-
 
 impl<P, H, R, RS> MyServiceProcessor<P, H, R, RS>
 where

@@ -586,7 +586,7 @@ class ClientMetadataTestingServiceTests(unittest.TestCase):
                     ClientMetadataTestingService, host=ip, port=port
                 ) as client:
                     agent = await client.getAgent()
-                    self.assertEqual(agent, "HeaderClientChannel.cpp")
+                    self.assertEqual(agent, "RocketClientChannel.cpp")
                     self.assertEqual(await client.getHostname(), hostname)
                     # Test env returns empty metadata fields dict
                     cluster = await client.getMetadaField("tw_cluster")

@@ -183,6 +183,7 @@ fn rewrite_86constinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) 
     let class = &method_info.class;
 
     let infer_const = ir::ClassName::intern(crate::lower::class::INFER_CONSTANT);
+    let infer_type_const = ir::ClassName::intern(crate::lower::class::INFER_TYPE_CONSTANT);
     let cls_name = builder.emit_imm(Immediate::String(class.name.as_bytes_id()));
     let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(
         cls_name,
@@ -191,7 +192,10 @@ fn rewrite_86constinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) 
     )));
     // Now emit the constants
     for prop in &class.properties {
-        let is_const = prop.attributes.iter().any(|attr| attr.name == infer_const);
+        let is_const = prop
+            .attributes
+            .iter()
+            .any(|attr| attr.name == infer_const || attr.name == infer_type_const);
 
         if !is_const {
             continue; // we'll deal with mutable fields in 86sinit
@@ -253,6 +257,7 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
     let class = &method_info.class;
 
     let infer_const = ir::ClassName::intern(crate::lower::class::INFER_CONSTANT);
+    let infer_type_const = ir::ClassName::intern(crate::lower::class::INFER_TYPE_CONSTANT);
 
     // emit a call to constinit so we do initialize both mutable and non-mutable fields
     let clsref = SpecialClsRef::SelfCls;
@@ -272,7 +277,10 @@ fn rewrite_86sinit(builder: &mut FuncBuilder, method_info: &MethodInfo<'_>) {
         if !prop.flags.is_static() {
             continue;
         }
-        let is_const = prop.attributes.iter().any(|attr| attr.name == infer_const);
+        let is_const = prop
+            .attributes
+            .iter()
+            .any(|attr| attr.name == infer_const || attr.name == infer_type_const);
 
         if is_const {
             continue; // we'll deal with these in 86constinit

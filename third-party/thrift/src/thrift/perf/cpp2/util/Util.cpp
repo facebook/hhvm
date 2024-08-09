@@ -38,10 +38,10 @@ folly::AsyncSocket::UniquePtr getSocket(
   if (encrypted) {
     auto sslContext = std::make_shared<folly::SSLContext>();
     sslContext->setAdvertisedNextProtocols(advertizedProtocols);
-    auto sslSock = new TAsyncSSLSocket(
+    auto sslSock = folly::AsyncSSLSocket::newSocket(
         sslContext, evb, sock->detachNetworkSocket(), false);
     sslSock->sslConn(nullptr);
-    sock.reset(sslSock);
+    sock = std::move(sslSock);
   }
   sock->setZeroCopy(true);
   return sock;

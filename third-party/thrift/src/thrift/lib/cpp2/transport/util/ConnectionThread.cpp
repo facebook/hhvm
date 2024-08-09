@@ -20,9 +20,9 @@
 #include <folly/portability/GFlags.h>
 
 #include <folly/Conv.h>
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp2/transport/http2/client/H2ClientConnection.h>
 
 DEFINE_string(transport, "http2", "The transport to use (http2)");
@@ -30,8 +30,6 @@ DEFINE_bool(use_ssl, false, "Create an encrypted client connection");
 
 namespace apache {
 namespace thrift {
-
-using apache::thrift::async::TAsyncSSLSocket;
 
 ConnectionThread::~ConnectionThread() {
   getEventBase()->runInEventBaseThreadAndWait(
@@ -60,13 +58,13 @@ void ConnectionThread::maybeCreateConnection(
       if (FLAGS_use_ssl) {
         auto sslContext = std::make_shared<folly::SSLContext>();
         sslContext->setAdvertisedNextProtocols({"h2", "http"});
-        auto sslSocket = new TAsyncSSLSocket(
+        auto sslSocket = folly::AsyncSSLSocket::newSocket(
             sslContext,
             this->getEventBase(),
             socket->detachNetworkSocket(),
             false);
         sslSocket->sslConn(nullptr);
-        socket.reset(sslSocket);
+        socket = std::move(sslSocket);
       }
       if (FLAGS_transport != "http2") {
         LOG(ERROR) << "Unknown transport " << FLAGS_transport

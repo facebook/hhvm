@@ -19,9 +19,9 @@
 #include <thrift/perf/cpp/AsyncClientWorker2.h>
 
 #include <queue>
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp/test/loadgen/RNG.h>
 #include <thrift/lib/cpp/test/loadgen/ScoreBoard.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
@@ -30,7 +30,6 @@
 #include <thrift/perf/cpp/ClientLoadConfig.h>
 
 using namespace apache::thrift::test;
-using namespace apache::thrift::async;
 using apache::thrift::loadgen::ScoreBoard;
 
 namespace apache {
@@ -154,7 +153,7 @@ LoadTestClientPtr AsyncClientWorker2::createConnection() {
       getConfig();
   folly::AsyncSocket::UniquePtr socket;
   if (config->useSSL()) {
-    auto sslSocket = TAsyncSSLSocket::newSocket(sslContext_, &eb_);
+    auto sslSocket = folly::AsyncSSLSocket::newSocket(sslContext_, &eb_);
     if (session_) {
       sslSocket->setSSLSession(session_);
     }

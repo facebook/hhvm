@@ -18,13 +18,11 @@
 
 #include <thrift/perf/cpp/ClientWorker2.h>
 
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp/test/loadgen/RNG.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/perf/cpp/ClientLoadConfig.h>
-
-using namespace apache::thrift::async;
 
 namespace apache {
 namespace thrift {
@@ -55,7 +53,7 @@ std::shared_ptr<ClientWorker2::Client> ClientWorker2::createConnection() {
       context->loadPrivateKey(config->key().c_str());
     }
 
-    socket = TAsyncSSLSocket::newSocket(context, ebm_.getEventBase());
+    socket = folly::AsyncSSLSocket::newSocket(context, ebm_.getEventBase());
     socket->connect(nullptr, *config->getAddress());
     // Loop once to connect
     ebm_.getEventBase()->loop();

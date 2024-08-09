@@ -35,7 +35,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/observer/Observer.h>
 #include <folly/portability/GFlags.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
@@ -54,7 +53,6 @@
 using namespace apache::thrift;
 using namespace apache::thrift::test;
 using namespace apache::thrift::util;
-using namespace apache::thrift::async;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::concurrency;
 using namespace std::literals;

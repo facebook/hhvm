@@ -30,7 +30,6 @@
 #include <folly/io/async/test/TestSSLServer.h>
 #include <folly/lang/Bits.h>
 #include <thrift/lib/cpp/EventHandlerBase.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp2/async/Cpp2Channel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
@@ -41,7 +40,6 @@
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 
 using namespace apache::thrift;
-using namespace apache::thrift::async;
 using namespace apache::thrift::transport;
 using folly::IOBuf;
 using folly::IOBufQueue;
@@ -197,9 +195,9 @@ class SocketPairTest {
       auto clientCtx = std::make_shared<folly::SSLContext>();
       auto serverCtx = std::make_shared<folly::SSLContext>();
       getctx(clientCtx, serverCtx);
-      socket0 = TAsyncSSLSocket::newSocket(
+      socket0 = folly::AsyncSSLSocket::newSocket(
           clientCtx, &eventBase_, socketPair.extractNetworkSocket0(), false);
-      socket1 = TAsyncSSLSocket::newSocket(
+      socket1 = folly::AsyncSSLSocket::newSocket(
           serverCtx, &eventBase_, socketPair.extractNetworkSocket1(), true);
       dynamic_cast<folly::AsyncSSLSocket*>(socket0.get())->sslConn(nullptr);
       dynamic_cast<folly::AsyncSSLSocket*>(socket1.get())->sslAccept(nullptr);

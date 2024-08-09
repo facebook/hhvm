@@ -50,7 +50,7 @@ ConnectHandler::ConnectHandler(
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
     const std::string& endpoint)
-    : socket_{new apache::thrift::async::TAsyncSSLSocket(ctx, evb)},
+    : socket_{folly::AsyncSSLSocket::newSocket(ctx, evb)},
       host_(host),
       port_(port),
       connect_timeout_(connect_timeout),

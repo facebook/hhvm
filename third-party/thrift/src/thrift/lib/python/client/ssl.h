@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncSocketException.h>
 #include <folly/io/async/SSLContext.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
 namespace thrift {
@@ -54,7 +54,7 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
 
  private:
   folly::Promise<apache::thrift::RequestChannel::Ptr> promise_;
-  apache::thrift::async::TAsyncSSLSocket::UniquePtr socket_;
+  folly::AsyncSSLSocket::UniquePtr socket_;
   std::string host_;
   const uint16_t port_;
   const uint32_t connect_timeout_;

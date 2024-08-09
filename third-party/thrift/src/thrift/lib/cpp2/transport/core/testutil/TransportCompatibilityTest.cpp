@@ -21,11 +21,11 @@
 #include <glog/logging.h>
 
 #include <folly/ScopeGuard.h>
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
@@ -279,10 +279,10 @@ void SampleServer<Service>::connectToServer(
           if (FLAGS_use_ssl) {
             auto sslContext = std::make_shared<folly::SSLContext>();
             sslContext->setAdvertisedNextProtocols({"h2", "http"});
-            auto sslSocket = new TAsyncSSLSocket(
+            auto sslSocket = folly::AsyncSSLSocket::newSocket(
                 sslContext, &evb, socket->detachNetworkSocket(), false);
             sslSocket->sslConn(nullptr);
-            socket.reset(sslSocket);
+            socket = std::move(sslSocket);
           }
           auto channel = HTTPClientChannel::newHTTP2Channel(std::move(socket));
           channel->setProtocolId(protocol::T_COMPACT_PROTOCOL);

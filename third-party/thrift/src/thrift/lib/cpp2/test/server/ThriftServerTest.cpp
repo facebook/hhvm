@@ -42,6 +42,7 @@
 #include <folly/experimental/coro/Baton.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/io/GlobalShutdownSocketSet.h>
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncSocketException.h>
@@ -92,7 +93,6 @@ using namespace fizz::client;
 using namespace apache::thrift;
 using namespace apache::thrift::test;
 using namespace apache::thrift::util;
-using namespace apache::thrift::async;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::concurrency;
 using namespace std::literals;
@@ -203,7 +203,7 @@ TEST(ThriftServer, SSLClientOnPlaintextServerTest) {
   ScopedServerThread sst(factory.create());
   folly::EventBase base;
   auto sslCtx = std::make_shared<folly::SSLContext>();
-  auto socket = TAsyncSSLSocket::newSocket(sslCtx, &base);
+  auto socket = folly::AsyncSSLSocket::newSocket(sslCtx, &base);
   TestConnCallback cb;
   socket->connect(&cb, *sst.getAddress());
   base.loop();
@@ -2962,7 +2962,7 @@ TEST(ThriftServer, SSLRequiredLoopbackUsesSSL) {
   folly::SocketAddress loopback("::1", port);
 
   auto ctx = makeClientSslContext();
-  auto sslSock = TAsyncSSLSocket::newSocket(ctx, &base);
+  auto sslSock = folly::AsyncSSLSocket::newSocket(ctx, &base);
   sslSock->connect(nullptr /* connect callback */, loopback);
 
   TestServiceAsyncClient client(HeaderClientChannel::newChannel(
@@ -2996,7 +2996,7 @@ TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
   {
     SCOPED_TRACE("SSL");
     auto ctx = makeClientSslContext();
-    auto sslSock = TAsyncSSLSocket::newSocket(ctx, &base);
+    auto sslSock = folly::AsyncSSLSocket::newSocket(ctx, &base);
     sslSock->connect(nullptr /* connect callback */, *sst.getAddress());
 
     TestServiceAsyncClient client(HeaderClientChannel::newChannel(

@@ -7359,3 +7359,71 @@ function baz<T>(readonly T $x): readonly T {
             )
         )
         self.run_spec(spec, variables)
+
+    def test_will_save_wait_until_newlines_at_top(self) -> None:
+        """
+        Test our handling of textDocument/willSaveWaitUntil:
+        we shouldn't have any extra newlines at the top (T188437747)
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "will_save_wait_until_newlines_at_top.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+
+
+
+class C {}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("notebook_mode"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/willSaveWaitUntil",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                    },
+                    # TextDocumentSaveReason.Manual (user saved)
+                    # https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentSaveReason
+                    "reason": 1,
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 2, "character": 0},
+                            "end": {"line": 3, "character": 0},
+                        },
+                        "newText": "\n",
+                    }
+                ],
+            )
+            .request(
+                line=line(),
+                method="shutdown",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                    }
+                },
+                result=None,
+            )
+        )
+        self.run_spec(spec, variables)

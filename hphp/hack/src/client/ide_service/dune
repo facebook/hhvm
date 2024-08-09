@@ -139,3 +139,23 @@
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name ide_format)
+ (wrapped true)
+ (modules ide_format)
+ (libraries
+ hackfmt_error
+ pos
+ relative_path
+ server_command_types
+ server_load_flag
+ symbol
+ exec_command
+ core
+ file_content
+ errors
+ build_options
+ )
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

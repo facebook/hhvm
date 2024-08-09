@@ -89,7 +89,6 @@
   serverDepsUtil
   serverError
   serverFileDependents
-  serverFormat
   serverFunDepsBatch
   serverGlobalState
   serverIdentifyFunction

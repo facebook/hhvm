@@ -2922,7 +2922,7 @@ let do_formatting_common
   let lsp_doc = UriMap.find uri editor_open_files in
   let content = lsp_doc.Lsp.TextDocumentItem.text in
   let response =
-    ServerFormat.go_ide ~filename_for_logging ~content ~action ~options
+    Ide_format.go_ide ~filename_for_logging ~content ~action ~options
   in
   match response with
   | Error "File failed to parse without errors" ->

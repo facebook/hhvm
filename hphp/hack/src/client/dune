@@ -17,6 +17,7 @@
   flytrap
   formatting_stubs
   hh_server_monitor
+  ide_format
   logging
   lwt
   lwt.unix

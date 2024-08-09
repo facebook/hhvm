@@ -6657,75 +6657,16 @@ end = struct
         ty_super
     | Tunion ty_subs ->
       let r_sub = get_reason ty_sub in
-      let simplify_union_l ty_subs env =
-        Common.simplify_union_l
-          ~subtype_env
-          ~this_ty
-          ~mk_prop:simplify
-          ~update_reason:
-            (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
-          (sub_supportdyn, ty_subs)
-          rhs
-          env
-      in
-      (* If we handle dynamic normally, we'll break the union and check
-           dynamic < tysuper
-         which will result in
-           (dynamic & P) < ty_true, (dynamic & !P) < ty_false
-         While these bounds are strictly more informative than just dynamic,
-         the typechecker's handling of dynamic will trip up over intersections
-         with dynamic in some cases.
-         Here, we strip the dynamic from the type, process the stripped type,
-         and then add back dynamic as a lower bound separately.
-
-         For example: suppose we have ty_sub = ~?int, predicate = IsNum
-         If we handle dynamic normally, we'll get:
-           dynamic & num < ty_true
-           int < ty_true
-           dynamic & not num < ty_false
-           null < ty_false
-         but with this change, we'll strip the dynamic and proces ?int and get:
-           int < ty_true
-           null < ty_false
-         and add back the dynamic bounds:
-           dynamic < ty_true
-           dynamic < ty_false
-
-         Notably, because we're only doing this logic for unions, we'll still
-         intersect with a bare dynamic which is desirable if you were to refine
-         something explicitly typed as dynamic
-
-         The above compromise breaks down especially though in the IsNull case
-         because you turn ~T into ~null instead of just null
-         and then handling like for `idx` will trip up on the dynamic
-      *)
-      let should_add_dyn_lower_bound_on_true predicate =
-        match predicate with
-        | IsNull -> false
-        (* TODO possibly false too for other singleton types' predicates *)
-        | _ -> true
-      in
-      begin
-        match Typing_dynamic_utils.try_strip_dynamic_from_union env ty_subs with
-        | None -> simplify_union_l ty_subs env
-        | Some (dyn, ty_subs) ->
-          let simplify_dyn_sub_super ty_super env =
-            Subtype.(
-              simplify
-                ~subtype_env
-                ~this_ty
-                ~lhs:{ sub_supportdyn; ty_sub = dyn }
-                ~rhs:{ super_supportdyn = false; super_like; ty_super }
-                env)
-          in
-          (if should_add_dyn_lower_bound_on_true predicate then
-            simplify_dyn_sub_super ty_true env
-          else
-            (env, TL.valid))
-          &&& simplify_dyn_sub_super ty_false
-          &&& simplify_union_l ty_subs
-      end
+      Common.simplify_union_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop:simplify
+        ~update_reason:
+          (Typing_env.update_reason ~f:(fun r_sub_prj ->
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
     | _ ->
       let (env, partition) =
         Typing_refinement.partition_ty env ty_sub predicate
@@ -6786,19 +6727,47 @@ end = struct
         let neg = MakeType.neg reason_super predicate in
         intersect (neg :: tyl)
       in
+      let left = partition.Typing_refinement.left in
+      let span = partition.Typing_refinement.span in
+      let right = partition.Typing_refinement.right in
+      (* Handle dynamic a bit differently to avoid intersecting with dynamic on
+         the false side. This is less precise, but plays better with dynamic
+         stripping logic elsewhere in the typechecker.
+         dynamic will always span (except cases like IsMixed, but this actually
+         isn't a problem if dynamic is in a different part since we only
+         intersect the span) so this picks out the dynamic and, for the false
+         side, moves it to the right.
+         This makes it such that (e.g. in the case when there is no other part
+         of the span) instead of `(dynamic & !P) | right` you get
+         `dynamic | right`
+      *)
+      let (span_for_false, dyn) =
+        List.fold_left
+          ~init:([], None)
+          ~f:(fun (tyll, dyn_opt) tyl ->
+            match tyl with
+            | [ty] when Typing_defs.is_dynamic ty -> (tyll, Some ty)
+            | _ -> (tyl :: tyll, dyn_opt))
+          span
+      in
+      let right =
+        match dyn with
+        | Some dyn -> [dyn] :: right
+        | _ -> right
+      in
       let (env, props) =
         simplify_split
           ~refine:refine_true
           ~init:(env, TL.valid)
-          partition.Typing_refinement.left
-          partition.Typing_refinement.span
+          left
+          span
           ty_true
       in
       simplify_split
         ~refine:refine_false
         ~init:(env, props)
-        partition.Typing_refinement.right
-        partition.Typing_refinement.span
+        right
+        span_for_false
         ty_false
 end
 

@@ -35,8 +35,8 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_init(apache
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::thrift::shared_interactions::InteractLocally_SharedInteraction_init_pargs pargs() {
-      ::thrift::shared_interactions::InteractLocally_SharedInteraction_init_pargs args;
+    InteractLocally_SharedInteraction_init_pargs pargs() {
+      InteractLocally_SharedInteraction_init_pargs args;
       return args;
     }
 
@@ -145,8 +145,8 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_do_somethin
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::thrift::shared_interactions::InteractLocally_SharedInteraction_do_something_pargs pargs() {
-      ::thrift::shared_interactions::InteractLocally_SharedInteraction_do_something_pargs args;
+    InteractLocally_SharedInteraction_do_something_pargs pargs() {
+      InteractLocally_SharedInteraction_do_something_pargs args;
       return args;
     }
 
@@ -255,8 +255,8 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_tear_down(a
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::thrift::shared_interactions::InteractLocally_SharedInteraction_tear_down_pargs pargs() {
-      ::thrift::shared_interactions::InteractLocally_SharedInteraction_tear_down_pargs args;
+    InteractLocally_SharedInteraction_tear_down_pargs pargs() {
+      InteractLocally_SharedInteraction_tear_down_pargs args;
       return args;
     }
 

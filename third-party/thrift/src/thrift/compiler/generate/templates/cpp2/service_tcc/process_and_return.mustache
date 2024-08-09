@@ -71,8 +71,8 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     {{/function:stack_arguments?}}
   {{/type:resolves_to_complex_return?}}
   {{/field:type}}{{/function:args}}
-    {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs pargs() {
-      {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs args;
+    {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs pargs() {
+      {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs args;
       {{#function:args}}{{#field:type}}
       {{^type:resolves_to_complex_return?}}
       args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
@@ -211,8 +211,8 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
 {{/function:cpp_void?}}
   ProtocolOut_ prot;
 {{#function:stream?}}
-  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
-  using StreamPResultType = {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::StreamPResultType;
+  {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
+  using StreamPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::StreamPResultType;
       {{#function:stream_has_first_response?}}
   result.get<0>().value = const_cast<{{function:cpp_return_type}}::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
@@ -244,9 +244,9 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   return {serializeResponse("{{ > common/function_name}}", &prot, ctx, result), std::move(encodedStream)};
 {{/function:stream?}}
 {{#function:sink?}}
-  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
-  using SinkPResultType = {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::SinkPResultType;
-  using FinalResponsePResultType = {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FinalResponsePResultType;
+  {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
+  using SinkPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::SinkPResultType;
+  using FinalResponsePResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FinalResponsePResultType;
   {{#function:sink_has_first_response?}}
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);

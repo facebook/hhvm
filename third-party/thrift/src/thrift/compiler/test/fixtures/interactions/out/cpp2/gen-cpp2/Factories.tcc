@@ -38,8 +38,8 @@ void FactoriesAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_foo_pargs pargs() {
-      ::cpp2::Factories_foo_pargs args;
+    Factories_foo_pargs pargs() {
+      Factories_foo_pargs args;
       return args;
     }
 
@@ -146,8 +146,8 @@ void FactoriesAsyncProcessor::executeRequest_interact(apache::thrift::ServerRequ
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int32_t uarg_arg{0};
-    ::cpp2::Factories_interact_pargs pargs() {
-      ::cpp2::Factories_interact_pargs args;
+    Factories_interact_pargs pargs() {
+      Factories_interact_pargs args;
       args.get<0>().value = &uarg_arg;
       return args;
     }
@@ -255,8 +255,8 @@ void FactoriesAsyncProcessor::executeRequest_interactFast(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_interactFast_pargs pargs() {
-      ::cpp2::Factories_interactFast_pargs args;
+    Factories_interactFast_pargs pargs() {
+      Factories_interactFast_pargs args;
       return args;
     }
 
@@ -364,8 +364,8 @@ void FactoriesAsyncProcessor::executeRequest_serialize(apache::thrift::ServerReq
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_serialize_pargs pargs() {
-      ::cpp2::Factories_serialize_pargs args;
+    Factories_serialize_pargs pargs() {
+      Factories_serialize_pargs args;
       return args;
     }
 
@@ -438,8 +438,8 @@ void FactoriesAsyncProcessor::executeRequest_serialize(apache::thrift::ServerReq
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_serialize(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>&& _return) {
   ProtocolOut_ prot;
-  ::cpp2::Factories_serialize_presult::FieldsType result;
-  using StreamPResultType = ::cpp2::Factories_serialize_presult::StreamPResultType;
+  Factories_serialize_presult::FieldsType result;
+  using StreamPResultType = Factories_serialize_presult::StreamPResultType;
   result.get<0>().value = const_cast<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
@@ -493,8 +493,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteraction_frobnicate_pargs pargs() {
-      ::cpp2::Factories_MyInteraction_frobnicate_pargs args;
+    Factories_MyInteraction_frobnicate_pargs pargs() {
+      Factories_MyInteraction_frobnicate_pargs args;
       return args;
     }
 
@@ -620,8 +620,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteraction_ping_pargs pargs() {
-      ::cpp2::Factories_MyInteraction_ping_pargs args;
+    Factories_MyInteraction_ping_pargs pargs() {
+      Factories_MyInteraction_ping_pargs args;
       return args;
     }
 
@@ -702,8 +702,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteraction_truthify_pargs pargs() {
-      ::cpp2::Factories_MyInteraction_truthify_pargs args;
+    Factories_MyInteraction_truthify_pargs pargs() {
+      Factories_MyInteraction_truthify_pargs args;
       return args;
     }
 
@@ -777,8 +777,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_MyInteraction_truthify(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ServerStream<bool>&& _return) {
   ProtocolOut_ prot;
-  ::cpp2::Factories_MyInteraction_truthify_presult::FieldsType result;
-  using StreamPResultType = ::cpp2::Factories_MyInteraction_truthify_presult::StreamPResultType;
+  Factories_MyInteraction_truthify_presult::FieldsType result;
+  using StreamPResultType = Factories_MyInteraction_truthify_presult::StreamPResultType;
   auto& returnStream = _return;
 
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -815,8 +815,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteraction_encode_pargs pargs() {
-      ::cpp2::Factories_MyInteraction_encode_pargs args;
+    Factories_MyInteraction_encode_pargs pargs() {
+      Factories_MyInteraction_encode_pargs args;
       return args;
     }
 
@@ -890,9 +890,9 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> FactoriesAsyncProcessor::return_MyInteraction_encode(apache::thrift::ContextStack* ctx, ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::Factories_MyInteraction_encode_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::Factories_MyInteraction_encode_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::Factories_MyInteraction_encode_presult::FinalResponsePResultType;
+  Factories_MyInteraction_encode_presult::FieldsType result;
+  using SinkPResultType = Factories_MyInteraction_encode_presult::SinkPResultType;
+  using FinalResponsePResultType = Factories_MyInteraction_encode_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
 
@@ -951,8 +951,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteractionFast_frobnicate_pargs pargs() {
-      ::cpp2::Factories_MyInteractionFast_frobnicate_pargs args;
+    Factories_MyInteractionFast_frobnicate_pargs pargs() {
+      Factories_MyInteractionFast_frobnicate_pargs args;
       return args;
     }
 
@@ -1059,8 +1059,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteractionFast_ping_pargs pargs() {
-      ::cpp2::Factories_MyInteractionFast_ping_pargs args;
+    Factories_MyInteractionFast_ping_pargs pargs() {
+      Factories_MyInteractionFast_ping_pargs args;
       return args;
     }
 
@@ -1139,8 +1139,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteractionFast_truthify_pargs pargs() {
-      ::cpp2::Factories_MyInteractionFast_truthify_pargs args;
+    Factories_MyInteractionFast_truthify_pargs pargs() {
+      Factories_MyInteractionFast_truthify_pargs args;
       return args;
     }
 
@@ -1214,8 +1214,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_MyInteractionFast_truthify(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ServerStream<bool>&& _return) {
   ProtocolOut_ prot;
-  ::cpp2::Factories_MyInteractionFast_truthify_presult::FieldsType result;
-  using StreamPResultType = ::cpp2::Factories_MyInteractionFast_truthify_presult::StreamPResultType;
+  Factories_MyInteractionFast_truthify_presult::FieldsType result;
+  using StreamPResultType = Factories_MyInteractionFast_truthify_presult::StreamPResultType;
   auto& returnStream = _return;
 
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -1250,8 +1250,8 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_MyInteractionFast_encode_pargs pargs() {
-      ::cpp2::Factories_MyInteractionFast_encode_pargs args;
+    Factories_MyInteractionFast_encode_pargs pargs() {
+      Factories_MyInteractionFast_encode_pargs args;
       return args;
     }
 
@@ -1325,9 +1325,9 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> FactoriesAsyncProcessor::return_MyInteractionFast_encode(apache::thrift::ContextStack* ctx, ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::Factories_MyInteractionFast_encode_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::Factories_MyInteractionFast_encode_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::Factories_MyInteractionFast_encode_presult::FinalResponsePResultType;
+  Factories_MyInteractionFast_encode_presult::FieldsType result;
+  using SinkPResultType = Factories_MyInteractionFast_encode_presult::SinkPResultType;
+  using FinalResponsePResultType = Factories_MyInteractionFast_encode_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
 
@@ -1376,8 +1376,8 @@ void FactoriesAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Factories_SerialInteraction_frobnicate_pargs pargs() {
-      ::cpp2::Factories_SerialInteraction_frobnicate_pargs args;
+    Factories_SerialInteraction_frobnicate_pargs pargs() {
+      Factories_SerialInteraction_frobnicate_pargs args;
       return args;
     }
 

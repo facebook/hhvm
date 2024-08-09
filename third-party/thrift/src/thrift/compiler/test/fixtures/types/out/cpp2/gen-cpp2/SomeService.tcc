@@ -32,8 +32,8 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(apache::thrift::Server
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> uarg_m = std::make_unique<::apache::thrift::fixtures::types::SomeMap>();
-    ::apache::thrift::fixtures::types::SomeService_bounce_map_pargs pargs() {
-      ::apache::thrift::fixtures::types::SomeService_bounce_map_pargs args;
+    SomeService_bounce_map_pargs pargs() {
+      SomeService_bounce_map_pargs args;
       args.get<0>().value = uarg_m.get();
       return args;
     }
@@ -143,8 +143,8 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(apache::thrift::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::int64_t>> uarg_r = std::make_unique<::std::vector<::std::int64_t>>();
-    ::apache::thrift::fixtures::types::SomeService_binary_keyed_map_pargs pargs() {
-      ::apache::thrift::fixtures::types::SomeService_binary_keyed_map_pargs args;
+    SomeService_binary_keyed_map_pargs pargs() {
+      SomeService_binary_keyed_map_pargs args;
       args.get<0>().value = uarg_r.get();
       return args;
     }

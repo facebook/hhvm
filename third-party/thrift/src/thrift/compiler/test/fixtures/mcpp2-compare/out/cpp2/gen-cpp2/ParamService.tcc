@@ -89,8 +89,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(apache::thrif
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int16_t uarg_param1{0};
-    ::some::valid::ns::ParamService_void_ret_i16_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_i16_param_pargs args;
+    ParamService_void_ret_i16_param_pargs pargs() {
+      ParamService_void_ret_i16_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -199,8 +199,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(apache::
   struct ArgsState {
     ::std::int8_t uarg_param1{0};
     ::std::int16_t uarg_param2{0};
-    ::some::valid::ns::ParamService_void_ret_byte_i16_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_byte_i16_param_pargs args;
+    ParamService_void_ret_byte_i16_param_pargs pargs() {
+      ParamService_void_ret_byte_i16_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       return args;
@@ -310,8 +310,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(apache::thrif
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::std::int64_t>> uarg_param1 = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
-    ::some::valid::ns::ParamService_void_ret_map_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_map_param_pargs args;
+    ParamService_void_ret_map_param_pargs pargs() {
+      ParamService_void_ret_map_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -420,8 +420,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(apach
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::std::int64_t>> uarg_param1 = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
     std::unique_ptr<::std::set<::std::vector<::std::string>>> uarg_param2 = std::make_unique<::std::set<::std::vector<::std::string>>>();
-    ::some::valid::ns::ParamService_void_ret_map_setlist_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_map_setlist_param_pargs args;
+    ParamService_void_ret_map_setlist_param_pargs pargs() {
+      ParamService_void_ret_map_setlist_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       args.get<1>().value = uarg_param2.get();
       return args;
@@ -531,8 +531,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(apach
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::some::valid::ns::simpleTypeDef uarg_param1{0};
-    ::some::valid::ns::ParamService_void_ret_map_typedef_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_map_typedef_param_pargs args;
+    ParamService_void_ret_map_typedef_param_pargs pargs() {
+      ParamService_void_ret_map_typedef_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -640,8 +640,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(apache::thri
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::some::valid::ns::MyEnumA uarg_param1{static_cast<::some::valid::ns::MyEnumA>(0)};
-    ::some::valid::ns::ParamService_void_ret_enum_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_enum_param_pargs args;
+    ParamService_void_ret_enum_param_pargs pargs() {
+      ParamService_void_ret_enum_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -749,8 +749,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(apache::th
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::some::valid::ns::MyStruct> uarg_param1 = std::make_unique<::some::valid::ns::MyStruct>();
-    ::some::valid::ns::ParamService_void_ret_struct_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_struct_param_pargs args;
+    ParamService_void_ret_struct_param_pargs pargs() {
+      ParamService_void_ret_struct_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -858,8 +858,8 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(apache:
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> uarg_param1 = std::make_unique<::std::vector<::some::valid::ns::ComplexUnion>>();
-    ::some::valid::ns::ParamService_void_ret_listunion_param_pargs pargs() {
-      ::some::valid::ns::ParamService_void_ret_listunion_param_pargs args;
+    ParamService_void_ret_listunion_param_pargs pargs() {
+      ParamService_void_ret_listunion_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -968,8 +968,8 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(apache::t
   struct ArgsState {
     ::std::int32_t uarg_param1{0};
     ::std::int64_t uarg_param2{0};
-    ::some::valid::ns::ParamService_bool_ret_i32_i64_param_pargs pargs() {
-      ::some::valid::ns::ParamService_bool_ret_i32_i64_param_pargs args;
+    ParamService_bool_ret_i32_i64_param_pargs pargs() {
+      ParamService_bool_ret_i32_i64_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       return args;
@@ -1081,8 +1081,8 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(apache::thrif
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::std::int64_t>> uarg_param1 = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
-    ::some::valid::ns::ParamService_bool_ret_map_param_pargs pargs() {
-      ::some::valid::ns::ParamService_bool_ret_map_param_pargs args;
+    ParamService_bool_ret_map_param_pargs pargs() {
+      ParamService_bool_ret_map_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -1192,8 +1192,8 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(apache::thr
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::some::valid::ns::ComplexUnion> uarg_param1 = std::make_unique<::some::valid::ns::ComplexUnion>();
-    ::some::valid::ns::ParamService_bool_ret_union_param_pargs pargs() {
-      ::some::valid::ns::ParamService_bool_ret_union_param_pargs args;
+    ParamService_bool_ret_union_param_pargs pargs() {
+      ParamService_bool_ret_union_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -1304,8 +1304,8 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(apach
   struct ArgsState {
     float uarg_param1{0};
     double uarg_param2{0};
-    ::some::valid::ns::ParamService_i64_ret_float_double_param_pargs pargs() {
-      ::some::valid::ns::ParamService_i64_ret_float_double_param_pargs args;
+    ParamService_i64_ret_float_double_param_pargs pargs() {
+      ParamService_i64_ret_float_double_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       return args;
@@ -1418,8 +1418,8 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(apa
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_param1 = std::make_unique<::std::string>();
     std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> uarg_param2 = std::make_unique<::std::set<::some::valid::ns::mostComplexTypeDef>>();
-    ::some::valid::ns::ParamService_i64_ret_string_typedef_param_pargs pargs() {
-      ::some::valid::ns::ParamService_i64_ret_string_typedef_param_pargs args;
+    ParamService_i64_ret_string_typedef_param_pargs pargs() {
+      ParamService_i64_ret_string_typedef_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       args.get<1>().value = uarg_param2.get();
       return args;
@@ -1538,8 +1538,8 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
     ::std::int32_t uarg_param3{0};
     ::std::int32_t uarg_param4{0};
     ::std::int32_t uarg_param5{0};
-    ::some::valid::ns::ParamService_i64_ret_i32_i32_i32_i32_i32_param_pargs pargs() {
-      ::some::valid::ns::ParamService_i64_ret_i32_i32_i32_i32_i32_param_pargs args;
+    ParamService_i64_ret_i32_i32_i32_i32_i32_param_pargs pargs() {
+      ParamService_i64_ret_i32_i32_i32_i32_i32_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       args.get<2>().value = &uarg_param3;
@@ -1657,8 +1657,8 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(apach
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> uarg_param1 = std::make_unique<::std::set<::some::valid::ns::MyStruct>>();
-    ::some::valid::ns::ParamService_double_ret_setstruct_param_pargs pargs() {
-      ::some::valid::ns::ParamService_double_ret_setstruct_param_pargs args;
+    ParamService_double_ret_setstruct_param_pargs pargs() {
+      ParamService_double_ret_setstruct_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -1768,8 +1768,8 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(apache::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_param1 = std::make_unique<::std::string>();
-    ::some::valid::ns::ParamService_string_ret_string_param_pargs pargs() {
-      ::some::valid::ns::ParamService_string_ret_string_param_pargs args;
+    ParamService_string_ret_string_param_pargs pargs() {
+      ParamService_string_ret_string_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -1879,8 +1879,8 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(apache::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_param1 = std::make_unique<::std::string>();
-    ::some::valid::ns::ParamService_binary_ret_binary_param_pargs pargs() {
-      ::some::valid::ns::ParamService_binary_ret_binary_param_pargs args;
+    ParamService_binary_ret_binary_param_pargs pargs() {
+      ParamService_binary_ret_binary_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -1990,8 +1990,8 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(apache::thrif
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     bool uarg_param1{0};
-    ::some::valid::ns::ParamService_map_ret_bool_param_pargs pargs() {
-      ::some::valid::ns::ParamService_map_ret_bool_param_pargs args;
+    ParamService_map_ret_bool_param_pargs pargs() {
+      ParamService_map_ret_bool_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -2102,8 +2102,8 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(apach
   struct ArgsState {
     std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> uarg_param1 = std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::string>>>();
     std::unique_ptr<::std::vector<::std::string>> uarg_param2 = std::make_unique<::std::vector<::std::string>>();
-    ::some::valid::ns::ParamService_list_ret_map_setlist_param_pargs pargs() {
-      ::some::valid::ns::ParamService_list_ret_map_setlist_param_pargs args;
+    ParamService_list_ret_map_setlist_param_pargs pargs() {
+      ParamService_list_ret_map_setlist_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       args.get<1>().value = uarg_param2.get();
       return args;
@@ -2215,8 +2215,8 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> uarg_param1 = std::make_unique<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>>();
-    ::some::valid::ns::ParamService_mapsetlistmapliststring_ret_listlistlist_param_pargs pargs() {
-      ::some::valid::ns::ParamService_mapsetlistmapliststring_ret_listlistlist_param_pargs args;
+    ParamService_mapsetlistmapliststring_ret_listlistlist_param_pargs pargs() {
+      ParamService_mapsetlistmapliststring_ret_listlistlist_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -2326,8 +2326,8 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(apache::th
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int32_t uarg_param1{0};
-    ::some::valid::ns::ParamService_typedef_ret_i32_param_pargs pargs() {
-      ::some::valid::ns::ParamService_typedef_ret_i32_param_pargs args;
+    ParamService_typedef_ret_i32_param_pargs pargs() {
+      ParamService_typedef_ret_i32_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -2440,8 +2440,8 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(ap
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::some::valid::ns::complexStructTypeDef> uarg_param1 = std::make_unique<::some::valid::ns::complexStructTypeDef>();
-    ::some::valid::ns::ParamService_listtypedef_ret_typedef_param_pargs pargs() {
-      ::some::valid::ns::ParamService_listtypedef_ret_typedef_param_pargs args;
+    ParamService_listtypedef_ret_typedef_param_pargs pargs() {
+      ParamService_listtypedef_ret_typedef_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -2551,8 +2551,8 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(apache::th
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     double uarg_param1{0};
-    ::some::valid::ns::ParamService_enum_ret_double_param_pargs pargs() {
-      ::some::valid::ns::ParamService_enum_ret_double_param_pargs args;
+    ParamService_enum_ret_double_param_pargs pargs() {
+      ParamService_enum_ret_double_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -2663,8 +2663,8 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(apach
   struct ArgsState {
     double uarg_param1{0};
     ::some::valid::ns::MyEnumA uarg_param2{static_cast<::some::valid::ns::MyEnumA>(0)};
-    ::some::valid::ns::ParamService_enum_ret_double_enum_param_pargs pargs() {
-      ::some::valid::ns::ParamService_enum_ret_double_enum_param_pargs args;
+    ParamService_enum_ret_double_enum_param_pargs pargs() {
+      ParamService_enum_ret_double_enum_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       return args;
@@ -2776,8 +2776,8 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(apache::t
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::std::int64_t>> uarg_param1 = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
-    ::some::valid::ns::ParamService_listenum_ret_map_param_pargs pargs() {
-      ::some::valid::ns::ParamService_listenum_ret_map_param_pargs args;
+    ParamService_listenum_ret_map_param_pargs pargs() {
+      ParamService_listenum_ret_map_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -2890,8 +2890,8 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(apache::thr
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int16_t uarg_param1{0};
-    ::some::valid::ns::ParamService_struct_ret_i16_param_pargs pargs() {
-      ::some::valid::ns::ParamService_struct_ret_i16_param_pargs args;
+    ParamService_struct_ret_i16_param_pargs pargs() {
+      ParamService_struct_ret_i16_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -3001,8 +3001,8 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(apache::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::set<::std::string>> uarg_param1 = std::make_unique<::std::set<::std::string>>();
-    ::some::valid::ns::ParamService_setstruct_ret_set_param_pargs pargs() {
-      ::some::valid::ns::ParamService_setstruct_ret_set_param_pargs args;
+    ParamService_setstruct_ret_set_param_pargs pargs() {
+      ParamService_setstruct_ret_set_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }
@@ -3113,8 +3113,8 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(apache::
   struct ArgsState {
     ::std::int32_t uarg_param1{0};
     ::std::int32_t uarg_param2{0};
-    ::some::valid::ns::ParamService_union_ret_i32_i32_param_pargs pargs() {
-      ::some::valid::ns::ParamService_union_ret_i32_i32_param_pargs args;
+    ParamService_union_ret_i32_i32_param_pargs pargs() {
+      ParamService_union_ret_i32_i32_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       return args;
@@ -3226,8 +3226,8 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(apache::t
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_param1 = std::make_unique<::std::string>();
-    ::some::valid::ns::ParamService_listunion_string_param_pargs pargs() {
-      ::some::valid::ns::ParamService_listunion_string_param_pargs args;
+    ParamService_listunion_string_param_pargs pargs() {
+      ParamService_listunion_string_param_pargs args;
       args.get<0>().value = uarg_param1.get();
       return args;
     }

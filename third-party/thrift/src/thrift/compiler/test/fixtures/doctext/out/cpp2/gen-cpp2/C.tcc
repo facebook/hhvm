@@ -36,8 +36,8 @@ void CAsyncProcessor::executeRequest_f(apache::thrift::ServerRequest&& serverReq
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::C_f_pargs pargs() {
-      ::cpp2::C_f_pargs args;
+    C_f_pargs pargs() {
+      C_f_pargs args;
       return args;
     }
 
@@ -142,8 +142,8 @@ void CAsyncProcessor::executeRequest_numbers(apache::thrift::ServerRequest&& ser
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::C_numbers_pargs pargs() {
-      ::cpp2::C_numbers_pargs args;
+    C_numbers_pargs pargs() {
+      C_numbers_pargs args;
       return args;
     }
 
@@ -216,8 +216,8 @@ void CAsyncProcessor::executeRequest_numbers(apache::thrift::ServerRequest&& ser
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory CAsyncProcessor::return_numbers(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ServerStream<::cpp2::number>&& _return) {
   ProtocolOut_ prot;
-  ::cpp2::C_numbers_presult::FieldsType result;
-  using StreamPResultType = ::cpp2::C_numbers_presult::StreamPResultType;
+  C_numbers_presult::FieldsType result;
+  using StreamPResultType = C_numbers_presult::StreamPResultType;
   auto& returnStream = _return;
 
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -256,8 +256,8 @@ void CAsyncProcessor::executeRequest_thing(apache::thrift::ServerRequest&& serve
     ::std::int32_t uarg_a{0};
     std::unique_ptr<::std::string> uarg_b = std::make_unique<::std::string>();
     std::unique_ptr<::std::set<::std::int32_t>> uarg_c = std::make_unique<::std::set<::std::int32_t>>();
-    ::cpp2::C_thing_pargs pargs() {
-      ::cpp2::C_thing_pargs args;
+    C_thing_pargs pargs() {
+      C_thing_pargs args;
       args.get<0>().value = &uarg_a;
       args.get<1>().value = uarg_b.get();
       args.get<2>().value = uarg_c.get();

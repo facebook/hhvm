@@ -29,8 +29,8 @@ void MyRootAsyncProcessor::executeRequest_do_root(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::MyRoot_do_root_pargs pargs() {
-      ::cpp2::MyRoot_do_root_pargs args;
+    MyRoot_do_root_pargs pargs() {
+      MyRoot_do_root_pargs args;
       return args;
     }
 

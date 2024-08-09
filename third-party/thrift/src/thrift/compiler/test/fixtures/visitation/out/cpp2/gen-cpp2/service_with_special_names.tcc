@@ -83,8 +83,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_get_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_get_pargs args;
+    service_with_special_names_get_pargs pargs() {
+      service_with_special_names_get_pargs args;
       return args;
     }
 
@@ -191,8 +191,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_getter_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_getter_pargs args;
+    service_with_special_names_getter_pargs pargs() {
+      service_with_special_names_getter_pargs args;
       return args;
     }
 
@@ -299,8 +299,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_lists_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_lists_pargs args;
+    service_with_special_names_lists_pargs pargs() {
+      service_with_special_names_lists_pargs args;
       return args;
     }
 
@@ -407,8 +407,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(apache::thrif
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_maps_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_maps_pargs args;
+    service_with_special_names_maps_pargs pargs() {
+      service_with_special_names_maps_pargs args;
       return args;
     }
 
@@ -515,8 +515,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(apache::thrif
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_name_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_name_pargs args;
+    service_with_special_names_name_pargs pargs() {
+      service_with_special_names_name_pargs args;
       return args;
     }
 
@@ -623,8 +623,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(apac
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_name_to_value_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_name_to_value_pargs args;
+    service_with_special_names_name_to_value_pargs pargs() {
+      service_with_special_names_name_to_value_pargs args;
       return args;
     }
 
@@ -731,8 +731,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_names_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_names_pargs args;
+    service_with_special_names_names_pargs pargs() {
+      service_with_special_names_names_pargs args;
       return args;
     }
 
@@ -839,8 +839,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(apache
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_prefix_tree_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_prefix_tree_pargs args;
+    service_with_special_names_prefix_tree_pargs pargs() {
+      service_with_special_names_prefix_tree_pargs args;
       return args;
     }
 
@@ -947,8 +947,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(apache::thrif
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_sets_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_sets_pargs args;
+    service_with_special_names_sets_pargs pargs() {
+      service_with_special_names_sets_pargs args;
       return args;
     }
 
@@ -1055,8 +1055,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_setter_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_setter_pargs args;
+    service_with_special_names_setter_pargs pargs() {
+      service_with_special_names_setter_pargs args;
       return args;
     }
 
@@ -1163,8 +1163,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_str_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_str_pargs args;
+    service_with_special_names_str_pargs pargs() {
+      service_with_special_names_str_pargs args;
       return args;
     }
 
@@ -1271,8 +1271,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_strings_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_strings_pargs args;
+    service_with_special_names_strings_pargs pargs() {
+      service_with_special_names_strings_pargs args;
       return args;
     }
 
@@ -1379,8 +1379,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(apache::thrif
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_type_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_type_pargs args;
+    service_with_special_names_type_pargs pargs() {
+      service_with_special_names_type_pargs args;
       return args;
     }
 
@@ -1487,8 +1487,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_value_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_value_pargs args;
+    service_with_special_names_value_pargs pargs() {
+      service_with_special_names_value_pargs args;
       return args;
     }
 
@@ -1595,8 +1595,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(apac
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_value_to_name_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_value_to_name_pargs args;
+    service_with_special_names_value_to_name_pargs pargs() {
+      service_with_special_names_value_to_name_pargs args;
       return args;
     }
 
@@ -1703,8 +1703,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_values_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_values_pargs args;
+    service_with_special_names_values_pargs pargs() {
+      service_with_special_names_values_pargs args;
       return args;
     }
 
@@ -1811,8 +1811,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(apache::thrift:
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_id_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_id_pargs args;
+    service_with_special_names_id_pargs pargs() {
+      service_with_special_names_id_pargs args;
       return args;
     }
 
@@ -1919,8 +1919,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_ids_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_ids_pargs args;
+    service_with_special_names_ids_pargs pargs() {
+      service_with_special_names_ids_pargs args;
       return args;
     }
 
@@ -2027,8 +2027,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(apache:
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_descriptor_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_descriptor_pargs args;
+    service_with_special_names_descriptor_pargs pargs() {
+      service_with_special_names_descriptor_pargs args;
       return args;
     }
 
@@ -2135,8 +2135,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(apache
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_descriptors_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_descriptors_pargs args;
+    service_with_special_names_descriptors_pargs pargs() {
+      service_with_special_names_descriptors_pargs args;
       return args;
     }
 
@@ -2243,8 +2243,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_key_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_key_pargs args;
+    service_with_special_names_key_pargs pargs() {
+      service_with_special_names_key_pargs args;
       return args;
     }
 
@@ -2351,8 +2351,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(apache::thrif
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_keys_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_keys_pargs args;
+    service_with_special_names_keys_pargs pargs() {
+      service_with_special_names_keys_pargs args;
       return args;
     }
 
@@ -2459,8 +2459,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(apache:
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_annotation_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_annotation_pargs args;
+    service_with_special_names_annotation_pargs pargs() {
+      service_with_special_names_annotation_pargs args;
       return args;
     }
 
@@ -2567,8 +2567,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(apache
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_annotations_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_annotations_pargs args;
+    service_with_special_names_annotations_pargs pargs() {
+      service_with_special_names_annotations_pargs args;
       return args;
     }
 
@@ -2675,8 +2675,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_member_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_member_pargs args;
+    service_with_special_names_member_pargs pargs() {
+      service_with_special_names_member_pargs args;
       return args;
     }
 
@@ -2783,8 +2783,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_members_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_members_pargs args;
+    service_with_special_names_members_pargs pargs() {
+      service_with_special_names_members_pargs args;
       return args;
     }
 
@@ -2891,8 +2891,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_field_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_field_pargs args;
+    service_with_special_names_field_pargs pargs() {
+      service_with_special_names_field_pargs args;
       return args;
     }
 
@@ -2999,8 +2999,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service_with_special_names_fields_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service_with_special_names_fields_pargs args;
+    service_with_special_names_fields_pargs pargs() {
+      service_with_special_names_fields_pargs args;
       return args;
     }
 

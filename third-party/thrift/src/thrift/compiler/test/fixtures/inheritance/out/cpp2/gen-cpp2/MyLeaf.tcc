@@ -29,8 +29,8 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::MyLeaf_do_leaf_pargs pargs() {
-      ::cpp2::MyLeaf_do_leaf_pargs args;
+    MyLeaf_do_leaf_pargs pargs() {
+      MyLeaf_do_leaf_pargs args;
       return args;
     }
 

@@ -32,8 +32,8 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo(a
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::cpp2::EchoRequest> uarg_request = std::make_unique<::cpp2::EchoRequest>();
-    ::cpp2::HeaderClientMethodsAnnotationOnService_echo_pargs pargs() {
-      ::cpp2::HeaderClientMethodsAnnotationOnService_echo_pargs args;
+    HeaderClientMethodsAnnotationOnService_echo_pargs pargs() {
+      HeaderClientMethodsAnnotationOnService_echo_pargs args;
       args.get<0>().value = uarg_request.get();
       return args;
     }
@@ -143,8 +143,8 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo_2
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::cpp2::EchoRequest> uarg_request = std::make_unique<::cpp2::EchoRequest>();
-    ::cpp2::HeaderClientMethodsAnnotationOnService_echo_2_pargs pargs() {
-      ::cpp2::HeaderClientMethodsAnnotationOnService_echo_2_pargs args;
+    HeaderClientMethodsAnnotationOnService_echo_2_pargs pargs() {
+      HeaderClientMethodsAnnotationOnService_echo_2_pargs args;
       args.get<0>().value = uarg_request.get();
       return args;
     }

@@ -30,8 +30,8 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int32_t uarg_int_parameter{0};
-    ::test::fixtures::basic::FB303Service_simple_rpc_pargs pargs() {
-      ::test::fixtures::basic::FB303Service_simple_rpc_pargs args;
+    FB303Service_simple_rpc_pargs pargs() {
+      FB303Service_simple_rpc_pargs args;
       args.get<0>().value = &uarg_int_parameter;
       return args;
     }

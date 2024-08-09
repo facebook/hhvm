@@ -31,8 +31,8 @@ void MyServicePrioParentAsyncProcessor::executeRequest_ping(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::MyServicePrioParent_ping_pargs pargs() {
-      ::cpp2::MyServicePrioParent_ping_pargs args;
+    MyServicePrioParent_ping_pargs pargs() {
+      MyServicePrioParent_ping_pargs args;
       return args;
     }
 
@@ -137,8 +137,8 @@ void MyServicePrioParentAsyncProcessor::executeRequest_pong(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::MyServicePrioParent_pong_pargs pargs() {
-      ::cpp2::MyServicePrioParent_pong_pargs args;
+    MyServicePrioParent_pong_pargs pargs() {
+      MyServicePrioParent_pong_pargs args;
       return args;
     }
 

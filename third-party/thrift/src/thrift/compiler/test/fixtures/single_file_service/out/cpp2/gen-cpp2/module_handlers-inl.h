@@ -29,8 +29,8 @@ void AAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&& serverR
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::A_foo_pargs pargs() {
-      ::cpp2::A_foo_pargs args;
+    A_foo_pargs pargs() {
+      A_foo_pargs args;
       return args;
     }
 
@@ -141,8 +141,8 @@ void AAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::A_I_interact_pargs pargs() {
-      ::cpp2::A_I_interact_pargs args;
+    A_I_interact_pargs pargs() {
+      A_I_interact_pargs args;
       return args;
     }
 
@@ -265,8 +265,8 @@ void BAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest&& serverR
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::cpp2::Foo> uarg_foo = std::make_unique<::cpp2::Foo>();
-    ::cpp2::B_bar_pargs pargs() {
-      ::cpp2::B_bar_pargs args;
+    B_bar_pargs pargs() {
+      B_bar_pargs args;
       args.get<0>().value = uarg_foo.get();
       return args;
     }
@@ -373,8 +373,8 @@ void BAsyncProcessor::executeRequest_stream_stuff(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::B_stream_stuff_pargs pargs() {
-      ::cpp2::B_stream_stuff_pargs args;
+    B_stream_stuff_pargs pargs() {
+      B_stream_stuff_pargs args;
       return args;
     }
 
@@ -447,8 +447,8 @@ void BAsyncProcessor::executeRequest_stream_stuff(apache::thrift::ServerRequest&
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory BAsyncProcessor::return_stream_stuff(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ServerStream<::std::int32_t>&& _return) {
   ProtocolOut_ prot;
-  ::cpp2::B_stream_stuff_presult::FieldsType result;
-  using StreamPResultType = ::cpp2::B_stream_stuff_presult::StreamPResultType;
+  B_stream_stuff_presult::FieldsType result;
+  using StreamPResultType = B_stream_stuff_presult::StreamPResultType;
   auto& returnStream = _return;
 
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -484,8 +484,8 @@ void BAsyncProcessor::executeRequest_sink_stuff(apache::thrift::ServerRequest&& 
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::B_sink_stuff_pargs pargs() {
-      ::cpp2::B_sink_stuff_pargs args;
+    B_sink_stuff_pargs pargs() {
+      B_sink_stuff_pargs args;
       return args;
     }
 
@@ -558,9 +558,9 @@ void BAsyncProcessor::executeRequest_sink_stuff(apache::thrift::ServerRequest&& 
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> BAsyncProcessor::return_sink_stuff(apache::thrift::ContextStack* ctx, ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::B_sink_stuff_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::B_sink_stuff_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::B_sink_stuff_presult::FinalResponsePResultType;
+  B_sink_stuff_presult::FieldsType result;
+  using SinkPResultType = B_sink_stuff_presult::SinkPResultType;
+  using FinalResponsePResultType = B_sink_stuff_presult::FinalResponsePResultType;
 
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
 
@@ -612,8 +612,8 @@ void CAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::C_I_interact_pargs pargs() {
-      ::cpp2::C_I_interact_pargs args;
+    C_I_interact_pargs pargs() {
+      C_I_interact_pargs args;
       return args;
     }
 

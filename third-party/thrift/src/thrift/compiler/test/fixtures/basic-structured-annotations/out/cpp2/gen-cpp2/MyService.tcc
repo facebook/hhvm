@@ -31,8 +31,8 @@ void MyServiceAsyncProcessor::executeRequest_first(apache::thrift::ServerRequest
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test::fixtures::basic-structured-annotations::MyService_first_pargs pargs() {
-      ::test::fixtures::basic-structured-annotations::MyService_first_pargs args;
+    MyService_first_pargs pargs() {
+      MyService_first_pargs args;
       return args;
     }
 
@@ -140,8 +140,8 @@ void MyServiceAsyncProcessor::executeRequest_second(apache::thrift::ServerReques
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_count{0};
-    ::test::fixtures::basic-structured-annotations::MyService_second_pargs pargs() {
-      ::test::fixtures::basic-structured-annotations::MyService_second_pargs args;
+    MyService_second_pargs pargs() {
+      MyService_second_pargs args;
       args.get<0>().value = &uarg_count;
       return args;
     }

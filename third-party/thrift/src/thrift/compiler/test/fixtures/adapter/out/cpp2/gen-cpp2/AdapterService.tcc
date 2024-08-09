@@ -31,8 +31,8 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::facebook::thrift::test::AdapterService_count_pargs pargs() {
-      ::facebook::thrift::test::AdapterService_count_pargs args;
+    AdapterService_count_pargs pargs() {
+      AdapterService_count_pargs args;
       return args;
     }
 
@@ -140,8 +140,8 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::facebook::thrift::test::HeapAllocated> uarg_arg = std::make_unique<::facebook::thrift::test::HeapAllocated>();
-    ::facebook::thrift::test::AdapterService_adaptedTypes_pargs pargs() {
-      ::facebook::thrift::test::AdapterService_adaptedTypes_pargs args;
+    AdapterService_adaptedTypes_pargs pargs() {
+      AdapterService_adaptedTypes_pargs args;
       args.get<0>().value = uarg_arg.get();
       return args;
     }

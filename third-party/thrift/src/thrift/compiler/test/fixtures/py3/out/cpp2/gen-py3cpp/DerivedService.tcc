@@ -29,8 +29,8 @@ void DerivedServiceAsyncProcessor::executeRequest_get_six(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::DerivedService_get_six_pargs pargs() {
-      ::py3::simple::DerivedService_get_six_pargs args;
+    DerivedService_get_six_pargs pargs() {
+      DerivedService_get_six_pargs args;
       return args;
     }
 

@@ -46,8 +46,8 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test::fixtures::basic::MyService_ping_pargs pargs() {
-      ::test::fixtures::basic::MyService_ping_pargs args;
+    MyService_ping_pargs pargs() {
+      MyService_ping_pargs args;
       return args;
     }
 
@@ -152,8 +152,8 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test::fixtures::basic::MyService_getRandomData_pargs pargs() {
-      ::test::fixtures::basic::MyService_getRandomData_pargs args;
+    MyService_getRandomData_pargs pargs() {
+      MyService_getRandomData_pargs args;
       return args;
     }
 
@@ -261,8 +261,8 @@ void MyServiceAsyncProcessor::executeRequest_sink(apache::thrift::ServerRequest&
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_sink{0};
-    ::test::fixtures::basic::MyService_sink_pargs pargs() {
-      ::test::fixtures::basic::MyService_sink_pargs args;
+    MyService_sink_pargs pargs() {
+      MyService_sink_pargs args;
       args.get<0>().value = &uarg_sink;
       return args;
     }
@@ -371,8 +371,8 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
   struct ArgsState {
     ::std::int64_t uarg_id{0};
     std::unique_ptr<::std::string> uarg_data = std::make_unique<::std::string>();
-    ::test::fixtures::basic::MyService_putDataById_pargs pargs() {
-      ::test::fixtures::basic::MyService_putDataById_pargs args;
+    MyService_putDataById_pargs pargs() {
+      MyService_putDataById_pargs args;
       args.get<0>().value = &uarg_id;
       args.get<1>().value = uarg_data.get();
       return args;
@@ -482,8 +482,8 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_id{0};
-    ::test::fixtures::basic::MyService_hasDataById_pargs pargs() {
-      ::test::fixtures::basic::MyService_hasDataById_pargs args;
+    MyService_hasDataById_pargs pargs() {
+      MyService_hasDataById_pargs args;
       args.get<0>().value = &uarg_id;
       return args;
     }
@@ -593,8 +593,8 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_id{0};
-    ::test::fixtures::basic::MyService_getDataById_pargs pargs() {
-      ::test::fixtures::basic::MyService_getDataById_pargs args;
+    MyService_getDataById_pargs pargs() {
+      MyService_getDataById_pargs args;
       args.get<0>().value = &uarg_id;
       return args;
     }
@@ -704,8 +704,8 @@ void MyServiceAsyncProcessor::executeRequest_deleteDataById(apache::thrift::Serv
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_id{0};
-    ::test::fixtures::basic::MyService_deleteDataById_pargs pargs() {
-      ::test::fixtures::basic::MyService_deleteDataById_pargs args;
+    MyService_deleteDataById_pargs pargs() {
+      MyService_deleteDataById_pargs args;
       args.get<0>().value = &uarg_id;
       return args;
     }
@@ -814,8 +814,8 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
   struct ArgsState {
     ::std::int64_t uarg_id{0};
     std::unique_ptr<::std::string> uarg_data = std::make_unique<::std::string>();
-    ::test::fixtures::basic::MyService_lobDataById_pargs pargs() {
-      ::test::fixtures::basic::MyService_lobDataById_pargs args;
+    MyService_lobDataById_pargs pargs() {
+      MyService_lobDataById_pargs args;
       args.get<0>().value = &uarg_id;
       args.get<1>().value = uarg_data.get();
       return args;
@@ -898,8 +898,8 @@ void MyServiceAsyncProcessor::executeRequest_invalid_return_for_hack(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test::fixtures::basic::MyService_invalid_return_for_hack_pargs pargs() {
-      ::test::fixtures::basic::MyService_invalid_return_for_hack_pargs args;
+    MyService_invalid_return_for_hack_pargs pargs() {
+      MyService_invalid_return_for_hack_pargs args;
       return args;
     }
 
@@ -1006,8 +1006,8 @@ void MyServiceAsyncProcessor::executeRequest_rpc_skipped_codegen(apache::thrift:
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test::fixtures::basic::MyService_rpc_skipped_codegen_pargs pargs() {
-      ::test::fixtures::basic::MyService_rpc_skipped_codegen_pargs args;
+    MyService_rpc_skipped_codegen_pargs pargs() {
+      MyService_rpc_skipped_codegen_pargs args;
       return args;
     }
 

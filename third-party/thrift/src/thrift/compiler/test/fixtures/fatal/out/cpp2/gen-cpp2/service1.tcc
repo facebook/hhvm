@@ -39,8 +39,8 @@ void service1AsyncProcessor::executeRequest_method1(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service1_method1_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service1_method1_pargs args;
+    service1_method1_pargs pargs() {
+      service1_method1_pargs args;
       return args;
     }
 
@@ -148,8 +148,8 @@ void service1AsyncProcessor::executeRequest_method2(apache::thrift::ServerReques
     ::std::int32_t uarg_x{0};
     std::unique_ptr<::test_cpp2::cpp_reflection::struct1> uarg_y = std::make_unique<::test_cpp2::cpp_reflection::struct1>();
     double uarg_z{0};
-    ::test_cpp2::cpp_reflection::service1_method2_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service1_method2_pargs args;
+    service1_method2_pargs pargs() {
+      service1_method2_pargs args;
       args.get<0>().value = &uarg_x;
       args.get<1>().value = uarg_y.get();
       args.get<2>().value = &uarg_z;
@@ -260,8 +260,8 @@ void service1AsyncProcessor::executeRequest_method3(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service1_method3_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service1_method3_pargs args;
+    service1_method3_pargs pargs() {
+      service1_method3_pargs args;
       return args;
     }
 
@@ -371,8 +371,8 @@ void service1AsyncProcessor::executeRequest_method4(apache::thrift::ServerReques
     ::std::int32_t uarg_i{0};
     std::unique_ptr<::test_cpp2::cpp_reflection::struct1> uarg_j = std::make_unique<::test_cpp2::cpp_reflection::struct1>();
     double uarg_k{0};
-    ::test_cpp2::cpp_reflection::service1_method4_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service1_method4_pargs args;
+    service1_method4_pargs pargs() {
+      service1_method4_pargs args;
       args.get<0>().value = &uarg_i;
       args.get<1>().value = uarg_j.get();
       args.get<2>().value = &uarg_k;
@@ -485,8 +485,8 @@ void service1AsyncProcessor::executeRequest_method5(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test_cpp2::cpp_reflection::service1_method5_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service1_method5_pargs args;
+    service1_method5_pargs pargs() {
+      service1_method5_pargs args;
       return args;
     }
 
@@ -596,8 +596,8 @@ void service1AsyncProcessor::executeRequest_method6(apache::thrift::ServerReques
     ::std::int32_t uarg_l{0};
     std::unique_ptr<::test_cpp2::cpp_reflection::struct1> uarg_m = std::make_unique<::test_cpp2::cpp_reflection::struct1>();
     double uarg_n{0};
-    ::test_cpp2::cpp_reflection::service1_method6_pargs pargs() {
-      ::test_cpp2::cpp_reflection::service1_method6_pargs args;
+    service1_method6_pargs pargs() {
+      service1_method6_pargs args;
       args.get<0>().value = &uarg_l;
       args.get<1>().value = uarg_m.get();
       args.get<2>().value = &uarg_n;

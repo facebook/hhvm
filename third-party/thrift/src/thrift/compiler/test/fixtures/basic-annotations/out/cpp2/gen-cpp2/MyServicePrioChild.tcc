@@ -29,8 +29,8 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::MyServicePrioChild_pang_pargs pargs() {
-      ::cpp2::MyServicePrioChild_pang_pargs args;
+    MyServicePrioChild_pang_pargs pargs() {
+      MyServicePrioChild_pang_pargs args;
       return args;
     }
 

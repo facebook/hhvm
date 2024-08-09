@@ -72,8 +72,8 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_noReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_noReturn_pargs args;
+    ReturnService_noReturn_pargs pargs() {
+      ReturnService_noReturn_pargs args;
       return args;
     }
 
@@ -178,8 +178,8 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_boolReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_boolReturn_pargs args;
+    ReturnService_boolReturn_pargs pargs() {
+      ReturnService_boolReturn_pargs args;
       return args;
     }
 
@@ -286,8 +286,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_i16Return_pargs pargs() {
-      ::some::valid::ns::ReturnService_i16Return_pargs args;
+    ReturnService_i16Return_pargs pargs() {
+      ReturnService_i16Return_pargs args;
       return args;
     }
 
@@ -394,8 +394,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_i32Return_pargs pargs() {
-      ::some::valid::ns::ReturnService_i32Return_pargs args;
+    ReturnService_i32Return_pargs pargs() {
+      ReturnService_i32Return_pargs args;
       return args;
     }
 
@@ -502,8 +502,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_i64Return_pargs pargs() {
-      ::some::valid::ns::ReturnService_i64Return_pargs args;
+    ReturnService_i64Return_pargs pargs() {
+      ReturnService_i64Return_pargs args;
       return args;
     }
 
@@ -610,8 +610,8 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(apache::thrift::Ser
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_floatReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_floatReturn_pargs args;
+    ReturnService_floatReturn_pargs pargs() {
+      ReturnService_floatReturn_pargs args;
       return args;
     }
 
@@ -718,8 +718,8 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_doubleReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_doubleReturn_pargs args;
+    ReturnService_doubleReturn_pargs pargs() {
+      ReturnService_doubleReturn_pargs args;
       return args;
     }
 
@@ -829,8 +829,8 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_stringReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_stringReturn_pargs args;
+    ReturnService_stringReturn_pargs pargs() {
+      ReturnService_stringReturn_pargs args;
       return args;
     }
 
@@ -937,8 +937,8 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_binaryReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_binaryReturn_pargs args;
+    ReturnService_binaryReturn_pargs pargs() {
+      ReturnService_binaryReturn_pargs args;
       return args;
     }
 
@@ -1045,8 +1045,8 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_mapReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_mapReturn_pargs args;
+    ReturnService_mapReturn_pargs pargs() {
+      ReturnService_mapReturn_pargs args;
       return args;
     }
 
@@ -1153,8 +1153,8 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_simpleTypedefReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_simpleTypedefReturn_pargs args;
+    ReturnService_simpleTypedefReturn_pargs pargs() {
+      ReturnService_simpleTypedefReturn_pargs args;
       return args;
     }
 
@@ -1261,8 +1261,8 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_complexTypedefReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_complexTypedefReturn_pargs args;
+    ReturnService_complexTypedefReturn_pargs pargs() {
+      ReturnService_complexTypedefReturn_pargs args;
       return args;
     }
 
@@ -1369,8 +1369,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(a
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_list_mostComplexTypedefReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_list_mostComplexTypedefReturn_pargs args;
+    ReturnService_list_mostComplexTypedefReturn_pargs pargs() {
+      ReturnService_list_mostComplexTypedefReturn_pargs args;
       return args;
     }
 
@@ -1480,8 +1480,8 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_enumReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_enumReturn_pargs args;
+    ReturnService_enumReturn_pargs pargs() {
+      ReturnService_enumReturn_pargs args;
       return args;
     }
 
@@ -1591,8 +1591,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(apache::thrift:
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_list_EnumReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_list_EnumReturn_pargs args;
+    ReturnService_list_EnumReturn_pargs pargs() {
+      ReturnService_list_EnumReturn_pargs args;
       return args;
     }
 
@@ -1699,8 +1699,8 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_structReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_structReturn_pargs args;
+    ReturnService_structReturn_pargs pargs() {
+      ReturnService_structReturn_pargs args;
       return args;
     }
 
@@ -1807,8 +1807,8 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_set_StructReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_set_StructReturn_pargs args;
+    ReturnService_set_StructReturn_pargs pargs() {
+      ReturnService_set_StructReturn_pargs args;
       return args;
     }
 
@@ -1918,8 +1918,8 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(apache::thrift::Ser
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_unionReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_unionReturn_pargs args;
+    ReturnService_unionReturn_pargs pargs() {
+      ReturnService_unionReturn_pargs args;
       return args;
     }
 
@@ -2026,8 +2026,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::some::valid::ns::ReturnService_list_UnionReturn_pargs pargs() {
-      ::some::valid::ns::ReturnService_list_UnionReturn_pargs args;
+    ReturnService_list_UnionReturn_pargs pargs() {
+      ReturnService_list_UnionReturn_pargs args;
       return args;
     }
 
@@ -2138,8 +2138,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(apache::thrift::Serv
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_size{0};
-    ::some::valid::ns::ReturnService_readDataEb_pargs pargs() {
-      ::some::valid::ns::ReturnService_readDataEb_pargs args;
+    ReturnService_readDataEb_pargs pargs() {
+      ReturnService_readDataEb_pargs args;
       args.get<0>().value = &uarg_size;
       return args;
     }
@@ -2249,8 +2249,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(apache::thrift::Server
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_size{0};
-    ::some::valid::ns::ReturnService_readData_pargs pargs() {
-      ::some::valid::ns::ReturnService_readData_pargs args;
+    ReturnService_readData_pargs pargs() {
+      ReturnService_readData_pargs args;
       args.get<0>().value = &uarg_size;
       return args;
     }

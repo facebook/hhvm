@@ -38,8 +38,8 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>>();
-    ::cpp2::NestedContainers_mapList_pargs pargs() {
-      ::cpp2::NestedContainers_mapList_pargs args;
+    NestedContainers_mapList_pargs pargs() {
+      NestedContainers_mapList_pargs args;
       args.get<0>().value = uarg_foo.get();
       return args;
     }
@@ -147,8 +147,8 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> uarg_foo = std::make_unique<::std::map<::std::int32_t, ::std::set<::std::int32_t>>>();
-    ::cpp2::NestedContainers_mapSet_pargs pargs() {
-      ::cpp2::NestedContainers_mapSet_pargs args;
+    NestedContainers_mapSet_pargs pargs() {
+      NestedContainers_mapSet_pargs args;
       args.get<0>().value = uarg_foo.get();
       return args;
     }
@@ -256,8 +256,8 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> uarg_foo = std::make_unique<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>();
-    ::cpp2::NestedContainers_listMap_pargs pargs() {
-      ::cpp2::NestedContainers_listMap_pargs args;
+    NestedContainers_listMap_pargs pargs() {
+      NestedContainers_listMap_pargs args;
       args.get<0>().value = uarg_foo.get();
       return args;
     }
@@ -365,8 +365,8 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> uarg_foo = std::make_unique<::std::vector<::std::set<::std::int32_t>>>();
-    ::cpp2::NestedContainers_listSet_pargs pargs() {
-      ::cpp2::NestedContainers_listSet_pargs args;
+    NestedContainers_listSet_pargs pargs() {
+      NestedContainers_listSet_pargs args;
       args.get<0>().value = uarg_foo.get();
       return args;
     }
@@ -474,8 +474,8 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> uarg_foo = std::make_unique<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>>();
-    ::cpp2::NestedContainers_turtles_pargs pargs() {
-      ::cpp2::NestedContainers_turtles_pargs args;
+    NestedContainers_turtles_pargs pargs() {
+      NestedContainers_turtles_pargs args;
       args.get<0>().value = uarg_foo.get();
       return args;
     }

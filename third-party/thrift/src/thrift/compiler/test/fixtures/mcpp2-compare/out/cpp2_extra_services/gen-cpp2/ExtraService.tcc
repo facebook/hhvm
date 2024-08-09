@@ -40,8 +40,8 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::extra::svc::ExtraService_simple_function_pargs pargs() {
-      ::extra::svc::ExtraService_simple_function_pargs args;
+    ExtraService_simple_function_pargs pargs() {
+      ExtraService_simple_function_pargs args;
       return args;
     }
 
@@ -151,8 +151,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::extra::svc::ExtraService_throws_function_pargs pargs() {
-      ::extra::svc::ExtraService_throws_function_pargs args;
+    ExtraService_throws_function_pargs pargs() {
+      ExtraService_throws_function_pargs args;
       return args;
     }
 
@@ -285,8 +285,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(apache::thrift:
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     bool uarg_param1{0};
-    ::extra::svc::ExtraService_throws_function2_pargs pargs() {
-      ::extra::svc::ExtraService_throws_function2_pargs args;
+    ExtraService_throws_function2_pargs pargs() {
+      ExtraService_throws_function2_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -424,8 +424,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(apache::thrift:
   struct ArgsState {
     bool uarg_param1{0};
     ::std::string uarg_param2;
-    ::extra::svc::ExtraService_throws_function3_pargs pargs() {
-      ::extra::svc::ExtraService_throws_function3_pargs args;
+    ExtraService_throws_function3_pargs pargs() {
+      ExtraService_throws_function3_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       return args;
@@ -563,8 +563,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::extra::svc::ExtraService_oneway_void_ret_pargs pargs() {
-      ::extra::svc::ExtraService_oneway_void_ret_pargs args;
+    ExtraService_oneway_void_ret_pargs pargs() {
+      ExtraService_oneway_void_ret_pargs args;
       return args;
     }
 
@@ -648,8 +648,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_i32_i32_i32_i32_
     ::std::int32_t uarg_param3{0};
     ::std::int32_t uarg_param4{0};
     ::std::int32_t uarg_param5{0};
-    ::extra::svc::ExtraService_oneway_void_ret_i32_i32_i32_i32_i32_param_pargs pargs() {
-      ::extra::svc::ExtraService_oneway_void_ret_i32_i32_i32_i32_i32_param_pargs args;
+    ExtraService_oneway_void_ret_i32_i32_i32_i32_i32_param_pargs pargs() {
+      ExtraService_oneway_void_ret_i32_i32_i32_i32_i32_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       args.get<2>().value = &uarg_param3;
@@ -739,8 +739,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_map_setlist_para
   struct ArgsState {
     ::std::map<::std::string, ::std::int64_t> uarg_param1;
     ::std::set<::std::vector<::std::string>> uarg_param2;
-    ::extra::svc::ExtraService_oneway_void_ret_map_setlist_param_pargs pargs() {
-      ::extra::svc::ExtraService_oneway_void_ret_map_setlist_param_pargs args;
+    ExtraService_oneway_void_ret_map_setlist_param_pargs pargs() {
+      ExtraService_oneway_void_ret_map_setlist_param_pargs args;
       args.get<0>().value = &uarg_param1;
       args.get<1>().value = &uarg_param2;
       return args;
@@ -824,8 +824,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_struct_param(apa
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::some::valid::ns::MyStruct uarg_param1;
-    ::extra::svc::ExtraService_oneway_void_ret_struct_param_pargs pargs() {
-      ::extra::svc::ExtraService_oneway_void_ret_struct_param_pargs args;
+    ExtraService_oneway_void_ret_struct_param_pargs pargs() {
+      ExtraService_oneway_void_ret_struct_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }
@@ -907,8 +907,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::vector<::some::valid::ns::ComplexUnion> uarg_param1;
-    ::extra::svc::ExtraService_oneway_void_ret_listunion_param_pargs pargs() {
-      ::extra::svc::ExtraService_oneway_void_ret_listunion_param_pargs args;
+    ExtraService_oneway_void_ret_listunion_param_pargs pargs() {
+      ExtraService_oneway_void_ret_listunion_param_pargs args;
       args.get<0>().value = &uarg_param1;
       return args;
     }

@@ -69,8 +69,8 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::SinkService_method_pargs pargs() {
-      ::cpp2::SinkService_method_pargs args;
+    SinkService_method_pargs pargs() {
+      SinkService_method_pargs args;
       return args;
     }
 
@@ -143,9 +143,9 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> SinkServiceAsyncProcessor::return_method(apache::thrift::ContextStack* ctx, ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::SinkService_method_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::SinkService_method_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::SinkService_method_presult::FinalResponsePResultType;
+  SinkService_method_presult::FieldsType result;
+  using SinkPResultType = SinkService_method_presult::SinkPResultType;
+  using FinalResponsePResultType = SinkService_method_presult::FinalResponsePResultType;
 
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
 
@@ -189,8 +189,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::SinkService_methodAndReponse_pargs pargs() {
-      ::cpp2::SinkService_methodAndReponse_pargs args;
+    SinkService_methodAndReponse_pargs pargs() {
+      SinkService_methodAndReponse_pargs args;
       return args;
     }
 
@@ -263,9 +263,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> SinkServiceAsyncProcessor::return_methodAndReponse(apache::thrift::ContextStack* ctx, ::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::SinkService_methodAndReponse_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::SinkService_methodAndReponse_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::SinkService_methodAndReponse_presult::FinalResponsePResultType;
+  SinkService_methodAndReponse_presult::FieldsType result;
+  using SinkPResultType = SinkService_methodAndReponse_presult::SinkPResultType;
+  using FinalResponsePResultType = SinkService_methodAndReponse_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
 
@@ -311,8 +311,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::SinkService_methodThrow_pargs pargs() {
-      ::cpp2::SinkService_methodThrow_pargs args;
+    SinkService_methodThrow_pargs pargs() {
+      SinkService_methodThrow_pargs args;
       return args;
     }
 
@@ -385,9 +385,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> SinkServiceAsyncProcessor::return_methodThrow(apache::thrift::ContextStack* ctx, ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::SinkService_methodThrow_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::SinkService_methodThrow_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::SinkService_methodThrow_presult::FinalResponsePResultType;
+  SinkService_methodThrow_presult::FieldsType result;
+  using SinkPResultType = SinkService_methodThrow_presult::SinkPResultType;
+  using FinalResponsePResultType = SinkService_methodThrow_presult::FinalResponsePResultType;
 
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
 
@@ -448,8 +448,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::SinkService_methodSinkThrow_pargs pargs() {
-      ::cpp2::SinkService_methodSinkThrow_pargs args;
+    SinkService_methodSinkThrow_pargs pargs() {
+      SinkService_methodSinkThrow_pargs args;
       return args;
     }
 
@@ -522,9 +522,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> SinkServiceAsyncProcessor::return_methodSinkThrow(apache::thrift::ContextStack* ctx, ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::SinkService_methodSinkThrow_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::SinkService_methodSinkThrow_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::SinkService_methodSinkThrow_presult::FinalResponsePResultType;
+  SinkService_methodSinkThrow_presult::FieldsType result;
+  using SinkPResultType = SinkService_methodSinkThrow_presult::SinkPResultType;
+  using FinalResponsePResultType = SinkService_methodSinkThrow_presult::FinalResponsePResultType;
 
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
 
@@ -568,8 +568,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::SinkService_methodFinalThrow_pargs pargs() {
-      ::cpp2::SinkService_methodFinalThrow_pargs args;
+    SinkService_methodFinalThrow_pargs pargs() {
+      SinkService_methodFinalThrow_pargs args;
       return args;
     }
 
@@ -642,9 +642,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> SinkServiceAsyncProcessor::return_methodFinalThrow(apache::thrift::ContextStack* ctx, ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::SinkService_methodFinalThrow_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::SinkService_methodFinalThrow_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::SinkService_methodFinalThrow_presult::FinalResponsePResultType;
+  SinkService_methodFinalThrow_presult::FieldsType result;
+  using SinkPResultType = SinkService_methodFinalThrow_presult::SinkPResultType;
+  using FinalResponsePResultType = SinkService_methodFinalThrow_presult::FinalResponsePResultType;
 
   struct ExMapType {
     bool operator()(FinalResponsePResultType& res, folly::exception_wrapper ew) {
@@ -698,8 +698,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::SinkService_methodBothThrow_pargs pargs() {
-      ::cpp2::SinkService_methodBothThrow_pargs args;
+    SinkService_methodBothThrow_pargs pargs() {
+      SinkService_methodBothThrow_pargs args;
       return args;
     }
 
@@ -772,9 +772,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> SinkServiceAsyncProcessor::return_methodBothThrow(apache::thrift::ContextStack* ctx, ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::SinkService_methodBothThrow_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::SinkService_methodBothThrow_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::SinkService_methodBothThrow_presult::FinalResponsePResultType;
+  SinkService_methodBothThrow_presult::FieldsType result;
+  using SinkPResultType = SinkService_methodBothThrow_presult::SinkPResultType;
+  using FinalResponsePResultType = SinkService_methodBothThrow_presult::FinalResponsePResultType;
 
   struct ExMapType {
     bool operator()(FinalResponsePResultType& res, folly::exception_wrapper ew) {
@@ -831,8 +831,8 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::SinkService_methodFast_pargs pargs() {
-      ::cpp2::SinkService_methodFast_pargs args;
+    SinkService_methodFast_pargs pargs() {
+      SinkService_methodFast_pargs args;
       return args;
     }
 
@@ -905,9 +905,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> SinkServiceAsyncProcessor::return_methodFast(apache::thrift::ContextStack* ctx, ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::SinkService_methodFast_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::SinkService_methodFast_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::SinkService_methodFast_presult::FinalResponsePResultType;
+  SinkService_methodFast_presult::FieldsType result;
+  using SinkPResultType = SinkService_methodFast_presult::SinkPResultType;
+  using FinalResponsePResultType = SinkService_methodFast_presult::FinalResponsePResultType;
 
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
 

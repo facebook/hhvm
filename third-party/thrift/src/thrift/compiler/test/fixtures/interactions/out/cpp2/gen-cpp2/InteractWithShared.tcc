@@ -29,8 +29,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_do_some_similar_things(apa
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::InteractWithShared_do_some_similar_things_pargs pargs() {
-      ::cpp2::InteractWithShared_do_some_similar_things_pargs args;
+    InteractWithShared_do_some_similar_things_pargs pargs() {
+      InteractWithShared_do_some_similar_things_pargs args;
       return args;
     }
 
@@ -153,8 +153,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(a
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::InteractWithShared_MyInteraction_frobnicate_pargs pargs() {
-      ::cpp2::InteractWithShared_MyInteraction_frobnicate_pargs args;
+    InteractWithShared_MyInteraction_frobnicate_pargs pargs() {
+      InteractWithShared_MyInteraction_frobnicate_pargs args;
       return args;
     }
 
@@ -280,8 +280,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(apache:
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::InteractWithShared_MyInteraction_ping_pargs pargs() {
-      ::cpp2::InteractWithShared_MyInteraction_ping_pargs args;
+    InteractWithShared_MyInteraction_ping_pargs pargs() {
+      InteractWithShared_MyInteraction_ping_pargs args;
       return args;
     }
 
@@ -362,8 +362,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(apa
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::InteractWithShared_MyInteraction_truthify_pargs pargs() {
-      ::cpp2::InteractWithShared_MyInteraction_truthify_pargs args;
+    InteractWithShared_MyInteraction_truthify_pargs pargs() {
+      InteractWithShared_MyInteraction_truthify_pargs args;
       return args;
     }
 
@@ -437,8 +437,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(apa
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory InteractWithSharedAsyncProcessor::return_MyInteraction_truthify(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ServerStream<bool>&& _return) {
   ProtocolOut_ prot;
-  ::cpp2::InteractWithShared_MyInteraction_truthify_presult::FieldsType result;
-  using StreamPResultType = ::cpp2::InteractWithShared_MyInteraction_truthify_presult::StreamPResultType;
+  InteractWithShared_MyInteraction_truthify_presult::FieldsType result;
+  using StreamPResultType = InteractWithShared_MyInteraction_truthify_presult::StreamPResultType;
   auto& returnStream = _return;
 
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -475,8 +475,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(apach
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::InteractWithShared_MyInteraction_encode_pargs pargs() {
-      ::cpp2::InteractWithShared_MyInteraction_encode_pargs args;
+    InteractWithShared_MyInteraction_encode_pargs pargs() {
+      InteractWithShared_MyInteraction_encode_pargs args;
       return args;
     }
 
@@ -550,9 +550,9 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(apach
 template <class ProtocolIn_, class ProtocolOut_>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> InteractWithSharedAsyncProcessor::return_MyInteraction_encode(apache::thrift::ContextStack* ctx, ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return, folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  ::cpp2::InteractWithShared_MyInteraction_encode_presult::FieldsType result;
-  using SinkPResultType = ::cpp2::InteractWithShared_MyInteraction_encode_presult::SinkPResultType;
-  using FinalResponsePResultType = ::cpp2::InteractWithShared_MyInteraction_encode_presult::FinalResponsePResultType;
+  InteractWithShared_MyInteraction_encode_presult::FieldsType result;
+  using SinkPResultType = InteractWithShared_MyInteraction_encode_presult::SinkPResultType;
+  using FinalResponsePResultType = InteractWithShared_MyInteraction_encode_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
 
@@ -605,8 +605,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(apa
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::thrift::shared_interactions::InteractWithShared_SharedInteraction_init_pargs pargs() {
-      ::thrift::shared_interactions::InteractWithShared_SharedInteraction_init_pargs args;
+    InteractWithShared_SharedInteraction_init_pargs pargs() {
+      InteractWithShared_SharedInteraction_init_pargs args;
       return args;
     }
 
@@ -715,8 +715,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::thrift::shared_interactions::InteractWithShared_SharedInteraction_do_something_pargs pargs() {
-      ::thrift::shared_interactions::InteractWithShared_SharedInteraction_do_something_pargs args;
+    InteractWithShared_SharedInteraction_do_something_pargs pargs() {
+      InteractWithShared_SharedInteraction_do_something_pargs args;
       return args;
     }
 
@@ -825,8 +825,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::thrift::shared_interactions::InteractWithShared_SharedInteraction_tear_down_pargs pargs() {
-      ::thrift::shared_interactions::InteractWithShared_SharedInteraction_tear_down_pargs args;
+    InteractWithShared_SharedInteraction_tear_down_pargs pargs() {
+      InteractWithShared_SharedInteraction_tear_down_pargs args;
       return args;
     }
 

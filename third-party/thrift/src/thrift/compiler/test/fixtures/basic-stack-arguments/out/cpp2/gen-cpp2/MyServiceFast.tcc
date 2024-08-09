@@ -38,8 +38,8 @@ void MyServiceFastAsyncProcessor::executeRequest_hasDataById(apache::thrift::Ser
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_id{0};
-    ::cpp2::MyServiceFast_hasDataById_pargs pargs() {
-      ::cpp2::MyServiceFast_hasDataById_pargs args;
+    MyServiceFast_hasDataById_pargs pargs() {
+      MyServiceFast_hasDataById_pargs args;
       args.get<0>().value = &uarg_id;
       return args;
     }
@@ -152,8 +152,8 @@ void MyServiceFastAsyncProcessor::executeRequest_getDataById(apache::thrift::Ser
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_id{0};
-    ::cpp2::MyServiceFast_getDataById_pargs pargs() {
-      ::cpp2::MyServiceFast_getDataById_pargs args;
+    MyServiceFast_getDataById_pargs pargs() {
+      MyServiceFast_getDataById_pargs args;
       args.get<0>().value = &uarg_id;
       return args;
     }
@@ -267,8 +267,8 @@ void MyServiceFastAsyncProcessor::executeRequest_putDataById(apache::thrift::Ser
   struct ArgsState {
     ::std::int64_t uarg_id{0};
     ::std::string uarg_data;
-    ::cpp2::MyServiceFast_putDataById_pargs pargs() {
-      ::cpp2::MyServiceFast_putDataById_pargs args;
+    MyServiceFast_putDataById_pargs pargs() {
+      MyServiceFast_putDataById_pargs args;
       args.get<0>().value = &uarg_id;
       args.get<1>().value = &uarg_data;
       return args;
@@ -378,8 +378,8 @@ void MyServiceFastAsyncProcessor::executeRequest_lobDataById(apache::thrift::Ser
   struct ArgsState {
     ::std::int64_t uarg_id{0};
     ::std::string uarg_data;
-    ::cpp2::MyServiceFast_lobDataById_pargs pargs() {
-      ::cpp2::MyServiceFast_lobDataById_pargs args;
+    MyServiceFast_lobDataById_pargs pargs() {
+      MyServiceFast_lobDataById_pargs args;
       args.get<0>().value = &uarg_id;
       args.get<1>().value = &uarg_data;
       return args;

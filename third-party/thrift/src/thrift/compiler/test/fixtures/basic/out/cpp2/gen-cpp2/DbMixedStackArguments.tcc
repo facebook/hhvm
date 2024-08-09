@@ -32,8 +32,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_key = std::make_unique<::std::string>();
-    ::test::fixtures::basic::DbMixedStackArguments_getDataByKey0_pargs pargs() {
-      ::test::fixtures::basic::DbMixedStackArguments_getDataByKey0_pargs args;
+    DbMixedStackArguments_getDataByKey0_pargs pargs() {
+      DbMixedStackArguments_getDataByKey0_pargs args;
       args.get<0>().value = uarg_key.get();
       return args;
     }
@@ -143,8 +143,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_key = std::make_unique<::std::string>();
-    ::test::fixtures::basic::DbMixedStackArguments_getDataByKey1_pargs pargs() {
-      ::test::fixtures::basic::DbMixedStackArguments_getDataByKey1_pargs args;
+    DbMixedStackArguments_getDataByKey1_pargs pargs() {
+      DbMixedStackArguments_getDataByKey1_pargs args;
       args.get<0>().value = uarg_key.get();
       return args;
     }

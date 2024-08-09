@@ -29,8 +29,8 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::ServerR
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::test::fixtures::basic::FooService_simple_rpc_pargs pargs() {
-      ::test::fixtures::basic::FooService_simple_rpc_pargs args;
+    FooService_simple_rpc_pargs pargs() {
+      FooService_simple_rpc_pargs args;
       return args;
     }
 

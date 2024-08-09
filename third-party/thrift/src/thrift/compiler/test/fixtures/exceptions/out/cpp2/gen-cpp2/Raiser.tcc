@@ -35,8 +35,8 @@ void RaiserAsyncProcessor::executeRequest_doBland(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Raiser_doBland_pargs pargs() {
-      ::cpp2::Raiser_doBland_pargs args;
+    Raiser_doBland_pargs pargs() {
+      Raiser_doBland_pargs args;
       return args;
     }
 
@@ -141,8 +141,8 @@ void RaiserAsyncProcessor::executeRequest_doRaise(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Raiser_doRaise_pargs pargs() {
-      ::cpp2::Raiser_doRaise_pargs args;
+    Raiser_doRaise_pargs pargs() {
+      Raiser_doRaise_pargs args;
       return args;
     }
 
@@ -284,8 +284,8 @@ void RaiserAsyncProcessor::executeRequest_get200(apache::thrift::ServerRequest&&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Raiser_get200_pargs pargs() {
-      ::cpp2::Raiser_get200_pargs args;
+    Raiser_get200_pargs pargs() {
+      Raiser_get200_pargs args;
       return args;
     }
 
@@ -392,8 +392,8 @@ void RaiserAsyncProcessor::executeRequest_get500(apache::thrift::ServerRequest&&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::Raiser_get500_pargs pargs() {
-      ::cpp2::Raiser_get500_pargs args;
+    Raiser_get500_pargs pargs() {
+      Raiser_get500_pargs args;
       return args;
     }
 

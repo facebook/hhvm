@@ -35,8 +35,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
   struct ArgsState {
     ::std::int64_t uarg_param0{0};
     ::std::int64_t uarg_param1{0};
-    ::cpp2::PrimitivesService_init_pargs pargs() {
-      ::cpp2::PrimitivesService_init_pargs args;
+    PrimitivesService_init_pargs pargs() {
+      PrimitivesService_init_pargs args;
       args.get<0>().value = &uarg_param0;
       args.get<1>().value = &uarg_param1;
       return args;
@@ -147,8 +147,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::PrimitivesService_method_that_throws_pargs pargs() {
-      ::cpp2::PrimitivesService_method_that_throws_pargs args;
+    PrimitivesService_method_that_throws_pargs pargs() {
+      PrimitivesService_method_that_throws_pargs args;
       return args;
     }
 
@@ -273,8 +273,8 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_id{0};
-    ::cpp2::PrimitivesService_return_void_method_pargs pargs() {
-      ::cpp2::PrimitivesService_return_void_method_pargs args;
+    PrimitivesService_return_void_method_pargs pargs() {
+      PrimitivesService_return_void_method_pargs args;
       args.get<0>().value = &uarg_id;
       return args;
     }

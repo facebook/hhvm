@@ -29,8 +29,8 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::RederivedService_get_seven_pargs pargs() {
-      ::py3::simple::RederivedService_get_seven_pargs args;
+    RederivedService_get_seven_pargs pargs() {
+      RederivedService_get_seven_pargs args;
       return args;
     }
 

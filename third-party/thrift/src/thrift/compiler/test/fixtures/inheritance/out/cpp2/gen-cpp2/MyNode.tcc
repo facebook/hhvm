@@ -29,8 +29,8 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(apache::thrift::ServerRequest&&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::MyNode_do_mid_pargs pargs() {
-      ::cpp2::MyNode_do_mid_pargs args;
+    MyNode_do_mid_pargs pargs() {
+      MyNode_do_mid_pargs args;
       return args;
     }
 

@@ -30,8 +30,8 @@ void TestServiceAsyncProcessor::executeRequest_init(apache::thrift::ServerReques
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_int1{0};
-    ::test::namespace_from_package_without_module_name::TestService_init_pargs pargs() {
-      ::test::namespace_from_package_without_module_name::TestService_init_pargs args;
+    TestService_init_pargs pargs() {
+      TestService_init_pargs args;
       args.get<0>().value = &uarg_int1;
       return args;
     }

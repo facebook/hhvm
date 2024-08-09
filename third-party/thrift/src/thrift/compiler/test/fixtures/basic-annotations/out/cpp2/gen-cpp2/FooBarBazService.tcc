@@ -33,8 +33,8 @@ void FooBarBazServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::FooBarBazService_foo_pargs pargs() {
-      ::cpp2::FooBarBazService_foo_pargs args;
+    FooBarBazService_foo_pargs pargs() {
+      FooBarBazService_foo_pargs args;
       return args;
     }
 
@@ -139,8 +139,8 @@ void FooBarBazServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::FooBarBazService_bar_pargs pargs() {
-      ::cpp2::FooBarBazService_bar_pargs args;
+    FooBarBazService_bar_pargs pargs() {
+      FooBarBazService_bar_pargs args;
       return args;
     }
 
@@ -245,8 +245,8 @@ void FooBarBazServiceAsyncProcessor::executeRequest_baz(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::FooBarBazService_baz_pargs pargs() {
-      ::cpp2::FooBarBazService_baz_pargs args;
+    FooBarBazService_baz_pargs pargs() {
+      FooBarBazService_baz_pargs args;
       return args;
     }
 

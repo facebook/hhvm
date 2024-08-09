@@ -29,8 +29,8 @@ void GoodServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::GoodService_bar_pargs pargs() {
-      ::cpp2::GoodService_bar_pargs args;
+    GoodService_bar_pargs pargs() {
+      GoodService_bar_pargs args;
       return args;
     }
 
@@ -141,8 +141,8 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::cpp2::GoodService_BadInteraction_foo_pargs pargs() {
-      ::cpp2::GoodService_BadInteraction_foo_pargs args;
+    GoodService_BadInteraction_foo_pargs pargs() {
+      GoodService_BadInteraction_foo_pargs args;
       return args;
     }
 

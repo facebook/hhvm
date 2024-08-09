@@ -111,8 +111,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_five(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::SimpleService_get_five_pargs pargs() {
-      ::py3::simple::SimpleService_get_five_pargs args;
+    SimpleService_get_five_pargs pargs() {
+      SimpleService_get_five_pargs args;
       return args;
     }
 
@@ -220,8 +220,8 @@ void SimpleServiceAsyncProcessor::executeRequest_add_five(apache::thrift::Server
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int32_t uarg_num{0};
-    ::py3::simple::SimpleService_add_five_pargs pargs() {
-      ::py3::simple::SimpleService_add_five_pargs args;
+    SimpleService_add_five_pargs pargs() {
+      SimpleService_add_five_pargs args;
       args.get<0>().value = &uarg_num;
       return args;
     }
@@ -330,8 +330,8 @@ void SimpleServiceAsyncProcessor::executeRequest_do_nothing(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::SimpleService_do_nothing_pargs pargs() {
-      ::py3::simple::SimpleService_do_nothing_pargs args;
+    SimpleService_do_nothing_pargs pargs() {
+      SimpleService_do_nothing_pargs args;
       return args;
     }
 
@@ -438,8 +438,8 @@ void SimpleServiceAsyncProcessor::executeRequest_concat(apache::thrift::ServerRe
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_first = std::make_unique<::std::string>();
     std::unique_ptr<::std::string> uarg_second = std::make_unique<::std::string>();
-    ::py3::simple::SimpleService_concat_pargs pargs() {
-      ::py3::simple::SimpleService_concat_pargs args;
+    SimpleService_concat_pargs pargs() {
+      SimpleService_concat_pargs args;
       args.get<0>().value = uarg_first.get();
       args.get<1>().value = uarg_second.get();
       return args;
@@ -551,8 +551,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_value(apache::thrift::Serve
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::py3::simple::SimpleStruct> uarg_simple_struct = std::make_unique<::py3::simple::SimpleStruct>();
-    ::py3::simple::SimpleService_get_value_pargs pargs() {
-      ::py3::simple::SimpleService_get_value_pargs args;
+    SimpleService_get_value_pargs pargs() {
+      SimpleService_get_value_pargs args;
       args.get<0>().value = uarg_simple_struct.get();
       return args;
     }
@@ -662,8 +662,8 @@ void SimpleServiceAsyncProcessor::executeRequest_negate(apache::thrift::ServerRe
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     bool uarg_input{0};
-    ::py3::simple::SimpleService_negate_pargs pargs() {
-      ::py3::simple::SimpleService_negate_pargs args;
+    SimpleService_negate_pargs pargs() {
+      SimpleService_negate_pargs args;
       args.get<0>().value = &uarg_input;
       return args;
     }
@@ -773,8 +773,8 @@ void SimpleServiceAsyncProcessor::executeRequest_tiny(apache::thrift::ServerRequ
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int8_t uarg_input{0};
-    ::py3::simple::SimpleService_tiny_pargs pargs() {
-      ::py3::simple::SimpleService_tiny_pargs args;
+    SimpleService_tiny_pargs pargs() {
+      SimpleService_tiny_pargs args;
       args.get<0>().value = &uarg_input;
       return args;
     }
@@ -884,8 +884,8 @@ void SimpleServiceAsyncProcessor::executeRequest_small(apache::thrift::ServerReq
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int16_t uarg_input{0};
-    ::py3::simple::SimpleService_small_pargs pargs() {
-      ::py3::simple::SimpleService_small_pargs args;
+    SimpleService_small_pargs pargs() {
+      SimpleService_small_pargs args;
       args.get<0>().value = &uarg_input;
       return args;
     }
@@ -995,8 +995,8 @@ void SimpleServiceAsyncProcessor::executeRequest_big(apache::thrift::ServerReque
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int64_t uarg_input{0};
-    ::py3::simple::SimpleService_big_pargs pargs() {
-      ::py3::simple::SimpleService_big_pargs args;
+    SimpleService_big_pargs pargs() {
+      SimpleService_big_pargs args;
       args.get<0>().value = &uarg_input;
       return args;
     }
@@ -1106,8 +1106,8 @@ void SimpleServiceAsyncProcessor::executeRequest_two(apache::thrift::ServerReque
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     double uarg_input{0};
-    ::py3::simple::SimpleService_two_pargs pargs() {
-      ::py3::simple::SimpleService_two_pargs args;
+    SimpleService_two_pargs pargs() {
+      SimpleService_two_pargs args;
       args.get<0>().value = &uarg_input;
       return args;
     }
@@ -1216,8 +1216,8 @@ void SimpleServiceAsyncProcessor::executeRequest_expected_exception(apache::thri
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::SimpleService_expected_exception_pargs pargs() {
-      ::py3::simple::SimpleService_expected_exception_pargs args;
+    SimpleService_expected_exception_pargs pargs() {
+      SimpleService_expected_exception_pargs args;
       return args;
     }
 
@@ -1339,8 +1339,8 @@ void SimpleServiceAsyncProcessor::executeRequest_unexpected_exception(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::SimpleService_unexpected_exception_pargs pargs() {
-      ::py3::simple::SimpleService_unexpected_exception_pargs args;
+    SimpleService_unexpected_exception_pargs pargs() {
+      SimpleService_unexpected_exception_pargs args;
       return args;
     }
 
@@ -1448,8 +1448,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i16_list(apache::thrift::Se
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::int16_t>> uarg_numbers = std::make_unique<::std::vector<::std::int16_t>>();
-    ::py3::simple::SimpleService_sum_i16_list_pargs pargs() {
-      ::py3::simple::SimpleService_sum_i16_list_pargs args;
+    SimpleService_sum_i16_list_pargs pargs() {
+      SimpleService_sum_i16_list_pargs args;
       args.get<0>().value = uarg_numbers.get();
       return args;
     }
@@ -1559,8 +1559,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i32_list(apache::thrift::Se
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::int32_t>> uarg_numbers = std::make_unique<::std::vector<::std::int32_t>>();
-    ::py3::simple::SimpleService_sum_i32_list_pargs pargs() {
-      ::py3::simple::SimpleService_sum_i32_list_pargs args;
+    SimpleService_sum_i32_list_pargs pargs() {
+      SimpleService_sum_i32_list_pargs args;
       args.get<0>().value = uarg_numbers.get();
       return args;
     }
@@ -1670,8 +1670,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i64_list(apache::thrift::Se
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::int64_t>> uarg_numbers = std::make_unique<::std::vector<::std::int64_t>>();
-    ::py3::simple::SimpleService_sum_i64_list_pargs pargs() {
-      ::py3::simple::SimpleService_sum_i64_list_pargs args;
+    SimpleService_sum_i64_list_pargs pargs() {
+      SimpleService_sum_i64_list_pargs args;
       args.get<0>().value = uarg_numbers.get();
       return args;
     }
@@ -1781,8 +1781,8 @@ void SimpleServiceAsyncProcessor::executeRequest_concat_many(apache::thrift::Ser
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::string>> uarg_words = std::make_unique<::std::vector<::std::string>>();
-    ::py3::simple::SimpleService_concat_many_pargs pargs() {
-      ::py3::simple::SimpleService_concat_many_pargs args;
+    SimpleService_concat_many_pargs pargs() {
+      SimpleService_concat_many_pargs args;
       args.get<0>().value = uarg_words.get();
       return args;
     }
@@ -1892,8 +1892,8 @@ void SimpleServiceAsyncProcessor::executeRequest_count_structs(apache::thrift::S
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> uarg_items = std::make_unique<::std::vector<::py3::simple::SimpleStruct>>();
-    ::py3::simple::SimpleService_count_structs_pargs pargs() {
-      ::py3::simple::SimpleService_count_structs_pargs args;
+    SimpleService_count_structs_pargs pargs() {
+      SimpleService_count_structs_pargs args;
       args.get<0>().value = uarg_items.get();
       return args;
     }
@@ -2003,8 +2003,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_set(apache::thrift::ServerR
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::set<::std::int32_t>> uarg_numbers = std::make_unique<::std::set<::std::int32_t>>();
-    ::py3::simple::SimpleService_sum_set_pargs pargs() {
-      ::py3::simple::SimpleService_sum_set_pargs args;
+    SimpleService_sum_set_pargs pargs() {
+      SimpleService_sum_set_pargs args;
       args.get<0>().value = uarg_numbers.get();
       return args;
     }
@@ -2115,8 +2115,8 @@ void SimpleServiceAsyncProcessor::executeRequest_contains_word(apache::thrift::S
   struct ArgsState {
     std::unique_ptr<::std::set<::std::string>> uarg_words = std::make_unique<::std::set<::std::string>>();
     std::unique_ptr<::std::string> uarg_word = std::make_unique<::std::string>();
-    ::py3::simple::SimpleService_contains_word_pargs pargs() {
-      ::py3::simple::SimpleService_contains_word_pargs args;
+    SimpleService_contains_word_pargs pargs() {
+      SimpleService_contains_word_pargs args;
       args.get<0>().value = uarg_words.get();
       args.get<1>().value = uarg_word.get();
       return args;
@@ -2229,8 +2229,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_map_value(apache::thrift::S
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::std::string>> uarg_words = std::make_unique<::std::map<::std::string, ::std::string>>();
     std::unique_ptr<::std::string> uarg_key = std::make_unique<::std::string>();
-    ::py3::simple::SimpleService_get_map_value_pargs pargs() {
-      ::py3::simple::SimpleService_get_map_value_pargs args;
+    SimpleService_get_map_value_pargs pargs() {
+      SimpleService_get_map_value_pargs args;
       args.get<0>().value = uarg_words.get();
       args.get<1>().value = uarg_key.get();
       return args;
@@ -2342,8 +2342,8 @@ void SimpleServiceAsyncProcessor::executeRequest_map_length(apache::thrift::Serv
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> uarg_items = std::make_unique<::std::map<::std::string, ::py3::simple::SimpleStruct>>();
-    ::py3::simple::SimpleService_map_length_pargs pargs() {
-      ::py3::simple::SimpleService_map_length_pargs args;
+    SimpleService_map_length_pargs pargs() {
+      SimpleService_map_length_pargs args;
       args.get<0>().value = uarg_items.get();
       return args;
     }
@@ -2453,8 +2453,8 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_map_values(apache::thrift::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::std::int16_t>> uarg_items = std::make_unique<::std::map<::std::string, ::std::int16_t>>();
-    ::py3::simple::SimpleService_sum_map_values_pargs pargs() {
-      ::py3::simple::SimpleService_sum_map_values_pargs args;
+    SimpleService_sum_map_values_pargs pargs() {
+      SimpleService_sum_map_values_pargs args;
       args.get<0>().value = uarg_items.get();
       return args;
     }
@@ -2564,8 +2564,8 @@ void SimpleServiceAsyncProcessor::executeRequest_complex_sum_i32(apache::thrift:
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::py3::simple::ComplexStruct> uarg_counter = std::make_unique<::py3::simple::ComplexStruct>();
-    ::py3::simple::SimpleService_complex_sum_i32_pargs pargs() {
-      ::py3::simple::SimpleService_complex_sum_i32_pargs args;
+    SimpleService_complex_sum_i32_pargs pargs() {
+      SimpleService_complex_sum_i32_pargs args;
       args.get<0>().value = uarg_counter.get();
       return args;
     }
@@ -2675,8 +2675,8 @@ void SimpleServiceAsyncProcessor::executeRequest_repeat_name(apache::thrift::Ser
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::py3::simple::ComplexStruct> uarg_counter = std::make_unique<::py3::simple::ComplexStruct>();
-    ::py3::simple::SimpleService_repeat_name_pargs pargs() {
-      ::py3::simple::SimpleService_repeat_name_pargs args;
+    SimpleService_repeat_name_pargs pargs() {
+      SimpleService_repeat_name_pargs args;
       args.get<0>().value = uarg_counter.get();
       return args;
     }
@@ -2785,8 +2785,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::SimpleService_get_struct_pargs pargs() {
-      ::py3::simple::SimpleService_get_struct_pargs args;
+    SimpleService_get_struct_pargs pargs() {
+      SimpleService_get_struct_pargs args;
       return args;
     }
 
@@ -2894,8 +2894,8 @@ void SimpleServiceAsyncProcessor::executeRequest_fib(apache::thrift::ServerReque
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int16_t uarg_n{0};
-    ::py3::simple::SimpleService_fib_pargs pargs() {
-      ::py3::simple::SimpleService_fib_pargs args;
+    SimpleService_fib_pargs pargs() {
+      SimpleService_fib_pargs args;
       args.get<0>().value = &uarg_n;
       return args;
     }
@@ -3005,8 +3005,8 @@ void SimpleServiceAsyncProcessor::executeRequest_unique_words(apache::thrift::Se
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::string>> uarg_words = std::make_unique<::std::vector<::std::string>>();
-    ::py3::simple::SimpleService_unique_words_pargs pargs() {
-      ::py3::simple::SimpleService_unique_words_pargs args;
+    SimpleService_unique_words_pargs pargs() {
+      SimpleService_unique_words_pargs args;
       args.get<0>().value = uarg_words.get();
       return args;
     }
@@ -3116,8 +3116,8 @@ void SimpleServiceAsyncProcessor::executeRequest_words_count(apache::thrift::Ser
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::string>> uarg_words = std::make_unique<::std::vector<::std::string>>();
-    ::py3::simple::SimpleService_words_count_pargs pargs() {
-      ::py3::simple::SimpleService_words_count_pargs args;
+    SimpleService_words_count_pargs pargs() {
+      SimpleService_words_count_pargs args;
       args.get<0>().value = uarg_words.get();
       return args;
     }
@@ -3227,8 +3227,8 @@ void SimpleServiceAsyncProcessor::executeRequest_set_enum(apache::thrift::Server
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::py3::simple::AnEnum uarg_in_enum{static_cast<::py3::simple::AnEnum>(0)};
-    ::py3::simple::SimpleService_set_enum_pargs pargs() {
-      ::py3::simple::SimpleService_set_enum_pargs args;
+    SimpleService_set_enum_pargs pargs() {
+      SimpleService_set_enum_pargs args;
       args.get<0>().value = &uarg_in_enum;
       return args;
     }
@@ -3339,8 +3339,8 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_lists(apache::thrift::S
   struct ArgsState {
     ::std::int16_t uarg_num_lists{0};
     ::std::int16_t uarg_num_items{0};
-    ::py3::simple::SimpleService_list_of_lists_pargs pargs() {
-      ::py3::simple::SimpleService_list_of_lists_pargs args;
+    SimpleService_list_of_lists_pargs pargs() {
+      SimpleService_list_of_lists_pargs args;
       args.get<0>().value = &uarg_num_lists;
       args.get<1>().value = &uarg_num_items;
       return args;
@@ -3452,8 +3452,8 @@ void SimpleServiceAsyncProcessor::executeRequest_word_character_frequency(apache
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_sentence = std::make_unique<::std::string>();
-    ::py3::simple::SimpleService_word_character_frequency_pargs pargs() {
-      ::py3::simple::SimpleService_word_character_frequency_pargs args;
+    SimpleService_word_character_frequency_pargs pargs() {
+      SimpleService_word_character_frequency_pargs args;
       args.get<0>().value = uarg_sentence.get();
       return args;
     }
@@ -3563,8 +3563,8 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_sets(apache::thrift::Se
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_some_words = std::make_unique<::std::string>();
-    ::py3::simple::SimpleService_list_of_sets_pargs pargs() {
-      ::py3::simple::SimpleService_list_of_sets_pargs args;
+    SimpleService_list_of_sets_pargs pargs() {
+      SimpleService_list_of_sets_pargs args;
       args.get<0>().value = uarg_some_words.get();
       return args;
     }
@@ -3674,8 +3674,8 @@ void SimpleServiceAsyncProcessor::executeRequest_nested_map_argument(apache::thr
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> uarg_struct_map = std::make_unique<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>>();
-    ::py3::simple::SimpleService_nested_map_argument_pargs pargs() {
-      ::py3::simple::SimpleService_nested_map_argument_pargs args;
+    SimpleService_nested_map_argument_pargs pargs() {
+      SimpleService_nested_map_argument_pargs args;
       args.get<0>().value = uarg_struct_map.get();
       return args;
     }
@@ -3785,8 +3785,8 @@ void SimpleServiceAsyncProcessor::executeRequest_make_sentence(apache::thrift::S
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::vector<::std::string>>> uarg_word_chars = std::make_unique<::std::vector<::std::vector<::std::string>>>();
-    ::py3::simple::SimpleService_make_sentence_pargs pargs() {
-      ::py3::simple::SimpleService_make_sentence_pargs args;
+    SimpleService_make_sentence_pargs pargs() {
+      SimpleService_make_sentence_pargs args;
       args.get<0>().value = uarg_word_chars.get();
       return args;
     }
@@ -3896,8 +3896,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_union(apache::thrift::Serve
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> uarg_sets = std::make_unique<::std::vector<::std::set<::std::int32_t>>>();
-    ::py3::simple::SimpleService_get_union_pargs pargs() {
-      ::py3::simple::SimpleService_get_union_pargs args;
+    SimpleService_get_union_pargs pargs() {
+      SimpleService_get_union_pargs args;
       args.get<0>().value = uarg_sets.get();
       return args;
     }
@@ -4007,8 +4007,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_keys(apache::thrift::Server
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> uarg_string_map = std::make_unique<::std::vector<::std::map<::std::string, ::std::string>>>();
-    ::py3::simple::SimpleService_get_keys_pargs pargs() {
-      ::py3::simple::SimpleService_get_keys_pargs args;
+    SimpleService_get_keys_pargs pargs() {
+      SimpleService_get_keys_pargs args;
       args.get<0>().value = uarg_string_map.get();
       return args;
     }
@@ -4118,8 +4118,8 @@ void SimpleServiceAsyncProcessor::executeRequest_lookup_double(apache::thrift::S
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     ::std::int32_t uarg_key{0};
-    ::py3::simple::SimpleService_lookup_double_pargs pargs() {
-      ::py3::simple::SimpleService_lookup_double_pargs args;
+    SimpleService_lookup_double_pargs pargs() {
+      SimpleService_lookup_double_pargs args;
       args.get<0>().value = &uarg_key;
       return args;
     }
@@ -4229,8 +4229,8 @@ void SimpleServiceAsyncProcessor::executeRequest_retrieve_binary(apache::thrift:
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::string> uarg_something = std::make_unique<::std::string>();
-    ::py3::simple::SimpleService_retrieve_binary_pargs pargs() {
-      ::py3::simple::SimpleService_retrieve_binary_pargs args;
+    SimpleService_retrieve_binary_pargs pargs() {
+      SimpleService_retrieve_binary_pargs args;
       args.get<0>().value = uarg_something.get();
       return args;
     }
@@ -4340,8 +4340,8 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_binary(apache::thrift::
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::std::string>> uarg_binaries = std::make_unique<::std::vector<::std::string>>();
-    ::py3::simple::SimpleService_contain_binary_pargs pargs() {
-      ::py3::simple::SimpleService_contain_binary_pargs args;
+    SimpleService_contain_binary_pargs pargs() {
+      SimpleService_contain_binary_pargs args;
       args.get<0>().value = uarg_binaries.get();
       return args;
     }
@@ -4451,8 +4451,8 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_enum(apache::thrift::Se
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::std::vector<::py3::simple::AnEnum>> uarg_the_enum = std::make_unique<::std::vector<::py3::simple::AnEnum>>();
-    ::py3::simple::SimpleService_contain_enum_pargs pargs() {
-      ::py3::simple::SimpleService_contain_enum_pargs args;
+    SimpleService_contain_enum_pargs pargs() {
+      SimpleService_contain_enum_pargs args;
       args.get<0>().value = uarg_the_enum.get();
       return args;
     }
@@ -4562,8 +4562,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct(apache:
   iface_->setRequestContext(nullptr);
   struct ArgsState {
     std::unique_ptr<::py3::simple::BinaryUnion> uarg_u = std::make_unique<::py3::simple::BinaryUnion>();
-    ::py3::simple::SimpleService_get_binary_union_struct_pargs pargs() {
-      ::py3::simple::SimpleService_get_binary_union_struct_pargs args;
+    SimpleService_get_binary_union_struct_pargs pargs() {
+      SimpleService_get_binary_union_struct_pargs args;
       args.get<0>().value = uarg_u.get();
       return args;
     }
@@ -4672,8 +4672,8 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(apache::thrif
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    ::py3::simple::SimpleService_get_struct_hidden_pargs pargs() {
-      ::py3::simple::SimpleService_get_struct_hidden_pargs args;
+    SimpleService_get_struct_hidden_pargs pargs() {
+      SimpleService_get_struct_hidden_pargs args;
       return args;
     }
 

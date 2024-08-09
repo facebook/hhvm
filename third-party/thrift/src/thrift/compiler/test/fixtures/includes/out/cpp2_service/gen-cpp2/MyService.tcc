@@ -33,8 +33,8 @@ void MyServiceAsyncProcessor::executeRequest_query(apache::thrift::ServerRequest
   struct ArgsState {
     std::unique_ptr<::cpp2::MyStruct> uarg_s = std::make_unique<::cpp2::MyStruct>();
     std::unique_ptr<::cpp2::Included> uarg_i = std::make_unique<::cpp2::Included>();
-    ::cpp2::MyService_query_pargs pargs() {
-      ::cpp2::MyService_query_pargs args;
+    MyService_query_pargs pargs() {
+      MyService_query_pargs args;
       args.get<0>().value = uarg_s.get();
       args.get<1>().value = uarg_i.get();
       return args;
@@ -145,8 +145,8 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(apache::thrift::Server
   struct ArgsState {
     std::unique_ptr<::cpp2::MyStruct> uarg_s = std::make_unique<::cpp2::MyStruct>();
     std::unique_ptr<::cpp2::Included> uarg_i = std::make_unique<::cpp2::Included>();
-    ::cpp2::MyService_has_arg_docs_pargs pargs() {
-      ::cpp2::MyService_has_arg_docs_pargs args;
+    MyService_has_arg_docs_pargs pargs() {
+      MyService_has_arg_docs_pargs args;
       args.get<0>().value = uarg_s.get();
       args.get<1>().value = uarg_i.get();
       return args;

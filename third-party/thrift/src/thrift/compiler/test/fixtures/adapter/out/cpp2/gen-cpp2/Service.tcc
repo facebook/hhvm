@@ -32,8 +32,8 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
     std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> uarg_arg1 = std::make_unique<::facebook::thrift::test::StringWithAdapter_7208>();
     std::unique_ptr<::std::string> uarg_arg2 = std::make_unique<::std::string>();
     std::unique_ptr<::facebook::thrift::test::Foo> uarg_arg3 = std::make_unique<::facebook::thrift::test::Foo>();
-    ::facebook::thrift::test::Service_func_pargs pargs() {
-      ::facebook::thrift::test::Service_func_pargs args;
+    Service_func_pargs pargs() {
+      Service_func_pargs args;
       args.get<0>().value = uarg_arg1.get();
       args.get<1>().value = uarg_arg2.get();
       args.get<2>().value = uarg_arg3.get();

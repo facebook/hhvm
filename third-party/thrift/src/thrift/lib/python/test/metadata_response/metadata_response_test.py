@@ -84,9 +84,9 @@ class Handler(TestingServiceInterface):
         return ret
 
 
-# pyre-fixme[13]: Attribute `serve_task` is never initialized.
 class TestServer:
     server: ThriftServer
+    # pyre-fixme[13]: Attribute `serve_task` is never initialized.
     serve_task: asyncio.Task
 
     def __init__(

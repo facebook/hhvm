@@ -98,9 +98,9 @@ class BinaryHandler(BinaryServiceInterface):
         return BinaryUnion(iobuf_val=IOBuf(b"sv6"))
 
 
-# pyre-fixme[13]: Attribute `serve_task` is never initialized.
 class TestServer:
     server: ThriftServer
+    # pyre-fixme[13]: Attribute `serve_task` is never initialized.
     serve_task: asyncio.Task
 
     def __init__(self, *, ip: str, handler: ServiceInterface) -> None:

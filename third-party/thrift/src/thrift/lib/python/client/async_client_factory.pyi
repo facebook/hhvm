@@ -39,7 +39,6 @@ def get_client(
     ssl_timeout: float = ...,
 ) -> TAsyncClient: ...
 def install_proxy_factory(
-    # pyre-fixme[11]: Annotation `` is not defined as a type.
     factory: typing.Optional[typing.Callable[[typing.Type[AsyncClient]], ...]],
 ) -> None: ...
 def get_proxy_factory() -> (

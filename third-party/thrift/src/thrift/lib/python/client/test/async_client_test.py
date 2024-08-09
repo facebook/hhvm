@@ -70,7 +70,9 @@ class ThriftClientTestProxy:
 
 def test_proxy_factory(
     client_class: typing.Type[AsyncClient],
-    # pyre-fixme[11]: Annotation `` is not defined as a type.
+    # pyre-fixme[31]: Expression
+    #  `typing.Callable[([thrift.python.client.async_client.AsyncClient], ...)]` is not a
+    #  valid type.
 ) -> typing.Callable[[AsyncClient], ...]:
     return ThriftClientTestProxy
 

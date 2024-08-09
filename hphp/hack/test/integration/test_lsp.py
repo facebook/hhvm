@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 from pathlib import Path
+from typing import Union
 
 from lsp_test_base import LspTestBase
 from lsptestspec import line, LspTestSpec, NoResponse
@@ -7359,6 +7360,106 @@ function baz<T>(readonly T $x): readonly T {
             )
         )
         self.run_spec(spec, variables)
+
+    def run_serverless_ide_will_save_wait_until(
+        self,
+        variables: dict[str, str],
+        filename: str,
+        expected_result: list[dict[str, Union[dict[str, dict[str, int]], str]]],
+    ) -> None:
+        variables.update(self.setup_php_file(filename))
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_will_save_wait_until_" + filename),
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .request(
+                line=line(),
+                comment="willSaveWaitUntil",
+                method="textDocument/willSaveWaitUntil",
+                params={"textDocument": {"uri": "${php_file_uri}"}, "reason": 1},
+                result=expected_result,
+            )
+            .request(
+                line=line(),
+                comment="shutdown",
+                method="shutdown",
+                params={},
+                result=None,
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_serverless_ide_will_save_wait_until_no_format(
+        self,
+    ) -> None:
+        variables = self.write_hhconf_and_naming_table()
+
+        for filename in [
+            "unformatted_with_format_and_generated.php",
+            "unformatted_with_noformat.php",
+        ]:
+            self.run_serverless_ide_will_save_wait_until(variables, filename, [])
+
+    def test_serverless_ide_will_save_wait_until_format(
+        self,
+    ) -> None:
+        variables = self.write_hhconf_and_naming_table()
+
+        for filename, expected_result in [
+            (
+                "formatted.php",
+                [
+                    {
+                        "range": {
+                            "start": {"line": 0, "character": 0},
+                            "end": {"line": 0, "character": 0},
+                        },
+                        "newText": "",
+                    }
+                ],
+            ),
+            (
+                "unformatted.php",
+                [
+                    {
+                        "range": {
+                            "start": {"line": 2, "character": 0},
+                            "end": {"line": 5, "character": 0},
+                        },
+                        "newText": 'function unformatted(): string {\n  return "this file should be formatted on save";\n}\n',
+                    }
+                ],
+            ),
+            (
+                "unformatted_and_partially_generated.php",
+                [
+                    {
+                        "range": {
+                            "start": {"line": 5, "character": 0},
+                            "end": {"line": 6, "character": 0},
+                        },
+                        "newText": "  return true;\n",
+                    }
+                ],
+            ),
+        ]:
+            self.run_serverless_ide_will_save_wait_until(
+                variables, filename, expected_result
+            )
 
     def test_will_save_wait_until_newlines_at_top(self) -> None:
         """

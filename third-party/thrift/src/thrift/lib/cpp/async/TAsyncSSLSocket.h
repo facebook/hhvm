@@ -27,7 +27,9 @@ namespace async {
 
 // Wrapper around folly's AsyncSSLSocket to maintain backwards compatibility:
 // Converts exceptions to thrift's TTransportException type.
-class TAsyncSSLSocket : public folly::AsyncSSLSocket {
+class [[deprecated(
+    "TAsyncSSLSocket is deprecated, use folly::AsyncSSLSocket "
+    "instead")]] TAsyncSSLSocket : public folly::AsyncSSLSocket {
  public:
   typedef std::unique_ptr<TAsyncSSLSocket, Destructor> UniquePtr;
 

@@ -16,11 +16,12 @@
 
 import unittest
 
+from thrift.lib.python.client.test.test_server import server_in_another_process
+
 from thrift.py.client.common import ClientType, Protocol
 from thrift.py.client.sync_client_factory import get_client
 from thrift.py.test import TestService
 from thrift.py.test.ttypes import ArithmeticException
-from thrift.python.test.test_server import server_in_another_process
 from thrift.Thrift import TApplicationException
 from thrift.transport.TTransport import TTransportException
 

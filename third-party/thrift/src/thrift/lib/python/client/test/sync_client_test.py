@@ -28,6 +28,7 @@ from thrift.lib.python.client.test.event_handler_helper import (
     addEventHandler,
     client_handler_that_throws,
 )
+from thrift.lib.python.client.test.test_server import server_in_another_process
 
 from thrift.python.client import ClientType, get_sync_client
 from thrift.python.common import RpcOptions
@@ -39,7 +40,6 @@ from thrift.python.exceptions import (
 )
 from thrift.python.leaf.thrift_clients import LeafService
 from thrift.python.serializer import Protocol
-from thrift.python.test.test_server import server_in_another_process
 from thrift.python.test.thrift_clients import EchoService, TestService
 from thrift.python.test.thrift_types import ArithmeticException, EmptyException
 

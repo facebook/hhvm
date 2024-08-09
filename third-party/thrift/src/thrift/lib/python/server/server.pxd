@@ -39,13 +39,13 @@ cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift"
         unique_ptr[cIOBuf] buffer
 
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
-    cdef dict funcMap
-    cdef list lifecycleFuncs
     @staticmethod
-    cdef PythonAsyncProcessorFactory create(cServiceInterface server)
+    cdef PythonAsyncProcessorFactory create(dict funcMap, list lifecycleFuncs, bytes serviceName, object server)
 
 cdef class PythonUserException(Exception):
     cdef unique_ptr[cPythonUserException] _cpp_obj
 
 cdef class ThriftServer(ThriftServer_py3):
+    cdef readonly dict funcMap
+    cdef readonly list lifecycle
     cdef readonly cServiceInterface handler

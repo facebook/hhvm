@@ -17,8 +17,8 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
 
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 
 #include "mcrouter/lib/fbi/cpp/LogFailure.h"
 #include "mcrouter/lib/network/AsyncTlsToPlaintextSocket.h"
@@ -123,7 +123,7 @@ createSocketCommon(
       folly::AsyncSocket>;
   using AsyncSSLSocketT = std::conditional_t<
       CreateThriftFriendlySocket,
-      apache::thrift::async::TAsyncSSLSocket,
+      folly::AsyncSSLSocket,
       folly::AsyncSSLSocket>;
   using Ptr = folly::AsyncTransportWrapper::UniquePtr;
 

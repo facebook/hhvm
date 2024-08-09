@@ -18,8 +18,8 @@
 #include <folly/io/async/ssl/BasicTransportCertificate.h>
 #include <folly/portability/OpenSSL.h>
 
+#include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
-#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 
 namespace facebook {
 namespace memcache {
@@ -50,8 +50,7 @@ class AsyncTlsToPlaintextSocket::ConnectCallback
       me_.flushWrites();
     };
 
-    auto* tlsSocket =
-        impl->getUnderlyingTransport<apache::thrift::async::TAsyncSSLSocket>();
+    auto* tlsSocket = impl->getUnderlyingTransport<folly::AsyncSSLSocket>();
     CHECK(tlsSocket);
 
     // Save state regarding session resumption
@@ -116,12 +115,11 @@ void AsyncTlsToPlaintextSocket::connect(
     folly::SocketOptionMap socketOptions) {
   auto* const wrappedConnectCallback =
       new ConnectCallback(*this, connectCallback);
-  impl_->getUnderlyingTransport<apache::thrift::async::TAsyncSSLSocket>()
-      ->connect(
-          wrappedConnectCallback,
-          address,
-          connectTimeout.count(),
-          std::move(socketOptions));
+  impl_->getUnderlyingTransport<folly::AsyncSSLSocket>()->connect(
+      wrappedConnectCallback,
+      address,
+      connectTimeout.count(),
+      std::move(socketOptions));
 }
 
 void AsyncTlsToPlaintextSocket::flushWrites() {

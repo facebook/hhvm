@@ -51,6 +51,10 @@ constexpr std::string_view kNewConnectionRocket = "new_connection.rocket";
 constexpr std::string_view kNewConnectionHeader = "new_connection.header";
 constexpr std::string_view kRocketSetup = "rocket.setup";
 constexpr std::string_view kTransportMetadata = "transport.metadata";
+constexpr std::string_view kEnqueuedForAcceptorCallback =
+    "connection_enqueued_acceptor";
+constexpr std::string_view kDequeuedForAcceptorCallback =
+    "connection_dequeued_acceptor";
 
 using namespace apache::thrift;
 
@@ -91,6 +95,10 @@ class TestEventRegistry : public LoggingEventRegistry {
     connectionEventMap_[kRocketSetup] =
         makeHandler<TestConnectionEventHandler>();
     connectionEventMap_[kTransportMetadata] =
+        makeHandler<TestConnectionEventHandler>();
+    connectionEventMap_[kEnqueuedForAcceptorCallback] =
+        makeHandler<TestConnectionEventHandler>();
+    connectionEventMap_[kDequeuedForAcceptorCallback] =
         makeHandler<TestConnectionEventHandler>();
     serverTrackerMap_
         [apache::thrift::instrumentation::kThriftServerTrackerKey] =

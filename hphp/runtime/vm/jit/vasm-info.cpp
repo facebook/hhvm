@@ -309,6 +309,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::load:
     case Vinstr::loadb:
     case Vinstr::loadl:
+    case Vinstr::loadpair:
+    case Vinstr::loadpairl:
     case Vinstr::loadqd:
     case Vinstr::loadqp:
     case Vinstr::loadsbl:
@@ -431,6 +433,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::storeups:
     case Vinstr::storew:
     case Vinstr::storewi:
+    case Vinstr::storepair:
+    case Vinstr::storepairl:
     case Vinstr::stublogue:
     case Vinstr::stubret:
     case Vinstr::stubtophp:

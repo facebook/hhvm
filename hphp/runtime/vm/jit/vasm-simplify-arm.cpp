@@ -145,6 +145,104 @@ bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t min_disp, int32_t max_disp) {
+  const int32_t min_disp_val = a.disp < b.disp ? a.disp : b.disp;
+  if (a.base.isValid() && b.base.isValid() &&
+      !a.index.isValid() && !b.index.isValid() &&
+      a.base == b.base &&
+      a.scale == 1 && b.scale == 1 &&
+      a.width == b.width &&
+      (a.disp - b.disp == step || b.disp - a.disp == step) &&
+      (min_disp_val >= min_disp && min_disp_val <= max_disp && (min_disp_val % step) == 0)) {
+    return a.disp < b.disp ? -1 : 1;
+  }
+  return 0;
+}
+
+bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
+  // store{s, d}; store{s, d} --> storepair{s0, s1, d}
+  return if_inst<Vinstr::store>(env, b, i + 1, [&](const store& st) {
+    if (inst.s == st.s) return false;
+    const auto rv = is_adjacent_vptr64(inst.d, st.d, 8, -512, 504);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << storepair{inst.s, st.s, inst.d};
+        } else {
+          v << storepair{st.s, inst.s, st.d};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
+  // storel{s, d}; storel{s, d} --> storepairl{s0, s1, d}
+  return if_inst<Vinstr::storel>(env, b, i + 1, [&](const storel& st) {
+    if (inst.s == st.s) return false;
+    const auto rv = is_adjacent_vptr64(inst.m, st.m, 4, -256, 252);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << storepairl{inst.s, st.s, inst.m};
+        } else {
+          v << storepairl{st.s, inst.s, st.m};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
+  // load{d, m}; load{d, m} --> loadpair{s, d0, d1}
+  return if_inst<Vinstr::load>(env, b, i + 1, [&](const load& st) {
+    if (inst.d == st.d) return false;
+    const auto rv = is_adjacent_vptr64(inst.s, st.s, 8, -512, 504);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << loadpair{inst.s, inst.d, st.d};
+        } else {
+          v << loadpair{st.s, st.d, inst.d};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
+  // loadl{d, m}; loadl{d, m} --> loadpairl{s, d0, d1}
+  return if_inst<Vinstr::loadl>(env, b, i + 1, [&](const loadl& st) {
+    if (inst.d == st.d) return false;
+    const auto rv = is_adjacent_vptr64(inst.s, st.s, 4, -256, 252);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << loadpairl{inst.s, inst.d, st.d};
+        } else {
+          v << loadpairl{st.s, st.d, inst.d};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 bool simplify(Env& env, Vlabel b, size_t i) {

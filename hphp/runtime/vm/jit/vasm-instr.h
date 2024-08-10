@@ -364,6 +364,10 @@ struct Vunit;
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
   O(ubfmli, I(mr) I(ms), U(s), D(d))\
+  O(loadpair, Inone, U(s), D(d0) D(d1))\
+  O(loadpairl, Inone, U(s), D(d0) D(d1))\
+  O(storepair, Inone, U(s0) U(s1) UW(d), Dn)\
+  O(storepairl, Inone, U(s0) U(s1) UW(d), Dn)\
   /* */
 
 /*
@@ -1284,6 +1288,10 @@ struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
 struct ubfmli { Immed mr, ms; Vreg32 s, d; };
+struct loadpair { Vptr64 s; Vreg64 d0, d1; };
+struct loadpairl { Vptr64 s; Vreg32 d0, d1; };
+struct storepair { Vreg64 s0, s1; Vptr64 d; };
+struct storepairl { Vreg32 s0, s1; Vptr64 d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

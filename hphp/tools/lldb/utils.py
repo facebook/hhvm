@@ -9,6 +9,7 @@ import re
 import shlex
 import struct
 import sys
+import time
 import typing
 
 import lldb
@@ -73,8 +74,8 @@ class Command(abc.ABC):
     ): ...
 
 
-# ------------------------------------------------------------------------------
-# Memoization.
+# -------------------------------------------------------------------------------------
+# Memoization for functions that take in hashable arguments (i.e. not lldb.SB* values).
 
 _all_caches = []
 
@@ -105,8 +106,132 @@ def memoized(func):
 # when within a script. I.e. the target object needs to come from the
 # execution context that is passed when starting a command's execution.
 
+_target_cache = {}
 
-# TODO(michristensen) Deal with the following lookup helpers not being hashable
+
+def clear_caches(
+    target: typing.Optional[lldb.SBTarget] = None, key: typing.Optional[str] = None
+) -> None:
+    global _target_cache
+
+    if target is None:
+        _target_cache.clear()
+        return
+
+    target_idx = target.GetDebugger().GetIndexOfTarget(target)
+    if target_idx in _target_cache:
+        cache = _target_cache[target_idx]
+        if key is not None:
+            if key in cache:
+                del cache[key]
+        else:
+            del _target_cache[target_idx]
+
+
+def get_target_cache_dict(target: lldb.SBTarget) -> typing.Dict[str, typing.Any]:
+    """Get the target cache dictionary for the specified target"""
+
+    global _target_cache
+    target_idx = target.GetDebugger().GetIndexOfTarget(target)
+
+    if target_idx not in _target_cache:
+        _target_cache[target_idx] = {}
+
+    return _target_cache[target_idx]
+
+
+def get_hhvm_module(target: lldb.SBTarget) -> typing.Optional[lldb.SBModule]:
+    """Get the module that contains the HHVM globals and types"""
+
+    target_cache_dict = get_target_cache_dict(target)
+    key = "module"
+
+    if key in target_cache_dict:
+        return target_cache_dict[key]
+
+    for module in target.modules:
+        # Pick a symbol name we can rely on to always find the HHVM module here
+        sym = module.FindSymbol("HPHP::jit::tc::g_code")
+        if sym is not None and sym.IsValid():
+            target_cache_dict[key] = module
+            return module
+
+    return None
+
+
+def get_cached_type(name: str, target: lldb.SBTarget) -> typing.Optional[lldb.SBType]:
+    """Get a type by name (trying from the HHVM module first) and cache the results"""
+
+    target_cache_dict = get_target_cache_dict(target)
+    key = "types"
+
+    if key not in target_cache_dict:
+        target_cache_dict[key] = {}
+    elif name in target_cache_dict[key]:
+        return target_cache_dict[key][name]  # Return the cached type
+
+    ty = None
+
+    hhvm_module = get_hhvm_module(target)
+    if hhvm_module is not None:
+        ty = hhvm_module.FindFirstType(name)
+
+        # There was a bug in FindFirstType (T133615659) that has been fixed. But just in case...
+        if ty is None or not ty.IsValid():
+            ty = hhvm_module.FindTypes(name).GetTypeAtIndex(0)
+
+    # If we can't find it in the hhvm module,
+    # let's try it on the target, which might take longer but handles cases where
+    # the type we want is in a different module. Looking in the hhvm module first
+    # lets us prioritize types defined in it.
+    if ty is None or not ty.IsValid():
+        ty = target.FindFirstType(name)
+        if ty is None or not ty.IsValid():
+            ty = target.FindTypes(name).GetTypeAtIndex(0)
+
+    if ty is not None and ty.IsValid():
+        target_cache_dict[key][name] = ty
+
+    return ty
+
+
+def get_cached_global(
+    name: str, target: lldb.SBTarget
+) -> typing.Optional[lldb.SBValue]:
+    """Get a global by name (trying from the HHVM module first) and cache the results"""
+
+    target_cache_dict = get_target_cache_dict(target)
+    key = "globals"
+
+    if key not in target_cache_dict:
+        target_cache_dict[key] = {}
+    elif name in target_cache_dict[key]:
+        return target_cache_dict[key][name]  # Return the cached global
+
+    g = None
+
+    hhvm_module = get_hhvm_module(target)
+    if hhvm_module is not None:
+        g = hhvm_module.FindFirstGlobalVariable(target, name)
+        if g is None or g.GetError().Fail():
+            g = hhvm_module.FindGlobalVariables(target, name, 1).GetValueAtIndex(0)
+
+    if g is None or g.GetError().Fail():
+        g = target.FindFirstGlobalVariable(name)
+        if g is None or g.GetError().Fail():
+            g = target.FindGlobalVariables(name, 1).GetValueAtIndex(0)
+
+    if g is None or g.GetError().Fail():
+        debug_print(
+            f"couldn't find global variable '{name}'; attempting to find it by evaluating it"
+        )
+        return Value(name, target)
+    else:
+        target_cache_dict[key][name] = g
+
+    return g
+
+
 def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
     """Look up an HHVM type
 
@@ -119,15 +244,7 @@ def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
     Returns:
         An SBType wrapping the HHVM type
     """
-    # T133615659: Using FindTypes(name).GetTypesAtIndex(0) because
-    # it appears that sometimes FindFirstType(name) returns an empty type.
-    ty = target.modules[0].FindTypes(name).GetTypeAtIndex(0)
-    if not ty.IsValid():
-        # If we can't find it in the first module (assuming it's the HHVM executable),
-        # let's try it on the target, which might take longer but handles cases where
-        # the type we want is in a different module. Looking in the first module first
-        # let's us prioritize types defined in it.
-        ty = target.FindTypes(name).GetTypeAtIndex(0)
+    ty = get_cached_type(name, target)
     assert ty.IsValid(), f"couldn't find type '{name}'"
     return ty
 
@@ -145,15 +262,8 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
     Returns:
         SBValue wrapping the global variable
     """
-    # Search in hhvm module first to try and speed things up.
-    g = target.modules[0].FindFirstGlobalVariable(target, name)
-    if g.GetError().Fail():
-        g = target.FindFirstGlobalVariable(name)
-        if g.GetError().Fail():
-            debug_print(
-                f"couldn't find global variable '{name}'; attempting to find it by evaluating it"
-            )
-            return Value(name, target)
+    g = get_cached_global(name, target)
+    assert g.GetError().Success(), f"couldn't find global '{name}'"
     return g
 
 
@@ -640,7 +750,7 @@ def _unpack(s):
     return 0xDFDFDFDFDFDFDFDF & struct.unpack("<Q", bytes(s, encoding="utf-8"))[0]
 
 
-def hash_string(s: str):
+def hash_string(s: str) -> int:
     """Hash a string as in hphp/util/hash-crc-x64.S"""
 
     size = len(s)
@@ -662,7 +772,15 @@ def hash_string(s: str):
     return crc >> 1
 
 
-def strinfo(s: lldb.SBValue, keep_case: bool = True):
+def is_char_pointer_type(t: lldb.SBType, target: lldb.SBTarget):
+    return (
+        re.match(r"char((8|16|32)_t)? \*", t.name) is not None
+        or re.match(r"char \[\d*\]$", t.name) is not None
+        or t == Type("char", target).GetPointerType()
+    )
+
+
+def strinfo(s: lldb.SBValue, keep_case: bool = True) -> typing.Dict[str, typing.Any]:
     """Return the Python string and HHVM hash for `s`, or None if `s` is not a stringish lldb.Value"""
 
     data = None
@@ -677,10 +795,7 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True):
         )
         return None
 
-    if (
-        t == Type("char", s.target).GetPointerType()
-        or re.match(r"char \[\d*\]$", t.name) is not None
-    ):
+    if is_char_pointer_type(t, s.target):
         # Note: 1024 is very arbitrary; the string may
         # very well be longer than this.
         data = read_cstring(s.deref.load_addr, 1024, s.process)
@@ -1092,6 +1207,22 @@ class DebugCommand(Command):
 def debug_print(message: str, file=sys.stderr) -> None:
     if _Debug:
         print(message)
+
+
+def timer(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        tic = time.perf_counter()
+        value = func(*args, **kwargs)
+        toc = time.perf_counter()
+        elapsed_time = toc - tic
+        print(
+            f"Elapsed time: %s.%s {elapsed_time:0.4f} seconds"
+            % (func.__module__, func.__name__)
+        )
+        return value
+
+    return wrapper
 
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):

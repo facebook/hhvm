@@ -206,7 +206,7 @@ def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue:
         return None
 
 
-def dict_at(base, idx) -> (str, lldb.SBValue):
+def dict_at(base: lldb.SBValue, idx: int) -> (str, lldb.SBValue):
     vde_type = utils.Type("HPHP::VanillaDictElm", base.target)
     utils.debug_print(f"Dict base address (i.e. first element): 0x{base.load_addr:x}")
     offset = vde_type.size * idx

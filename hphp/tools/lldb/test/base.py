@@ -29,6 +29,7 @@ for path in [
 assert lldb_path, "Couldn't find lldb on host"
 
 sys.path.append(lldb_path)
+import hhvm_lldb.utils as utils
 import lldb
 from fblldb.utils import get_lldb_object_description, run_lldb_command
 
@@ -44,6 +45,8 @@ scripts_path = os.environ["HHVM_LLDB_SCRIPTS"]
 class LLDBTestBase(BaseFacebookTestCase):
     def setUp(self):
         """Set up a debugger for each test case instance"""
+        utils.clear_caches()
+
         debugger = lldb.SBDebugger.Create()
         debugger.SetAsync(
             False

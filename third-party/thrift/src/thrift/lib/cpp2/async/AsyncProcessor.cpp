@@ -1167,7 +1167,9 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
     auto responseInfo = ServiceInterceptorBase::ResponseInfo{
         reqCtx_,
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
-        resultOrActiveException};
+        resultOrActiveException,
+        serviceName_,
+        methodName_};
     try {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onResponse(
           std::move(connectionInfo), std::move(responseInfo));

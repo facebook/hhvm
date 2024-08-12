@@ -31,6 +31,7 @@ from apache.thrift.test.terse_write.terse_write.thrift_types import (
     MyStruct,
     MyStructWithCustomDefault,
     MyUnion,
+    TerseSafePatch,
     TerseStructs,
     TerseStructs1,
     TerseStructs2,
@@ -394,6 +395,11 @@ class SerializerTests(unittest.TestCase):
             encoded_obj3 = serialize(obj3, protocol=proto)
             encoded_obj = serialize(obj, protocol=proto)
             self.assertEqual(encoded_obj3, encoded_obj)
+
+    @unittest.skip("AddressSanitizer: SEGV")
+    def test_terse_safe_patch(self) -> None:
+        s = TerseSafePatch(version=1, data=IOBuf(b"abcdef"))
+        self.thrift_serialization_round_trip(s)
 
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:

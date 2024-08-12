@@ -286,3 +286,11 @@ struct TerseInternBoxedStructWithCustomDefault {
   @thrift.InternBox
   2: MyStructWithCustomDefaultAdapted intern_boxed_field_with_custom_default_adapted;
 }
+
+@thrift.TerseWrite
+struct TerseSafePatch {
+  1: i32 version;
+
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  2: binary data;
+}

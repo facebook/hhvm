@@ -18,7 +18,7 @@ from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import module.thrift_types
 import module.thrift_metadata
-import apache.thrift.type.schema.thrift_types
+import include.thrift_types
 
 class PrimitivesServiceInterface(
     ServiceInterface,

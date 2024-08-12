@@ -10,7 +10,7 @@ from __future__ import annotations
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 
-import apache.thrift.type.schema.thrift_metadata
+import include.thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs

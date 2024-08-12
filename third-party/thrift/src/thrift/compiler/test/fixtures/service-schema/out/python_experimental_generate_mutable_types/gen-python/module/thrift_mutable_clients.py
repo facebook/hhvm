@@ -25,7 +25,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_mutable_types
 import module.thrift_metadata
-import apache.thrift.type.schema.thrift_mutable_types
+import include.thrift_mutable_types
 
 class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "PrimitivesService.Sync"]):
     @staticmethod

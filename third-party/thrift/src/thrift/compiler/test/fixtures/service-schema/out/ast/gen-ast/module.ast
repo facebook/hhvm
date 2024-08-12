@@ -1,18 +1,18 @@
 Schema {
-  1: programs (list) = list<struct>[14] {
+  1: programs (list) = list<struct>[4] {
     [0] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "module",
       },
-      2: id (i64) = 4311836713659120699,
+      2: id (i64) = 2965325806698557205,
       3: includes (list) = list<i64>[2] {
         [0] = -2910911769510737115,
-        [1] = 5620022766950117278,
+        [1] = -8833283253468445782,
       },
       8: definitionKeys (list) = list<string>[3] {
-        [0] = "~\203T\344\20103\365#r\010\271\346\261\322K",
-        [1] = "\313n7\247\375Z\272\031\363\020\030%\301\306$_",
-        [2] = "\240\311\3732\362\247\347(\033w7\344\337#\215&",
+        [0] = "\343\217\337\3657\366X\216\250\222 \312P}\255\336",
+        [1] = "(\355\023\201\245\006\343;\200\211\270\235&\304u`",
+        [2] = "\334\003XQhoS~\232_\221;x\2226\r",
       },
       5: path (string) = "thrift/compiler/test/fixtures/service-schema/src/module.thrift",
       7: namespaces (map) = map<string,string>[1] {
@@ -104,493 +104,13 @@ Schema {
     },
     [3] = Program {
       1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "schema",
-        2: uri (string) = "facebook.com/thrift/type",
-        8: annotations (map) = map<string,struct>[2] {
-          "facebook.com/thrift/annotation/Experimental" -> Annotation {
-          },
-          "facebook.com/thrift/annotation/TerseWrite" -> Annotation {
-          },
-        },
-        6: docs (struct) = DocBlock {
-          1: contents (string) = "The canonical representations for a Thrift schema.\n\nThe definitions in this file contain the absolute minimal amount of\ninformat[...](672)",
-          2: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 5620022766950117278,
-            2: beginLine (i32) = 26,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 40,
-            5: endColumn (i32) = 4,
-          },
-        },
+        1: name (string) = "include",
       },
-      2: id (i64) = 5620022766950117278,
-      3: includes (list) = list<i64>[8] {
-        [0] = -2895088982299593956,
-        [1] = -8150165434060991361,
-        [2] = -2910911769510737115,
-        [3] = 4261727627074570159,
-        [4] = -1411000023015307811,
-        [5] = 5032647719888282931,
-        [6] = 3090172986120490708,
-        [7] = -6221644413379777926,
+      2: id (i64) = -8833283253468445782,
+      8: definitionKeys (list) = list<string>[1] {
+        [0] = "\243F\372\262\275\034\312j\360\024\n\375\316\265l\311",
       },
-      8: definitionKeys (list) = list<string>[45] {
-        [0] = "\343\020%\000\031\037\227WS\305Y\274\332[+\302",
-        [1] = "|o@\037j\271_!\377\373\371!\266\327\332\236",
-        [2] = "\177\266\253K\347\306\242\004,\021\331\225R\370\304\335",
-        [3] = "\024H\317F\007*\354\350\220\034\030iW\037\207f",
-        [4] = "X\031\347B \341#\016\332\034\346\353\325\337\033\205",
-        [5] = "\370zom\342K\317\023\314'\223\357\211T\002(",
-        [6] = "e\322\315\270\235\034)=\202\367\3360\307\230\215\351",
-        [7] = "\315}\355\177j\357\204\034'\023\335[\231)K\352",
-        [8] = "\351W@\177Z\022\242\027\362\3771q\030\211\200\334",
-        [9] = "{\217\272\013=\262\010\360\200\301\036\307\033\310z\013",
-        [10] = " \266\366\213\232\030\027\025}WD\356+c\331l",
-        [11] = "}\335(\327\211\033\3716K\310\231e\?\001\243\362",
-        [12] = "7 \016d8[1\225g\332B\3449\264\025H",
-        [13] = "\003\\\310\177\224\277\202\266`\023\002\371\325\374\207\231",
-        [14] = "\241\016\271\336\267\353\357\364\036`\275\274\017N\377\272",
-        [15] = "\317\317`S\366\226f\201\023\377\022\356\263my\355",
-        [16] = "V\224U\010\234\350!3\362\267O+\275\322\352\217",
-        [17] = "\036\324y\035\330\365\316\366\337\216\202\327\215\255\376\345",
-        [18] = "}!\234pohB\304d^\332\217\017b6\231",
-        [19] = "\360\327L\357 \233\232\355\352\204\273!\261\027\376)",
-        [20] = "W\311\317\342\307\0145\010k\264\373\255\243\324p]",
-        [21] = "JYF\275\024\231\311@\n2Bl\301\"\245\321",
-        [22] = "\266\202\247Pe\345\332]\350\274\002n!.\255]",
-        [23] = "\366q\016k\257\027\217\230\373\226\343\022Ae\334;",
-        [24] = "\334\202\370k\022\345\263\023\374\375\301Yx\200\337w",
-        [25] = "\341g*\037\205)\?\027\243a0lI\021\346\016",
-        [26] = "}\204W\\m^\275\342\025^\317R\332n<\204",
-        [27] = "\020O\367\001>\326\320c\032\363\274y\321\256|\366",
-        [28] = "\300\315\324\223d\253O\313\3214M\235\254\253G\247",
-        [29] = "{\336t\375n'\215\372[`\277\2028\205\024\021",
-        [30] = "\230\303\242\235\363\225\0327:\332\370F\214\353\260=",
-        [31] = "15\310\030\230\354Uc\346(\006O\007\250z\235",
-        [32] = "\006V\314tK\024\230+O\377b\013~\212\010T",
-        [33] = "\335\266mKwtq\335~\251\226\366O\244\007\240",
-        [34] = "1\327\277!\037\214f\r\352\245\306 \330\022\025\373",
-        [35] = "\237i\374e\257\270\313ce\216\210\222L\342\304\266",
-        [36] = "Z9b\337\255,]\217\231\372<\020\372\034\340w",
-        [37] = "\202\034\220\250\035\246;j\327\037\206\334\240\312G\316",
-        [38] = "%\323\325\217\230\326\304\227\026\202\235\200\315k\263\204",
-        [39] = "#x\314\331\365\344\006\211\326\211\371\303|l\3711",
-        [40] = "\240\001zv\336\262\005\377(\203v\036De^C",
-        [41] = "\007\034\363\215P_\377[\025o\201\330\250\346\263\374",
-        [42] = "~\332hL\365R\235=\346\342\204(\0229\230\032",
-        [43] = "\243qd\236\240\236\263\372\364=\203\326O\352\335\341",
-        [44] = "\017\000\023\341V!Q\232\377v\367~\231\250sM",
-      },
-      5: path (string) = "thrift/lib/thrift/schema.thrift",
-      7: namespaces (map) = map<string,string>[4] {
-        "cpp2" -> "apache.thrift.type",
-        "go" -> "thrift.lib.thrift.schema",
-        "java.swift" -> "com.facebook.thrift.type",
-        "py3" -> "apache.thrift.type",
-      },
-    },
-    [4] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "hack",
-        2: uri (string) = "facebook.com/thrift/annotation/hack",
-      },
-      2: id (i64) = -2895088982299593956,
-      3: includes (list) = list<i64>[1] {
-        [0] = -7702644072597283434,
-      },
-      8: definitionKeys (list) = list<string>[10] {
-        [0] = "2\014\377\006\355\360\216\315g\211\336c\262\315\200\356",
-        [1] = "\221_\224\372\243\217\220\374\2113\227&\206\004\272\343",
-        [2] = "\345\027\030\216~1Z\301\353@\216\021ZI\2564",
-        [3] = "U\267\364sy\005\333aojFW\177\267\347\315",
-        [4] = "h\260\350\273>\225\2274~\204-0/\305\325|",
-        [5] = "\0335I\013\266oV\331\224\000\330\336,\036\303\237",
-        [6] = "\247\374+\315<G\3216U\335\213Z\022\034\367[",
-        [7] = "\222\025\020\2726S}]\2525{\327p]_@",
-        [8] = "Z\231\003\025\366\034\201{\250z@\312&\000y\023",
-        [9] = "px\027%C\372\004\307\234\311#y\355Tl\355",
-      },
-      5: path (string) = "thrift/annotation/hack.thrift",
-      7: namespaces (map) = map<string,string>[6] {
-        "android" -> "com.facebook.thrift.annotation.hack_deprecated",
-        "go" -> "thrift.annotation.hack",
-        "hs2" -> "facebook.thrift.annotation.hack",
-        "java" -> "com.facebook.thrift.annotation.hack_deprecated",
-        "py" -> "thrift.annotation.hack",
-        "py.asyncio" -> "facebook_thrift_asyncio.annotation.hack",
-      },
-    },
-    [5] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "cpp",
-        2: uri (string) = "facebook.com/thrift/annotation/cpp",
-      },
-      2: id (i64) = -8150165434060991361,
-      3: includes (list) = list<i64>[2] {
-        [0] = -7702644072597283434,
-        [1] = -2910911769510737115,
-      },
-      8: definitionKeys (list) = list<string>[20] {
-        [0] = "'\370\034FO2\242h\035\303\203\032\334\343\331\201",
-        [1] = "\025)\271Y\025\023;d\275\337\372O\357\215<\035",
-        [2] = "\340\004VxI\014\025\210vKq\245\315\377Q\266",
-        [3] = "\022fo\307\265\313\215]\200Q\212\?\264\363\017~",
-        [4] = "L\367p*}F\021#\302\014\200-\324\227\247\253",
-        [5] = "\271gq.\000\252=\360\236\374\222\277\266)\265\322",
-        [6] = "\220\241\004\271\226\215\014n\027q*VOc\307\027",
-        [7] = "\226\3309\327>T\373[!z\356\351\201M3y",
-        [8] = "\317\353fA\236\216\217+\354\213s\375#\301sA",
-        [9] = "\005l\272\005\013V\351\313\001\315\270\304}n\301\365",
-        [10] = "\313\373\0278sU\304\237\331\263B<\310\364\366\262",
-        [11] = "z\342H\356\275\273p\200\353{F\236$:\372#",
-        [12] = "\367W:R\202\211\242)\"*H\263+\273\200\323",
-        [13] = "\300z\250\252\207\365\351\212~Gs\360W\336\372+",
-        [14] = "\324\276C&w\334\177\363\373h\n\230}\216L\245",
-        [15] = "\033\014\275\350'<\346\3144\203%\014\244\347I\333",
-        [16] = "\231\367\210\274\\\237\257p,\255\026\337%\277\274v",
-        [17] = ",m\207\320|y\354\317\236d8\307U]t\013",
-        [18] = "\367!\251\200\201\335*\245\315\372u\177y\273h)",
-        [19] = "Yv\346e\367!\352\3722G\240P\320\004[\225",
-      },
-      5: path (string) = "thrift/annotation/cpp.thrift",
-      7: namespaces (map) = map<string,string>[6] {
-        "android" -> "com.facebook.thrift.annotation.cpp_deprecated",
-        "go" -> "thrift.annotation.cpp",
-        "java" -> "com.facebook.thrift.annotation.cpp_deprecated",
-        "js" -> "thrift.annotation.cpp",
-        "py" -> "thrift.annotation.cpp",
-        "py.asyncio" -> "facebook_thrift_asyncio.annotation.cpp",
-      },
-    },
-    [6] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "id",
-        2: uri (string) = "facebook.com/thrift/type",
-        8: annotations (map) = map<string,struct>[2] {
-          "facebook.com/thrift/annotation/Experimental" -> Annotation {
-          },
-          "facebook.com/thrift/annotation/TerseWrite" -> Annotation {
-          },
-        },
-      },
-      2: id (i64) = 4261727627074570159,
-      3: includes (list) = list<i64>[2] {
-        [0] = -8150165434060991361,
-        [1] = -2910911769510737115,
-      },
-      8: definitionKeys (list) = list<string>[9] {
-        [0] = "i\007\000[\267x\251\002q\317\007\203\277]P\260",
-        [1] = "\027\341\031\246\372Q0\276\205\375\0354\027\236Q\257",
-        [2] = "\362\2461t\006\016\241\\\373\001\000\377\363\372\253\341",
-        [3] = "\267\345\337|\335'\311\024\245\016\026\207\n|\027\323",
-        [4] = "\337H\365\320\317i`J\362\265\321\340\235M\001\350",
-        [5] = "\300\205\240\206\206\232FI\327I\326\266\250\006\243\221",
-        [6] = "\306\360\260]\344\221\276\355\223lsD\347.Z)",
-        [7] = "\034>\3630q\374\250\377@\003\022\207n\332Y\222",
-        [8] = "\251\226\021>F3;\245\310\345\365\227\010\205\364\016",
-      },
-      5: path (string) = "thrift/lib/thrift/id.thrift",
-      6: languageIncludes (map) = map<string,list>[1] {
-        "cpp" -> list<string>[1] {
-          [0] = "thrift/lib/thrift/detail/id.h",
-        },
-      },
-      7: namespaces (map) = map<string,string>[9] {
-        "cpp2" -> "apache.thrift.type",
-        "go" -> "thrift.lib.thrift.id",
-        "java" -> "com.facebook.thrift.type",
-        "java.swift" -> "com.facebook.thrift.type_id",
-        "js" -> "apache.thrift.type",
-        "php" -> "apache_thrift_type_id",
-        "py" -> "thrift.lib.thrift.id",
-        "py.asyncio" -> "apache_thrift_asyncio.id",
-        "py3" -> "apache.thrift.type",
-      },
-    },
-    [7] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "standard",
-        2: uri (string) = "facebook.com/thrift/type",
-        8: annotations (map) = map<string,struct>[2] {
-          "facebook.com/thrift/annotation/Experimental" -> Annotation {
-          },
-          "facebook.com/thrift/annotation/TerseWrite" -> Annotation {
-          },
-        },
-        6: docs (struct) = DocBlock {
-          1: contents (string) = "The **standard** types all Thrift implementations support.\n",
-          2: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -1411000023015307811,
-            2: beginLine (i32) = 24,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 24,
-            5: endColumn (i32) = 66,
-          },
-        },
-      },
-      2: id (i64) = -1411000023015307811,
-      3: includes (list) = list<i64>[3] {
-        [0] = -2910911769510737115,
-        [1] = -1081331891627254549,
-        [2] = -8150165434060991361,
-      },
-      8: definitionKeys (list) = list<string>[6] {
-        [0] = "\257bs\326\311\254\236\263\023\017\034\323f\372b\206",
-        [1] = "Vv\342\361\331fF\030\360 \306\344C\325\333\027",
-        [2] = "\265\014l'Yo\253yG\233H\275\207\0211L",
-        [3] = "\344\242\254\014}t\013\375\215{$\216~s>8",
-        [4] = "\3108\304\220\007\350R'\213\025\361\346\002\216\227\036",
-        [5] = "\274\203)\232O\231\342\241\262\243\342\357S\225l\210",
-      },
-      5: path (string) = "thrift/lib/thrift/standard.thrift",
-      6: languageIncludes (map) = map<string,list>[1] {
-        "cpp" -> list<string>[2] {
-          [0] = "<folly/io/IOBuf.h>",
-          [1] = "<folly/FBString.h>",
-        },
-      },
-      7: namespaces (map) = map<string,string>[9] {
-        "cpp2" -> "apache.thrift.type",
-        "go" -> "thrift.lib.thrift.standard",
-        "java" -> "com.facebook.thrift.type",
-        "java.swift" -> "com.facebook.thrift.standard_type",
-        "js" -> "apache.thrift.type",
-        "php" -> "apache_thrift_type_standard",
-        "py" -> "thrift.lib.thrift.standard",
-        "py.asyncio" -> "apache_thrift_asyncio.standard",
-        "py3" -> "apache.thrift.type",
-      },
-    },
-    [8] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "java",
-        2: uri (string) = "facebook.com/thrift/annotation/java",
-      },
-      2: id (i64) = -1081331891627254549,
-      3: includes (list) = list<i64>[1] {
-        [0] = -7702644072597283434,
-      },
-      8: definitionKeys (list) = list<string>[7] {
-        [0] = "t\335\201\023a\320\034.Q8\033\367>&\337\226",
-        [1] = "\224\031\002\317\375\357\355f\231G\211\340\332\031\253\323",
-        [2] = "\247ca\216L\345M\362\313\003\361;\025\022|B",
-        [3] = "tK+\223e\366\352\006G\234\222]Z\016\257'",
-        [4] = "\215\031\204\005\031\345\323\360\271\312\304\177+\014}\261",
-        [5] = "\216W\242\?\343\326\372\017\332\017%\366C\362v\203",
-        [6] = "\376Q\255p\315\363\331[-\207\351\327RG\270\017",
-      },
-      5: path (string) = "thrift/annotation/java.thrift",
-      7: namespaces (map) = map<string,string>[6] {
-        "android" -> "com.facebook.thrift.annotation.java_deprecated",
-        "go" -> "thrift.annotation.java",
-        "java" -> "com.facebook.thrift.annotation.java_deprecated",
-        "js" -> "thrift.annotation.java",
-        "py" -> "thrift.annotation.java",
-        "py.asyncio" -> "facebook_thrift_asyncio.annotation.java",
-      },
-    },
-    [9] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "protocol",
-        2: uri (string) = "facebook.com/thrift/protocol",
-        8: annotations (map) = map<string,struct>[1] {
-          "facebook.com/thrift/annotation/Experimental" -> Annotation {
-          },
-        },
-      },
-      2: id (i64) = 5032647719888282931,
-      3: includes (list) = list<i64>[7] {
-        [0] = -8150165434060991361,
-        [1] = -2910911769510737115,
-        [2] = 4261727627074570159,
-        [3] = 8644127220089432106,
-        [4] = 3090172986120490708,
-        [5] = -1411000023015307811,
-        [6] = -6221644413379777926,
-      },
-      8: definitionKeys (list) = list<string>[5] {
-        [0] = "L\274I'\022\224\232J\362\2341\263\246.\304\215",
-        [1] = "\220\006@+\341\006\221\251\202\377\265\\\352\0073\225",
-        [2] = "\300\324\342\213r`\256\221\026\311@\201o\305\355\230",
-        [3] = "\363T\000Cl\335@\2271L3\250\014#\344\255",
-        [4] = "g\305\031\021DO\277eQI\276/\030>\326w",
-      },
-      5: path (string) = "thrift/lib/thrift/protocol.thrift",
-      6: languageIncludes (map) = map<string,list>[1] {
-        "cpp" -> list<string>[2] {
-          [0] = "folly/container/F14Map.h",
-          [1] = "thrift/lib/thrift/detail/id.h",
-        },
-      },
-      7: namespaces (map) = map<string,string>[7] {
-        "cpp2" -> "apache.thrift.protocol",
-        "go" -> "thrift.lib.thrift.protocol",
-        "java.swift" -> "com.facebook.thrift.protocol_swift",
-        "php" -> "apache_thrift_protocol",
-        "py" -> "thrift.lib.thrift.protocol",
-        "py.asyncio" -> "apache_thrift_asyncio.protocol",
-        "py3" -> "apache.thrift.protocol",
-      },
-    },
-    [10] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "protocol_detail",
-        2: uri (string) = "facebook.com/thrift/protocol/detail",
-        8: annotations (map) = map<string,struct>[1] {
-          "facebook.com/thrift/annotation/Experimental" -> Annotation {
-          },
-        },
-      },
-      2: id (i64) = 8644127220089432106,
-      3: includes (list) = list<i64>[4] {
-        [0] = -2910911769510737115,
-        [1] = -1411000023015307811,
-        [2] = -8150165434060991361,
-        [3] = -2895088982299593956,
-      },
-      8: definitionKeys (list) = list<string>[4] {
-        [0] = "\330\200`\241s\344\241\250\374\211~\352-!\250*",
-        [1] = "u~\004-\220O\314\3749rW%\305tI\274",
-        [2] = "\244\355\270\034U\023s\217\204\350\232V^\225\231\321",
-        [3] = "\240\?\304\370\331\271\212\021\215\374c\016\310\231\334\334",
-      },
-      5: path (string) = "thrift/lib/thrift/protocol_detail.thrift",
-      6: languageIncludes (map) = map<string,list>[1] {
-        "cpp" -> list<string>[3] {
-          [0] = "thrift/lib/thrift/detail/protocol.h",
-          [1] = "folly/container/F14Map.h",
-          [2] = "folly/container/F14Set.h",
-        },
-      },
-      7: namespaces (map) = map<string,string>[7] {
-        "cpp2" -> "apache.thrift.protocol.detail",
-        "go" -> "thrift.lib.thrift.protocol_detail",
-        "java.swift" -> "com.facebook.thrift.protocol_detail_swift",
-        "php" -> "apache_thrift_protocol.detail",
-        "py" -> "thrift.lib.thrift.protocol_detail",
-        "py.asyncio" -> "apache_thrift_asyncio.protocol_detail",
-        "py3" -> "apache.thrift.protocol.detail",
-      },
-    },
-    [11] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "type",
-        2: uri (string) = "facebook.com/thrift/type",
-        8: annotations (map) = map<string,struct>[2] {
-          "facebook.com/thrift/annotation/Experimental" -> Annotation {
-          },
-          "facebook.com/thrift/annotation/TerseWrite" -> Annotation {
-          },
-        },
-        6: docs (struct) = DocBlock {
-          1: contents (string) = "Canonical representations for well-known Thrift types.\n",
-          2: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 3090172986120490708,
-            2: beginLine (i32) = 26,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 26,
-            5: endColumn (i32) = 62,
-          },
-        },
-      },
-      2: id (i64) = 3090172986120490708,
-      3: includes (list) = list<i64>[4] {
-        [0] = -8150165434060991361,
-        [1] = -2895088982299593956,
-        [2] = -2910911769510737115,
-        [3] = 721383434353131889,
-      },
-      8: definitionKeys (list) = list<string>[5] {
-        [0] = "\367\324tY\263u9E)\335mFs5b\025",
-        [1] = "h\026\341%6^\010n\016\333P\215a\354\363i",
-        [2] = "\335pk\316\251\332\002\220\204\312\221\t\320\n\330g",
-        [3] = "\232VQ\265R\002x;v\202\330n/\017\303f",
-        [4] = "\366\030\304\336\310\036\340\247\033\247*\371Ew\361v",
-      },
-      5: path (string) = "thrift/lib/thrift/type.thrift",
-      6: languageIncludes (map) = map<string,list>[1] {
-        "cpp" -> list<string>[3] {
-          [0] = "<thrift/lib/cpp2/type/BaseType.h>",
-          [1] = "<thrift/lib/cpp2/type/Protocol.h>",
-          [2] = "<thrift/lib/cpp2/type/Type.h>",
-        },
-      },
-      7: namespaces (map) = map<string,string>[7] {
-        "cpp2" -> "apache.thrift.type",
-        "go" -> "thrift.lib.thrift.type",
-        "java.swift" -> "com.facebook.thrift.type_swift",
-        "php" -> "apache_thrift_type",
-        "py" -> "thrift.lib.thrift.type",
-        "py.asyncio" -> "apache_thrift_asyncio.type",
-        "py3" -> "apache.thrift.type",
-      },
-    },
-    [12] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "type_rep",
-        2: uri (string) = "facebook.com/thrift/type",
-        8: annotations (map) = map<string,struct>[1] {
-          "facebook.com/thrift/annotation/Experimental" -> Annotation {
-          },
-        },
-        6: docs (struct) = DocBlock {
-          1: contents (string) = "The **underlying representations** for well-known Thrift types.\n\nThe following definitions are provided as unadapted underlying\n[...](388)",
-          2: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 721383434353131889,
-            2: beginLine (i32) = 22,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 31,
-            5: endColumn (i32) = 4,
-          },
-        },
-      },
-      2: id (i64) = 721383434353131889,
-      3: includes (list) = list<i64>[4] {
-        [0] = -2910911769510737115,
-        [1] = 4261727627074570159,
-        [2] = -1411000023015307811,
-        [3] = -6221644413379777926,
-      },
-      8: definitionKeys (list) = list<string>[2] {
-        [0] = "n4g\2039Y\340Ck\224\224\260\020\370\264\000",
-        [1] = "\332\342U\347^R\371\017\305\342\020\034\245\tc\020",
-      },
-      5: path (string) = "thrift/lib/thrift/type_rep.thrift",
-      7: namespaces (map) = map<string,string>[8] {
-        "cpp2" -> "apache.thrift.type",
-        "go" -> "thrift.lib.thrift.type_rep",
-        "java.swift" -> "com.facebook.thrift.type_swift",
-        "js" -> "apache.thrift.type",
-        "php" -> "apache_thrift_type_rep",
-        "py" -> "thrift.lib.thrift.type_rep",
-        "py.asyncio" -> "apache_thrift_asyncio.type_rep",
-        "py3" -> "apache.thrift.type",
-      },
-    },
-    [13] = Program {
-      1: attrs (struct) = DefinitionAttrs {
-        1: name (string) = "python",
-        2: uri (string) = "facebook.com/thrift/annotation/python",
-      },
-      2: id (i64) = -6221644413379777926,
-      3: includes (list) = list<i64>[1] {
-        [0] = -7702644072597283434,
-      },
-      8: definitionKeys (list) = list<string>[5] {
-        [0] = "\317Q\342\2048,\\!\350\216k\243\313\013Y\306",
-        [1] = "\324\022\257[\207\260p\317\312P\346;\373\207\366r",
-        [2] = "\264\353\017\301\340\252Q\237Y\204\377\347Z\222\241\212",
-        [3] = "@\236q\023(c\000\262&g\022\230\310\3709|",
-        [4] = "\200\?\214^M\374\010\275\324A\271b\221#~=",
-      },
-      5: path (string) = "thrift/annotation/python.thrift",
-      7: namespaces (map) = map<string,string>[5] {
-        "android" -> "com.facebook.thrift.annotation.python_deprecated",
-        "go" -> "thrift.annotation.python",
-        "java" -> "com.facebook.thrift.annotation.python_deprecated",
-        "py" -> "thrift.annotation.python",
-        "py.asyncio" -> "facebook_thrift_asyncio.annotation.python",
-      },
+      5: path (string) = "include.thrift",
     },
   },
   3: valuesMap (map) = map<i64,struct>[1] {
@@ -599,61 +119,66 @@ Schema {
     },
   },
   8: definitionsMap (map) = map<string,struct>[3] {
-    "~\203T\344\20103\365#r\010\271\346\261\322K" -> Definition {
-      4: enumDef (struct) = Enum {
+    "(\355\023\201\245\006\343;\200\211\270\235&\304u`" -> Definition {
+      3: exceptionDef (struct) = Exception {
         1: attrs (struct) = DefinitionAttrs {
-          1: name (string) = "Result",
+          1: name (string) = "CustomException",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 4311836713659120699,
-            2: beginLine (i32) = 22,
+            1: programId (i64) = 2965325806698557205,
+            2: beginLine (i32) = 28,
             3: beginColumn (i32) = 1,
-            4: endLine (i32) = 26,
+            4: endLine (i32) = 31,
             5: endColumn (i32) = 2,
           },
         },
-        2: values (list) = list<struct>[3] {
-          [0] = EnumValue {
-            1: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "OK",
+        2: fields (list) = list<struct>[2] {
+          [0] = Field {
+            1: id (i16) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                8: stringType (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "name",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
-                2: beginLine (i32) = 23,
+                1: programId (i64) = 2965325806698557205,
+                2: beginLine (i32) = 29,
                 3: beginColumn (i32) = 3,
-                4: endLine (i32) = 23,
-                5: endColumn (i32) = 10,
+                4: endLine (i32) = 29,
+                5: endColumn (i32) = 18,
               },
             },
           },
-          [1] = EnumValue {
-            1: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "SO_SO",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
-                2: beginLine (i32) = 24,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 24,
-                5: endColumn (i32) = 13,
+          [1] = Field {
+            1: id (i16) = 2,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                10: enumType (struct) = TypeUri {
+                  2: typeHashPrefixSha2_256 (string) = "\343\217\337\3657\366X\216\250\222 \312P}\255\336",
+                },
+              },
+              2: params (list) = list<struct>[0] {
               },
             },
-            2: value (i32) = 1,
-          },
-          [2] = EnumValue {
-            1: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "GOOD",
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "result",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
-                2: beginLine (i32) = 25,
+                1: programId (i64) = 2965325806698557205,
+                2: beginLine (i32) = 30,
                 3: beginColumn (i32) = 3,
-                4: endLine (i32) = 25,
-                5: endColumn (i32) = 12,
+                4: endLine (i32) = 30,
+                5: endColumn (i32) = 35,
               },
             },
-            2: value (i32) = 2,
+            5: customDefault (i64) = -5721078285587364846,
           },
         },
       },
     },
-    "\240\311\3732\362\247\347(\033w7\344\337#\215&" -> Definition {
+    "\334\003XQhoS~\232_\221;x\2226\r" -> Definition {
       7: serviceDef (struct) = Service {
         1: attrs (struct) = DefinitionAttrs {
           1: name (string) = "PrimitivesService",
@@ -662,7 +187,7 @@ Schema {
             },
           },
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 4311836713659120699,
+            1: programId (i64) = 2965325806698557205,
             2: beginLine (i32) = 33,
             3: beginColumn (i32) = 1,
             4: endLine (i32) = 38,
@@ -674,7 +199,7 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "init",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
+                1: programId (i64) = 2965325806698557205,
                 2: beginLine (i32) = 35,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 35,
@@ -723,7 +248,7 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "method_that_throws",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
+                1: programId (i64) = 2965325806698557205,
                 2: beginLine (i32) = 36,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 36,
@@ -736,7 +261,7 @@ Schema {
                 3: type (struct) = TypeStruct {
                   1: name (struct) = TypeName {
                     13: exceptionType (struct) = TypeUri {
-                      2: typeHashPrefixSha2_256 (string) = "\313n7\247\375Z\272\031\363\020\030%\301\306$_",
+                      2: typeHashPrefixSha2_256 (string) = "(\355\023\201\245\006\343;\200\211\270\235&\304u`",
                     },
                   },
                   2: params (list) = list<struct>[0] {
@@ -750,7 +275,7 @@ Schema {
             6: returnType (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 10: enumType (struct) = TypeUri {
-                  2: typeHashPrefixSha2_256 (string) = "~\203T\344\20103\365#r\010\271\346\261\322K",
+                  2: typeHashPrefixSha2_256 (string) = "\343\217\337\3657\366X\216\250\222 \312P}\255\336",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -761,7 +286,7 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "return_void_method",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
+                1: programId (i64) = 2965325806698557205,
                 2: beginLine (i32) = 37,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 37,
@@ -795,61 +320,56 @@ Schema {
         },
       },
     },
-    "\313n7\247\375Z\272\031\363\020\030%\301\306$_" -> Definition {
-      3: exceptionDef (struct) = Exception {
+    "\343\217\337\3657\366X\216\250\222 \312P}\255\336" -> Definition {
+      4: enumDef (struct) = Enum {
         1: attrs (struct) = DefinitionAttrs {
-          1: name (string) = "CustomException",
+          1: name (string) = "Result",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 4311836713659120699,
-            2: beginLine (i32) = 28,
+            1: programId (i64) = 2965325806698557205,
+            2: beginLine (i32) = 22,
             3: beginColumn (i32) = 1,
-            4: endLine (i32) = 31,
+            4: endLine (i32) = 26,
             5: endColumn (i32) = 2,
           },
         },
-        2: fields (list) = list<struct>[2] {
-          [0] = Field {
-            1: id (i16) = 1,
-            3: type (struct) = TypeStruct {
-              1: name (struct) = TypeName {
-                8: stringType (i32) = 0,
-              },
-              2: params (list) = list<struct>[0] {
-              },
-            },
-            4: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "name",
+        2: values (list) = list<struct>[3] {
+          [0] = EnumValue {
+            1: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "OK",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
-                2: beginLine (i32) = 29,
+                1: programId (i64) = 2965325806698557205,
+                2: beginLine (i32) = 23,
                 3: beginColumn (i32) = 3,
-                4: endLine (i32) = 29,
-                5: endColumn (i32) = 18,
+                4: endLine (i32) = 23,
+                5: endColumn (i32) = 10,
               },
             },
           },
-          [1] = Field {
-            1: id (i16) = 2,
-            3: type (struct) = TypeStruct {
-              1: name (struct) = TypeName {
-                10: enumType (struct) = TypeUri {
-                  2: typeHashPrefixSha2_256 (string) = "~\203T\344\20103\365#r\010\271\346\261\322K",
-                },
-              },
-              2: params (list) = list<struct>[0] {
-              },
-            },
-            4: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "result",
+          [1] = EnumValue {
+            1: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "SO_SO",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4311836713659120699,
-                2: beginLine (i32) = 30,
+                1: programId (i64) = 2965325806698557205,
+                2: beginLine (i32) = 24,
                 3: beginColumn (i32) = 3,
-                4: endLine (i32) = 30,
-                5: endColumn (i32) = 35,
+                4: endLine (i32) = 24,
+                5: endColumn (i32) = 13,
               },
             },
-            5: customDefault (i64) = -5721078285587364846,
+            2: value (i32) = 1,
+          },
+          [2] = EnumValue {
+            1: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "GOOD",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 2965325806698557205,
+                2: beginLine (i32) = 25,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 25,
+                5: endColumn (i32) = 12,
+              },
+            },
+            2: value (i32) = 2,
           },
         },
       },

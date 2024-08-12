@@ -14,7 +14,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-import apache.thrift.type.schema.thrift_types
+import include.thrift_types
 
 class _fbthrift_compatible_with_Result:
     pass
@@ -48,7 +48,7 @@ class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_py_deprecated(self) -> "module.ttypes.CustomException": ...  # type: ignore
 
 
-_fbthrift_schema_3bd6b8a55f23bc3b: bytes = ...
+_fbthrift_schema_2926f41c3790ef15: bytes = ...
 
 
 class _fbthrift_PrimitivesService_init_args(_fbthrift_python_types.Struct):

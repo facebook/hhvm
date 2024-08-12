@@ -9,7 +9,7 @@
 #include <thrift/lib/cpp2/gen/client_h.h>
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
-#include "thrift/lib/thrift/gen-cpp2/schema_types.h"
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_types.h"
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

@@ -1683,6 +1683,21 @@ struct GetBlockedFaultsResponse {
   1: list<string> keyValues;
 }
 
+struct CheckoutProgressInfo {
+  1: i64 updatedInodes;
+}
+
+struct CheckoutNotInProgress {}
+
+struct CheckoutProgressInfoRequest {
+  1: PathString mountPoint;
+}
+
+union CheckoutProgressInfoResponse {
+  1: CheckoutProgressInfo checkoutProgressInfo;
+  2: CheckoutNotInProgress noProgress;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -1717,6 +1732,16 @@ service EdenService extends fb303_core.BaseService {
     2: ThriftRootId snapshotHash,
     3: CheckoutMode checkoutMode,
     4: CheckOutRevisionParams params,
+  ) throws (1: EdenError ex);
+
+  /**
+   * Given an Eden mount point returns progress for the checkOutRevision end
+   * point. When a checkout is not in progress it returns CheckoutNotInProgress
+   *
+   * It errors out when no valid mountPoint is provided.
+   */
+  CheckoutProgressInfoResponse getCheckoutProgressInfo(
+    1: CheckoutProgressInfoRequest params,
   ) throws (1: EdenError ex);
 
   /**

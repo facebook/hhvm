@@ -103,8 +103,10 @@ void KeepAliveWatcher::timeoutExpired() noexcept {
     stop();
     return;
   }
-  sendKeepAliveFrame(nullptr);
   checkTimeoutToCloseOrSchedule();
+  if (!closeConnection_) {
+    sendKeepAliveFrame(nullptr);
+  }
 }
 
 std::unique_ptr<folly::IOBuf> KeepAliveWatcher::makeKeepAliveFrame(

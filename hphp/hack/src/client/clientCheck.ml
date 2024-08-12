@@ -8,9 +8,6 @@
  *)
 
 open Hh_prelude
-open ClientEnv
-open Utils
-open ClientRename
 open Ocaml_overrides
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
@@ -99,7 +96,7 @@ let parse_position_string ~(split_on : string) arg =
 
 let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
   let {
-    root;
+    ClientEnv.root;
     from;
     autostart;
     force_dormant_start;
@@ -187,7 +184,7 @@ let rpc_with_connection
     'b Lwt.t =
   let use_priority_pipe = ServerCommandTypes.use_priority_pipe command in
   let conn () = connect args ~use_priority_pipe in
-  let%lwt result = call conn ~desc:args.desc @@ command in
+  let%lwt result = call conn ~desc:args.ClientEnv.desc @@ command in
   Lwt.return result
 
 let rpc_with_retry
@@ -234,34 +231,36 @@ let filter_real_paths ~allow_directories paths =
       match Sys_utils.realpath fn with
       | Some path ->
         if (not allow_directories) && Disk.is_directory fn then begin
-          prerr_endlinef "Path is a directory, only files are allowed: '%s'" fn;
+          Utils.prerr_endlinef
+            "Path is a directory, only files are allowed: '%s'"
+            fn;
           None
         end else
           Some path
       | None ->
-        prerr_endlinef "Could not find file '%s'" fn;
+        Utils.prerr_endlinef "Could not find file '%s'" fn;
         None)
 
 let main_internal
-    (args : client_check_env)
+    (args : ClientEnv.client_check_env)
     (local_config : ServerLocalConfig.t)
     (partial_telemetry_ref : Telemetry.t option ref) :
     (Exit_status.t * Telemetry.t) Lwt.t =
-  match args.mode with
-  | MODE_LIST_FILES ->
+  match args.ClientEnv.mode with
+  | ClientEnv.MODE_LIST_FILES ->
     let%lwt (infol, telemetry) =
       rpc args @@ ServerCommandTypes.LIST_FILES_WITH_ERRORS
     in
     List.iter infol ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_FIND_CLASS_REFS name ->
+  | ClientEnv.MODE_FIND_CLASS_REFS name ->
     let%lwt results =
       rpc_with_retry args
       @@ ServerCommandTypes.FIND_REFS (ServerCommandTypes.Find_refs.Class name)
     in
-    print_refs results ~json:args.output_json;
+    print_refs results ~json:args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_FIND_REFS name ->
+  | ClientEnv.MODE_FIND_REFS name ->
     let open ServerCommandTypes.Find_refs in
     let pieces = Str.split (Str.regexp "|") name in
     let (kind, name) =
@@ -300,17 +299,17 @@ let main_internal
     let%lwt results =
       rpc_with_retry args @@ ServerCommandTypes.FIND_REFS action
     in
-    print_refs results ~json:args.output_json;
+    print_refs results ~json:args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_GO_TO_IMPL_CLASS class_name ->
+  | ClientEnv.MODE_GO_TO_IMPL_CLASS class_name ->
     let%lwt results =
       rpc_with_retry args
       @@ ServerCommandTypes.GO_TO_IMPL
            (ServerCommandTypes.Find_refs.Class class_name)
     in
-    print_refs results ~json:args.output_json;
+    print_refs results ~json:args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_GO_TO_IMPL_METHOD name ->
+  | ClientEnv.MODE_GO_TO_IMPL_METHOD name ->
     let action =
       parse_name_or_member_id
         ~name_and_member_action:(fun class_name method_name ->
@@ -325,34 +324,42 @@ let main_internal
       let%lwt results =
         rpc_with_retry args @@ ServerCommandTypes.GO_TO_IMPL action
       in
-      print_refs results ~json:args.output_json;
+      print_refs results ~json:args.ClientEnv.output_json;
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | _ ->
       Printf.eprintf "Invalid input\n";
       Lwt.return (Exit_status.Input_error, Telemetry.create ()))
-  | MODE_IDE_FIND_REFS_BY_SYMBOL arg ->
+  | ClientEnv.MODE_IDE_FIND_REFS_BY_SYMBOL arg ->
     let%lwt results =
       rpc_with_retry args @@ ServerCommandTypes.IDE_FIND_REFS_BY_SYMBOL arg
     in
     FindRefsWireFormat.IdeShellout.to_string results |> print_endline;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_IDE_GO_TO_IMPL_BY_SYMBOL arg ->
+  | ClientEnv.MODE_IDE_GO_TO_IMPL_BY_SYMBOL arg ->
     let%lwt results =
       rpc_with_retry args @@ ServerCommandTypes.IDE_GO_TO_IMPL_BY_SYMBOL arg
     in
     FindRefsWireFormat.IdeShellout.to_string results |> print_endline;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_DUMP_SYMBOL_INFO files ->
+  | ClientEnv.MODE_DUMP_SYMBOL_INFO files ->
     let%lwt conn = connect args in
-    let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
-    Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_RENAME ((ref_mode : rename_mode), before, after) ->
-    let conn () = connect args in
     let%lwt () =
-      ClientRename.go conn ~desc:args.desc args ref_mode ~before ~after
+      ClientSymbolInfo.go conn ~desc:args.ClientEnv.desc files expand_path
     in
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_IDE_RENAME_BY_SYMBOL arg ->
+  | ClientEnv.MODE_RENAME ((ref_mode : ClientEnv.rename_mode), before, after) ->
+    let conn () = connect args in
+    let%lwt () =
+      ClientRename.go
+        conn
+        ~desc:args.ClientEnv.desc
+        args
+        ref_mode
+        ~before
+        ~after
+    in
+    Lwt.return (Exit_status.No_error, Telemetry.create ())
+  | ClientEnv.MODE_IDE_RENAME_BY_SYMBOL arg ->
     let open ServerCommandTypes in
     let (new_name, action, symbol_definition) = Rename.string_to_args arg in
     let%lwt results =
@@ -363,12 +370,12 @@ let main_internal
     begin
       match results with
       | Ok patches ->
-        ClientRename.go_ide_from_patches patches args.output_json;
+        ClientRename.go_ide_from_patches patches args.ClientEnv.output_json;
         Lwt.return (Exit_status.No_error, Telemetry.create ())
       | Error _msg -> raise Exit_status.(Exit_with Input_error)
     end
-  | MODE_IDENTIFY_SYMBOL arg ->
-    if not args.output_json then begin
+  | ClientEnv.MODE_IDENTIFY_SYMBOL arg ->
+    if not args.ClientEnv.output_json then begin
       Printf.eprintf "Must use --json\n%!";
       raise Exit_status.(Exit_with Input_error)
     end;
@@ -389,12 +396,12 @@ let main_internal
     let definitions = List.map result ~f:definition_to_json in
     Hh_json.json_to_string (Hh_json.JSON_Array definitions) |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_IDENTIFY_SYMBOL1 arg
-  | MODE_IDENTIFY_SYMBOL2 arg
-  | MODE_IDENTIFY_SYMBOL3 arg ->
+  | ClientEnv.MODE_IDENTIFY_SYMBOL1 arg
+  | ClientEnv.MODE_IDENTIFY_SYMBOL2 arg
+  | ClientEnv.MODE_IDENTIFY_SYMBOL3 arg ->
     let (line, char) = parse_position_string ~split_on:":" arg in
     let file =
-      match args.stdin_name with
+      match args.ClientEnv.stdin_name with
       | None -> ""
       | Some f -> expand_path f
     in
@@ -405,9 +412,9 @@ let main_internal
       rpc args
       @@ ServerCommandTypes.IDENTIFY_FUNCTION (file, content, line, char)
     in
-    ClientGetDefinition.go result args.output_json;
+    ClientGetDefinition.go result args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_TYPE_AT_POS arg ->
+  | ClientEnv.MODE_TYPE_AT_POS arg ->
     let tpos = Str.split (Str.regexp ":") arg in
     let (fn, line, char) =
       try
@@ -431,9 +438,9 @@ let main_internal
     let%lwt (ty, telemetry) =
       rpc args @@ ServerCommandTypes.INFER_TYPE (fn, line, char)
     in
-    ClientTypeAtPos.go ty args.output_json;
+    ClientTypeAtPos.go ty args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_TYPE_AT_POS_BATCH positions ->
+  | ClientEnv.MODE_TYPE_AT_POS_BATCH positions ->
     let positions =
       List.map positions ~f:(fun pos ->
           try
@@ -461,7 +468,7 @@ let main_internal
     in
     List.iter responses ~f:print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_IS_SUBTYPE ->
+  | ClientEnv.MODE_IS_SUBTYPE ->
     let stdin = Sys_utils.read_stdin_to_string () in
     let%lwt (response, telemetry) =
       rpc args @@ ServerCommandTypes.IS_SUBTYPE stdin
@@ -473,7 +480,7 @@ let main_internal
     | Error str ->
       Printf.eprintf "%s" str;
       raise Exit_status.(Exit_with Input_error))
-  | MODE_TYPE_ERROR_AT_POS arg ->
+  | ClientEnv.MODE_TYPE_ERROR_AT_POS arg ->
     let tpos = Str.split (Str.regexp ":") arg in
     let (fn, line, char) =
       try
@@ -498,9 +505,9 @@ let main_internal
     let%lwt (ty, telemetry) =
       rpc args @@ ServerCommandTypes.INFER_TYPE_ERROR (fn, line, char)
     in
-    ClientTypeErrorAtPos.go ty args.output_json;
+    ClientTypeErrorAtPos.go ty args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_TAST_HOLES arg ->
+  | ClientEnv.MODE_TAST_HOLES arg ->
     let parse_hole_filter = function
       | "any" -> Some ServerCommandTypes.Tast_hole.Any
       | "typing" -> Some ServerCommandTypes.Tast_hole.Typing
@@ -541,9 +548,9 @@ let main_internal
     let%lwt (ty, telemetry) =
       rpc args @@ ServerCommandTypes.TAST_HOLES (filename, hole_src_opt)
     in
-    ClientTastHoles.go ty ~print_file:false args.output_json;
+    ClientTastHoles.go ty ~print_file:false args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_TAST_HOLES_BATCH (file : string) ->
+  | ClientEnv.MODE_TAST_HOLES_BATCH (file : string) ->
     let files =
       expand_path file
       |> Sys_utils.read_file
@@ -555,24 +562,24 @@ let main_internal
     let%lwt (holes, telemetry) =
       rpc args @@ ServerCommandTypes.TAST_HOLES_BATCH files
     in
-    ClientTastHoles.go holes ~print_file:true args.output_json;
+    ClientTastHoles.go holes ~print_file:true args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_FUN_DEPS_AT_POS_BATCH positions ->
+  | ClientEnv.MODE_FUN_DEPS_AT_POS_BATCH positions ->
     let positions = parse_positions positions in
     let%lwt (responses, telemetry) =
       rpc args @@ ServerCommandTypes.FUN_DEPS_BATCH positions
     in
     List.iter responses ~f:print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_DEPS_OUT_AT_POS_BATCH positions ->
+  | ClientEnv.MODE_DEPS_OUT_AT_POS_BATCH positions ->
     let positions = parse_positions positions in
     let%lwt (responses, telemetry) =
       rpc args @@ ServerCommandTypes.DEPS_OUT_BATCH positions
     in
     List.iter responses ~f:print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_OUTLINE
-  | MODE_OUTLINE2 ->
+  | ClientEnv.MODE_OUTLINE
+  | ClientEnv.MODE_OUTLINE2 ->
     let (_handle : SharedMem.handle) =
       SharedMem.init ~num_workers:0 SharedMem.default_config
     in
@@ -593,16 +600,16 @@ let main_internal
         ParserOptions.default
         content
     in
-    ClientOutline.go results args.output_json;
+    ClientOutline.go results args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_METHOD_JUMP_CHILDREN class_ ->
+  | ClientEnv.MODE_METHOD_JUMP_CHILDREN class_ ->
     let filter = ServerCommandTypes.Method_jumps.No_filter in
     let%lwt (results, telemetry) =
       rpc args @@ ServerCommandTypes.METHOD_JUMP (class_, filter, true)
     in
-    ClientMethodJumps.go results true args.output_json;
+    ClientMethodJumps.go results true args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_METHOD_JUMP_ANCESTORS (class_, filter) ->
+  | ClientEnv.MODE_METHOD_JUMP_ANCESTORS (class_, filter) ->
     let filter =
       match MethodJumps.string_filter_to_method_jump_filter filter with
       | Some filter -> filter
@@ -613,9 +620,9 @@ let main_internal
     let%lwt (results, telemetry) =
       rpc args @@ ServerCommandTypes.METHOD_JUMP (class_, filter, false)
     in
-    ClientMethodJumps.go results false args.output_json;
+    ClientMethodJumps.go results false args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, filter) ->
+  | ClientEnv.MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, filter) ->
     let filter =
       match MethodJumps.string_filter_to_method_jump_filter filter with
       | Some filter -> filter
@@ -626,23 +633,23 @@ let main_internal
     let%lwt (results, telemetry) =
       rpc args @@ ServerCommandTypes.METHOD_JUMP_BATCH (classes, filter)
     in
-    ClientMethodJumps.go results false args.output_json;
+    ClientMethodJumps.go results false args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_IN_MEMORY_DEP_TABLE_SIZE ->
+  | ClientEnv.MODE_IN_MEMORY_DEP_TABLE_SIZE ->
     let%lwt (result, telemetry) =
       rpc args @@ ServerCommandTypes.IN_MEMORY_DEP_TABLE_SIZE
     in
-    ClientResultPrinter.Int_printer.go result args.output_json;
+    ClientResultPrinter.Int_printer.go result args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_SAVE_NAMING path ->
+  | ClientEnv.MODE_SAVE_NAMING path ->
     let () = Sys_utils.mkdir_p (Filename.dirname path) in
     let path = Path.make path in
     let%lwt (result, telemetry) =
       rpc args @@ ServerCommandTypes.SAVE_NAMING (Path.to_string path)
     in
-    SaveNamingResultPrinter.go result args.output_json;
+    SaveNamingResultPrinter.go result args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_SAVE_STATE path ->
+  | ClientEnv.MODE_SAVE_STATE path ->
     let () = Sys_utils.mkdir_p (Filename.dirname path) in
     (* Convert to real path because Client and Server may have
      * different cwd and we want to use the client processes' cwd. *)
@@ -650,12 +657,12 @@ let main_internal
     let%lwt (result, telemetry) =
       rpc args
       @@ ServerCommandTypes.SAVE_STATE
-           (Path.to_string path, args.gen_saved_ignore_type_errors)
+           (Path.to_string path, args.ClientEnv.gen_saved_ignore_type_errors)
     in
-    SaveStateResultPrinter.go result args.output_json;
+    SaveStateResultPrinter.go result args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_STATUS ->
-    let prechecked = Option.value args.prechecked ~default:true in
+  | ClientEnv.MODE_STATUS ->
+    let prechecked = Option.value args.ClientEnv.prechecked ~default:true in
     let%lwt ((), telemetry1) =
       if prechecked then
         Lwt.return ((), Telemetry.create ())
@@ -672,7 +679,7 @@ let main_internal
        preceding call to ServerCommandTypes.NO_PRECHECKED_FILES. *)
     let use_streaming =
       local_config.ServerLocalConfig.consume_streaming_errors
-      && (not args.output_json)
+      && (not args.ClientEnv.output_json)
       && prechecked
     in
     if use_streaming then
@@ -687,18 +694,20 @@ let main_internal
       Lwt.return (exit_status, telemetry)
     else
       let%lwt (status, telemetry) =
-        rpc args (ServerCommandTypes.STATUS { max_errors = args.max_errors })
+        rpc
+          args
+          (ServerCommandTypes.STATUS { max_errors = args.ClientEnv.max_errors })
       in
       let exit_status =
         ClientCheckStatus.go
           status
-          args.error_format
-          args.warning_switches
+          args.ClientEnv.error_format
+          args.ClientEnv.warning_switches
           ~warnings_default_all:
             local_config.ServerLocalConfig.warnings_default_all
-          ~output_json:args.output_json
-          ~max_errors:args.max_errors
-          ~is_interactive:args.is_interactive
+          ~output_json:args.ClientEnv.output_json
+          ~max_errors:args.ClientEnv.max_errors
+          ~is_interactive:args.ClientEnv.is_interactive
       in
       let telemetry =
         telemetry
@@ -709,7 +718,8 @@ let main_internal
              ~value:status.ServerCommandTypes.Server_status.last_recheck_stats
       in
       Lwt.return (exit_status, telemetry)
-  | MODE_STATUS_SINGLE { filenames; show_tast; preexisting_warnings } ->
+  | ClientEnv.(
+      MODE_STATUS_SINGLE { filenames; show_tast; preexisting_warnings }) ->
     let file_input filename =
       match filename with
       | "-" ->
@@ -723,7 +733,7 @@ let main_internal
         (ServerCommandTypes.STATUS_SINGLE
            {
              file_names = file_inputs;
-             max_errors = args.max_errors;
+             max_errors = args.ClientEnv.max_errors;
              return_expanded_tast = show_tast;
              preexisting_warnings;
            })
@@ -753,16 +763,16 @@ let main_internal
     let exit_status =
       ClientCheckStatus.go
         status
-        args.error_format
-        args.warning_switches
+        args.ClientEnv.error_format
+        args.ClientEnv.warning_switches
         ~warnings_default_all:
           local_config.ServerLocalConfig.warnings_default_all
-        ~is_interactive:args.is_interactive
-        ~output_json:args.output_json
-        ~max_errors:args.max_errors
+        ~is_interactive:args.ClientEnv.is_interactive
+        ~output_json:args.ClientEnv.output_json
+        ~max_errors:args.ClientEnv.max_errors
     in
     Lwt.return (exit_status, telemetry)
-  | MODE_SEARCH query ->
+  | ClientEnv.MODE_SEARCH query ->
     if not (String.equal query "this_is_just_to_check_liveness_of_hh_server")
     then begin
       prerr_endline
@@ -770,13 +780,13 @@ let main_internal
       Lwt.return (Exit_status.Input_error, Telemetry.create ())
     end else begin
       let%lwt ((), telemetry) = rpc args @@ ServerCommandTypes.CHECK_LIVENESS in
-      if args.output_json then print_endline "[]";
+      if args.ClientEnv.output_json then print_endline "[]";
       Lwt.return (Exit_status.No_error, telemetry)
     end
-  | MODE_LINT ->
-    let fnl = filter_real_paths ~allow_directories:false args.paths in
+  | ClientEnv.MODE_LINT ->
+    let fnl = filter_real_paths ~allow_directories:false args.ClientEnv.paths in
     begin
-      match args.paths with
+      match args.ClientEnv.paths with
       | [] ->
         prerr_endline "No lint errors (0 files checked)!";
         prerr_endline "Note: --lint expects a list of filenames to check.";
@@ -785,14 +795,16 @@ let main_internal
         let%lwt (results, telemetry) =
           rpc args @@ ServerCommandTypes.LINT fnl
         in
-        let error_format = Errors.format_or_default args.error_format in
-        ClientLint.go results args.output_json error_format;
+        let error_format =
+          Errors.format_or_default args.ClientEnv.error_format
+        in
+        ClientLint.go results args.ClientEnv.output_json error_format;
         Lwt.return (Exit_status.No_error, telemetry)
     end
-  | MODE_SERVER_RAGE ->
+  | ClientEnv.MODE_SERVER_RAGE ->
     let open ServerRageTypes in
     let open Hh_json in
-    if not args.output_json then begin
+    if not args.ClientEnv.output_json then begin
       Printf.eprintf "Must use --json\n%!";
       raise Exit_status.(Exit_with Input_error)
     end;
@@ -803,10 +815,10 @@ let main_internal
     let%lwt (items, telemetry) = rpc args ServerCommandTypes.RAGE in
     json_to_string (JSON_Array (List.map items ~f:make_item)) |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_LINT_STDIN filename -> begin
+  | ClientEnv.MODE_LINT_STDIN filename -> begin
     match Sys_utils.realpath filename with
     | None ->
-      prerr_endlinef "Could not find file '%s'" filename;
+      Utils.prerr_endlinef "Could not find file '%s'" filename;
       Lwt.return (Exit_status.Input_error, Telemetry.create ())
     | Some filename ->
       let contents = Sys_utils.read_stdin_to_string () in
@@ -815,28 +827,28 @@ let main_internal
         @@ ServerCommandTypes.LINT_STDIN
              { ServerCommandTypes.filename; contents }
       in
-      let error_format = Errors.format_or_default args.error_format in
-      ClientLint.go results args.output_json error_format;
+      let error_format = Errors.format_or_default args.ClientEnv.error_format in
+      ClientLint.go results args.ClientEnv.output_json error_format;
       Lwt.return (Exit_status.No_error, telemetry)
   end
-  | MODE_LINT_ALL code ->
+  | ClientEnv.MODE_LINT_ALL code ->
     let%lwt (results, telemetry) =
       rpc args @@ ServerCommandTypes.LINT_ALL code
     in
-    let error_format = Errors.format_or_default args.error_format in
-    ClientLint.go results args.output_json error_format;
+    let error_format = Errors.format_or_default args.ClientEnv.error_format in
+    ClientLint.go results args.ClientEnv.output_json error_format;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_STATS ->
+  | ClientEnv.MODE_STATS ->
     let%lwt (stats, telemetry) = rpc args @@ ServerCommandTypes.STATS in
     print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_REMOVE_DEAD_FIXMES codes ->
+  | ClientEnv.MODE_REMOVE_DEAD_FIXMES codes ->
     (* we need to confirm that the server is not already started
      * in a non-no-load (yes-load) state
      *)
     let%lwt conn = connect args in
     let%lwt (response, telemetry) =
-      ClientConnect.rpc conn ~desc:args.desc
+      ClientConnect.rpc conn ~desc:args.ClientEnv.desc
       @@ ServerCommandTypes.REMOVE_DEAD_FIXMES codes
     in
     begin
@@ -845,15 +857,15 @@ let main_internal
         Printf.eprintf "%s\n" msg;
         Lwt.return (Exit_status.Type_error, telemetry)
       | `Ok patches ->
-        if args.output_json then
-          print_patches_json patches
+        if args.ClientEnv.output_json then
+          ClientRename.print_patches_json patches
         else
-          apply_patches patches;
+          ClientRename.apply_patches patches;
         Lwt.return (Exit_status.No_error, telemetry)
     end
-  | MODE_REMOVE_DEAD_UNSAFE_CASTS ->
+  | ClientEnv.MODE_REMOVE_DEAD_UNSAFE_CASTS ->
     let status_cmd =
-      ServerCommandTypes.STATUS { max_errors = args.max_errors }
+      ServerCommandTypes.STATUS { max_errors = args.ClientEnv.max_errors }
     in
     let rec go () =
       let%lwt (response, telemetry) =
@@ -864,7 +876,7 @@ let main_internal
         Printf.eprintf "%s\n" msg;
         Lwt.return (Exit_status.Type_error, telemetry)
       | `Ok patches ->
-        apply_patches patches;
+        ClientRename.apply_patches patches;
         if List.is_empty patches then
           Lwt.return (Exit_status.No_error, telemetry)
         else
@@ -872,21 +884,21 @@ let main_internal
           go ()
     in
     go ()
-  | MODE_REWRITE_DECLARATIONS ->
+  | ClientEnv.MODE_REWRITE_DECLARATIONS ->
     DeclarationsRewriter.start (Random.State.make_self_init ());
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_REWRITE_LAMBDA_PARAMETERS files ->
+  | ClientEnv.MODE_REWRITE_LAMBDA_PARAMETERS files ->
     let%lwt conn = connect args in
     let%lwt (patches, telemetry) =
-      ClientConnect.rpc conn ~desc:args.desc
+      ClientConnect.rpc conn ~desc:args.ClientEnv.desc
       @@ ServerCommandTypes.REWRITE_LAMBDA_PARAMETERS files
     in
-    if args.output_json then
-      print_patches_json patches
+    if args.ClientEnv.output_json then
+      ClientRename.print_patches_json patches
     else
-      apply_patches patches;
+      ClientRename.apply_patches patches;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_FULL_FIDELITY_PARSE file ->
+  | ClientEnv.MODE_FULL_FIDELITY_PARSE file ->
     (* We can cheaply do this on the client today, but we might want to
        do it on the server and cache the results in the future. *)
     let do_it_on_server = false in
@@ -902,12 +914,12 @@ let main_internal
     in
     ClientFullFidelityParse.go results;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_FULL_FIDELITY_SCHEMA ->
+  | ClientEnv.MODE_FULL_FIDELITY_SCHEMA ->
     let schema = Full_fidelity_schema.schema_as_json () in
     print_string schema;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_CST_SEARCH files_to_search ->
-    let sort_results = args.sort_results in
+  | ClientEnv.MODE_CST_SEARCH files_to_search ->
+    let sort_results = args.ClientEnv.sort_results in
     let input = Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string in
     let%lwt (result, telemetry) =
       rpc args
@@ -923,12 +935,14 @@ let main_internal
         print_endline error;
         raise Exit_status.(Exit_with Input_error)
     end
-  | MODE_FILE_LEVEL_DEPENDENCIES ->
-    let paths = filter_real_paths ~allow_directories:true args.paths in
+  | ClientEnv.MODE_FILE_LEVEL_DEPENDENCIES ->
+    let paths =
+      filter_real_paths ~allow_directories:true args.ClientEnv.paths
+    in
     let%lwt (responses, telemetry) =
       rpc args @@ ServerCommandTypes.FILE_DEPENDENTS paths
     in
-    if args.output_json then
+    if args.ClientEnv.output_json then
       Hh_json.(
         let json_path_list =
           List.map responses ~f:(fun path -> JSON_String path)
@@ -938,10 +952,10 @@ let main_internal
     else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_VERBOSE verbose ->
+  | ClientEnv.MODE_VERBOSE verbose ->
     let%lwt ((), telemetry) = rpc args @@ ServerCommandTypes.VERBOSE verbose in
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_DEPS_IN_AT_POS_BATCH positions ->
+  | ClientEnv.MODE_DEPS_IN_AT_POS_BATCH positions ->
     let positions = parse_positions positions in
     let%lwt results =
       rpc_with_retry_list args @@ ServerCommandTypes.DEPS_IN_BATCH positions
@@ -955,11 +969,11 @@ let rec flush_event_logger () : unit Lwt.t =
   flush_event_logger ()
 
 let main
-    (args : client_check_env)
+    (args : ClientEnv.client_check_env)
     (local_config : ServerLocalConfig.t)
     ~(init_proc_stack : string list option) : 'a =
   HackEventLogger.client_set_mode
-    (ClientEnv.Variants_of_client_mode.to_name args.mode);
+    (ClientEnv.Variants_of_client_mode.to_name args.ClientEnv.mode);
 
   HackEventLogger.client_check_start ();
   ClientSpinner.start_heartbeat_telemetry ();

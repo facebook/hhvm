@@ -759,8 +759,7 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
   appender.insert(paramQueue.move());
 
   return rocket::SetupFrame(
-      rocket::Payload::makeFromMetadataAndData(queue.move(), {}),
-      /* rocketMimeTypes = */ true);
+      rocket::Payload::makeFromMetadataAndData(queue.move(), {}));
 }
 
 RocketClientChannel::RocketClientChannel(

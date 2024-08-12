@@ -42,8 +42,8 @@ class SetupFrame {
  public:
   explicit SetupFrame(std::unique_ptr<folly::IOBuf> frame);
 
-  explicit SetupFrame(Payload&& payload, bool rocketMimeTypes)
-      : payload_(std::move(payload)), rocketMimeTypes_(rocketMimeTypes) {}
+  explicit SetupFrame(Payload&& payload)
+      : payload_(std::move(payload)), rocketMimeTypes_(true) {}
 
   static constexpr FrameType frameType() { return FrameType::SETUP; }
 

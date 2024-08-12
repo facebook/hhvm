@@ -113,7 +113,7 @@ namespace thrift {
 namespace rocket {
 
 TEST(FrameSerialization, SetupSanity) {
-  SetupFrame frame(Payload::makeFromMetadataAndData(kMetadata, kData), false);
+  SetupFrame frame(Payload::makeFromMetadataAndData(kMetadata, kData));
 
   auto validate = [](const SetupFrame& f) {
     // Resumption and lease flags are not currently supported

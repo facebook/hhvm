@@ -230,8 +230,17 @@ void SetupFrame::serialize(Serializer& writer) && {
     nwritten += writer.write(resumeIdentificationToken_);
   }
 
-  const auto& metadataMimeType =
-      rocketMimeTypes_ ? kRocketMetadataMimeType : kLegacyMimeType;
+  std::string_view metadataMimeType;
+  if (rocketMimeTypes_) {
+    if (encodeMetadataUsingBinary_) {
+      metadataMimeType = kRocketMetadataBinaryMimeType;
+    } else {
+      metadataMimeType = kRocketMetadataCompactMimeType;
+    }
+  } else {
+    metadataMimeType = kLegacyMimeType;
+  }
+
   const auto& payloadMimeType =
       rocketMimeTypes_ ? kRocketPayloadMimeType : kLegacyMimeType;
 
@@ -709,7 +718,10 @@ SetupFrame::SetupFrame(std::unique_ptr<folly::IOBuf> frame) {
   const auto dataMimeLength = cursor.read<uint8_t>();
   auto dataMimeType = cursor.readFixedString(dataMimeLength);
 
-  rocketMimeTypes_ = (metadataMimeType == kRocketMetadataMimeType) &&
+  encodeMetadataUsingBinary_ =
+      metadataMimeType == kRocketMetadataBinaryMimeType;
+  rocketMimeTypes_ = (metadataMimeType == kRocketMetadataBinaryMimeType ||
+                      metadataMimeType == kRocketMetadataCompactMimeType) &&
       (dataMimeType == kRocketPayloadMimeType);
 
   payload_ = readPayload(flags_.metadata(), cursor, std::move(frame));

@@ -64,6 +64,7 @@ THRIFT_FLAG_DEFINE_bool(rocket_client_new_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_client_max_version, kRocketClientMaxVersion);
 THRIFT_FLAG_DEFINE_bool(rocket_client_rocket_skip_protocol_key, false);
 THRIFT_FLAG_DEFINE_bool(rocket_client_enable_bidirectional_propagation, true);
+THRIFT_FLAG_DEFINE_bool(rocket_client_binary_rpc_metadata_encoding, false);
 
 using namespace apache::thrift::transport;
 
@@ -736,15 +737,24 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
   if (!clientMetadata.agent_ref()) {
     clientMetadata.agent_ref() = "RocketClientChannel.cpp";
   }
-  CompactProtocolWriter compactProtocolWriter;
+
   folly::IOBufQueue paramQueue;
-  compactProtocolWriter.setOutput(&paramQueue);
-  meta.write(&compactProtocolWriter);
+  uint32_t serialized_size;
+  if (THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding)) {
+    BinaryProtocolWriter binaryProtocolWriter;
+    binaryProtocolWriter.setOutput(&paramQueue);
+    meta.write(&binaryProtocolWriter);
+    serialized_size = meta.serializedSize(&binaryProtocolWriter);
+  } else {
+    CompactProtocolWriter compactProtocolWriter;
+    compactProtocolWriter.setOutput(&paramQueue);
+    meta.write(&compactProtocolWriter);
+    serialized_size = meta.serializedSize(&compactProtocolWriter);
+  }
 
   // Serialize RocketClient's major/minor version (which is separate from the
   // rsocket protocol major/minor version) into setup metadata.
-  auto buf = folly::IOBuf::createCombined(
-      sizeof(int32_t) + meta.serializedSize(&compactProtocolWriter));
+  auto buf = folly::IOBuf::createCombined(sizeof(int32_t) + serialized_size);
   folly::IOBufQueue queue;
   queue.append(std::move(buf));
   folly::io::QueueAppender appender(&queue, /* do not grow */ 0);
@@ -759,7 +769,8 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
   appender.insert(paramQueue.move());
 
   return rocket::SetupFrame(
-      rocket::Payload::makeFromMetadataAndData(queue.move(), {}));
+      rocket::Payload::makeFromMetadataAndData(queue.move(), {}),
+      THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding));
 }
 
 RocketClientChannel::RocketClientChannel(

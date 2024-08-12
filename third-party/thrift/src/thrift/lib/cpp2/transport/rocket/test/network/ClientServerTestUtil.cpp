@@ -134,7 +134,7 @@ rocket::SetupFrame RocketTestClient::makeTestSetupFrame(
   // Append serialized setup parameters to setup frame metadata
   appender.insert(paramQueue.move());
   return rocket::SetupFrame(
-      rocket::Payload::makeFromMetadataAndData(queue.move(), {}));
+      rocket::Payload::makeFromMetadataAndData(queue.move(), {}), false);
 }
 
 RocketTestClient::RocketTestClient(const folly::SocketAddress& serverAddr)

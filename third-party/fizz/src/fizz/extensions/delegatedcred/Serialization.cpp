@@ -118,10 +118,11 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
   }
   folly::Optional<DelegatedCredential> cred;
   try {
-    auto credData = folly::base64Decode(combinedPemData.substr(
+    auto data = combinedPemData.substr(
         credDataPtr + dcHeader.size(),
-        credDataEndPtr - credDataPtr - dcHeader.size() - 1));
-
+        credDataEndPtr - credDataPtr - dcHeader.size() - 1);
+    data.erase(remove_if(data.begin(), data.end(), ::isspace), data.end());
+    auto credData = folly::base64Decode(data);
     std::vector<Extension> credVec;
     credVec.emplace_back(Extension{
         ExtensionType::delegated_credential,

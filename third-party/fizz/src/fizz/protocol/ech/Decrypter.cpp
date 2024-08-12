@@ -30,10 +30,10 @@ folly::Optional<DecrypterLookupResult> decodeAndGetParam(
     const Extension& encodedECHExtension,
     const std::vector<DecrypterParams>& decrypterParams) {
   folly::io::Cursor cursor(encodedECHExtension.extension_data.get());
+  auto echExtension = getExtension<ech::OuterECHClientHello>(cursor);
   for (const auto& param : decrypterParams) {
     switch (param.echConfig.version) {
       case ECHVersion::Draft15: {
-        auto echExtension = getExtension<ech::OuterECHClientHello>(cursor);
         auto& echConfig = param.echConfig;
         auto currentConfigDraft = decode<ECHConfigContentDraft>(
             echConfig.ech_config_content->clone());

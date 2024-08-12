@@ -20,11 +20,18 @@ using namespace fizz::test;
 namespace fizz {
 namespace ech {
 namespace test {
-ClientHello getChloOuterWithExt(std::unique_ptr<KeyExchange> kex) {
+ClientHello getChloOuterWithExt(
+    std::unique_ptr<KeyExchange> kex,
+    std::optional<ECHConfig> config = std::nullopt) {
+  if (!config) {
+    config = getECHConfig();
+  }
+
   // Setup ECH extension
-  auto echConfigContent = getECHConfigContent();
+  folly::io::Cursor c(config->ech_config_content.get());
+  auto echConfigContent = decode<ECHConfigContentDraft>(c);
   auto supportedECHConfig = SupportedECHConfig{
-      getECHConfig(),
+      std::move(config.value()),
       echConfigContent.key_config.config_id,
       echConfigContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
@@ -220,6 +227,30 @@ TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
       decrypter.decryptClientHelloHRR(
           TestMessages::clientHello(), gotChlo->context),
       FizzException);
+}
+
+TEST(DecrypterTest, TestDecodeMultipleDecrypterParam) {
+  auto targetEchConfigContent = getECHConfigContent();
+  targetEchConfigContent.key_config.config_id = 2;
+  ECHConfig targetECHConfig;
+  targetECHConfig.ech_config_content =
+      encode(std::move(targetEchConfigContent));
+  targetECHConfig.version = ECHVersion::Draft15;
+
+  auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
+  kex->setPrivateKey(getPrivateKey(kP256Key));
+  ECHConfigManager decrypter;
+  // Load multiple decrypter params
+  decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
+  decrypter.addDecryptionConfig(DecrypterParams{targetECHConfig, kex->clone()});
+
+  Buf enc;
+  auto chlo = getChloOuterWithExt(kex->clone(), targetECHConfig);
+
+  // Decrypting chlo should result in the second decrypter param being used
+  auto result = decrypter.decryptClientHello(chlo);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result->configId == 2);
 }
 
 } // namespace test

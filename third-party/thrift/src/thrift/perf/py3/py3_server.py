@@ -18,7 +18,7 @@ import signal
 import sys
 from argparse import ArgumentParser
 
-from apache.thrift.test.py3.load_handler import LoadTestHandler
+from thrift.perf.py3.load_handler import LoadTestHandler
 from thrift.py3 import ThriftServer
 
 

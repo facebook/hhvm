@@ -725,10 +725,7 @@ using FieldValueMap = std::unordered_map<int16_t, PyObject*>;
 class DynamicStructInfo {
  public:
   DynamicStructInfo(
-      const char* name,
-      int16_t numFields,
-      bool isUnion = false,
-      bool isMutable = false);
+      const char* name, int16_t numFields, bool isUnion, bool isMutable);
 
   // DynamicStructInfo is non-copyable
   DynamicStructInfo(const DynamicStructInfo&) = delete;

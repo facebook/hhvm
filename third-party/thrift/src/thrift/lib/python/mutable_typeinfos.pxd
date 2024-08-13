@@ -27,9 +27,16 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
-        cDynamicStructInfo(const char* name, int16_t numFields, bint isUnion)
+        cDynamicStructInfo(
+            const char* name, int16_t numFields, bint isUnion, bint isMutable
+        )
         const cStructInfo& getStructInfo()
-        void addFieldInfo(int16_t id, FieldQualifier qualifier, const char* name, const cTypeInfo* typeInfo) except+
+        void addFieldInfo(
+            int16_t id,
+            FieldQualifier qualifier,
+            const char* name,
+            const cTypeInfo* typeInfo,
+        ) except+
         void addFieldValue(int16_t index, object fieldValue) except+
         bint isUnion()
 
@@ -46,7 +53,9 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         const cTypeInfo* get()
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
-    cdef cTypeInfo createMutableStructTypeInfo(const cDynamicStructInfo& structInfo) except+
+    cdef cTypeInfo createMutableStructTypeInfo(
+        const cDynamicStructInfo& structInfo
+    ) except+
 
 from thrift.python.types cimport TypeInfoBase
 

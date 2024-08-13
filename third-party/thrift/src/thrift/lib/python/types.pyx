@@ -419,6 +419,7 @@ cdef class StructInfo:
             PyUnicode_AsUTF8(name),
             num_fields,
             False, # isUnion
+            False, # isMutable
         )
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
@@ -512,6 +513,7 @@ cdef class UnionInfo:
             PyUnicode_AsUTF8(name),
             len(field_infos),
             True, # isUnion
+            False, # isMutable
         )
         self.type_infos = {}
         self.id_to_adapter_info = {}

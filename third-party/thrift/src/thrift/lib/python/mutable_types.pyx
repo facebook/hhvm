@@ -583,6 +583,7 @@ cdef class MutableUnionInfo:
             PyUnicode_AsUTF8(union_name),
             len(field_infos),
             True, # isUnion
+            True, # isMutable
         )
         self.type_infos = {}
         self.id_to_adapter_info = {}

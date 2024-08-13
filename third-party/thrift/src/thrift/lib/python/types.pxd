@@ -36,9 +36,16 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
-        cDynamicStructInfo(const char* name, int16_t numFields, bint isUnion)
+        cDynamicStructInfo(
+            const char* name, int16_t numFields, bint isUnion, bint isMutable
+        )
         const cStructInfo& getStructInfo()
-        void addFieldInfo(int16_t id, FieldQualifier qualifier, const char* name, const cTypeInfo* typeInfo) except+
+        void addFieldInfo(
+            int16_t id,
+            FieldQualifier qualifier,
+            const char* name,
+            const cTypeInfo* typeInfo,
+        ) except+
         void addFieldValue(int16_t index, object fieldValue) except+
         bint isUnion()
 
@@ -54,11 +61,17 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         cMapTypeInfo(cTypeInfo& keyInfo, cTypeInfo& valInfo)
         const cTypeInfo* get()
 
-    cdef object createImmutableStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
+    cdef object createImmutableStructTupleWithDefaultValues(
+        const cStructInfo& structInfo
+    ) except+
     cdef object createStructTupleWithNones(const cStructInfo& structInfo)
-    cdef void populateImmutableStructTupleUnsetFieldsWithDefaultValues(object, const cStructInfo& structInfo) except+
+    cdef void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
+        object, const cStructInfo& structInfo
+    ) except+
     cdef object createUnionTuple() except+
-    cdef cTypeInfo createImmutableStructTypeInfo(const cDynamicStructInfo& structInfo) except+
+    cdef cTypeInfo createImmutableStructTypeInfo(
+        const cDynamicStructInfo& structInfo
+    ) except+
     cdef void setStructIsset(object, int index, bint set) except+
 
     cdef const cTypeInfo& boolTypeInfo
@@ -120,7 +133,8 @@ cdef class IOBufTypeInfo(TypeInfoBase):
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)
 
-# TODO(ffrancet): Refactor this to a c class and update all of its accesses to c functions
+# TODO(ffrancet): Refactor this to a c class and update all of its accesses to c
+# functions
 cdef class FieldInfo:
     cdef int id
     cdef FieldQualifier qualifier
@@ -201,7 +215,9 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
 cdef class StructOrUnion:
     cdef tuple _fbthrift_data
     cdef folly.iobuf.IOBuf _serialize(StructOrUnion self, Protocol proto)
-    cdef uint32_t _deserialize(StructOrUnion self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
+    cdef uint32_t _deserialize(
+        StructOrUnion self, folly.iobuf.IOBuf buf, Protocol proto
+    ) except? 0
     cdef _fbthrift_get_field_value(self, int16_t index)
 
 cdef api object _get_fbthrift_data(object struct_or_union)
@@ -210,7 +226,9 @@ cdef api object _get_exception_fbthrift_data(object generated_error)
 cdef class Struct(StructOrUnion):
     cdef tuple _fbthrift_field_cache
     cdef folly.iobuf.IOBuf _serialize(Struct self, Protocol proto)
-    cdef uint32_t _deserialize(Struct self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
+    cdef uint32_t _deserialize(
+        Struct self, folly.iobuf.IOBuf buf, Protocol proto
+    ) except? 0
     cdef _fbthrift_get_field_value(Struct self, int16_t index)
     cdef _fbthrift_populate_primitive_fields(Struct self)
     cdef _fbthrift_fully_populate_cache(Struct self)
@@ -227,7 +245,9 @@ cdef class Union(StructOrUnion):
     cdef object _fbthrift_to_internal_data(self, type_value, value)
     cdef void _fbthrift_set_union_value(self, field_id, value) except *
     cdef folly.iobuf.IOBuf _serialize(Union self, Protocol proto)
-    cdef uint32_t _deserialize(Union self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
+    cdef uint32_t _deserialize(
+        Union self, folly.iobuf.IOBuf buf, Protocol proto
+    ) except? 0
 
 cdef class BadEnum:
     cdef object _enum

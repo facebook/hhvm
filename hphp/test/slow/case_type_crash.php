@@ -1,8 +1,11 @@
 <?hh
 <<file: __EnableUnstableFeatures('case_types')>>
-enum E : string as string {
+
+type A4 = string;
+enum E : A4 {
   A = 'A';
 }
+
 final class Foo {}
 case type EOrFoo = E | Foo;
 function take(EOrFoo $e_or_foo): void {}

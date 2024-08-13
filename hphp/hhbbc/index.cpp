@@ -11886,7 +11886,6 @@ void flatten_type_mappings(IndexData& index,
                                       | TypeConstraintFlags::TypeConstant
                                       | TypeConstraintFlags::DisplayNullable
                                       | TypeConstraintFlags::UpperBound);
-      auto firstEnum = typeMapping->firstEnum;
       auto const isUnion = typeMapping->value.isUnion();
       FTRACE(4, "Flattening Type Mapping {} \n", typeMapping->name);
       bool anyUnresolved = false;
@@ -11899,7 +11898,7 @@ void flatten_type_mappings(IndexData& index,
         const auto type = tc.type();
         const auto value = tc.typeName();
         auto name = value;
-        LSString curEnum; // The enum we are currently in
+        bool inEnum = typeMapping->isEnum; // Are we inside an enum
 
         if (type != AnnotType::Unresolved) {
           // If the type-mapping is already resolved, we mainly take it
@@ -11925,17 +11924,17 @@ void flatten_type_mappings(IndexData& index,
           continue;
         }
 
-        std::queue<std::tuple<LSString, LSString>> queue; // item, curEnum
-        FTRACE(4, "Pushing {} onto queue\n", name);
-        queue.push(std::make_tuple(name, curEnum));
+        std::queue<std::tuple<LSString, bool>> queue; // item, inEnum
+        FTRACE(4, "Pushing ({} {}) onto queue\n", name, inEnum);
+        queue.push(std::make_tuple(name, inEnum));
 
         for (size_t rounds = 0;; ++rounds) {
           if (queue.empty()) break;
-          auto [name, curEnum] = queue.front();
+          auto [name, inEnum] = queue.front();
           name = normalizeNS(name);
           queue.pop();
 
-          FTRACE(4, "Popping {}\n", name);
+          FTRACE(4, "Popping ({} {})\n", name, inEnum);
 
           if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
             flags |= next->value.flags() & (TypeConstraintFlags::Nullable
@@ -11944,32 +11943,25 @@ void flatten_type_mappings(IndexData& index,
                                             | TypeConstraintFlags::TypeConstant
                                             | TypeConstraintFlags::DisplayNullable
                                             | TypeConstraintFlags::UpperBound);
-            auto const nextEnum = next->firstEnum;
-            assertx(IMPLIES(next->value.isUnion(), !nextEnum));
-            if (!curEnum) curEnum = nextEnum;
-            if (!firstEnum && !isUnion) firstEnum = curEnum;
-
-            if (enumMeta && nextEnum) {
-              enumMeta->deps.emplace(nextEnum);
-            }
+            assertx(IMPLIES(next->value.isUnion(), !next->isEnum));
+            if (!inEnum) inEnum = next->isEnum;
+            if (enumMeta && next->isEnum) enumMeta->deps.emplace(name);
 
             for (auto const& next_tc : eachTypeConstraintInUnion(next->value)) {
               auto next_type = next_tc.type();
               auto next_value = next_tc.typeName();
               if (next_type == AnnotType::Unresolved) {
-                FTRACE(4, "Pushing {} onto queue\n", next_value);
-                queue.push(std::make_tuple(next_value, curEnum));
+                FTRACE(4, "Pushing ({} {}) onto queue\n", next_value, inEnum);
+                queue.push(std::make_tuple(next_value, inEnum));
                 continue;
               }
               assertx(next_type != AnnotType::SubObject);
-              if (curEnum && !enumSupportsAnnot(next_type)) {
+              if (inEnum && !enumSupportsAnnot(next_type)) {
                 FTRACE(
                   2, "Type-mapping '{}' is invalid because it resolves to "
-                  "invalid enum type {}{}\n",
+                  "invalid enum type {}\n",
                   typeMapping->name,
-                  annotName(next_type),
-                  curEnum->tsame(typeMapping->name)
-                    ? "" : folly::sformat(" (via {})", curEnum)
+                  annotName(next_type)
                 );
                 tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
                 anyUnresolved = true;
@@ -11978,31 +11970,28 @@ void flatten_type_mappings(IndexData& index,
               tvu.emplace_back(next_type, tc.flags() | flags, next_value);
             }
           } else if (index.classRefs.count(name)) {
-            if (curEnum) {
+            if (inEnum) {
               FTRACE(
                 2, "Type-mapping '{}' is invalid because it resolves to "
-                "invalid object '{}' for enum type (via {})\n",
+                "invalid object '{}' for enum\n",
                 typeMapping->name,
-                name,
-                curEnum
+                name
               );
             }
 
             tvu.emplace_back(
-              curEnum ? AnnotType::Unresolved : AnnotType::SubObject,
+              inEnum ? AnnotType::Unresolved : AnnotType::SubObject,
               tc.flags() | flags,
               name
             );
-            if (curEnum) anyUnresolved = true;
+            if (inEnum) anyUnresolved = true;
             continue;
           } else {
             FTRACE(
               2, "Type-mapping '{}' is invalid because it involves "
-              "non-existent type '{}'{}\n",
+              "non-existent type '{}'\n",
               typeMapping->name,
-              name,
-              (curEnum && !curEnum->tsame(typeMapping->name))
-                ? folly::sformat(" (via {})", curEnum) : ""
+              name
             );
             tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
             anyUnresolved = true;
@@ -12025,8 +12014,9 @@ void flatten_type_mappings(IndexData& index,
               );
               return TypeMapping {
                 typeMapping->name,
-                firstEnum,
                 TypeConstraint{AnnotType::Unresolved, flags, name},
+                false,
+                inEnum,
               };
             }
           }
@@ -12043,7 +12033,8 @@ void flatten_type_mappings(IndexData& index,
       // be unresolved. But it's important to try the `makeUnion` anyway because
       // it will deal with some of the canonicalizations like `bool`.
       auto value = TypeConstraint::makeUnion(typeMapping->name, std::move(tvu));
-      return TypeMapping { typeMapping->name, firstEnum, value };
+      // Should no longer be a type alias.
+      return TypeMapping { typeMapping->name, value, false, typeMapping->isEnum};
     }
   );
 
@@ -12051,11 +12042,9 @@ void flatten_type_mappings(IndexData& index,
     auto const name = after.name;
     using namespace folly::gen;
     FTRACE(
-      4, "Type-mapping '{}' flattened to {}{}\n",
+      4, "Type-mapping '{}' flattened to {}\n",
       name,
-      after.value.debugName(),
-      (after.firstEnum && !after.firstEnum->tsame(name))
-        ? folly::sformat(" (via {})", after.firstEnum) : ""
+      after.value.debugName()
     );
     if (after.value.isUnresolved() && meta.cls.count(name)) {
       FTRACE(4, "  Marking enum '{}' as uninstantiable\n", name);
@@ -12392,13 +12381,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       auto const addUnresolved = [&] (SString u) {
         if (!seen.emplace(u).second) return;
         if (auto const m = folly::get_ptr(meta.typeMappings, u)) {
-          // If the type-mapping maps an enum, and that enum is
-          // uninstantiable, just treat it as a missing type.
-          if (m->firstEnum && meta.cls.at(m->firstEnum).uninstantiable) {
-            missingTypes.emplace_back(u);
-          } else {
-            typeMappings.emplace_back(*m);
-          }
+          typeMappings.emplace_back(*m);
         } else if (!index.classRefs.count(u) ||
                    meta.cls.at(u).uninstantiable) {
           missingTypes.emplace_back(u);

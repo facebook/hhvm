@@ -996,9 +996,9 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       info.typeMappings.emplace_back(
         TypeMapping{
           typeAlias->name,
-          nullptr,
           typeAlias->value,
-          true
+          true,
+          false
         }
       );
     }
@@ -1062,7 +1062,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       assertx(!tc.isNullable());
       addType(types, tc, nullptr);
       if (tc.isMixed()) tc.setType(AnnotType::ArrayKey);
-      typeMapping.emplace(TypeMapping{c->name, c->name, tc, false});
+      typeMapping.emplace(TypeMapping{c->name, tc, false, true});
     }
 
     std::sort(begin(deps), end(deps), string_data_lt_type{});

@@ -951,11 +951,9 @@ std::string show(const Class&);
  */
 struct TypeMapping {
   LSString name;
-  // If an enum, this is the same value as name. Otherwise it's the
-  // first enum encountered when resolving a type-alias.
-  LSString firstEnum;
   TypeConstraint value;
   bool isTypeAlias;
+  bool isEnum;
 
   bool operator==(const TypeMapping& o) const {
     return name->tsame(o.name);
@@ -965,7 +963,7 @@ struct TypeMapping {
   }
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(firstEnum)(value)(isTypeAlias);
+    sd(name)(value)(isTypeAlias)(isEnum);
   }
 };
 

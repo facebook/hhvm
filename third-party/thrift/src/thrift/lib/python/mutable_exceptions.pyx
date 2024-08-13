@@ -15,7 +15,7 @@
 from folly.iobuf cimport from_unique_ptr
 from libcpp.utility cimport move as std_move
 
-from thrift.python.mutable_serializer cimport cserialize, cdeserialize
+from thrift.python.mutable_serializer cimport c_mutable_serialize, c_mutable_deserialize
 from thrift.python.mutable_types cimport (
     MutableStructInfo,
     set_mutable_struct_field,
@@ -234,13 +234,17 @@ cdef class MutableGeneratedError(Error):
     cdef IOBuf _fbthrift_serialize(self, Protocol proto):
         cdef MutableStructInfo info = self._fbthrift_mutable_struct_info
         return from_unique_ptr(
-            std_move(cserialize(deref(info.cpp_obj), self._fbthrift_data, proto))
+            std_move(
+                c_mutable_serialize(deref(info.cpp_obj), self._fbthrift_data, proto)
+            )
         )
 
     cdef uint32_t _fbthrift_deserialize(self, IOBuf buf, Protocol proto) except? 0:
         cdef MutableStructInfo info = self._fbthrift_mutable_struct_info
-        cdef uint32_t lenght = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
-        return lenght
+        cdef uint32_t length = c_mutable_deserialize(
+            deref(info.cpp_obj), buf._this, self._fbthrift_data, proto
+        )
+        return length
 
     @classmethod
     def _fbthrift_create(cls, data):

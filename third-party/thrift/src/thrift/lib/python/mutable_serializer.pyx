@@ -20,33 +20,91 @@ from thrift.python.mutable_types cimport MutableStruct, MutableStructOrUnion
 from thrift.python.protocol import Protocol
 
 
-def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT):
-    if isinstance(strct, MutableStructOrUnion):
-        return (<MutableStructOrUnion>strct)._fbthrift_serialize(protocol)
-    if isinstance(strct, MutableGeneratedError):
-        return (<MutableGeneratedError>strct)._fbthrift_serialize(protocol)
+def serialize_iobuf(thrift_object, cProtocol protocol=cProtocol.COMPACT):
+    """
+    Serializes the given mutable Thrift object into an `IOBuf`, according to the given
+    serialization `protocol`.
+
+    Args:
+        thrift_object (MutableStructOrUnion | MutableGeneratedError)
+
+        protocol (cProtocol): Enum value of the serialization protocol to use.
+
+    Raises: TypeError if the given `thrift_object` is not a valid thrift-python object.
+
+    Returns (IOBuf) Serialized `thrift_object`, using the specified `protocol`.
+    """
+    if isinstance(thrift_object, MutableStructOrUnion):
+        return (<MutableStructOrUnion>thrift_object)._fbthrift_serialize(protocol)
+    if isinstance(thrift_object, MutableGeneratedError):
+        return (<MutableGeneratedError>thrift_object)._fbthrift_serialize(protocol)
 
     raise TypeError("thrift-python serialization only supports thrift-python types")
 
-def serialize(struct, cProtocol protocol=cProtocol.COMPACT):
-    return b''.join(serialize_iobuf(struct, protocol))
 
-def deserialize_with_length(klass, buf, cProtocol protocol=cProtocol.COMPACT):
-    if not issubclass(klass, (MutableStructOrUnion, MutableGeneratedError)):
-        raise TypeError("thrift-python deserialization only supports thrift-python types")
+def serialize(thrift_object, cProtocol protocol=cProtocol.COMPACT):
+    """
+    Returns the serialized form of `thrift_object` using the given Thrift
+    (de)serialization `protocol`.
+
+    Like `serialize_iobuf()`, but returns `bytes` instead of `IOBuf`.
+    """
+    return b''.join(serialize_iobuf(thrift_object, protocol))
+
+
+def deserialize_with_length(thrift_class, buf, cProtocol protocol=cProtocol.COMPACT):
+    """
+    Deserializes the contents of `buf` as an instance of `thrift_class`, using the given
+    Thrift (de)serialization `protocol`.
+
+    Args:
+        thrift_class (class):
+            Type of the Thrift struct, union or exception to deserialize.
+
+        buf (IOBuf | bytes | bytearray | memoryview):
+            Source containing the serialized representation of the Thrift object to
+            deserialize (using the given `protocol`).
+
+        protocol (cProtocol): Enum value of the (de)serialization protocol to use.
+
+    Raises:
+      * `TypeError` if any input is of invalid type.
+      * (Thrift) `Error` if any other exception is raised during deserialization.
+
+
+    Returns: tuple(object, length), where:
+        object: instance of `thrift_class`, deserialized from the given buffer.
+
+        length: number of bytes read during deserialization.
+    """
+    if not issubclass(thrift_class, (MutableStructOrUnion, MutableGeneratedError)):
+        raise TypeError(
+            "thrift-python deserialization only supports thrift-python types"
+        )
+
     if not isinstance(buf, (IOBuf, bytes, bytearray, memoryview)):
         raise TypeError("buf must be IOBuf, bytes, bytearray, or memoryview")
+
     cdef IOBuf iobuf = buf if isinstance(buf, IOBuf) else IOBuf(buf)
-    inst = klass.__new__(klass)
+    inst = thrift_class.__new__(thrift_class)
     cdef uint32_t length
     try:
-        if issubclass(klass, MutableStruct):
+        if issubclass(thrift_class, MutableStruct):
             length = (<MutableStruct>inst)._fbthrift_deserialize(iobuf, protocol)
         else:
-            length = (<MutableGeneratedError>inst)._fbthrift_deserialize(iobuf, protocol)
+            length = (
+                <MutableGeneratedError>inst
+            )._fbthrift_deserialize(iobuf, protocol)
     except Exception as e:
         raise Error.__new__(Error, *e.args) from None
     return inst, length
 
-def deserialize(klass, buf, cProtocol protocol=cProtocol.COMPACT):
-    return deserialize_with_length(klass, buf, protocol)[0]
+
+def deserialize(thrift_class, buf, cProtocol protocol=cProtocol.COMPACT):
+    """
+    Deserializes the contents of `buf` as an instance of `thrift_class`, using the given
+    Thrift (de)serialization `protocol`.
+
+    Like `deserialize_with_length()`, but only returns the deserialized object.
+    """
+    return deserialize_with_length(thrift_class, buf, protocol)[0]

@@ -25,7 +25,7 @@ import enum
 import copy
 
 from thrift.python.mutable_exceptions cimport MutableGeneratedError
-from thrift.python.mutable_serializer cimport cserialize, cdeserialize
+from thrift.python.mutable_serializer cimport c_mutable_serialize, c_mutable_deserialize
 from thrift.python.mutable_typeinfos cimport (
     MutableListTypeInfo,
     MutableSetTypeInfo,
@@ -336,13 +336,17 @@ cdef class MutableStruct(MutableStructOrUnion):
     cdef IOBuf _fbthrift_serialize(self, Protocol proto):
         cdef MutableStructInfo info = self._fbthrift_mutable_struct_info
         return from_unique_ptr(
-            std_move(cserialize(deref(info.cpp_obj), self._fbthrift_data, proto))
+            std_move(
+                c_mutable_serialize(deref(info.cpp_obj), self._fbthrift_data, proto)
+            )
         )
 
     cdef uint32_t _fbthrift_deserialize(self, IOBuf buf, Protocol proto) except? 0:
         cdef MutableStructInfo info = self._fbthrift_mutable_struct_info
-        cdef uint32_t lenght = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
-        return lenght
+        cdef uint32_t length = c_mutable_deserialize(
+            deref(info.cpp_obj), buf._this, self._fbthrift_data, proto
+        )
+        return length
 
     def _do_not_use_resetFieldToStandardDefault(self, field_name: str):
         """

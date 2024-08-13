@@ -21,5 +21,15 @@ from thrift.python.protocol cimport Protocol as cProtocol
 
 
 cdef extern from "<thrift/lib/python/Serializer.h>" namespace "::apache::thrift::python":
-    cdef unique_ptr[folly.iobuf.cIOBuf] cserialize "::apache::thrift::python::mutable_serialize"(const cDynamicStructInfo& structInfo, obj, cProtocol proto) except +
-    cdef uint32_t cdeserialize "::apache::thrift::python::mutable_deserialize"(const cDynamicStructInfo& structInfo, const folly.iobuf.cIOBuf* buf, obj, cProtocol proto) except +
+    cdef unique_ptr[folly.iobuf.cIOBuf] c_mutable_serialize "::apache::thrift::python::mutable_serialize"(
+        const cDynamicStructInfo& structInfo,
+        obj,
+        cProtocol proto
+    ) except +
+
+    cdef uint32_t c_mutable_deserialize "::apache::thrift::python::mutable_deserialize"(
+        const cDynamicStructInfo& structInfo,
+        const folly.iobuf.cIOBuf* buf,
+        obj,
+        cProtocol proto
+    ) except +

@@ -62,7 +62,6 @@ struct TestHeaderClientChannelFactory {
   apache::thrift::ClientChannel::Ptr create(
       folly::AsyncTransport::UniquePtr socket) {
     auto channel = apache::thrift::HeaderClientChannel::newChannel(
-        HeaderClientChannel::WithoutRocketUpgrade{},
         std::move(socket),
         apache::thrift::HeaderClientChannel::Options().setProtocolId(
             protocol_));

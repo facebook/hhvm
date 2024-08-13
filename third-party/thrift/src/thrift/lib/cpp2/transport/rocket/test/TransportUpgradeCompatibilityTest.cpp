@@ -36,7 +36,7 @@ class TransportUpgradeCompatibilityTest : public testing::TestWithParam<bool> {
     FLAGS_transport = "header";
 
     compatibilityTest_ = std::make_unique<TransportCompatibilityTest>();
-    compatibilityTest_->setTransportUpgradeExpected(GetParam());
+    compatibilityTest_->setTransportUpgrade(GetParam());
     compatibilityTest_->startServer();
   }
 

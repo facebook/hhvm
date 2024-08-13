@@ -287,8 +287,7 @@ TEST(ThriftServer, OnewayFutureClientTest) {
   EventBase base;
   auto socket = AsyncSocket::newSocket(&base, *sst.getAddress());
 
-  auto channel = HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
+  auto channel = HeaderClientChannel::newChannel(std::move(socket));
   FutureServiceAsyncClient client(std::move(channel));
 
   auto future = client.future_noResponse(100);

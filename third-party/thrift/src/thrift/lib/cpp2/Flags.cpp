@@ -90,6 +90,7 @@ class FlagsBackendDummy : public apache::thrift::detail::FlagsBackend {
       std::string_view name) override {
     static const folly::Indestructible<std::map<std::string, bool>>
         oss_defaults = std::map<std::string, bool>{
+            {"server_rocket_upgrade_enabled", false},
             {"server_header_reject_framed", false},
             {"server_header_reject_unframed", false},
             {"server_header_reject_all", false}};

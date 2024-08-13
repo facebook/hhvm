@@ -113,8 +113,7 @@ class PresultServiceInterface
 std::shared_ptr<PresultServiceAsyncClient> getClient(
     const ScopedServerThread& sst, folly::EventBase& eb) {
   auto socket = folly::AsyncSocket::newSocket(&eb, *sst.getAddress());
-  auto channel = HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
+  auto channel = HeaderClientChannel::newChannel(std::move(socket));
   auto client = std::make_shared<PresultServiceAsyncClient>(std::move(channel));
   return client;
 }

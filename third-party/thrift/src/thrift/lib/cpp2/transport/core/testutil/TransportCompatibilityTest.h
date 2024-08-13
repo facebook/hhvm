@@ -43,7 +43,6 @@ class SampleServer {
 
   void connectToServer(
       std::string transport,
-      bool withUpgrade,
       folly::Function<void(
           std::shared_ptr<RequestChannel>, std::shared_ptr<ClientConnectionIf>)>
           callMe);
@@ -79,8 +78,8 @@ class TransportCompatibilityTest {
   void addRoutingHandler(
       std::unique_ptr<TransportRoutingHandler> routingHandler);
 
-  void setTransportUpgradeExpected(bool upgradeToRocketExpected) {
-    upgradeToRocketExpected_ = upgradeToRocketExpected;
+  void setTransportUpgrade(bool upgradeToRocket) {
+    upgradeToRocket_ = upgradeToRocket;
   }
 
   ThriftServer* getServer();
@@ -146,7 +145,7 @@ class TransportCompatibilityTest {
 
  protected:
   std::unique_ptr<SampleServer<testutil::testservice::TestServiceMock>> server_;
-  bool upgradeToRocketExpected_{true};
+  bool upgradeToRocket_{false};
 };
 
 } // namespace thrift

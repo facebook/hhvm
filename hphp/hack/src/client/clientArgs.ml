@@ -688,35 +688,32 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         " (mode) turn off verbose server log" );
       ("--version", Arg.Set version, " (mode) show version and exit");
       ( "-Wall",
-        Arg.Unit (fun () -> add_warning_switch ClientFilterErrors.WAll),
+        Arg.Unit (fun () -> add_warning_switch Filter_errors.WAll),
         " show all warnings" );
       ( "-Wnone",
-        Arg.Unit (fun () -> add_warning_switch ClientFilterErrors.WNone),
+        Arg.Unit (fun () -> add_warning_switch Filter_errors.WNone),
         " hide all warnings" );
       ( "-W",
         Arg.Int
           (fun code ->
-            match ClientFilterErrors.Code.of_enum code with
+            match Filter_errors.Code.of_enum code with
             | None -> add_invalid_warning_code code
-            | Some code -> add_warning_switch @@ ClientFilterErrors.Code_on code),
+            | Some code -> add_warning_switch @@ Filter_errors.Code_on code),
         " show all warnings with a given code, e.g. -W 12001" );
       ( "-Wno",
         Arg.Int
           (fun code ->
-            match ClientFilterErrors.Code.of_enum code with
+            match Filter_errors.Code.of_enum code with
             | None -> add_invalid_warning_code code
-            | Some code ->
-              add_warning_switch @@ ClientFilterErrors.Code_off code),
+            | Some code -> add_warning_switch @@ Filter_errors.Code_off code),
         " hide all warnings with a given code, e.g. -Wno 12001" );
       ( "-Wignore-files",
         Arg.String
           (fun regexp ->
-            add_warning_switch
-              (ClientFilterErrors.Ignored_files (Str.regexp regexp))),
+            add_warning_switch (Filter_errors.Ignored_files (Str.regexp regexp))),
         " hide warnings in files matching a regexp" );
       ( "-Wgenerated",
-        Arg.Unit
-          (fun () -> add_warning_switch ClientFilterErrors.Generated_files_on),
+        Arg.Unit (fun () -> add_warning_switch Filter_errors.Generated_files_on),
         " show warnings in generated files (the ones specified by .hhconfig flag warnings_generated_files). "
         ^ "To ignore more files, use -Wignore-files, avoid modifying warnings_generated_files"
       );

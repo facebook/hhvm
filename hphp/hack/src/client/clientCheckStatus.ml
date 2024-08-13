@@ -40,29 +40,12 @@ let is_stale_msg liveness =
       ^ " watchman being unresponsive)\n")
   | Live_status -> None
 
-let go
-    status
-    error_format
-    ~warnings_default_all
-    ~warnings_generated_files
-    warning_switches
-    ~is_interactive
-    ~output_json
-    ~max_errors =
+let go status error_format ~is_interactive ~output_json ~max_errors =
   let { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
       =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  let error_list =
-    let filter =
-      ClientFilterErrors.Filter.make
-        warning_switches
-        ~default_all:warnings_default_all
-        ~generated_files:warnings_generated_files
-    in
-    ClientFilterErrors.filter filter error_list
-  in
   if
     output_json
     || (Option.is_none error_format && not is_interactive)
@@ -106,8 +89,7 @@ let go_streaming_on_fd
     ~(pid : int)
     (fd : Unix.file_descr)
     (args : ClientEnv.client_check_env)
-    ~warnings_default_all
-    ~warnings_generated_files
+    (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(progress_callback : string option -> unit) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -153,13 +135,6 @@ let go_streaming_on_fd
     show_progress ()
   in
 
-  let warning_filter =
-    ClientFilterErrors.Filter.make
-      ~default_all:warnings_default_all
-      ~generated_files:warnings_generated_files
-      args.ClientEnv.warning_switches
-  in
-
   (* this lwt process consumes errors from the errors.bin file by polling
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
@@ -188,9 +163,7 @@ let go_streaming_on_fd
       let found_new = ref 0 in
       let error_format = Errors.format_or_default error_format in
       let errors =
-        Relative_path.Map.map
-          errors
-          ~f:(ClientFilterErrors.filter warning_filter)
+        Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
       in
       begin
         try
@@ -605,8 +578,7 @@ let rec keep_trying_to_open
     Errors are printed soon after they are known instead of all at once at the end. *)
 let go_streaming
     (args : ClientEnv.client_check_env)
-    ~warnings_default_all
-    ~warnings_generated_files
+    (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -633,8 +605,7 @@ let go_streaming
       ~pid
       fd
       args
-      ~warnings_default_all
-      ~warnings_generated_files
+      error_filter
       ~partial_telemetry_ref
       ~progress_callback
   in

@@ -47,10 +47,14 @@ let log_check_response env =
 (* Might raise {!Naming_table.File_info_not_found} *)
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
  fun genv env ~is_stale -> function
-  | STATUS { max_errors; _ } ->
+  | STATUS { max_errors; error_filter } ->
     log_check_response env;
-    let error_list = Errors.sort_and_finalize env.errorl in
-    let (error_list, dropped_count) = take_max_errors max_errors error_list in
+    let (error_list, dropped_count) =
+      env.errorl
+      |> Errors.sort_and_finalize
+      |> Filter_errors.filter error_filter
+      |> take_max_errors max_errors
+    in
     let liveness =
       if is_stale then
         Stale_status
@@ -69,7 +73,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
     )
   | STATUS_SINGLE
-      { file_names; max_errors; preexisting_warnings; return_expanded_tast } ->
+      {
+        file_names;
+        max_errors;
+        error_filter;
+        preexisting_warnings;
+        return_expanded_tast;
+      } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let (errors, tasts) = ServerStatusSingle.go file_names ctx in
     let errors =
@@ -77,6 +87,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       |> ServerTypeCheck.filter_out_mergebase_warnings env ~preexisting_warnings
       |> Errors.get_sorted_error_list
       |> List.map ~f:User_error.to_absolute
+      |> Filter_errors.filter error_filter
       |> take_max_errors max_errors
     in
     (* Unforced lazy values are closures which make serialization over RPC fail. *)

@@ -235,6 +235,16 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name filter_errors)
+ (modules
+  filter_errors)
+ (libraries
+  error_codes
+  errors
+  user_error
+  utils_core))
+
+(library
  (name server_command_types)
  (wrapped false)
  (modules
@@ -256,6 +266,7 @@
  (libraries
   base64
   connection_tracker
+  filter_errors
   full_fidelity
   hh_json
   ide_rpc_api_types

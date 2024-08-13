@@ -332,12 +332,19 @@ type cst_search_input = {
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
-  | STATUS : { max_errors: int option } -> Server_status.t t
+  | STATUS : {
+      max_errors: int option;
+      error_filter: Filter_errors.Filter.t;
+    }
+      -> Server_status.t t
   | STATUS_SINGLE : {
       file_names: file_input list;
       max_errors: int option;
+      error_filter: Filter_errors.Filter.t;
       return_expanded_tast: bool;
       preexisting_warnings: bool;
+          (** Whether to show preexisting warnings
+            (the ones that were there prior to saved state revision) *)
     }
       -> ((Errors.finalized_error list * int)
          * Tast.program Tast_with_dynamic.t Relative_path.Map.t option)

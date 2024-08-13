@@ -3366,8 +3366,7 @@ let publish_and_report_after_recomputing_live_squiggles
 let handle_errors_file_item
     ~(state : state ref)
     (item : Server_progress.ErrorsRead.read_result option)
-    (error_filter : ClientFilterErrors.Filter.t) : result_telemetry option Lwt.t
-    =
+    (error_filter : Filter_errors.Filter.t) : result_telemetry option Lwt.t =
   (* a small helper, to send the actual lsp message *)
   let publish params =
     notify_jsonrpc ~powered_by:Hh_server (PublishDiagnosticsNotification params)
@@ -3493,9 +3492,7 @@ let handle_errors_file_item
               when Float.(existing_timestamp > start_time) ->
               acc
             | _ ->
-              let file_errors =
-                ClientFilterErrors.filter error_filter file_errors
-              in
+              let file_errors = Filter_errors.filter error_filter file_errors in
               (* We do not precompute additional diagnostic information (like
                  where to display additional LSP visual hints) for errors
                  received from the server. They will in general only be received
@@ -4838,7 +4835,7 @@ let main
   let ref_event = ref None in
   let ref_unblocked_time = ref (Unix.gettimeofday ()) in
   let error_filter =
-    ClientFilterErrors.Filter.make
+    Filter_errors.Filter.make
       ~default_all:local_config.ServerLocalConfig.warnings_default_all
       ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
       []

@@ -669,6 +669,12 @@ let main_internal
       else
         rpc args ServerCommandTypes.NO_PRECHECKED_FILES
     in
+    let error_filter =
+      Filter_errors.Filter.make
+        ~default_all:local_config.ServerLocalConfig.warnings_default_all
+        ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
+        args.ClientEnv.warning_switches
+    in
     (* We don't do streaming errors under [output_json]: our contract
        with the outside world is that if a caller uses [output_json] then they
        will never see [Exit_status.Typecheck_restarted], which streaming might show.
@@ -686,10 +692,7 @@ let main_internal
       let%lwt (exit_status, telemetry) =
         ClientCheckStatus.go_streaming
           args
-          ~warnings_default_all:
-            local_config.ServerLocalConfig.warnings_default_all
-          ~warnings_generated_files:
-            local_config.ServerLocalConfig.warnings_generated_files
+          error_filter
           ~partial_telemetry_ref
           ~connect_then_close:(fun () -> connect_then_close args)
       in
@@ -698,17 +701,13 @@ let main_internal
       let%lwt (status, telemetry) =
         rpc
           args
-          (ServerCommandTypes.STATUS { max_errors = args.ClientEnv.max_errors })
+          (ServerCommandTypes.STATUS
+             { max_errors = args.ClientEnv.max_errors; error_filter })
       in
       let exit_status =
         ClientCheckStatus.go
           status
           args.ClientEnv.error_format
-          args.ClientEnv.warning_switches
-          ~warnings_default_all:
-            local_config.ServerLocalConfig.warnings_default_all
-          ~warnings_generated_files:
-            local_config.ServerLocalConfig.warnings_generated_files
           ~output_json:args.ClientEnv.output_json
           ~max_errors:args.ClientEnv.max_errors
           ~is_interactive:args.ClientEnv.is_interactive
@@ -731,6 +730,12 @@ let main_internal
       | _ -> ServerCommandTypes.FileName (expand_path filename)
     in
     let file_inputs = List.map ~f:file_input filenames in
+    let error_filter =
+      Filter_errors.Filter.make
+        ~default_all:local_config.ServerLocalConfig.warnings_default_all
+        ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
+        args.ClientEnv.warning_switches
+    in
     let%lwt (((error_list, dropped_count), tasts), telemetry) =
       rpc
         args
@@ -738,6 +743,7 @@ let main_internal
            {
              file_names = file_inputs;
              max_errors = args.ClientEnv.max_errors;
+             error_filter;
              return_expanded_tast = show_tast;
              preexisting_warnings;
            })
@@ -768,11 +774,6 @@ let main_internal
       ClientCheckStatus.go
         status
         args.ClientEnv.error_format
-        args.ClientEnv.warning_switches
-        ~warnings_default_all:
-          local_config.ServerLocalConfig.warnings_default_all
-        ~warnings_generated_files:
-          local_config.ServerLocalConfig.warnings_generated_files
         ~is_interactive:args.ClientEnv.is_interactive
         ~output_json:args.ClientEnv.output_json
         ~max_errors:args.ClientEnv.max_errors
@@ -870,8 +871,15 @@ let main_internal
         Lwt.return (Exit_status.No_error, telemetry)
     end
   | ClientEnv.MODE_REMOVE_DEAD_UNSAFE_CASTS ->
+    let error_filter =
+      Filter_errors.Filter.make
+        ~default_all:local_config.ServerLocalConfig.warnings_default_all
+        ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
+        args.ClientEnv.warning_switches
+    in
     let status_cmd =
-      ServerCommandTypes.STATUS { max_errors = args.ClientEnv.max_errors }
+      ServerCommandTypes.STATUS
+        { max_errors = args.ClientEnv.max_errors; error_filter }
     in
     let rec go () =
       let%lwt (response, telemetry) =

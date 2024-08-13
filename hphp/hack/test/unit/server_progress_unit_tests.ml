@@ -555,6 +555,12 @@ let env =
       warning_switches = [];
     }
 
+let make_error_filter env =
+  Filter_errors.Filter.make
+    ~default_all:true
+    ~generated_files:[]
+    env.ClientEnv.warning_switches
+
 let test_check_success () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
@@ -573,8 +579,7 @@ let test_check_success () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
-            ~warnings_default_all:true
-            ~warnings_generated_files:[]
+            (make_error_filter env)
             ~partial_telemetry_ref
             ~connect_then_close
         in
@@ -606,8 +611,7 @@ let test_check_errors () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
-            ~warnings_default_all:true
-            ~warnings_generated_files:[]
+            (make_error_filter env)
             ~partial_telemetry_ref
             ~connect_then_close
         in
@@ -648,8 +652,7 @@ let test_check_connect_success () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
-            ~warnings_default_all:true
-            ~warnings_generated_files:[]
+            (make_error_filter env)
             ~partial_telemetry_ref
             ~connect_then_close
         in
@@ -697,8 +700,7 @@ let test_check_connect_failure () : bool Lwt.t =
         let check_future =
           ClientCheckStatus.go_streaming
             env
-            ~warnings_default_all:true
-            ~warnings_generated_files:[]
+            (make_error_filter env)
             ~partial_telemetry_ref
             ~connect_then_close
         in
@@ -741,15 +743,15 @@ let assert_errors ~expected ~(actual : Errors.finalized_error list) =
 
 let test_filter_warnings () : bool =
   let error_filter =
-    ClientFilterErrors.Filter.make
+    Filter_errors.Filter.make
       ~default_all:true
       ~generated_files:[Str.regexp "gen/"]
       [
-        ClientFilterErrors.Code_off Error_codes.Warning.SketchyEquality;
-        ClientFilterErrors.Ignored_files (Str.regexp "def");
-        ClientFilterErrors.Code_off Error_codes.Warning.SketchyNullCheck;
-        ClientFilterErrors.Code_on Error_codes.Warning.SketchyEquality;
-        ClientFilterErrors.Ignored_files (Str.regexp "abc");
+        Filter_errors.Code_off Error_codes.Warning.SketchyEquality;
+        Filter_errors.Ignored_files (Str.regexp "def");
+        Filter_errors.Code_off Error_codes.Warning.SketchyNullCheck;
+        Filter_errors.Code_on Error_codes.Warning.SketchyEquality;
+        Filter_errors.Ignored_files (Str.regexp "abc");
       ]
   in
   let errors =
@@ -765,7 +767,7 @@ let test_filter_warnings () : bool =
       ]
     |> Errors.sort_and_finalize
   in
-  let actual = ClientFilterErrors.filter error_filter errors in
+  let actual = Filter_errors.filter error_filter errors in
   let expected =
     [
       (12001, "a", "SketchyEquality in non-ignored file. Show");
@@ -778,13 +780,13 @@ let test_filter_warnings () : bool =
 
 let test_filter_warnings_generated () : bool =
   let error_filter =
-    ClientFilterErrors.Filter.make
+    Filter_errors.Filter.make
       ~default_all:true
       ~generated_files:[Str.regexp "gen/"; Str.regexp "gen2"]
       [
-        ClientFilterErrors.Ignored_files (Str.regexp "def");
-        ClientFilterErrors.Ignored_files (Str.regexp "gen2");
-        ClientFilterErrors.Generated_files_on;
+        Filter_errors.Ignored_files (Str.regexp "def");
+        Filter_errors.Ignored_files (Str.regexp "gen2");
+        Filter_errors.Generated_files_on;
       ]
   in
   let errors =
@@ -800,7 +802,7 @@ let test_filter_warnings_generated () : bool =
       ]
     |> Errors.sort_and_finalize
   in
-  let actual = ClientFilterErrors.filter error_filter errors in
+  let actual = Filter_errors.filter error_filter errors in
   let expected =
     [
       (12004, "abcd", "unrelated. show");

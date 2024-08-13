@@ -1891,10 +1891,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   int nAcceptors_ = 1;
   uint16_t socketMaxReadsPerEvent_{16};
 
-  mutable std::mutex ioGroupMutex_;
+  mutable folly::SharedMutex ioGroupMutex_;
 
   std::shared_ptr<folly::IOThreadPoolExecutorBase> getIOGroupSafe() const {
-    std::lock_guard<std::mutex> lock(ioGroupMutex_);
+    std::shared_lock lock(ioGroupMutex_);
     return getIOGroup();
   }
 

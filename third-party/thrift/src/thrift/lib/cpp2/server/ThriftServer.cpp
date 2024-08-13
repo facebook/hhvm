@@ -679,7 +679,7 @@ void ThriftServer::setup() {
     ServerBootstrap::childHandler(std::move(acceptorFactory));
 
     {
-      std::lock_guard<std::mutex> lock(ioGroupMutex_);
+      std::unique_lock lock(ioGroupMutex_);
       ServerBootstrap::group(acceptPool_, ioThreadPool_);
     }
     if (socket_) {
@@ -2033,6 +2033,8 @@ ThriftServer::getUsedIOMemory() {
   using WorkerIOMemory = ServerIOMemory;
   std::vector<folly::SemiFuture<WorkerIOMemory>> tasks;
 
+  std::shared_lock ioGroupLock(ioGroupMutex_);
+
   forEachWorker([&tasks](wangle::Acceptor* acceptor) {
     auto worker = dynamic_cast<Cpp2Worker*>(acceptor);
     if (!worker) {
@@ -2049,7 +2051,8 @@ ThriftServer::getUsedIOMemory() {
 
   return folly::collect(tasks.begin(), tasks.end())
       .deferValue(
-          [](std::vector<WorkerIOMemory> workerIOMems) -> ServerIOMemory {
+          [ioGroupLock = std::move(ioGroupLock)](
+              std::vector<WorkerIOMemory> workerIOMems) -> ServerIOMemory {
             ServerIOMemory ret{0, 0};
             // Sum all ingress and egress usages
             for (const auto& workerIOMem : workerIOMems) {

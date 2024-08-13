@@ -78,6 +78,9 @@ struct SafePatchType {};
 template <class T>
 struct SafePatchValueType {};
 
+template <typename T>
+using detect_safe_patch_value_type = typename SafePatchValueType<T>::type;
+
 } // namespace detail
 
 /// The safe patch represenations for the base thrift types.
@@ -125,6 +128,10 @@ template <typename T>
 inline constexpr bool is_assign_only_patch_v = false;
 template <typename T>
 inline constexpr bool is_assign_only_patch_v<detail::AssignPatch<T>> = true;
+
+template <typename T>
+constexpr static bool is_safe_patch_v =
+    folly::is_detected_v<detail::detect_safe_patch_value_type, T>;
 
 template <typename T>
 std::string prettyPrintPatch(

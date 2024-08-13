@@ -9,16 +9,16 @@ received code:
 7 
 8 function foo(): void {}
 
-New text at range 4:1-5:1 (1-indexed) is
-'
+New text at range 3:1-5:1 (1-indexed) is
+''
+
+Code after applying language server edits:
+'<?hh
+// T188437747 regression test
+
+class C {}
+
+function foo(): void {}
 '
 
-Updated code:
-1 <?hh
-2 // T188437747 regression test
-3 
-4 
-5 
-6 class C {}
-7 
-8 function foo(): void {}
+Matched Hackfmt result

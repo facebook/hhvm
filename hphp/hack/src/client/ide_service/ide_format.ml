@@ -52,7 +52,9 @@ let formatting_options_to_args
 let range_offsets_to_args from to_ =
   ["--range"; string_of_int from; string_of_int to_]
 
-let go_hackfmt ?filename_for_logging ~content args =
+(** returns lines of stdout we get from shelling out to hackfmt *)
+let go_hackfmt ?filename_for_logging ~content args :
+    (string list, string) Result.t =
   let args =
     match filename_for_logging with
     | Some filename -> args @ ["--filename-for-logging"; filename]
@@ -73,14 +75,6 @@ let go_hackfmt ?filename_for_logging ~content args =
     Hh_logger.log "Formatter not found";
     Error
       ("Could not locate formatter - looked in: " ^ String.concat ~sep:" " paths)
-
-(* This function takes 1-based offsets, and 'to_' is exclusive. *)
-let go ?filename_for_logging ~content from to_ options =
-  let format_args = formatting_options_to_args options in
-  let range_args = range_offsets_to_args from to_ in
-  let args = format_args @ range_args in
-  go_hackfmt ?filename_for_logging ~content args >>| fun lines ->
-  String.concat ~sep:"\n" lines ^ "\n"
 
 (* Our formatting engine can only handle ranges that span entire rows.  *)
 (* This is signified by a range that starts at column 1 on one row,     *)
@@ -131,6 +125,7 @@ let opt_string_eq (x : string) (y : string option) : bool =
   | Some y -> String.equal x y
   | None -> false
 
+(** 0-indexed (line count starts from 0) *)
 let first_changed_line_idx (old_lines : string list) (new_lines : string list) :
     int option =
   let numbered_lines = zip_with_index old_lines new_lines in
@@ -170,6 +165,7 @@ let minimal_edit (old_src : string) (new_src : string) :
   let old_src_lines = String.split_lines old_src in
   let new_src_lines = String.split_lines new_src in
 
+  (* 0-indexed (line count starts from 0) *)
   let range_start_line = first_changed_line_idx old_src_lines new_src_lines in
   let range_end_line = last_changed_line_idx old_src_lines new_src_lines in
 
@@ -180,17 +176,30 @@ let minimal_edit (old_src : string) (new_src : string) :
         (List.drop new_src_lines range_start_line)
         (List.length old_src_lines - range_end_line)
     in
-
+    let (new_text, start_line_adjustment) =
+      if List.is_empty new_src_novel_lines then
+        (*
+          Empty `new_src_novel_lines` does not mean that there was no change
+          (otherwise we wouldn't have reached here),
+          it means some lines have been deleted. `-1` here allows to delete those lines.
+        *)
+        ("", -1)
+      else
+        (String.concat ~sep:"\n" new_src_novel_lines ^ "\n", 0)
+    in
+    let range_start_line_1_indexed =
+      range_start_line + 1 + start_line_adjustment
+    in
+    let range_end_line_1_indexed = range_end_line + 1 in
     let range =
       {
         File_content.st =
-          { File_content.line = range_start_line + 1; column = 1 };
-        ed = { File_content.line = range_end_line + 1; column = 1 };
+          { File_content.line = range_start_line_1_indexed; column = 1 };
+        ed = { File_content.line = range_end_line_1_indexed; column = 1 };
       }
     in
     {
-      ServerFormatTypes.new_text =
-        String.concat ~sep:"\n" new_src_novel_lines ^ "\n";
+      ServerFormatTypes.new_text;
       range = Ide_api_types.ide_range_from_fc range;
     }
   | _ -> noop_edit
@@ -209,18 +218,19 @@ let go_ide
     let range = Ide_api_types.ide_range_from_fc range in
     old_format_result |> Result.map ~f:(fun new_text -> { new_text; range })
   in
+  let formatting_args = formatting_options_to_args options in
   match action with
   | Document ->
-    (* `from0` and `to0` are zero-indexed, hence the name. *)
-    let from0 = 0 in
-    let to0 = String.length content in
     (* hackfmt currently takes one-indexed integers for range formatting. *)
-    go ~filename_for_logging ~content (from0 + 1) (to0 + 1) options
+    go_hackfmt ~filename_for_logging ~content formatting_args
+    |> Result.map ~f:(String.concat ~sep:"\n")
     |> Result.map ~f:(fun new_text -> minimal_edit content new_text)
   | Range range ->
     let fc_range = Ide_api_types.ide_range_to_fc range in
     let (range, from0, to0) = expand_range_to_whole_rows content fc_range in
-    go ~filename_for_logging ~content (from0 + 1) (to0 + 1) options
+    let args = formatting_args @ range_offsets_to_args (from0 + 1) (to0 + 1) in
+    go_hackfmt ~filename_for_logging ~content args
+    |> Result.map ~f:(fun lines -> String.concat lines ~sep:"\n" ^ "\n")
     |> convert_to_ide_result ~range
   | Position position ->
     (* `get_offset` returns a zero-based index, and `--at-char` takes a
@@ -228,7 +238,7 @@ let go_ide
     let fc_position = Ide_api_types.ide_pos_to_fc position in
     let offset = get_offset content fc_position in
     let args = ["--at-char"; string_of_int offset] in
-    let args = args @ formatting_options_to_args options in
+    let args = args @ formatting_args in
     go_hackfmt ~filename_for_logging ~content args >>= fun lines ->
     (* `hackfmt --at-char` returns the range that was formatted, as well as the
        contents of that range. For example, it might return

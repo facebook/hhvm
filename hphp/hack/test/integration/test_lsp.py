@@ -7509,10 +7509,10 @@ class C {}
                 result=[
                     {
                         "range": {
-                            "start": {"line": 2, "character": 0},
+                            "start": {"line": 1, "character": 0},
                             "end": {"line": 3, "character": 0},
                         },
-                        "newText": "\n",
+                        "newText": "",
                     }
                 ],
             )

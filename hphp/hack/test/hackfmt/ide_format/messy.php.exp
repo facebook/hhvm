@@ -16,10 +16,13 @@ function bar(): void {
 }
 '
 
-Updated code:
-1 <?hh
-2 
-3 function foo(): void {}
-4 function bar(): void {
-5 
-6 }
+Code after applying language server edits:
+'<?hh
+
+function foo(): void {}
+function bar(): void {
+
+}
+'
+
+Matched Hackfmt result

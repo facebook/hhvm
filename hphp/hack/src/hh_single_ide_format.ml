@@ -2,7 +2,10 @@ open Hh_prelude
 
 let usage =
   {|
-For lightweight testing of the formatting logic in **the language server**.
+For lightweight testing of the formatting logic in **the language server**
+and verifying that we get the same results for formatting a file:
+- with the language server
+- with hackfmt directly
 
 Usage: hh_single_ide_format $FILENAME
 
@@ -16,6 +19,13 @@ Tests for any other hackfmt logic should be in:
 Tests for handling LSP request/response and converting between position representations:
 - [lsp integration tests](https://fburl.com/code/bfxd9ohr)
 |}
+
+let run_hackfmt filename : string =
+  let cmd = Exec_command.Hackfmt BuildOptions.default_hackfmt_path in
+  let lwt_result = Lwt_utils.exec_checked cmd [| filename |] in
+  match Lwt_main.run lwt_result with
+  | Ok Lwt_utils.Process_success.{ stdout; _ } -> stdout
+  | Error failure -> failwith (Lwt_utils.Process_failure.to_string failure)
 
 let str_of_range
     Ide_api_types.
@@ -63,9 +73,17 @@ let apply_edit
         line_number >= end_line)
   in
   let updated_code_lines = before_lines @ lines_to_insert @ after_lines in
-  String.concat ~sep:"\n" updated_code_lines
+  let suffix =
+    match (List.length updated_code_lines, List.last updated_code_lines) with
+    | (0, _)
+    | (_, Some "") ->
+      ""
+    | _ -> "\n"
+  in
+  String.concat ~sep:"\n" updated_code_lines ^ suffix
 
-let run_format_test (code : string) : unit =
+let run_format_test (filename : string) : unit =
+  let code = Disk.cat filename in
   match
     Ide_format.go_ide
       ~filename_for_logging:"foo.php"
@@ -74,6 +92,7 @@ let run_format_test (code : string) : unit =
       ~options:Lsp.DocumentFormatting.{ tabSize = 2; insertSpaces = true }
   with
   | Ok (ServerFormatTypes.{ new_text; range } as edit) -> begin
+    let new_code = apply_edit code edit in
     Printf.printf "> lines and columns in ranges are 1-indexed\n";
     Printf.printf "received code:\n%s\n\n" (with_line_numbers code);
     Printf.printf
@@ -81,8 +100,14 @@ let run_format_test (code : string) : unit =
       (str_of_range range)
       new_text;
     Printf.printf
-      "Updated code:\n%s\n"
-      (with_line_numbers (apply_edit code edit))
+      "Code after applying language server edits:\n'%s'\n\n%!"
+      new_code;
+    let hackfmt_stdout = run_hackfmt filename in
+    if String.equal new_code hackfmt_stdout then
+      Printf.printf "Matched Hackfmt result\n"
+    else
+      failwith
+        (Printf.sprintf "Did not match hackfmt result!'%s'\n" hackfmt_stdout)
   end
   | Error s -> failwith (Printf.sprintf "something went wrong! %s" s)
 
@@ -94,4 +119,4 @@ let parse_args () : string =
 
 let () =
   let filename = parse_args () in
-  run_format_test (Disk.cat filename)
+  run_format_test filename

@@ -300,6 +300,7 @@ class HeaderClientChannel : public ClientChannel,
    public:
     RocketUpgradeChannel(
         HeaderClientChannel::LegacyPtr headerChannel,
+        bool enabled,
         std::unique_ptr<RequestSetupMetadata>);
 
     ~RocketUpgradeChannel() override;

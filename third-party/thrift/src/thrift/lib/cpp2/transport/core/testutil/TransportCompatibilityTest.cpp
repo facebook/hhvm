@@ -51,6 +51,7 @@ DECLARE_string(transport);
 
 DEFINE_string(host, "::1", "host to connect to");
 
+THRIFT_FLAG_DECLARE_bool(raw_client_rocket_upgrade_enabled_v2);
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
 THRIFT_FLAG_DECLARE_int64(thrift_client_checksum_sampling_rate);
 
@@ -208,6 +209,11 @@ void TransportCompatibilityTest::connectToServer(
     folly::Function<void(
         std::unique_ptr<TestServiceAsyncClient>,
         std::shared_ptr<ClientConnectionIf>)> callMe) {
+  if (upgradeToRocketExpected_) {
+    THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
+  } else {
+    THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, false);
+  }
   server_->connectToServer(
       FLAGS_transport,
       upgradeToRocketExpected_,

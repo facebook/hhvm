@@ -557,7 +557,7 @@ impl LiftAwait {
                 for (_, arg) in args {
                     self.extract_await(arg, con, seq, tmps)
                 }
-                for unpack in unpacked_arg {
+                if let Some(unpack) = unpacked_arg {
                     self.extract_await(unpack, con, seq, tmps)
                 }
             }
@@ -572,7 +572,7 @@ impl LiftAwait {
                 for arg in args {
                     self.extract_await(arg, con, seq, tmps)
                 }
-                for unpack in unpacked_arg {
+                if let Some(unpack) = unpacked_arg {
                     self.extract_await(unpack, con, seq, tmps)
                 }
             }
@@ -611,7 +611,7 @@ impl LiftAwait {
                 if self.replace_dd.is_some() {
                     // Relying on syntactic checks that there are no await in t or f,
                     // but still need to traverse in case there is $$
-                    for expr in t {
+                    if let Some(expr) = t {
                         self.extract_await(expr, con, seq, tmps)
                     }
                     self.extract_await(f, con, seq, tmps)

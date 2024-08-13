@@ -18,10 +18,17 @@ Where regular Thrift codegen is optimized for usability first and performance se
 - Methods taking a Curse-enabled struct/union as a parameter may only take one parameter.
 - Reading and writing cannot be interleaved, so structs are effectively immutable during reading.
 - The user is responsible for keeping the `CursorSerializationWrapper` alive until all reading/writing is complete.
-- By default the `std::string_view` APIs are disabled. In order to enable them the reader must receive contiguous buffers, which is achieved by using Rocket as the transport and adding an override for the Thrift flag `rocket_frame_parser` to `"allocating"`. Then the reader can call `beginRead<true>` on the `CursorSerializationWrapper` to enforce the contiguous requirement and enable those APIs.
+- By default the `std::string_view` APIs are disabled. In order to enable them the reader must receive contiguous buffers, which is achieved by using Rocket as the transport and adding an override for the Thrift flag [`rocket_frame_parser`](https://github.com/facebook/fbthrift/blob/v2024.08.12.00/thrift/lib/cpp2/transport/rocket/framing/Parser.cpp#L19-L28) to `"allocating"`. Then the reader can call `beginRead<true>` on the `CursorSerializationWrapper` to enforce the contiguous requirement and enable those APIs.
 
 
 These restrictions are all fundamental to the performance wins, and if any of them do not work for a service then that service is not a candidate for using CurSe. Most services will not be.
+
+## How to save CPU
+- Rewrite the application logic to pull values as they are needed. Using CurSe to populate a handwritten version of the generated Thrift struct and reading from that will likely be slower than not using CurSe at all.
+- Ensure fields appear in each struct in the order they will be used. This will likely require defining a new struct and migrating via a new method, since fields are typically listed in order of addition rather than use.
+  - It can be helpful to leave gaps between the ids of consecutive fields in case a new field needs to be consumed in between in the future.
+  - If the application code sometimes performs partial reads of a struct, ensuring the read fields are at the beginning will avoid the cost of skipping the unused data.
+- If you have many string fields or containers of strings, enabling the `string_view` APIs can pay off in allocation-free string reads. (See [restrictions](#restrictions) for details.)
 
 ## How to enable
 

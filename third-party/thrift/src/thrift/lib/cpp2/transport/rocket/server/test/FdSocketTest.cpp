@@ -17,9 +17,9 @@
 #include <chrono>
 #include <string_view>
 
-#include <folly/experimental/TestUtil.h>
 #include <folly/experimental/coro/Baton.h>
 #include <folly/portability/GMock.h>
+#include <folly/testing/TestUtil.h>
 
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>

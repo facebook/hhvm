@@ -20,7 +20,7 @@
 #include <atomic>
 
 #include <folly/executors/GlobalExecutor.h>
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 
 #include <folly/Memory.h>
 #include <folly/experimental/coro/BlockingWait.h>

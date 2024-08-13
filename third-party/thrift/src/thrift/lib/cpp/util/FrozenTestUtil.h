@@ -17,7 +17,7 @@
 #ifndef THRIFT_LIB_CPP_UTIL_FROZENTESTUTIL_H_
 #define THRIFT_LIB_CPP_UTIL_FROZENTESTUTIL_H_
 
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 #include <thrift/lib/cpp/util/FrozenUtil.h>
 
 namespace apache {

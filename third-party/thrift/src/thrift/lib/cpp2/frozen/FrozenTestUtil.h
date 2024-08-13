@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
 
 namespace apache {

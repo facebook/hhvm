@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <folly/experimental/TestUtil.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/testing/TestUtil.h>
 #include <thrift/compiler/source_location.h>
 
 using namespace apache::thrift::compiler;

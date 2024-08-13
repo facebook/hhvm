@@ -17,7 +17,6 @@
 #include <folly/portability/GTest.h>
 
 #include <folly/SocketAddress.h>
-#include <folly/experimental/TestUtil.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
@@ -29,6 +28,7 @@
 #include <folly/io/async/test/SocketPair.h>
 #include <folly/io/async/test/TestSSLServer.h>
 #include <folly/lang/Bits.h>
+#include <folly/testing/TestUtil.h>
 #include <thrift/lib/cpp/EventHandlerBase.h>
 #include <thrift/lib/cpp2/async/Cpp2Channel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>

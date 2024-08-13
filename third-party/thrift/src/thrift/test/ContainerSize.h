@@ -17,8 +17,8 @@
 #pragma once
 
 #include <optional>
-#include <folly/experimental/TestUtil.h>
 #include <folly/system/MemoryMapping.h>
+#include <folly/testing/TestUtil.h>
 
 namespace apache::thrift::test {
 template <class Base>

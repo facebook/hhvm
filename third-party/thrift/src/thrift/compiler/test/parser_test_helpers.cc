@@ -20,7 +20,7 @@
 #include <glog/logging.h>
 #include <folly/Memory.h>
 #include <folly/String.h>
-#include <folly/experimental/TestUtil.h>
+#include <folly/testing/TestUtil.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/compiler.h>
 

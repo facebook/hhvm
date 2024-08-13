@@ -38,7 +38,6 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/executors/MeteredExecutor.h>
-#include <folly/experimental/TestUtil.h>
 #include <folly/experimental/coro/Baton.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/io/GlobalShutdownSocketSet.h>
@@ -55,6 +54,7 @@
 #include <folly/synchronization/test/Barrier.h>
 #include <folly/system/ThreadName.h>
 #include <folly/test/TestUtils.h>
+#include <folly/testing/TestUtil.h>
 #include <proxygen/httpserver/HTTPServerOptions.h>
 #include <quic/client/QuicClientAsyncTransport.h>
 #include <quic/common/events/FollyQuicEventBase.h>

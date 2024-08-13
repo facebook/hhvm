@@ -48,6 +48,9 @@ type summary = {
   num_mixed: int;
   num_supportdyn_of_mixed: int;
   num_dynamic: int;
+  num_dynamic_obj: int;
+  num_like_obj: int;
+  num_non_like_obj: int;
   num_tany: int;
 }
 [@@deriving yojson_of]

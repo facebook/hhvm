@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab6b6d2cb8c6f5937164b90ee6438ad7>>
+// @generated SignedSource<<6a21fbf57fe95708045046c9692443e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -178,6 +178,9 @@ pub struct Summary {
     pub mixed: isize,
     pub supportdyn_of_mixed: isize,
     pub dynamic: isize,
+    pub dynamic_obj: isize,
+    pub like_obj: isize,
+    pub non_like_obj: isize,
     pub tany: isize,
 }
 

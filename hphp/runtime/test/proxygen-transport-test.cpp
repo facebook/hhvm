@@ -237,6 +237,11 @@ TEST_F(ProxygenTransportBasicTest, body_after_413) {
     [&](const HTTPMessage& m) {
       m_txn.HTTPTransaction::sendHeaders(m);
     }));
+  EXPECT_CALL(m_txn, sendHeadersWithOptionalEOM(_, _))
+  .WillOnce(Invoke(
+    [&](const HTTPMessage& m, bool eom) {
+      m_txn.HTTPTransaction::sendHeadersWithOptionalEOM(m, eom);
+    }));
   EXPECT_CALL(m_txn, sendEOM())
   .WillOnce(Invoke(
     [&]() {
@@ -328,6 +333,11 @@ TEST_F(ProxygenTransportBasicTest, overlarge_body) {
   .WillOnce(Invoke(
     [&](const HTTPMessage& m) {
       m_txn.HTTPTransaction::sendHeaders(m);
+    }));
+  EXPECT_CALL(m_txn, sendHeadersWithOptionalEOM(_, _))
+  .WillOnce(Invoke(
+    [&](const HTTPMessage& m, bool eom) {
+      m_txn.HTTPTransaction::sendHeadersWithOptionalEOM(m, eom);
     }));
   EXPECT_CALL(m_txn, sendEOM())
   .WillOnce(Invoke(

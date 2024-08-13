@@ -43,6 +43,11 @@ FakeResponseHandler::FakeResponseHandler(folly::EventBase* evb)
         };
         msg.getHeaders().forEach(copyHeaders);
       }));
+
+  EXPECT_CALL(txn_, sendHeadersWithOptionalEOM(testing::_, testing::_))
+      .WillRepeatedly(Invoke([this](const HTTPMessage& msg, bool eom) mutable {
+        txn_.HTTPTransaction::sendHeadersWithOptionalEOM(msg, eom);
+      }));
   EXPECT_CALL(txn_, sendBody(testing::_))
       .WillRepeatedly(Invoke([this](std::shared_ptr<IOBuf> body) mutable {
         EXPECT_TRUE(evb_->inRunningEventBaseThread());

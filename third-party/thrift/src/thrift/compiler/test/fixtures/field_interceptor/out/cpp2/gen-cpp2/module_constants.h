@@ -13,6 +13,7 @@
 namespace facebook::thrift::test {
 namespace module_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_27503ccaf08c5312();
 
 } // namespace module_constants
 } // namespace facebook::thrift::test

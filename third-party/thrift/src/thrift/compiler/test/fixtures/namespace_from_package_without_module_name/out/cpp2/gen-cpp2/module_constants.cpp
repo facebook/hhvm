@@ -4,3 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
+#include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+
+namespace test::namespace_from_package_without_module_name {
+namespace module_constants {
+
+  ::std::string_view _fbthrift_schema_d1fc3edb82d57174() { return ""; }
+
+} // namespace module_constants
+} // namespace test::namespace_from_package_without_module_name

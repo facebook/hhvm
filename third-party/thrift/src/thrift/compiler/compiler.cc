@@ -749,6 +749,9 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
         "Could not load Thrift standard libraries: {}",
         std::get<1>(found_or_error));
   }
+
+  // C++ codegen inserts an empty const if this is false. Other languages may
+  // dynamically determine whether the schema const exists.
   if (gparams.inject_schema_const) {
     mutator_context mctx;
     mctx.bundle = program_bundle.get();

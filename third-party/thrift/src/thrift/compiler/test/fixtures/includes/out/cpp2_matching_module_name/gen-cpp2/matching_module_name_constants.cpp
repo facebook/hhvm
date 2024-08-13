@@ -4,3 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+
+namespace matching_module_name {
+namespace matching_module_name_constants {
+
+  ::std::string_view _fbthrift_schema_1cd40e8dd523bf67() { return ""; }
+
+} // namespace matching_module_name_constants
+} // namespace matching_module_name

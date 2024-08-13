@@ -30,5 +30,7 @@ namespace module2_constants {
   return *instance;
 }
 
+  ::std::string_view _fbthrift_schema_9188ad030fa5981a() { return ""; }
+
 } // namespace module2_constants
 } // namespace module2

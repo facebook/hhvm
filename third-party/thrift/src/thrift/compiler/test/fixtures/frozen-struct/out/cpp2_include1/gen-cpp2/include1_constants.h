@@ -13,6 +13,7 @@
 namespace some::ns {
 namespace include1_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_933b10759aaa870();
 
 } // namespace include1_constants
 } // namespace some::ns

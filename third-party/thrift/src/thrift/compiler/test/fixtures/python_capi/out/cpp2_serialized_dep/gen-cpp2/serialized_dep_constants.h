@@ -13,6 +13,7 @@
 namespace test::fixtures::python_capi {
 namespace serialized_dep_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_b748ca241bc21635();
 
 } // namespace serialized_dep_constants
 } // namespace test::fixtures::python_capi

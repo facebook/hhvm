@@ -48,6 +48,10 @@ namespace {{program:name}}_constants {
 {{/constant:outline_init?}}
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
+{{! Generate empty schema const if none was injected. }}
+{{^program:has_schema?}}
+  FOLLY_EXPORT ::std::string_view {{program:schema_name}}();
+{{/program:has_schema?}}
 
 } // namespace {{program:name}}_constants
 {{ > common/namespace_cpp2_end}}

@@ -20,5 +20,7 @@ namespace includes_constants {
 }
 
 
+  ::std::string_view _fbthrift_schema_708c30a658df2a09() { return ""; }
+
 } // namespace includes_constants
 } // namespace cpp2

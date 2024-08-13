@@ -13,6 +13,7 @@
 namespace apache::thrift::test {
 namespace module_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_8f27844fb09008d6();
 
 } // namespace module_constants
 } // namespace apache::thrift::test

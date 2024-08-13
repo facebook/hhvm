@@ -13,6 +13,7 @@
 namespace apache::thrift::fixtures::types {
 namespace module_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_e891a7857e533163();
 
 } // namespace module_constants
 } // namespace apache::thrift::fixtures::types

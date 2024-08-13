@@ -13,6 +13,7 @@
 namespace facebook::thrift::test::terse_write {
 namespace terse_write_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_b2d2455fa6f0dfdd();
 
 } // namespace terse_write_constants
 } // namespace facebook::thrift::test::terse_write

@@ -18,6 +18,7 @@ namespace includes_constants {
     return IncludedConstant_;
   }
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_a19367d5994054e6();
 
 } // namespace includes_constants
 } // namespace a::different::ns

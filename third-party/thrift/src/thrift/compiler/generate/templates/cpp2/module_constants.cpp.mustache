@@ -15,7 +15,6 @@
   limitations under the License.
 
 }}{{ > Autogen}}
-{{#program:constants?}}
 
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
 
@@ -56,6 +55,10 @@ namespace {{program:name}}_constants {
 {{/type:binary?}}{{/constant:generated?}}{{/constant:outline_init?}}
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
+{{! Generate empty schema const if none was injected. }}
+{{^program:has_schema?}}
+  ::std::string_view {{program:schema_name}}() { return ""; }
+{{/program:has_schema?}}
+
 } // namespace {{program:name}}_constants
 {{ > common/namespace_cpp2_end}}
-{{/program:constants?}}

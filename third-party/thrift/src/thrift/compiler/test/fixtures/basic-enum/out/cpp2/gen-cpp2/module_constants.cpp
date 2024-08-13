@@ -20,5 +20,7 @@ namespace module_constants {
   return *instance;
 }
 
+  ::std::string_view _fbthrift_schema_9ca1d0550f77cda5() { return ""; }
+
 } // namespace module_constants
 } // namespace test::fixtures::enumstrict

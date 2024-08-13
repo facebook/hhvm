@@ -13,6 +13,7 @@
 namespace apache::thrift::test {
 namespace deprecated_terse_writes_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_5fb8d5476e240a7d();
 
 } // namespace deprecated_terse_writes_constants
 } // namespace apache::thrift::test

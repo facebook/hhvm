@@ -20,6 +20,7 @@ namespace module_constants {
 
   ::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string> const& enumNames();
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_9ca1d0550f77cda5();
 
 } // namespace module_constants
 } // namespace test::fixtures::enumstrict

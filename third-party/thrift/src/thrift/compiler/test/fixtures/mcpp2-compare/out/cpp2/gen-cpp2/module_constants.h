@@ -84,6 +84,7 @@ namespace module_constants {
     return constEnumB_;
   }
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_461f120cd2880445();
 
 } // namespace module_constants
 } // namespace some::valid::ns

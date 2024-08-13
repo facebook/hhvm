@@ -19,6 +19,7 @@ namespace module2_constants {
 
   ::module2::Struct const& c4();
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_9188ad030fa5981a();
 
 } // namespace module2_constants
 } // namespace module2

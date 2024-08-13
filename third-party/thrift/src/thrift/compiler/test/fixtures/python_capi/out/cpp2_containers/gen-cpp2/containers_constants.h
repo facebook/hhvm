@@ -13,6 +13,7 @@
 namespace test::fixtures::python_capi {
 namespace containers_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_2194db3c9ad8a621();
 
 } // namespace containers_constants
 } // namespace test::fixtures::python_capi

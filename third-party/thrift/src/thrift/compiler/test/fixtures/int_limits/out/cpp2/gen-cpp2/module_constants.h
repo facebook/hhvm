@@ -53,6 +53,7 @@ namespace module_constants {
     return min_byte_const_;
   }
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_6a92e1732fe1f98d();
 
 } // namespace module_constants
 } // namespace cpp2

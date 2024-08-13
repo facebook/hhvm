@@ -19,5 +19,7 @@ namespace module_constants {
   return *instance;
 }
 
+  ::std::string_view _fbthrift_schema_49a8a875b834f528() { return ""; }
+
 } // namespace module_constants
 } // namespace test::fixtures::basic-structured-annotations

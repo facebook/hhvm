@@ -4,3 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
+#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+
+namespace apache::thrift::test {
+namespace simple_constants {
+
+  ::std::string_view _fbthrift_schema_53f2f7f9a3bb3ebf() { return ""; }
+
+} // namespace simple_constants
+} // namespace apache::thrift::test

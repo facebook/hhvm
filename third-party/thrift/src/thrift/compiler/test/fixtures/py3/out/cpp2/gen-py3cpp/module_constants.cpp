@@ -73,5 +73,7 @@ namespace module_constants {
   return *instance;
 }
 
+  ::std::string_view _fbthrift_schema_d88852123f9665d3() { return ""; }
+
 } // namespace module_constants
 } // namespace py3::simple

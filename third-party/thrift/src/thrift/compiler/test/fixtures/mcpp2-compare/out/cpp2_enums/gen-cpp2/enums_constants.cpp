@@ -35,5 +35,7 @@ namespace enums_constants {
   return *instance;
 }
 
+  ::std::string_view _fbthrift_schema_13f072109540bb8d() { return ""; }
+
 } // namespace enums_constants
 } // namespace facebook::ns::qwerty

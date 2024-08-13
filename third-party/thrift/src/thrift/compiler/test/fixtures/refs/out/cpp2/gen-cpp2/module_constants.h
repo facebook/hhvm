@@ -21,6 +21,7 @@ namespace module_constants {
 
   ::cpp2::StructWithRefTypeSharedConst const& kStructWithRefTypeSharedConst();
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_1a3968d5a44d4338();
 
 } // namespace module_constants
 } // namespace cpp2

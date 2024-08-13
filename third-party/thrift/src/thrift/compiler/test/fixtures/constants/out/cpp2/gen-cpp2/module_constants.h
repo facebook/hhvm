@@ -317,6 +317,7 @@ namespace module_constants {
 
   ::std::map<::std::int32_t, bool> const& I2B_REF();
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_8493d5f955645dbe();
 
 } // namespace module_constants
 } // namespace cpp2

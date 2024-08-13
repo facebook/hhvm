@@ -33,6 +33,7 @@ namespace module_constants {
     return SHOUTY_;
   }
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_f7fd5f7069fff5e1();
 
 } // namespace module_constants
 } // namespace cpp2

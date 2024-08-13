@@ -4,3 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+
+namespace some::ns {
+namespace include2_constants {
+
+  ::std::string_view _fbthrift_schema_2d56b80040d134fe() { return ""; }
+
+} // namespace include2_constants
+} // namespace some::ns

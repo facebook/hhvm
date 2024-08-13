@@ -17,5 +17,7 @@ namespace module_constants {
 
 
 
+  ::std::string_view _fbthrift_schema_c10aed29f43b19bb() { return ""; }
+
 } // namespace module_constants
 } // namespace test_cpp2::cpp_reflection

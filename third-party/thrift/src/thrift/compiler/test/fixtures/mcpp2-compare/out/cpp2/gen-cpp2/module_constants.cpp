@@ -84,5 +84,7 @@ namespace module_constants {
 
 
 
+  ::std::string_view _fbthrift_schema_461f120cd2880445() { return ""; }
+
 } // namespace module_constants
 } // namespace some::valid::ns

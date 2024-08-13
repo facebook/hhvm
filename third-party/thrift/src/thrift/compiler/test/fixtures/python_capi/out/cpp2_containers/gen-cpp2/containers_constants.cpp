@@ -4,3 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+
+namespace test::fixtures::python_capi {
+namespace containers_constants {
+
+  ::std::string_view _fbthrift_schema_2194db3c9ad8a621() { return ""; }
+
+} // namespace containers_constants
+} // namespace test::fixtures::python_capi

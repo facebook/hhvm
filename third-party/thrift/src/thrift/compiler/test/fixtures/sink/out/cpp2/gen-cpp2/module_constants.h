@@ -13,6 +13,7 @@
 namespace cpp2 {
 namespace module_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_587a9f6180c9d26a();
 
 } // namespace module_constants
 } // namespace cpp2

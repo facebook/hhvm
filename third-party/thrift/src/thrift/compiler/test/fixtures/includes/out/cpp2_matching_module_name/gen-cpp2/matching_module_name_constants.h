@@ -13,6 +13,7 @@
 namespace matching_module_name {
 namespace matching_module_name_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_1cd40e8dd523bf67();
 
 } // namespace matching_module_name_constants
 } // namespace matching_module_name

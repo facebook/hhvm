@@ -15,6 +15,7 @@ namespace module_constants {
 
   ::cpp2::YourStruct const& myStruct();
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_e062e2c29ccabf8a();
 
 } // namespace module_constants
 } // namespace cpp2

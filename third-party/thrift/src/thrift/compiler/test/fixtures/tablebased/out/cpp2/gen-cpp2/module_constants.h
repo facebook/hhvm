@@ -13,6 +13,7 @@
 namespace test::fixtures::tablebased {
 namespace module_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_8dac88a2d2ebc650();
 
 } // namespace module_constants
 } // namespace test::fixtures::tablebased

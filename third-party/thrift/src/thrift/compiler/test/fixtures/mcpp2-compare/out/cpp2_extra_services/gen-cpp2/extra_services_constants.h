@@ -13,6 +13,7 @@
 namespace extra::svc {
 namespace extra_services_constants {
 
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_6e8480798c558f9d();
 
 } // namespace extra_services_constants
 } // namespace extra::svc

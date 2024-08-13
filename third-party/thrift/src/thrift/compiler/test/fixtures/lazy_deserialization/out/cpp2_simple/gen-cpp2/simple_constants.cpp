@@ -15,5 +15,7 @@ namespace simple_constants {
 
 
 
+  ::std::string_view _fbthrift_schema_80230e619119706c() { return ""; }
+
 } // namespace simple_constants
 } // namespace apache::thrift::test

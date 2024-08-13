@@ -4,3 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+
+namespace thrift::shared_interactions {
+namespace shared_constants {
+
+  ::std::string_view _fbthrift_schema_c56c72d4e711dd06() { return ""; }
+
+} // namespace shared_constants
+} // namespace thrift::shared_interactions

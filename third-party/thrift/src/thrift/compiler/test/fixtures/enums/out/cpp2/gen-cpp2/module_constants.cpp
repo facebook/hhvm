@@ -4,3 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
+
+#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+
+namespace test::fixtures::enums {
+namespace module_constants {
+
+  ::std::string_view _fbthrift_schema_aee2267ce76e558f() { return ""; }
+
+} // namespace module_constants
+} // namespace test::fixtures::enums

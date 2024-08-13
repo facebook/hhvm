@@ -162,18 +162,9 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     static_assert(std::is_base_of_v<
                   BasePatch<typename VPatch::underlying_type, VPatch>,
                   VPatch>);
-    // TODO: Add ensurePatchable
-    auto type =
-        type::Type::create<type::infer_tag<typename VPatch::value_type>>();
-    auto anyStruct =
-        type::AnyData::toAny<type::infer_tag<VPatch>>(patch).toThrift();
-    if (ensures(type)) {
-      data_.patchIfTypeIsAfter().value()[std::move(type)].push_back(
-          std::move(anyStruct));
-    } else {
-      data_.patchIfTypeIsPrior().value()[std::move(type)].push_back(
-          std::move(anyStruct));
-    }
+    tryPatchable<VPatch>();
+    patchIfTypeIsImpl(
+        patch, ensures<type::infer_tag<typename VPatch::value_type>>());
   }
 
  private:
@@ -188,6 +179,38 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   template <typename Tag>
   bool ensures() {
     return ensures(type::Type::create<Tag>());
+  }
+
+  // If assign has value and specified 'Vpatch' is the corresponding patch type
+  // to the type in 'assign' operation, we ensure the patch is patchable by
+  // making it to 'clear' + 'ensureAny' operation.
+  template <typename VPatch>
+  void tryPatchable() {
+    using VType = typename VPatch::value_type;
+    using VTag = type::infer_tag<VType>;
+    if (data_.assign().has_value()) {
+      if (data_.assign().value().type() != type::Type::create<VTag>()) {
+        return;
+      }
+      data_.clear() = true;
+      ensureAny(std::move(data_.assign().value()));
+      data_.assign().reset();
+    }
+  }
+
+  template <typename VPatch>
+  void patchIfTypeIsImpl(const VPatch& patch, bool after) {
+    auto type =
+        type::Type::create<type::infer_tag<typename VPatch::value_type>>();
+    auto anyStruct =
+        type::AnyData::toAny<type::infer_tag<VPatch>>(patch).toThrift();
+    if (after) {
+      data_.patchIfTypeIsAfter().value()[std::move(type)].push_back(
+          std::move(anyStruct));
+    } else {
+      data_.patchIfTypeIsPrior().value()[std::move(type)].push_back(
+          std::move(anyStruct));
+    }
   }
 };
 

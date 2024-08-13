@@ -91,11 +91,14 @@ val to_string : finalized_error -> string
 or the default formatter. *)
 val format_or_default : format option -> format
 
-(** Prints a summary indicating things like how many errors were
-  found, how many are displayed and how many were dropped. *)
+(** Returns a summary string indicating things like how many errors were
+  found, how many are displayed and how many were dropped.
+
+  None is returned for [Raw] and [Plain] error formats. *)
 val format_summary :
   format ->
-  displayed_count:int ->
+  error_count:int ->
+  warning_count:int ->
   dropped_count:int option ->
   max_errors:int option ->
   string option
@@ -263,3 +266,5 @@ val global_access_error :
   Error_codes.GlobalAccessCheck.t -> Pos.t -> string -> unit
 
 val filter : t -> f:(Relative_path.t -> error -> bool) -> t
+
+val count_errors_and_warnings : ('a, 'b) User_error.t list -> int * int

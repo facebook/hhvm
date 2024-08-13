@@ -52,4 +52,4 @@ PACKAGES.toml:20:11
 [4] 20 | [packages.default]
     21 | uses=["*"]
 
-2 errors found.
+2 errors found

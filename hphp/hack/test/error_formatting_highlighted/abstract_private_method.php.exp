@@ -25,4 +25,4 @@ abstract_private_method.php:4:29
 [1] 4 |   private abstract function f(): void;
     5 | }
 
-3 errors found.
+3 errors found

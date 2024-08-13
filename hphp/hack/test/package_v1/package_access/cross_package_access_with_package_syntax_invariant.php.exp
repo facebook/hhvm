@@ -82,4 +82,4 @@ PACKAGES.toml:11:11
     12 | uses = ["c"]
     13 | includes = ["pkg2", "default"]
 
-3 errors found.
+3 errors found

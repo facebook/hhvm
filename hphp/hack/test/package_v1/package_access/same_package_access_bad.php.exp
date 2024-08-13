@@ -11,4 +11,4 @@ same_package_access_bad.php--a.php:3:15
     2 | module a;
 [2] 3 | internal type AInt = int;
 
-1 error found.
+1 error found

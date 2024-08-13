@@ -8,4 +8,4 @@ error: Parsing[1002] Encountered unexpected text ``, was expecting a type hint.
   3 | class Foo extends {}
     |                   ^
 
-2 errors found.
+2 errors found

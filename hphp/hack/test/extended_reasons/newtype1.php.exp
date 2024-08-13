@@ -102,4 +102,4 @@ File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
  4 |   return $x;
  5 | }
 
-1 error found.
+1 error found

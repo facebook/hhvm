@@ -46,35 +46,42 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  if
-    output_json
-    || (Option.is_none error_format && not is_interactive)
-    || List.is_empty error_list
-  then
-    ServerError.print_error_list
-      stdout
-      ~stale_msg
-      ~output_json
-      ~error_format
-      ~error_list
-      ~save_state_result:None
-      ~recheck_stats:last_recheck_stats
-  else begin
-    let error_format = Errors.format_or_default error_format in
-    List.iter error_list ~f:(print_error ~error_format);
-    Option.iter
-      (Errors.format_summary
-         error_format
-         ~displayed_count:(List.length error_list)
-         ~dropped_count:(Some dropped_count)
-         ~max_errors)
-      ~f:(fun msg -> Printf.printf "%s" msg);
-    (* [stale_msg] ultimately comes from [ServerMain.query_notifier], and says whether the check
-       reflects data from a watchman sync, or just whatever has arrived so far over the watchman
-       subscription. *)
-    Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg)
-  end;
-  if List.is_empty error_list then
+  let error_count =
+    if
+      output_json
+      || (Option.is_none error_format && not is_interactive)
+      || List.is_empty error_list
+    then (
+      ServerError.print_error_list
+        stdout
+        ~stale_msg
+        ~output_json
+        ~error_format
+        ~error_list
+        ~save_state_result:None
+        ~recheck_stats:last_recheck_stats;
+      0
+    ) else
+      let error_format = Errors.format_or_default error_format in
+      List.iter error_list ~f:(print_error ~error_format);
+      let (error_count, warning_count) =
+        Errors.count_errors_and_warnings error_list
+      in
+      Option.iter
+        (Errors.format_summary
+           error_format
+           ~error_count
+           ~warning_count
+           ~dropped_count:(Some dropped_count)
+           ~max_errors)
+        ~f:(fun msg -> Printf.printf "%s" msg);
+      (* [stale_msg] ultimately comes from [ServerMain.query_notifier], and says whether the check
+         reflects data from a watchman sync, or just whatever has arrived so far over the watchman
+         subscription. *)
+      Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
+      error_count
+  in
+  if Int.( = ) error_count 0 then
     Exit_status.No_error
   else
     Exit_status.Type_error
@@ -138,8 +145,10 @@ let go_streaming_on_fd
   (* this lwt process consumes errors from the errors.bin file by polling
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
-  let rec consume (displayed_count : int) :
-      (int * Server_progress.errors_file_error * string) Lwt.t =
+  let rec consume (error_counts : int * int) :
+      ((int * int) * Server_progress.errors_file_error * string) Lwt.t =
+    let add_tuples (i, j) (k, l) = (i + k, j + l) in
+    let total_errors (i, j) = i + j in
     let%lwt errors = Lwt_stream.get errors_stream in
     match errors with
     | None ->
@@ -149,12 +158,12 @@ let go_streaming_on_fd
          If we're here, it means that contract has been violated. *)
       failwith "Expected end_sentinel before end of stream"
     | Some (Error (end_sentinel, log_message)) ->
-      Lwt.return (displayed_count, end_sentinel, log_message)
+      Lwt.return (error_counts, end_sentinel, log_message)
     | Some (Ok (Server_progress.Telemetry telemetry_item)) ->
       errors_file_telemetry :=
         Telemetry.merge !errors_file_telemetry telemetry_item;
-      update_partial_telemetry displayed_count;
-      consume displayed_count
+      update_partial_telemetry (total_errors error_counts);
+      consume error_counts
     | Some (Ok (Server_progress.Errors { errors; timestamp = _ })) ->
       first_error_time :=
         Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
@@ -164,6 +173,13 @@ let go_streaming_on_fd
       let error_format = Errors.format_or_default error_format in
       let errors =
         Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
+      in
+      let error_counts =
+        Relative_path.Map.fold
+          errors
+          ~init:error_counts
+          ~f:(fun _ errors error_counts ->
+            Errors.count_errors_and_warnings errors |> add_tuples error_counts)
       in
       begin
         try
@@ -183,21 +199,23 @@ let go_streaming_on_fd
             backtrace
       end;
       progress_callback !latest_progress;
-      let displayed_count = displayed_count + !found_new in
-      update_partial_telemetry displayed_count;
-      if displayed_count >= Option.value max_errors ~default:Int.max_value then
+      update_partial_telemetry (total_errors error_counts);
+      if
+        total_errors error_counts
+        >= Option.value max_errors ~default:Int.max_value
+      then
         Lwt.return
-          ( displayed_count,
+          ( error_counts,
             Server_progress.Complete (Telemetry.create ()),
             "max-errors" )
       else
-        consume displayed_count
+        consume error_counts
   in
 
   (* We will show progress indefinitely until "consume" finishes,
      at which Lwt.pick will cancel show_progress. *)
-  let%lwt (displayed_count, end_sentinel, _log_message) =
-    Lwt.pick [consume 0; show_progress ()]
+  let%lwt ((error_count, warning_count), end_sentinel, _log_message) =
+    Lwt.pick [consume (0, 0); show_progress ()]
   in
   (* Clear the spinner *)
   progress_callback None;
@@ -210,14 +228,17 @@ let go_streaming_on_fd
       Option.iter
         (Errors.format_summary
            error_format
-           ~displayed_count
+           ~error_count
+           ~warning_count
            ~dropped_count:None
            ~max_errors)
         ~f:(fun msg -> Printf.printf "%s" msg);
       let telemetry =
-        Telemetry.merge (telemetry_so_far displayed_count) telemetry
+        Telemetry.merge
+          (telemetry_so_far (error_count + warning_count))
+          telemetry
       in
-      if displayed_count = 0 then
+      if Int.( = ) error_count 0 then
         (Exit_status.No_error, telemetry)
       else
         (Exit_status.Type_error, telemetry)

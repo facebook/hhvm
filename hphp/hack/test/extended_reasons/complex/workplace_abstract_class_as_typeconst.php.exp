@@ -64,4 +64,4 @@ File "workplace_abstract_class_as_typeconst.php", line 13, character 57 - line 1
  14 |     $this->container?->add($val);
  15 |   }
 
-1 error found.
+1 error found

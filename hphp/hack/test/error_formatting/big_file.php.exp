@@ -10,4 +10,4 @@ error: Typing[4105] Too many arguments (expected 0 but got 1)
 1009 |   foo(1);
      |   ^^^^^^
 
-2 errors found.
+2 errors found

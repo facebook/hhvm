@@ -15,7 +15,7 @@ globs1.php--foo.php:3:14
      2 | module foo;
 [2]  3 | public class Foo {}
 
-/tmp/8o9XhD1pxl/modules.hhi:5:12
+/tmp/wiZLQhWFp2/modules.hhi:5:12
      3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
      4 | **/
 [3]  5 | new module default {}
@@ -43,7 +43,7 @@ globs1.php--foobar.php:3:14
      2 | module foo.bar;
 [2]  3 | public class FooBar {}
 
-/tmp/8o9XhD1pxl/modules.hhi:5:12
+/tmp/wiZLQhWFp2/modules.hhi:5:12
      3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
      4 | **/
 [3]  5 | new module default {}
@@ -70,7 +70,7 @@ globs1.php--foobarbaz.php:3:14
      2 | module foo.bar.baz;
 [2]  3 | public class FooBarBaz {}
 
-/tmp/8o9XhD1pxl/modules.hhi:5:12
+/tmp/wiZLQhWFp2/modules.hhi:5:12
      3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
      4 | **/
 [3]  5 | new module default {}
@@ -81,4 +81,4 @@ PACKAGES.toml:12:11
 [4] 12 | [packages.default]
     13 | uses=["*"]
 
-3 errors found.
+3 errors found

@@ -6,4 +6,4 @@ cross_package_access_with_crosspackage_attr_bad2.php:4:18
 [1] 4 | <<__CrossPackage(123)>> // parse error
     5 | function test() : void {}
 
-1 error found.
+1 error found

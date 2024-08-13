@@ -11,4 +11,4 @@ cross_package_access_with_crosspackage_attr_bad_call_fun.php--a.php:6:5
 [2] 10 | function test(): void {
     11 | }
 
-1 error found.
+1 error found

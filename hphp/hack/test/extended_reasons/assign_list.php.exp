@@ -13,9 +13,9 @@ File "assign_list.php", line 6, character 14 - line 6, character 16:
 
  3 | class Super {}
  4 | class Sub extends Super {}
- 5 |
+ 5 | 
  6 | function foo(»Sub« $_): void {}
- 7 |
+ 7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
 
 But got `Super`
@@ -37,9 +37,9 @@ File "assign_list.php", line 6, character 10 - line 6, character 12:
 
  3 | class Super {}
  4 | class Sub extends Super {}
- 5 |
+ 5 | 
  6 | function »foo«(Sub $_): void {}
- 7 |
+ 7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
 
 The supertype comes from this expression
@@ -108,9 +108,9 @@ File "assign_list.php", line 3, character 7 - line 3, character 11:
 
  3 | class »Super« {}
  4 | class Sub extends Super {}
- 5 |
+ 5 | 
  6 | function foo(Sub $_): void {}
- 7 |
+ 7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
 
 which itself flows into this expression via an assignment
@@ -137,9 +137,9 @@ File "assign_list.php", line 6, character 14 - line 6, character 16:
 
  3 | class Super {}
  4 | class Sub extends Super {}
- 5 |
+ 5 | 
  6 | function foo(»Sub« $_): void {}
- 7 |
+ 7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
 
 which is defined here
@@ -148,9 +148,9 @@ File "assign_list.php", line 4, character 7 - line 4, character 9:
 
  3 | class Super {}
  4 | class »Sub« extends Super {}
- 5 |
+ 5 | 
  6 | function foo(Sub $_): void {}
- 7 |
+ 7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
 
-1 error found.
+1 error found

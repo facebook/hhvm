@@ -186,4 +186,4 @@ File "class_subtyping_invariant.php", line 9, character 7 - line 9, character 9:
 10 | 
 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
 
-1 error found.
+1 error found

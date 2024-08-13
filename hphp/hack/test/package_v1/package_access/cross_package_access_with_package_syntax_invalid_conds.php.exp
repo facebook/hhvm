@@ -147,4 +147,4 @@ PACKAGES.toml:11:11
     12 | uses = ["c"]
     13 | includes = ["pkg2", "default"]
 
-6 errors found.
+6 errors found

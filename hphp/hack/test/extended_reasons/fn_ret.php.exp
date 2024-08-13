@@ -106,4 +106,4 @@ File "fn_ret.php", line 7, character 17 - line 7, character 20:
  8 |   return foo();
  9 | }
 
-2 errors found.
+2 errors found

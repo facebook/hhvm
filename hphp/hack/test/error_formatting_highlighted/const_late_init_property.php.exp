@@ -24,4 +24,4 @@ const_late_init_property.php:5:14
 [1] 5 |   public int $x = 0;
     6 | }
 
-3 errors found.
+3 errors found

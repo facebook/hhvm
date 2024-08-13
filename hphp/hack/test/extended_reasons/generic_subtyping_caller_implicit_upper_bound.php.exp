@@ -121,7 +121,7 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 -
 
 which is defined here
 
-File "/tmp/NmfnkLlRqk/supportdynamic.hhi", line 6, character 11 - line 6, character 20:
+File "/tmp/APfXwn98zo/supportdynamic.hhi", line 6, character 11 - line 6, character 20:
 
  5 | namespace HH {
  6 |   newtype »supportdyn«<+T> as T = (T & dynamic);
@@ -272,4 +272,4 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 5, character 7 - 
  6 | 
  7 | function rcvr_concrete(B $x): void {}
 
-2 errors found.
+2 errors found

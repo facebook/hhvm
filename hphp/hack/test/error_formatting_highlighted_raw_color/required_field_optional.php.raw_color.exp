@@ -17,4 +17,4 @@ required_field_optional.php[0;2m:13:10[0m
 [0;2m[[0m[31m1[0m[0;2m][0m [0;2m13[0m[0;2m |[0m   return [31m$[0m[31ms[0m;
     [0;2m14[0m[0;2m |[0m }
 
-1 error found.
+1 error found

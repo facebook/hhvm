@@ -36,7 +36,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/ER1BCinbHo/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/saRkKRCJvG/classname.hhi", line 19, character 11 - line 19, character 19:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype »classname«<+T> as typename<T> = typename<T>;
@@ -195,7 +195,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/ER1BCinbHo/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/saRkKRCJvG/classname.hhi", line 19, character 11 - line 19, character 19:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype »classname«<+T> as typename<T> = typename<T>;
@@ -334,7 +334,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/ER1BCinbHo/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/saRkKRCJvG/classname.hhi", line 19, character 11 - line 19, character 19:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype »classname«<+T> as typename<T> = typename<T>;
@@ -435,4 +435,4 @@ File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
  16 |     return foo::class;
  17 | }
 
-3 errors found.
+3 errors found

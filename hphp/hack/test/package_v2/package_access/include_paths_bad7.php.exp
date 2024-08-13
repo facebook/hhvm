@@ -91,4 +91,4 @@ PACKAGES.toml:6:11
 7 | include_paths=[
 8 |     "include_paths_bad1.php--foo.php",
 
-4 errors found.
+4 errors found

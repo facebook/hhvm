@@ -9,4 +9,4 @@ return_type.php:4:10
 [1] 4 |   return "hello";
     5 | }
 
-1 error found.
+1 error found

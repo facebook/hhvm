@@ -9,4 +9,4 @@ error: Typing[4105] Too many arguments (expected 0 but got 1)
     |                                          ^^^^^^
     |          ^^^ Definition is here
 
-2 errors found.
+2 errors found

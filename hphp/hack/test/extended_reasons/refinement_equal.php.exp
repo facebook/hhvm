@@ -107,4 +107,4 @@ File "refinement_equal.php", line 4, character 7 - line 4, character 7:
  5 | 
  6 | function inter_equal(?A $a, C $c): C {
 
-1 error found.
+1 error found

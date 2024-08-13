@@ -24,4 +24,4 @@ error_pos_outside_range1.php:3:10
     4 |   return 3;
     5 | }
 
-3 errors found.
+3 errors found

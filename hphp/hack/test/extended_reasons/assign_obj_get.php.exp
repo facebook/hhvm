@@ -121,4 +121,4 @@ File "assign_obj_get.php", line 4, character 7 - line 4, character 9:
  8 |     return $this->item;
  9 |   }
 
-1 error found.
+1 error found

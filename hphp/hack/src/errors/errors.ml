@@ -495,37 +495,69 @@ let format_or_default = function
   | Some error_format -> error_format
   | None -> Highlighted
 
-(* E.g. "10 errors found." *)
-let format_summary format ~displayed_count ~dropped_count ~max_errors :
-    string option =
+(* E.g. "10 errors, 11 warnings found." *)
+let format_summary
+    format
+    ~(error_count : int)
+    ~(warning_count : int)
+    ~(dropped_count : int option)
+    ~(max_errors : int option) : string option =
   match format with
   | Context
   | Highlighted
   | Extended ->
-    let found_count = displayed_count + Option.value dropped_count ~default:0 in
-    let found_message =
-      Printf.sprintf
-        "%d error%s found"
-        found_count
-        (if found_count = 1 then
-          ""
-        else
-          "s")
+    let error_count_message =
+      if Int.( = ) error_count 0 then
+        "No errors!"
+      else
+        Printf.sprintf
+          "%d error%s"
+          error_count
+          (if error_count = 1 then
+            ""
+          else
+            "s")
+    in
+    let warning_count_message =
+      if Int.( = ) warning_count 0 then
+        ""
+      else
+        Printf.sprintf
+          "%s %d warning%s"
+          (if Int.( = ) error_count 0 then
+            ""
+          else
+            ",")
+          warning_count
+          (if warning_count = 1 then
+            ""
+          else
+            "s")
+    in
+    let found_s =
+      if Int.( > ) (error_count + warning_count) 0 then
+        " found"
+      else
+        ""
     in
     let truncated_message =
       match (max_errors, dropped_count) with
       | (Some max_errors, Some dropped_count) when dropped_count > 0 ->
         Printf.sprintf
-          " (only showing first %d, dropped %d).\n"
+          " (only showing first %d, dropped %d)"
           max_errors
           dropped_count
-      | (Some max_errors, None) when displayed_count >= max_errors ->
-        Printf.sprintf
-          " (max-errors is %d; more errors may exist).\n"
-          max_errors
-      | _ -> ".\n"
+      | (Some max_errors, None) when error_count + warning_count >= max_errors
+        ->
+        Printf.sprintf " (max-errors is %d; more errors may exist)" max_errors
+      | _ -> ""
     in
-    Some (found_message ^ truncated_message)
+    Some
+      (error_count_message
+      ^ warning_count_message
+      ^ found_s
+      ^ truncated_message
+      ^ "\n")
   | Raw
   | Plain ->
     None
@@ -1313,3 +1345,14 @@ let filter (errors : t) ~(f : Relative_path.t -> error -> bool) : t =
   Relative_path.Map.filter_map errors ~f:(fun path errors ->
       let errors = List.filter errors ~f:(f path) in
       Option.some_if (not (List.is_empty errors)) errors)
+
+let count_errors_and_warnings (error_list : (_, _) User_error.t list) :
+    int * int =
+  List.fold error_list ~init:(0, 0) ~f:(fun (err_count, warn_count) err ->
+      let is_warning err =
+        Option.is_some @@ Error_codes.Warning.of_enum @@ User_error.get_code err
+      in
+      if is_warning err then
+        (err_count, warn_count + 1)
+      else
+        (err_count + 1, warn_count))

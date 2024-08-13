@@ -12,4 +12,4 @@ cross_package_access_with_crosspackage_attr_bad_call.php--a.php:11:7
 [1] 11 |   $x->test(); // error
     12 | }
 
-1 error found.
+1 error found

@@ -14,7 +14,7 @@ File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
- 5 |
+ 5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   »required_a_at_int« $s,
  8 | ): void {
@@ -26,7 +26,7 @@ File "shape_subtyping_7.php", line 4, character 24 - line 4, character 26:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape(»'b'« => int);
- 5 |
+ 5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   required_a_at_int $s,
  8 | ): void {
@@ -42,7 +42,7 @@ File "shape_subtyping_7.php", line 6, character 10 - line 6, character 40:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
- 5 |
+ 5 | 
  6 | function »expects_required_a_at_int_alias«(
  7 |   required_a_at_int $s,
  8 | ): void {
@@ -78,7 +78,7 @@ File "shape_subtyping_7.php", line 4, character 6 - line 4, character 14:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type »missing_a« = shape('b' => int);
- 5 |
+ 5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   required_a_at_int $s,
  8 | ): void {
@@ -110,7 +110,7 @@ File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
- 5 |
+ 5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   »required_a_at_int« $s,
  8 | ): void {
@@ -135,7 +135,7 @@ File "shape_subtyping_7.php", line 4, character 31 - line 4, character 33:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => »int«);
- 5 |
+ 5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   required_a_at_int $s,
  8 | ): void {
@@ -183,7 +183,7 @@ File "shape_subtyping_7.php", line 6, character 10 - line 6, character 40:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
- 5 |
+ 5 | 
  6 | function »expects_required_a_at_int_alias«(
  7 |   required_a_at_int $s,
  8 | ): void {
@@ -219,7 +219,7 @@ File "shape_subtyping_7.php", line 4, character 6 - line 4, character 14:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type »missing_a« = shape('b' => int);
- 5 |
+ 5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   required_a_at_int $s,
  8 | ): void {
@@ -251,7 +251,7 @@ File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
 
  3 | type required_a_at_int = shape('a' => int);
  4 | type missing_a = shape('b' => int);
- 5 |
+ 5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   »required_a_at_int« $s,
  8 | ): void {
@@ -282,4 +282,4 @@ File "shape_subtyping_7.php", line 3, character 39 - line 3, character 41:
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type missing_a = shape('b' => int);
 
-2 errors found.
+2 errors found

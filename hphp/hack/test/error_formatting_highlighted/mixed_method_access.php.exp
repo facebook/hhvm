@@ -8,4 +8,4 @@ mixed_method_access.php:4:9
 [1] 4 |   $foo->bar();
     5 | }
 
-1 error found.
+1 error found

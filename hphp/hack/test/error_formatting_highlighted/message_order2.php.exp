@@ -26,4 +26,4 @@ message_order2.php:7:16
     8 |   takes_one_arg(123, 1); // error 4105
     9 | }
 
-2 errors found.
+2 errors found

@@ -8,4 +8,4 @@ two_pos_embedded_in_larger_pos.php:4:10
 [1,2,3] 4 |   return "5" === 5;
         5 | }
 
-1 error found.
+1 error found

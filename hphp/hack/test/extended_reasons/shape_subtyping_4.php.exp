@@ -143,4 +143,4 @@ File "shape_subtyping_4.php", line 3, character 39 - line 3, character 41:
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type required_a_at_bool = shape('a' => bool);
 
-1 error found.
+1 error found

@@ -17,4 +17,4 @@ required_field_optional.php:13:10
 [1] 13 |   return $s;
     14 | }
 
-1 error found.
+1 error found

@@ -290,4 +290,4 @@ File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, chara
 12 |   rcvr_both_bounds($x);
 13 | }
 
-2 errors found.
+2 errors found

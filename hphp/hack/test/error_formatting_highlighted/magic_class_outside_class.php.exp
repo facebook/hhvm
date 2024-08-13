@@ -6,4 +6,4 @@ magic_class_outside_class.php:4:21
 [1] 4 |   echo "Inside >" . __CLASS__ . "<\n";
     5 | }
 
-1 error found.
+1 error found

@@ -172,4 +172,4 @@ File "union_join_point.php", line 5, character 37 - line 5, character 37:
  6 |   if($p){
  7 |     $z = $x;
 
-1 error found.
+1 error found

@@ -61,4 +61,4 @@ PACKAGES.toml:3:11
     4 | uses = ["a", "b.*"]
     5 | includes=["default"]
 
-3 errors found.
+3 errors found

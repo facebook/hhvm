@@ -20,4 +20,4 @@ PACKAGES.toml:3:11
 4 | include_paths=["./*"]
 5 |
 
-1 error found.
+1 error found

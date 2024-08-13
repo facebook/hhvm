@@ -13,4 +13,4 @@ messages_same_line.php:3:42
       2 | 
 [1,2] 3 | function foo(): void {} function bar() { foo(1); }
 
-2 errors found.
+2 errors found

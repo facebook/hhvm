@@ -159,4 +159,4 @@ File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
 
-2 errors found.
+2 errors found

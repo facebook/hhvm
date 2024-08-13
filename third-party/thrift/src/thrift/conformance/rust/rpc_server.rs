@@ -102,6 +102,8 @@ use std::sync::Mutex;
 
 use async_trait::async_trait;
 use futures::stream::BoxStream;
+use rpc::rpc::services::basic_interaction::AddExn;
+use rpc::rpc::services::basic_interaction::InitExn;
 use rpc::rpc::services::r_p_c_conformance_service::BasicInteractionFactoryFunctionExn;
 use rpc::rpc::services::r_p_c_conformance_service::GetTestResultExn;
 use rpc::rpc::services::r_p_c_conformance_service::RequestResponseBasicExn;
@@ -127,6 +129,10 @@ use rpc::rpc::services::r_p_c_conformance_service::StreamInitialUndeclaredExcept
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialUndeclaredExceptionStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamUndeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamUndeclaredExceptionStreamExn;
+use rpc::rpc::InteractionConstructorServerTestResult;
+use rpc::rpc::InteractionFactoryFunctionServerTestResult;
+use rpc::rpc::InteractionPersistsStateServerTestResult;
+use rpc::rpc::InteractionTerminationServerTestResult;
 use rpc::rpc::Request;
 use rpc::rpc::RequestResponseBasicServerTestResult;
 use rpc::rpc::RequestResponseDeclaredExceptionServerTestResult;
@@ -138,6 +144,54 @@ use rpc::rpc::ServerInstruction;
 use rpc::rpc::ServerTestResult;
 use rpc_services::rpc::BasicInteraction;
 use rpc_services::rpc::RPCConformanceService;
+
+// ---
+
+struct BasicInteractionImpl {
+    pub test_case: Arc<Mutex<rpc::rpc::RpcTestCase>>,
+    pub test_result: Arc<Mutex<rpc::rpc::ServerTestResult>>,
+    pub storage: Mutex<i32>,
+}
+
+impl BasicInteractionImpl {
+    fn new(
+        init: i32,
+        test_case: Arc<Mutex<rpc::rpc::RpcTestCase>>,
+        test_result: Arc<Mutex<rpc::rpc::ServerTestResult>>,
+    ) -> Self {
+        Self {
+            storage: std::sync::Mutex::new(init),
+            test_case,
+            test_result,
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl rpc_services::rpc::BasicInteraction for BasicInteractionImpl {
+    async fn init(&self) -> Result<(), InitExn> {
+        let mut cell = self.storage.lock().unwrap();
+        *cell = 0i32;
+        Ok(())
+    }
+    async fn add(&self, i: i32) -> Result<i32, AddExn> {
+        let mut cell = self.storage.lock().unwrap();
+        *cell += i;
+        Ok(*cell)
+    }
+    async fn on_termination(&self) {
+        let r = self.test_case.lock().unwrap();
+        if let ServerInstruction::interactionTermination(_instr) = &r.serverInstruction {
+            let mut w = self.test_result.lock().unwrap();
+            *w = ServerTestResult::interactionTermination(InteractionTerminationServerTestResult {
+                terminationReceived: true,
+                ..Default::default()
+            });
+        }
+    }
+}
+
+// --
 
 #[derive(Clone)]
 pub struct RPCConformanceServiceImpl {
@@ -241,6 +295,107 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
             },
         );
         Ok(())
+    }
+
+    fn createBasicInteraction(&self) -> ::anyhow::Result<Box<dyn BasicInteraction>> {
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::interactionConstructor(_instr) => {
+                let mut w = self.test_result.lock().unwrap();
+                *w = ServerTestResult::interactionConstructor(
+                    InteractionConstructorServerTestResult {
+                        constructorCalled: true,
+                        ..Default::default()
+                    },
+                );
+                Ok(Box::new(BasicInteractionImpl::new(
+                    0i32,
+                    Arc::clone(&self.test_case),
+                    Arc::clone(&self.test_result),
+                )))
+            }
+            ServerInstruction::interactionPersistsState(_instr) => {
+                let mut w = self.test_result.lock().unwrap();
+                *w = ServerTestResult::interactionPersistsState(
+                    InteractionPersistsStateServerTestResult {
+                        ..Default::default()
+                    },
+                );
+                Ok(Box::new(BasicInteractionImpl::new(
+                    0i32,
+                    Arc::clone(&self.test_case),
+                    Arc::clone(&self.test_result),
+                )))
+            }
+            ServerInstruction::interactionTermination(_instr) => {
+                let mut w = self.test_result.lock().unwrap();
+                *w = ServerTestResult::interactionTermination(
+                    InteractionTerminationServerTestResult {
+                        terminationReceived: false,
+                        ..Default::default()
+                    },
+                );
+                Ok(Box::new(BasicInteractionImpl::new(
+                    0i32,
+                    Arc::clone(&self.test_case),
+                    Arc::clone(&self.test_result),
+                )))
+            }
+            _ => Err(instruction_match_error().into()),
+        }
+    }
+
+    async fn basicInteractionFactoryFunction(
+        &self,
+        init: i32,
+    ) -> Result<Box<dyn BasicInteraction>, BasicInteractionFactoryFunctionExn> {
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::interactionFactoryFunction(_instr) => {
+                let mut w = self.test_result.lock().unwrap();
+                *w = ServerTestResult::interactionFactoryFunction(
+                    InteractionFactoryFunctionServerTestResult {
+                        initialSum: init,
+                        ..Default::default()
+                    },
+                );
+                Ok(Box::new(BasicInteractionImpl::new(
+                    init,
+                    Arc::clone(&self.test_case),
+                    Arc::clone(&self.test_result),
+                )))
+            }
+            ServerInstruction::interactionPersistsState(_instr) => {
+                let mut w = self.test_result.lock().unwrap();
+                *w = ServerTestResult::interactionPersistsState(
+                    InteractionPersistsStateServerTestResult {
+                        ..Default::default()
+                    },
+                );
+                Ok(Box::new(BasicInteractionImpl::new(
+                    init,
+                    Arc::clone(&self.test_case),
+                    Arc::clone(&self.test_result),
+                )))
+            }
+            ServerInstruction::interactionTermination(_instr) => {
+                let mut w = self.test_result.lock().unwrap();
+                *w = ServerTestResult::interactionTermination(
+                    InteractionTerminationServerTestResult {
+                        terminationReceived: false,
+                        ..Default::default()
+                    },
+                );
+                Ok(Box::new(BasicInteractionImpl::new(
+                    init,
+                    Arc::clone(&self.test_case),
+                    Arc::clone(&self.test_result),
+                )))
+            }
+            _ => Err(BasicInteractionFactoryFunctionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn streamBasic(
@@ -374,22 +529,6 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
             ::fbthrift::ApplicationException::unimplemented_method(
                 "RPCConformanceService",
                 "streamInitialTimeout",
-            ),
-        ))
-    }
-
-    fn createBasicInteraction(&self) -> anyhow::Result<Box<dyn BasicInteraction>> {
-        anyhow::bail!("RPCConformanceService.createBasicInteraction not implemented");
-    }
-
-    async fn basicInteractionFactoryFunction(
-        &self,
-        _initial_sum: i32,
-    ) -> Result<Box<dyn BasicInteraction>, BasicInteractionFactoryFunctionExn> {
-        Err(BasicInteractionFactoryFunctionExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "basicInteractionFactoryFunction",
             ),
         ))
     }

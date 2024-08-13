@@ -122,30 +122,36 @@ class Foo final  {
   bool operator==(const Foo&) const;
   bool operator<(const Foo&) const;
 
+  /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&> field_ref() const& {
     return ::apache::thrift::required_field_ref<const T&>{this->field};
   }
 
+  /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<const T&&> field_ref() const&& {
     return ::apache::thrift::required_field_ref<const T&&>{static_cast<const T&&>(this->field)};
   }
 
+  /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&> field_ref() & {
     return ::apache::thrift::required_field_ref<T&>{this->field};
   }
 
+  /** Glean { "field": "field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::required_field_ref<T&&> field_ref() && {
     return ::apache::thrift::required_field_ref<T&&>{static_cast<T&&>(this->field)};
   }
 
+  /** Glean { "field": "field" } */
   ::std::int32_t get_field() const {
     return field;
   }
 
+  /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;

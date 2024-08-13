@@ -335,313 +335,377 @@ class MyStruct final  {
   bool operator==(const MyStruct&) const;
   bool operator<(const MyStruct&) const;
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyIntField_ref() const& {
     return {this->__fbthrift_field_MyIntField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyIntField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyIntField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyIntField_ref() & {
     return {this->__fbthrift_field_MyIntField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyIntField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyIntField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyIntField() const& {
     return {this->__fbthrift_field_MyIntField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyIntField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyIntField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyIntField() & {
     return {this->__fbthrift_field_MyIntField, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   template <typename..., typename T = ::std::int64_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyIntField() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyIntField), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyStringField_ref() const& {
     return {this->__fbthrift_field_MyStringField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyStringField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyStringField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyStringField_ref() & {
     return {this->__fbthrift_field_MyStringField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyStringField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyStringField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyStringField() const& {
     return {this->__fbthrift_field_MyStringField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyStringField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyStringField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyStringField() & {
     return {this->__fbthrift_field_MyStringField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyStringField() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyStringField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyDataField_ref() const& {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyDataField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyDataField_ref() & {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyDataField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> MyDataField() const& {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> MyDataField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> MyDataField() & {
     return {this->__fbthrift_field_MyDataField, __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "MyDataField" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyDataField() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyDataField), __isset.at(2), __isset.bit(2)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> myEnum_ref() const& {
     return {this->__fbthrift_field_myEnum, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> myEnum_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_myEnum), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> myEnum_ref() & {
     return {this->__fbthrift_field_myEnum, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> myEnum_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_myEnum), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> myEnum() const& {
     return {this->__fbthrift_field_myEnum, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> myEnum() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_myEnum), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> myEnum() & {
     return {this->__fbthrift_field_myEnum, __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> myEnum() && {
     return {static_cast<T&&>(this->__fbthrift_field_myEnum), __isset.at(3), __isset.bit(3)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> oneway_ref() const& {
     return {this->__fbthrift_field_oneway, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> oneway_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_oneway), __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> oneway_ref() & {
     return {this->__fbthrift_field_oneway, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> oneway_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_oneway), __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> oneway() const& {
     return {this->__fbthrift_field_oneway, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> oneway() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_oneway), __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> oneway() & {
     return {this->__fbthrift_field_oneway, __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "oneway" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> oneway() && {
     return {static_cast<T&&>(this->__fbthrift_field_oneway), __isset.at(4), __isset.bit(4)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> readonly_ref() const& {
     return {this->__fbthrift_field_readonly, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> readonly_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_readonly), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> readonly_ref() & {
     return {this->__fbthrift_field_readonly, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> readonly_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_readonly), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> readonly() const& {
     return {this->__fbthrift_field_readonly, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> readonly() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_readonly), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> readonly() & {
     return {this->__fbthrift_field_readonly, __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "readonly" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> readonly() && {
     return {static_cast<T&&>(this->__fbthrift_field_readonly), __isset.at(5), __isset.bit(5)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> idempotent_ref() const& {
     return {this->__fbthrift_field_idempotent, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> idempotent_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_idempotent), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> idempotent_ref() & {
     return {this->__fbthrift_field_idempotent, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> idempotent_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_idempotent), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> idempotent() const& {
     return {this->__fbthrift_field_idempotent, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> idempotent() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_idempotent), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> idempotent() & {
     return {this->__fbthrift_field_idempotent, __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "idempotent" } */
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> idempotent() && {
     return {static_cast<T&&>(this->__fbthrift_field_idempotent), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "MyIntField" } */
   ::std::int64_t get_MyIntField() const {
     return __fbthrift_field_MyIntField;
   }
 
+  /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField_ref() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
   }
 
+  /** Glean { "field": "MyStringField" } */
   const ::std::string& get_MyStringField() const& {
     return __fbthrift_field_MyStringField;
   }
 
+  /** Glean { "field": "MyStringField" } */
   ::std::string get_MyStringField() && {
     return std::move(__fbthrift_field_MyStringField);
   }
 
+  /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
   [[deprecated("Use `FOO.MyStringField_ref() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
   ::std::string& set_MyStringField(T_MyStruct_MyStringField_struct_setter&& MyStringField_) {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
+  /** Glean { "field": "MyDataField" } */
   const ::cpp2::MyDataItem& get_MyDataField() const&;
+  /** Glean { "field": "MyDataField" } */
   ::cpp2::MyDataItem get_MyDataField() &&;
 
+  /** Glean { "field": "MyDataField" } */
   template <typename T_MyStruct_MyDataField_struct_setter = ::cpp2::MyDataItem>
   [[deprecated("Use `FOO.MyDataField_ref() = BAR;` instead of `FOO.set_MyDataField(BAR);`")]]
   ::cpp2::MyDataItem& set_MyDataField(T_MyStruct_MyDataField_struct_setter&& MyDataField_) {
@@ -649,40 +713,48 @@ class MyStruct final  {
     return __fbthrift_field_MyDataField;
   }
 
+  /** Glean { "field": "myEnum" } */
   ::cpp2::MyEnum get_myEnum() const {
     return __fbthrift_field_myEnum;
   }
 
+  /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum_ref() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_) {
     myEnum_ref() = myEnum_;
     return __fbthrift_field_myEnum;
   }
 
+  /** Glean { "field": "oneway" } */
   bool get_oneway() const {
     return __fbthrift_field_oneway;
   }
 
+  /** Glean { "field": "oneway" } */
   [[deprecated("Use `FOO.oneway_ref() = BAR;` instead of `FOO.set_oneway(BAR);`")]]
   bool& set_oneway(bool oneway_) {
     oneway_ref() = oneway_;
     return __fbthrift_field_oneway;
   }
 
+  /** Glean { "field": "readonly" } */
   bool get_readonly() const {
     return __fbthrift_field_readonly;
   }
 
+  /** Glean { "field": "readonly" } */
   [[deprecated("Use `FOO.readonly_ref() = BAR;` instead of `FOO.set_readonly(BAR);`")]]
   bool& set_readonly(bool readonly_) {
     readonly_ref() = readonly_;
     return __fbthrift_field_readonly;
   }
 
+  /** Glean { "field": "idempotent" } */
   bool get_idempotent() const {
     return __fbthrift_field_idempotent;
   }
 
+  /** Glean { "field": "idempotent" } */
   [[deprecated("Use `FOO.idempotent_ref() = BAR;` instead of `FOO.set_idempotent(BAR);`")]]
   bool& set_idempotent(bool idempotent_) {
     idempotent_ref() = idempotent_;

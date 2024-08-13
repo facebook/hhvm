@@ -134,104 +134,125 @@ class IncludedA final  {
   bool operator==(const IncludedA&) const;
   bool operator<(const IncludedA&) const;
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> i32Field_ref() const& {
     return {this->__fbthrift_field_i32Field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i32Field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_i32Field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> i32Field_ref() & {
     return {this->__fbthrift_field_i32Field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i32Field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_i32Field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> i32Field() const& {
     return {this->__fbthrift_field_i32Field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i32Field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_i32Field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> i32Field() & {
     return {this->__fbthrift_field_i32Field, __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "i32Field" } */
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i32Field() && {
     return {static_cast<T&&>(this->__fbthrift_field_i32Field), __isset.at(0), __isset.bit(0)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> strField_ref() const& {
     return {this->__fbthrift_field_strField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> strField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_strField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> strField_ref() & {
     return {this->__fbthrift_field_strField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> strField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_strField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> strField() const& {
     return {this->__fbthrift_field_strField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> strField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_strField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> strField() & {
     return {this->__fbthrift_field_strField, __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "strField" } */
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> strField() && {
     return {static_cast<T&&>(this->__fbthrift_field_strField), __isset.at(1), __isset.bit(1)};
   }
 
+  /** Glean { "field": "i32Field" } */
   ::std::int32_t get_i32Field() const {
     return __fbthrift_field_i32Field;
   }
 
+  /** Glean { "field": "i32Field" } */
   [[deprecated("Use `FOO.i32Field_ref() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
   ::std::int32_t& set_i32Field(::std::int32_t i32Field_) {
     i32Field_ref() = i32Field_;
     return __fbthrift_field_i32Field;
   }
 
+  /** Glean { "field": "strField" } */
   const ::std::string& get_strField() const& {
     return __fbthrift_field_strField;
   }
 
+  /** Glean { "field": "strField" } */
   ::std::string get_strField() && {
     return std::move(__fbthrift_field_strField);
   }
 
+  /** Glean { "field": "strField" } */
   template <typename T_IncludedA_strField_struct_setter = ::std::string>
   [[deprecated("Use `FOO.strField_ref() = BAR;` instead of `FOO.set_strField(BAR);`")]]
   ::std::string& set_strField(T_IncludedA_strField_struct_setter&& strField_) {

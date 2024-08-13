@@ -61,15 +61,6 @@ inline PyObject* toPyObject(void* object) {
     }                                     \
   } while (false)
 
-template <typename T, typename V>
-inline T convInt(V v) {
-  if (v >= std::numeric_limits<T>::min() &&
-      v <= std::numeric_limits<T>::max()) {
-    return static_cast<T>(v);
-  }
-  LOG(FATAL) << "int out of range";
-}
-
 /**
  * Creates a new "union tuple" initialized for an empty union.
  *
@@ -260,135 +251,6 @@ inline PyObject* setPyObject(void* objectPtr, UniquePyObjectPtr value) {
   Py_XDECREF(oldObject);
   return *pyObjPtr;
 }
-
-inline UniquePyObjectPtr primitiveCppToPython(bool value) {
-  PyObject* ret = value ? Py_True : Py_False;
-  Py_INCREF(ret);
-  return UniquePyObjectPtr{ret};
-}
-
-inline UniquePyObjectPtr primitiveCppToPython(std::int32_t value) {
-  if (UniquePyObjectPtr ret{PyLong_FromLong(value)}) {
-    return ret;
-  }
-  THRIFT_PY3_CHECK_ERROR();
-}
-
-inline UniquePyObjectPtr primitiveCppToPython(std::int8_t value) {
-  return primitiveCppToPython(static_cast<std::int32_t>(value));
-}
-
-inline UniquePyObjectPtr primitiveCppToPython(std::int16_t value) {
-  return primitiveCppToPython(static_cast<std::int32_t>(value));
-}
-
-inline UniquePyObjectPtr primitiveCppToPython(std::int64_t value) {
-  if (UniquePyObjectPtr ret{PyLong_FromLongLong(value)}) {
-    return ret;
-  }
-  THRIFT_PY3_CHECK_ERROR();
-}
-
-inline UniquePyObjectPtr primitiveCppToPython(float value) {
-  if (UniquePyObjectPtr ret{PyFloat_FromDouble(value)}) {
-    return ret;
-  }
-  THRIFT_PY3_CHECK_ERROR();
-}
-
-inline UniquePyObjectPtr primitiveCppToPython(double value) {
-  if (UniquePyObjectPtr ret{PyFloat_FromDouble(value)}) {
-    return ret;
-  }
-  THRIFT_PY3_CHECK_ERROR();
-}
-
-template <typename PrimitiveType>
-detail::ThriftValue primitivePythonToCpp(PyObject* object);
-
-template <>
-inline detail::ThriftValue primitivePythonToCpp<bool>(PyObject* object) {
-  DCHECK(object == Py_True || object == Py_False);
-  return detail::ThriftValue{object == Py_True};
-}
-
-template <typename T>
-inline detail::ThriftValue pyLongToCpp(PyObject* object) {
-  auto value = PyLong_AsLong(object);
-  if (value == -1) {
-    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
-  }
-  return detail::ThriftValue{convInt<T>(value)};
-}
-
-template <>
-inline detail::ThriftValue primitivePythonToCpp<std::int8_t>(PyObject* object) {
-  return pyLongToCpp<std::int8_t>(object);
-}
-
-template <>
-inline detail::ThriftValue primitivePythonToCpp<std::int16_t>(
-    PyObject* object) {
-  return pyLongToCpp<std::int16_t>(object);
-}
-
-template <>
-inline detail::ThriftValue primitivePythonToCpp<std::int32_t>(
-    PyObject* object) {
-  return pyLongToCpp<std::int32_t>(object);
-}
-
-template <>
-inline detail::ThriftValue primitivePythonToCpp<std::int64_t>(
-    PyObject* object) {
-  auto value = PyLong_AsLongLong(object);
-  if (value == -1) {
-    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
-  }
-  return detail::ThriftValue{convInt<std::int64_t>(value)};
-}
-
-template <>
-inline detail::ThriftValue primitivePythonToCpp<double>(PyObject* object) {
-  auto value = PyFloat_AsDouble(object);
-  if (value == -1.0) {
-    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
-  }
-  return detail::ThriftValue{value};
-}
-
-template <>
-inline detail::ThriftValue primitivePythonToCpp<float>(PyObject* object) {
-  auto value = PyFloat_AsDouble(object);
-  if (value == -1.0) {
-    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
-  }
-  return detail::ThriftValue{static_cast<float>(value)};
-}
-
-template <typename PrimitiveType, protocol::TType Type>
-struct PrimitiveTypeInfo {
-  static detail::OptionalThriftValue get(
-      const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
-    PyObject* pyObj = *toPyObjectPtr(objectPtr);
-    return folly::make_optional<detail::ThriftValue>(
-        primitivePythonToCpp<PrimitiveType>(pyObj));
-  }
-
-  static void set(void* objectPtr, PrimitiveType value) {
-    setPyObject(objectPtr, primitiveCppToPython(value));
-  }
-
-  static const detail::TypeInfo typeInfo;
-};
-
-template <typename PrimitiveType, protocol::TType Type>
-const detail::TypeInfo PrimitiveTypeInfo<PrimitiveType, Type>::typeInfo{
-    /* .type */ Type,
-    /* .get */ get,
-    /* .set */ reinterpret_cast<detail::VoidFuncPtr>(set),
-    /* .typeExt */ nullptr,
-};
 
 extern const detail::TypeInfo& boolTypeInfo;
 extern const detail::TypeInfo& byteTypeInfo;
@@ -667,7 +529,7 @@ void SetTypeInfoTemplate<T>::consumeElem(
   DCHECK(elem);
   // This is nasty hack since Cython generated code will incr the refcnt
   // so PySet_Add will fail. Need to temporarily decrref.
-  auto currentRefCnt = Py_REFCNT(*pyObjPtr);
+  const Py_ssize_t currentRefCnt = Py_REFCNT(*pyObjPtr);
   _fbthrift_Py_SET_REFCNT(*pyObjPtr, 1);
   if (PySet_Add(*pyObjPtr, elem) == -1) {
     _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);

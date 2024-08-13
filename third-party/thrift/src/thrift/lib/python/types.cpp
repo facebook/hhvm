@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/python/types.h>
+// To access Cython C APIs, such as create_IOBuf(). See `types.pxd`.
 #include <thrift/lib/python/types_api.h> // @manual
 
 #include <folly/Indestructible.h>
@@ -118,7 +118,7 @@ std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
         case detail::StringFieldType::IOBuf:
         case detail::StringFieldType::IOBufPtr:
         case detail::StringFieldType::IOBufObj:
-          auto buf = create_IOBuf(folly::IOBuf::create(0));
+          PyObject* buf = create_IOBuf(folly::IOBuf::create(0));
           value = UniquePyObjectPtr(buf);
           addValueToCache = false;
           break;
@@ -207,7 +207,7 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
         case detail::StringFieldType::IOBuf:
         case detail::StringFieldType::IOBufPtr:
         case detail::StringFieldType::IOBufObj:
-          auto buf = create_IOBuf(folly::IOBuf::create(0));
+          PyObject* buf = create_IOBuf(folly::IOBuf::create(0));
           value = UniquePyObjectPtr(buf);
           addValueToCache = false;
           break;
@@ -424,7 +424,7 @@ PyObject* createStructContainerWithDefaultValues(
   }
 
   // Initialize container[1:numFields+1] with default field values.
-  const auto& defaultValues =
+  const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   for (int fieldIndex = 0; fieldIndex < numFields; ++fieldIndex) {
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[fieldIndex];
@@ -494,7 +494,7 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
   const int16_t numFields = structInfo.numFields;
   DCHECK(Container::Size(container) == numFields + 1);
 
-  const auto& defaultValues =
+  const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   const char* issetFlags = getIssetFlags<Container>(container);
   for (int i = 0; i < numFields; ++i) {
@@ -694,7 +694,7 @@ detail::StructInfo* newStructInfo(
     bool isUnion,
     FieldValueMap& fieldValues,
     bool isMutable) {
-  auto structInfo = static_cast<detail::StructInfo*>(folly::operator_new(
+  auto* structInfo = static_cast<detail::StructInfo*>(folly::operator_new(
       sizeof(detail::StructInfo) + sizeof(detail::FieldInfo) * numFields,
       std::align_val_t{alignof(detail::StructInfo)}));
   structInfo->numFields = numFields;
@@ -763,9 +763,9 @@ detail::OptionalThriftValue getIOBuf(
 
 void setIOBuf(void* objectPtr, const folly::IOBuf& value) {
   ensureImportOrThrow();
-  const auto buf = create_IOBuf(value.clone());
+  PyObject* buf = create_IOBuf(value.clone());
   UniquePyObjectPtr iobufObj{buf};
-  if (!buf) {
+  if (buf == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
   setPyObject(objectPtr, std::move(iobufObj));
@@ -791,7 +791,7 @@ size_t writeMapSorted(
   }
 
   size_t written = 0;
-  auto size = PyList_Size(listPtr.get());
+  const Py_ssize_t size = PyList_Size(listPtr.get());
   for (std::uint32_t i = 0; i < size; ++i) {
     PyObject* pair = PyList_GET_ITEM(listPtr.get(), i);
     PyObject* key = PyTuple_GET_ITEM(pair, 0);
@@ -801,6 +801,202 @@ size_t writeMapSorted(
 
   return written;
 }
+
+inline UniquePyObjectPtr primitiveCppToPython(bool value) {
+  PyObject* ret = value ? Py_True : Py_False;
+  Py_INCREF(ret);
+  return UniquePyObjectPtr{ret};
+}
+
+inline UniquePyObjectPtr primitiveCppToPython(std::int32_t value) {
+  if (UniquePyObjectPtr ret{PyLong_FromLong(value)}) {
+    return ret;
+  }
+  THRIFT_PY3_CHECK_ERROR();
+}
+
+inline UniquePyObjectPtr primitiveCppToPython(std::int8_t value) {
+  return primitiveCppToPython(static_cast<std::int32_t>(value));
+}
+
+inline UniquePyObjectPtr primitiveCppToPython(std::int16_t value) {
+  return primitiveCppToPython(static_cast<std::int32_t>(value));
+}
+
+inline UniquePyObjectPtr primitiveCppToPython(std::int64_t value) {
+  if (UniquePyObjectPtr ret{PyLong_FromLongLong(value)}) {
+    return ret;
+  }
+  THRIFT_PY3_CHECK_ERROR();
+}
+
+inline UniquePyObjectPtr primitiveCppToPython(float value) {
+  if (UniquePyObjectPtr ret{PyFloat_FromDouble(value)}) {
+    return ret;
+  }
+  THRIFT_PY3_CHECK_ERROR();
+}
+
+inline UniquePyObjectPtr primitiveCppToPython(double value) {
+  if (UniquePyObjectPtr ret{PyFloat_FromDouble(value)}) {
+    return ret;
+  }
+  THRIFT_PY3_CHECK_ERROR();
+}
+
+/**
+ * Converts the given integral value to the specified target type.
+ *
+ * Both source and target types MUST be integrals (or this will fail to
+ * compile).
+ *
+ * Terminates the process (i.e., aborts) if the input value does not fit in the
+ * target type range.
+ */
+template <typename T, typename V>
+inline T convInt(V v) {
+  static_assert(std::is_integral_v<T> && std::is_integral_v<V>);
+  if (v >= std::numeric_limits<T>::min() &&
+      v <= std::numeric_limits<T>::max()) {
+    return static_cast<T>(v);
+  }
+  LOG(FATAL) << "int out of range";
+}
+
+/**
+ * Converts the given python `object` to the corresponding native C++ type.
+ *
+ * The returned `ThriftValue` union instance will be initialized with the field
+ * corresponding to the given `TCppType`.
+ *
+ * Note: by design, no definition is provided for this primary template.
+ * Instead, explicit specializations are defined for all supported target C++
+ * types (i.e., `TCppType` template parameters).
+ */
+template <typename TCppType>
+detail::ThriftValue primitivePythonToCpp(PyObject* object);
+
+template <>
+inline detail::ThriftValue primitivePythonToCpp<bool>(PyObject* object) {
+  DCHECK(object == Py_True || object == Py_False);
+  return detail::ThriftValue{object == Py_True};
+}
+
+/**
+ * Converts the given `PyLong` object to the C++ integral type (`TCppIntType`).
+ *
+ * Throws `std::runtime_error` if `object` does not hold a (valid) `PyLong`.
+ * Terminates the process (i.e., aborts) if the value of the given long `object`
+ * does not fit in the target `TCppIntType`.
+ */
+template <typename TCppIntType>
+inline detail::ThriftValue pyLongToCpp(PyObject* object) {
+  const long value = PyLong_AsLong(object);
+  if (value == -1) {
+    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
+  }
+  return detail::ThriftValue{convInt<TCppIntType>(value)};
+}
+
+template <>
+inline detail::ThriftValue primitivePythonToCpp<std::int8_t>(PyObject* object) {
+  return pyLongToCpp<std::int8_t>(object);
+}
+
+template <>
+inline detail::ThriftValue primitivePythonToCpp<std::int16_t>(
+    PyObject* object) {
+  return pyLongToCpp<std::int16_t>(object);
+}
+
+template <>
+inline detail::ThriftValue primitivePythonToCpp<std::int32_t>(
+    PyObject* object) {
+  return pyLongToCpp<std::int32_t>(object);
+}
+
+template <>
+inline detail::ThriftValue primitivePythonToCpp<std::int64_t>(
+    PyObject* object) {
+  const long long value = PyLong_AsLongLong(object);
+  if (value == -1) {
+    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
+  }
+  return detail::ThriftValue{convInt<std::int64_t>(value)};
+}
+
+template <>
+inline detail::ThriftValue primitivePythonToCpp<double>(PyObject* object) {
+  const double value = PyFloat_AsDouble(object);
+  if (value == -1.0) {
+    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
+  }
+  return detail::ThriftValue{value};
+}
+
+template <>
+inline detail::ThriftValue primitivePythonToCpp<float>(PyObject* object) {
+  const double value = PyFloat_AsDouble(object);
+  if (value == -1.0) {
+    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
+  }
+  return detail::ThriftValue{static_cast<float>(value)};
+}
+
+/**
+ * Convenience class template to provide `TypeInfo` implementations for all
+ * primitive C++/Python type combinations.
+ */
+template <typename TCppType, protocol::TType TThriftProtocolTypeEnum>
+class PrimitiveTypeInfoHelper final {
+ public:
+  /**
+   * Type info suitable for Thrift Table-Based serialization of thrift-python
+   * values, for the given template parameters.
+   */
+  static const detail::TypeInfo kTypeInfo;
+
+ private:
+  /**
+   * Returns the Thrift native (C++) value for the given Python `objectPtr`.
+   *
+   * @param `objectPtr` A (pointer to) `PyObject*` whose (Python) value
+   *         corresponds to the specified `TCppType`.
+   *
+   * @return a `ThriftValue` union instance whose `TCppType` field is set with
+   *         the corresponding value, extracted from the given `PyObject*`.
+   */
+  static detail::OptionalThriftValue get(
+      const void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+    PyObject* pyObj = *toPyObjectPtr(objectPtr);
+    return folly::make_optional<detail::ThriftValue>(
+        primitivePythonToCpp<TCppType>(pyObj));
+  }
+
+  /**
+   * Updates the `PyObject*` pointed to by `objectPtr` to hold the given `value`
+   * (converted to the corresponding Python type).
+   *
+   * @param `objectPtr` Pointer to a `PyObject*` that will be set to the
+   *        resulting value.
+   *
+   * @param `value` Native C++ value (of the given `TCppType`) that will be
+   *        converted to the corresponding Python type and pointed to by the
+   *        given `PyObject*`.
+   */
+  static void set(void* objectPtr, TCppType value) {
+    setPyObject(objectPtr, primitiveCppToPython(value));
+  }
+};
+
+template <typename TCppType, protocol::TType TThriftProtocolTypeEnum>
+const detail::TypeInfo
+    PrimitiveTypeInfoHelper<TCppType, TThriftProtocolTypeEnum>::kTypeInfo{
+        /* .type */ TThriftProtocolTypeEnum,
+        /* .get */ get,
+        /* .set */ reinterpret_cast<detail::VoidFuncPtr>(set),
+        /* .typeExt */ nullptr,
+    };
 
 } // namespace
 
@@ -932,7 +1128,7 @@ void resetFieldToStandardDefault(
   DCHECK(PyList_Check(structList));
   DCHECK(index < structInfo.numFields);
 
-  const auto& defaultValues =
+  const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[index];
   PyObject* oldValue = PyList_GET_ITEM(structList, index + 1);
@@ -1016,10 +1212,10 @@ size_t ListTypeInfo::write(
     const void* object,
     size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
   const PyObject* list = toPyObject(object);
-  auto size = PyTuple_GET_SIZE(list);
+  const Py_ssize_t size = PyTuple_GET_SIZE(list);
   size_t written = 0;
   for (Py_ssize_t i = 0; i < size; i++) {
-    auto elem = PyTuple_GET_ITEM(list, i);
+    PyObject* elem = PyTuple_GET_ITEM(list, i);
     written += writer(context, &elem);
   }
   return written;
@@ -1032,7 +1228,7 @@ void ListTypeInfo::consumeElem(
   PyObject* elem = nullptr;
   reader(context, &elem);
   PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
-  auto currentSize = PyTuple_GET_SIZE(*pyObjPtr);
+  const Py_ssize_t currentSize = PyTuple_GET_SIZE(*pyObjPtr);
   if (_PyTuple_Resize(pyObjPtr, currentSize + 1) == -1) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -1096,9 +1292,9 @@ void MapTypeInfo::read(
   if (!map) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  auto read = [=](auto reader) {
+  auto read = [=](auto readerFn) {
     PyObject* obj = nullptr;
-    reader(context, &obj);
+    readerFn(context, &obj);
     return UniquePyObjectPtr(obj);
   };
   for (std::uint32_t i = 0; i < mapSize; ++i) {
@@ -1123,7 +1319,7 @@ size_t MapTypeInfo::write(
         const void* context, const void* keyElem, const void* valueElem)) {
   size_t written = 0;
   PyObject* map = const_cast<PyObject*>(toPyObject(object));
-  auto size = PyTuple_GET_SIZE(map);
+  const Py_ssize_t size = PyTuple_GET_SIZE(map);
   UniquePyObjectPtr seq;
   if (protocolSortKeys) {
     seq = UniquePyObjectPtr{PySequence_List(map)};
@@ -1161,7 +1357,7 @@ void MapTypeInfo::consumeElem(
   }
   PyTuple_SET_ITEM(elem.get(), 0, mkey);
   PyTuple_SET_ITEM(elem.get(), 1, mval);
-  auto currentSize = PyTuple_GET_SIZE(*pyObjPtr);
+  const Py_ssize_t currentSize = PyTuple_GET_SIZE(*pyObjPtr);
   if (_PyTuple_Resize(pyObjPtr, currentSize + 1) == -1) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -1352,19 +1548,19 @@ void DynamicStructInfo::addFieldValue(int16_t index, PyObject* fieldValue) {
 }
 
 const detail::TypeInfo& boolTypeInfo =
-    PrimitiveTypeInfo<bool, protocol::TType::T_BOOL>::typeInfo;
+    PrimitiveTypeInfoHelper<bool, protocol::TType::T_BOOL>::kTypeInfo;
 const detail::TypeInfo& byteTypeInfo =
-    PrimitiveTypeInfo<std::int8_t, protocol::TType::T_BYTE>::typeInfo;
+    PrimitiveTypeInfoHelper<std::int8_t, protocol::TType::T_BYTE>::kTypeInfo;
 const detail::TypeInfo& i16TypeInfo =
-    PrimitiveTypeInfo<std::int16_t, protocol::TType::T_I16>::typeInfo;
+    PrimitiveTypeInfoHelper<std::int16_t, protocol::TType::T_I16>::kTypeInfo;
 const detail::TypeInfo& i32TypeInfo =
-    PrimitiveTypeInfo<std::int32_t, protocol::TType::T_I32>::typeInfo;
+    PrimitiveTypeInfoHelper<std::int32_t, protocol::TType::T_I32>::kTypeInfo;
 const detail::TypeInfo& i64TypeInfo =
-    PrimitiveTypeInfo<std::int64_t, protocol::TType::T_I64>::typeInfo;
+    PrimitiveTypeInfoHelper<std::int64_t, protocol::TType::T_I64>::kTypeInfo;
 const detail::TypeInfo& doubleTypeInfo =
-    PrimitiveTypeInfo<double, protocol::TType::T_DOUBLE>::typeInfo;
+    PrimitiveTypeInfoHelper<double, protocol::TType::T_DOUBLE>::kTypeInfo;
 const detail::TypeInfo& floatTypeInfo =
-    PrimitiveTypeInfo<float, protocol::TType::T_FLOAT>::typeInfo;
+    PrimitiveTypeInfoHelper<float, protocol::TType::T_FLOAT>::kTypeInfo;
 
 const detail::StringFieldType stringFieldType =
     detail::StringFieldType::StringView;

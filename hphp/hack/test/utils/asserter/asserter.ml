@@ -159,6 +159,8 @@ module Make_asserter (Comp : Comparator) : sig
 
   val assert_option_equals : Comp.t option -> Comp.t option -> string -> unit
 end = struct
+  (** [assert_equals expexted actual failure_msg] asserts that
+    [expected] is equal to [actual]. Prints to stderr and assert false if not. *)
   let assert_equals exp actual failure_msg =
     if Comp.is_equal exp actual then
       ()

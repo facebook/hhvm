@@ -109,10 +109,7 @@ end = struct
     (* TODO: consider reordering switches to put all the -Wall and -Wnone first *)
     List.fold switches ~init:{ empty with generated_files } ~f:apply_switch
 
-  let pass_code codes code =
-    match Code.of_enum code with
-    | None -> (* This is not a warning, so don't filter out *) true
-    | Some code -> Warning_set.mem code codes
+  let pass_code codes code = Warning_set.mem code codes
 
   (* Silence warning about Not_found below being deprecated. *)
   [@@@ocaml.warning "-3"]
@@ -132,7 +129,11 @@ end = struct
     not (List.exists ignore_files ~f:(match_regexp file_path))
 
   let pass { codes; ignore_files; generated_files } (code, file_path) =
-    pass_code codes code && pass_path (ignore_files @ generated_files) file_path
+    match Code.of_enum code with
+    | None -> (* This is not a warning, so don't filter out *) true
+    | Some code ->
+      pass_code codes code
+      && pass_path (ignore_files @ generated_files) file_path
 end
 
 let filter filter (error_list : Errors.finalized_error list) =

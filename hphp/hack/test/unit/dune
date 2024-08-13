@@ -54,7 +54,8 @@
   unit_test_common_setup)
  (preprocess
   (pps
-   lwt_ppx)))
+   lwt_ppx
+   ppx_deriving.std)))
 
 (library
  (name server_progress_test_helpers)

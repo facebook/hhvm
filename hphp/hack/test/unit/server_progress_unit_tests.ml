@@ -30,6 +30,8 @@ let telemetry = Telemetry.create ()
 
 let cancel_reason = ("test", "")
 
+let root = Path.make "test"
+
 let try_with_tmp (f : root:Path.t -> unit Lwt.t) : unit Lwt.t =
   let tmp = Tempfile.mkdtemp ~skip_mocking:true in
   Lwt_utils.try_finally
@@ -37,7 +39,6 @@ let try_with_tmp (f : root:Path.t -> unit Lwt.t) : unit Lwt.t =
       (* We want ServerFiles.errors_file to be placed in this test's temp directory *)
       ServerFiles.set_tmp_FOR_TESTING_ONLY tmp;
       (* We need Server_progress.Errors to have a root (any root) so it knows how to name the errors file *)
-      let root = Path.make "test" in
       Server_progress.set_root root;
       Relative_path.set_path_prefix Relative_path.Root root;
       (* To isolate tests, we have to reset Server_progress.Errors global state in memory. *)
@@ -48,16 +49,20 @@ let try_with_tmp (f : root:Path.t -> unit Lwt.t) : unit Lwt.t =
       Sys_utils.rm_dir_tree ~skip_mocking:true (Path.to_string tmp);
       Lwt.return_unit)
 
-let make_errors (errors : (string * string) list) : Errors.t =
+type simple_error = int * string * string [@@deriving ord, eq, show]
+
+type simple_error_list = simple_error list [@@deriving show]
+
+let make_errors (errors : (int * string * string) list) : Errors.t =
   let errors =
-    List.map errors ~f:(fun (suffix, message) ->
-        let path = Relative_path.from_root ~suffix in
-        let error = User_error.make_err 101 (Pos.make_from path, message) [] in
+    List.map errors ~f:(fun (code, rel_path, message) ->
+        let path = Relative_path.from_root ~suffix:rel_path in
+        let error = User_error.make_err code (Pos.make_from path, message) [] in
         (path, error))
   in
   Errors.from_file_error_list errors
 
-let an_error : Errors.t = make_errors [("c", "oops")]
+let an_error : Errors.t = make_errors [(101, "c", "oops")]
 
 let test_completed () : bool Lwt.t =
   let%lwt () =
@@ -68,8 +73,9 @@ let test_completed () : bool Lwt.t =
           ~ignore_hh_version:false
           ~cancel_reason;
         Server_progress.ErrorsWrite.report
-          (make_errors [("a", "hello"); ("a", "there"); ("b", "world")]);
-        Server_progress.ErrorsWrite.report (make_errors [("c", "oops")]);
+          (make_errors
+             [(101, "a", "hello"); (101, "a", "there"); (101, "b", "world")]);
+        Server_progress.ErrorsWrite.report (make_errors [(101, "c", "oops")]);
         Server_progress.ErrorsWrite.complete telemetry;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         assert (Server_progress.ErrorsRead.openfile fd |> Result.is_ok);
@@ -333,8 +339,9 @@ let test_async_read_completed () : bool Lwt.t =
           ~ignore_hh_version:false
           ~cancel_reason;
         Server_progress.ErrorsWrite.report
-          (make_errors [("a", "hello"); ("a", "there"); ("b", "world")]);
-        Server_progress.ErrorsWrite.report (make_errors [("c", "oops")]);
+          (make_errors
+             [(101, "a", "hello"); (101, "a", "there"); (101, "b", "world")]);
+        Server_progress.ErrorsWrite.report (make_errors [(101, "c", "oops")]);
         Server_progress.ErrorsWrite.complete telemetry;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = Server_progress.ErrorsRead.openfile fd in
@@ -362,7 +369,8 @@ let test_async_read_partial () : bool Lwt.t =
         let%lwt () = expect_qitem q "nothing" in
         (* we'll put in one report, and after this there should be exactly one item available *)
         Server_progress.ErrorsWrite.report
-          (make_errors [("a", "hello"); ("a", "there"); ("b", "world")]);
+          (make_errors
+             [(101, "a", "hello"); (101, "a", "there"); (101, "b", "world")]);
         let%lwt () = expect_qitem q "Errors [a=2,b=1]" in
         let%lwt () = expect_qitem q "nothing" in
         (* we'll complete the file, and after this the stream should be closed *)
@@ -608,7 +616,7 @@ let test_check_errors () : bool Lwt.t =
           ~clock:None
           ~ignore_hh_version:false
           ~cancel_reason;
-        Server_progress.ErrorsWrite.report (make_errors [("c", "oops")]);
+        Server_progress.ErrorsWrite.report (make_errors [(101, "c", "oops")]);
         Server_progress.ErrorsWrite.complete telemetry;
         let%lwt (exit_status, _telemetry) = check_future in
         let exit_status = Exit_status.show exit_status in
@@ -711,6 +719,98 @@ let test_check_connect_failure () : bool Lwt.t =
   in
   Lwt.return_true
 
+let assert_errors ~expected ~(actual : Errors.finalized_error list) =
+  let expected = List.sort expected ~compare:compare_simple_error in
+  let actual =
+    List.fold actual ~init:[] ~f:(fun acc err ->
+        ( User_error.get_code err,
+          User_error.get_pos err
+          |> Pos.filename
+          |> String.chop_prefix_exn ~prefix:(Path.to_string root ^ "/"),
+          User_error.get_messages err |> List.hd_exn |> snd )
+        :: acc)
+    |> List.sort ~compare:compare_simple_error
+  in
+  if not @@ List.equal equal_simple_error expected actual then (
+    Printf.eprintf
+      "Expected \n%s\nbut got\n%s"
+      (show_simple_error_list expected)
+      (show_simple_error_list actual);
+    assert false
+  )
+
+let test_filter_warnings () : bool =
+  let error_filter =
+    ClientFilterErrors.Filter.make
+      ~default_all:true
+      ~generated_files:[Str.regexp "gen/"]
+      [
+        ClientFilterErrors.Code_off Error_codes.Warning.SketchyEquality;
+        ClientFilterErrors.Ignored_files (Str.regexp "def");
+        ClientFilterErrors.Code_off Error_codes.Warning.SketchyNullCheck;
+        ClientFilterErrors.Code_on Error_codes.Warning.SketchyEquality;
+        ClientFilterErrors.Ignored_files (Str.regexp "abc");
+      ]
+  in
+  let errors =
+    make_errors
+      [
+        (12001, "a", "SketchyEquality in non-ignored file. Show");
+        (12003, "a", "SketchyNullCheck in non-ignored file. Hide");
+        (12001, "defgh", "SketchyEquality in ignored file. Hide");
+        (12004, "abcd", "other warning in ignored file. Hide");
+        (4110, "abc", "non-warning in ignored file. Show");
+        (4110, "gen/", "non-warning in generated file. Show");
+        (12004, "gen/", "other warning in generated file. Hide");
+      ]
+    |> Errors.sort_and_finalize
+  in
+  let actual = ClientFilterErrors.filter error_filter errors in
+  let expected =
+    [
+      (12001, "a", "SketchyEquality in non-ignored file. Show");
+      (4110, "abc", "non-warning in ignored file. Show");
+      (4110, "gen/", "non-warning in generated file. Show");
+    ]
+  in
+  assert_errors ~expected ~actual;
+  true
+
+let test_filter_warnings_generated () : bool =
+  let error_filter =
+    ClientFilterErrors.Filter.make
+      ~default_all:true
+      ~generated_files:[Str.regexp "gen/"; Str.regexp "gen2"]
+      [
+        ClientFilterErrors.Ignored_files (Str.regexp "def");
+        ClientFilterErrors.Ignored_files (Str.regexp "gen2");
+        ClientFilterErrors.Generated_files_on;
+      ]
+  in
+  let errors =
+    make_errors
+      [
+        (12001, "defgh", "warning in ignored file. Hide");
+        (12004, "abcd", "unrelated. show");
+        (4110, "gen2/", "non-warning in ignored file. Show");
+        (12004, "gen/", "warning in generated file with -Wgenerated. Show");
+        ( 12004,
+          "gen2/",
+          "warning in generated file with -Wgenerated but ignored. Hide" );
+      ]
+    |> Errors.sort_and_finalize
+  in
+  let actual = ClientFilterErrors.filter error_filter errors in
+  let expected =
+    [
+      (12004, "abcd", "unrelated. show");
+      (4110, "gen2/", "non-warning in ignored file. Show");
+      (12004, "gen/", "warning in generated file with -Wgenerated. Show");
+    ]
+  in
+  assert_errors ~expected ~actual;
+  true
+
 let () =
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
@@ -747,4 +847,6 @@ let () =
         (fun () -> Lwt_main.run (test_check_connect_success ())) );
       ( "test_check_connect_failure",
         (fun () -> Lwt_main.run (test_check_connect_failure ())) );
+      ("test_filter_warnings", test_filter_warnings);
+      ("test_filter_warnings_generated", test_filter_warnings_generated);
     ]

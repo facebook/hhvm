@@ -265,6 +265,8 @@ file(
 list(FILTER PROXYGEN_HEADERS_TOINSTALL EXCLUDE REGEX test/)
 list(FILTER PROXYGEN_HEADERS_TOINSTALL EXCLUDE REGEX utils/TestUtils.h)
 list(FILTER PROXYGEN_HEADERS_TOINSTALL EXCLUDE REGEX .template.h)
+# some exceptions
+list(APPEND PROXYGEN_HEADERS_TOINSTALL http/webtransport/test/FakeSharedWebTransport.h)
 
 # cmake doesn't provide a way to install a list of relative paths to the correct
 # location (it will flatten them all into DESTINATION), so we have to manually

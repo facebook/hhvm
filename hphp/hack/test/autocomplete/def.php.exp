@@ -396,7 +396,7 @@ sodium_crypto_scalarmult_ristretto255
 SORT TEXT: none
 sodium_crypto_secretstream_xchacha20poly1305_rekey
   INSERT sodium_crypto_secretstream_xchacha20poly1305_rekey(${1:\$state})
-  (function(inout ~mixed $state): void)
+  (function(inout mixed $state): void)
 SORT TEXT: none
 enum
   INSERT enum

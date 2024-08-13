@@ -104,7 +104,24 @@ let nonnull r = mk (r, Tnonnull)
 
 let dynamic r = mk (r, Tdynamic)
 
-let like r ty = mk (r, Tlike ty)
+let is_dynamic_or_like_or_mixed ty =
+  match get_node ty with
+  | Tdynamic
+  | Tlike _
+  | Tmixed ->
+    true
+  | _ -> false
+
+let like r ty =
+  if is_dynamic_or_like_or_mixed ty then
+    ty
+  else
+    match get_node ty with
+    | Tapply ((_, n), [inner_ty])
+      when String.equal n Naming_special_names.Classes.cSupportDyn
+           && is_dynamic_or_like_or_mixed inner_ty ->
+      ty
+    | _ -> mk (r, Tlike ty)
 
 let locl_like r ty =
   if Typing_defs.is_dynamic ty then

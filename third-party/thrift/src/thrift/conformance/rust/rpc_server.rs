@@ -15,12 +15,11 @@
  */
 
 use std::io::IsTerminal;
+use std::sync::Arc;
 
 use anyhow::Context;
-use async_trait::async_trait;
 use clap::Parser;
 use futures::StreamExt;
-use rpc_services::rpc::RPCConformanceService;
 use tracing_subscriber::layer::SubscriberExt;
 
 #[derive(Debug, Parser)]
@@ -38,11 +37,17 @@ fn main(fb: fbinit::FacebookInit) -> anyhow::Result<()> {
 
     init_logging(args.log);
 
+    let test_case = Arc::new(Mutex::new(RpcTestCase::default()));
+    let test_result = Arc::new(Mutex::new(ServerTestResult::default()));
     let runtime = tokio::runtime::Runtime::new()?;
     let service = move |proto| {
         rpc_services::rpc::make_RPCConformanceService_server(
             proto,
-            RPCConformanceServiceImpl { fb },
+            RPCConformanceServiceImpl {
+                fb,
+                test_case: Arc::clone(&test_case),
+                test_result: Arc::clone(&test_result),
+            },
         )
     };
     let thrift_server = srserver::ThriftServerBuilder::new(fb)
@@ -93,22 +98,17 @@ fn init_logging(directives: Vec<tracing_subscriber::filter::Directive>) {
     tracing::subscriber::set_global_default(subscriber).expect("to set global subscriber");
 }
 
-#[derive(Clone)]
-pub struct RPCConformanceServiceImpl {
-    pub fb: fbinit::FacebookInit,
-}
+use std::sync::Mutex;
 
+use async_trait::async_trait;
 use futures::stream::BoxStream;
 use rpc::rpc::services::r_p_c_conformance_service::BasicInteractionFactoryFunctionExn;
-use rpc::rpc::services::r_p_c_conformance_service::GetTestCaseExn;
 use rpc::rpc::services::r_p_c_conformance_service::GetTestResultExn;
 use rpc::rpc::services::r_p_c_conformance_service::RequestResponseBasicExn;
 use rpc::rpc::services::r_p_c_conformance_service::RequestResponseDeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::RequestResponseNoArgVoidResponseExn;
-use rpc::rpc::services::r_p_c_conformance_service::RequestResponseTimeoutExn;
 use rpc::rpc::services::r_p_c_conformance_service::RequestResponseUndeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::SendTestCaseExn;
-use rpc::rpc::services::r_p_c_conformance_service::SendTestResultExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamBasicExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamBasicStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamChunkTimeoutExn;
@@ -127,108 +127,120 @@ use rpc::rpc::services::r_p_c_conformance_service::StreamInitialUndeclaredExcept
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialUndeclaredExceptionStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamUndeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamUndeclaredExceptionStreamExn;
-use rpc::rpc::ClientTestResult;
 use rpc::rpc::Request;
+use rpc::rpc::RequestResponseBasicServerTestResult;
+use rpc::rpc::RequestResponseDeclaredExceptionServerTestResult;
+use rpc::rpc::RequestResponseNoArgVoidResponseServerTestResult;
+use rpc::rpc::RequestResponseUndeclaredExceptionServerTestResult;
 use rpc::rpc::Response;
 use rpc::rpc::RpcTestCase;
+use rpc::rpc::ServerInstruction;
 use rpc::rpc::ServerTestResult;
 use rpc_services::rpc::BasicInteraction;
+use rpc_services::rpc::RPCConformanceService;
+
+#[derive(Clone)]
+pub struct RPCConformanceServiceImpl {
+    pub fb: fbinit::FacebookInit,
+    pub test_case: Arc<Mutex<rpc::rpc::RpcTestCase>>,
+    pub test_result: Arc<Mutex<rpc::rpc::ServerTestResult>>,
+}
 
 #[async_trait]
 impl RPCConformanceService for RPCConformanceServiceImpl {
-    async fn sendTestCase(&self, _test_case: RpcTestCase) -> Result<(), SendTestCaseExn> {
-        Err(SendTestCaseExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "sendTestCase",
-            ),
-        ))
+    async fn sendTestCase(&self, test_case: RpcTestCase) -> Result<(), SendTestCaseExn> {
+        let mut w = self.test_case.lock().unwrap();
+        *w = test_case;
+        Ok(())
     }
 
     async fn getTestResult(&self) -> Result<ServerTestResult, GetTestResultExn> {
-        Err(GetTestResultExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "getTestResult",
-            ),
-        ))
-    }
-
-    async fn getTestCase(&self) -> Result<RpcTestCase, GetTestCaseExn> {
-        Err(GetTestCaseExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "getTestCase",
-            ),
-        ))
-    }
-
-    async fn sendTestResult(&self, _result: ClientTestResult) -> Result<(), SendTestResultExn> {
-        Err(SendTestResultExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "sendTestResult",
-            ),
-        ))
+        let r = self.test_result.lock().unwrap();
+        Ok(r.clone())
     }
 
     async fn requestResponseBasic(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<Response, RequestResponseBasicExn> {
-        Err(RequestResponseBasicExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "requestResponseBasic",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::requestResponseBasic(RequestResponseBasicServerTestResult {
+            request,
+            ..Default::default()
+        });
+
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::requestResponseBasic(instr) => Ok(instr.response.clone()),
+            _ => Err(RequestResponseBasicExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn requestResponseDeclaredException(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<(), RequestResponseDeclaredExceptionExn> {
-        Err(RequestResponseDeclaredExceptionExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "requestResponseDeclaredException",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::requestResponseDeclaredException(
+            RequestResponseDeclaredExceptionServerTestResult {
+                request,
+                ..Default::default()
+            },
+        );
+
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::requestResponseDeclaredException(instr) => {
+                match &instr.userException {
+                    Some(e) => Err(RequestResponseDeclaredExceptionExn::e(*e.clone())),
+                    None => Err(RequestResponseDeclaredExceptionExn::ApplicationException(
+                        none_error(),
+                    )),
+                }
+            }
+            _ => Err(RequestResponseDeclaredExceptionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn requestResponseUndeclaredException(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<(), RequestResponseUndeclaredExceptionExn> {
-        Err(RequestResponseUndeclaredExceptionExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "requestResponseUndeclaredException",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::requestResponseUndeclaredException(
+            RequestResponseUndeclaredExceptionServerTestResult {
+                request,
+                ..Default::default()
+            },
+        );
+
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::requestResponseUndeclaredException(instr) => {
+                Err(RequestResponseUndeclaredExceptionExn::ApplicationException(
+                    custom_error(instr.exceptionMessage.clone()),
+                ))
+            }
+            _ => Err(RequestResponseUndeclaredExceptionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn requestResponseNoArgVoidResponse(
         &self,
     ) -> Result<(), RequestResponseNoArgVoidResponseExn> {
-        Err(RequestResponseNoArgVoidResponseExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "requestResponseNoArgVoidResponse",
-            ),
-        ))
-    }
-
-    async fn requestResponseTimeout(
-        &self,
-        _req: Request,
-    ) -> Result<Response, RequestResponseTimeoutExn> {
-        Err(RequestResponseTimeoutExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "requestResponseTimeout",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::requestResponseNoArgVoidResponse(
+            RequestResponseNoArgVoidResponseServerTestResult {
+                ..Default::default()
+            },
+        );
+        Ok(())
     }
 
     async fn streamBasic(
@@ -381,4 +393,22 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
             ),
         ))
     }
+}
+
+fn instruction_match_error() -> fbthrift::ApplicationException {
+    fbthrift::ApplicationException::new(
+        fbthrift::ApplicationExceptionErrorCode::InternalError,
+        "the current instruction is of an unexpected case".to_owned(),
+    )
+}
+
+fn none_error() -> fbthrift::ApplicationException {
+    fbthrift::ApplicationException::new(
+        fbthrift::ApplicationExceptionErrorCode::InternalError,
+        "an option value was not expected to contain `None`".to_owned(),
+    )
+}
+
+fn custom_error(msg: String) -> fbthrift::ApplicationException {
+    fbthrift::ApplicationException::new(fbthrift::ApplicationExceptionErrorCode::InternalError, msg)
 }

@@ -10,5 +10,5 @@ ERROR: File "generator.php", line 6, characters 14-32:
 Invalid return type (Typing[4110])
   File "generator.php", line 6, characters 14-32:
   Expected `Generator<_, _, _>` (result of function containing a `yield`)
-  File "expr_tree.hhi", line 47, characters 38-48:
+  File "expr_tree.php", line 47, characters 38-48:
   But got `ExampleVoid`

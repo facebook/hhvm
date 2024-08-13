@@ -301,13 +301,17 @@ interface ExampleFunction<T> {
 abstract class ExampleKeyedCollection<+Tkey as ExampleArraykey, +Tvalue> {
   public static function __makeType<Tk as ExampleArraykey, Tv>(
     (Tk, Tv) ...$_
-  ): ExampleKeyedCollection<Tk, Tv>;
+  ): ExampleKeyedCollection<Tk, Tv> {
+    throw new Exception();
+  }
 }
 
 abstract class ExampleKeyedCollectionMut<Tkey as ExampleArraykey, Tvalue> {
   public static function __makeType<Tk as ExampleArraykey, Tv>(
     (Tk, Tv) ...$_
-  ): ExampleKeyedCollectionMut<Tk, Tv>;
+  ): ExampleKeyedCollectionMut<Tk, Tv> {
+    throw new Exception();
+  }
 }
 
 type ExampleDslExpression<T> = Spliceable<ExampleDsl, ExampleDsl::TAst, T>;

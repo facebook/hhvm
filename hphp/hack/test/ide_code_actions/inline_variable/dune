@@ -2,7 +2,7 @@
  (alias ide_code_actions_inline_variable)
  (deps
   %{exe:../../../src/hh_single_type_check.exe}
-  %{project_root}/hack/test/hhi/expr_tree.hhi
+  %{project_root}/hack/test/expr_tree.php
   %{project_root}/hack/test/verify.py
   %{project_root}/hack/test/review.sh
   (glob_files %{project_root}/hack/test/ide_code_actions/inline_variable/HH_FLAGS)

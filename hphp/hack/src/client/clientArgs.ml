@@ -714,6 +714,12 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
             add_warning_switch
               (ClientFilterErrors.Ignored_files (Str.regexp regexp))),
         " hide warnings in files matching a regexp" );
+      ( "-Wgenerated",
+        Arg.Unit
+          (fun () -> add_warning_switch ClientFilterErrors.Generated_files_on),
+        " show warnings in generated files (the ones specified by .hhconfig flag warnings_generated_files). "
+        ^ "To ignore more files, use -Wignore-files, avoid modifying warnings_generated_files"
+      );
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
       (* Please keep these sorted in the alphabetical order *)
     ]

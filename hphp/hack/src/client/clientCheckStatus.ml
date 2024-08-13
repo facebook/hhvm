@@ -44,6 +44,7 @@ let go
     status
     error_format
     ~warnings_default_all
+    ~warnings_generated_files
     warning_switches
     ~is_interactive
     ~output_json
@@ -58,6 +59,7 @@ let go
       ClientFilterErrors.Filter.make
         warning_switches
         ~default_all:warnings_default_all
+        ~generated_files:warnings_generated_files
     in
     ClientFilterErrors.filter filter error_list
   in
@@ -105,6 +107,7 @@ let go_streaming_on_fd
     (fd : Unix.file_descr)
     (args : ClientEnv.client_check_env)
     ~warnings_default_all
+    ~warnings_generated_files
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(progress_callback : string option -> unit) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -153,6 +156,7 @@ let go_streaming_on_fd
   let warning_filter =
     ClientFilterErrors.Filter.make
       ~default_all:warnings_default_all
+      ~generated_files:warnings_generated_files
       args.ClientEnv.warning_switches
   in
 
@@ -602,6 +606,7 @@ let rec keep_trying_to_open
 let go_streaming
     (args : ClientEnv.client_check_env)
     ~warnings_default_all
+    ~warnings_generated_files
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -629,6 +634,7 @@ let go_streaming
       fd
       args
       ~warnings_default_all
+      ~warnings_generated_files
       ~partial_telemetry_ref
       ~progress_callback
   in

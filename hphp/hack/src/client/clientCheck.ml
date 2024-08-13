@@ -688,6 +688,8 @@ let main_internal
           args
           ~warnings_default_all:
             local_config.ServerLocalConfig.warnings_default_all
+          ~warnings_generated_files:
+            local_config.ServerLocalConfig.warnings_generated_files
           ~partial_telemetry_ref
           ~connect_then_close:(fun () -> connect_then_close args)
       in
@@ -705,6 +707,8 @@ let main_internal
           args.ClientEnv.warning_switches
           ~warnings_default_all:
             local_config.ServerLocalConfig.warnings_default_all
+          ~warnings_generated_files:
+            local_config.ServerLocalConfig.warnings_generated_files
           ~output_json:args.ClientEnv.output_json
           ~max_errors:args.ClientEnv.max_errors
           ~is_interactive:args.ClientEnv.is_interactive
@@ -767,6 +771,8 @@ let main_internal
         args.ClientEnv.warning_switches
         ~warnings_default_all:
           local_config.ServerLocalConfig.warnings_default_all
+        ~warnings_generated_files:
+          local_config.ServerLocalConfig.warnings_generated_files
         ~is_interactive:args.ClientEnv.is_interactive
         ~output_json:args.ClientEnv.output_json
         ~max_errors:args.ClientEnv.max_errors

@@ -9,18 +9,20 @@
 module Code = Error_codes.Warning
 
 type switch =
-  | WAll
-  | WNone
-  | Code_on of Code.t
-  | Code_off of Code.t
-  | Ignored_files of Str.regexp
+  | WAll  (** -Wall *)
+  | WNone  (** -Wnone *)
+  | Code_on of Code.t  (** -W 12001 *)
+  | Code_off of Code.t  (** -Wno 12001 *)
+  | Ignored_files of Str.regexp  (** -Wignored-files <regexp> *)
+  | Generated_files_on  (** -Wgenerated *)
 
 module Filter : sig
   type t
 
   (** [default_all] controls wether an empty list of switches is equivalent to [WAll]
     as opposed to [WNone] *)
-  val make : default_all:bool -> switch list -> t
+  val make :
+    default_all:bool -> generated_files:Str.regexp list -> switch list -> t
 end
 
 val filter :

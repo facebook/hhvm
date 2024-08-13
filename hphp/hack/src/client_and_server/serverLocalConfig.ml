@@ -257,6 +257,11 @@ type t = {
   warnings_default_all: bool;
       (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.
         Otherwise, `hh` is equivalent to `hh -Wnone`, i.e. warnings are not shown. *)
+  warnings_generated_files: Str.regexp list;
+      (** List of regexps for file paths for which any warning will be ignored.
+        Useful to ignore warnings from certain generated files.
+        Passing `-Wgenerated` on the command line will override this behavior
+        and show warnings from those files. *)
 }
 
 let default =
@@ -345,6 +350,7 @@ let default =
     autocomplete_sort_text = false;
     hack_warnings = GlobalOptions.ASome [];
     warnings_default_all = false;
+    warnings_generated_files = [];
   }
 
 let system_config_path =
@@ -1042,6 +1048,12 @@ let load_
   let warnings_default_all =
     bool_ "warnings_default_all" ~default:default.warnings_default_all config
   in
+  let warnings_generated_files =
+    string_list_opt "warnings_generated_files" config
+    |> Option.value_map
+         ~default:default.warnings_generated_files
+         ~f:(List.map ~f:Str.regexp)
+  in
   {
     saved_state =
       {
@@ -1149,6 +1161,7 @@ let load_
     autocomplete_sort_text;
     hack_warnings;
     warnings_default_all;
+    warnings_generated_files;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.

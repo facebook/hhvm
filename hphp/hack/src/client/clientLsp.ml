@@ -4840,6 +4840,7 @@ let main
   let error_filter =
     ClientFilterErrors.Filter.make
       ~default_all:local_config.ServerLocalConfig.warnings_default_all
+      ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
       []
   in
   (* ref_unblocked_time is the time at which we're no longer blocked on either

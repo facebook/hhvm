@@ -207,8 +207,12 @@ void setWeights(Vunit& unit, const T& key) {
         // Drop the separation between the main, cold and frozen areas, to avoid
         // scaling of the block weights based on the area since we have accurate
         // counters.  The code-layout pass may re-split the code into
-        // hot/cold/frozen later.
-        block.area_idx = AreaIndex::Main;
+        // hot/cold/frozen later.  If JitPGOLayoutResplitFrozen is false, leave
+        // frozen blocks alone as we won't move them to another area.
+        if (block.area_idx != AreaIndex::Frozen ||
+            Cfg::Jit::PGOLayoutResplitFrozen) {
+          block.area_idx = AreaIndex::Main;
+        }
       }
     }
   }

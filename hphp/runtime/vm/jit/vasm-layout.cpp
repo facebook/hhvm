@@ -563,7 +563,12 @@ void Clusterizer::splitHotColdClusters() {
     FTRACE(3, "  -> C{}: {} (avg wgt = {}): ",
            cid, area_names[unsigned(area)], clusterAvgWgt[cid]);
     for (auto b : m_clusters[cid]) {
-      m_unit.blocks[b].area_idx = area;
+      // If JitPGOLayoutResplitFrozen is false, don't change the area of blocks
+      // initially assigned to frozen.
+      if (m_unit.blocks[b].area_idx != AreaIndex::Frozen ||
+          Cfg::Jit::PGOLayoutResplitFrozen) {
+        m_unit.blocks[b].area_idx = area;
+      }
       FTRACE(3, "{}, ", b);
     }
     FTRACE(3, "\n");
@@ -611,7 +616,10 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
 
   if (!Cfg::Jit::PGOLayoutSplitHotCold) {
     for (auto b : labels) {
-      unit.blocks[b].area_idx = AreaIndex::Main;
+      if (unit.blocks[b].area_idx != AreaIndex::Frozen ||
+          Cfg::Jit::PGOLayoutResplitFrozen) {
+        unit.blocks[b].area_idx = AreaIndex::Main;
+      }
     }
   }
 

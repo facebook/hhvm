@@ -420,6 +420,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - bool Jit.RerunRetranslateAll = false, UNKNOWN
 - bool Jit.BuildOutliningHashes = false, UNKNOWN
 - bool Jit.PGOLayoutSplitHotCold, UNKNOWN
+- bool Jit.PGOLayoutResplitFrozen = true, UNKNOWN
 - bool Jit.PGOVasmBlockCounters = true, UNKNOWN
 - bool Jit.PGOVasmBlockCountersOptPrologue = true, UNKNOWN
 - uint32_t Jit.PGOVasmBlockCountersMaxOpMismatches = 12, UNKNOWN

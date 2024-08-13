@@ -118,7 +118,10 @@ void setToIntrinsicDefault(void* value, const FieldInfo& info) {
           static_cast<std::string*>(value)->clear();
           break;
         case StringFieldType::IOBufObj: {
-          static_cast<folly::IOBuf*>(value)->clear();
+          OptionalThriftValue thriftValue = getValue(typeInfo, value);
+          if (thriftValue.hasValue()) {
+            thriftValue.value().iobuf->clear();
+          }
           break;
         }
         case StringFieldType::IOBuf:

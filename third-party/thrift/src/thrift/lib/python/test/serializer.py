@@ -396,7 +396,6 @@ class SerializerTests(unittest.TestCase):
             encoded_obj = serialize(obj, protocol=proto)
             self.assertEqual(encoded_obj3, encoded_obj)
 
-    @unittest.skip("AddressSanitizer: SEGV")
     def test_terse_safe_patch(self) -> None:
         s = TerseSafePatch(version=1, data=IOBuf(b"abcdef"))
         self.thrift_serialization_round_trip(s)

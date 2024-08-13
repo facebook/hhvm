@@ -105,7 +105,7 @@ type client_check_env = {
   is_interactive: bool;
       (** Determined based on the --from option. Affects UI behaviour in a
       number of places, e.g., error formatting and spinners. *)
-  warning_switches: ClientCheckStatusFilterWarnings.switch list;
+  warning_switches: ClientFilterErrors.switch list;
 }
 
 let string_to_rename_mode = function

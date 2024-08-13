@@ -17,7 +17,7 @@ val go :
   ServerCommandTypes.Server_status.t ->
   Errors.format option ->
   warnings_default_all:bool ->
-  ClientCheckStatusFilterWarnings.switch list ->
+  ClientFilterErrors.switch list ->
   is_interactive:bool ->
   output_json:bool ->
   max_errors:int option ->

@@ -55,11 +55,11 @@ let go
   let stale_msg = is_stale_msg liveness in
   let error_list =
     let filter =
-      ClientCheckStatusFilterWarnings.Filter.make
+      ClientFilterErrors.Filter.make
         warning_switches
         ~default_all:warnings_default_all
     in
-    ClientCheckStatusFilterWarnings.filter filter error_list
+    ClientFilterErrors.filter filter error_list
   in
   if
     output_json
@@ -151,7 +151,7 @@ let go_streaming_on_fd
   in
 
   let warning_filter =
-    ClientCheckStatusFilterWarnings.Filter.make
+    ClientFilterErrors.Filter.make
       ~default_all:warnings_default_all
       args.ClientEnv.warning_switches
   in
@@ -186,7 +186,7 @@ let go_streaming_on_fd
       let errors =
         Relative_path.Map.map
           errors
-          ~f:(ClientCheckStatusFilterWarnings.filter warning_filter)
+          ~f:(ClientFilterErrors.filter warning_filter)
       in
       begin
         try

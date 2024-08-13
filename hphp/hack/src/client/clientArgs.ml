@@ -688,35 +688,31 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         " (mode) turn off verbose server log" );
       ("--version", Arg.Set version, " (mode) show version and exit");
       ( "-Wall",
-        Arg.Unit
-          (fun () -> add_warning_switch ClientCheckStatusFilterWarnings.WAll),
+        Arg.Unit (fun () -> add_warning_switch ClientFilterErrors.WAll),
         " show all warnings" );
       ( "-Wnone",
-        Arg.Unit
-          (fun () -> add_warning_switch ClientCheckStatusFilterWarnings.WNone),
+        Arg.Unit (fun () -> add_warning_switch ClientFilterErrors.WNone),
         " hide all warnings" );
       ( "-W",
         Arg.Int
           (fun code ->
-            match ClientCheckStatusFilterWarnings.Code.of_enum code with
+            match ClientFilterErrors.Code.of_enum code with
             | None -> add_invalid_warning_code code
-            | Some code ->
-              add_warning_switch @@ ClientCheckStatusFilterWarnings.Code_on code),
+            | Some code -> add_warning_switch @@ ClientFilterErrors.Code_on code),
         " show all warnings with a given code, e.g. -W 12001" );
       ( "-Wno",
         Arg.Int
           (fun code ->
-            match ClientCheckStatusFilterWarnings.Code.of_enum code with
+            match ClientFilterErrors.Code.of_enum code with
             | None -> add_invalid_warning_code code
             | Some code ->
-              add_warning_switch
-              @@ ClientCheckStatusFilterWarnings.Code_off code),
+              add_warning_switch @@ ClientFilterErrors.Code_off code),
         " hide all warnings with a given code, e.g. -Wno 12001" );
       ( "-Wignore-files",
         Arg.String
           (fun regexp ->
             add_warning_switch
-              (ClientCheckStatusFilterWarnings.Ignored_files (Str.regexp regexp))),
+              (ClientFilterErrors.Ignored_files (Str.regexp regexp))),
         " hide warnings in files matching a regexp" );
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
       (* Please keep these sorted in the alphabetical order *)

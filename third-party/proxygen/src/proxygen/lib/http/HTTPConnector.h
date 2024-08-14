@@ -70,11 +70,12 @@ class HTTPConnector : protected folly::AsyncSocket::ConnectCallback {
   ~HTTPConnector() override;
 
   /**
-   * Reset the object so that it can begin a new connection. No callbacks
-   * will be invoked as a result of executing this function. After this
-   * function returns, isBusy() will return false.
+   * Reset the object so that it can begin a new connection. Callbacks
+   * are suppressed by default, but can be enabled, when the intent is to cancel
+   * the outstanding work. After this function returns, isBusy() will return
+   * false.
    */
-  void reset();
+  void reset(bool invokeCallbacks = false);
 
   /**
    * Sets the plain text protocol to use after the connection

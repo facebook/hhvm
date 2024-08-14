@@ -7,6 +7,7 @@
  */
 
 #include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
 
 namespace {

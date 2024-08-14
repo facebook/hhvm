@@ -10,6 +10,7 @@
 
 #include <folly/executors/FunctionScheduler.h>
 
+#include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/ConnectionPool.h"
 #include "squangle/mysql_client/SyncMysqlClient.h"
 

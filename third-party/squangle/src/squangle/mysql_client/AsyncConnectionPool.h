@@ -35,6 +35,7 @@
 
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
+#include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/ConnectionPool.h"
 #include "squangle/mysql_client/Operation.h"
 

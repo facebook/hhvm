@@ -20,9 +20,16 @@ from __future__ import annotations
 
 import asyncio
 import pickle
+import types
 import unittest
 from collections.abc import Sequence, Set
-from typing import Any, Mapping, Union
+from typing import Any, Mapping, Type, Union
+
+import apache.thrift.test.terse_write.terse_write.thrift_mutable_types as mutable_terse_types
+import apache.thrift.test.terse_write.terse_write.thrift_types as immutable_terse_types
+
+import thrift.python.mutable_serializer as mutable_serializer
+import thrift.python.serializer as immutable_serializer
 
 from apache.thrift.test.terse_write.terse_write.thrift_types import (
     EmptyStruct,
@@ -39,6 +46,8 @@ from apache.thrift.test.terse_write.terse_write.thrift_types import (
     TerseStructWithCustomDefault,
 )
 from folly.iobuf import IOBuf
+
+from parameterized import parameterized_class
 from python_test.containers.thrift_types import Foo, Lists, Maps, Sets
 from testing.thrift_types import (
     Color,
@@ -72,6 +81,23 @@ from thrift.python.serializer import (
     serialize_iobuf,
 )
 from thrift.python.types import StructOrUnion
+
+
+def thrift_serialization_round_trip(
+    self: unittest.TestCase, control: StructOrUnion, serializer: types.ModuleType
+) -> None:
+    for proto in Protocol:
+        encoded = serializer.serialize(control, protocol=proto)
+        self.assertIsInstance(encoded, bytes)
+        decoded = serializer.deserialize(type(control), encoded, protocol=proto)
+        self.assertIsInstance(decoded, type(control))
+        self.assertEqual(control, decoded)
+
+        decoded_with_full_cache = serializer.deserialize(
+            type(control), encoded, protocol=proto
+        )
+        self.assertIsInstance(decoded_with_full_cache, type(control))
+        self.assertEqual(control, decoded_with_full_cache)
 
 
 class SerializerTests(unittest.TestCase):
@@ -123,18 +149,7 @@ class SerializerTests(unittest.TestCase):
             deserialize(easy, b"\x02\xDE\xAD\xBE\xEF", protocol=Protocol.BINARY)
 
     def thrift_serialization_round_trip(self, control: StructOrUnion) -> None:
-        for proto in Protocol:
-            encoded = serialize(control, protocol=proto)
-            self.assertIsInstance(encoded, bytes)
-            decoded = deserialize(type(control), encoded, protocol=proto)
-            self.assertIsInstance(decoded, type(control))
-            self.assertEqual(control, decoded)
-
-            decoded_with_full_cache = deserialize(
-                type(control), encoded, protocol=proto, fully_populate_cache=True
-            )
-            self.assertIsInstance(decoded_with_full_cache, type(control))
-            self.assertEqual(control, decoded_with_full_cache)
+        thrift_serialization_round_trip(self, control, immutable_serializer)
 
     def pickle_round_trip(
         self,
@@ -287,119 +302,6 @@ class SerializerTests(unittest.TestCase):
             # Accessing the property is when the string is decoded as UTF-8.
             sb.one
 
-    def test_field_level_terse_write(self) -> None:
-        obj = FieldLevelTerseStruct(
-            bool_field=True,
-            byte_field=1,
-            short_field=2,
-            int_field=3,
-            long_field=4,
-            float_field=5,
-            double_field=6,
-            string_field="7",
-            binary_field=b"8",
-            enum_field=MyEnum.ME1,
-            list_field=[1],
-            set_field={1},
-            map_field={1: 1},
-            struct_field=MyStruct(field1=1),
-            union_field=MyUnion(struct_field=MyStruct(field1=1)),
-        )
-        empty = EmptyStruct()
-        for proto in Protocol:
-            encoded = serialize(obj, protocol=proto)
-            decoded, length = deserialize_with_length(
-                type(obj), encoded, protocol=proto
-            )
-            self.assertIsInstance(decoded, type(obj))
-            self.assertEqual(decoded, obj)
-            self.assertEqual(length, len(encoded))
-
-        # Set fields to their intrinsic default.
-        obj = FieldLevelTerseStruct()
-        for proto in Protocol:
-            encoded = serialize(obj, protocol=proto)
-            encoded_empty = serialize(empty, protocol=proto)
-            self.assertEqual(encoded, encoded_empty)
-
-    # Since empty serializd binary is deserialized, all terse fields should equal
-    # to their intrinsic default values.
-    def test_terse_struct_with_custom_default(self) -> None:
-        empty = EmptyStruct()
-        for proto in Protocol:
-            encoded_empty = serialize(empty, protocol=proto)
-            decoded, length = deserialize_with_length(
-                TerseStructWithCustomDefault, encoded_empty, protocol=proto
-            )
-            self.assertIsInstance(decoded, TerseStructWithCustomDefault)
-            self.assertEqual(decoded.bool_field, False)
-            self.assertEqual(decoded.byte_field, 0)
-            self.assertEqual(decoded.short_field, 0)
-            self.assertEqual(decoded.int_field, 0)
-            self.assertEqual(decoded.long_field, 0)
-            self.assertEqual(decoded.float_field, 0.0)
-            self.assertEqual(decoded.double_field, 0.0)
-            self.assertEqual(decoded.string_field, "")
-            self.assertEqual(decoded.binary_field, b"")
-            self.assertEqual(decoded.enum_field, MyEnum.ME0)
-            self.assertEqual(decoded.list_field, [])
-            self.assertEqual(decoded.set_field, set())
-            self.assertEqual(decoded.map_field, {})
-            self.assertEqual(decoded.struct_field, MyStructWithCustomDefault(field1=0))
-
-    def test_terse_structs_optimization(self) -> None:
-        # empty
-        empty = EmptyStruct()
-        obj = TerseStructs(
-            field1=MyStruct(field1=0),
-            field2=MyStruct(field1=0),
-            field3=MyStruct(field1=0),
-        )
-        for proto in Protocol:
-            encoded_empty = serialize(empty, protocol=proto)
-            encoded_obj = serialize(obj, protocol=proto)
-            self.assertEqual(encoded_empty, encoded_obj)
-
-        # field1 set
-        obj = TerseStructs(
-            field1=MyStruct(field1=1),
-            field2=MyStruct(field1=0),
-            field3=MyStruct(field1=0),
-        )
-        obj1 = TerseStructs1(field1=MyStruct(field1=1))
-        for proto in Protocol:
-            encoded_obj1 = serialize(obj1, protocol=proto)
-            encoded_obj = serialize(obj, protocol=proto)
-            self.assertEqual(encoded_obj1, encoded_obj)
-
-        # field2 set
-        obj = TerseStructs(
-            field1=MyStruct(field1=0),
-            field2=MyStruct(field1=1),
-            field3=MyStruct(field1=0),
-        )
-        obj2 = TerseStructs2(field2=MyStruct(field1=1))
-        for proto in Protocol:
-            encoded_obj2 = serialize(obj2, protocol=proto)
-            encoded_obj = serialize(obj, protocol=proto)
-            self.assertEqual(encoded_obj2, encoded_obj)
-
-        # field3 set
-        obj = TerseStructs(
-            field1=MyStruct(field1=0),
-            field2=MyStruct(field1=0),
-            field3=MyStruct(field1=1),
-        )
-        obj3 = TerseStructs3(field3=MyStruct(field1=1))
-        for proto in Protocol:
-            encoded_obj3 = serialize(obj3, protocol=proto)
-            encoded_obj = serialize(obj, protocol=proto)
-            self.assertEqual(encoded_obj3, encoded_obj)
-
-    def test_terse_safe_patch(self) -> None:
-        s = TerseSafePatch(version=1, data=IOBuf(b"abcdef"))
-        self.thrift_serialization_round_trip(s)
-
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:
         json_bytes = b'{"val_bool":false,"val_i32":0,"val_i64":0,"val_string":"abcdef","val_binary":"YWJjZGU","val_iobuf":"YWJjZGVm","val_enum":0,"val_union":{},"val_list":[],"val_map":{},"val_struct_with_containers":{"color_list":[],"color_set":[],"color_map":{}}}'
@@ -417,3 +319,165 @@ class SerializerTests(unittest.TestCase):
         print(serialize(r, protocol=Protocol.JSON))
         self.assertEqual(serialize(r, protocol=Protocol.JSON), json_bytes)
         self.assertEqual(deserialize(Reserved, json_bytes, protocol=Protocol.JSON), r)
+
+
+@parameterized_class(
+    ("test_types", "serializer_module"),
+    [
+        (immutable_terse_types, immutable_serializer),
+        (mutable_terse_types, mutable_serializer),
+    ],
+)
+class SerializerTerseWriteTests(unittest.TestCase):
+    def setUp(self) -> None:
+        """
+        The `setUp` method performs these assignments with type hints to enable
+        pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
+        behind `test_types`.
+        """
+        self.FieldLevelTerseStruct: Type[FieldLevelTerseStruct] = (
+            # pyre-ignore[16]: has no attribute `test_types`
+            self.test_types.FieldLevelTerseStruct
+        )
+        self.TerseStructWithCustomDefault: Type[TerseStructWithCustomDefault] = (
+            self.test_types.TerseStructWithCustomDefault
+        )
+        self.MyStruct: Type[MyStruct] = self.test_types.MyStruct
+        self.MyStructWithCustomDefault: Type[MyStructWithCustomDefault] = (
+            self.test_types.MyStructWithCustomDefault
+        )
+        self.MyUnion: Type[MyUnion] = self.test_types.MyUnion
+        self.EmptyStruct: Type[EmptyStruct] = self.test_types.EmptyStruct
+        self.MyEnum: Type[MyEnum] = self.test_types.MyEnum
+        self.TerseStructs: Type[TerseStructs] = self.test_types.TerseStructs
+        self.TerseStructs1: Type[TerseStructs1] = self.test_types.TerseStructs1
+        self.TerseStructs2: Type[TerseStructs2] = self.test_types.TerseStructs2
+        self.TerseStructs3: Type[TerseStructs3] = self.test_types.TerseStructs3
+        self.TerseSafePatch: Type[TerseSafePatch] = self.test_types.TerseSafePatch
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+        # pyre-ignore[16]: has no attribute `serializer_module`
+        self.serializer: types.ModuleType = self.serializer_module
+
+    def thrift_serialization_round_trip(self, control: StructOrUnion) -> None:
+        thrift_serialization_round_trip(self, control, self.serializer)
+
+    def test_field_level_terse_write(self) -> None:
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
+        obj = self.FieldLevelTerseStruct(
+            bool_field=True,
+            byte_field=1,
+            short_field=2,
+            int_field=3,
+            long_field=4,
+            float_field=5,
+            double_field=6,
+            string_field="7",
+            binary_field=b"8",
+            enum_field=self.MyEnum.ME1,
+            list_field=[1],
+            set_field={1},
+            map_field={1: 1},
+            struct_field=self.MyStruct(field1=1),
+            union_field=self.MyUnion(struct_field=self.MyStruct(field1=1)),
+        )
+        empty = self.EmptyStruct()
+        for proto in Protocol:
+            encoded = self.serializer.serialize(obj, protocol=proto)
+            decoded, length = self.serializer.deserialize_with_length(
+                type(obj), encoded, protocol=proto
+            )
+            self.assertIsInstance(decoded, type(obj))
+            self.assertEqual(decoded, obj)
+            self.assertEqual(length, len(encoded))
+
+        # Set fields to their intrinsic default.
+        obj = self.FieldLevelTerseStruct()
+        for proto in Protocol:
+            encoded = self.serializer.serialize(obj, protocol=proto)
+            encoded_empty = self.serializer.serialize(empty, protocol=proto)
+            self.assertEqual(encoded, encoded_empty)
+
+    # Since empty serializd binary is deserialized, all terse fields should equal
+    # to their intrinsic default values.
+    def test_terse_struct_with_custom_default(self) -> None:
+        empty = self.EmptyStruct()
+        for proto in Protocol:
+            encoded_empty = self.serializer.serialize(empty, protocol=proto)
+            decoded, length = self.serializer.deserialize_with_length(
+                self.TerseStructWithCustomDefault, encoded_empty, protocol=proto
+            )
+            self.assertIsInstance(decoded, self.TerseStructWithCustomDefault)
+            self.assertEqual(decoded.bool_field, False)
+            self.assertEqual(decoded.byte_field, 0)
+            self.assertEqual(decoded.short_field, 0)
+            self.assertEqual(decoded.int_field, 0)
+            self.assertEqual(decoded.long_field, 0)
+            self.assertEqual(decoded.float_field, 0.0)
+            self.assertEqual(decoded.double_field, 0.0)
+            self.assertEqual(decoded.string_field, "")
+            self.assertEqual(decoded.binary_field, b"")
+            self.assertEqual(decoded.enum_field, self.MyEnum.ME0)
+            self.assertEqual(decoded.list_field, [])
+            self.assertEqual(decoded.set_field, set())
+            self.assertEqual(decoded.map_field, {})
+            self.assertEqual(
+                decoded.struct_field, self.MyStructWithCustomDefault(field1=0)
+            )
+
+    def test_terse_structs_optimization(self) -> None:
+        # empty
+        empty = self.EmptyStruct()
+        obj = self.TerseStructs(
+            field1=self.MyStruct(field1=0),
+            field2=self.MyStruct(field1=0),
+            field3=self.MyStruct(field1=0),
+        )
+        for proto in Protocol:
+            encoded_empty = self.serializer.serialize(empty, protocol=proto)
+            encoded_obj = self.serializer.serialize(obj, protocol=proto)
+            self.assertEqual(encoded_empty, encoded_obj)
+
+        # field1 set
+        obj = self.TerseStructs(
+            field1=self.MyStruct(field1=1),
+            field2=self.MyStruct(field1=0),
+            field3=self.MyStruct(field1=0),
+        )
+        obj1 = self.TerseStructs1(field1=self.MyStruct(field1=1))
+        for proto in Protocol:
+            encoded_obj1 = self.serializer.serialize(obj1, protocol=proto)
+            encoded_obj = self.serializer.serialize(obj, protocol=proto)
+            self.assertEqual(encoded_obj1, encoded_obj)
+
+        # field2 set
+        obj = self.TerseStructs(
+            field1=self.MyStruct(field1=0),
+            field2=self.MyStruct(field1=1),
+            field3=self.MyStruct(field1=0),
+        )
+        obj2 = self.TerseStructs2(field2=self.MyStruct(field1=1))
+        for proto in Protocol:
+            encoded_obj2 = self.serializer.serialize(obj2, protocol=proto)
+            encoded_obj = self.serializer.serialize(obj, protocol=proto)
+            self.assertEqual(encoded_obj2, encoded_obj)
+
+        # field3 set
+        obj = self.TerseStructs(
+            field1=self.MyStruct(field1=0),
+            field2=self.MyStruct(field1=0),
+            field3=self.MyStruct(field1=1),
+        )
+        obj3 = self.TerseStructs3(field3=self.MyStruct(field1=1))
+        for proto in Protocol:
+            encoded_obj3 = self.serializer.serialize(obj3, protocol=proto)
+            encoded_obj = self.serializer.serialize(obj, protocol=proto)
+            self.assertEqual(encoded_obj3, encoded_obj)
+
+    def test_terse_safe_patch(self) -> None:
+        s = self.TerseSafePatch(version=1, data=IOBuf(b"abcdef"))
+        self.thrift_serialization_round_trip(s)

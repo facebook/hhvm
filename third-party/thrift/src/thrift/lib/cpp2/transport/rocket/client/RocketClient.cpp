@@ -653,7 +653,7 @@ void RocketClient::handleError(RocketException&& rex) {
     }
     case ErrorCode::INVALID_SETUP: {
       ew = transport::TTransportException(
-          transport::TTransportException::NOT_OPEN,
+          transport::TTransportException::INVALID_SETUP,
           enrichMsg("Connection setup failed", rex));
       break;
     }

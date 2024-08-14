@@ -58,10 +58,11 @@ class FOLLY_EXPORT TTransportException
     NETWORK_ERROR = 15,
     EARLY_DATA_REJECTED = 16,
     STREAMING_CONTRACT_VIOLATION = 17,
+    INVALID_SETUP = 18,
     // Remember to update TTransportExceptionTypeSize if you add an entry here
   };
 
-  using TTransportExceptionTypeSize = std::integral_constant<std::size_t, 18>;
+  using TTransportExceptionTypeSize = std::integral_constant<std::size_t, 19>;
 
   TTransportException()
       : apache::thrift::TLibraryException(),
@@ -154,6 +155,8 @@ class FOLLY_EXPORT TTransportException
           return "TTransportException: Early data rejected";
         case STREAMING_CONTRACT_VIOLATION:
           return "TTransportException: Streaming contract violation";
+        case INVALID_SETUP:
+          return "TTransportException: Setup Frame rejected";
         default:
           return "TTransportException: (Invalid exception type)";
       }

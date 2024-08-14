@@ -30,28 +30,6 @@ class MultiQueryStreamOperation;
 using ConnectionDyingCallback =
     std::function<void(std::unique_ptr<ConnectionHolder>)>;
 
-// A helper class to interface with the EventBase.  Each connection
-// has an instance of this class and this class is what is invoked
-// when sockets become readable/writable or when a timeout occurs.
-// This is a separate class to avoid polluting the class hierarchy.
-class ConnectionSocketHandler : public folly::EventHandler,
-                                public folly::AsyncTimeout {
- public:
-  explicit ConnectionSocketHandler(folly::EventBase* base);
-  void timeoutExpired() noexcept override;
-  void handlerReady(uint16_t events) noexcept override;
-  void setOperation(Operation* op) {
-    op_ = op;
-  }
-
- private:
-  Operation* op_;
-
-  ConnectionSocketHandler() = delete;
-  ConnectionSocketHandler(const ConnectionSocketHandler&) = delete;
-  ConnectionSocketHandler& operator=(const ConnectionSocketHandler&) = delete;
-};
-
 // Connection is a thin wrapper around a MYSQL object, associating it
 // with an AsyncMysqlClient.  Its primary purpose is to manage that
 // connection and initiate queries.
@@ -67,7 +45,6 @@ class Connection {
       : mysql_connection_(std::move(conn)),
         conn_key_(std::move(conn_key)),
         mysql_client_(mysql_client),
-        socket_handler_(mysql_client_->getEventBase()),
         initialized_(false) {}
 
   Connection(
@@ -76,7 +53,6 @@ class Connection {
       MYSQL* existing_conn)
       : conn_key_(std::move(conn_key)),
         mysql_client_(mysql_client),
-        socket_handler_(mysql_client_->getEventBase()),
         initialized_(false) {
     if (existing_conn) {
       auto internal_conn = std::make_unique<InternalMysqlConnection>(
@@ -539,10 +515,6 @@ class Connection {
     };
   }
 
-  ConnectionSocketHandler* socketHandler() {
-    return &socket_handler_;
-  }
-
   ConnectionHolder* mysqlConnection() const {
     DCHECK(isInEventBaseThread());
     return mysql_connection_.get();
@@ -725,8 +697,6 @@ class Connection {
 
   // Unowned pointer to the client we're from.
   MysqlClientBase* mysql_client_;
-
-  ConnectionSocketHandler socket_handler_;
 
   ConnectionDyingCallback conn_dying_callback_;
 

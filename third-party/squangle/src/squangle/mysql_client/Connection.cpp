@@ -12,27 +12,6 @@
 
 namespace facebook::common::mysql_client {
 
-ConnectionSocketHandler::ConnectionSocketHandler(folly::EventBase* base)
-    : EventHandler(base), AsyncTimeout(base), op_(nullptr) {}
-
-void ConnectionSocketHandler::timeoutExpired() noexcept {
-  op_->timeoutTriggered();
-}
-
-void ConnectionSocketHandler::handlerReady(uint16_t /*events*/) noexcept {
-  DCHECK(op_->conn()->isInEventBaseThread());
-  CHECK_THROW(
-      op_->state_ != OperationState::Completed &&
-          op_->state_ != OperationState::Unstarted,
-      db::OperationStateException);
-
-  if (op_->state() == OperationState::Cancelling) {
-    op_->cancel();
-  } else {
-    op_->invokeSocketActionable();
-  }
-}
-
 bool Connection::isSSL() const {
   CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
   return mysql_connection_->isSSL();
@@ -82,8 +61,6 @@ std::shared_ptr<ResetOperation> Connection::resetConn(
   if (timeout.count() > 0) {
     resetOperationPtr->setTimeout(timeout);
   }
-  resetOperationPtr->connection()->socket_handler_.setOperation(
-      resetOperationPtr.get());
   return resetOperationPtr;
 }
 
@@ -104,8 +81,6 @@ std::shared_ptr<ChangeUserOperation> Connection::changeUser(
     // operation from hitting timeout earlier than connection timeout itself
     changeUserOperationPtr->setTimeout(timeout + std::chrono::seconds(1));
   }
-  changeUserOperationPtr->connection()->socket_handler_.setOperation(
-      changeUserOperationPtr.get());
   return changeUserOperationPtr;
 }
 
@@ -168,7 +143,6 @@ std::shared_ptr<QueryType> Connection::beginAnyQuery(
 
   auto* conn = ret->connection();
   conn->mysql_client_->addOperation(ret);
-  conn->socket_handler_.setOperation(ret.get());
   ret->setPreOperationCallback([conn](Operation& op) {
     if (conn->callbacks_.pre_operation_callback_) {
       conn->callbacks_.pre_operation_callback_(op);
@@ -579,7 +553,6 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
     ret->setTimeout(timeout);
   }
   ret->connection()->mysql_client_->addOperation(ret);
-  ret->connection()->socket_handler_.setOperation(ret.get());
 
   // MultiQueryStreamHandler needs to be alive while the operation is running.
   // To accomplish that, ~MultiQueryStreamHandler waits until

@@ -83,7 +83,6 @@ class ChangeUserOperation;
 class Operation;
 class Connection;
 class ConnectionKey;
-class ConnectionSocketHandler;
 class ConnectionOptions;
 class SSLOptionsProviderBase;
 class SyncConnection;
@@ -417,10 +416,12 @@ class ConnectionOptions {
 // The abstract base for our available Operations.  Subclasses share
 // intimate knowledge with the Operation class (most member variables
 // are protected).
-class Operation : public std::enable_shared_from_this<Operation> {
+class Operation : public folly::EventHandler,
+                  public folly::AsyncTimeout,
+                  public std::enable_shared_from_this<Operation> {
  public:
   // No public constructor.
-  virtual ~Operation();
+  virtual ~Operation() override;
 
   Operation* run();
 
@@ -656,7 +657,15 @@ class Operation : public std::enable_shared_from_this<Operation> {
   // waitForSocketActionable.
   virtual void socketActionable() = 0;
 
-  // Called by ConnectionSocketHandler when the operation timed out
+  // EventHandler override
+  void handlerReady(uint16_t /*events*/) noexcept override;
+
+  // AsyncTimeout override
+  void timeoutExpired() noexcept override {
+    timeoutTriggered();
+  }
+
+  // Called by AsyncTimeout::timeoutExpired when the operation timed out
   void timeoutTriggered();
 
   // Our operation has completed.  During completeOperation,
@@ -816,7 +825,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
   friend class Connection;
   friend class SyncConnection;
   friend class SyncConnectionPool;
-  friend class ConnectionSocketHandler;
 };
 
 // Timeout used for controlling early timeout of just the tcp handshake phase

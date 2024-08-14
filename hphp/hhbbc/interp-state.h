@@ -582,6 +582,19 @@ inline CollectionOpts operator-(CollectionOpts o1, CollectionOpts o2) {
 
 inline bool any(CollectionOpts o) { return static_cast<int>(o); }
 
+//////////////////////////////////////////////////////////////////////
+
+// Information about all the memoization setters seen so far.
+struct MemoSets {
+  // To avoid ambiguity, we separate the types for the eager and
+  // suspend case.
+  Type retTy;
+  Type waitHandleRetTy;
+  bool effectFree{true};
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Area used for writing down any information that is collected across
  * a series of step operations (possibly cross block).
@@ -649,7 +662,7 @@ struct CollectedInfo {
    * The union of all types used as inputs to a MemoSet instruction,
    * and whether those types come from an effect-free function.
    */
-  Index::ReturnType allMemoSets{TBottom, true};
+  MemoSets allMemoSets;
 };
 
 //////////////////////////////////////////////////////////////////////

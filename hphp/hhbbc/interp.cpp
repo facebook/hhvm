@@ -5733,7 +5733,11 @@ void in(ISS& env, const bc::Silence& op) {
 namespace {
 
 template <typename Op, typename Rebind>
-bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
+void memoGetImpl(ISS& env,
+                 const Op& op,
+                 BlockId noValueBlk,
+                 Optional<BlockId> whBlk,
+                 Rebind&& rebind) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   always_assert(op.locrange.first + op.locrange.count
                 <= env.ctx.func->locals.size());
@@ -5743,11 +5747,11 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
     auto const equiv = equivLocalRange(env, op.locrange);
     if (equiv != op.locrange.first) {
       reduce(env, rebind(LocalRange { equiv, op.locrange.count }));
-      return true;
+      return;
     }
   }
 
-  auto [retTy, effectFree] = memoGet(env);
+  auto memoSets = memoGet(env);
 
   // MemoGet can raise if we give a non arr-key local, or if we're in a method
   // and $this isn't available.
@@ -5762,17 +5766,24 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
        (env.ctx.func->attrs & AttrStatic) ||
        thisAvailable(env))) {
     if (will_reduce(env)) {
-      if (retTy.subtypeOf(BBottom)) {
+      if (memoSets.retTy.subtypeOf(BBottom) &&
+          (!whBlk || memoSets.waitHandleRetTy.is(BBottom))) {
         reduce(env);
-        jmp_setdest(env, op.target1);
-        return true;
+        jmp_setdest(env, noValueBlk);
+        return;
       }
       // deal with constprop manually; otherwise we will propagate the
       // taken edge and *then* replace the MemoGet with a constant.
-      if (effectFree) {
-        if (auto const v = tv(retTy)) {
+      if (memoSets.effectFree) {
+        auto const v = [&] () -> Optional<TypedValue> {
+          if (auto const v = tv(memoSets.retTy)) return v;
+          if (!whBlk) return std::nullopt;
+          if (auto const v = tv(memoSets.waitHandleRetTy)) return v;
+          return std::nullopt;
+        }();
+        if (v) {
           reduce(env, gen_constant(*v));
-          return true;
+          return;
         }
       }
     }
@@ -5784,43 +5795,50 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
     mayReadLocal(env, op.locrange.first + i);
   }
 
-  if (retTy.is(BBottom)) {
-    jmp_setdest(env, op.target1);
-    return true;
+  if (memoSets.retTy.is(BBottom)) {
+    if (!whBlk || memoSets.waitHandleRetTy.is(BBottom)) {
+      // No sets for either cases, we'll always branch to the no value
+      // case.
+      jmp_setdest(env, noValueBlk);
+    } else {
+      // Only sets for the non-eager case. The fallthrough case
+      // is unreachable.
+      env.propagate(noValueBlk, &env.state);
+      push(env, std::move(memoSets.waitHandleRetTy));
+      env.propagate(*whBlk, &env.state);
+      popC(env);
+      unreachable(env);
+      push(env, TBottom);
+    }
+    return;
   }
 
-  env.propagate(op.target1, &env.state);
-  push(env, std::move(retTy));
-  return false;
+  env.propagate(noValueBlk, &env.state);
+  if (whBlk && !memoSets.waitHandleRetTy.is(BBottom)) {
+    push(env, std::move(memoSets.waitHandleRetTy));
+    env.propagate(*whBlk, &env.state);
+    popC(env);
+  }
+  push(env, std::move(memoSets.retTy));
 }
 
 }
 
 void in(ISS& env, const bc::MemoGet& op) {
   memoGetImpl(
-    env, op,
+    env, op, op.target1, std::nullopt,
     [&] (const LocalRange& l) { return bc::MemoGet { op.target1, l }; }
   );
 }
 
 void in(ISS& env, const bc::MemoGetEager& op) {
   always_assert(env.ctx.func->isAsync && !env.ctx.func->isGenerator);
-
-  auto const reduced = memoGetImpl(
-    env, op,
+  memoGetImpl(
+    env, op, op.target1, op.target2,
     [&] (const LocalRange& l) {
       return bc::MemoGetEager { op.target1, op.target2, l };
     }
   );
-  if (reduced) return;
-
-  auto const t = popC(env);
-
-  push(env, wait_handle(t));
-  env.propagate(op.target2, &env.state);
-
-  popC(env);
-  push(env, t);
 }
 
 namespace {
@@ -5866,12 +5884,8 @@ void memoSetImpl(ISS& env, const Op& op, bool eager) {
   auto t = popC(env);
   memoSet(
     env,
-    [&] {
-      if (!env.ctx.func->isAsync || eager) return t;
-      return is_specialized_wait_handle(t)
-        ? wait_handle_inner(t)
-        : TInitCell;
-    }(),
+    (!env.ctx.func->isAsync || eager) ? t : TBottom,
+    (!env.ctx.func->isAsync || eager) ? TBottom : t,
     effectFree
   );
   push(env, std::move(t));

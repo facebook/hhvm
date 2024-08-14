@@ -1071,17 +1071,22 @@ inline PropMergeResult mergeStaticProp(ISS& env,
   );
 }
 
-inline Index::ReturnType memoGet(ISS& env) {
+inline MemoSets memoGet(ISS& env) {
   env.collect.allMemoGets.emplace(env.bid);
   return env.collect.allMemoSets;
 }
 
-inline void memoSet(ISS& env, Type t, bool effectFree) {
+inline void memoSet(ISS& env, Type t, Type wh, bool effectFree) {
   auto reflow = false;
 
-  t |= env.collect.allMemoSets.t;
-  if (env.collect.allMemoSets.t.strictSubtypeOf(t)) {
-    env.collect.allMemoSets.t = std::move(t);
+  t |= env.collect.allMemoSets.retTy;
+  if (env.collect.allMemoSets.retTy.strictSubtypeOf(t)) {
+    env.collect.allMemoSets.retTy = std::move(t);
+    reflow = true;
+  }
+  wh |= env.collect.allMemoSets.waitHandleRetTy;
+  if (env.collect.allMemoSets.waitHandleRetTy.strictSubtypeOf(wh)) {
+    env.collect.allMemoSets.waitHandleRetTy = std::move(wh);
     reflow = true;
   }
   if (!effectFree && env.collect.allMemoSets.effectFree) {

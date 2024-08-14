@@ -38,7 +38,6 @@
 
 #include <condition_variable>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
@@ -741,10 +740,6 @@ class Operation : public folly::EventHandler,
   bool isInEventBaseThread() const;
   bool isEventBaseSet() const;
 
-  bool isCancelledOnRun() const {
-    return cancel_on_run_;
-  }
-
   std::string threadOverloadMessage(double cbDelayUs) const;
   std::string timeoutMessage(std::chrono::milliseconds delta) const;
 
@@ -772,11 +767,6 @@ class Operation : public folly::EventHandler,
 
   // Connection or query attributes (depending on the Operation type)
   AttributeMap attributes_;
-
-  // This mutex protects the operation cancel process when the state
-  // is being checked in `run` and the operation is being cancelled in other
-  // thread.
-  std::mutex run_state_mutex_;
 
   struct Callbacks {
     Callbacks()
@@ -816,7 +806,12 @@ class Operation : public folly::EventHandler,
 
   MysqlClientBase* mysql_client_;
 
-  bool cancel_on_run_ = false;
+  // The cancel() and run() commands both check the current value of state_ and
+  // then change it.  The synchronized state on `cancel_on_run_` is used to
+  // protect this check and then set code.  This is not an ideal solution, but
+  // we don't really need to synchronize state_ anywhere else, so putting it in
+  // a Synchronized<> object is overkill.
+  folly::Synchronized<bool> cancel_on_run_{false};
 
   Operation() = delete;
   Operation(const Operation&) = delete;

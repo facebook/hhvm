@@ -113,18 +113,12 @@ use rpc::rpc::services::r_p_c_conformance_service::RequestResponseUndeclaredExce
 use rpc::rpc::services::r_p_c_conformance_service::SendTestCaseExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamBasicExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamBasicStreamExn;
-use rpc::rpc::services::r_p_c_conformance_service::StreamChunkTimeoutExn;
-use rpc::rpc::services::r_p_c_conformance_service::StreamChunkTimeoutStreamExn;
-use rpc::rpc::services::r_p_c_conformance_service::StreamCreditTimeoutExn;
-use rpc::rpc::services::r_p_c_conformance_service::StreamCreditTimeoutStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamDeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamDeclaredExceptionStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialDeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialDeclaredExceptionStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialResponseExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialResponseStreamExn;
-use rpc::rpc::services::r_p_c_conformance_service::StreamInitialTimeoutExn;
-use rpc::rpc::services::r_p_c_conformance_service::StreamInitialTimeoutStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialUndeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamInitialUndeclaredExceptionStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamUndeclaredExceptionExn;
@@ -142,6 +136,12 @@ use rpc::rpc::Response;
 use rpc::rpc::RpcTestCase;
 use rpc::rpc::ServerInstruction;
 use rpc::rpc::ServerTestResult;
+use rpc::rpc::StreamBasicServerTestResult;
+use rpc::rpc::StreamDeclaredExceptionServerTestResult;
+use rpc::rpc::StreamInitialDeclaredExceptionServerTestResult;
+use rpc::rpc::StreamInitialResponseServerTestResult;
+use rpc::rpc::StreamInitialUndeclaredExceptionServerTestResult;
+use rpc::rpc::StreamUndeclaredExceptionServerTestResult;
 use rpc_services::rpc::BasicInteraction;
 use rpc_services::rpc::RPCConformanceService;
 
@@ -400,34 +400,27 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
 
     async fn streamBasic(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<BoxStream<'static, Result<Response, StreamBasicStreamExn>>, StreamBasicExn> {
-        Err(StreamBasicExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamBasic",
-            ),
-        ))
-    }
-
-    async fn streamChunkTimeout(
-        &self,
-        _req: Request,
-    ) -> Result<
-        BoxStream<'static, Result<Response, StreamChunkTimeoutStreamExn>>,
-        StreamChunkTimeoutExn,
-    > {
-        Err(StreamChunkTimeoutExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamChunkTimeout",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::streamBasic(StreamBasicServerTestResult {
+            request,
+            ..Default::default()
+        });
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::streamBasic(instr) => Ok(Box::pin(
+                futures::stream::iter(instr.streamPayloads.clone()).map(Result::Ok),
+            )),
+            _ => Err(StreamBasicExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn streamInitialResponse(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<
         (
             Response,
@@ -435,102 +428,139 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
         ),
         StreamInitialResponseExn,
     > {
-        Err(StreamInitialResponseExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamInitialResponse",
-            ),
-        ))
-    }
-
-    async fn streamCreditTimeout(
-        &self,
-        _req: Request,
-    ) -> Result<
-        BoxStream<'static, Result<Response, StreamCreditTimeoutStreamExn>>,
-        StreamCreditTimeoutExn,
-    > {
-        Err(StreamCreditTimeoutExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamCreditTimeout",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::streamInitialResponse(StreamInitialResponseServerTestResult {
+            request,
+            ..Default::default()
+        });
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::streamInitialResponse(instr) => Ok((
+                instr.initialResponse.clone(),
+                Box::pin(futures::stream::iter(instr.streamPayloads.clone()).map(Result::Ok)),
+            )),
+            _ => Err(StreamInitialResponseExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn streamDeclaredException(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<
         BoxStream<'static, Result<Response, StreamDeclaredExceptionStreamExn>>,
         StreamDeclaredExceptionExn,
     > {
-        Err(StreamDeclaredExceptionExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamDeclaredException",
-            ),
-        ))
-    }
-
-    async fn streamUndeclaredException(
-        &self,
-        _req: Request,
-    ) -> Result<
-        BoxStream<'static, Result<Response, StreamUndeclaredExceptionStreamExn>>,
-        StreamUndeclaredExceptionExn,
-    > {
-        Err(StreamUndeclaredExceptionExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamUndeclaredException",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::streamDeclaredException(StreamDeclaredExceptionServerTestResult {
+            request,
+            ..Default::default()
+        });
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::streamDeclaredException(instr) => {
+                if let Some(exception) = &instr.userException {
+                    Ok(Box::pin(futures::stream::once(futures::future::ready(
+                        Err(StreamDeclaredExceptionStreamExn::e(*exception.clone())),
+                    ))))
+                } else {
+                    Err(StreamDeclaredExceptionExn::ApplicationException(
+                        none_error(),
+                    ))
+                }
+            }
+            _ => Err(StreamDeclaredExceptionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn streamInitialDeclaredException(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<
         BoxStream<'static, Result<Response, StreamInitialDeclaredExceptionStreamExn>>,
         StreamInitialDeclaredExceptionExn,
     > {
-        Err(StreamInitialDeclaredExceptionExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamInitialDeclaredException",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::streamInitialDeclaredException(
+            StreamInitialDeclaredExceptionServerTestResult {
+                request,
+                ..Default::default()
+            },
+        );
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::streamInitialDeclaredException(instr) => {
+                if let Some(exception) = &instr.userException {
+                    Err(StreamInitialDeclaredExceptionExn::e(*exception.clone()))
+                } else {
+                    Err(StreamInitialDeclaredExceptionExn::ApplicationException(
+                        none_error(),
+                    ))
+                }
+            }
+            _ => Err(StreamInitialDeclaredExceptionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
+    }
+
+    async fn streamUndeclaredException(
+        &self,
+        request: Request,
+    ) -> Result<
+        BoxStream<'static, Result<Response, StreamUndeclaredExceptionStreamExn>>,
+        StreamUndeclaredExceptionExn,
+    > {
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::streamUndeclaredException(
+            StreamUndeclaredExceptionServerTestResult {
+                request,
+                ..Default::default()
+            },
+        );
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::streamUndeclaredException(instr) => {
+                Ok(Box::pin(futures::stream::once(futures::future::ready(
+                    Err(StreamUndeclaredExceptionStreamExn::ApplicationException(
+                        custom_error(instr.exceptionMessage.clone()),
+                    )),
+                ))))
+            }
+            _ => Err(StreamUndeclaredExceptionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 
     async fn streamInitialUndeclaredException(
         &self,
-        _req: Request,
+        request: Request,
     ) -> Result<
         BoxStream<'static, Result<Response, StreamInitialUndeclaredExceptionStreamExn>>,
         StreamInitialUndeclaredExceptionExn,
     > {
-        Err(StreamInitialUndeclaredExceptionExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamInitialUndeclaredException",
-            ),
-        ))
-    }
-
-    async fn streamInitialTimeout(
-        &self,
-        _req: Request,
-    ) -> Result<
-        BoxStream<'static, Result<Response, StreamInitialTimeoutStreamExn>>,
-        StreamInitialTimeoutExn,
-    > {
-        Err(StreamInitialTimeoutExn::ApplicationException(
-            ::fbthrift::ApplicationException::unimplemented_method(
-                "RPCConformanceService",
-                "streamInitialTimeout",
-            ),
-        ))
+        let mut w = self.test_result.lock().unwrap();
+        *w = ServerTestResult::streamInitialUndeclaredException(
+            StreamInitialUndeclaredExceptionServerTestResult {
+                request,
+                ..Default::default()
+            },
+        );
+        let r = self.test_case.lock().unwrap();
+        match &r.serverInstruction {
+            ServerInstruction::streamInitialUndeclaredException(instr) => {
+                Err(StreamInitialUndeclaredExceptionExn::ApplicationException(
+                    custom_error(instr.exceptionMessage.clone()),
+                ))
+            }
+            _ => Err(StreamInitialUndeclaredExceptionExn::ApplicationException(
+                instruction_match_error(),
+            )),
+        }
     }
 }
 

@@ -61,7 +61,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::SerializedCompressedRequest&&,
       apache::thrift::Cpp2RequestContext* context,
       folly::EventBase* eb,
-      apache::thrift::concurrency::ThreadManager* tm);
+      folly::Executor::KeepAlive<> executor);
   struct ProcessFuncs {
     ProcessFunc compact;
     ProcessFunc binary;
@@ -105,7 +105,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::SerializedCompressedRequest&& serializedCompressedRequest,
       apache::thrift::Cpp2RequestContext* ctx,
       folly::EventBase* eb,
-      apache::thrift::concurrency::ThreadManager* tm) {
+      folly::Executor::KeepAlive<> executor) {
     ProtocolIn_ prot;
     auto serializedRequest =
         std::move(serializedCompressedRequest).uncompress();
@@ -138,7 +138,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
                      prot,
                      ctx,
                      eb,
-                     tm,
+                     executor,
                      req = std::move(req),
                      ctxStack = std::move(ctxStack),
                      serializedRequest = std::move(serializedRequest)](
@@ -174,8 +174,11 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
                     methodName,
                     nullptr,
                     eb,
-                    tm,
-                    ctx));
+                    executor,
+                    ctx,
+                    nullptr,
+                    nullptr,
+                    apache::thrift::ServerRequestData{}));
           } else if constexpr (
               kind ==
               apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE) {
@@ -196,8 +199,11 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
                     detail::throw_wrapped<ProtocolIn_, ProtocolOut_>,
                     ctx->getProtoSeqId(),
                     eb,
-                    tm,
-                    ctx));
+                    executor,
+                    ctx,
+                    nullptr,
+                    nullptr,
+                    apache::thrift::ServerRequestData{}));
           } else {
             return handlePythonServerCallback(
                 prot.protocolType(),
@@ -214,8 +220,11 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
                     detail::throw_wrapped<ProtocolIn_, ProtocolOut_>,
                     ctx->getProtoSeqId(),
                     eb,
-                    tm,
-                    ctx));
+                    executor,
+                    ctx,
+                    nullptr,
+                    nullptr,
+                    apache::thrift::ServerRequestData{}));
           }
         })
         .via(executor_);

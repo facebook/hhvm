@@ -168,7 +168,13 @@ void PythonAsyncProcessor::processSerializedCompressedRequestWithMetadata(
       LOG(ERROR) << "invalid protType: " << folly::to_underlying(protType);
       return;
   }
-  (this->*pfn)(std::move(req), std::move(serializedRequest), context, eb, tm);
+  auto executor = tm
+      ? tm->getKeepAlive(
+            context->getRequestExecutionScope(),
+            apache::thrift::concurrency::ThreadManager::Source::INTERNAL)
+      : nullptr;
+  (this->*pfn)(
+      std::move(req), std::move(serializedRequest), context, eb, executor);
 }
 
 } // namespace python

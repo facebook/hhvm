@@ -336,20 +336,33 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
     data_.patchPrior()->customVisit(std::forward<Visitor>(v));
 
-    // TODO: Optimize ensure for UnionPatch
-    for_each_field_id<T>([&](auto id) {
-      using Id = decltype(id);
-      if constexpr (!apache::thrift::detail::is_shared_ptr_v<
-                        op::get_field_ref<T, Id>>) {
-        if (auto p = op::get<Id>(*data_.ensure())) {
-          if constexpr (type::is_optional_or_union_field_v<T, Id>) {
-            std::forward<Visitor>(v).template ensure<Id>(*p);
-          } else {
-            std::forward<Visitor>(v).template ensure<Id>();
+    if constexpr (!is_thrift_union_v<T>) {
+      for_each_field_id<T>([&](auto id) {
+        using Id = decltype(id);
+        if constexpr (!apache::thrift::detail::is_shared_ptr_v<
+                          op::get_field_ref<T, Id>>) {
+          if (auto p = op::get<Id>(*data_.ensure())) {
+            if constexpr (type::is_optional_or_union_field_v<T, Id>) {
+              std::forward<Visitor>(v).template ensure<Id>(*p);
+            } else {
+              std::forward<Visitor>(v).template ensure<Id>();
+            }
           }
         }
-      }
-    });
+      });
+    } else {
+      // For Thrift Union, we only need to visit the active field.
+      op::invoke_by_field_id<T>(
+          static_cast<FieldId>(data_.ensure().value().getType()),
+          [&](auto id) {
+            using Id = decltype(id);
+            std::forward<Visitor>(v).template ensure<Id>(
+                *op::get<Id>(*data_.ensure()));
+          },
+          []() {
+            // Ignore if the union is empty.
+          });
+    }
 
     data_.patch()->customVisit(std::forward<Visitor>(v));
 

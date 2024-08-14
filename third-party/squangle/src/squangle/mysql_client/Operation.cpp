@@ -110,27 +110,27 @@ std::string ConnectionOptions::getDisplayString() const {
   return fmt::format("({})", folly::join(", ", parts));
 }
 
-Operation::Operation(ConnectionProxy&& safe_conn)
-    : EventHandler(safe_conn->mysql_client_->getEventBase()),
-      AsyncTimeout(safe_conn->mysql_client_->getEventBase()),
+Operation::Operation(std::unique_ptr<ConnectionProxy> safe_conn)
+    : EventHandler(safe_conn->get().mysql_client_.getEventBase()),
+      AsyncTimeout(safe_conn->get().mysql_client_.getEventBase()),
       state_(OperationState::Unstarted),
       result_(OperationResult::Unknown),
       conn_proxy_(std::move(safe_conn)),
       mysql_errno_(0),
       observer_callback_(nullptr),
-      mysql_client_(conn()->mysql_client_) {
+      mysql_client_(conn().mysql_client_) {
   timeout_ = Duration(FLAGS_async_mysql_timeout_micros);
-  conn()->resetActionable();
+  conn().resetActionable();
   request_context_.store(
       folly::RequestContext::saveContext(), std::memory_order_relaxed);
 }
 
 bool Operation::isInEventBaseThread() const {
-  return connection()->isInEventBaseThread();
+  return connection().isInEventBaseThread();
 }
 
 bool Operation::isEventBaseSet() const {
-  return connection()->getEventBase() != nullptr;
+  return connection().getEventBase() != nullptr;
 }
 
 Operation::~Operation() {}
@@ -145,7 +145,7 @@ void Operation::invokeSocketActionable() {
 void Operation::waitForSocketActionable() {
   DCHECK(isInEventBaseThread());
 
-  auto event_mask = conn().get()->getReadWriteState();
+  auto event_mask = conn().getReadWriteState();
 
   if (stopwatch_->elapsed(timeout_)) {
     timeoutTriggered();
@@ -184,7 +184,7 @@ void Operation::cancel() {
     state_ = OperationState::Cancelling;
   }
 
-  if (!connection()->runInThread(
+  if (!connection().runInThread(
           this, &Operation::completeOperation, OperationResult::Cancelled)) {
     // if a strange error happen in EventBase , mark it cancelled now
     completeOperationInner(OperationResult::Cancelled);
@@ -192,7 +192,7 @@ void Operation::cancel() {
 }
 
 void Operation::handlerReady(uint16_t /*events*/) noexcept {
-  DCHECK(conn()->isInEventBaseThread());
+  DCHECK(conn().isInEventBaseThread());
   CHECK_THROW(
       state_ != OperationState::Completed &&
           state_ != OperationState::Unstarted,
@@ -209,7 +209,7 @@ void Operation::timeoutTriggered() {
   specializedTimeoutTriggered();
 }
 
-Operation* Operation::run() {
+Operation& Operation::run() {
   stopwatch_ = std::make_unique<StopWatch>();
   if (callbacks_.pre_operation_callback_) {
     CHECK_THROW(
@@ -220,9 +220,9 @@ Operation* Operation::run() {
     auto locked = cancel_on_run_.wlock();
     if (*locked) {
       state_ = OperationState::Cancelling;
-      connection()->runInThread(
+      connection().runInThread(
           this, &Operation::completeOperation, OperationResult::Cancelled);
-      return this;
+      return *this;
     }
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
@@ -255,10 +255,10 @@ void Operation::completeOperationInner(OperationResult result) {
   opDuration_ = stopwatch_->elapsed();
   if ((result == OperationResult::Cancelled ||
        result == OperationResult::TimedOut) &&
-      conn()->hasInitialized()) {
+      conn().hasInitialized()) {
     // Cancelled/timed out ops leave our connection in an undefined
     // state.  Close it to prevent trouble.
-    conn()->close();
+    conn().close();
   }
 
   unregisterHandler();
@@ -275,24 +275,24 @@ void Operation::completeOperationInner(OperationResult result) {
     observer_callback_(*this);
   }
 
-  client()->deferRemoveOperation(this);
+  client().deferRemoveOperation(this);
 }
 
-std::unique_ptr<Connection>&& Operation::releaseConnection() {
+std::unique_ptr<Connection> Operation::releaseConnection() {
   CHECK_THROW(
       state_ == OperationState::Completed ||
           state_ == OperationState::Unstarted,
       db::OperationStateException);
-  return std::move(conn_proxy_.releaseConnection());
+  return conn_proxy_->releaseConnection();
 }
 
 void Operation::snapshotMysqlErrors() {
-  mysql_errno_ = conn()->getErrno();
+  mysql_errno_ = conn().getErrno();
   if (mysql_errno_ != 0) {
     if (mysql_errno_ == CR_TLS_SERVER_NOT_FOUND) {
       mysql_error_ = "Server loadshedded the connection request.";
     } else {
-      mysql_error_ = conn()->getErrorMessage();
+      mysql_error_ = conn().getErrorMessage();
     }
   }
 }
@@ -304,11 +304,11 @@ void Operation::setAsyncClientError(
   mysql_error_ = msg.toString();
 }
 
-void Operation::wait() {
-  return conn()->wait();
+void Operation::wait() const {
+  conn().wait();
 }
 
-MysqlClientBase* Operation::client() const {
+MysqlClientBase& Operation::client() const {
   return mysql_client_;
 }
 
@@ -317,10 +317,10 @@ std::shared_ptr<Operation> Operation::getSharedPointer() {
 }
 
 const std::string& Operation::host() const {
-  return conn()->host();
+  return conn().host();
 }
 int Operation::port() const {
-  return conn()->port();
+  return conn().port();
 }
 
 void Operation::setObserverCallback(ObserverCallback obs_cb) {
@@ -422,8 +422,8 @@ void ConnectTcpTimeoutHandler::timeoutExpired() noexcept {
 ConnectOperation::ConnectOperation(
     MysqlClientBase* mysql_client,
     ConnectionKey conn_key)
-    : Operation(Operation::ConnectionProxy(Operation::OwnedConnection(
-          mysql_client->createConnection(conn_key, nullptr)))),
+    : Operation(std::make_unique<Operation::OwnedConnection>(
+          mysql_client->createConnection(conn_key, nullptr))),
       conn_key_(std::move(conn_key)),
       flags_(CLIENT_MULTI_STATEMENTS),
       active_in_client_(true),
@@ -431,7 +431,7 @@ ConnectOperation::ConnectOperation(
   mysql_client->activeConnectionAdded(&conn_key_);
 }
 
-ConnectOperation* ConnectOperation::setConnectionOptions(
+ConnectOperation& ConnectOperation::setConnectionOptions(
     const ConnectionOptions& conn_opts) {
   setTimeout(conn_opts.getTimeout());
   setDefaultQueryTimeout(conn_opts.getQueryTimeout());
@@ -458,44 +458,44 @@ ConnectOperation* ConnectOperation::setConnectionOptions(
         conn_opts.getCertValidationContext(),
         conn_opts.isOpPtrAsValidationContext());
   }
-  return this;
+  return *this;
 }
 
 const ConnectionOptions& ConnectOperation::getConnectionOptions() const {
   return conn_options_;
 }
 
-ConnectOperation* ConnectOperation::setDefaultQueryTimeout(Duration t) {
+ConnectOperation& ConnectOperation::setDefaultQueryTimeout(Duration t) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setQueryTimeout(t);
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::setSniServerName(
+ConnectOperation& ConnectOperation::setSniServerName(
     const std::string& sni_servername) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setSniServerName(sni_servername);
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::enableResetConnBeforeClose() {
+ConnectOperation& ConnectOperation::enableResetConnBeforeClose() {
   conn_options_.enableResetConnBeforeClose();
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::enableDelayedResetConn() {
+ConnectOperation& ConnectOperation::enableDelayedResetConn() {
   conn_options_.enableDelayedResetConn();
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::enableChangeUser() {
+ConnectOperation& ConnectOperation::enableChangeUser() {
   conn_options_.enableChangeUser();
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::setCertValidationCallback(
+ConnectOperation& ConnectOperation::setCertValidationCallback(
     CertValidatorCallback callback,
     const void* context,
     bool opPtrAsContext) {
@@ -503,59 +503,59 @@ ConnectOperation* ConnectOperation::setCertValidationCallback(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setCertValidationCallback(
       std::move(callback), context, opPtrAsContext);
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::setTimeout(Duration timeout) {
+ConnectOperation& ConnectOperation::setTimeout(Duration timeout) {
   conn_options_.setTimeout(timeout);
   Operation::setTimeout(timeout);
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::setTcpTimeout(Duration timeout) {
+ConnectOperation& ConnectOperation::setTcpTimeout(Duration timeout) {
   conn_options_.setConnectTcpTimeout(timeout);
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::setTotalTimeout(Duration total_timeout) {
+ConnectOperation& ConnectOperation::setTotalTimeout(Duration total_timeout) {
   conn_options_.setTotalTimeout(total_timeout);
   Operation::setTimeout(min(timeout_, total_timeout));
-  return this;
+  return *this;
 }
-ConnectOperation* ConnectOperation::setConnectAttempts(uint32_t max_attempts) {
+ConnectOperation& ConnectOperation::setConnectAttempts(uint32_t max_attempts) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setConnectAttempts(max_attempts);
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::setDscp(uint8_t dscp) {
+ConnectOperation& ConnectOperation::setDscp(uint8_t dscp) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setDscp(dscp);
-  return this;
+  return *this;
 }
 
-ConnectOperation* ConnectOperation::setKillOnQueryTimeout(
+ConnectOperation& ConnectOperation::setKillOnQueryTimeout(
     bool killOnQueryTimeout) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   killOnQueryTimeout_ = killOnQueryTimeout;
-  return this;
+  return *this;
 }
-ConnectOperation* ConnectOperation::setSSLOptionsProviderBase(
+ConnectOperation& ConnectOperation::setSSLOptionsProviderBase(
     std::unique_ptr<SSLOptionsProviderBase> /*ssl_options_provider*/) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   LOG(ERROR) << "Using deprecated function";
-  return this;
+  return *this;
 }
-ConnectOperation* ConnectOperation::setSSLOptionsProvider(
+ConnectOperation& ConnectOperation::setSSLOptionsProvider(
     std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setSSLOptionsProvider(ssl_options_provider);
-  return this;
+  return *this;
 }
 
 bool ConnectOperation::shouldCompleteOperation(OperationResult result) {
@@ -584,7 +584,7 @@ void ConnectOperation::attemptFailed(OperationResult result) {
 
   unregisterHandler();
   cancelTimeout();
-  conn()->close();
+  conn().close();
 
   // Adjust timeout
   Duration timeout_attempt_based =
@@ -600,38 +600,38 @@ void ConnectOperation::attemptSucceeded(OperationResult result) {
 
 void ConnectOperation::specializedRunImpl() {
   if (attempts_made_ == 0) {
-    conn()->initialize();
+    conn().initialize();
   } else {
-    conn()->initMysqlOnly();
+    conn().initMysqlOnly();
   }
   removeClientReference();
 
-  conn()->setConnectAttributes(attributes_);
+  conn().setConnectAttributes(attributes_);
 
   if (const auto& optCompressionLib = getCompression()) {
-    conn()->setCompression(*optCompressionLib);
+    conn().setCompression(*optCompressionLib);
   }
 
-  auto provider = conn_options_.getSSLOptionsProviderPtr();
-  if (provider && conn()->setSSLOptionsProvider(*provider) &&
-      connection_context_) {
-    connection_context_->isSslConnection = true;
-  }
+  conn_options_.withPossibleSSLOptionsProvider([&](auto& provider) {
+    if (conn().setSSLOptionsProvider(provider) && connection_context_) {
+      connection_context_->isSslConnection = true;
+    }
+  });
 
   // Set sni field for ssl connection
   if (const auto& optSniServerName = conn_options_.getSniServerName()) {
-    conn()->setSniServerName(*optSniServerName);
+    conn().setSniServerName(*optSniServerName);
   }
 
   if (const auto& optDscp = conn_options_.getDscp()) {
-    if (!conn()->setDscp(*optDscp)) {
+    if (!conn().setDscp(*optDscp)) {
       LOG(WARNING) << fmt::format(
           "Failed to set DSCP {} for MySQL Client socket", *optDscp);
     }
   }
 
   if (conn_options_.getCertValidationCallback()) {
-    conn()->setCertValidatorCallback(mysqlCertValidator, this);
+    conn().setCertValidatorCallback(mysqlCertValidator, this);
   }
 
   // If the tcp timeout value is not set in conn options, use the default value
@@ -642,7 +642,7 @@ void ConnectOperation::specializedRunImpl() {
   // event base is set. Sync implmenation of MysqlClientBase may not have it
   // set. If the timeout is set to 0, skip setting any timeout
   if (timeout.count() != 0) {
-    conn()->setConnectTimeout(timeout);
+    conn().setConnectTimeout(timeout);
     if (isEventBaseSet()) {
       tcp_timeout_handler_.scheduleTimeout(timeout.count());
     }
@@ -652,11 +652,11 @@ void ConnectOperation::specializedRunImpl() {
   socketActionable();
 }
 
-ConnectOperation* ConnectOperation::specializedRun() {
-  if (!connection()->runInThread(this, &ConnectOperation::specializedRunImpl)) {
+ConnectOperation& ConnectOperation::specializedRun() {
+  if (!connection().runInThread(this, &ConnectOperation::specializedRunImpl)) {
     completeOperationInner(OperationResult::Failed);
   }
-  return this;
+  return *this;
 }
 
 ConnectOperation::~ConnectOperation() {
@@ -670,12 +670,12 @@ void ConnectOperation::socketActionable() {
   auto logThreadBlockTimeGuard =
       std::make_unique<OperationGuard>([&]() { logThreadBlockTime(sw); });
 
-  auto& handler = conn()->client()->getMysqlHandler();
+  auto& handler = conn().client().getMysqlHandler();
   // MYSQL* mysql = conn()->mysql();
   const auto usingUnixSocket = !conn_key_.unixSocketPath().empty();
 
   auto status = handler.tryConnect(
-      conn()->getInternalConnection(), conn_options_, conn_key_, flags_);
+      conn().getInternalConnection(), conn_options_, conn_key_, flags_);
 
   if (status == ERROR) {
     snapshotMysqlErrors();
@@ -688,7 +688,7 @@ void ConnectOperation::socketActionable() {
       tcp_timeout_handler_.cancelTimeout();
     }
 
-    auto fd = conn()->getSocketDescriptor();
+    auto fd = conn().getSocketDescriptor();
     if (fd <= 0) {
       LOG(ERROR) << "Unexpected invalid socket descriptor on completed, "
                  << (status == DONE ? "errorless" : "pending")
@@ -702,8 +702,8 @@ void ConnectOperation::socketActionable() {
     } else if (status == DONE) {
       auto socket = folly::NetworkSocket::fromFd(fd);
       changeHandlerFD(socket);
-      conn()->mysqlConnection()->setConnectionContext(connection_context_);
-      conn()->mysqlConnection()->connectionOpened();
+      conn().mysqlConnection()->setConnectionContext(connection_context_);
+      conn().mysqlConnection()->connectionOpened();
       logThreadBlockTimeGuard.reset();
       attemptSucceeded(OperationResult::Succeeded);
     } else {
@@ -714,7 +714,7 @@ void ConnectOperation::socketActionable() {
 }
 
 bool ConnectOperation::isDoneWithTcpHandShake() {
-  return conn()->isDoneWithTcpHandShake();
+  return conn().isDoneWithTcpHandShake();
 }
 
 void ConnectOperation::specializedTimeoutTriggered() {
@@ -734,7 +734,7 @@ void ConnectOperation::timeoutHandler(
   auto deltaUs = stopwatch_->elapsed();
   auto deltaMs = std::chrono::duration_cast<std::chrono::milliseconds>(deltaUs);
 
-  auto cbDelayUs = client()->callbackDelayMicrosAvg();
+  auto cbDelayUs = client().callbackDelayMicrosAvg();
   bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
 
   // Overall the message looks like this:
@@ -752,7 +752,7 @@ void ConnectOperation::timeoutHandler(
       host(),
       port()));
   if (!isPoolConnection) {
-    parts.push_back(fmt::format("at stage {}", conn()->getConnectStageName()));
+    parts.push_back(fmt::format("at stage {}", conn().getConnectStageName()));
   }
 
   parts.push_back(timeoutMessage(deltaMs));
@@ -777,22 +777,22 @@ void ConnectOperation::timeoutHandler(
 void ConnectOperation::logConnectCompleted(OperationResult result) {
   // If the connection wasn't initialized, it's because the operation
   // was cancelled before anything started, so we don't do the logs
-  if (!conn()->hasInitialized()) {
+  if (!conn().hasInitialized()) {
     return;
   }
   auto* context = connection_context_.get();
   if (result == OperationResult::Succeeded) {
     if (context) {
-      context->sslVersion = conn()->getTlsVersion();
+      context->sslVersion = conn().getTlsVersion();
     }
-    client()->logConnectionSuccess(
+    client().logConnectionSuccess(
         db::CommonLoggingData(
             getOperationType(),
             opDuration_,
             timeout_,
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
-        conn()->getKey(),
+        conn().getKey(),
         context);
   } else {
     db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
@@ -801,7 +801,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     } else if (result == OperationResult::Cancelled) {
       reason = db::FailureReason::CANCELLED;
     }
-    client()->logConnectionFailure(
+    client().logConnectionFailure(
         db::CommonLoggingData(
             getOperationType(),
             opDuration_,
@@ -809,7 +809,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
         reason,
-        conn()->getKey(),
+        conn().getKey(),
         mysql_errno(),
         mysql_error(),
         context);
@@ -817,28 +817,25 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
 }
 
 void ConnectOperation::maybeStoreSSLSession() {
-  // if there is an ssl provider set
-  auto provider = conn_options_.getSSLOptionsProviderPtr();
-  if (!provider) {
-    return;
-  }
-
   // If connection was successful
-  if (result_ != OperationResult::Succeeded || !conn()->hasInitialized()) {
+  if (result_ != OperationResult::Succeeded || !conn().hasInitialized()) {
     return;
   }
 
-  if (conn()->storeSession(*provider)) {
-    if (connection_context_) {
-      connection_context_->sslSessionReused = true;
+  // if there is an ssl provider set
+  conn_options_.withPossibleSSLOptionsProvider([&](auto& provider) {
+    if (conn().storeSession(provider)) {
+      if (connection_context_) {
+        connection_context_->sslSessionReused = true;
+      }
+      client().stats()->incrReusedSSLSessions();
     }
-    client()->stats()->incrReusedSSLSessions();
-  }
+  });
 }
 
 void ConnectOperation::specializedCompleteOperation() {
   // Pass the callbacks to the Connection now that we are done with them
-  conn()->setCallbacks(std::move(callbacks_));
+  conn().setCallbacks(std::move(callbacks_));
 
   // Operations that don't directly initiate a new TLS conneciton
   // shouldn't update the TLS session because it can propagate the
@@ -850,9 +847,9 @@ void ConnectOperation::specializedCompleteOperation() {
 
   // Can only log this on successful connections because unsuccessful
   // ones call mysql_close_free inside libmysql
-  if (result_ == OperationResult::Succeeded && conn()->ok() &&
+  if (result_ == OperationResult::Succeeded && conn().ok() &&
       connection_context_) {
-    connection_context_->endpointVersion = conn()->serverInfo();
+    connection_context_->endpointVersion = conn().serverInfo();
   }
 
   // Cancel tcp timeout
@@ -862,13 +859,13 @@ void ConnectOperation::specializedCompleteOperation() {
 
   // If connection_initialized_ is false the only way to complete the
   // operation is by cancellation
-  DCHECK(conn()->hasInitialized() || result_ == OperationResult::Cancelled);
+  DCHECK(conn().hasInitialized() || result_ == OperationResult::Cancelled);
 
-  conn()->setConnectionOptions(conn_options_);
-  conn()->setKillOnQueryTimeout(getKillOnQueryTimeout());
-  conn()->setConnectionContext(connection_context_);
+  conn().setConnectionOptions(conn_options_);
+  conn().setKillOnQueryTimeout(getKillOnQueryTimeout());
+  conn().setConnectionContext(connection_context_);
 
-  conn()->notify();
+  conn().notify();
 
   if (connect_callback_) {
     connect_callback_(*this);
@@ -881,8 +878,7 @@ void ConnectOperation::specializedCompleteOperation() {
 }
 
 void ConnectOperation::mustSucceed() {
-  run();
-  wait();
+  run().wait();
   if (!ok()) {
     throw db::RequiredOperationFailedException(
         "Connect failed: " + mysql_error_);
@@ -894,7 +890,7 @@ void ConnectOperation::removeClientReference() {
     // It's safe to call the client since we still have a ref counting
     // it won't die before it goes to 0
     active_in_client_ = false;
-    client()->activeConnectionRemoved(&conn_key_);
+    client().activeConnectionRemoved(&conn_key_);
   }
 }
 
@@ -933,16 +929,18 @@ int ConnectOperation::mysqlCertValidator(
 }
 
 FetchOperation::FetchOperation(
-    ConnectionProxy&& conn,
+    std::unique_ptr<ConnectionProxy> conn,
     std::vector<Query>&& queries)
     : Operation(std::move(conn)), queries_(std::move(queries)) {}
 
-FetchOperation::FetchOperation(ConnectionProxy&& conn, MultiQuery&& multi_query)
+FetchOperation::FetchOperation(
+    std::unique_ptr<ConnectionProxy> conn,
+    MultiQuery&& multi_query)
     : Operation(std::move(conn)), queries_(std::move(multi_query)) {}
 
-FetchOperation* FetchOperation::setUseChecksum(bool useChecksum) noexcept {
+FetchOperation& FetchOperation::setUseChecksum(bool useChecksum) noexcept {
   use_checksum_ = useChecksum;
-  return this;
+  return *this;
 }
 
 bool FetchOperation::isStreamAccessAllowed() const {
@@ -954,26 +952,26 @@ bool FetchOperation::isPaused() const {
   return active_fetch_action_ == FetchAction::WaitForConsumer;
 }
 
-FetchOperation* FetchOperation::specializedRun() {
-  if (!connection()->runInThread(this, &FetchOperation::specializedRunImpl)) {
+FetchOperation& FetchOperation::specializedRun() {
+  if (!connection().runInThread(this, &FetchOperation::specializedRunImpl)) {
     completeOperationInner(OperationResult::Failed);
   }
 
-  return this;
+  return *this;
 }
 
 void FetchOperation::specializedRunImpl() {
   try {
-    rendered_query_ = queries_.renderQuery(&conn()->getInternalConnection());
+    rendered_query_ = queries_.renderQuery(&conn().getInternalConnection());
 
-    if (int retErrCode = conn()->setQueryAttributes(attributes_)) {
+    if (int retErrCode = conn().setQueryAttributes(attributes_)) {
       setAsyncClientError(retErrCode, "Failed to set query attributes");
       completeOperation(OperationResult::Failed);
       return;
     }
 
-    if ((use_checksum_ || conn()->getConnectionOptions().getUseChecksum())) {
-      if (int retErrCode = conn()->setQueryAttribute(kQueryChecksumKey, "ON")) {
+    if ((use_checksum_ || conn().getConnectionOptions().getUseChecksum())) {
+      if (int retErrCode = conn().setQueryAttribute(kQueryChecksumKey, "ON")) {
         setAsyncClientError(retErrCode, "Failed to set checksum = ON");
         completeOperation(OperationResult::Failed);
         return;
@@ -1068,7 +1066,7 @@ FetchOperation::RowStream* FetchOperation::rowStream() {
 }
 
 AttributeMap FetchOperation::readResponseAttributes() {
-  return conn()->getResponseAttributes();
+  return conn().getResponseAttributes();
 }
 
 void FetchOperation::socketActionable() {
@@ -1079,11 +1077,11 @@ void FetchOperation::socketActionable() {
   auto logThreadBlockTimeGuard =
       std::make_unique<OperationGuard>([&]() { logThreadBlockTime(sw); });
 
-  auto& handler = conn()->client()->getMysqlHandler();
-  auto& internalConn = conn()->getInternalConnection();
+  auto& handler = conn().client().getMysqlHandler();
+  auto& internalConn = conn().getInternalConnection();
 
   // Add the socket to the FetchOperation so that we can wait on alerts
-  changeHandlerFD(folly::NetworkSocket::fromFd(conn()->getSocketDescriptor()));
+  changeHandlerFD(folly::NetworkSocket::fromFd(conn().getSocketDescriptor()));
 
   // This loop runs the fetch actions required to successfully execute query,
   // request next results, fetch results, identify errors and complete operation
@@ -1214,16 +1212,16 @@ void FetchOperation::socketActionable() {
       if (mysql_errno_ != 0 || cancel_) {
         active_fetch_action_ = FetchAction::CompleteOperation;
       } else {
-        current_last_insert_id_ = conn()->getLastInsertId();
-        current_affected_rows_ = conn()->getAffectedRows();
-        if (auto optGtid = conn()->getRecvGtid()) {
+        current_last_insert_id_ = conn().getLastInsertId();
+        current_affected_rows_ = conn().getAffectedRows();
+        if (auto optGtid = conn().getRecvGtid()) {
           current_recv_gtid_ = *optGtid;
         }
-        if (auto optSchemaChanged = conn()->getSchemaChanged()) {
-          conn()->setCurrentSchema(std::move(*optSchemaChanged));
+        if (auto optSchemaChanged = conn().getSchemaChanged()) {
+          conn().setCurrentSchema(std::move(*optSchemaChanged));
         }
         current_resp_attrs_ = readResponseAttributes();
-        more_results = conn()->hasMoreResults();
+        more_results = conn().hasMoreResults();
         active_fetch_action_ = more_results ? FetchAction::StartQuery
                                             : FetchAction::CompleteOperation;
 
@@ -1235,8 +1233,8 @@ void FetchOperation::socketActionable() {
           total_result_size_ += current_row_stream_->query_result_size_;
         }
         ++num_queries_executed_;
-        no_index_used_ |= conn()->getNoIndexUsed();
-        was_slow_ |= conn()->wasSlow();
+        no_index_used_ |= conn().getNoIndexUsed();
+        was_slow_ |= conn().wasSlow();
         notifyQuerySuccess(more_results);
       }
       current_row_stream_.reset();
@@ -1293,7 +1291,7 @@ void FetchOperation::resumeImpl() {
 
 void FetchOperation::resume() {
   DCHECK(active_fetch_action_ == FetchAction::WaitForConsumer);
-  connection()->runInThread(this, &FetchOperation::resumeImpl);
+  conn().runInThread(this, &FetchOperation::resumeImpl);
 }
 
 namespace {
@@ -1327,7 +1325,7 @@ void FetchOperation::specializedTimeoutTriggered() {
   auto deltaUs = stopwatch_->elapsed();
   auto deltaMs = std::chrono::duration_cast<std::chrono::milliseconds>(deltaUs);
 
-  if (conn()->getKillOnQueryTimeout()) {
+  if (conn().getKillOnQueryTimeout()) {
     killRunningQuery();
   }
 
@@ -1367,7 +1365,7 @@ void FetchOperation::specializedTimeoutTriggered() {
     rows = "(no rows seen)";
   }
 
-  auto cbDelayUs = client()->callbackDelayMicrosAvg();
+  auto cbDelayUs = client().callbackDelayMicrosAvg();
   bool stalled = cbDelayUs >= kCallbackDelayStallThresholdUs;
 
   std::vector<std::string> parts;
@@ -1392,7 +1390,7 @@ void FetchOperation::specializedCompleteOperation() {
   // Stats for query
   if (result_ == OperationResult::Succeeded) {
     // set last successful query time to MysqlConnectionHolder
-    conn()->setLastActivityTime(chrono::steady_clock::now());
+    conn().setLastActivityTime(chrono::steady_clock::now());
     db::QueryLoggingData logging_data(
         getOperationType(),
         elapsed(),
@@ -1402,13 +1400,13 @@ void FetchOperation::specializedCompleteOperation() {
         rows_received_,
         total_result_size_,
         no_index_used_,
-        use_checksum_ || conn()->getConnectionOptions().getUseChecksum(),
+        use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
         attributes_,
         readResponseAttributes(),
         getMaxThreadBlockTime(),
         getTotalThreadBlockTime(),
         was_slow_);
-    client()->logQuerySuccess(logging_data, *conn().get());
+    client().logQuerySuccess(logging_data, conn());
   } else {
     db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
     if (result_ == OperationResult::Cancelled) {
@@ -1416,7 +1414,7 @@ void FetchOperation::specializedCompleteOperation() {
     } else if (result_ == OperationResult::TimedOut) {
       reason = db::FailureReason::TIMEOUT;
     }
-    client()->logQueryFailure(
+    client().logQueryFailure(
         db::QueryLoggingData(
             getOperationType(),
             elapsed(),
@@ -1426,7 +1424,7 @@ void FetchOperation::specializedCompleteOperation() {
             rows_received_,
             total_result_size_,
             no_index_used_,
-            use_checksum_ || conn()->getConnectionOptions().getUseChecksum(),
+            use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
             attributes_,
             readResponseAttributes(),
             getMaxThreadBlockTime(),
@@ -1435,7 +1433,7 @@ void FetchOperation::specializedCompleteOperation() {
         reason,
         mysql_errno(),
         mysql_error(),
-        *conn().get());
+        conn());
   }
 
   if (result_ != OperationResult::Succeeded) {
@@ -1443,13 +1441,12 @@ void FetchOperation::specializedCompleteOperation() {
   }
   // This frees the `Operation::wait()` call. We need to free it here because
   // callback can stealConnection and we can't notify anymore.
-  conn()->notify();
+  conn().notify();
   notifyOperationCompleted(result_);
 }
 
 void FetchOperation::mustSucceed() {
-  run();
-  wait();
+  run().wait();
   if (!ok()) {
     throw db::RequiredOperationFailedException("Query failed: " + mysql_error_);
   }
@@ -1470,12 +1467,11 @@ void FetchOperation::killRunningQuery() {
    * before this client is able to send the KILL query on a separate
    * proxy->db connection which then terminates the OTHER client's query
    */
-  auto thread_id = conn()->mysqlThreadId();
-  auto host = conn()->host();
-  auto port = conn()->port();
-  auto conn_op = client()
-                     ->beginConnection(conn()->getKey())
-                     ->setConnectionOptions(conn()->getConnectionOptions());
+  auto thread_id = conn().mysqlThreadId();
+  auto host = conn().host();
+  auto port = conn().port();
+  auto conn_op = client().beginConnection(conn().getKey());
+  conn_op->setConnectionOptions(conn().getConnectionOptions());
   conn_op->setCallback([thread_id, host, port](ConnectOperation& conn_op) {
     if (conn_op.ok()) {
       auto op = Connection::beginQuery(
@@ -1499,12 +1495,12 @@ void FetchOperation::killRunningQuery() {
 }
 
 MultiQueryStreamOperation::MultiQueryStreamOperation(
-    ConnectionProxy&& conn,
+    std::unique_ptr<ConnectionProxy> conn,
     MultiQuery&& multi_query)
     : FetchOperation(std::move(conn), std::move(multi_query)) {}
 
 MultiQueryStreamOperation::MultiQueryStreamOperation(
-    ConnectionProxy&& conn,
+    std::unique_ptr<ConnectionProxy> conn,
     std::vector<Query>&& queries)
     : FetchOperation(std::move(conn), std::move(queries)) {}
 
@@ -1513,7 +1509,7 @@ void MultiQueryStreamOperation::invokeCallback(StreamState reason) {
   // call the appropriate overaload of 'operator()' depending on the type
   // of callback stored in stream_callback_ i.e. either MultiQueryStreamHandler
   // or MultiQueryStreamOperation::Callback.
-  boost::apply_visitor(CallbackVisitor(this, reason), stream_callback_);
+  boost::apply_visitor(CallbackVisitor(*this, reason), stream_callback_);
 }
 
 void MultiQueryStreamOperation::notifyInitQuery() {
@@ -1546,7 +1542,9 @@ void MultiQueryStreamOperation::notifyOperationCompleted(
   stream_callback_ = nullptr;
 }
 
-QueryOperation::QueryOperation(ConnectionProxy&& conn, Query&& query)
+QueryOperation::QueryOperation(
+    std::unique_ptr<ConnectionProxy> conn,
+    Query&& query)
     : FetchOperation(std::move(conn), std::vector<Query>{std::move(query)}),
       query_result_(std::make_unique<QueryResult>(0)) {}
 
@@ -1617,7 +1615,7 @@ void QueryOperation::notifyOperationCompleted(OperationResult result) {
 }
 
 MultiQueryOperation::MultiQueryOperation(
-    ConnectionProxy&& conn,
+    std::unique_ptr<ConnectionProxy> conn,
     std::vector<Query>&& queries)
     : FetchOperation(std::move(conn), std::move(queries)),
       current_query_result_(std::make_unique<QueryResult>(0)) {}
@@ -1713,28 +1711,28 @@ void SpecialOperation::mustSucceed() {
 }
 
 void SpecialOperation::specializedCompleteOperation() {
-  conn()->notify();
+  conn().notify();
 }
 
 void SpecialOperation::specializedTimeoutTriggered() {
   completeOperation(OperationResult::TimedOut);
 }
 
-SpecialOperation* SpecialOperation::specializedRun() {
-  changeHandlerFD(folly::NetworkSocket::fromFd(conn()->getSocketDescriptor()));
+SpecialOperation& SpecialOperation::specializedRun() {
+  changeHandlerFD(folly::NetworkSocket::fromFd(conn().getSocketDescriptor()));
   socketActionable();
-  return this;
+  return *this;
 }
 
 MysqlHandler::Status ResetOperation::callMysqlHandler() {
-  auto& handler = conn()->client()->getMysqlHandler();
-  return handler.resetConn(conn()->getInternalConnection());
+  auto& handler = conn().client().getMysqlHandler();
+  return handler.resetConn(conn().getInternalConnection());
 }
 
 MysqlHandler::Status ChangeUserOperation::callMysqlHandler() {
-  auto& handler = conn()->client()->getMysqlHandler();
+  auto& handler = conn().client().getMysqlHandler();
   return handler.changeUser(
-      conn()->getInternalConnection(), user_, password_, database_);
+      conn().getInternalConnection(), user_, password_, database_);
 }
 
 folly::StringPiece Operation::resultString() const {
@@ -1855,7 +1853,7 @@ folly::StringPiece FetchOperation::toString(FetchAction action) {
 
 std::unique_ptr<Connection> blockingConnectHelper(
     std::shared_ptr<ConnectOperation> conn_op) {
-  conn_op->run()->wait();
+  conn_op->run().wait();
   if (!conn_op->ok()) {
     throw MysqlException(
         conn_op->result(),
@@ -1865,45 +1863,31 @@ std::unique_ptr<Connection> blockingConnectHelper(
         conn_op->elapsed());
   }
 
-  return std::move(conn_op->releaseConnection());
+  return conn_op->releaseConnection();
 }
-
-Operation::OwnedConnection::OwnedConnection() {}
 
 Operation::OwnedConnection::OwnedConnection(std::unique_ptr<Connection>&& conn)
-    : conn_(std::move(conn)) {}
-
-Connection* Operation::OwnedConnection::get() {
-  return conn_.get();
+    : conn_(std::move(conn)) {
+  CHECK_THROW(conn_, db::InvalidConnectionException);
 }
 
-std::unique_ptr<Connection>&& Operation::OwnedConnection::releaseConnection() {
+Connection& Operation::OwnedConnection::get() {
+  return *conn_.get();
+}
+
+const Connection& Operation::OwnedConnection::get() const {
+  return *conn_.get();
+}
+
+std::unique_ptr<Connection> Operation::OwnedConnection::releaseConnection() {
   return std::move(conn_);
-}
-
-Operation::ConnectionProxy::ConnectionProxy(Operation::OwnedConnection&& conn)
-    : ownedConn_(std::move(conn)) {}
-
-Operation::ConnectionProxy::ConnectionProxy(
-    Operation::ReferencedConnection&& conn)
-    : referencedConn_(std::move(conn)) {}
-
-Connection* Operation::ConnectionProxy::get() {
-  return ownedConn_.get() ? ownedConn_.get() : referencedConn_.get();
-}
-
-std::unique_ptr<Connection>&& Operation::ConnectionProxy::releaseConnection() {
-  if (ownedConn_.get() != nullptr) {
-    return ownedConn_.releaseConnection();
-  }
-  throw std::runtime_error("Releasing connection from referenced conn");
 }
 
 std::string Operation::threadOverloadMessage(double cbDelayUs) const {
   return fmt::format(
       "(CLIENT_OVERLOADED: cb delay {}ms, {} active conns)",
       std::lround(cbDelayUs / 1000.0),
-      client()->numStartedAndOpenConnections());
+      client().numStartedAndOpenConnections());
 }
 
 std::string Operation::timeoutMessage(std::chrono::milliseconds delta) const {

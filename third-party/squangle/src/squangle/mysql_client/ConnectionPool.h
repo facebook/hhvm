@@ -585,7 +585,7 @@ class ConnectionPool
 
     // For async - run in mysql thread; for sync - run in current thread
     runInCorrectThread([changeUserOp = std::move(changeUserOp)] {
-      changeUserOp->connection()->client()->addOperation(changeUserOp);
+      changeUserOp->connection().client().addOperation(changeUserOp);
       changeUserOp->run();
     });
   }
@@ -672,7 +672,7 @@ class ConnectionPool
 
     // For async - run in mysql thread; for sync - run in current thread
     runInCorrectThread([resetOp = std::move(resetOp)]() {
-      resetOp->connection()->client()->addOperation(resetOp);
+      resetOp->connection().client().addOperation(resetOp);
       resetOp->run();
     });
   }
@@ -828,7 +828,7 @@ class ConnectPoolOperation : public ConnectOperation {
   }
 
  protected:
-  ConnectPoolOperation<Client>* specializedRun() override;
+  ConnectPoolOperation<Client>& specializedRun() override;
 
   void specializedTimeoutTriggered() override {
     if (auto locked_pool = pool_.lock(); locked_pool) {
@@ -892,11 +892,14 @@ class ConnectPoolOperation : public ConnectOperation {
   void specializedRunImpl() {
     // Initialize all we need from our tevent handler
     if (attempts_made_ == 0) {
-      conn()->initialize(false);
+      conn().initialize(false);
     }
 
-    if (conn_options_.getSSLOptionsProviderPtr() && connection_context_) {
-      connection_context_->isSslConnection = true;
+    if (connection_context_) {
+      conn_options_.withPossibleSSLOptionsProvider(
+          [&](const auto& /*provider*/) {
+            connection_context_->isSslConnection = true;
+          });
     }
 
     // Set timeout for waiting for connection
@@ -948,9 +951,9 @@ class ConnectPoolOperation : public ConnectOperation {
     changeHandlerFD(
         folly::NetworkSocket::fromFd(mysql_conn->getSocketDescriptor()));
 
-    conn()->setConnectionHolder(std::move(mysql_conn));
-    conn()->setConnectionOptions(getConnectionOptions());
-    conn()->setConnectionDyingCallback(
+    conn().setConnectionHolder(std::move(mysql_conn));
+    conn().setConnectionOptions(getConnectionOptions());
+    conn().setConnectionDyingCallback(
         [pool = pool_](std::unique_ptr<ConnectionHolder> mysql_conn) {
           auto shared_pool = pool.lock();
           if (shared_pool) {
@@ -973,7 +976,7 @@ class ConnectPoolOperation : public ConnectOperation {
   }
 
   void socketActionable() override {
-    DCHECK(client()->getEventBase()->isInEventBaseThread());
+    DCHECK(client().getEventBase()->isInEventBaseThread());
     LOG(DFATAL) << "Should not be called";
   }
 

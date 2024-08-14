@@ -82,10 +82,14 @@ class ChangeUserOperation;
 class Operation;
 class Connection;
 class ConnectionKey;
+class ConnectionHolder;
 class ConnectionOptions;
 class SSLOptionsProviderBase;
 class SyncConnection;
 class MultiQueryStreamHandler;
+
+using ConnectionDyingCallback =
+    std::function<void(std::unique_ptr<ConnectionHolder>)>;
 
 enum class QueryCallbackReason;
 
@@ -236,8 +240,11 @@ class ConnectionOptions {
     return ssl_options_provider_;
   }
 
-  SSLOptionsProviderBase* getSSLOptionsProviderPtr() const {
-    return ssl_options_provider_.get();
+  template <typename Func>
+  void withPossibleSSLOptionsProvider(Func&& func) {
+    if (ssl_options_provider_) {
+      func(*ssl_options_provider_);
+    }
   }
 
   // Provide a Connection Attribute to be passed in the connection handshake
@@ -422,15 +429,15 @@ class Operation : public folly::EventHandler,
   // No public constructor.
   virtual ~Operation() override;
 
-  Operation* run();
+  Operation& run();
 
   // Set a timeout; otherwise FLAGS_async_mysql_timeout_micros is
   // used.
-  Operation* setTimeout(Duration timeout) {
+  Operation& setTimeout(Duration timeout) {
     CHECK_THROW(
         state_ == OperationState::Unstarted, db::OperationStateException);
     timeout_ = timeout;
-    return this;
+    return *this;
   }
 
   Duration getTimeout() {
@@ -471,7 +478,7 @@ class Operation : public folly::EventHandler,
   void cancel();
 
   // Wait for the Operation to complete.
-  void wait();
+  void wait() const;
 
   // Wait for an operation to complete.  Throw a
   // RequiredOperationFailedException if it fails. Mainly for testing.
@@ -505,46 +512,29 @@ class Operation : public folly::EventHandler,
 
   static std::string connectStageString(connect_stage stage);
 
-  // An Operation can have a folly::dynamic associated with it.  This
-  // can represent anything the caller wants to track and is primarily
-  // useful in the callback.  Typically this would be a string or
-  // integer.  Note, also, such information can be stored inside the
-  // callback itself (via a lambda).
-  Operation* setUserData(folly::dynamic val) {
-    user_data_.assign(std::move(val));
-    return this;
-  }
-
-  const folly::dynamic& userData() const {
-    return *user_data_;
-  }
-  folly::dynamic&& stealUserData() {
-    return std::move(*user_data_);
-  }
-
-  Operation* setAttributes(const AttributeMap& attributes) {
+  Operation& setAttributes(const AttributeMap& attributes) {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
     for (const auto& [key, value] : attributes) {
       attributes_[key] = value;
     }
-    return this;
+    return *this;
   }
 
-  Operation* setAttributes(AttributeMap&& attributes) {
+  Operation& setAttributes(AttributeMap&& attributes) {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
     for (auto& [key, value] : attributes) {
       attributes_[key] = std::move(value);
     }
-    return this;
+    return *this;
   }
 
-  Operation* setAttribute(const std::string& key, const std::string& value) {
+  Operation& setAttribute(const std::string& key, const std::string& value) {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
     attributes_[key] = value;
-    return this;
+    return *this;
   }
 
   const AttributeMap& getAttributes() const {
@@ -553,12 +543,12 @@ class Operation : public folly::EventHandler,
 
   // Connections are transferred across operations.  At any one time,
   // there is one unique owner of the connection.
-  std::unique_ptr<Connection>&& releaseConnection();
-  const Connection* connection() const {
-    return conn_proxy_.get();
+  std::unique_ptr<Connection> releaseConnection();
+  const Connection& connection() const {
+    return conn_proxy_->get();
   }
-  Connection* connection() {
-    return conn_proxy_.get();
+  Connection& connection() {
+    return conn_proxy_->get();
   }
 
   // Various accessors for our Operation's start, end, and total elapsed time.
@@ -610,7 +600,7 @@ class Operation : public folly::EventHandler,
   // Retrieve the shared pointer that holds this instance.
   std::shared_ptr<Operation> getSharedPointer();
 
-  MysqlClientBase* client() const;
+  MysqlClientBase& client() const;
 
   void setAsyncClientError(unsigned int mysql_errno, folly::StringPiece msg);
 
@@ -634,13 +624,16 @@ class Operation : public folly::EventHandler,
   static constexpr double kCallbackDelayStallThresholdUs = 50 * 1000;
 
   class ConnectionProxy;
-  explicit Operation(ConnectionProxy&& conn);
+  explicit Operation(std::unique_ptr<ConnectionProxy> conn);
 
-  ConnectionProxy& conn() {
-    return conn_proxy_;
+  // These are duplicates of `connection()` below, but we don't want to have to
+  // change all the callsites at this point so just point them to the other
+  // versions.
+  Connection& conn() {
+    return connection();
   }
-  const ConnectionProxy& conn() const {
-    return conn_proxy_;
+  const Connection& conn() const {
+    return connection();
   }
 
   // Save any mysql errors that occurred (since we may hand off the
@@ -673,68 +666,46 @@ class Operation : public folly::EventHandler,
   // timeouts).
   void completeOperation(OperationResult result);
   void completeOperationInner(OperationResult result);
-  virtual Operation* specializedRun() = 0;
+  virtual Operation& specializedRun() = 0;
   virtual void specializedTimeoutTriggered() = 0;
   virtual void specializedCompleteOperation() = 0;
 
-  class OwnedConnection {
+  class ConnectionProxy {
    public:
-    OwnedConnection();
+    virtual ~ConnectionProxy() = default;
+
+    virtual Connection& get() = 0;
+    virtual const Connection& get() const = 0;
+    virtual std::unique_ptr<Connection> releaseConnection() {
+      return nullptr;
+    }
+  };
+
+  class OwnedConnection : public ConnectionProxy {
+   public:
     explicit OwnedConnection(std::unique_ptr<Connection>&& conn);
-    Connection* get();
-    std::unique_ptr<Connection>&& releaseConnection();
+
+    Connection& get() override;
+    const Connection& get() const override;
+    std::unique_ptr<Connection> releaseConnection() override;
 
    private:
     std::unique_ptr<Connection> conn_;
   };
 
-  class ReferencedConnection {
+  class ReferencedConnection : public ConnectionProxy {
    public:
-    ReferencedConnection() : conn_(nullptr) {}
-    explicit ReferencedConnection(Connection* conn) : conn_(conn) {}
-    Connection* get() {
+    explicit ReferencedConnection(Connection& conn) : conn_(conn) {}
+
+    Connection& get() override {
+      return conn_;
+    }
+    const Connection& get() const override {
       return conn_;
     }
 
    private:
-    Connection* conn_;
-  };
-
-  // Base class for a wrapper around the 2 types of connection
-  // pointers we accept in the Operation:
-  // - OwnedConnection: will hold an unique_ptr to the Connection
-  //   for the async calls of the API, so the ownership is clear;
-  // - ReferencedConnection: allows synchronous calls without moving unique_ptrs
-  //   to the Operation;
-  class ConnectionProxy {
-   public:
-    explicit ConnectionProxy(OwnedConnection&& conn);
-    explicit ConnectionProxy(ReferencedConnection&& conn);
-
-    Connection* get();
-
-    std::unique_ptr<Connection>&& releaseConnection();
-
-    const Connection* get() const {
-      return const_cast<ConnectionProxy*>(this)->get();
-    }
-
-    Connection* operator->() {
-      return get();
-    }
-    const Connection* operator->() const {
-      return get();
-    }
-
-    ConnectionProxy(ConnectionProxy&&) = default;
-    ConnectionProxy& operator=(ConnectionProxy&&) = default;
-
-    ConnectionProxy(ConnectionProxy const&) = delete;
-    ConnectionProxy& operator=(ConnectionProxy const&) = delete;
-
-   private:
-    OwnedConnection ownedConn_;
-    ReferencedConnection referencedConn_;
+    Connection& conn_;
   };
 
   bool isInEventBaseThread() const;
@@ -759,7 +730,7 @@ class Operation : public folly::EventHandler,
 
   // Our Connection object.  Created by ConnectOperation and moved
   // into QueryOperations.
-  ConnectionProxy conn_proxy_;
+  std::unique_ptr<ConnectionProxy> conn_proxy_;
 
   // Errors that may have occurred.
   unsigned int mysql_errno_;
@@ -800,11 +771,10 @@ class Operation : public folly::EventHandler,
 
   folly::atomic_shared_ptr<folly::RequestContext> request_context_;
 
-  folly::Optional<folly::dynamic> user_data_;
   ObserverCallback observer_callback_;
   std::shared_ptr<db::ConnectionContextBase> connection_context_;
 
-  MysqlClientBase* mysql_client_;
+  MysqlClientBase& mysql_client_;
 
   // The cancel() and run() commands both check the current value of state_ and
   // then change it.  The synchronized state on `cancel_on_run_` is used to
@@ -867,26 +837,26 @@ class ConnectOperation : public Operation {
     return conn_key_;
   }
 
-  ConnectOperation* setSSLOptionsProviderBase(
+  ConnectOperation& setSSLOptionsProviderBase(
       std::unique_ptr<SSLOptionsProviderBase> ssl_options_provider);
-  ConnectOperation* setSSLOptionsProvider(
+  ConnectOperation& setSSLOptionsProvider(
       std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider);
 
   // Default timeout for queries created by the connection this
   // operation will create.
-  ConnectOperation* setDefaultQueryTimeout(Duration t);
-  ConnectOperation* setConnectionContext(
+  ConnectOperation& setDefaultQueryTimeout(Duration t);
+  ConnectOperation& setConnectionContext(
       std::shared_ptr<db::ConnectionContextBase> e) {
     CHECK_THROW(
         state_ == OperationState::Unstarted, db::OperationStateException);
     connection_context_ = std::move(e);
-    return this;
+    return *this;
   }
-  ConnectOperation* setSniServerName(const std::string& sni_servername);
-  ConnectOperation* enableResetConnBeforeClose();
-  ConnectOperation* enableDelayedResetConn();
-  ConnectOperation* enableChangeUser();
-  ConnectOperation* setCertValidationCallback(
+  ConnectOperation& setSniServerName(const std::string& sni_servername);
+  ConnectOperation& enableResetConnBeforeClose();
+  ConnectOperation& enableDelayedResetConn();
+  ConnectOperation& enableChangeUser();
+  ConnectOperation& setCertValidationCallback(
       CertValidatorCallback callback,
       const void* context = nullptr,
       bool opPtrAsContext = false);
@@ -936,37 +906,32 @@ class ConnectOperation : public Operation {
   // Overriding to narrow the return type
   // Each connect attempt will take at most this timeout to retry to acquire
   // the connection.
-  ConnectOperation* setTimeout(Duration timeout);
+  ConnectOperation& setTimeout(Duration timeout);
 
   // This timeout allows for clients to fail fast when tcp handshake
   // latency is high . This method allows to override the tcp timeout
   // connection options. These timeouts can either be set directly or by
   // passing in connection options.
-  ConnectOperation* setTcpTimeout(Duration timeout);
+  ConnectOperation& setTcpTimeout(Duration timeout);
 
   const folly::Optional<Duration>& getTcpTimeout() const {
     return conn_options_.getConnectTcpTimeout();
-  }
-
-  ConnectOperation* setUserData(folly::dynamic val) {
-    Operation::setUserData(std::move(val));
-    return this;
   }
 
   // Sets the total timeout that the connect operation will use.
   // Each attempt will take at most `setTimeout`. Use this in case
   // you have strong timeout restrictions but still want the connection to
   // retry.
-  ConnectOperation* setTotalTimeout(Duration total_timeout);
+  ConnectOperation& setTotalTimeout(Duration total_timeout);
 
   // Sets the number of attempts this operation will try to acquire a mysql
   // connection.
-  ConnectOperation* setConnectAttempts(uint32_t max_attempts);
+  ConnectOperation& setConnectAttempts(uint32_t max_attempts);
 
   // Sets the DSCP (QoS) value associated with this connection
   //
   // See Also ConnectionOptions::setDscp
-  ConnectOperation* setDscp(uint8_t dscp);
+  ConnectOperation& setDscp(uint8_t dscp);
 
   folly::Optional<uint8_t> getDscp() const {
     return conn_options_.getDscp();
@@ -982,23 +947,23 @@ class ConnectOperation : public Operation {
 
   // Set if we should open a new connection to kill a timed out query
   // Should not be used when connecting through a proxy
-  ConnectOperation* setKillOnQueryTimeout(bool killOnQueryTimeout);
+  ConnectOperation& setKillOnQueryTimeout(bool killOnQueryTimeout);
 
   bool getKillOnQueryTimeout() const {
     return killOnQueryTimeout_;
   }
 
-  ConnectOperation* setCompression(
+  ConnectOperation& setCompression(
       folly::Optional<CompressionAlgorithm> compression_lib) {
     conn_options_.setCompression(std::move(compression_lib));
-    return this;
+    return *this;
   }
 
   const folly::Optional<CompressionAlgorithm>& getCompression() const {
     return conn_options_.getCompression();
   }
 
-  ConnectOperation* setConnectionOptions(const ConnectionOptions& conn_options);
+  ConnectOperation& setConnectionOptions(const ConnectionOptions& conn_options);
 
   static constexpr Duration kMinimumViableConnectTimeout =
       std::chrono::microseconds(50);
@@ -1015,7 +980,7 @@ class ConnectOperation : public Operation {
   virtual void attemptFailed(OperationResult result);
   virtual void attemptSucceeded(OperationResult result);
 
-  ConnectOperation* specializedRun() override;
+  ConnectOperation& specializedRun() override;
   void socketActionable() override;
   void specializedTimeoutTriggered() override;
   void specializedCompleteOperation() override;
@@ -1099,7 +1064,7 @@ class FetchOperation : public Operation {
     return total_result_size_;
   }
 
-  FetchOperation* setUseChecksum(bool useChecksum) noexcept;
+  FetchOperation& setUseChecksum(bool useChecksum) noexcept;
 
   // This class encapsulates the operations and access to the MySQL ResultSet.
   // When the consumer receives a notification for RowsFetched, it should
@@ -1185,10 +1150,14 @@ class FetchOperation : public Operation {
  protected:
   MultiQuery queries_;
 
-  FetchOperation* specializedRun() override;
+  FetchOperation& specializedRun() override;
 
-  FetchOperation(ConnectionProxy&& conn, std::vector<Query>&& queries);
-  FetchOperation(ConnectionProxy&& conn, MultiQuery&& multi_query);
+  FetchOperation(
+      std::unique_ptr<ConnectionProxy> conn,
+      std::vector<Query>&& queries);
+  FetchOperation(
+      std::unique_ptr<ConnectionProxy> conn,
+      MultiQuery&& multi_query);
 
   enum class FetchAction {
     StartQuery,
@@ -1277,8 +1246,7 @@ class MultiQueryStreamOperation : public FetchOperation {
  public:
   ~MultiQueryStreamOperation() override = default;
 
-  typedef std::function<void(FetchOperation*, StreamState)> Callback;
-
+  using Callback = std::function<void(FetchOperation&, StreamState)>;
   using StreamCallback = boost::variant<MultiQueryStreamHandler*, Callback>;
 
   void notifyInitQuery() override;
@@ -1288,17 +1256,17 @@ class MultiQueryStreamOperation : public FetchOperation {
   void notifyOperationCompleted(OperationResult result) override;
 
   // Overriding to narrow the return type
-  MultiQueryStreamOperation* setTimeout(Duration timeout) {
+  MultiQueryStreamOperation& setTimeout(Duration timeout) {
     Operation::setTimeout(timeout);
-    return this;
+    return *this;
   }
 
   MultiQueryStreamOperation(
-      ConnectionProxy&& connection,
+      std::unique_ptr<ConnectionProxy> connection,
       MultiQuery&& multi_query);
 
   MultiQueryStreamOperation(
-      ConnectionProxy&& connection,
+      std::unique_ptr<ConnectionProxy> connection,
       std::vector<Query>&& queries);
 
   db::OperationType getOperationType() const override {
@@ -1318,25 +1286,23 @@ class MultiQueryStreamOperation : public FetchOperation {
   // Vistor to invoke the right callback depending on the type stored
   // in the variant 'stream_callback_'
   struct CallbackVisitor : public boost::static_visitor<> {
-    CallbackVisitor(MultiQueryStreamOperation* op, StreamState state)
+    CallbackVisitor(MultiQueryStreamOperation& op, StreamState state)
         : op_(op), state_(state) {}
 
     void operator()(MultiQueryStreamHandler* handler) const {
-      DCHECK(op_ != nullptr);
       if (handler != nullptr) {
         handler->streamCallback(op_, state_);
       }
     }
 
     void operator()(Callback cb) const {
-      DCHECK(op_ != nullptr);
       if (cb != nullptr) {
         cb(op_, state_);
       }
     }
 
    private:
-    MultiQueryStreamOperation* op_;
+    MultiQueryStreamOperation& op_;
     StreamState state_;
   };
 
@@ -1418,17 +1384,12 @@ class QueryOperation : public FetchOperation {
 
   // Don't call this; it's public strictly for Connection to be able
   // to call make_shared.
-  QueryOperation(ConnectionProxy&& connection, Query&& query);
+  QueryOperation(std::unique_ptr<ConnectionProxy> connection, Query&& query);
 
   // Overriding to narrow the return type
-  QueryOperation* setTimeout(Duration timeout) {
+  QueryOperation& setTimeout(Duration timeout) {
     Operation::setTimeout(timeout);
-    return this;
-  }
-
-  QueryOperation* setUserData(folly::dynamic val) {
-    Operation::setUserData(std::move(val));
-    return this;
+    return *this;
   }
 
   db::OperationType getOperationType() const override {
@@ -1511,18 +1472,13 @@ class MultiQueryOperation : public FetchOperation {
   // Don't call this; it's public strictly for Connection to be able
   // to call make_shared.
   MultiQueryOperation(
-      ConnectionProxy&& connection,
+      std::unique_ptr<ConnectionProxy> connection,
       std::vector<Query>&& queries);
 
   // Overriding to narrow the return type
-  MultiQueryOperation* setTimeout(Duration timeout) {
+  MultiQueryOperation& setTimeout(Duration timeout) {
     Operation::setTimeout(timeout);
-    return this;
-  }
-
-  MultiQueryOperation* setUserData(folly::dynamic val) {
-    Operation::setUserData(std::move(val));
-    return this;
+    return *this;
   }
 
   db::OperationType getOperationType() const override {
@@ -1557,7 +1513,7 @@ class MultiQueryOperation : public FetchOperation {
 // COM_CHANGE_USER, etc.
 class SpecialOperation : public Operation {
  public:
-  explicit SpecialOperation(ConnectionProxy&& conn)
+  explicit SpecialOperation(std::unique_ptr<ConnectionProxy> conn)
       : Operation(std::move(conn)) {}
   void setCallback(SpecialOperationCallback callback) {
     callback_ = std::move(callback);
@@ -1567,7 +1523,7 @@ class SpecialOperation : public Operation {
   void socketActionable() override;
   void specializedCompleteOperation() override;
   void specializedTimeoutTriggered() override;
-  SpecialOperation* specializedRun() override;
+  SpecialOperation& specializedRun() override;
   void mustSucceed() override;
   SpecialOperationCallback callback_{nullptr};
   friend class Connection;
@@ -1581,7 +1537,7 @@ class SpecialOperation : public Operation {
 // connection back to connection pool
 class ResetOperation : public SpecialOperation {
  public:
-  explicit ResetOperation(ConnectionProxy&& conn)
+  explicit ResetOperation(std::unique_ptr<ConnectionProxy> conn)
       : SpecialOperation(std::move(conn)) {}
 
  private:
@@ -1598,7 +1554,7 @@ class ResetOperation : public SpecialOperation {
 class ChangeUserOperation : public SpecialOperation {
  public:
   explicit ChangeUserOperation(
-      ConnectionProxy&& conn,
+      std::unique_ptr<ConnectionProxy> conn,
       const std::string& user,
       const std::string& password,
       const std::string& database)

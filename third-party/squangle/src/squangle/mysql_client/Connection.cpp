@@ -24,7 +24,7 @@ void Connection::initMysqlOnly() {
       mysql_client_,
       std::make_unique<InternalMysqlConnection>(mysql_client_),
       conn_key_);
-  if (!mysql_client_->supportsLocalFiles()) {
+  if (!mysql_client_.supportsLocalFiles()) {
     mysql_connection_->disableLocalFiles();
   }
 
@@ -55,9 +55,9 @@ std::shared_ptr<ResetOperation> Connection::resetConn(
   // operation still exists in operations_to_remove_ queue; in that case,
   // cleanupCompletedOperations() hits FATAL error.
   auto resetOperationPtr = std::make_shared<ResetOperation>(
-      Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))));
+      std::make_unique<Operation::OwnedConnection>(std::move(conn)));
   Duration timeout =
-      resetOperationPtr->connection()->conn_options_.getQueryTimeout();
+      resetOperationPtr->connection().conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
     resetOperationPtr->setTimeout(timeout);
   }
@@ -70,12 +70,12 @@ std::shared_ptr<ChangeUserOperation> Connection::changeUser(
     const std::string& password,
     const std::string& database) {
   auto changeUserOperationPtr = std::make_shared<ChangeUserOperation>(
-      Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))),
+      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
       user,
       password,
       database);
   Duration timeout =
-      changeUserOperationPtr->connection()->conn_options_.getTimeout();
+      changeUserOperationPtr->connection().conn_options_.getTimeout();
   if (timeout.count() > 0) {
     // set its timeout longer than connection timeout to prevent change user
     // operation from hitting timeout earlier than connection timeout itself
@@ -89,7 +89,7 @@ std::shared_ptr<QueryOperation> Connection::beginQuery(
     std::unique_ptr<Connection> conn,
     Query&& query) {
   return beginAnyQuery<QueryOperation>(
-      Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))),
+      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
       std::move(query));
 }
 
@@ -99,7 +99,7 @@ std::shared_ptr<MultiQueryOperation> Connection::beginMultiQuery(
     std::vector<Query>&& queries) {
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryOperation>(
-      Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))),
+      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -116,7 +116,7 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
     std::vector<Query>&& queries) {
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryStreamOperation>(
-      Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))),
+      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -129,41 +129,41 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
 
 template <typename QueryType, typename QueryArg>
 std::shared_ptr<QueryType> Connection::beginAnyQuery(
-    Operation::ConnectionProxy&& conn_proxy,
+    std::unique_ptr<Operation::ConnectionProxy> conn_proxy,
     QueryArg&& query) {
   CHECK_THROW(conn_proxy.get(), db::InvalidConnectionException);
-  CHECK_THROW(conn_proxy.get()->ok(), db::InvalidConnectionException);
-  conn_proxy.get()->checkOperationInProgress();
+  CHECK_THROW(conn_proxy->get().ok(), db::InvalidConnectionException);
+  conn_proxy->get().checkOperationInProgress();
   auto ret = std::make_shared<QueryType>(
       std::move(conn_proxy), std::forward<QueryArg>(query));
-  Duration timeout = ret->connection()->conn_options_.getQueryTimeout();
+  Duration timeout = ret->connection().conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
     ret->setTimeout(timeout);
   }
 
-  auto* conn = ret->connection();
-  conn->mysql_client_->addOperation(ret);
-  ret->setPreOperationCallback([conn](Operation& op) {
-    if (conn->callbacks_.pre_operation_callback_) {
-      conn->callbacks_.pre_operation_callback_(op);
+  auto& conn = ret->connection();
+  conn.mysql_client_.addOperation(ret);
+  ret->setPreOperationCallback([&](Operation& op) {
+    if (conn.callbacks_.pre_operation_callback_) {
+      conn.callbacks_.pre_operation_callback_(op);
     }
   });
-  ret->setPostOperationCallback([conn](Operation& op) {
-    if (conn->callbacks_.post_operation_callback_) {
-      conn->callbacks_.post_operation_callback_(op);
+  ret->setPostOperationCallback([&](Operation& op) {
+    if (conn.callbacks_.post_operation_callback_) {
+      conn.callbacks_.post_operation_callback_(op);
     }
   });
   auto opType = ret->getOperationType();
   if (opType == db::OperationType::Query ||
       opType == db::OperationType::MultiQuery) {
-    ret->setPreQueryCallback([conn](FetchOperation& op) {
-      return conn->callbacks_.pre_query_callback_
-          ? conn->callbacks_.pre_query_callback_(op)
+    ret->setPreQueryCallback([&](FetchOperation& op) {
+      return conn.callbacks_.pre_query_callback_
+          ? conn.callbacks_.pre_query_callback_(op)
           : folly::makeSemiFuture(folly::unit);
     });
-    ret->setPostQueryCallback([conn](AsyncPostQueryResult&& result) {
-      return conn->callbacks_.post_query_callback_
-          ? conn->callbacks_.post_query_callback_(std::move(result))
+    ret->setPostQueryCallback([&](AsyncPostQueryResult&& result) {
+      return conn.callbacks_.post_query_callback_
+          ? conn.callbacks_.post_query_callback_(std::move(result))
           : folly::makeSemiFuture(std::move(result));
     });
   }
@@ -246,7 +246,7 @@ DbQueryResult Connection::internalQuery(
     QueryCallback&& cb,
     QueryOptions&& options) {
   auto op = beginAnyQuery<QueryOperation>(
-      Operation::ConnectionProxy(Operation::ReferencedConnection(this)),
+      std::make_unique<Operation::ReferencedConnection>(*this),
       std::move(query));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -264,7 +264,7 @@ DbQueryResult Connection::internalQuery(
   if (op->callbacks_.pre_query_callback_) {
     op->callbacks_.pre_query_callback_(*op).get();
   }
-  op->run()->wait();
+  op->run().wait();
 
   if (!op->ok()) {
     throw QueryException(
@@ -281,7 +281,7 @@ DbQueryResult Connection::internalQuery(
       op->resultSize(),
       nullptr,
       op->result(),
-      op->connection()->getKey(),
+      op->connection().getKey(),
       op->elapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the
@@ -365,7 +365,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
   auto op = beginAnyQuery<MultiQueryOperation>(
-      Operation::ConnectionProxy(Operation::ReferencedConnection(this)),
+      std::make_unique<Operation::ReferencedConnection>(*this),
       std::move(queries));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -381,7 +381,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
   if (op->callbacks_.pre_query_callback_) {
     op->callbacks_.pre_query_callback_(*op).get();
   }
-  op->run()->wait();
+  op->run().wait();
 
   if (!op->ok()) {
     throw QueryException(
@@ -399,7 +399,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
       op->resultSize(),
       nullptr,
       op->result(),
-      op->connection()->getKey(),
+      op->connection().getKey(),
       op->elapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the
@@ -529,7 +529,7 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   // To accomplish that, ~MultiQueryStreamHandler waits until
   // `postOperationEnded` is called.
   auto operation = beginAnyQuery<MultiQueryStreamOperation>(
-      Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))),
+      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (attributes.size() > 0) {
     operation->setAttributes(attributes);
@@ -541,18 +541,17 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
     std::unique_ptr<Connection> conn,
     MultiQuery&& multi_query,
     const AttributeMap& attributes) {
-  auto proxy =
-      Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn)));
-  auto connP = proxy.get();
-  auto ret = connP->createOperation(std::move(proxy), std::move(multi_query));
+  auto proxy = std::make_unique<Operation::OwnedConnection>(std::move(conn));
+  auto& connP = proxy->get();
+  auto ret = connP.createOperation(std::move(proxy), std::move(multi_query));
   if (attributes.size() > 0) {
     ret->setAttributes(attributes);
   }
-  Duration timeout = ret->connection()->conn_options_.getQueryTimeout();
+  Duration timeout = ret->connection().conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
     ret->setTimeout(timeout);
   }
-  ret->connection()->mysql_client_->addOperation(ret);
+  ret->connection().mysql_client_.addOperation(ret);
 
   // MultiQueryStreamHandler needs to be alive while the operation is running.
   // To accomplish that, ~MultiQueryStreamHandler waits until

@@ -137,7 +137,7 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
       const ConnectionKey& conn_key,
       std::unique_ptr<MysqlPooledHolder<AsyncMysqlClient>> mysqlConn) override {
     return std::make_unique<AsyncConnection>(
-        mysql_client_.get(), conn_key, std::move(mysqlConn));
+        *mysql_client_, conn_key, std::move(mysqlConn));
   }
 
   struct ShutdownData {

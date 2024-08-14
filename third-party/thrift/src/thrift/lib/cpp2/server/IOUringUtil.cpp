@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/server/IOUringUtil.h>
 
-#ifdef HAS_IO_URING
+#if FOLLY_HAS_LIBURING
 #include <folly/experimental/io/IoUringEventBaseLocal.h>
 #include <folly/system/HardwareConcurrency.h>
 

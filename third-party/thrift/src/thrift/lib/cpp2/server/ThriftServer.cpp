@@ -478,7 +478,7 @@ void ThriftServer::touchRequestTimestamp() noexcept {
 }
 
 void ThriftServer::configureIOUring() {
-#ifdef HAS_IO_URING
+#if FOLLY_HAS_LIBURING
   if (preferIoUring_) {
     XLOG_IF(INFO, infoLoggingEnabled_) << "Preferring io_uring";
     auto b = io_uring_util::validateExecutorSupportsIOUring(ioThreadPool_);

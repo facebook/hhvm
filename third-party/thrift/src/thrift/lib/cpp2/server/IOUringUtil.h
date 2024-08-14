@@ -22,8 +22,6 @@
 
 #if FOLLY_HAS_LIBURING
 
-#define HAS_IO_URING 1
-
 #include <folly/executors/IOThreadPoolExecutor.h>
 
 namespace apache {

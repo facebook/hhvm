@@ -7,6 +7,7 @@
  */
 
 #include <folly/Singleton.h>
+#include <squangle/mysql_client/SyncMysqlClient.h>
 
 #include "squangle/mysql_client/SyncMysqlClient.h"
 
@@ -41,7 +42,7 @@ SyncConnection::~SyncConnection() {
     // callback instead points to the original callback function, which will
     // be called after COM_RESET_CONNECTION.
 
-    auto connHolder = stealMysqlConnectionHolder(true);
+    auto connHolder = stealConnectionHolder(true);
     auto conn = std::make_unique<SyncConnection>(
         client(), getKey(), std::move(connHolder));
     conn->needToCloneConnection_ = false;
@@ -54,6 +55,34 @@ SyncConnection::~SyncConnection() {
     resetOp->connection()->client()->addOperation(resetOp);
     resetOp->run()->wait();
   }
+}
+
+MysqlHandler::Status SyncMysqlClient::SyncMysqlHandler::tryConnect(
+    const InternalConnection& conn,
+    const ConnectionOptions& opts,
+    const ConnectionKey& key,
+    int flags) {
+  auto qtmo = std::chrono::duration_cast<std::chrono::milliseconds>(
+      opts.getQueryTimeout());
+  auto ctmo =
+      std::chrono::duration_cast<std::chrono::milliseconds>(opts.getTimeout());
+
+  conn.setConnectTimeout(ctmo);
+  conn.setReadTimeout(qtmo);
+  conn.setWriteTimeout(qtmo);
+
+  const auto usingUnixSocket = !key.unixSocketPath().empty();
+
+  // When using unix socket (AF_UNIX), host/port do not matter.
+  static const std::string kEmptyString = "";
+  return conn.tryConnectBlocking(
+      usingUnixSocket ? kEmptyString : key.host(),
+      key.user(),
+      key.password(),
+      key.db_name(),
+      usingUnixSocket ? 0 : key.port(),
+      usingUnixSocket ? key.unixSocketPath() : kEmptyString,
+      flags);
 }
 
 } // namespace mysql_client

@@ -96,9 +96,6 @@ enum class StreamState;
 // Simplify some std::chrono types.
 typedef std::chrono::time_point<std::chrono::steady_clock> Timepoint;
 
-// Simple name for mysql internal connect stage enum
-typedef enum connect_stage MySqlConnectStage;
-
 // Callbacks for connecting and querying, respectively.  A
 // ConnectCallback is invoked when a connection succeeds or fails.  A
 // QueryCallback is called for each row block (see Row.h) as well as
@@ -506,7 +503,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
   static folly::StringPiece toString(QueryCallbackReason reason);
   static folly::StringPiece toString(StreamState state);
 
-  static folly::fbstring connectStageString(connect_stage stage);
+  static std::string connectStageString(connect_stage stage);
 
   // An Operation can have a folly::dynamic associated with it.  This
   // can represent anything the caller wants to track and is primarily
@@ -1064,11 +1061,6 @@ class ConnectOperation : public Operation {
   bool active_in_client_;
   ConnectTcpTimeoutHandler tcp_timeout_handler_;
 
-  // Mysql internal connect stage which handles the async tcp handshake
-  // completion between client and server
-  static constexpr MySqlConnectStage tcpCompletionStage_ =
-      MySqlConnectStage::CONNECT_STAGE_NET_COMPLETE_CONNECT;
-
   friend class AsyncMysqlClient;
   friend class MysqlClientBase;
   friend class ConnectTcpTimeoutHandler;
@@ -1116,14 +1108,17 @@ class FetchOperation : public Operation {
   // whether or not to go to next query.
   class RowStream {
    public:
-    RowStream(MYSQL_RES* mysql_query_result, MysqlHandler* handler);
+    RowStream(
+        std::unique_ptr<InternalResult> mysql_query_result,
+        std::unique_ptr<InternalRowMetadata> metadata,
+        MysqlHandler* handler);
 
     EphemeralRow consumeRow();
 
     bool hasNext();
 
     EphemeralRowFields* getEphemeralRowFields() {
-      return &row_fields_;
+      return &*row_fields_;
     }
 
     ~RowStream() = default;
@@ -1145,14 +1140,10 @@ class FetchOperation : public Operation {
     uint64_t num_rows_seen_ = 0;
     uint64_t query_result_size_ = 0;
 
-    using MysqlResultDeleter =
-        folly::static_function_deleter<MYSQL_RES, mysql_free_result>;
-    using MysqlResultUniquePtr = std::unique_ptr<MYSQL_RES, MysqlResultDeleter>;
-
     // All memory lifetime is guaranteed by FetchOperation.
-    MysqlResultUniquePtr mysql_query_result_ = nullptr;
+    std::unique_ptr<InternalResult> mysql_query_result_;
     folly::Optional<EphemeralRow> current_row_;
-    EphemeralRowFields row_fields_;
+    std::shared_ptr<EphemeralRowFields> row_fields_;
     MysqlHandler* handler_ = nullptr;
   };
 
@@ -1232,8 +1223,6 @@ class FetchOperation : public Operation {
  private:
   friend class MultiQueryStreamHandler;
   void specializedRunImpl();
-
-  int setQueryAttribute(const std::string& key, const std::string& value);
 
   void resumeImpl();
   // Checks if the current thread has access to stream, or result data.

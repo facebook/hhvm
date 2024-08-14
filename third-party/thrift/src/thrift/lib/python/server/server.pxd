@@ -18,6 +18,7 @@ from folly.iobuf cimport cIOBuf
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.py3.server cimport cAsyncProcessorFactory, AsyncProcessorFactory, ThriftServer as ThriftServer_py3
 from thrift.python.exceptions cimport cException
+from libcpp cimport bool as cbool
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
     cpdef enum class RpcKind:
@@ -34,6 +35,9 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namesp
     cdef cppclass cPythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
         cPythonAsyncProcessorFactory()
 
+cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::thrift::python::detail":
+    cdef cbool cAreResourcePoolsEnabledForPython "::thrift::python::detail::areResourcePoolsEnabledForPython"()
+
 cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift":
     cdef cppclass SerializedRequest "::apache::thrift::SerializedRequest":
         unique_ptr[cIOBuf] buffer
@@ -41,6 +45,8 @@ cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift"
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     cdef dict funcMap
     cdef list lifecycleFuncs
+    cdef cbool useResourcePools
+
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server)
 

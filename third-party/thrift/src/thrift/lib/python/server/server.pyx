@@ -347,6 +347,9 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
         cdef PythonAsyncProcessorFactory inst = PythonAsyncProcessorFactory.__new__(PythonAsyncProcessorFactory)
         inst.funcMap = funcMap
         inst.lifecycleFuncs = lifecycleFuncs
+        # Store the value of the enable_resource_pools_for_python Trift Flag
+        # so that it is visible in thriftDbg. Subsequent changes will use this value.
+        inst.useResourcePools = cAreResourcePoolsEnabledForPython()
         inst._cpp_obj = static_pointer_cast[cAsyncProcessorFactory, cPythonAsyncProcessorFactory](
             make_shared[cPythonAsyncProcessorFactory](<PyObject*>server, cmove(funcs), cmove(lifecycle), get_executor(), <bytes>server.service_name()))
         return inst

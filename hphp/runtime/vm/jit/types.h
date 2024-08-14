@@ -116,6 +116,24 @@ inline Optional<TransKind> nameToTransKind(const std::string& str) {
   return std::nullopt;
 }
 
+inline bool isLive(TransKind k) {
+  switch (k) {
+    case TransKind::Live:
+    case TransKind::LivePrologue:
+      return true;
+
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
+}
+
 inline bool isProfiling(TransKind k) {
   switch (k) {
     case TransKind::Profile:

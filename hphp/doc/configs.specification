@@ -428,6 +428,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - double Jit.PGOVasmBlockCountersHotWeightMultiplier = 0, UNKNOWN
 - bool Jit.LayoutSeparateZeroWeightBlocks = false, UNKNOWN
 - bool Jit.LayoutPrologueSplitHotCold, UNKNOWN
+- bool Jit.LayoutLiveSplitHotCold = true, UNKNOWN
 - bool Jit.LayoutProfileSplitHotCold = true, UNKNOWN
 - uint64_t Jit.LayoutMinHotThreshold = 0, UNKNOWN
 - uint64_t Jit.LayoutMinColdThreshold = 0, UNKNOWN

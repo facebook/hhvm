@@ -16,12 +16,15 @@
 
 #pragma once
 
-#if __linux__ && !FOLLY_MOBILE && __has_include(<liburing.h>)
+#if __has_include(<folly/experimental/io/IoUringBackend.h>)
+#include <folly/experimental/io/IoUringBackend.h>
+#endif
+
+#if FOLLY_HAS_LIBURING
 
 #define HAS_IO_URING 1
 
 #include <folly/executors/IOThreadPoolExecutor.h>
-#include <folly/experimental/io/IoUringBackend.h>
 
 namespace apache {
 namespace thrift {

@@ -6,10 +6,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/experimental/crypto/exchange/OQSKeyExchange.h>
+#include <fizz/backend/liboqs/OQSKeyExchange.h>
 #include <folly/portability/GTest.h>
 
 using namespace fizz;
+using namespace fizz::liboqs;
 
 namespace fizz::test {
 TEST(OQSKeyExchangeTest, InvalidKeyGenerationTest) {

@@ -8,11 +8,15 @@
 
 #pragma once
 
+#include <fizz/fizz-config.h>
+
+#if FIZZ_HAVE_OQS
 #include <fizz/crypto/exchange/KeyExchange.h>
 #include <folly/Memory.h>
 #include <oqs/kem.h>
 
-namespace fizz {
+namespace fizz::liboqs {
+
 class OQSKeyExchange : public KeyExchange {
  public:
   static std::unique_ptr<OQSKeyExchange> createOQSKeyExchange(
@@ -103,4 +107,6 @@ class OQSServerKeyExchange : public OQSKeyExchange {
   bool isInitiated() const override;
   void checkChained() const override;
 };
-} // namespace fizz
+} // namespace fizz::liboqs
+
+#endif

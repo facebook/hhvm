@@ -111,6 +111,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h DESTINATI
 
 set(FIZZ_HEADER_DIRS
   backend
+  backend/liboqs
   backend/openssl
   backend/openssl/certificate
   backend/openssl/crypto
@@ -171,6 +172,7 @@ foreach(dir ${FIZZ_TEST_HEADER_DIRS})
 endforeach()
 
 set(FIZZ_SOURCES
+  backend/liboqs/OQSKeyExchange.cpp
   compression/CertDecompressionManager.cpp
   compression/ZlibCertificateCompressor.cpp
   compression/ZlibCertificateDecompressor.cpp
@@ -253,11 +255,6 @@ set(FIZZ_SOURCES
   util/FizzUtil.cpp
   util/Tracing.cpp
 )
-
-if (liboqs_FOUND)
-  set(FIZZ_SOURCES ${FIZZ_SOURCES}
-    experimental/crypto/exchange/OQSKeyExchange.cpp)
-endif()
 
 add_library(fizz
   ${FIZZ_HEADERS}

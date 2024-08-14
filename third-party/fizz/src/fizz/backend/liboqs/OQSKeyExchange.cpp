@@ -6,9 +6,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/experimental/crypto/exchange/OQSKeyExchange.h>
+#include <fizz/backend/liboqs/OQSKeyExchange.h>
 
-namespace fizz {
+#if FIZZ_HAVE_OQS
+
+namespace fizz::liboqs {
 std::unique_ptr<OQSKeyExchange> OQSKeyExchange::createOQSKeyExchange(
     KeyExchangeRole role,
     const std::string& algorithm) {
@@ -183,4 +185,6 @@ inline void OQSServerKeyExchange::checkChained() const {
     throw std::runtime_error("OQSServerKeyExchange: cipher text is chained!");
   }
 }
-} // namespace fizz
+} // namespace fizz::liboqs
+
+#endif

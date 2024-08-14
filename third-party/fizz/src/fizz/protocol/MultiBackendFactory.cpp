@@ -6,18 +6,15 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/fizz-config.h>
+
 #include <fizz/protocol/MultiBackendFactory.h>
 
+#include <fizz/backend/liboqs/LibOQS.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/crypto/Hkdf.h>
-
-#include <fizz/fizz-config.h>
-
-#if FIZZ_HAVE_OQS
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
-#include <fizz/experimental/crypto/exchange/OQSKeyExchange.h>
-#endif
 
 #if FIZZ_BUILD_AEGIS
 #include <fizz/crypto/aead/AEGISCipher.h>
@@ -43,26 +40,26 @@ std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(
     case NamedGroup::x25519_kyber512_experimental:
       return std::make_unique<HybridKeyExchange>(
           std::make_unique<X25519KeyExchange>(),
-          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_512));
+          fizz::liboqs::makeKeyExchange<Kyber512>(role));
     case NamedGroup::secp256r1_kyber512:
       return std::make_unique<HybridKeyExchange>(
           fizz::openssl::makeKeyExchange<fizz::P256>(),
-          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_512));
+          fizz::liboqs::makeKeyExchange<Kyber512>(role));
     case NamedGroup::kyber512:
-      return OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_512);
+      return fizz::liboqs::makeKeyExchange<Kyber512>(role);
     case NamedGroup::x25519_kyber768_draft00:
     case NamedGroup::x25519_kyber768_experimental:
       return std::make_unique<HybridKeyExchange>(
           std::make_unique<X25519KeyExchange>(),
-          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_768));
+          fizz::liboqs::makeKeyExchange<Kyber768>(role));
     case NamedGroup::secp256r1_kyber768_draft00:
       return std::make_unique<HybridKeyExchange>(
           fizz::openssl::makeKeyExchange<fizz::P256>(),
-          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_768));
+          fizz::liboqs::makeKeyExchange<Kyber768>(role));
     case NamedGroup::secp384r1_kyber768:
       return std::make_unique<HybridKeyExchange>(
           fizz::openssl::makeKeyExchange<fizz::P384>(),
-          OQSKeyExchange::createOQSKeyExchange(role, OQS_KEM_alg_kyber_768));
+          fizz::liboqs::makeKeyExchange<Kyber768>(role));
 #endif
     default:
       throw std::runtime_error("ke: not implemented");

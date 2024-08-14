@@ -86,8 +86,11 @@ struct P521 {
   static constexpr int keyShareLength = coordinateLength * 2 + 1;
 };
 
+// KEMs
+struct Kyber512 {};
+struct Kyber768 {};
+
 using HashFunc = void (*)(const folly::IOBuf&, folly::MutableByteRange);
 using HmacFunc =
     void (*)(folly::ByteRange, const folly::IOBuf&, folly::MutableByteRange);
-
 } // namespace fizz

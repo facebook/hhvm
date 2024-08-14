@@ -16,7 +16,7 @@ from cython.view cimport memoryview
 from folly.iobuf cimport IOBuf
 from thrift.python.exceptions cimport Error
 from thrift.python.mutable_exceptions cimport MutableGeneratedError
-from thrift.python.mutable_types cimport MutableStruct, MutableStructOrUnion
+from thrift.python.mutable_types cimport MutableStructOrUnion
 from thrift.python.protocol import Protocol
 
 
@@ -89,8 +89,8 @@ def deserialize_with_length(thrift_class, buf, cProtocol protocol=cProtocol.COMP
     inst = thrift_class.__new__(thrift_class)
     cdef uint32_t length
     try:
-        if issubclass(thrift_class, MutableStruct):
-            length = (<MutableStruct>inst)._fbthrift_deserialize(iobuf, protocol)
+        if issubclass(thrift_class, MutableStructOrUnion):
+            length = (<MutableStructOrUnion>inst)._fbthrift_deserialize(iobuf, protocol)
         else:
             length = (
                 <MutableGeneratedError>inst

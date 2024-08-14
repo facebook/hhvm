@@ -747,3 +747,11 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def test_to_mutable_python(self) -> None:
         union_mutable = TestUnionMutable(string_field="hello")
         self.assertIs(union_mutable, union_mutable._to_mutable_python())
+
+    # DO_BEFORE(aristidis, 20240823): Support serialization for mutable unions
+    def test_serialize_not_implemented_yet(self) -> None:
+        with self.assertRaises(NotImplementedError):
+            mutable_serializer.serialize(TestUnionMutable())
+
+        with self.assertRaises(Exception):
+            mutable_serializer.deserialize(TestUnionMutable, b"")

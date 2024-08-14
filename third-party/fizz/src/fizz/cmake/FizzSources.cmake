@@ -1,15 +1,28 @@
+# @generated SignedSource<<763cf2268090f7edbe5a555851f925c0>>
+#
+# This file is generated file from `fizz/facebook/boilerplate.sh`.
+# All manual changes will be lost.
+
+# This file contains sources that were extracted from the source of truth in
+# BUCK.
+#
+# Open source commits can modify this file, despite being labeled as
+# generated. Maintainers that import open source PRs will apply necessary
+# changes to the Buck source of truth to incorporate any changes.
+
 set(
     FIZZ_LIBRARY_SOURCES
         backend/liboqs/OQSKeyExchange.cpp
         backend/openssl/certificate/CertUtils.cpp
+        backend/openssl/crypto/OpenSSLKeyUtils.cpp
         backend/openssl/crypto/aead/OpenSSLEVPCipher.cpp
         backend/openssl/crypto/exchange/OpenSSLKeyExchange.cpp
-        backend/openssl/crypto/OpenSSLKeyUtils.cpp
         backend/openssl/crypto/signature/Signature.cpp
         client/CertManager.cpp
         client/ClientProtocol.cpp
         client/EarlyDataRejectionPolicy.cpp
         client/FizzClientContext.cpp
+        client/MultiClientExtensions.cpp
         client/PskSerializationUtils.cpp
         client/State.cpp
         client/SynchronizedLruPskCache.cpp
@@ -18,21 +31,21 @@ set(
         compression/ZlibCertificateDecompressor.cpp
         compression/ZstdCertificateCompressor.cpp
         compression/ZstdCertificateDecompressor.cpp
-        crypto/aead/AEGISCipher.cpp
-        crypto/aead/IOBufUtil.cpp
         crypto/Crypto.cpp
-        crypto/exchange/HybridKeyExchange.cpp
-        crypto/exchange/X25519.cpp
         crypto/Hasher.cpp
         crypto/Hkdf.cpp
         crypto/Hmac.cpp
+        crypto/KeyDerivation.cpp
+        crypto/Utils.cpp
+        crypto/aead/AEGISCipher.cpp
+        crypto/aead/IOBufUtil.cpp
+        crypto/exchange/HybridKeyExchange.cpp
+        crypto/exchange/X25519.cpp
         crypto/hpke/Context.cpp
         crypto/hpke/DHKEM.cpp
         crypto/hpke/Hkdf.cpp
         crypto/hpke/Hpke.cpp
         crypto/hpke/Utils.cpp
-        crypto/KeyDerivation.cpp
-        crypto/Utils.cpp
         experimental/client/BatchSignaturePeerCert.cpp
         experimental/ktls/AsyncFizzBaseKTLS.cpp
         experimental/ktls/AsyncKTLSSocket.cpp
@@ -40,6 +53,7 @@ set(
         experimental/ktls/KTLS.cpp
         experimental/protocol/BatchSignatureTypes.cpp
         extensions/delegatedcred/DelegatedCredentialCertManager.cpp
+        extensions/delegatedcred/DelegatedCredentialClientCertManager.cpp
         extensions/delegatedcred/DelegatedCredentialClientExtension.cpp
         extensions/delegatedcred/DelegatedCredentialFactory.cpp
         extensions/delegatedcred/DelegatedCredentialUtils.cpp
@@ -52,10 +66,7 @@ set(
         extensions/tokenbinding/Validator.cpp
         protocol/AsyncFizzBase.cpp
         protocol/Certificate.cpp
-        protocol/clock/SystemClock.cpp
         protocol/DefaultCertificateVerifier.cpp
-        protocol/ech/Decrypter.cpp
-        protocol/ech/Encryption.cpp
         protocol/Events.cpp
         protocol/Exporter.cpp
         protocol/Factory.cpp
@@ -63,6 +74,9 @@ set(
         protocol/MultiBackendFactory.cpp
         protocol/Params.cpp
         protocol/Types.cpp
+        protocol/clock/SystemClock.cpp
+        protocol/ech/Decrypter.cpp
+        protocol/ech/Encryption.cpp
         record/BufAndPaddingPolicy.cpp
         record/EncryptedRecordLayer.cpp
         record/PlaintextRecordLayer.cpp
@@ -72,14 +86,195 @@ set(
         server/AeadTokenCipher.cpp
         server/CertManager.cpp
         server/CookieCipher.cpp
-        server/FizzServerContext.cpp
         server/FizzServer.cpp
+        server/FizzServerContext.cpp
+        server/MultiServerExtensions.cpp
         server/ReplayCache.cpp
         server/ServerProtocol.cpp
         server/SlidingBloomReplayCache.cpp
         server/State.cpp
         server/TicketCodec.cpp
-        tool/FizzCommandCommon.cpp
         util/FizzUtil.cpp
         util/Tracing.cpp
+)
+
+set(
+    FIZZ_LIBRARY_HEADERS
+        backend/liboqs/LibOQS.h
+        backend/liboqs/OQSKeyExchange.h
+        backend/openssl/Hasher.h
+        backend/openssl/OpenSSL.h
+        backend/openssl/Properties.h
+        backend/openssl/certificate/CertUtils-inl.h
+        backend/openssl/certificate/CertUtils.h
+        backend/openssl/certificate/OpenSSLPeerCertImpl-inl.h
+        backend/openssl/certificate/OpenSSLPeerCertImpl.h
+        backend/openssl/certificate/OpenSSLSelfCertImpl-inl.h
+        backend/openssl/certificate/OpenSSLSelfCertImpl.h
+        backend/openssl/crypto/ECCurve.h
+        backend/openssl/crypto/OpenSSL.h
+        backend/openssl/crypto/OpenSSLKeyUtils.h
+        backend/openssl/crypto/Sha-inl.h
+        backend/openssl/crypto/Sha.h
+        backend/openssl/crypto/Sha256.h
+        backend/openssl/crypto/Sha384.h
+        backend/openssl/crypto/Sha512.h
+        backend/openssl/crypto/aead/AESGCM128.h
+        backend/openssl/crypto/aead/AESGCM256.h
+        backend/openssl/crypto/aead/AESOCB128.h
+        backend/openssl/crypto/aead/ChaCha20Poly1305.h
+        backend/openssl/crypto/aead/Ciphers.h
+        backend/openssl/crypto/aead/OpenSSLEVPCipher-inl.h
+        backend/openssl/crypto/aead/OpenSSLEVPCipher.h
+        backend/openssl/crypto/exchange/OpenSSLKeyExchange.h
+        backend/openssl/crypto/signature/Signature-inl.h
+        backend/openssl/crypto/signature/Signature.h
+        client/Actions.h
+        client/AsyncFizzClient-inl.h
+        client/AsyncFizzClient.h
+        client/CertManager.h
+        client/ClientExtensions.h
+        client/ClientProtocol.h
+        client/ECHPolicy.h
+        client/EarlyDataRejectionPolicy.h
+        client/FizzClient-inl.h
+        client/FizzClient.h
+        client/FizzClientContext.h
+        client/MultiClientExtensions.h
+        client/PskCache.h
+        client/PskSerializationUtils.h
+        client/State.h
+        client/SynchronizedLruPskCache.h
+        compression/CertDecompressionManager.h
+        compression/CertificateCompressor.h
+        compression/ZlibCertificateCompressor.h
+        compression/ZlibCertificateDecompressor.h
+        compression/ZstdCertificateCompressor.h
+        compression/ZstdCertificateDecompressor.h
+        crypto/Crypto.h
+        crypto/Hasher.h
+        crypto/Hkdf.h
+        crypto/Hmac.h
+        crypto/KeyDerivation.h
+        crypto/RandomGenerator.h
+        crypto/Utils.h
+        crypto/aead/AEGISCipher.h
+        crypto/aead/Aead.h
+        crypto/aead/CryptoUtil.h
+        crypto/aead/IOBufUtil.h
+        crypto/exchange/AsyncKeyExchange.h
+        crypto/exchange/HybridKeyExchange.h
+        crypto/exchange/KeyExchange.h
+        crypto/exchange/X25519.h
+        crypto/hpke/Context.h
+        crypto/hpke/DHKEM.h
+        crypto/hpke/Hkdf.h
+        crypto/hpke/Hpke.h
+        crypto/hpke/Types.h
+        crypto/hpke/Utils.h
+        experimental/batcher/Batcher.h
+        experimental/client/BatchSignaturePeerCert.h
+        experimental/crypto/BatchSignature.h
+        experimental/crypto/MerkleTree.h
+        experimental/ktls/AsyncFizzBaseKTLS.h
+        experimental/ktls/AsyncKTLSSocket.h
+        experimental/ktls/FizzKTLSCallback.h
+        experimental/ktls/KTLS.h
+        experimental/ktls/LinuxKTLS.h
+        experimental/protocol/BatchSignatureFactory.h
+        experimental/protocol/BatchSignatureTypes.h
+        experimental/server/BatchSignatureAsyncSelfCert.h
+        experimental/util/CertExtraction.h
+        extensions/delegatedcred/DelegatedCredentialCertManager.h
+        extensions/delegatedcred/DelegatedCredentialClientCertManager.h
+        extensions/delegatedcred/DelegatedCredentialClientExtension.h
+        extensions/delegatedcred/DelegatedCredentialFactory.h
+        extensions/delegatedcred/DelegatedCredentialUtils.h
+        extensions/delegatedcred/PeerDelegatedCredential-inl.h
+        extensions/delegatedcred/PeerDelegatedCredential.h
+        extensions/delegatedcred/SelfDelegatedCredential-inl.h
+        extensions/delegatedcred/SelfDelegatedCredential.h
+        extensions/delegatedcred/Serialization.h
+        extensions/delegatedcred/Types.h
+        extensions/exportedauth/ExportedAuthenticator.h
+        extensions/exportedauth/Util.h
+        extensions/tokenbinding/TokenBindingClientExtension.h
+        extensions/tokenbinding/TokenBindingConstructor.h
+        extensions/tokenbinding/TokenBindingContext.h
+        extensions/tokenbinding/TokenBindingServerExtension.h
+        extensions/tokenbinding/Types.h
+        extensions/tokenbinding/Utils.h
+        extensions/tokenbinding/Validator.h
+        protocol/Actions.h
+        protocol/AsyncFizzBase.h
+        protocol/CertManagerBase.h
+        protocol/Certificate.h
+        protocol/CertificateVerifier.h
+        protocol/DefaultCertificateVerifier.h
+        protocol/DefaultFactory.h
+        protocol/Events.h
+        protocol/Exporter.h
+        protocol/Factory.h
+        protocol/FizzBase-inl.h
+        protocol/FizzBase.h
+        protocol/HandshakeContext-inl.h
+        protocol/HandshakeContext.h
+        protocol/KeyScheduler.h
+        protocol/MultiBackendFactory.h
+        protocol/Params.h
+        protocol/Protocol.h
+        protocol/StateMachine-inl.h
+        protocol/StateMachine.h
+        protocol/Types.h
+        protocol/clock/Clock.h
+        protocol/clock/SystemClock.h
+        protocol/ech/Decrypter.h
+        protocol/ech/ECHExtensions-inl.h
+        protocol/ech/ECHExtensions.h
+        protocol/ech/Encryption.h
+        protocol/ech/Types-inl.h
+        protocol/ech/Types.h
+        record/BufAndPaddingPolicy.h
+        record/EncryptedRecordLayer.h
+        record/Extensions-inl.h
+        record/Extensions.h
+        record/PlaintextRecordLayer.h
+        record/RecordLayer.h
+        record/Types-inl.h
+        record/Types.h
+        server/Actions.h
+        server/AeadCookieCipher.h
+        server/AeadTicketCipher.h
+        server/AeadTokenCipher.h
+        server/AsyncFizzServer-inl.h
+        server/AsyncFizzServer.h
+        server/AsyncSelfCert.h
+        server/CertManager.h
+        server/CookieCipher.h
+        server/CookieTypes.h
+        server/DualTicketCipher.h
+        server/FizzServer-inl.h
+        server/FizzServer.h
+        server/FizzServerContext.h
+        server/MultiServerExtensions.h
+        server/Negotiator.h
+        server/ReplayCache.h
+        server/ResumptionState.h
+        server/ServerExtensions.h
+        server/ServerProtocol.h
+        server/SlidingBloomReplayCache.h
+        server/State.h
+        server/TicketCipher.h
+        server/TicketCodec-inl.h
+        server/TicketCodec.h
+        server/TicketPolicy.h
+        server/TicketTypes.h
+        server/TokenCipher.h
+        util/FizzUtil.h
+        util/KeyLogWriter.h
+        util/Parse-inl.h
+        util/Parse.h
+        util/Tracing.h
+        util/Variant.h
+        util/Workarounds.h
 )

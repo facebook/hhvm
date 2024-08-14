@@ -392,7 +392,10 @@ if(BUILD_TESTS)
   add_gtest(server/test/NegotiatorTest.cpp NegotiatorTest)
   add_gtest(server/test/FizzServerTest.cpp FizzServerTest)
   add_gtest(server/test/SlidingBloomReplayCacheTest.cpp SlidingBloomReplayCacheTest)
-  add_gtest(tool/test/FizzCommandCommonTest.cpp FizzCommandCommonTest)
+  add_gtest(
+      "tool/test/FizzCommandCommonTest.cpp;tool/FizzCommandCommon.cpp"
+      FizzCommandCommonTest
+  )
   add_gtest(util/test/FizzUtilTest.cpp FizzUtilTest)
   add_gtest(util/test/FizzVariantTest.cpp FizzVariantTest)
   add_gtest(util/test/KeyLogWriterTest.cpp KeyLogWriterTest)

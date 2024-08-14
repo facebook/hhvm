@@ -159,12 +159,24 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   template <typename VPatch>
   void patchIfTypeIs(const VPatch& patch) {
+    // TODO(dokwon): Refactor PatchTrait to use is_patch_v.
     static_assert(std::is_base_of_v<
                   BasePatch<typename VPatch::underlying_type, VPatch>,
                   VPatch>);
     tryPatchable<VPatch>();
     patchIfTypeIsImpl(
         patch, ensures<type::infer_tag<typename VPatch::value_type>>());
+  }
+
+  template <typename VPatch>
+  void ensureAndPatch(const VPatch& patch) {
+    // TODO(dokwon): Refactor PatchTrait to use is_patch_v.
+    static_assert(std::is_base_of_v<
+                  BasePatch<typename VPatch::underlying_type, VPatch>,
+                  VPatch>);
+    using VTag = type::infer_tag<typename VPatch::value_type>;
+    ensureImpl(type::AnyData::toAny<VTag>({}).toThrift());
+    patchIfTypeIsImpl(patch, true);
   }
 
  private:

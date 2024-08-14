@@ -103,8 +103,8 @@ if (liboqs_FOUND)
   set(FIZZ_HAVE_OQS TRUE)
 endif()
 
-# Fizz build time options
 include(FizzOptions)
+include(FizzSources)
 
 configure_file(fizz-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h DESTINATION ${INCLUDE_INSTALL_DIR}/fizz/)
@@ -171,94 +171,9 @@ foreach(dir ${FIZZ_TEST_HEADER_DIRS})
     ${headers})
 endforeach()
 
-set(FIZZ_SOURCES
-  backend/liboqs/OQSKeyExchange.cpp
-  compression/CertDecompressionManager.cpp
-  compression/ZlibCertificateCompressor.cpp
-  compression/ZlibCertificateDecompressor.cpp
-  compression/ZstdCertificateCompressor.cpp
-  compression/ZstdCertificateDecompressor.cpp
-  crypto/Utils.cpp
-  crypto/exchange/HybridKeyExchange.cpp
-  crypto/exchange/X25519.cpp
-  backend/openssl/crypto/aead/OpenSSLEVPCipher.cpp
-  crypto/aead/IOBufUtil.cpp
-  crypto/aead/AEGISCipher.cpp
-  backend/openssl/crypto/signature/Signature.cpp
-  crypto/Hasher.cpp
-  crypto/Hmac.cpp
-  crypto/Hkdf.cpp
-  crypto/KeyDerivation.cpp
-  crypto/Crypto.cpp
-  crypto/hpke/Context.cpp
-  crypto/hpke/DHKEM.cpp
-  crypto/hpke/Hkdf.cpp
-  crypto/hpke/Hpke.cpp
-  crypto/hpke/Utils.cpp
-  backend/openssl/crypto/OpenSSLKeyUtils.cpp
-  backend/openssl/crypto/exchange/OpenSSLKeyExchange.cpp
-  record/Types.cpp
-  record/RecordLayer.cpp
-  record/EncryptedRecordLayer.cpp
-  record/PlaintextRecordLayer.cpp
-  record/BufAndPaddingPolicy.cpp
-  server/AeadTokenCipher.cpp
-  server/AeadCookieCipher.cpp
-  server/FizzServerContext.cpp
-  server/ServerProtocol.cpp
-  server/CertManager.cpp
-  server/State.cpp
-  server/FizzServer.cpp
-  server/TicketCodec.cpp
-  server/CookieCipher.cpp
-  server/ReplayCache.cpp
-  server/SlidingBloomReplayCache.cpp
-  protocol/AsyncFizzBase.cpp
-  protocol/Types.cpp
-  protocol/Exporter.cpp
-  protocol/DefaultCertificateVerifier.cpp
-  protocol/Events.cpp
-  protocol/KeyScheduler.cpp
-  protocol/Certificate.cpp
-  protocol/Factory.cpp
-  protocol/MultiBackendFactory.cpp
-  backend/openssl/certificate/CertUtils.cpp
-  protocol/Params.cpp
-  protocol/clock/SystemClock.cpp
-  protocol/ech/Decrypter.cpp
-  protocol/ech/Encryption.cpp
-  extensions/delegatedcred/DelegatedCredentialCertManager.cpp
-  extensions/delegatedcred/DelegatedCredentialClientExtension.cpp
-  extensions/delegatedcred/DelegatedCredentialFactory.cpp
-  extensions/delegatedcred/Serialization.cpp
-  extensions/delegatedcred/DelegatedCredentialUtils.cpp
-  extensions/delegatedcred/Types.cpp
-  extensions/exportedauth/ExportedAuthenticator.cpp
-  extensions/tokenbinding/Types.cpp
-  extensions/tokenbinding/TokenBindingConstructor.cpp
-  extensions/tokenbinding/TokenBindingClientExtension.cpp
-  extensions/tokenbinding/Validator.cpp
-  experimental/client/BatchSignaturePeerCert.cpp
-  experimental/protocol/BatchSignatureTypes.cpp
-  experimental/ktls/AsyncFizzBaseKTLS.cpp
-  experimental/ktls/FizzKTLSCallback.cpp
-  experimental/ktls/AsyncKTLSSocket.cpp
-  experimental/ktls/KTLS.cpp
-  client/FizzClientContext.cpp
-  client/State.cpp
-  client/ClientProtocol.cpp
-  client/CertManager.cpp
-  client/PskSerializationUtils.cpp
-  client/SynchronizedLruPskCache.cpp
-  client/EarlyDataRejectionPolicy.cpp
-  tool/FizzCommandCommon.cpp
-  util/FizzUtil.cpp
-  util/Tracing.cpp
-)
 
 add_library(fizz
-  ${FIZZ_HEADERS}
-  ${FIZZ_SOURCES}
+  ${FIZZ_LIBRARY_SOURCES}
 )
 
 if (BUILD_SHARED_LIBS)

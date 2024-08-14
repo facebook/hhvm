@@ -440,6 +440,7 @@ static ClientHello getClientHello(
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<PskKeyExchangeMode>& supportedPskModes,
     const folly::Optional<std::string>& hostname,
+    const bool sniExtFirst,
     const std::vector<std::string>& supportedAlpns,
     const std::vector<CertificateCompressionAlgorithm>& compressionAlgos,
     const Optional<EarlyDataParams>& earlyDataParams,
@@ -452,6 +453,14 @@ static ClientHello getClientHello(
   chlo.legacy_session_id = legacySessionId->clone();
   chlo.cipher_suites = supportedCiphers;
   chlo.legacy_compression_methods.push_back(0x00);
+
+  if (sniExtFirst) {
+    if (hostname) {
+      auto hostnameBuf = folly::IOBuf::copyBuffer(*hostname);
+      auto sni = ServerNameList(ServerName(std::move(hostnameBuf)));
+      chlo.extensions.push_back(encodeExtension(sni));
+    }
+  }
 
   SupportedVersions versions;
   versions.versions = supportedVersions;
@@ -474,10 +483,12 @@ static ClientHello getClientHello(
   sigAlgs.supported_signature_algorithms = supportedSigSchemes;
   chlo.extensions.push_back(encodeExtension(std::move(sigAlgs)));
 
-  if (hostname) {
-    auto hostnameBuf = folly::IOBuf::copyBuffer(*hostname);
-    auto sni = ServerNameList(ServerName(std::move(hostnameBuf)));
-    chlo.extensions.push_back(encodeExtension(sni));
+  if (!sniExtFirst) {
+    if (hostname) {
+      auto hostnameBuf = folly::IOBuf::copyBuffer(*hostname);
+      auto sni = ServerNameList(ServerName(std::move(hostnameBuf)));
+      chlo.extensions.push_back(encodeExtension(sni));
+    }
   }
 
   if (!supportedAlpns.empty()) {
@@ -849,6 +860,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       context->getSupportedSigSchemes(),
       context->getSupportedPskModes(),
       sni,
+      context->getSniExtFirst(),
       context->getSupportedAlpns(),
       context->getSupportedCertDecompressionAlgorithms(),
       earlyDataParams,
@@ -1541,6 +1553,7 @@ Actions EventHandler<
       state.context()->getSupportedSigSchemes(),
       state.context()->getSupportedPskModes(),
       std::move(sni),
+      state.context()->getSniExtFirst(),
       state.context()->getSupportedAlpns(),
       state.context()->getSupportedCertDecompressionAlgorithms(),
       folly::none,

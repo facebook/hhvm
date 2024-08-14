@@ -347,6 +347,18 @@ class FizzClientContext {
     return sendKeyShare_;
   }
 
+  /**
+   * Option to place the SNI extension first in the ClientHello. Default is
+   * false.
+   */
+  void setSniExtFirst(bool sniExtFirst) {
+    sniExtFirst_ = sniExtFirst;
+  }
+
+  bool getSniExtFirst() const {
+    return sniExtFirst_;
+  }
+
  private:
   std::shared_ptr<Factory> factory_;
 
@@ -392,6 +404,8 @@ class FizzClientContext {
   std::shared_ptr<Clock> clock_;
 
   std::chrono::seconds maxPskHandshakeLife_{std::chrono::hours(168)};
+
+  bool sniExtFirst_{false};
 };
 } // namespace client
 } // namespace fizz

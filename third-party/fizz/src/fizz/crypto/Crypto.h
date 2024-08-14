@@ -39,6 +39,18 @@ struct ChaCha20Poly1305 {
   static const size_t kTagLength{16};
 };
 
+struct AEGIS128L {
+  static const size_t kKeyLength{16};
+  static const size_t kIVLength{16};
+  static const size_t kTagLength{16};
+};
+
+struct AEGIS256 {
+  static const size_t kKeyLength{32};
+  static const size_t kIVLength{32};
+  static const size_t kTagLength{16};
+};
+
 // Hashing Algorithms
 // Please update HASH_MAX_BLOCK_SIZE if necessary if adding support for more
 // hashes.

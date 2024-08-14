@@ -1,4 +1,4 @@
-# @generated SignedSource<<763cf2268090f7edbe5a555851f925c0>>
+# @generated SignedSource<<ae67bc084384a6e76a53f4e29c5bb8ba>>
 #
 # This file is generated file from `fizz/facebook/boilerplate.sh`.
 # All manual changes will be lost.
@@ -12,6 +12,7 @@
 
 set(
     FIZZ_LIBRARY_SOURCES
+        backend/libaegis/AEGISCipher.cpp
         backend/liboqs/OQSKeyExchange.cpp
         backend/openssl/certificate/CertUtils.cpp
         backend/openssl/crypto/OpenSSLKeyUtils.cpp
@@ -37,7 +38,6 @@ set(
         crypto/Hmac.cpp
         crypto/KeyDerivation.cpp
         crypto/Utils.cpp
-        crypto/aead/AEGISCipher.cpp
         crypto/aead/IOBufUtil.cpp
         crypto/exchange/HybridKeyExchange.cpp
         crypto/exchange/X25519.cpp
@@ -100,6 +100,7 @@ set(
 
 set(
     FIZZ_LIBRARY_HEADERS
+        backend/libaegis/LibAEGIS.h
         backend/liboqs/LibOQS.h
         backend/liboqs/OQSKeyExchange.h
         backend/openssl/Hasher.h
@@ -158,7 +159,6 @@ set(
         crypto/KeyDerivation.h
         crypto/RandomGenerator.h
         crypto/Utils.h
-        crypto/aead/AEGISCipher.h
         crypto/aead/Aead.h
         crypto/aead/CryptoUtil.h
         crypto/aead/IOBufUtil.h

@@ -1147,7 +1147,7 @@ TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
 }
 #endif
 
-#if FIZZ_BUILD_AEGIS
+#if FIZZ_HAVE_LIBAEGIS
 TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
   auto echConfig = ech::test::getECHConfig();
   Connect connect;

@@ -6,9 +6,9 @@
 #include <folly/Random.h>
 #include <folly/init/Init.h>
 
+#include <fizz/backend/libaegis/LibAEGIS.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/Utils.h>
-#include <fizz/crypto/aead/AEGISCipher.h>
 #include <fizz/record/EncryptedRecordLayer.h>
 
 using namespace fizz;
@@ -242,7 +242,7 @@ void encryptAEGIS(uint32_t n, size_t size) {
   std::vector<fizz::TLSMessage> msgs;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = AEGIS::make128L();
+    aead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
     aead->setKey(getAegisKey());
     write.setAead(folly::ByteRange(), std::move(aead));
     for (size_t i = 0; i < n; ++i) {
@@ -263,8 +263,8 @@ void decryptAEGIS(uint32_t n, size_t size) {
   EncryptedReadRecordLayer read{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
-    auto writeAead = AEGIS::make128L();
-    auto readAead = AEGIS::make128L();
+    auto writeAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
+    auto readAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
     writeAead->setKey(getAegisKey());
     readAead->setKey(getAegisKey());
     write.setAead(folly::ByteRange(), std::move(writeAead));

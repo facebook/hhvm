@@ -11,6 +11,6 @@
  */
 #pragma once
 
-#cmakedefine01 FIZZ_BUILD_AEGIS
+#cmakedefine01 FIZZ_HAVE_LIBAEGIS
 #cmakedefine01 FIZZ_CERTIFICATE_USE_OPENSSL_CERT
 #cmakedefine01 FIZZ_HAVE_OQS

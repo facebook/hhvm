@@ -982,7 +982,7 @@ INSTANTIATE_TEST_SUITE_P(
             CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL}));
 #endif
 
-#if FIZZ_BUILD_AEGIS
+#if FIZZ_HAVE_LIBAEGIS
 // Adapted from libsodium's aegis testing values
 INSTANTIATE_TEST_SUITE_P(
     AEGIS128LTestVectors,

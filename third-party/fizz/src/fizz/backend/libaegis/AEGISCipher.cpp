@@ -6,16 +6,17 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/aead/AEGISCipher.h>
-#include <fizz/crypto/aead/CryptoUtil.h>
+#include <fizz/backend/libaegis/LibAEGIS.h>
 #include <fizz/fizz-config.h>
+
+#if FIZZ_HAVE_LIBAEGIS
+#include <aegis.h>
+#include <fizz/crypto/aead/CryptoUtil.h>
 #include <folly/lang/CheckedMath.h>
 #include <cstring>
-#include <functional>
 
-#if FIZZ_BUILD_AEGIS
-#include <aegis.h>
-namespace fizz::detail {
+namespace fizz::libaegis {
+namespace {
 class LibAegisCipherBase {
  public:
   virtual ~LibAegisCipherBase() = default;
@@ -98,7 +99,7 @@ class AEGISCipher : public Aead {
   static constexpr size_t kAEGIS256MMS = 16;
 
   AEGISCipher(
-      std::unique_ptr<detail::LibAegisCipherBase> impl_,
+      std::unique_ptr<LibAegisCipherBase> impl_,
       size_t keyLength,
       size_t ivLength,
       size_t mms);
@@ -163,7 +164,7 @@ class AEGISCipher : public Aead {
   }
 
  private:
-  std::unique_ptr<detail::LibAegisCipherBase> impl_;
+  std::unique_ptr<LibAegisCipherBase> impl_;
   TrafficKey trafficKey_;
   folly::ByteRange trafficIvKey_;
   folly::ByteRange trafficKeyKey_;
@@ -347,7 +348,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
 }
 
 AEGISCipher::AEGISCipher(
-    std::unique_ptr<detail::LibAegisCipherBase> impl,
+    std::unique_ptr<LibAegisCipherBase> impl,
     size_t keyLength,
     size_t ivLength,
     size_t mms)
@@ -483,33 +484,29 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
 size_t AEGISCipher::getCipherOverhead() const {
   return kTagLength;
 }
-} // namespace fizz::detail
-#endif // FIZZ_BUILD_AEGIS
+} // namespace
 
-namespace fizz {
-std::unique_ptr<Aead> AEGIS::make128L() {
-#if FIZZ_BUILD_AEGIS
-  auto impl = std::unique_ptr<detail::LibAegisCipherBase>(
-      new detail::LibAegisCipher<detail::AEGIS128L>());
-  return std::unique_ptr<Aead>(new detail::AEGISCipher(
+template <>
+std::unique_ptr<Aead> makeCipher<fizz::AEGIS128L>() {
+  auto impl =
+      std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS128L>());
+  return std::unique_ptr<Aead>(new AEGISCipher(
       std::move(impl),
       aegis128l_KEYBYTES,
       aegis128l_NPUBBYTES,
-      detail::AEGISCipher::kAEGIS128LMMS));
-#endif
-  return nullptr;
+      AEGISCipher::kAEGIS128LMMS));
 }
 
-std::unique_ptr<Aead> AEGIS::make256() {
-#if FIZZ_BUILD_AEGIS
-  auto impl = std::unique_ptr<detail::LibAegisCipherBase>(
-      new detail::LibAegisCipher<detail::AEGIS256>());
-  return std::unique_ptr<Aead>(new detail::AEGISCipher(
+template <>
+std::unique_ptr<Aead> makeCipher<fizz::AEGIS256>() {
+  auto impl =
+      std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS256>());
+  return std::unique_ptr<Aead>(new AEGISCipher(
       std::move(impl),
       aegis256_KEYBYTES,
       aegis256_NPUBBYTES,
-      detail::AEGISCipher::kAEGIS256MMS));
-#endif
+      AEGISCipher::kAEGIS256MMS));
   return nullptr;
 }
-} // namespace fizz
+} // namespace fizz::libaegis
+#endif

@@ -6,13 +6,10 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/libaegis/LibAEGIS.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/fizz-config.h>
-
-#if FIZZ_BUILD_AEGIS
-#include <fizz/crypto/aead/AEGISCipher.h>
-#endif
 
 #include <folly/String.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
@@ -91,12 +88,12 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
       cipher = openssl::OpenSSLEVPCipher::makeCipher<AESOCB128>();
       break;
-#if FIZZ_BUILD_AEGIS
+#if FIZZ_HAVE_LIBAEGIS
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      cipher = AEGIS::make128L();
+      cipher = libaegis::makeCipher<fizz::AEGIS128L>();
       break;
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      cipher = AEGIS::make256();
+      cipher = libaegis::makeCipher<fizz::AEGIS256>();
       break;
 #endif
     default:

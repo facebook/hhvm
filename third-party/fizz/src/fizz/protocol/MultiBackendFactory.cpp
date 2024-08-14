@@ -10,15 +10,12 @@
 
 #include <fizz/protocol/MultiBackendFactory.h>
 
+#include <fizz/backend/libaegis/LibAEGIS.h>
 #include <fizz/backend/liboqs/LibOQS.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
-
-#if FIZZ_BUILD_AEGIS
-#include <fizz/crypto/aead/AEGISCipher.h>
-#endif
 
 namespace fizz {
 
@@ -76,11 +73,11 @@ std::unique_ptr<Aead> MultiBackendFactory::makeAead(CipherSuite cipher) const {
       return openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM256>();
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
       return openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
-#if FIZZ_BUILD_AEGIS
+#if FIZZ_HAVE_LIBAEGIS
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      return AEGIS::make256();
+      return libaegis::makeCipher<fizz::AEGIS256>();
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return AEGIS::make128L();
+      return libaegis::makeCipher<fizz::AEGIS128L>();
 #endif
     default:
       throw std::runtime_error("aead: not implemented");

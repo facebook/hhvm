@@ -3,12 +3,12 @@ Invalid argument (Typing[4110])
   File "pipe4.php", line 5, characters 14-16:
   Expected `int`
   File "pipe4.php", line 5, characters 23-72:
-  But got `ExprTree<ExampleDsl, mixed, ExampleInt>`
+  But got `ExprTree<ExampleDsl, string, ExampleInt>`
 ERROR: File "pipe4.php", line 14, characters 10-12:
 Invalid return type (Typing[4110])
   File "pipe4.php", line 9, characters 57-68:
   Expected `ExampleFloat`
   File "pipe4.php", line 5, characters 62-71:
   But got `ExampleInt`
-  File "expr_tree.php", line 229, characters 44-49:
+  File "expr_tree.php", line 37, characters 44-49:
     via this generic `TInfer`

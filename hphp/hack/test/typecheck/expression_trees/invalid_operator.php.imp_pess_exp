@@ -26,6 +26,30 @@ ERROR: File "invalid_operator.php", line 32, characters 34-40:
 You are trying to access the method `__unsupported` but this is an int (Typing[4062])
   File "invalid_operator.php", line 32, characters 20-22:
   Definition is here
+ERROR: File "invalid_operator.php", line 13, characters 19-27:
+Invalid return type (Typing[4110])
+  File "expr_tree.php", line 61, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 72, characters 28-43:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "invalid_operator.php", line 13, characters 23-25:
+  But got `Foo`
+ERROR: File "invalid_operator.php", line 16, characters 19-26:
+Invalid argument (Typing[4110])
+  File "expr_tree.php", line 61, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 135, characters 5-20:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "invalid_operator.php", line 9, characters 7-9:
+  But got `int`
+ERROR: File "invalid_operator.php", line 19, characters 19-42:
+Invalid return type (Typing[4110])
+  File "expr_tree.php", line 61, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 72, characters 28-43:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "invalid_operator.php", line 19, characters 19-42:
+  But got `(function(): int)`
 ERROR: File "invalid_operator.php", line 26, characters 31-32:
 Wrong type hint (Typing[4331])
   File "invalid_operator.php", line 26, characters 20-29:

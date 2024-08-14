@@ -31,8 +31,8 @@ namespace common {
 namespace mysql_client {
 
 Operation::Operation(std::unique_ptr<ConnectionProxy> safe_conn)
-    : EventHandler(safe_conn->get().mysql_client_.getEventBase()),
-      AsyncTimeout(safe_conn->get().mysql_client_.getEventBase()),
+    : EventHandler(safe_conn->get()->mysql_client_.getEventBase()),
+      AsyncTimeout(safe_conn->get()->mysql_client_.getEventBase()),
       state_(OperationState::Unstarted),
       result_(OperationResult::Unknown),
       conn_proxy_(std::move(safe_conn)),
@@ -46,23 +46,23 @@ Operation::Operation(std::unique_ptr<ConnectionProxy> safe_conn)
 }
 
 bool Operation::isInEventBaseThread() const {
-  return connection().isInEventBaseThread();
+  return conn().isInEventBaseThread();
 }
 
 bool Operation::isEventBaseSet() const {
-  return connection().getEventBase() != nullptr;
+  return conn().getEventBase() != nullptr;
 }
 
 Operation::~Operation() {}
 
-void Operation::invokeSocketActionable() {
+void Operation::invokeActionable() {
   DCHECK(isInEventBaseThread());
   folly::RequestContextScopeGuard guard(
       request_context_.load(std::memory_order_relaxed));
-  socketActionable();
+  actionable();
 }
 
-void Operation::waitForSocketActionable() {
+void Operation::waitForActionable() {
   DCHECK(isInEventBaseThread());
 
   auto event_mask = conn().getReadWriteState();
@@ -104,7 +104,7 @@ void Operation::cancel() {
     state_ = OperationState::Cancelling;
   }
 
-  if (!connection().runInThread(
+  if (!conn().runInThread(
           this, &Operation::completeOperation, OperationResult::Cancelled)) {
     // if a strange error happen in EventBase , mark it cancelled now
     completeOperationInner(OperationResult::Cancelled);
@@ -121,7 +121,7 @@ void Operation::handlerReady(uint16_t /*events*/) noexcept {
   if (state() == OperationState::Cancelling) {
     cancel();
   } else {
-    invokeSocketActionable();
+    invokeActionable();
   }
 }
 
@@ -140,7 +140,7 @@ Operation& Operation::run() {
     auto locked = cancel_on_run_.wlock();
     if (*locked) {
       state_ = OperationState::Cancelling;
-      connection().runInThread(
+      conn().runInThread(
           this, &Operation::completeOperation, OperationResult::Cancelled);
       return *this;
     }
@@ -450,12 +450,12 @@ Operation::OwnedConnection::OwnedConnection(std::unique_ptr<Connection>&& conn)
   CHECK_THROW(conn_, db::InvalidConnectionException);
 }
 
-Connection& Operation::OwnedConnection::get() {
-  return *conn_.get();
+Connection* Operation::OwnedConnection::get() {
+  return conn_.get();
 }
 
-const Connection& Operation::OwnedConnection::get() const {
-  return *conn_.get();
+const Connection* Operation::OwnedConnection::get() const {
+  return conn_.get();
 }
 
 std::unique_ptr<Connection> Operation::OwnedConnection::releaseConnection() {

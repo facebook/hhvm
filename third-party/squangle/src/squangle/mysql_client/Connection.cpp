@@ -58,8 +58,7 @@ std::shared_ptr<ResetOperation> Connection::resetConn(
   // cleanupCompletedOperations() hits FATAL error.
   auto resetOperationPtr = std::make_shared<ResetOperation>(
       std::make_unique<Operation::OwnedConnection>(std::move(conn)));
-  Duration timeout =
-      resetOperationPtr->connection().conn_options_.getQueryTimeout();
+  Duration timeout = resetOperationPtr->conn().conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
     resetOperationPtr->setTimeout(timeout);
   }
@@ -76,8 +75,7 @@ std::shared_ptr<ChangeUserOperation> Connection::changeUser(
       user,
       password,
       database);
-  Duration timeout =
-      changeUserOperationPtr->connection().conn_options_.getTimeout();
+  Duration timeout = changeUserOperationPtr->conn().conn_options_.getTimeout();
   if (timeout.count() > 0) {
     // set its timeout longer than connection timeout to prevent change user
     // operation from hitting timeout earlier than connection timeout itself
@@ -134,16 +132,16 @@ std::shared_ptr<QueryType> Connection::beginAnyQuery(
     std::unique_ptr<Operation::ConnectionProxy> conn_proxy,
     QueryArg&& query) {
   CHECK_THROW(conn_proxy.get(), db::InvalidConnectionException);
-  CHECK_THROW(conn_proxy->get().ok(), db::InvalidConnectionException);
-  conn_proxy->get().checkOperationInProgress();
+  CHECK_THROW(conn_proxy->get()->ok(), db::InvalidConnectionException);
+  conn_proxy->get()->checkOperationInProgress();
   auto ret = std::make_shared<QueryType>(
       std::move(conn_proxy), std::forward<QueryArg>(query));
-  Duration timeout = ret->connection().conn_options_.getQueryTimeout();
+  auto& conn = ret->conn();
+  Duration timeout = conn.conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
     ret->setTimeout(timeout);
   }
 
-  auto& conn = ret->connection();
   conn.mysql_client_.addOperation(ret);
   ret->setPreOperationCallback([&](Operation& op) {
     if (conn.callbacks_.pre_operation_callback_) {
@@ -283,7 +281,7 @@ DbQueryResult Connection::internalQuery(
       op->resultSize(),
       nullptr,
       op->result(),
-      op->connection().getKey(),
+      op->conn().getKey(),
       op->elapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the
@@ -401,7 +399,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
       op->resultSize(),
       nullptr,
       op->result(),
-      op->connection().getKey(),
+      op->conn().getKey(),
       op->elapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the
@@ -544,16 +542,16 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
     MultiQuery&& multi_query,
     const AttributeMap& attributes) {
   auto proxy = std::make_unique<Operation::OwnedConnection>(std::move(conn));
-  auto& connP = proxy->get();
-  auto ret = connP.createOperation(std::move(proxy), std::move(multi_query));
+  auto* connP = proxy->get();
+  auto ret = connP->createOperation(std::move(proxy), std::move(multi_query));
   if (attributes.size() > 0) {
     ret->setAttributes(attributes);
   }
-  Duration timeout = ret->connection().conn_options_.getQueryTimeout();
+  Duration timeout = ret->connection()->conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
     ret->setTimeout(timeout);
   }
-  ret->connection().mysql_client_.addOperation(ret);
+  ret->connection()->mysql_client_.addOperation(ret);
 
   // MultiQueryStreamHandler needs to be alive while the operation is running.
   // To accomplish that, ~MultiQueryStreamHandler waits until

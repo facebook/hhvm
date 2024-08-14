@@ -255,10 +255,10 @@ class Operation : public folly::EventHandler,
   // Connections are transferred across operations.  At any one time,
   // there is one unique owner of the connection.
   std::unique_ptr<Connection> releaseConnection();
-  const Connection& connection() const {
+  const Connection* connection() const {
     return conn_proxy_->get();
   }
-  Connection& connection() {
+  Connection* connection() {
     return conn_proxy_->get();
   }
 
@@ -337,28 +337,28 @@ class Operation : public folly::EventHandler,
   class ConnectionProxy;
   explicit Operation(std::unique_ptr<ConnectionProxy> conn);
 
-  // These are duplicates of `connection()` below, but we don't want to have to
-  // change all the callsites at this point so just point them to the other
-  // versions.
   Connection& conn() {
-    return connection();
+    auto* conn = connection();
+    CHECK(conn);
+    return *conn;
   }
   const Connection& conn() const {
-    return connection();
+    const auto* conn = connection();
+    CHECK(conn);
+    return *conn;
   }
 
   // Save any mysql errors that occurred (since we may hand off the
   // Connection before the user wants this information).
   void snapshotMysqlErrors();
 
-  // Called when an Operation needs to wait for the socket to become
-  // readable or writable (aka actionable).
-  void waitForSocketActionable();
+  // Called when an Operation needs to wait for the data to be readable or
+  // writable (aka actionable).
+  void waitForActionable();
 
-  // Overridden in child classes and invoked when the socket is
-  // actionable.  This function should either completeOperation or
-  // waitForSocketActionable.
-  virtual void socketActionable() = 0;
+  // Overridden in child classes and invoked when the status is actionable. This
+  // function should either completeOperation or waitForActionable.
+  virtual void actionable() = 0;
 
   // EventHandler override
   void handlerReady(uint16_t /*events*/) noexcept override;
@@ -385,8 +385,8 @@ class Operation : public folly::EventHandler,
    public:
     virtual ~ConnectionProxy() = default;
 
-    virtual Connection& get() = 0;
-    virtual const Connection& get() const = 0;
+    virtual Connection* get() = 0;
+    virtual const Connection* get() const = 0;
     virtual std::unique_ptr<Connection> releaseConnection() {
       return nullptr;
     }
@@ -396,8 +396,8 @@ class Operation : public folly::EventHandler,
    public:
     explicit OwnedConnection(std::unique_ptr<Connection>&& conn);
 
-    Connection& get() override;
-    const Connection& get() const override;
+    Connection* get() override;
+    const Connection* get() const override;
     std::unique_ptr<Connection> releaseConnection() override;
 
    private:
@@ -408,11 +408,11 @@ class Operation : public folly::EventHandler,
    public:
     explicit ReferencedConnection(Connection& conn) : conn_(conn) {}
 
-    Connection& get() override {
-      return conn_;
+    Connection* get() override {
+      return &conn_;
     }
-    const Connection& get() const override {
-      return conn_;
+    const Connection* get() const override {
+      return &conn_;
     }
 
    private:
@@ -477,8 +477,8 @@ class Operation : public folly::EventHandler,
       folly::Promise<std::pair<ReturnType, AsyncPostQueryCallback>>& promise);
 
  private:
-  // Restore folly::RequestContext and also invoke socketActionable()
-  void invokeSocketActionable();
+  // Restore folly::RequestContext and also invoke actionable()
+  void invokeActionable();
 
   folly::atomic_shared_ptr<folly::RequestContext> request_context_;
 

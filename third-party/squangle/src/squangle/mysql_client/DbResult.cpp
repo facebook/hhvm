@@ -291,11 +291,11 @@ void MultiQueryStreamHandler::streamCallback(
         op.result(),
         op.mysql_errno(),
         op.mysql_error(),
-        op.connection().getKey(),
+        op.conn().getKey(),
         op.elapsed());
     state_ = State::OperationFailed;
   }
-  op.connection().notify();
+  op.conn().notify();
 }
 
 folly::Optional<EphemeralRow> MultiQueryStreamHandler::fetchOneRow(
@@ -426,7 +426,7 @@ MultiQueryStreamHandler::~MultiQueryStreamHandler() {
 }
 
 Connection& MultiQueryStreamHandler::connection() const {
-  return operation_->connection();
+  return operation_->conn();
 }
 
 EphemeralRowFields* StreamedQueryResult::getRowFields() const {

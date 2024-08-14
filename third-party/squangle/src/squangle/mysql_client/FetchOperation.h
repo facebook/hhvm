@@ -119,7 +119,7 @@ class FetchOperation : public Operation {
   RowStream* rowStream();
 
   // Stalls the FetchOperation until `resume` is called.
-  // This is used to allow another thread to access the socket functions.
+  // This is used to allow another thread to access the functions.
   void pauseForConsumer();
 
   // Resumes the operation to the action it was before `pause` was called.
@@ -152,13 +152,13 @@ class FetchOperation : public Operation {
   void setFetchAction(FetchAction action);
   static folly::StringPiece toString(FetchAction action);
 
-  // In socket actionable it is analyzed the action that is required to
-  // continue the operation. For example, if the fetch action is StartQuery,
-  // it runs query or requests more results depending if it had already ran or
-  // not the query. The same process happens for the other FetchActions. The
-  // action member can be changed in other member functions called in
-  // socketActionable to keep the fetching flow running.
-  void socketActionable() override;
+  // In actionable it is analyzed the action that is required to continue the
+  // operation. For example, if the fetch action is StartQuery, it runs query or
+  // requests more results depending if it had already ran or not the query. The
+  // same process happens for the other FetchActions. The action member can be
+  // changed in other member functions called in actionable to keep the fetching
+  // flow running.
+  void actionable() override;
   void specializedTimeoutTriggered() override;
   void specializedCompleteOperation() override;
 

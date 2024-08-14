@@ -1331,7 +1331,10 @@ Object AsyncMysqlResult::clientStats() {
 //
 static const db::ConnectionContextBase*
 connectionContextFromOperation(const am::Operation* operation) {
-  auto context = operation->connection().getConnectionContext();
+  const db::ConnectionContextBase* context = nullptr;
+  if (auto* connection = operation->connection()) {
+    context = connection->getConnectionContext();
+  }
   if (!context) {
     auto* connectOp = dynamic_cast<const am::ConnectOperation*>(operation);
     if (connectOp) {

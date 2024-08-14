@@ -207,7 +207,7 @@ class ConnectPoolOperation : public ConnectOperation {
     attemptFailed(failure);
   }
 
-  void socketActionable() override {
+  void actionable() override {
     DCHECK(client().getEventBase()->isInEventBaseThread());
     LOG(DFATAL) << "Should not be called";
   }

@@ -587,7 +587,7 @@ class ConnectionPool
 
     // For async - run in mysql thread; for sync - run in current thread
     runInCorrectThread([changeUserOp = std::move(changeUserOp)] {
-      changeUserOp->connection().client().addOperation(changeUserOp);
+      changeUserOp->connection()->client().addOperation(changeUserOp);
       changeUserOp->run();
     });
   }
@@ -674,7 +674,7 @@ class ConnectionPool
 
     // For async - run in mysql thread; for sync - run in current thread
     runInCorrectThread([resetOp = std::move(resetOp)]() {
-      resetOp->connection().client().addOperation(resetOp);
+      resetOp->conn().client().addOperation(resetOp);
       resetOp->run();
     });
   }

@@ -185,7 +185,7 @@ class ConnectOperation : public Operation {
   virtual void attemptSucceeded(OperationResult result);
 
   ConnectOperation& specializedRun() override;
-  void socketActionable() override;
+  void actionable() override;
   void specializedTimeoutTriggered() override;
   void specializedCompleteOperation() override;
 

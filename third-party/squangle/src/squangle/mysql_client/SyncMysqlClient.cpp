@@ -52,7 +52,7 @@ SyncConnection::~SyncConnection() {
     auto resetOp = Connection::resetConn(std::move(conn));
     // addOperation() is necessary here for proper cancelling of reset
     // operation in case of sudden SyncMysqlClient shutdown
-    resetOp->connection().client().addOperation(resetOp);
+    client().addOperation(resetOp);
     resetOp->run().wait();
   }
 }

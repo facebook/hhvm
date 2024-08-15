@@ -86,7 +86,6 @@ FOLLY_GFLAGS_DEFINE_bool(
     false,
     "Do not register a TransportRoutingHandler that can handle the legacy transports: header, framed, and unframed (default: false)");
 
-THRIFT_FLAG_DEFINE_bool(server_alpn_prefer_rocket, true);
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
 THRIFT_FLAG_DEFINE_bool(enable_mrl_check_for_thrift_server, false);
 THRIFT_FLAG_DEFINE_bool(enforce_mrl_check_for_thrift_server, false);
@@ -2172,35 +2171,18 @@ folly::SemiFuture<ThriftServer::ServerSnapshot> ThriftServer::getServerSnapshot(
 
 folly::observer::Observer<std::list<std::string>>
 ThriftServer::defaultNextProtocols() {
-  return folly::observer::makeObserver(
-      [rocketPreferredObserver =
-           THRIFT_FLAG_OBSERVE(server_alpn_prefer_rocket)] {
-        const auto rocketPreferred = *rocketPreferredObserver.getSnapshot();
-        if (rocketPreferred) {
-          return std::list<std::string>{
-              "rs",
-              "thrift",
-              "h2",
-              // "http" is not a legit specifier but need to include it for
-              // legacy.  Thrift's HTTP2RoutingHandler uses this, and clients
-              // may be sending it.
-              "http",
-              // Many clients still send http/1.1 which is handled by the
-              // default handler.
-              "http/1.1"};
-        }
-        return std::list<std::string>{
-            "thrift",
-            "h2",
-            // "http" is not a legit specifier but need to include it for
-            // legacy.  Thrift's HTTP2RoutingHandler uses this, and clients
-            // may be sending it.
-            "http",
-            // Many clients still send http/1.1 which is handled by the
-            // default handler.
-            "http/1.1",
-            "rs"};
-      });
+  return folly::observer::makeStaticObserver(
+      std::make_shared<std::list<std::string>>(std::list<std::string>{
+          "rs",
+          "thrift",
+          "h2",
+          // "http" is not a legit specifier but need to include it for
+          // legacy.  Thrift's HTTP2RoutingHandler uses this, and clients
+          // may be sending it.
+          "http",
+          // Many clients still send http/1.1 which is handled by the
+          // default handler.
+          "http/1.1"}));
 }
 
 folly::observer::Observer<bool> ThriftServer::enableStopTLS() {

@@ -51,7 +51,6 @@ DECLARE_string(transport);
 
 DEFINE_string(host, "::1", "host to connect to");
 
-THRIFT_FLAG_DECLARE_bool(raw_client_rocket_upgrade_enabled_v2);
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
 THRIFT_FLAG_DECLARE_int64(thrift_client_checksum_sampling_rate);
 
@@ -209,15 +208,11 @@ void TransportCompatibilityTest::connectToServer(
     folly::Function<void(
         std::unique_ptr<TestServiceAsyncClient>,
         std::shared_ptr<ClientConnectionIf>)> callMe) {
-  if (upgradeToRocket_) {
-    THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, true);
-    THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, true);
-  } else {
-    THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_enabled_v2, false);
-    THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, false);
-  }
+  THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, upgradeToRocket_);
+
   server_->connectToServer(
       FLAGS_transport,
+      upgradeToRocket_,
       [callMe = std::move(callMe)](
           std::shared_ptr<RequestChannel> channel,
           std::shared_ptr<ClientConnectionIf> connection) mutable {
@@ -230,6 +225,7 @@ void TransportCompatibilityTest::connectToServer(
 template <typename Service>
 void SampleServer<Service>::connectToServer(
     std::string transport,
+    bool withUpgrade,
     folly::Function<void(
         std::shared_ptr<RequestChannel>, std::shared_ptr<ClientConnectionIf>)>
         callMe) {
@@ -237,9 +233,16 @@ void SampleServer<Service>::connectToServer(
   if (transport == "header") {
     std::shared_ptr<ClientChannel> channel;
     evbThread_.getEventBase()->runInEventBaseThreadAndWait([&]() {
-      channel = HeaderClientChannel::newChannel(
-          folly::AsyncSocket::UniquePtr(new TAsyncSocketIntercepted(
-              evbThread_.getEventBase(), FLAGS_host, port_)));
+      if (withUpgrade) {
+        channel = HeaderClientChannel::newChannel(
+            folly::AsyncSocket::UniquePtr(new TAsyncSocketIntercepted(
+                evbThread_.getEventBase(), FLAGS_host, port_)));
+      } else {
+        channel = HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithoutRocketUpgrade{},
+            folly::AsyncSocket::UniquePtr(new TAsyncSocketIntercepted(
+                evbThread_.getEventBase(), FLAGS_host, port_)));
+      }
     });
     auto channelPtr = channel.get();
     std::shared_ptr<ClientChannel> destroyInEvbChannel(
@@ -288,12 +291,14 @@ void SampleServer<Service>::connectToServer(
           return channel;
         });
     callMe(std::move(channel), nullptr);
-  } else {
+  } else if (transport == "http2") {
     auto mgr = ConnectionManager::getInstance();
     auto connection = mgr->getConnection(FLAGS_host, port_);
     auto channel = ThriftClient::Ptr(new ThriftClient(connection));
     channel->setProtocolId(apache::thrift::protocol::T_COMPACT_PROTOCOL);
     callMe(std::move(channel), std::move(connection));
+  } else {
+    throw std::runtime_error("unknown transport: " + transport);
   }
 }
 

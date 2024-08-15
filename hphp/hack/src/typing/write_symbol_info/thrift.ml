@@ -27,6 +27,7 @@ type t = {
   thrift_path: string;
   services: (string, string) Hashtbl.t;
   mutable cur_container: container option;
+  mutable cur_union_fields: string list;
 }
 
 let empty ~thrift_path =
@@ -34,6 +35,7 @@ let empty ~thrift_path =
     thrift_path;
     services = Hashtbl.create (module String);
     cur_container = None;
+    cur_union_fields = [];
   }
 
 let add { services; _ } ~interface ~service =
@@ -142,6 +144,7 @@ let get_thrift_from_container t con =
     | _ -> container
   in
   Option.iter ~f:(fun container -> t.cur_container <- Some container) container;
+  t.cur_union_fields <- [];
   fact
 
 let make_member_decl member_name container_qname kind =
@@ -173,13 +176,16 @@ let make_member_decl member_name container_qname kind =
           Key
             { enum_ = NamedType.{ name; kind = NamedKind.Enum_ }; name = mname }))
 
-let get_thrift_from_member t ~doc =
+let get_thrift_from_comment t ~doc =
   try
     let substrings = Pcre.exec ~rex:rex_member doc in
     let member_name = Pcre.get_substring substrings 2 in
     let file = File.Key (Src.File.Key t.thrift_path) in
     match t.cur_container with
     | Some { name; kind } ->
+      (match kind with
+      | Union -> t.cur_union_fields <- member_name :: t.cur_union_fields
+      | _ -> ());
       let name = Identifier.Key name in
       let container_qname = QualName.(Key { file; name }) in
       Some (make_member_decl member_name container_qname kind)
@@ -198,3 +204,16 @@ let get_thrift_from_enum t member_name =
   let file = File.Key (Src.File.Key t.thrift_path) in
   let container_qname = QualName.(Key { file; name }) in
   Some (make_member_decl member_name container_qname kind)
+
+let get_thrift_from_union_member t member_name =
+  t.cur_container >>= fun { name; kind } ->
+  List.find t.cur_union_fields ~f:(fun suffix ->
+      String.is_suffix ~suffix member_name)
+  >>= fun union_field_name ->
+  match kind with
+  | Union ->
+    let file = File.Key (Src.File.Key t.thrift_path) in
+    let name = Identifier.Key name in
+    let container_qname = QualName.(Key { file; name }) in
+    Some (make_member_decl union_field_name container_qname kind)
+  | _ -> None

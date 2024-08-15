@@ -32,9 +32,12 @@ let process_thrift_container
     | Some thrift_decl -> Add_fact.hack_to_thrift hack_decl thrift_decl fa
     | None -> fa)
 
+(* Thrift declaration can be reconstructed from comments, enum values, or class members
+   names for union, see [Thrift] *)
 type thrift_member =
-  | Comment of Aast.doc_comment option
+  | Comment of string
   | Enumerator of string
+  | Member_name of string
 
 let process_thrift_member
     (thrift_ctx : Thrift.t)
@@ -46,9 +49,9 @@ let process_thrift_member
     let decl =
       match member with
       | Enumerator id -> Thrift.get_thrift_from_enum thrift_ctx id
-      | Comment (Some (_pos, doc)) ->
-        Thrift.get_thrift_from_member thrift_ctx ~doc
-      | Comment None -> None
+      | Comment doc -> Thrift.get_thrift_from_comment thrift_ctx ~doc
+      | Member_name member_name ->
+        Thrift.get_thrift_from_union_member thrift_ctx member_name
     in
     (match decl with
     | None -> fa
@@ -78,9 +81,14 @@ let process_decl_loc
   let (_, fa) = defn_fun elem decl_id fa in
   let ref = decl_ref_fun decl_id in
   let fa = process_doc_comment doc path ref fa in
+  let thrift_member =
+    match doc with
+    | Some (_pos, doc) -> Comment doc
+    | None -> Member_name id
+  in
   let fa =
     match thrift_ctx with
-    | Some thrift_ctx -> process_thrift_member thrift_ctx (Comment doc) ref fa
+    | Some thrift_ctx -> process_thrift_member thrift_ctx thrift_member ref fa
     | None -> fa
   in
   let fa = process_loc_span path pos span ref fa in

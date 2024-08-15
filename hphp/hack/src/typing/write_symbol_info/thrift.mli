@@ -6,27 +6,48 @@
  *
  *)
 
-(** Defines a context used when parsing comments in a
-    generated-thrift file. *)
+(** This module is used to generate fbthrift.declaration facts from
+    hack entities generated from Thrift.
+
+    For generated hack classes or field/function members,
+    a thrift declaration can be constructed from one or more
+    of the following:
+    - the doc comment of the generated entity
+    - the entity name (for union, and enum fields).
+    - the context in which it appears (enclosing class,
+        thrift source of generated file...)
+
+    The entity comment isn't always sufficient and some context [t] must
+    be maintain at the file level *)
+
+(** Defines a mutable context used when processing generated entities. *)
 type t
 
-(** Should be created for each file *)
+(** Empty context, [thrift_path] is the path relative to repo root
+    of the source thrift file *)
 val empty : thrift_path:string -> t
 
-(** Parse a hack container doc comment in hack file generated
-    from [thrift_path] and generate corresponding thrift fact.
+(** Parses a hack container doc comment and generate thrift decl fact.
 
-    As a side effect, remember container information needed
-    to generate thrift declaration from members. *)
+    Side effect: store in context Thrift container declaration *)
 val get_thrift_from_container :
   t -> ('a, 'b) Aast_defs.class_ -> Fbthrift.Declaration.t option
 
-(** Parse a hack member function doc comment and generate corresponding
-   thrift fact. Assume [get_thrift_from_container] was called immediately
-   before on the enclosing container. *)
-val get_thrift_from_member : t -> doc:string -> Fbthrift.Declaration.t option
+(** Parses a hack member function or field doc comment and generates
+   the corresponding declaration thrift fact. Assumes
+   [get_thrift_from_container] was called immediately before on
+   the enclosing container.
+
+   Side effect, for hack fields generated from Thrift union field, remember
+   Thrift field name in context [t] *)
+val get_thrift_from_comment : t -> doc:string -> Fbthrift.Declaration.t option
 
 (** Generate thrift declaration fact from an enumerator.
    Assume [get_thrift_from_container] was called immediately before on the
    enclosing enum declaration. *)
 val get_thrift_from_enum : t -> string -> Fbthrift.Declaration.t option
+
+(** Generate thrift declaration fact for class members generated from union fields.
+   Assume [get_thrift_from_container] was called on the enclosing container,
+   and [get_thrift_from_comment] on the first union field. *)
+val get_thrift_from_union_member : t -> string -> Fbthrift.Declaration.t option

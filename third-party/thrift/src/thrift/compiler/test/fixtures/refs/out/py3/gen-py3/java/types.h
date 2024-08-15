@@ -84,6 +84,13 @@ inline void reset_field<::facebook::thrift::annotation::java::FieldUseUnmangledN
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::java::UseIntrinsicDefault>(
+    ::facebook::thrift::annotation::java::UseIntrinsicDefault& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::java::Mutable>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -146,6 +153,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::java::FieldUseUnmangledName>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::java::UseIntrinsicDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

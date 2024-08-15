@@ -122,6 +122,8 @@ inline constexpr auto kJavaWrapperUri =
     "facebook.com/thrift/annotation/java/Wrapper";
 inline constexpr auto kJavaFieldUseUnmangledNameUri =
     "facebook.com/thrift/annotation/java/FieldUseUnmangledName";
+inline constexpr auto kJavaUseIntrinsicDefaultUri =
+    "facebook.com/thrift/annotation/java/UseIntrinsicDefault";
 
 // python
 inline constexpr auto kPythonAdapterUri =

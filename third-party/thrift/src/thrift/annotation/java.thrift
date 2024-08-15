@@ -78,3 +78,10 @@ struct Recursive {}
 // behavior is correct to begin with.
 @scope.Field
 struct FieldUseUnmangledName {}
+
+//In some case, due to client and server's thrift definitions out of sync,
+//when thrift runtime deserialize a message it encountered a value not definded in definitions, and it
+//returns null which cause some confusions.
+//We set an annotation named UseIntrinsicDefault here to offer an option to use a default value when the null is received.
+@scope.Enum
+struct UseIntrinsicDefault {}

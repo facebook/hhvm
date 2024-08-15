@@ -6,18 +6,30 @@
  *
  *)
 
+(* Information gathered from the TAST. Includes at least
+ * the type and an environment with which to resolve solved
+ * type variables. For function calls, the type arguments
+ * are also recorded. *)
+type t
+
+val get_type : t -> Tast.ty
+
+val get_targs : t -> Tast.targ list
+
+val get_env : t -> Tast_env.env
+
 val type_at_pos_fused :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->
   (int * int) list ->
-  (Tast_env.env * Tast.ty) option list
+  t option list
 
 val type_at_pos :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->
   int ->
   int ->
-  (Tast_env.env * Tast.ty) option
+  t option
 
 val human_friendly_type_at_pos :
   under_dynamic:bool ->
@@ -25,22 +37,13 @@ val human_friendly_type_at_pos :
   Tast.program Tast_with_dynamic.t ->
   int ->
   int ->
-  (Tast_env.env * Tast.ty) option
+  t option
 
 val type_at_range_fused :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->
   (int * int * int * int) list ->
-  (Tast_env.env * Tast.ty) option list
-
-val type_at_range :
-  Provider_context.t ->
-  Tast.program Tast_with_dynamic.t ->
-  int ->
-  int ->
-  int ->
-  int ->
-  (Tast_env.env * Tast.ty) option
+  t option list
 
 val go_ctx :
   ctx:Provider_context.t ->

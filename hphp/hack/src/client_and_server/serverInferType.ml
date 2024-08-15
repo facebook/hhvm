@@ -10,6 +10,26 @@
 open Hh_prelude
 open Option.Monad_infix
 
+(* Information gathered from TAST.
+ * Type variables occurring are solved with respect to this environment. *)
+type t = {
+  env: Tast_env.env;
+  ty: Tast.ty;
+  targs: Tast.targ list;
+}
+
+(* Usually we just want the type, which might be generic *)
+let get_type (x : t) = x.ty
+
+let get_targs (x : t) = x.targs
+
+let get_env (x : t) = x.env
+
+let mk_info env ty : t = { env; ty = Tast_expand.expand_ty env ty; targs = [] }
+
+let mk_info_with_targs env ty targs : t =
+  { env; ty = Tast_expand.expand_ty env ty; targs }
+
 (* Is this expression indexing into a value of type shape?
  * E.g. $some_shope['foo'].
  *
@@ -92,13 +112,21 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
-    inherit [(Pos.t * _ * _) option list] Visitors_runtime.monoid
+    inherit [(Pos.t * _) option list] Visitors_runtime.monoid
 
     method private select_pos pos env ty =
       let correct_assumptions = self#correct_assumptions env in
       List.map line_char_pairs ~f:(fun (line, char) ->
           if Pos.inside pos line char && correct_assumptions then
-            Some (pos, env, ty)
+            Some (pos, mk_info env ty)
+          else
+            None)
+
+    method private select_pos_targs pos env ty targs =
+      let correct_assumptions = self#correct_assumptions env in
+      List.map line_char_pairs ~f:(fun (line, char) ->
+          if Pos.inside pos line char && correct_assumptions then
+            Some (pos, mk_info_with_targs env ty targs)
           else
             None)
 
@@ -118,8 +146,8 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
          * rearranged so that this is no longer the case (e.g., `invariant`).
          *
          * To deal with this, we simply take the smaller node. *)
-        let (lpos, _, _) = lhs in
-        let (rpos, _, _) = rhs in
+        let (lpos, _) = lhs in
+        let (rpos, _) = rhs in
         if Pos.length lpos <= Pos.length rpos then
           lhs
         else
@@ -171,6 +199,15 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
       | _ ->
         let res = self#select_pos pos env ty in
         self#plus res (super#on_class_id env cid)
+
+    method! on_Call env (Aast.{ func = (ty, pos, _); targs; _ } as call) =
+      let res =
+        if under_dynamic then
+          self#select_pos pos env ty
+        else
+          self#select_pos_targs pos env ty targs
+      in
+      self#plus res (super#on_Call env call)
 
     method! on_class_const env cc =
       let acc = super#on_class_const env cc in
@@ -225,7 +262,7 @@ let range_visitor line_char_pairs =
               ~end_line:endl
               ~end_col:endc
           then
-            Some (env, ty)
+            Some (mk_info env ty)
           else
             None)
 
@@ -252,18 +289,17 @@ let range_visitor line_char_pairs =
 let type_at_pos_fused
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
-    (line_char_pairs : (int * int) list) : (Tast_env.env * Tast.ty) option list
-    =
+    (line_char_pairs : (int * int) list) : t option list =
   (base_visitor ~human_friendly:false ~under_dynamic:false line_char_pairs)#go
     ctx
     tast.Tast_with_dynamic.under_normal_assumptions
-  |> List.map ~f:(Option.map ~f:(fun (_, env, ty) -> (env, ty)))
+  |> List.map ~f:(Option.map ~f:snd)
 
 let type_at_pos
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
     (line : int)
-    (char : int) : (Tast_env.env * Tast.ty) option =
+    (char : int) : t option =
   type_at_pos_fused ctx tast [(line, char)] |> function
   | [res] -> res
   | _ -> None
@@ -282,7 +318,7 @@ let human_friendly_type_at_pos
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
     (line : int)
-    (char : int) : (Tast_env.env * Tast.ty) option =
+    (char : int) : t option =
   let tast =
     if under_dynamic then
       Option.value ~default:[] tast.Tast_with_dynamic.under_dynamic_assumptions
@@ -291,29 +327,16 @@ let human_friendly_type_at_pos
   in
   (base_visitor ~human_friendly:true ~under_dynamic [(line, char)])#go ctx tast
   |> function
-  | [Some (_, env, ty)] -> Some (env, Tast_expand.expand_ty env ty)
+  | [Some (_, info)] -> Some info
   | _ -> None
 
 let type_at_range_fused
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
-    (line_char_pairs : (int * int * int * int) list) :
-    (Tast_env.env * Tast.ty) option list =
+    (line_char_pairs : (int * int * int * int) list) : t option list =
   (range_visitor line_char_pairs)#go
     ctx
     tast.Tast_with_dynamic.under_normal_assumptions
-
-let type_at_range
-    (ctx : Provider_context.t)
-    (tast : Tast.program Tast_with_dynamic.t)
-    (start_line : int)
-    (start_char : int)
-    (end_line : int)
-    (end_char : int) : (Tast_env.env * Tast.ty) option =
-  type_at_range_fused ctx tast [(start_line, start_char, end_line, end_char)]
-  |> function
-  | [result] -> result
-  | _ -> None
 
 let go_ctx
     ~(ctx : Provider_context.t)
@@ -323,6 +346,8 @@ let go_ctx
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  type_at_pos ctx tast line column >>| fun (env, ty) ->
+  type_at_pos ctx tast line column >>| fun info ->
+  let env = get_env info in
+  let ty = get_type info in
   ( Tast_env.print_ty env ty,
     Tast_env.ty_to_json env ty |> Hh_json.json_to_string )

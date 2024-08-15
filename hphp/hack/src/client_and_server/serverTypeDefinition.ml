@@ -15,7 +15,7 @@ let go_common
     (tast : Tast.program Tast_with_dynamic.t)
     ~(line : int)
     ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
-  let env_and_ty =
+  let info_opt =
     ServerInferType.human_friendly_type_at_pos
       ~under_dynamic:false
       ctx
@@ -23,9 +23,10 @@ let go_common
       line
       column
   in
-  match env_and_ty with
+  match info_opt with
   | None -> []
-  | Some (env, ty) ->
+  | Some info ->
+    let ty = ServerInferType.get_type info in
     let rec handle_type acc ty =
       match get_node ty with
       | Tclass ((_, str), _, _) -> begin
@@ -43,7 +44,7 @@ let go_common
           | Tprim _ ->
             (* default to function definition *)
             ( Naming_provider.resolve_position ctx @@ get_pos ty,
-              Tast_env.print_ty env ty )
+              Tast_env.print_ty (ServerInferType.get_env info) ty )
             :: acc
           | _ -> handle_type acc ret_type
         end

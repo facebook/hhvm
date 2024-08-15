@@ -37,7 +37,10 @@ let get_type_at_pos ctx tast_map pos :
   let (path, line, col) = pos in
   let tast = Relative_path.Map.find tast_map path in
   match ServerInferType.type_at_pos ctx tast line col with
-  | Some (env, ty) -> Ok (Tast_env.tast_env_as_typing_env env, ty)
+  | Some info ->
+    Ok
+      ( Tast_env.tast_env_as_typing_env (ServerInferType.get_env info),
+        ServerInferType.get_type info )
   | _ ->
     Error
       (Printf.sprintf

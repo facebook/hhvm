@@ -107,10 +107,13 @@ let helper ctx acc pos_list =
           List.map2_exn
             pos_list
             results
-            ~f:(fun (line, char, end_line, end_char) env_and_ty ->
+            ~f:(fun (line, char, end_line, end_char) info_opt ->
               let result =
-                env_and_ty
-                |> Option.map ~f:(fun (env, ty) -> Tast_env.ty_to_json env ty)
+                info_opt
+                |> Option.map ~f:(fun info ->
+                       Tast_env.ty_to_json
+                         (ServerInferType.get_env info)
+                         (ServerInferType.get_type info))
               in
               let pos = (fn, line, char, Some (end_line, end_char)) in
               result_to_string (Result.Ok result) pos))
@@ -128,10 +131,13 @@ let helper ctx acc pos_list =
               result_to_string (Result.Error result) pos)
         | Some tast ->
           let results = ServerInferType.type_at_pos_fused ctx tast pos_list in
-          List.map2_exn pos_list results ~f:(fun (line, char) env_and_ty ->
+          List.map2_exn pos_list results ~f:(fun (line, char) info_opt ->
               let result =
-                env_and_ty
-                |> Option.map ~f:(fun (env, ty) -> Tast_env.ty_to_json env ty)
+                info_opt
+                |> Option.map ~f:(fun info ->
+                       Tast_env.ty_to_json
+                         (ServerInferType.get_env info)
+                         (ServerInferType.get_type info))
               in
               let pos = (fn, line, char, None) in
               result_to_string (Result.Ok result) pos))

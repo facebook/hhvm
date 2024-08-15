@@ -230,15 +230,20 @@ bool checkCfg(const IRUnit& unit) {
         );
 
         auto const dom = findDefiningBlock(src, idoms);
-        auto const locally_defined =
-          src->inst()->block() == inst.block() && defined_set.contains(src);
+        auto const locally_defined = defined_set.contains(src);
+        assertx(IMPLIES(locally_defined, src->inst()->block() == inst.block()));
         auto const strictly_dominates =
-          src->inst()->block() != inst.block() &&
-          dom && dominates(dom, inst.block(), idoms);
+          !locally_defined && dom && dominates(dom, inst.block(), idoms);
+        always_assert_flog(
+          locally_defined || dom,
+          "src '{}' in '{}' is not defined anywhere in this unit",
+          src->toString(), inst.toString()
+        );
         always_assert_flog(
           locally_defined || strictly_dominates,
           "src '{}' in '{}' came from '{}', which is not a "
-          "DefConst and is not defined at this use site",
+          "DefConst and is not defined at this use site since"
+          "defining block does not dominate",
           src->toString(), inst.toString(),
           src->inst()->toString()
         );

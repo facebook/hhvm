@@ -141,13 +141,6 @@ let accumulate_job_output
         accumulated_so_far.profiling_info;
   }
 
-type progress_kind = Progress
-
-type job_progress = {
-  kind: progress_kind;
-  progress: TypingProgress.t;
-}
-
 type check_info = {
   init_id: string;
   check_reason: string;

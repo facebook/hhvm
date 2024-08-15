@@ -528,13 +528,21 @@ let load_and_process_workitems
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
+module Counts = struct
+  type t = int SMap.t
+
+  let increment map key =
+    let prev_count = SMap.find_opt key map |> Option.value ~default:0 in
+    SMap.add key (prev_count + 1) map
+end
+
 (** Merge the results from multiple workers.
 
     We don't really care about which files are left unchecked since we use
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
 let merge
-    ~(batch_counts_by_worker_id : int SMap.t ref)
+    ~(batch_counts_by_worker_id : Counts.t ref)
     ~(errors_so_far : int ref)
     ~(check_info : check_info)
     (workitems_to_process : workitem BigList.t ref)
@@ -544,19 +552,10 @@ let merge
     (time_first_error : seconds_since_epoch option ref)
     ( (worker_id : string),
       (produced_by_job : typing_result),
-      ({ kind = progress_kind; progress : TypingProgress.t } : job_progress) )
+      (progress : TypingProgress.t) )
     (acc : typing_result) : typing_result =
-  (* Update batch count *)
-  begin
-    match progress_kind with
-    | Progress ->
-      let prev_batch_count =
-        SMap.find_opt worker_id !batch_counts_by_worker_id
-        |> Option.value ~default:0
-      in
-      batch_counts_by_worker_id :=
-        SMap.add worker_id (prev_batch_count + 1) !batch_counts_by_worker_id
-  end;
+  batch_counts_by_worker_id :=
+    Counts.increment !batch_counts_by_worker_id worker_id;
 
   (* And error count *)
   errors_so_far := !errors_so_far + Errors.count produced_by_job.errors;
@@ -633,18 +632,18 @@ let next
     (workers : MultiWorker.worker list option)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_in_progress : workitem Hash_set.Poly.t)
-    (record : Measure.record) : unit -> job_progress Bucket.bucket =
+    (record : Measure.record) : unit -> TypingProgress.t Bucket.bucket =
   let num_workers =
     match workers with
     | Some w -> List.length w
     | None -> 1
   in
-  let return_bucket_job (kind : progress_kind) ~current_bucket ~remaining_jobs =
+  let return_bucket_job ~current_bucket ~remaining_jobs =
     (* Update our shared mutable state, because hey: it's not like we're
        writing OCaml or anything. *)
     workitems_to_process := remaining_jobs;
     List.iter ~f:(Hash_set.Poly.add workitems_in_progress) current_bucket;
-    Bucket.Job { kind; progress = TypingProgress.init current_bucket }
+    Bucket.Job (TypingProgress.init current_bucket)
   in
   fun () ->
     Measure.time ~record "time" @@ fun () ->
@@ -660,8 +659,7 @@ let next
       begin
         match num_workers with
         (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
-        | 0 ->
-          return_bucket_job Progress ~current_bucket:[] ~remaining_jobs:jobs
+        | 0 -> return_bucket_job ~current_bucket:[] ~remaining_jobs:jobs
         | _ ->
           let bucket_size =
             Bucket.calculate_bucket_size
@@ -672,7 +670,7 @@ let next
           let (current_bucket, remaining_jobs) =
             BigList.split_n jobs bucket_size
           in
-          return_bucket_job Progress ~current_bucket ~remaining_jobs
+          return_bucket_job ~current_bucket ~remaining_jobs
       end
 
 let on_cancelled
@@ -892,27 +890,25 @@ let process_in_parallel
   let next = next workers workitems_to_process workitems_in_progress record in
   (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
      It is marshalled immediately before being executed. *)
-  let job (typing_result : typing_result) (progress : job_progress) :
-      string * typing_result * job_progress =
+  let job (typing_result : typing_result) (progress : TypingProgress.t) :
+      string * typing_result * TypingProgress.t =
     let worker_id = Option.value ~default:"main" (Hh_logger.get_id ()) in
     let (typing_result, computation_progress) =
-      match progress.kind with
-      | Progress ->
-        load_and_process_workitems
-          ctx
-          ~memory_cap
-          ~longlived_workers
-          ~check_info
-          ~typecheck_info
-          ~worker_id
-          ~error_count_at_start_of_batch:!errors_so_far
-          ~batch_number:
-            (SMap.find_opt worker_id !batch_counts_by_worker_id
-            |> Option.value ~default:0)
-          typing_result
-          progress.progress
+      load_and_process_workitems
+        ctx
+        ~memory_cap
+        ~longlived_workers
+        ~check_info
+        ~typecheck_info
+        ~worker_id
+        ~error_count_at_start_of_batch:!errors_so_far
+        ~batch_number:
+          (SMap.find_opt worker_id !batch_counts_by_worker_id
+          |> Option.value ~default:0)
+        typing_result
+        progress
     in
-    (worker_id, typing_result, { progress with progress = computation_progress })
+    (worker_id, typing_result, computation_progress)
   in
   let (typing_result, env, cancelled_results) =
     MultiWorker.call_with_interrupt
@@ -934,10 +930,10 @@ let process_in_parallel
         (on_cancelled next workitems_to_process workitems_in_progress)
       ~interrupt
   in
-  let paths_of (unfinished : job_progress list) : Relative_path.t list =
-    let paths_of (cancelled_progress : job_progress) =
+  let paths_of (unfinished : TypingProgress.t list) : Relative_path.t list =
+    let paths_of (cancelled_progress : TypingProgress.t) =
       let cancelled_computations =
-        TypingProgress.remaining cancelled_progress.progress
+        TypingProgress.remaining cancelled_progress
       in
       let paths_of paths (cancelled_workitem : workitem) =
         match cancelled_workitem with

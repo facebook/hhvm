@@ -86,18 +86,36 @@ inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
         std::string("failed to set name entry: ") + entry.first);
   }
 
-  if (ca) {
-    X509V3_CTX ctx;
-    X509V3_set_ctx_nodb(&ctx);
-    std::array<char, 8> constraint{"CA:TRUE"};
-    folly::ssl::X509ExtensionUniquePtr ext(X509V3_EXT_conf_nid(
-        nullptr, &ctx, NID_basic_constraints, constraint.data()));
-    throwIfNull(ext, "failed to create extension");
-    throwIfNeq(
-        X509_EXTENSION_set_critical(ext.get(), 1), 1, "failed to set critical");
-    throwIfNeq(
-        X509_add_ext(crt.get(), ext.get(), -1), 1, "failed to add extension");
+  X509V3_CTX ctx;
+  if (issuer) {
+    X509V3_set_ctx(&ctx, issuer->cert.get(), crt.get(), nullptr, nullptr, 0);
+  } else {
+    X509V3_set_ctx(&ctx, crt.get(), crt.get(), nullptr, nullptr, 0);
   }
+
+  std::string configuration = R"(
+[fizz]
+subjectKeyIdentifier    = hash                                            
+authorityKeyIdentifier  = keyid:always, issuer                     
+extendedKeyUsage        = critical, serverAuth, clientAuth
+)";
+  if (ca) {
+    configuration.append("basicConstraints = critical, CA:TRUE\n");
+    configuration.append(
+        "keyUsage = critical, cRLSign, digitalSignature, keyCertSign\n");
+  } else {
+    configuration.append("basicConstraints = critical, CA:FALSE\n");
+    configuration.append("keyUsage = critical, cRLSign, digitalSignature\n");
+  }
+
+  folly::ssl::BioUniquePtr bio(
+      BIO_new_mem_buf(configuration.data(), configuration.size()));
+  CONF* c = NCONF_new(nullptr);
+  NCONF_load_bio(c, bio.get(), nullptr);
+  // Create X509_EXTENSIONS from each extension config specified in the "fizz"
+  // section then add them into the X509 `crt`
+  X509V3_EXT_add_nconf(c, &ctx, "fizz", crt.get());
+  NCONF_free(c);
 
   if (issuer) {
     throwIfNeq(

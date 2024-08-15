@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
 #include <signal.h>
 
 #include <folly/io/async/AsyncServerSocket.h>
@@ -29,7 +28,6 @@
 #include <variant>
 
 #include <glog/logging.h>
-#include <folly/Conv.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>

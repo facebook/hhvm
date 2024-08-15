@@ -62,7 +62,7 @@ class TimeoutTest(unittest.TestCase):
                 socket.open()
                 leaky.append(socket)
         except Exception:
-            self.assert_(time.time() - starttime < 5.0)
+            self.assertTrue(time.time() - starttime < 5.0)
 
     def testWriteTimeout(self):
         starttime = time.time()
@@ -76,7 +76,7 @@ class TimeoutTest(unittest.TestCase):
                 socket.write("hi" * 100)
 
         except Exception:
-            self.assert_(time.time() - starttime < 5.0)
+            self.assertTrue(time.time() - starttime < 5.0)
 
 
 def suite():

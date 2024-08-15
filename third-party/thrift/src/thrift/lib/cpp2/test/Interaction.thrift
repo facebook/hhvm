@@ -25,10 +25,12 @@ struct Point {
   2: i32 y;
 }
 
+exception AdditionException {}
+
 interaction Addition {
   void accumulatePrimitive(1: i32 a);
   void accumulatePoint(1: Point a);
-  i32 getPrimitive();
+  i32 getPrimitive() throws (1: AdditionException ex);
   Point getPoint();
   oneway void noop();
 }
@@ -55,7 +57,7 @@ service Calculator {
   performs SerialAddition;
   i32 addPrimitive(1: i32 a, 2: i32 b);
 
-  Addition newAddition();
+  Addition newAddition() throws (1: AdditionException ex);
   Addition, i32 initializedAddition(1: i32 a);
   Addition, string stringifiedAddition(1: i32 a);
   AdditionFast fastAddition();

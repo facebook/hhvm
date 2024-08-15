@@ -56,6 +56,7 @@ from testing.thrift_types import (
     Reserved,
     Runtime,
     StringBucket,
+    StructuredAnnotation,
     UnusedError,
 )
 from thrift.python.serializer import deserialize, serialize_iobuf
@@ -327,6 +328,9 @@ class StructTests(unittest.TestCase):
         with self.assertRaises(AttributeError):
             # pyre-ignore[41]: Cannot reassign final attribute `name`.
             e.name = "foo"
+
+    def test_recursive_init(self) -> None:
+        StructuredAnnotation()
 
 
 @parameterized_class(

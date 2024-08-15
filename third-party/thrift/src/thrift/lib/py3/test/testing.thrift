@@ -367,7 +367,7 @@ struct StructuredAnnotation {
   2: map<double, i64> first;
   3: i64 second;
   4: list<string> third;
-  5: StructuredAnnotation recurse (cpp.ref = "True");
+  5: optional StructuredAnnotation recurse (cpp.ref = "True");
 }
 
 @StructuredAnnotation{

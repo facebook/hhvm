@@ -576,15 +576,16 @@ let go_quarantined
       | None -> ""
       | Some info ->
         let ty = ServerInferType.get_type info in
-        (* Rough: if there are type variables then we won't see that the types are the same *)
-        if Typing_defs.ty_equal ty ty_dynamic then
+        let env = ServerInferType.get_env info_dynamic in
+        (* If under dynamic the type is no worse then don't
+         * bother presenting it. Example: ~int in static mode, dynamic under dynamic mode.
+         *)
+        if Tast_env.is_sub_type env ty_dynamic ty then
           ""
         else
           Printf.sprintf
             " (%s when called dynamically)"
-            (Tast_env.print_ty
-               (ServerInferType.get_env info_dynamic)
-               ty_dynamic))
+            (Tast_env.print_ty env ty_dynamic))
     | None -> ""
   in
   let result =

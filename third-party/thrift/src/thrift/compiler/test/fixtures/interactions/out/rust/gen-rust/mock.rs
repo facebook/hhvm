@@ -135,19 +135,19 @@ impl<'mock> ::::MyService for MyService<'mock> {
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionFastClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::SerialInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
     fn foo(
@@ -161,19 +161,19 @@ impl<'mock> ::::MyService for MyService<'mock> {
     fn interact(
         &self,
         _arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 }
@@ -193,7 +193,7 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
         <Self as ::::MyService>::interact(
             self,
             arg_arg,
@@ -202,7 +202,7 @@ where
     fn interactFast_with_rpc_opts(
         &self,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
         <Self as ::::MyService>::interactFast(
             self,
         )
@@ -210,7 +210,7 @@ where
     fn serialize_with_rpc_opts(
         &self,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
         <Self as ::::MyService>::serialize(
             self,
         )
@@ -263,19 +263,19 @@ impl<'mock> ::::Factories for Factories<'mock> {
     fn interact(
         &self,
         _arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 }
@@ -295,7 +295,7 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
         <Self as ::::Factories>::interact(
             self,
             arg_arg,
@@ -304,7 +304,7 @@ where
     fn interactFast_with_rpc_opts(
         &self,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
         <Self as ::::Factories>::interactFast(
             self,
         )
@@ -312,7 +312,7 @@ where
     fn serialize_with_rpc_opts(
         &self,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
         <Self as ::::Factories>::serialize(
             self,
         )
@@ -351,19 +351,19 @@ impl<'mock> ::::Perform for Perform<'mock> {
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionFastClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::SerialInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
     fn foo(
@@ -427,13 +427,13 @@ impl<'mock> ::::InteractWithShared for InteractWithShared<'mock> {
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn createshared.SharedInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::SharedInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SharedInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 }

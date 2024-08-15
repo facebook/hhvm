@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 pub trait Service: ::std::marker::Send {
     fn func(
         &self,
@@ -93,6 +92,7 @@ pub struct ServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> ServiceImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -116,6 +116,7 @@ where
     }
 
 
+
     fn _func_impl(
         &self,
         arg_arg1: &::std::primitive::str,
@@ -126,8 +127,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Service";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Service.func";
+        let service_name = c"Service";
+        let service_method_name = c"Service.func";
+
         let args = self::Args_Service_func {
             arg1: arg_arg1,
             arg2: arg_arg2,
@@ -144,7 +146,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Service.func"));
 
         async move {
@@ -355,7 +357,6 @@ impl ::fbthrift::ClientFactory for make_Service {
     }
 }
 
-
 pub trait AdapterService: ::std::marker::Send {
     fn count(
         &self,
@@ -442,6 +443,7 @@ pub struct AdapterServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> AdapterServiceImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -465,6 +467,7 @@ where
     }
 
 
+
     fn _count_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -472,8 +475,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"AdapterService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AdapterService.count";
+        let service_name = c"AdapterService";
+        let service_method_name = c"AdapterService.count";
+
         let args = self::Args_AdapterService_count {
             _phantom: ::std::marker::PhantomData,
         };
@@ -487,7 +491,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AdapterService.count"));
 
         async move {
@@ -516,8 +520,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"AdapterService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AdapterService.adaptedTypes";
+        let service_name = c"AdapterService";
+        let service_method_name = c"AdapterService.adaptedTypes";
+
         let args = self::Args_AdapterService_adaptedTypes {
             arg: arg_arg,
             _phantom: ::std::marker::PhantomData,
@@ -532,7 +537,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AdapterService.adaptedTypes"));
 
         async move {

@@ -111,7 +111,335 @@ where
     fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
     }
-}pub trait MyInteractionFast: ::std::marker::Send {
+}
+/// Client definitions for `MyInteraction`.
+pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    #[allow(dead_code)]
+    names: &'static MyInteractionNames,
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+pub struct MyInteractionNames {
+    pub service: &'static ::std::ffi::CStr,
+    pub method_frobnicate: &'static ::std::ffi::CStr,
+    pub method_ping: &'static ::std::ffi::CStr,
+    pub method_truthify: &'static ::std::ffi::CStr,
+}
+
+impl<P, T, S> MyInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+        names: &'static MyInteractionNames,
+    ) -> Self {
+        Self {
+            names,
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+
+
+    fn _frobnicate_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_frobnicate;
+
+        let args = self::Args_MyInteraction_frobnicate {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.frobnicate", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::FrobnicateReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction::FrobnicateError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteraction.frobnicate"))
+        .boxed()
+    }
+
+    fn _ping_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_ping;
+
+        let args = self::Args_MyInteraction_ping {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
+        .boxed()
+    }
+
+    fn _truthify_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_truthify;
+
+        let args = self::Args_MyInteraction_truthify {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.truthify", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_stream = transport
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
+
+        async move {
+            let (initial, stream) = call_stream.await?;
+
+            let new_stream = stream.then(|item_res| {
+                async move {
+                    match item_res {
+                        ::std::result::Result::Err(err) =>
+                            ::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::from(err)),
+                        ::std::result::Result::Ok(item_enc) => {
+                            S::spawn(move || {
+                                match item_enc {
+                                    ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::my_interaction::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
+                                    ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
+                                    }
+                                }
+                            }).await.map_err(::anyhow::Error::from)??
+                        }
+                    }
+                }
+            })
+            .boxed();
+
+            let de = P::deserializer(initial);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::TruthifyReader, S>(de)
+                .await??
+                .map(move |_| new_stream);
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+
+
+struct Args_MyInteraction_frobnicate<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_frobnicate<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.frobnicate"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_MyInteraction_ping<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_MyInteraction_truthify<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_truthify<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.truthify"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._ping_impl(
+            rpc_options,
+        )
+    }
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._truthify_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
+        self._ping_impl(
+            rpc_options,
+        )
+    }
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
+        self._truthify_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
+
+
+pub trait MyInteractionFast: ::std::marker::Send {
     fn frobnicate(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>>;
@@ -207,7 +535,335 @@ where
     fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
     }
-}pub trait SerialInteraction: ::std::marker::Send {
+}
+/// Client definitions for `MyInteractionFast`.
+pub struct MyInteractionFastImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    #[allow(dead_code)]
+    names: &'static MyInteractionFastNames,
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+pub struct MyInteractionFastNames {
+    pub service: &'static ::std::ffi::CStr,
+    pub method_frobnicate: &'static ::std::ffi::CStr,
+    pub method_ping: &'static ::std::ffi::CStr,
+    pub method_truthify: &'static ::std::ffi::CStr,
+}
+
+impl<P, T, S> MyInteractionFastImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+        names: &'static MyInteractionFastNames,
+    ) -> Self {
+        Self {
+            names,
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+
+
+    fn _frobnicate_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_frobnicate;
+
+        let args = self::Args_MyInteractionFast_frobnicate {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.frobnicate", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::FrobnicateReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction_fast::FrobnicateError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.frobnicate"))
+        .boxed()
+    }
+
+    fn _ping_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_ping;
+
+        let args = self::Args_MyInteractionFast_ping {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.ping", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::PingReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::my_interaction_fast::PingError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.ping"))
+        .boxed()
+    }
+
+    fn _truthify_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_truthify;
+
+        let args = self::Args_MyInteractionFast_truthify {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.truthify", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call_stream = transport
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
+
+        async move {
+            let (initial, stream) = call_stream.await?;
+
+            let new_stream = stream.then(|item_res| {
+                async move {
+                    match item_res {
+                        ::std::result::Result::Err(err) =>
+                            ::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::from(err)),
+                        ::std::result::Result::Ok(item_enc) => {
+                            S::spawn(move || {
+                                match item_enc {
+                                    ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::my_interaction_fast::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
+                                    ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::ApplicationException(aexn)))
+                                    }
+                                }
+                            }).await.map_err(::anyhow::Error::from)??
+                        }
+                    }
+                }
+            })
+            .boxed();
+
+            let de = P::deserializer(initial);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::TruthifyReader, S>(de)
+                .await??
+                .map(move |_| new_stream);
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+
+
+struct Args_MyInteractionFast_frobnicate<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_frobnicate<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.frobnicate"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_MyInteractionFast_ping<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_ping<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.ping"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_MyInteractionFast_truthify<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_truthify<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.truthify"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> MyInteractionFast for MyInteractionFastImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+    fn ping(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._ping_impl(
+            rpc_options,
+        )
+    }
+    fn truthify(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._truthify_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> MyInteractionFastExt<T> for MyInteractionFastImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+    fn ping_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
+        self._ping_impl(
+            rpc_options,
+        )
+    }
+    fn truthify_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
+        self._truthify_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
+
+
+pub trait SerialInteraction: ::std::marker::Send {
     fn frobnicate(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
@@ -259,798 +915,174 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 }
-
-pub mod my_service {
-    use super::*;
-    
-    
-    /// Client definitions for `MyInteraction`.
-    pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.frobnicate";
-            let args = self::Args_MyInteraction_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.frobnicate"))
-            .boxed()
-        }
-    
-        fn _ping_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.ping";
-            let args = self::Args_MyInteraction_ping {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
-            .boxed()
-        }
-    
-        fn _truthify_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-            use ::futures::StreamExt as _;
-            use ::fbthrift::Deserialize as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteraction.truthify";
-            let args = self::Args_MyInteraction_truthify {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.truthify", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call_stream = transport
-                .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
-    
-            async move {
-                let (initial, stream) = call_stream.await?;
-    
-                let new_stream = stream.then(|item_res| {
-                    async move {
-                        match item_res {
-                            ::std::result::Result::Err(err) =>
-                                ::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::from(err)),
-                            ::std::result::Result::Ok(item_enc) => {
-                                S::spawn(move || {
-                                    match item_enc {
-                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            <crate::errors::my_interaction::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
-                                        }
-                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                            ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
-                                        }
-                                    }
-                                }).await.map_err(::anyhow::Error::from)??
-                            }
-                        }
-                    }
-                })
-                .boxed();
-    
-                let de = P::deserializer(initial);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::TruthifyReader, S>(de)
-                    .await??
-                    .map(move |_| new_stream);
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_MyInteraction_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_ping<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_truthify<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_truthify<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.truthify"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
-    
-    
-        
-    
-    /// Client definitions for `MyInteractionFast`.
-    pub struct MyInteractionFastImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.frobnicate";
-            let args = self::Args_MyInteractionFast_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction_fast::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.frobnicate"))
-            .boxed()
-        }
-    
-        fn _ping_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.ping";
-            let args = self::Args_MyInteractionFast_ping {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.ping", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::PingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction_fast::PingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.ping"))
-            .boxed()
-        }
-    
-        fn _truthify_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-            use ::futures::StreamExt as _;
-            use ::fbthrift::Deserialize as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.MyInteractionFast.truthify";
-            let args = self::Args_MyInteractionFast_truthify {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.truthify", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call_stream = transport
-                .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
-    
-            async move {
-                let (initial, stream) = call_stream.await?;
-    
-                let new_stream = stream.then(|item_res| {
-                    async move {
-                        match item_res {
-                            ::std::result::Result::Err(err) =>
-                                ::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::from(err)),
-                            ::std::result::Result::Ok(item_enc) => {
-                                S::spawn(move || {
-                                    match item_enc {
-                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            <crate::errors::my_interaction_fast::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
-                                        }
-                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                            ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::ApplicationException(aexn)))
-                                        }
-                                    }
-                                }).await.map_err(::anyhow::Error::from)??
-                            }
-                        }
-                    }
-                })
-                .boxed();
-    
-                let de = P::deserializer(initial);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::TruthifyReader, S>(de)
-                    .await??
-                    .map(move |_| new_stream);
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_MyInteractionFast_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteractionFast_ping<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_ping<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.ping"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteractionFast_truthify<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_truthify<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.truthify"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> MyInteractionFast for MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> MyInteractionFastExt<T> for MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
-    
-    
-        
-    
-    /// Client definitions for `SerialInteraction`.
-    pub struct SerialInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.SerialInteraction.frobnicate";
-            let args = self::Args_SerialInteraction_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SerialInteraction.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::serial_interaction::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::serial_interaction::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for SerialInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_SerialInteraction_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SerialInteraction_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SerialInteraction.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> SerialInteraction for SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> SerialInteractionExt<T> for SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
-    
-    
-    
+/// Client definitions for `SerialInteraction`.
+pub struct SerialInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    #[allow(dead_code)]
+    names: &'static SerialInteractionNames,
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
+
+pub struct SerialInteractionNames {
+    pub service: &'static ::std::ffi::CStr,
+    pub method_frobnicate: &'static ::std::ffi::CStr,
+}
+
+impl<P, T, S> SerialInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+        names: &'static SerialInteractionNames,
+    ) -> Self {
+        Self {
+            names,
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+
+
+    fn _frobnicate_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_frobnicate;
+
+        let args = self::Args_SerialInteraction_frobnicate {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SerialInteraction.frobnicate", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::serial_interaction::FrobnicateReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::serial_interaction::FrobnicateError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for SerialInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+
+
+struct Args_SerialInteraction_frobnicate<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SerialInteraction_frobnicate<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SerialInteraction.frobnicate"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> SerialInteraction for SerialInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> SerialInteractionExt<T> for SerialInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn frobnicate_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
+        self._frobnicate_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
+
+
 
 pub trait MyService: ::std::marker::Send {
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error>;
 
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionFastClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error>;
 
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::SerialInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error>;
 
     fn foo(
         &self,
@@ -1059,15 +1091,15 @@ pub trait MyService: ::std::marker::Send {
     fn interact(
         &self,
         arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>>;
 
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
 
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
 }
 
 pub trait MyServiceExt<T>: MyService
@@ -1082,15 +1114,15 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>>;
     fn interactFast_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>>;
     fn serialize_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -1103,17 +1135,17 @@ where
 {
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         self.as_ref().createMyInteraction()
     }
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionFastClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error> {
         self.as_ref().createMyInteractionFast()
     }
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::SerialInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error> {
         self.as_ref().createSerialInteraction()
     }
     fn foo(
@@ -1125,20 +1157,20 @@ where
     fn interact(
         &self,
         arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
         self.as_ref().interact(
             arg_arg,
         )
     }
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
         self.as_ref().interactFast(
         )
     }
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
         self.as_ref().serialize(
         )
     }
@@ -1163,7 +1195,7 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
         <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).interact_with_rpc_opts(
             arg_arg,
             rpc_options,
@@ -1172,7 +1204,7 @@ where
     fn interactFast_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
         <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).interactFast_with_rpc_opts(
             rpc_options,
         )
@@ -1180,7 +1212,7 @@ where
     fn serialize_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
         <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).serialize_with_rpc_opts(
             rpc_options,
         )
@@ -1195,6 +1227,7 @@ pub struct MyServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
+
 
 impl<P, T, S> MyServiceImpl<P, T, S>
 where
@@ -1218,6 +1251,23 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 
+    const NAMES_MyInteraction: crate::client::MyInteractionNames = crate::client::MyInteractionNames {
+        service: c"MyService",
+        method_frobnicate: c"MyService.MyInteraction.frobnicate",
+        method_ping: c"MyService.MyInteraction.ping",
+        method_truthify: c"MyService.MyInteraction.truthify",
+    };
+    const NAMES_MyInteractionFast: crate::client::MyInteractionFastNames = crate::client::MyInteractionFastNames {
+        service: c"MyService",
+        method_frobnicate: c"MyService.MyInteractionFast.frobnicate",
+        method_ping: c"MyService.MyInteractionFast.ping",
+        method_truthify: c"MyService.MyInteractionFast.truthify",
+    };
+    const NAMES_SerialInteraction: crate::client::SerialInteractionNames = crate::client::SerialInteractionNames {
+        service: c"MyService",
+        method_frobnicate: c"MyService.SerialInteraction.frobnicate",
+    };
+
 
     fn _foo_impl(
         &self,
@@ -1226,8 +1276,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.foo";
+        let service_name = c"MyService";
+        let service_method_name = c"MyService.foo";
+
         let args = self::Args_MyService_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1241,7 +1292,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.foo"));
 
         async move {
@@ -1266,12 +1317,13 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.interact";
+        let service_name = c"MyService";
+        let service_method_name = c"MyService.interact";
+
         const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteraction";
         let args = self::Args_MyService_interact {
             arg: arg_arg,
@@ -1282,7 +1334,7 @@ where
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = crate::my_service::MyInteractionImpl::<P, T, S>::new(interaction_transport);
+        let interaction_impl = crate::MyInteractionImpl::<P, T, S>::new(interaction_transport, &Self::NAMES_MyInteraction);
         let transport = interaction_impl.transport();
 
         // need to do call setup outside of async block because T: Transport isn't Send
@@ -1292,7 +1344,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.interact"));
 
         async move {
@@ -1307,7 +1359,7 @@ where
                     ::std::result::Result::Err(crate::errors::my_service::InteractError::ApplicationException(aexn))
                 }
             };
-            let interaction_client: crate::client::my_service::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
+            let interaction_client: crate::client::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
             res?;
             ::std::result::Result::Ok(interaction_client)
         }
@@ -1318,12 +1370,13 @@ where
     fn _interactFast_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.interactFast";
+        let service_name = c"MyService";
+        let service_method_name = c"MyService.interactFast";
+
         const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteractionFast";
         let args = self::Args_MyService_interactFast {
             _phantom: ::std::marker::PhantomData,
@@ -1333,7 +1386,7 @@ where
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = crate::my_service::MyInteractionFastImpl::<P, T, S>::new(interaction_transport);
+        let interaction_impl = crate::MyInteractionFastImpl::<P, T, S>::new(interaction_transport, &Self::NAMES_MyInteractionFast);
         let transport = interaction_impl.transport();
 
         // need to do call setup outside of async block because T: Transport isn't Send
@@ -1343,7 +1396,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyService.interactFast"));
 
         async move {
@@ -1358,7 +1411,7 @@ where
                     ::std::result::Result::Err(crate::errors::my_service::InteractFastError::ApplicationException(aexn))
                 }
             };
-            let interaction_client: crate::client::my_service::MyInteractionFastClient = ::std::sync::Arc::new(interaction_impl);
+            let interaction_client: crate::client::MyInteractionFastClient = ::std::sync::Arc::new(interaction_impl);
             ::std::result::Result::Ok((interaction_client, res?))
         }
         .instrument(::tracing::info_span!("stream", method = "MyService.interactFast"))
@@ -1368,14 +1421,15 @@ where
     fn _serialize_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyService.serialize";
+        let service_name = c"MyService";
+        let service_method_name = c"MyService.serialize";
+
         const INTERACTION_NAME: &::std::ffi::CStr = c"SerialInteraction";
         let args = self::Args_MyService_serialize {
             _phantom: ::std::marker::PhantomData,
@@ -1385,7 +1439,7 @@ where
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = crate::my_service::SerialInteractionImpl::<P, T, S>::new(interaction_transport);
+        let interaction_impl = crate::SerialInteractionImpl::<P, T, S>::new(interaction_transport, &Self::NAMES_SerialInteraction);
         let transport = interaction_impl.transport();
 
         // need to do call setup outside of async block because T: Transport isn't Send
@@ -1395,7 +1449,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "MyService.serialize"));
 
         async move {
@@ -1430,7 +1484,7 @@ where
             let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_service::SerializeReader, S>(de)
                 .await??
                 .map(move |initial| (initial, new_stream));
-            let interaction_client: crate::client::my_service::SerialInteractionClient = ::std::sync::Arc::new(interaction_impl);
+            let interaction_client: crate::client::SerialInteractionClient = ::std::sync::Arc::new(interaction_impl);
             ::std::result::Result::Ok((interaction_client, res?))
         }
         .instrument(::tracing::info_span!("stream", method = "MyService.serialize"))
@@ -1521,11 +1575,12 @@ where
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::my_service::MyInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"MyInteraction")?
+                crate::client::MyInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"MyInteraction")?,
+                    &Self::NAMES_MyInteraction,
                 )
             )
         )
@@ -1533,11 +1588,12 @@ where
 
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::MyInteractionFastClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::my_service::MyInteractionFastImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"MyInteractionFast")?
+                crate::client::MyInteractionFastImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"MyInteractionFast")?,
+                    &Self::NAMES_MyInteractionFast,
                 )
             )
         )
@@ -1545,11 +1601,12 @@ where
 
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::my_service::SerialInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::my_service::SerialInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"SerialInteraction")?
+                crate::client::SerialInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"SerialInteraction")?,
+                    &Self::NAMES_SerialInteraction,
                 )
             )
         )
@@ -1565,7 +1622,7 @@ where
     fn interact(
         &self,
         arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
         let rpc_options = T::RpcOptions::default();
         self._interact_impl(
             arg_arg,
@@ -1574,7 +1631,7 @@ where
     }
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
         let rpc_options = T::RpcOptions::default();
         self._interactFast_impl(
             rpc_options,
@@ -1582,7 +1639,7 @@ where
     }
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
         let rpc_options = T::RpcOptions::default();
         self._serialize_impl(
             rpc_options,
@@ -1611,7 +1668,7 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::my_service::MyInteractionClient, crate::errors::my_service::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
         self._interact_impl(
             arg_arg,
             rpc_options,
@@ -1620,7 +1677,7 @@ where
     fn interactFast_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
         self._interactFast_impl(
             rpc_options,
         )
@@ -1628,7 +1685,7 @@ where
     fn serialize_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::my_service::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {
         self._serialize_impl(
             rpc_options,
         )
@@ -1737,786 +1794,6 @@ impl ::fbthrift::ClientFactory for make_MyService {
     }
 }
 
-
-pub mod factories {
-    use super::*;
-    
-    
-    /// Client definitions for `MyInteraction`.
-    pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.frobnicate";
-            let args = self::Args_MyInteraction_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.frobnicate"))
-            .boxed()
-        }
-    
-        fn _ping_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.ping";
-            let args = self::Args_MyInteraction_ping {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
-            .boxed()
-        }
-    
-        fn _truthify_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-            use ::futures::StreamExt as _;
-            use ::fbthrift::Deserialize as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteraction.truthify";
-            let args = self::Args_MyInteraction_truthify {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.truthify", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call_stream = transport
-                .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
-    
-            async move {
-                let (initial, stream) = call_stream.await?;
-    
-                let new_stream = stream.then(|item_res| {
-                    async move {
-                        match item_res {
-                            ::std::result::Result::Err(err) =>
-                                ::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::from(err)),
-                            ::std::result::Result::Ok(item_enc) => {
-                                S::spawn(move || {
-                                    match item_enc {
-                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            <crate::errors::my_interaction::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
-                                        }
-                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                            ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
-                                        }
-                                    }
-                                }).await.map_err(::anyhow::Error::from)??
-                            }
-                        }
-                    }
-                })
-                .boxed();
-    
-                let de = P::deserializer(initial);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::TruthifyReader, S>(de)
-                    .await??
-                    .map(move |_| new_stream);
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_MyInteraction_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_ping<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_truthify<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_truthify<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.truthify"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
-    
-    
-        
-    
-    /// Client definitions for `MyInteractionFast`.
-    pub struct MyInteractionFastImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.frobnicate";
-            let args = self::Args_MyInteractionFast_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction_fast::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.frobnicate"))
-            .boxed()
-        }
-    
-        fn _ping_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.ping";
-            let args = self::Args_MyInteractionFast_ping {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.ping", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::PingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction_fast::PingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.ping"))
-            .boxed()
-        }
-    
-        fn _truthify_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-            use ::futures::StreamExt as _;
-            use ::fbthrift::Deserialize as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.MyInteractionFast.truthify";
-            let args = self::Args_MyInteractionFast_truthify {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.truthify", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call_stream = transport
-                .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
-    
-            async move {
-                let (initial, stream) = call_stream.await?;
-    
-                let new_stream = stream.then(|item_res| {
-                    async move {
-                        match item_res {
-                            ::std::result::Result::Err(err) =>
-                                ::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::from(err)),
-                            ::std::result::Result::Ok(item_enc) => {
-                                S::spawn(move || {
-                                    match item_enc {
-                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            <crate::errors::my_interaction_fast::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
-                                        }
-                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                            ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::ApplicationException(aexn)))
-                                        }
-                                    }
-                                }).await.map_err(::anyhow::Error::from)??
-                            }
-                        }
-                    }
-                })
-                .boxed();
-    
-                let de = P::deserializer(initial);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::TruthifyReader, S>(de)
-                    .await??
-                    .map(move |_| new_stream);
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_MyInteractionFast_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteractionFast_ping<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_ping<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.ping"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteractionFast_truthify<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_truthify<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.truthify"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> MyInteractionFast for MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> MyInteractionFastExt<T> for MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
-    
-    
-        
-    
-    /// Client definitions for `SerialInteraction`.
-    pub struct SerialInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.SerialInteraction.frobnicate";
-            let args = self::Args_SerialInteraction_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SerialInteraction.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::serial_interaction::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::serial_interaction::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for SerialInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_SerialInteraction_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SerialInteraction_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SerialInteraction.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> SerialInteraction for SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> SerialInteractionExt<T> for SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
-    
-    
-    
-}
-
 pub trait Factories: ::std::marker::Send {
     fn foo(
         &self,
@@ -2525,15 +1802,15 @@ pub trait Factories: ::std::marker::Send {
     fn interact(
         &self,
         arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>>;
 
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
 
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
 }
 
 pub trait FactoriesExt<T>: Factories
@@ -2548,15 +1825,15 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>>;
     fn interactFast_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>>;
     fn serialize_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -2576,20 +1853,20 @@ where
     fn interact(
         &self,
         arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
         self.as_ref().interact(
             arg_arg,
         )
     }
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
         self.as_ref().interactFast(
         )
     }
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
         self.as_ref().serialize(
         )
     }
@@ -2614,7 +1891,7 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
         <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).interact_with_rpc_opts(
             arg_arg,
             rpc_options,
@@ -2623,7 +1900,7 @@ where
     fn interactFast_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
         <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).interactFast_with_rpc_opts(
             rpc_options,
         )
@@ -2631,7 +1908,7 @@ where
     fn serialize_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
         <Self as ::std::convert::AsRef<dyn FactoriesExt<T>>>::as_ref(self).serialize_with_rpc_opts(
             rpc_options,
         )
@@ -2646,6 +1923,7 @@ pub struct FactoriesImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
+
 
 impl<P, T, S> FactoriesImpl<P, T, S>
 where
@@ -2669,6 +1947,23 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 
+    const NAMES_MyInteraction: crate::client::MyInteractionNames = crate::client::MyInteractionNames {
+        service: c"Factories",
+        method_frobnicate: c"Factories.MyInteraction.frobnicate",
+        method_ping: c"Factories.MyInteraction.ping",
+        method_truthify: c"Factories.MyInteraction.truthify",
+    };
+    const NAMES_MyInteractionFast: crate::client::MyInteractionFastNames = crate::client::MyInteractionFastNames {
+        service: c"Factories",
+        method_frobnicate: c"Factories.MyInteractionFast.frobnicate",
+        method_ping: c"Factories.MyInteractionFast.ping",
+        method_truthify: c"Factories.MyInteractionFast.truthify",
+    };
+    const NAMES_SerialInteraction: crate::client::SerialInteractionNames = crate::client::SerialInteractionNames {
+        service: c"Factories",
+        method_frobnicate: c"Factories.SerialInteraction.frobnicate",
+    };
+
 
     fn _foo_impl(
         &self,
@@ -2677,8 +1972,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.foo";
+        let service_name = c"Factories";
+        let service_method_name = c"Factories.foo";
+
         let args = self::Args_Factories_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -2692,7 +1988,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Factories.foo"));
 
         async move {
@@ -2717,12 +2013,13 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.interact";
+        let service_name = c"Factories";
+        let service_method_name = c"Factories.interact";
+
         const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteraction";
         let args = self::Args_Factories_interact {
             arg: arg_arg,
@@ -2733,7 +2030,7 @@ where
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = crate::factories::MyInteractionImpl::<P, T, S>::new(interaction_transport);
+        let interaction_impl = crate::MyInteractionImpl::<P, T, S>::new(interaction_transport, &Self::NAMES_MyInteraction);
         let transport = interaction_impl.transport();
 
         // need to do call setup outside of async block because T: Transport isn't Send
@@ -2743,7 +2040,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Factories.interact"));
 
         async move {
@@ -2758,7 +2055,7 @@ where
                     ::std::result::Result::Err(crate::errors::factories::InteractError::ApplicationException(aexn))
                 }
             };
-            let interaction_client: crate::client::factories::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
+            let interaction_client: crate::client::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
             res?;
             ::std::result::Result::Ok(interaction_client)
         }
@@ -2769,12 +2066,13 @@ where
     fn _interactFast_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.interactFast";
+        let service_name = c"Factories";
+        let service_method_name = c"Factories.interactFast";
+
         const INTERACTION_NAME: &::std::ffi::CStr = c"MyInteractionFast";
         let args = self::Args_Factories_interactFast {
             _phantom: ::std::marker::PhantomData,
@@ -2784,7 +2082,7 @@ where
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = crate::factories::MyInteractionFastImpl::<P, T, S>::new(interaction_transport);
+        let interaction_impl = crate::MyInteractionFastImpl::<P, T, S>::new(interaction_transport, &Self::NAMES_MyInteractionFast);
         let transport = interaction_impl.transport();
 
         // need to do call setup outside of async block because T: Transport isn't Send
@@ -2794,7 +2092,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Factories.interactFast"));
 
         async move {
@@ -2809,7 +2107,7 @@ where
                     ::std::result::Result::Err(crate::errors::factories::InteractFastError::ApplicationException(aexn))
                 }
             };
-            let interaction_client: crate::client::factories::MyInteractionFastClient = ::std::sync::Arc::new(interaction_impl);
+            let interaction_client: crate::client::MyInteractionFastClient = ::std::sync::Arc::new(interaction_impl);
             ::std::result::Result::Ok((interaction_client, res?))
         }
         .instrument(::tracing::info_span!("stream", method = "Factories.interactFast"))
@@ -2819,14 +2117,15 @@ where
     fn _serialize_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Factories";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Factories.serialize";
+        let service_name = c"Factories";
+        let service_method_name = c"Factories.serialize";
+
         const INTERACTION_NAME: &::std::ffi::CStr = c"SerialInteraction";
         let args = self::Args_Factories_serialize {
             _phantom: ::std::marker::PhantomData,
@@ -2836,7 +2135,7 @@ where
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = crate::factories::SerialInteractionImpl::<P, T, S>::new(interaction_transport);
+        let interaction_impl = crate::SerialInteractionImpl::<P, T, S>::new(interaction_transport, &Self::NAMES_SerialInteraction);
         let transport = interaction_impl.transport();
 
         // need to do call setup outside of async block because T: Transport isn't Send
@@ -2846,7 +2145,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "Factories.serialize"));
 
         async move {
@@ -2881,7 +2180,7 @@ where
             let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::factories::SerializeReader, S>(de)
                 .await??
                 .map(move |initial| (initial, new_stream));
-            let interaction_client: crate::client::factories::SerialInteractionClient = ::std::sync::Arc::new(interaction_impl);
+            let interaction_client: crate::client::SerialInteractionClient = ::std::sync::Arc::new(interaction_impl);
             ::std::result::Result::Ok((interaction_client, res?))
         }
         .instrument(::tracing::info_span!("stream", method = "Factories.serialize"))
@@ -2980,7 +2279,7 @@ where
     fn interact(
         &self,
         arg_arg: ::std::primitive::i32,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
         let rpc_options = T::RpcOptions::default();
         self._interact_impl(
             arg_arg,
@@ -2989,7 +2288,7 @@ where
     }
     fn interactFast(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
         let rpc_options = T::RpcOptions::default();
         self._interactFast_impl(
             rpc_options,
@@ -2997,7 +2296,7 @@ where
     }
     fn serialize(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
         let rpc_options = T::RpcOptions::default();
         self._serialize_impl(
             rpc_options,
@@ -3026,7 +2325,7 @@ where
         &self,
         arg_arg: ::std::primitive::i32,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::factories::MyInteractionClient, crate::errors::factories::InteractError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::factories::InteractError>> {
         self._interact_impl(
             arg_arg,
             rpc_options,
@@ -3035,7 +2334,7 @@ where
     fn interactFast_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::factories::InteractFastError>> {
         self._interactFast_impl(
             rpc_options,
         )
@@ -3043,7 +2342,7 @@ where
     fn serialize_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::factories::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)), crate::errors::factories::SerializeError>> {
         self._serialize_impl(
             rpc_options,
         )
@@ -3152,798 +2451,18 @@ impl ::fbthrift::ClientFactory for make_Factories {
     }
 }
 
-
-pub mod perform {
-    use super::*;
-    
-    
-    /// Client definitions for `MyInteraction`.
-    pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.frobnicate";
-            let args = self::Args_MyInteraction_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.frobnicate"))
-            .boxed()
-        }
-    
-        fn _ping_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.ping";
-            let args = self::Args_MyInteraction_ping {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
-            .boxed()
-        }
-    
-        fn _truthify_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-            use ::futures::StreamExt as _;
-            use ::fbthrift::Deserialize as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteraction.truthify";
-            let args = self::Args_MyInteraction_truthify {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.truthify", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call_stream = transport
-                .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
-    
-            async move {
-                let (initial, stream) = call_stream.await?;
-    
-                let new_stream = stream.then(|item_res| {
-                    async move {
-                        match item_res {
-                            ::std::result::Result::Err(err) =>
-                                ::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::from(err)),
-                            ::std::result::Result::Ok(item_enc) => {
-                                S::spawn(move || {
-                                    match item_enc {
-                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            <crate::errors::my_interaction::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
-                                        }
-                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                            ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
-                                        }
-                                    }
-                                }).await.map_err(::anyhow::Error::from)??
-                            }
-                        }
-                    }
-                })
-                .boxed();
-    
-                let de = P::deserializer(initial);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::TruthifyReader, S>(de)
-                    .await??
-                    .map(move |_| new_stream);
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_MyInteraction_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_ping<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_truthify<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_truthify<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.truthify"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
-    
-    
-        
-    
-    /// Client definitions for `MyInteractionFast`.
-    pub struct MyInteractionFastImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.frobnicate";
-            let args = self::Args_MyInteractionFast_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction_fast::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.frobnicate"))
-            .boxed()
-        }
-    
-        fn _ping_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.ping";
-            let args = self::Args_MyInteractionFast_ping {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.ping", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::PingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction_fast::PingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.ping"))
-            .boxed()
-        }
-    
-        fn _truthify_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-            use ::futures::StreamExt as _;
-            use ::fbthrift::Deserialize as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.MyInteractionFast.truthify";
-            let args = self::Args_MyInteractionFast_truthify {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.truthify", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call_stream = transport
-                .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call_stream", method = "MyInteractionFast.truthify"));
-    
-            async move {
-                let (initial, stream) = call_stream.await?;
-    
-                let new_stream = stream.then(|item_res| {
-                    async move {
-                        match item_res {
-                            ::std::result::Result::Err(err) =>
-                                ::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::from(err)),
-                            ::std::result::Result::Ok(item_enc) => {
-                                S::spawn(move || {
-                                    match item_enc {
-                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            <crate::errors::my_interaction_fast::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
-                                        }
-                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                            ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction_fast::TruthifyStreamError::ApplicationException(aexn)))
-                                        }
-                                    }
-                                }).await.map_err(::anyhow::Error::from)??
-                            }
-                        }
-                    }
-                })
-                .boxed();
-    
-                let de = P::deserializer(initial);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction_fast::TruthifyReader, S>(de)
-                    .await??
-                    .map(move |_| new_stream);
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionFastImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_MyInteractionFast_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteractionFast_ping<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_ping<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.ping"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteractionFast_truthify<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_truthify<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.truthify"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> MyInteractionFast for MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> MyInteractionFastExt<T> for MyInteractionFastImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction_fast::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::PingError>> {
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
-    
-    
-        
-    
-    /// Client definitions for `SerialInteraction`.
-    pub struct SerialInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.SerialInteraction.frobnicate";
-            let args = self::Args_SerialInteraction_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SerialInteraction.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::serial_interaction::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::serial_interaction::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for SerialInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_SerialInteraction_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SerialInteraction_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SerialInteraction.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> SerialInteraction for SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> SerialInteractionExt<T> for SerialInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
-    
-    
-    
-}
-
 pub trait Perform: ::std::marker::Send {
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error>;
 
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionFastClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error>;
 
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::SerialInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error>;
 
     fn foo(
         &self,
@@ -3970,17 +2489,17 @@ where
 {
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         self.as_ref().createMyInteraction()
     }
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionFastClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error> {
         self.as_ref().createMyInteractionFast()
     }
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::SerialInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error> {
         self.as_ref().createSerialInteraction()
     }
     fn foo(
@@ -4017,6 +2536,7 @@ pub struct PerformImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> PerformImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -4039,6 +2559,23 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 
+    const NAMES_MyInteraction: crate::client::MyInteractionNames = crate::client::MyInteractionNames {
+        service: c"Perform",
+        method_frobnicate: c"Perform.MyInteraction.frobnicate",
+        method_ping: c"Perform.MyInteraction.ping",
+        method_truthify: c"Perform.MyInteraction.truthify",
+    };
+    const NAMES_MyInteractionFast: crate::client::MyInteractionFastNames = crate::client::MyInteractionFastNames {
+        service: c"Perform",
+        method_frobnicate: c"Perform.MyInteractionFast.frobnicate",
+        method_ping: c"Perform.MyInteractionFast.ping",
+        method_truthify: c"Perform.MyInteractionFast.truthify",
+    };
+    const NAMES_SerialInteraction: crate::client::SerialInteractionNames = crate::client::SerialInteractionNames {
+        service: c"Perform",
+        method_frobnicate: c"Perform.SerialInteraction.frobnicate",
+    };
+
 
     fn _foo_impl(
         &self,
@@ -4047,8 +2584,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Perform";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Perform.foo";
+        let service_name = c"Perform";
+        let service_method_name = c"Perform.foo";
+
         let args = self::Args_Perform_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -4062,7 +2600,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Perform.foo"));
 
         async move {
@@ -4121,11 +2659,12 @@ where
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::perform::MyInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"MyInteraction")?
+                crate::client::MyInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"MyInteraction")?,
+                    &Self::NAMES_MyInteraction,
                 )
             )
         )
@@ -4133,11 +2672,12 @@ where
 
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::MyInteractionFastClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::perform::MyInteractionFastImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"MyInteractionFast")?
+                crate::client::MyInteractionFastImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"MyInteractionFast")?,
+                    &Self::NAMES_MyInteractionFast,
                 )
             )
         )
@@ -4145,11 +2685,12 @@ where
 
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::perform::SerialInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::perform::SerialInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"SerialInteraction")?
+                crate::client::SerialInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"SerialInteraction")?,
+                    &Self::NAMES_SerialInteraction,
                 )
             )
         )
@@ -4285,618 +2826,6 @@ impl ::fbthrift::ClientFactory for make_Perform {
     }
 }
 
-
-pub mod interact_with_shared {
-    use super::*;
-    
-    
-    /// Client definitions for `MyInteraction`.
-    pub struct MyInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _frobnicate_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.frobnicate";
-            let args = self::Args_MyInteraction_frobnicate {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.frobnicate", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::FrobnicateReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::FrobnicateError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.frobnicate"))
-            .boxed()
-        }
-    
-        fn _ping_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.ping";
-            let args = self::Args_MyInteraction_ping {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.ping", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::PingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::my_interaction::PingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
-            .boxed()
-        }
-    
-        fn _truthify_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-            use ::futures::StreamExt as _;
-            use ::fbthrift::Deserialize as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.MyInteraction.truthify";
-            let args = self::Args_MyInteraction_truthify {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.truthify", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call_stream = transport
-                .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call_stream", method = "MyInteraction.truthify"));
-    
-            async move {
-                let (initial, stream) = call_stream.await?;
-    
-                let new_stream = stream.then(|item_res| {
-                    async move {
-                        match item_res {
-                            ::std::result::Result::Err(err) =>
-                                ::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::from(err)),
-                            ::std::result::Result::Ok(item_enc) => {
-                                S::spawn(move || {
-                                    match item_enc {
-                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            <crate::errors::my_interaction::TruthifyStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
-                                        }
-                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
-                                            let mut de = P::deserializer(payload);
-                                            let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
-                                            ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_interaction::TruthifyStreamError::ApplicationException(aexn)))
-                                        }
-                                    }
-                                }).await.map_err(::anyhow::Error::from)??
-                            }
-                        }
-                    }
-                })
-                .boxed();
-    
-                let de = P::deserializer(initial);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::my_interaction::TruthifyReader, S>(de)
-                    .await??
-                    .map(move |_| new_stream);
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for MyInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_MyInteraction_frobnicate<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_frobnicate<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.frobnicate"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_ping<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_ping<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.ping"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_MyInteraction_truthify<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_truthify<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.truthify"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> MyInteractionExt<T> for MyInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn frobnicate_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_interaction::FrobnicateError>> {
-            self._frobnicate_impl(
-                rpc_options,
-            )
-        }
-        fn ping_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>> {
-            self._ping_impl(
-                rpc_options,
-            )
-        }
-        fn truthify_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
-            self._truthify_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
-    
-    
-        
-    
-    /// Client definitions for `SharedInteraction`.
-    pub struct SharedInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
-        transport: T,
-        _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    }
-    
-    impl<P, T, S> SharedInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        pub fn new(
-            transport: T,
-        ) -> Self {
-            Self {
-                transport,
-                _phantom: ::std::marker::PhantomData,
-            }
-        }
-    
-        pub fn transport(&self) -> &T {
-            ::fbthrift::help::GetTransport::transport(self)
-        }
-    
-    
-        fn _init_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.init";
-            let args = self::Args_SharedInteraction_init {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SharedInteraction.init", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "SharedInteraction.init"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::shared_interaction::InitReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::shared_interaction::InitError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "SharedInteraction.init"))
-            .boxed()
-        }
-    
-        fn _do_something_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.do_something";
-            let args = self::Args_SharedInteraction_do_something {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SharedInteraction.do_something", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "SharedInteraction.do_something"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::shared_interaction::DoSomethingReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::shared_interaction::DoSomethingError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "SharedInteraction.do_something"))
-            .boxed()
-        }
-    
-        fn _tear_down_impl(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
-            use ::tracing::Instrument as _;
-            use ::futures::FutureExt as _;
-    
-            const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-            const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.SharedInteraction.tear_down";
-            let args = self::Args_SharedInteraction_tear_down {
-                _phantom: ::std::marker::PhantomData,
-            };
-    
-            let transport = self.transport();
-    
-            // need to do call setup outside of async block because T: Transport isn't Send
-            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("SharedInteraction.tear_down", &args) {
-                ::std::result::Result::Ok(res) => res,
-                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-            };
-    
-            let call = transport
-                .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", method = "SharedInteraction.tear_down"));
-    
-            async move {
-                let reply_env = call.await?;
-    
-                let de = P::deserializer(reply_env);
-                let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::shared_interaction::TearDownReader, S>(de).await?;
-    
-                let res = match res {
-                    ::std::result::Result::Ok(res) => res,
-                    ::std::result::Result::Err(aexn) => {
-                        ::std::result::Result::Err(crate::errors::shared_interaction::TearDownError::ApplicationException(aexn))
-                    }
-                };
-                res
-            }
-            .instrument(::tracing::info_span!("stream", method = "SharedInteraction.tear_down"))
-            .boxed()
-        }
-    }
-    
-    impl<P, T, S> ::fbthrift::help::GetTransport<T> for SharedInteractionImpl<P, T, S>
-    where
-        T: ::fbthrift::Transport,
-    {
-        fn transport(&self) -> &T {
-            &self.transport
-        }
-    }
-    
-    
-    
-    struct Args_SharedInteraction_init<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SharedInteraction_init<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SharedInteraction.init"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_SharedInteraction_do_something<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SharedInteraction_do_something<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SharedInteraction.do_something"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    struct Args_SharedInteraction_tear_down<'a> {
-        _phantom: ::std::marker::PhantomData<&'a ()>,
-    }
-    
-    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_SharedInteraction_tear_down<'a> {
-        #[inline]
-        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "SharedInteraction.tear_down"))]
-        fn write(&self, p: &mut P) {
-            p.write_struct_begin("args");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P, T, S> SharedInteraction for SharedInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn init(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._init_impl(
-                rpc_options,
-            )
-        }
-        fn do_something(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._do_something_impl(
-                rpc_options,
-            )
-        }
-        fn tear_down(
-            &self,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
-            let rpc_options = T::RpcOptions::default();
-            self._tear_down_impl(
-                rpc_options,
-            )
-        }
-    }
-    
-    impl<P, T, S> SharedInteractionExt<T> for SharedInteractionImpl<P, T, S>
-    where
-        P: ::fbthrift::Protocol,
-        T: ::fbthrift::Transport,
-        P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
-        ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
-        P::Deserializer: ::std::marker::Send,
-        S: ::fbthrift::help::Spawner,
-    {
-        fn init_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::shared_interaction::InitError>> {
-            self._init_impl(
-                rpc_options,
-            )
-        }
-        fn do_something_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<shared__types::DoSomethingResult, crate::errors::shared_interaction::DoSomethingError>> {
-            self._do_something_impl(
-                rpc_options,
-            )
-        }
-        fn tear_down_with_rpc_opts(
-            &self,
-            rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::shared_interaction::TearDownError>> {
-            self._tear_down_impl(
-                rpc_options,
-            )
-        }
-    
-        fn transport(&self) -> &T {
-            self.transport()
-        }
-    }
-    
-    pub type SharedInteractionDynClient = dyn SharedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
-    pub type SharedInteractionClient = ::std::sync::Arc<SharedInteractionDynClient>;
-    
-    
-    
-}
-
 pub trait InteractWithShared: ::std::marker::Send {
     fn do_some_similar_things(
         &self,
@@ -4904,11 +2833,11 @@ pub trait InteractWithShared: ::std::marker::Send {
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::MyInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error>;
 
     fn createshared.SharedInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::SharedInteractionClient, ::anyhow::Error>;
+    ) -> ::std::result::Result<crate::client::SharedInteractionClient, ::anyhow::Error>;
 }
 
 pub trait InteractWithSharedExt<T>: InteractWithShared
@@ -4937,12 +2866,12 @@ where
     }
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         self.as_ref().createMyInteraction()
     }
     fn createshared.SharedInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::SharedInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SharedInteractionClient, ::anyhow::Error> {
         self.as_ref().createshared.SharedInteraction()
     }
 }
@@ -4973,6 +2902,7 @@ pub struct InteractWithSharedImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> InteractWithSharedImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -4995,6 +2925,19 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 
+    const NAMES_MyInteraction: crate::client::MyInteractionNames = crate::client::MyInteractionNames {
+        service: c"InteractWithShared",
+        method_frobnicate: c"InteractWithShared.MyInteraction.frobnicate",
+        method_ping: c"InteractWithShared.MyInteraction.ping",
+        method_truthify: c"InteractWithShared.MyInteraction.truthify",
+    };
+    const NAMES_SharedInteraction: shared__clients::SharedInteractionNames = shared__clients::SharedInteractionNames {
+        service: c"InteractWithShared",
+        method_init: c"InteractWithShared.SharedInteraction.init",
+        method_do_something: c"InteractWithShared.SharedInteraction.do_something",
+        method_tear_down: c"InteractWithShared.SharedInteraction.tear_down",
+    };
+
 
     fn _do_some_similar_things_impl(
         &self,
@@ -5003,8 +2946,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"InteractWithShared";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"InteractWithShared.do_some_similar_things";
+        let service_name = c"InteractWithShared";
+        let service_method_name = c"InteractWithShared.do_some_similar_things";
+
         let args = self::Args_InteractWithShared_do_some_similar_things {
             _phantom: ::std::marker::PhantomData,
         };
@@ -5018,7 +2962,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "InteractWithShared.do_some_similar_things"));
 
         async move {
@@ -5085,11 +3029,12 @@ where
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::interact_with_shared::MyInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"MyInteraction")?
+                crate::client::MyInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"MyInteraction")?,
+                    &Self::NAMES_MyInteraction,
                 )
             )
         )
@@ -5097,11 +3042,12 @@ where
 
     fn createshared.SharedInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::interact_with_shared::SharedInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::client::SharedInteractionClient, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                crate::client::interact_with_shared::SharedInteractionImpl::<P, T, S>::new(
-                    self.transport().create_interaction(c"SharedInteraction")?
+                crate::client::SharedInteractionImpl::<P, T, S>::new(
+                    self.transport().create_interaction(c"SharedInteraction")?,
+                    &Self::NAMES_SharedInteraction,
                 )
             )
         )

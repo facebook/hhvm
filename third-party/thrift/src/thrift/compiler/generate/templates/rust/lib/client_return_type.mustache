@@ -20,9 +20,9 @@
     }}{{#function:return_type}}{{!
         }}{{#function:creates_interaction?}}{{!
             }}{{#type:void?}}{{!
-                }}{{program:crate}}::client::{{service:snake}}::{{function:interaction_name}}Client{{!
+                }}{{program:crate}}::client::{{function:interaction_name}}Client{{!
             }}{{/type:void?}}{{^type:void?}}{{!
-                }}({{program:crate}}::client::{{service:snake}}::{{function:interaction_name}}Client, {{>lib/return_type}}){{!
+                }}({{program:crate}}::client::{{function:interaction_name}}Client, {{>lib/return_type}}){{!
             }}{{/type:void?}}{{!
         }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}{{!
             }}{{>lib/return_type}}{{!

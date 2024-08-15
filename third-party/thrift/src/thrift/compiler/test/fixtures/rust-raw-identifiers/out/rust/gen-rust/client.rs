@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 pub trait Foo: ::std::marker::Send {
     fn r#return(
         &self,
@@ -109,6 +108,7 @@ pub struct FooImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> FooImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -132,6 +132,7 @@ where
     }
 
 
+
     fn _return_impl(
         &self,
         arg_bar: &crate::types::ThereAreNoPascalCaseKeywords,
@@ -140,8 +141,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Foo";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Foo.return";
+        let service_name = c"Foo";
+        let service_method_name = c"Foo.return";
+
         let args = self::Args_Foo_return {
             bar: arg_bar,
             _phantom: ::std::marker::PhantomData,
@@ -156,7 +158,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Foo.return"));
 
         async move {
@@ -185,8 +187,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"Foo";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"Foo.super";
+        let service_name = c"Foo";
+        let service_method_name = c"Foo.super";
+
         let args = self::Args_Foo_super {
             bar: arg_bar,
             _phantom: ::std::marker::PhantomData,
@@ -201,7 +204,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "Foo.super"));
 
         async move {

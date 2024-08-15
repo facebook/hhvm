@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 #[doc = "Detailed overview of service"]
 pub trait C: ::std::marker::Send {
     #[doc = "Function doctext."]
@@ -144,6 +143,7 @@ pub struct CImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> CImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -167,6 +167,7 @@ where
     }
 
 
+
     fn _f_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -174,8 +175,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"C";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.f";
+        let service_name = c"C";
+        let service_method_name = c"C.f";
+
         let args = self::Args_C_f {
             _phantom: ::std::marker::PhantomData,
         };
@@ -189,7 +191,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "C.f"));
 
         async move {
@@ -219,8 +221,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"C";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.numbers";
+        let service_name = c"C";
+        let service_method_name = c"C.numbers";
+
         let args = self::Args_C_numbers {
             _phantom: ::std::marker::PhantomData,
         };
@@ -234,7 +237,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "C.numbers"));
 
         async move {
@@ -285,8 +288,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"C";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"C.thing";
+        let service_name = c"C";
+        let service_method_name = c"C.thing";
+
         let args = self::Args_C_thing {
             a: arg_a,
             b: arg_b,
@@ -303,7 +307,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "C.thing"));
 
         async move {

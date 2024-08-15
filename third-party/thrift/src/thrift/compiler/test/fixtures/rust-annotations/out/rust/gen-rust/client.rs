@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 pub trait Service1: ::std::marker::Send {
     fn r(
         &self,
@@ -75,6 +74,7 @@ pub struct Service1Impl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> Service1Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -98,6 +98,7 @@ where
     }
 
 
+
     fn _r_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -105,8 +106,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"S1";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"S1.r";
+        let service_name = c"S1";
+        let service_method_name = c"S1.r";
+
         let args = self::Args_Service1_r {
             _phantom: ::std::marker::PhantomData,
         };
@@ -120,7 +122,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "S1.r"));
 
         async move {
@@ -307,7 +309,6 @@ impl ::fbthrift::ClientFactory for make_Service1 {
     }
 }
 
-
 pub trait S2: ::std::marker::Send {
     fn s(
         &self,
@@ -366,6 +367,7 @@ pub struct S2Impl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> S2Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -389,6 +391,7 @@ where
     }
 
 
+
     fn _r_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -396,8 +399,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"S2";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"S2.r";
+        let service_name = c"S2";
+        let service_method_name = c"S2.r";
+
         let args = self::Args_S2_r {
             _phantom: ::std::marker::PhantomData,
         };
@@ -411,7 +415,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "S2.r"));
 
         async move {
@@ -598,7 +602,6 @@ impl ::fbthrift::ClientFactory for make_S2 {
     }
 }
 
-
 pub trait AllMethods: ::std::marker::Send {
     fn foo(
         &self,
@@ -679,6 +682,7 @@ pub struct AllMethodsImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> AllMethodsImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -702,6 +706,7 @@ where
     }
 
 
+
     fn _foo_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -709,8 +714,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"AllMethods";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AllMethods.foo";
+        let service_name = c"AllMethods";
+        let service_method_name = c"AllMethods.foo";
+
         let args = self::Args_AllMethods_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -724,7 +730,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AllMethods.foo"));
 
         async move {
@@ -752,8 +758,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"AllMethods";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"AllMethods.bar";
+        let service_name = c"AllMethods";
+        let service_method_name = c"AllMethods.bar";
+
         let args = self::Args_AllMethods_bar {
             _phantom: ::std::marker::PhantomData,
         };
@@ -767,7 +774,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "AllMethods.bar"));
 
         async move {
@@ -984,7 +991,6 @@ impl ::fbthrift::ClientFactory for make_AllMethods {
     }
 }
 
-
 pub trait OneMethod: ::std::marker::Send {
     fn foo(
         &self,
@@ -1065,6 +1071,7 @@ pub struct OneMethodImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> OneMethodImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -1088,6 +1095,7 @@ where
     }
 
 
+
     fn _foo_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -1095,8 +1103,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethod";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethod.foo";
+        let service_name = c"OneMethod";
+        let service_method_name = c"OneMethod.foo";
+
         let args = self::Args_OneMethod_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1110,7 +1119,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethod.foo"));
 
         async move {
@@ -1138,8 +1147,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethod";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethod.bar";
+        let service_name = c"OneMethod";
+        let service_method_name = c"OneMethod.bar";
+
         let args = self::Args_OneMethod_bar {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1153,7 +1163,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethod.bar"));
 
         async move {
@@ -1370,7 +1380,6 @@ impl ::fbthrift::ClientFactory for make_OneMethod {
     }
 }
 
-
 pub trait OneMethodOptOut: ::std::marker::Send {
     fn foo(
         &self,
@@ -1451,6 +1460,7 @@ pub struct OneMethodOptOutImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> OneMethodOptOutImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -1474,6 +1484,7 @@ where
     }
 
 
+
     fn _foo_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -1481,8 +1492,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethodOptOut";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethodOptOut.foo";
+        let service_name = c"OneMethodOptOut";
+        let service_method_name = c"OneMethodOptOut.foo";
+
         let args = self::Args_OneMethodOptOut_foo {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1496,7 +1508,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethodOptOut.foo"));
 
         async move {
@@ -1524,8 +1536,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"OneMethodOptOut";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"OneMethodOptOut.bar";
+        let service_name = c"OneMethodOptOut";
+        let service_method_name = c"OneMethodOptOut.bar";
+
         let args = self::Args_OneMethodOptOut_bar {
             _phantom: ::std::marker::PhantomData,
         };
@@ -1539,7 +1552,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "OneMethodOptOut.bar"));
 
         async move {

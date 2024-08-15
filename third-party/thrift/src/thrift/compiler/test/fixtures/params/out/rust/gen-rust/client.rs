@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 pub trait NestedContainers: ::std::marker::Send {
     fn mapList(
         &self,
@@ -193,6 +192,7 @@ pub struct NestedContainersImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> NestedContainersImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -216,6 +216,7 @@ where
     }
 
 
+
     fn _mapList_impl(
         &self,
         arg_foo: &::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
@@ -224,8 +225,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.mapList";
+        let service_name = c"NestedContainers";
+        let service_method_name = c"NestedContainers.mapList";
+
         let args = self::Args_NestedContainers_mapList {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -240,7 +242,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapList"));
 
         async move {
@@ -269,8 +271,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.mapSet";
+        let service_name = c"NestedContainers";
+        let service_method_name = c"NestedContainers.mapSet";
+
         let args = self::Args_NestedContainers_mapSet {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -285,7 +288,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapSet"));
 
         async move {
@@ -314,8 +317,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.listMap";
+        let service_name = c"NestedContainers";
+        let service_method_name = c"NestedContainers.listMap";
+
         let args = self::Args_NestedContainers_listMap {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -330,7 +334,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.listMap"));
 
         async move {
@@ -359,8 +363,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.listSet";
+        let service_name = c"NestedContainers";
+        let service_method_name = c"NestedContainers.listSet";
+
         let args = self::Args_NestedContainers_listSet {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -375,7 +380,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.listSet"));
 
         async move {
@@ -404,8 +409,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"NestedContainers";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"NestedContainers.turtles";
+        let service_name = c"NestedContainers";
+        let service_method_name = c"NestedContainers.turtles";
+
         let args = self::Args_NestedContainers_turtles {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -420,7 +426,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "NestedContainers.turtles"));
 
         async move {

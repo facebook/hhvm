@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 pub trait PubSubStreamingService: ::std::marker::Send {
     fn returnstream(
         &self,
@@ -317,6 +316,7 @@ pub struct PubSubStreamingServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> PubSubStreamingServiceImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -340,6 +340,7 @@ where
     }
 
 
+
     fn _returnstream_impl(
         &self,
         arg_i32_from: ::std::primitive::i32,
@@ -351,8 +352,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.returnstream";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.returnstream";
+
         let args = self::Args_PubSubStreamingService_returnstream {
             i32_from: arg_i32_from,
             i32_to: arg_i32_to,
@@ -368,7 +370,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstream"));
 
         async move {
@@ -419,8 +421,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.streamthrows";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.streamthrows";
+
         let args = self::Args_PubSubStreamingService_streamthrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -435,7 +438,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.streamthrows"));
 
         async move {
@@ -486,8 +489,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.servicethrows";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.servicethrows";
+
         let args = self::Args_PubSubStreamingService_servicethrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -502,7 +506,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows"));
 
         async move {
@@ -553,8 +557,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.servicethrows2";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.servicethrows2";
+
         let args = self::Args_PubSubStreamingService_servicethrows2 {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -569,7 +574,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows2"));
 
         async move {
@@ -620,8 +625,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.boththrows";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.boththrows";
+
         let args = self::Args_PubSubStreamingService_boththrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -636,7 +642,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.boththrows"));
 
         async move {
@@ -687,8 +693,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamstreamthrows";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.responseandstreamstreamthrows";
+
         let args = self::Args_PubSubStreamingService_responseandstreamstreamthrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -703,7 +710,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamstreamthrows"));
 
         async move {
@@ -754,8 +761,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamservicethrows";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.responseandstreamservicethrows";
+
         let args = self::Args_PubSubStreamingService_responseandstreamservicethrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -770,7 +778,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamservicethrows"));
 
         async move {
@@ -821,8 +829,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.responseandstreamboththrows";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.responseandstreamboththrows";
+
         let args = self::Args_PubSubStreamingService_responseandstreamboththrows {
             foo: arg_foo,
             _phantom: ::std::marker::PhantomData,
@@ -837,7 +846,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamboththrows"));
 
         async move {
@@ -889,8 +898,9 @@ where
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"PubSubStreamingService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"PubSubStreamingService.returnstreamFast";
+        let service_name = c"PubSubStreamingService";
+        let service_method_name = c"PubSubStreamingService.returnstreamFast";
+
         let args = self::Args_PubSubStreamingService_returnstreamFast {
             i32_from: arg_i32_from,
             i32_to: arg_i32_to,
@@ -906,7 +916,7 @@ where
         };
 
         let call_stream = transport
-            .call_stream(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstreamFast"));
 
         async move {

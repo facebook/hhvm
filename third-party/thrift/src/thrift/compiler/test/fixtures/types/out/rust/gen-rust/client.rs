@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 pub trait SomeService: ::std::marker::Send {
     fn bounce_map(
         &self,
@@ -109,6 +108,7 @@ pub struct SomeServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> SomeServiceImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -132,6 +132,7 @@ where
     }
 
 
+
     fn _bounce_map_impl(
         &self,
         arg_m: &included__types::SomeMap,
@@ -140,8 +141,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"SomeService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SomeService.bounce_map";
+        let service_name = c"SomeService";
+        let service_method_name = c"SomeService.bounce_map";
+
         let args = self::Args_SomeService_bounce_map {
             m: arg_m,
             _phantom: ::std::marker::PhantomData,
@@ -156,7 +158,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "SomeService.bounce_map"));
 
         async move {
@@ -185,8 +187,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"SomeService";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"SomeService.binary_keyed_map";
+        let service_name = c"SomeService";
+        let service_method_name = c"SomeService.binary_keyed_map";
+
         let args = self::Args_SomeService_binary_keyed_map {
             r: arg_r,
             _phantom: ::std::marker::PhantomData,
@@ -201,7 +204,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "SomeService.binary_keyed_map"));
 
         async move {

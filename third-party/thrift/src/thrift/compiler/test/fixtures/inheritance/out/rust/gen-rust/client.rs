@@ -16,7 +16,6 @@ pub(crate) use crate as client;
 pub(crate) use ::::services;
 
 
-
 pub trait MyRoot: ::std::marker::Send {
     fn do_root(
         &self,
@@ -75,6 +74,7 @@ pub struct MyRootImpl<P, T, S = ::fbthrift::NoopSpawner> {
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
+
 impl<P, T, S> MyRootImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -98,6 +98,7 @@ where
     }
 
 
+
     fn _do_root_impl(
         &self,
         rpc_options: T::RpcOptions,
@@ -105,8 +106,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyRoot";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyRoot.do_root";
+        let service_name = c"MyRoot";
+        let service_method_name = c"MyRoot.do_root";
+
         let args = self::Args_MyRoot_do_root {
             _phantom: ::std::marker::PhantomData,
         };
@@ -120,7 +122,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyRoot.do_root"));
 
         async move {
@@ -307,7 +309,6 @@ impl ::fbthrift::ClientFactory for make_MyRoot {
     }
 }
 
-
 pub trait MyNode: crate::client::MyRoot + ::std::marker::Send {
     fn do_mid(
         &self,
@@ -361,6 +362,7 @@ pub struct MyNodeImpl<P, T, S = ::fbthrift::NoopSpawner> {
     parent: crate::client::MyRootImpl<P, T, S>,
 }
 
+
 impl<P, T, S> MyNodeImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -373,13 +375,15 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::client::MyRootImpl::<P, T, S>::new(transport);
-        Self { parent }
+        Self {
+            parent: crate::client::MyRootImpl::<P, T, S>::new(transport),
+        }
     }
 
     pub fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
     }
+
 
 
     fn _do_mid_impl(
@@ -389,8 +393,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyNode";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyNode.do_mid";
+        let service_name = c"MyNode";
+        let service_method_name = c"MyNode.do_mid";
+
         let args = self::Args_MyNode_do_mid {
             _phantom: ::std::marker::PhantomData,
         };
@@ -404,7 +409,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyNode.do_mid"));
 
         async move {
@@ -619,7 +624,6 @@ impl ::fbthrift::ClientFactory for make_MyNode {
     }
 }
 
-
 pub trait MyLeaf: crate::client::MyNode + ::std::marker::Send {
     fn do_leaf(
         &self,
@@ -675,6 +679,7 @@ pub struct MyLeafImpl<P, T, S = ::fbthrift::NoopSpawner> {
     parent: crate::client::MyNodeImpl<P, T, S>,
 }
 
+
 impl<P, T, S> MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -687,13 +692,15 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::client::MyNodeImpl::<P, T, S>::new(transport);
-        Self { parent }
+        Self {
+            parent: crate::client::MyNodeImpl::<P, T, S>::new(transport),
+        }
     }
 
     pub fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
     }
+
 
 
     fn _do_leaf_impl(
@@ -703,8 +710,9 @@ where
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
 
-        const SERVICE_NAME: &::std::ffi::CStr = c"MyLeaf";
-        const SERVICE_METHOD_NAME: &::std::ffi::CStr = c"MyLeaf.do_leaf";
+        let service_name = c"MyLeaf";
+        let service_method_name = c"MyLeaf.do_leaf";
+
         let args = self::Args_MyLeaf_do_leaf {
             _phantom: ::std::marker::PhantomData,
         };
@@ -718,7 +726,7 @@ where
         };
 
         let call = transport
-            .call(SERVICE_NAME, SERVICE_METHOD_NAME, request_env, rpc_options)
+            .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "MyLeaf.do_leaf"));
 
         async move {

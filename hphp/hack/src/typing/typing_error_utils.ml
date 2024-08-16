@@ -1534,7 +1534,7 @@ end = struct
         lazy
           ( pos,
             Printf.sprintf
-              "Cannot access a public element which belongs to %s from %s"
+              "Cannot access an element which belongs to %s from %s"
               target_package
               current_package )
       and reason =

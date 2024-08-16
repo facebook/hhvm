@@ -1,4 +1,4 @@
-error: Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
 -> This is from include_paths_bad5.php--foo.php, which belongs to package pkg2 [2]
 -> But include_paths_bad5.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 

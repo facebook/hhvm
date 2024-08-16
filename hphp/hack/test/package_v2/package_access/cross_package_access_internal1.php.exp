@@ -11,7 +11,7 @@ cross_package_access_internal1.php--foo.php:4:15
 3 | module foo;
 [2] 4 | internal type TFoo = int;
 
-error: Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
 -> This is from cross_package_access_internal1.php--foo.php, which belongs to package pkg2 [2]
 -> But cross_package_access_internal1.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 

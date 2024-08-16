@@ -12,7 +12,22 @@
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 
+using namespace std::chrono_literals;
+
 namespace facebook::common::mysql_client {
+
+namespace {
+// Helper function to return QueryException when conn is invalid/null
+QueryException getInvalidConnException() {
+  return QueryException(
+      0,
+      OperationResult::Failed,
+      static_cast<int>(SquangleErrno::SQ_INVALID_CONN),
+      "Invalid argument, connection is null",
+      ConnectionKey("", 0, "", "", ""),
+      0ms);
+}
+} // namespace
 
 bool Connection::isSSL() const {
   CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
@@ -193,6 +208,9 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
     Query&& query,
     QueryCallback&& cb,
     QueryOptions&& options) {
+  if (conn == nullptr) {
+    throw getInvalidConnException();
+  }
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginQuery(std::move(conn), std::move(query));
   op->setAttributes(std::move(options.getAttributes()));
@@ -210,6 +228,9 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     Query&& args,
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
+  if (conn == nullptr) {
+    throw getInvalidConnException();
+  }
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
@@ -227,6 +248,9 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     std::vector<Query>&& args,
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
+  if (conn == nullptr) {
+    throw getInvalidConnException();
+  }
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));

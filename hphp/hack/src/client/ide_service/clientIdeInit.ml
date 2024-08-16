@@ -139,6 +139,8 @@ let init_via_build
         (Failure (ClientIdeUtils.make_rich_error "full_index_error" ~data))
   end
 
+(** Attempt to find the naming table and warning saved state
+  on disk. *)
 let init_via_find
     (ctx : Provider_context.t)
     ~(local_config : ServerLocalConfig.t)
@@ -159,7 +161,7 @@ let init_via_find
     | Error (load_error, _telemetry) ->
       Lwt.return (Failure (error_from_load_error load_error))
     | Ok (project_metadata, _telemetry) -> begin
-      let%lwt load_off_disk_result =
+      let load_off_disk_result =
         State_loader_lwt.load_arbitrary_naming_table_from_disk
           ~project_metadata
           ~threshold:
@@ -266,12 +268,18 @@ let init
     ~(local_memory : Provider_backend.local_memory) :
     (init_result, ClientIdeMessage.rich_error) result Lwt.t =
   let start_time = Unix.gettimeofday () in
-  let open ClientIdeMessage.Initialize_from_saved_state in
-  let root = param.root in
-  let ignore_hh_version = param.ignore_hh_version in
-  let naming_table_load_info = param.naming_table_load_info in
+  let {
+    ClientIdeMessage.Initialize_from_saved_state.root;
+    naming_table_load_info;
+    ignore_hh_version;
+    config = _;
+    open_files = _;
+  } =
+    param
+  in
   let popt = ServerConfig.parser_options config in
   let tcopt = ServerConfig.typechecker_options config in
+  let gleanopt = ServerConfig.glean_options config in
 
   let ctx =
     Provider_context.empty_for_tool
@@ -282,14 +290,16 @@ let init
   in
   let sienv =
     SymbolIndex.initialize
-      ~gleanopt:(ServerConfig.glean_options config)
+      ~gleanopt
       ~namespace_map:tcopt.GlobalOptions.po.ParserOptions.auto_namespace_map
       ~provider_name:
         local_config.ServerLocalConfig.ide_symbolindex_search_provider
       ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
   in
 
-  (* We will make several attempts using different techniques, in order, to try
+  (* How this code handles errors:
+     -----------------------------
+     We will make several attempts using different techniques, in order, to try
      to find a saved-state, and use the first attempt to succeed.
      The goal of this code is (1) rich telemetry about why each attempt failed,
      (2) in case none of them succeed, then return a user-facing
@@ -329,12 +339,12 @@ let init
     (Telemetry.create (), ClientIdeUtils.make_rich_error "trying...")
   in
 
-  (* Specified in the LSP initialize message? *)
+  (* LSP: Are the paths specified in the LSP initialize message? *)
   let%lwt result =
     init_via_lsp ~naming_table_load_info
     |> map_attempt "lsp" ctx ~prev ~f:(fun path -> (path, [], sienv))
   in
-  (* Find on disk? *)
+  (* FIND: Find on disk? *)
   let%lwt result =
     match result with
     | Ok _ -> Lwt.return result
@@ -343,7 +353,7 @@ let init
       |> map_attempt "find" ctx ~prev ~f:(fun (path, changed_files) ->
              (path, changed_files, sienv))
   in
-  (* Fetch? *)
+  (* FETCH *)
   let%lwt result =
     match result with
     | Ok _ -> Lwt.return result
@@ -352,7 +362,7 @@ let init
       |> map_attempt "fetch" ctx ~prev ~f:(fun (path, changed_files) ->
              (path, changed_files, sienv))
   in
-  (* Build? *)
+  (* BUILD *)
   let%lwt result =
     match result with
     | Ok _ -> Lwt.return result

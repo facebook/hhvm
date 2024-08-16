@@ -25,8 +25,10 @@ type init_result = {
 and figuring out what files have changed and need to be indexed.
 We use a strategy of "lsp/find/fetch/build":
 
-1. [LSP] If the LSP initialize request contains the path of a naming-table
-then use it, trust that there are no files changed since that saved-state, and initialize sienv empty
+1. [LSP] If the LSP initialization request contains the path of a naming-table
+then use it, trust that there are no files changed since that saved-state,
+and initialize sienv empty.
+This is only used for tests at time of writing.
 
 2. [FIND] Otherwise, (if ide_load_naming_table_on_disk) look for any saved-state already on disk
 in the canonical location /tmp/hh_server that's within an age threshold,

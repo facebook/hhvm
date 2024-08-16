@@ -133,6 +133,9 @@ module type S = sig
     t is finished. *)
   val continue_with : 'value t -> ('value -> 'next_value) -> 'next_value t
 
+  (** Same as `continue_with`, but with the usual signature for `map` *)
+  val map : ('value -> 'next_value) -> 'value t -> 'next_value t
+
   (** Adds another future to be generated after the given future finishes. *)
   val continue_with_future :
     'value t -> ('value -> 'next_value t) -> 'next_value t

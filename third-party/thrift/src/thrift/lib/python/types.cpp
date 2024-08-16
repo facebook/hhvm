@@ -633,6 +633,10 @@ void clearUnion(void* object) {
   Py_XDECREF(previousValue);
 }
 
+void clearImmutableUnion(void* object) {
+  clearUnion(object);
+}
+
 /**
  * Returns the id of the field that is currently set for the given union tuple,
  * or 0 if the union is empty.
@@ -647,6 +651,10 @@ int getUnionActiveFieldId(const void* object) {
     THRIFT_PY3_CHECK_POSSIBLE_ERROR();
   }
   return id;
+}
+
+int getImmutableUnionActiveFieldId(const void* object) {
+  return getUnionActiveFieldId(object);
 }
 
 /**
@@ -670,11 +678,15 @@ void setUnionActiveFieldId(void* object, int fieldId) {
   Py_DECREF(previousFieldId);
 }
 
-const detail::UnionExtN<1> kUnionExt = {
-    /* .clear */ clearUnion,
+void setImmutableUnionActiveFieldId(void* object, int fieldId) {
+  setUnionActiveFieldId(object, fieldId);
+}
+
+const detail::UnionExtN<1> kImmutableUnionExt = {
+    /* .clear */ clearImmutableUnion,
     /* .unionTypeOffset */ 0,
-    /* .getActiveId */ getUnionActiveFieldId,
-    /* .setActiveId */ setUnionActiveFieldId,
+    /* .getActiveId */ getImmutableUnionActiveFieldId,
+    /* .setActiveId */ setImmutableUnionActiveFieldId,
     /* .initMember */ {nullptr},
 };
 
@@ -699,8 +711,9 @@ detail::StructInfo* newStructInfo(
       std::align_val_t{alignof(detail::StructInfo)}));
   structInfo->numFields = numFields;
   structInfo->name = namePtr;
-  structInfo->unionExt =
-      isUnion ? reinterpret_cast<const detail::UnionExt*>(&kUnionExt) : nullptr;
+  structInfo->unionExt = isUnion
+      ? reinterpret_cast<const detail::UnionExt*>(&kImmutableUnionExt)
+      : nullptr;
   structInfo->getIsset = isMutable ? getMutableIsset : getIsset;
   structInfo->setIsset = isMutable ? setMutableIsset : setIsset;
   structInfo->customExt = &fieldValues;
@@ -998,9 +1011,7 @@ const detail::TypeInfo
         /* .typeExt */ nullptr,
     };
 
-} // namespace
-
-PyObject* createUnionTuple() {
+PyObject* createUnionDataHolder() {
   // Tuple items: (current field enum value, field value)
   UniquePyObjectPtr tuple{PyTuple_New(2)};
   if (tuple == nullptr) {
@@ -1015,6 +1026,12 @@ PyObject* createUnionTuple() {
   Py_INCREF(Py_None);
 
   return tuple.release();
+}
+
+} // namespace
+
+PyObject* createUnionTuple() {
+  return createUnionDataHolder();
 }
 
 template <typename Container>

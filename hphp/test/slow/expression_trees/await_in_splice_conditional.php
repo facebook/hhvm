@@ -8,19 +8,19 @@ class C<T> {
 
 async function myTestFunction1(
   bool $b,
-): Awaitable<ExprTree<Code, Code::TAst, ExampleInt>> {
-  return $b ? new C(Code`${await myTestFunction2()}`) : Code`2`;
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>> {
+  return $b ? new C(ExampleDsl`${await myTestFunction2()}`) : ExampleDsl`2`;
 }
 
 async function myTestFunction2(
-): Awaitable<ExprTree<Code, Code::TAst, ExampleInt>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>> {
   echo "here\n";
-  return Code`1`;
+  return ExampleDsl`1`;
 }
 
 <<__EntryPoint>>
 async function myTestFunction(): Awaitable<void> {
-  require 'expression_tree.inc';
-  $x = Code`${await myTestFunction1(false)}`;
+  require __DIR__.'/../../../hack/test/expr_tree.php';
+  $x = ExampleDsl`${await myTestFunction1(false)}`;
   print_et($x);
 }

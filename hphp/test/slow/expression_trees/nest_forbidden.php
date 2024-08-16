@@ -3,6 +3,6 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
-  Code`${Code`1`}`;
+  require __DIR__.'/../../../hack/test/expr_tree.php';
+  ExampleDsl`${ExampleDsl`1`}`;
 }

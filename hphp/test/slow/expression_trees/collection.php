@@ -10,9 +10,9 @@ function foo(
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  $et = Code`mapType { 1 => 2, 3 => 4 }`;
+  $et = ExampleDsl`mapType { 1 => 2, 3 => 4 }`;
 
   print_et($et);
 }

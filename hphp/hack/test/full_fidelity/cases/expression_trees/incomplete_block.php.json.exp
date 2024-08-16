@@ -158,10 +158,10 @@
                       "kind":"token",
                       "token":{
                         "kind":"name",
-                        "text":"Code",
+                        "text":"ExampleDsl",
                         "offset":30,
                         "leading_width":4,
-                        "width":4,
+                        "width":10,
                         "trailing_width":0,
                         "leading":[{"kind":"whitespace","text":"    ","offset":30,"width":4}],
                         "trailing":[],
@@ -174,7 +174,7 @@
                     "token":{
                       "kind":"`",
                       "text":"`",
-                      "offset":38,
+                      "offset":44,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
@@ -190,7 +190,7 @@
                       "token":{
                         "kind":"{",
                         "text":"{",
-                        "offset":39,
+                        "offset":45,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
@@ -211,7 +211,7 @@
                               "token":{
                                 "kind":"`",
                                 "text":"`",
-                                "offset":40,
+                                "offset":46,
                                 "leading_width":0,
                                 "width":1,
                                 "trailing_width":0,
@@ -226,12 +226,12 @@
                             "token":{
                               "kind":";",
                               "text":";",
-                              "offset":41,
+                              "offset":47,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":1,
                               "leading":[],
-                              "trailing":[{"kind":"end_of_line","text":"\n","offset":42,"width":1}],
+                              "trailing":[{"kind":"end_of_line","text":"\n","offset":48,"width":1}],
                               "line_number":4
                             }
                           }
@@ -243,12 +243,12 @@
                       "token":{
                         "kind":"}",
                         "text":"}",
-                        "offset":43,
+                        "offset":49,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":1,
                         "leading":[],
-                        "trailing":[{"kind":"end_of_line","text":"\n","offset":44,"width":1}],
+                        "trailing":[{"kind":"end_of_line","text":"\n","offset":50,"width":1}],
                         "line_number":5
                       }
                     }
@@ -266,7 +266,7 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":45,
+            "offset":51,
             "leading_width":0,
             "width":0,
             "trailing_width":0,

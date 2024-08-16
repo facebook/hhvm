@@ -10,9 +10,9 @@ function f<T1, T2, T3>(string $s, ExprTree<T1, T2, T3> $et): ExprTree<T1, T2, T3
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  $et = f('a', Code`1 + ${f('b', Code`3 + ${f('c', Code`4`)}`)}`);
+  $et = f('a', ExampleDsl`1 + ${f('b', ExampleDsl`3 + ${f('c', ExampleDsl`4`)}`)}`);
 
   print_et($et);
 }

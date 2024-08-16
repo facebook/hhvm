@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-    Code`{`;
+    ExampleDsl`{`;
 }

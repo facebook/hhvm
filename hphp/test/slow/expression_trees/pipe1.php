@@ -2,23 +2,23 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $i): ExprTree<Code, Code::TAst, ExampleInt> {
+function foo(int $i): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   print $i."\n";
-  return Code`123`;
+  return ExampleDsl`123`;
 }
 
-function bar(ExprTree<Code, Code::TAst, ExampleInt> $x): ExprTree<Code, Code::TAst, ExampleInt> {
-  return Code`2 - ${ $x }`;
+function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
+  return ExampleDsl`2 - ${ $x }`;
 }
 
 // Testing multiple $$ occurrences within many splices in ETs
-function test(ExprTree<Code, Code::TAst, ExampleInt> $x): void {
-  $et = $x |> Code`${ $$ } + ${ $$ |> bar($$) } + ${ 1 |> foo($$) }`;
+function test(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): void {
+  $et = $x |> ExampleDsl`${ $$ } + ${ $$ |> bar($$) } + ${ 1 |> foo($$) }`;
   print_et($et);
 }
 
 <<__EntryPoint>>
 function entrypoint(): void {
-  require 'expression_tree.inc';
-  test(Code`1`);
+  require __DIR__.'/../../../hack/test/expr_tree.php';
+  test(ExampleDsl`1`);
 }

@@ -10,9 +10,9 @@ function foo(
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  $et = Code`1 + foo("bar")`;
+  $et = ExampleDsl`1 + foo("bar")`;
 
   print_et($et);
 }

@@ -15,7 +15,7 @@ function concat_block(vec<string> $block): string {
   return implode("\n", $block);
 }
 
-class Code {
+class ExampleDsl {
   const type TAst = string;
 
     // Virtual types (These do not have to be implemented)
@@ -38,16 +38,16 @@ class Code {
     throw new Exception();
   }
   public static function symbolType<T>(
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
+    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
   ): T {
     throw new Exception();
   }
 
-  public static function makeTree<TVisitor as Code, TInfer>(
+  public static function makeTree<TVisitor as ExampleDsl, TInfer>(
     ?ExprPos $pos,
     ExprTreeInfo<TInfer> $metadata,
-    (function(TVisitor): Code::TAst) $ast,
-  ): ExprTree<TVisitor, Code::TAst, TInfer> {
+    (function(TVisitor): ExampleDsl::TAst) $ast,
+  ): ExprTree<TVisitor, ExampleDsl::TAst, TInfer> {
     return new ExprTree($pos, $metadata, $ast);
   }
 
@@ -70,28 +70,28 @@ class Code {
 
   public function visitGlobalFunction<T>(
     ?ExprPos $_,
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
-  ): Code::TAst {
+    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+  ): ExampleDsl::TAst {
     return "function_ptr";
   }
 
   public function visitStaticMethod<T>(
     ?ExprPos $_,
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
-  ): Code::TAst {
+    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+  ): ExampleDsl::TAst {
     return "function_ptr";
   }
 
   // Expressions
-  public function visitLocal(?ExprPos $_, string $local): Code::TAst {
+  public function visitLocal(?ExprPos $_, string $local): ExampleDsl::TAst {
     return $local;
   }
 
   public function visitLambda(
     ?ExprPos $_,
     vec<string> $args,
-    vec<Code::TAst> $body,
-  ): Code::TAst {
+    vec<ExampleDsl::TAst> $body,
+  ): ExampleDsl::TAst {
     return "(".concat_arg_list($args).")"." ==> {\n".concat_block($body)."}";
   }
 
@@ -115,35 +115,35 @@ class Code {
 
   public function visitCall<T>(
     ?ExprPos $_,
-    Code::TAst $callee,
-    vec<Code::TAst> $args,
-  ): Code::TAst {
+    ExampleDsl::TAst $callee,
+    vec<ExampleDsl::TAst> $args,
+  ): ExampleDsl::TAst {
     return $callee."(".concat_arg_list($args).")";
   }
 
   public function visitAssign(
     ?ExprPos $_,
-    Code::TAst $local,
-    Code::TAst $value,
-  ): Code::TAst {
+    ExampleDsl::TAst $local,
+    ExampleDsl::TAst $value,
+  ): ExampleDsl::TAst {
     return $local." = ".$value.";";
   }
 
   public function visitTernary(
     ?ExprPos $_,
-    Code::TAst $condition,
-    ?Code::TAst $truthy,
-    Code::TAst $falsy,
-  ): Code::TAst {
+    ExampleDsl::TAst $condition,
+    ?ExampleDsl::TAst $truthy,
+    ExampleDsl::TAst $falsy,
+  ): ExampleDsl::TAst {
     return $condition." ? ".$truthy." : ".$falsy;
   }
 
   public function visitIf(
     ?ExprPos $_,
-    Code::TAst $cond,
-    vec<Code::TAst> $then_body,
-    vec<Code::TAst> $else_body,
-  ): Code::TAst {
+    ExampleDsl::TAst $cond,
+    vec<ExampleDsl::TAst> $then_body,
+    vec<ExampleDsl::TAst> $else_body,
+  ): ExampleDsl::TAst {
     return "if (".
       $cond.
       ") {\n".
@@ -155,13 +155,13 @@ class Code {
 
   public function visitWhile(
     ?ExprPos $_,
-    Code::TAst $cond,
-    vec<Code::TAst> $body,
-  ): Code::TAst {
+    ExampleDsl::TAst $cond,
+    vec<ExampleDsl::TAst> $body,
+  ): ExampleDsl::TAst {
     return "while (".$cond.") {\n".concat_block($body)."}";
   }
 
-  public function visitReturn(?ExprPos $_, ?Code::TAst $return_val): Code::TAst {
+  public function visitReturn(?ExprPos $_, ?ExampleDsl::TAst $return_val): ExampleDsl::TAst {
     if ($return_val is null) {
       return "return;";
     }
@@ -170,11 +170,11 @@ class Code {
 
   public function visitFor(
     ?ExprPos $_,
-    vec<Code::TAst> $initializers,
-    ?Code::TAst $cond,
-    vec<Code::TAst> $increments,
-    vec<Code::TAst> $body,
-  ): Code::TAst {
+    vec<ExampleDsl::TAst> $initializers,
+    ?ExampleDsl::TAst $cond,
+    vec<ExampleDsl::TAst> $increments,
+    vec<ExampleDsl::TAst> $body,
+  ): ExampleDsl::TAst {
     return "for (".
       concat_arg_list($initializers).
       ";".
@@ -186,20 +186,20 @@ class Code {
       "}";
   }
 
-  public function visitBreak(?ExprPos $_): Code::TAst {
+  public function visitBreak(?ExprPos $_): ExampleDsl::TAst {
     return "break;";
   }
 
-  public function visitContinue(?ExprPos $_): Code::TAst {
+  public function visitContinue(?ExprPos $_): ExampleDsl::TAst {
     return "continue;";
   }
 
   public function visitXhp(
     ?ExprPos $_,
     string $class_name,
-    dict<string, Code::TAst> $attrs,
-    vec<Code::TAst> $children,
-  ): Code::TAst {
+    dict<string, ExampleDsl::TAst> $attrs,
+    vec<ExampleDsl::TAst> $children,
+  ): ExampleDsl::TAst {
     $attr_parts = vec[];
     foreach ($attrs as $name => $value) {
       $attr_parts[] = $name."=".$value;
@@ -220,8 +220,8 @@ class Code {
    public function visitKeyedCollection(
     ?ExprPos $_,
     string $collection,
-    (Code::TAst, Code::TAst) ...$operand
-   ): Code::TAst {
+    (ExampleDsl::TAst, ExampleDsl::TAst) ...$operand
+   ): ExampleDsl::TAst {
    $v = HH\Lib\Vec\map($operand, $kv ==> $kv[0]."=>".$kv[1]);
    return "$collection {".concat_arg_list($v)."}";
   }
@@ -230,8 +230,8 @@ class Code {
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
-    Spliceable<Code, Code::TAst, T> $splice_val,
-  ): Code::TAst {
+    Spliceable<ExampleDsl, ExampleDsl::TAst, T> $splice_val,
+  ): ExampleDsl::TAst {
     return "\${".($splice_val->visit($this))."}";
   }
 }
@@ -305,8 +305,8 @@ abstract class ExampleVoid extends ExampleMixed {}
 
 final class ExampleContext {}
 
-function print_et<TInfer>(ExprTree<Code, Code::TAst, TInfer> $et): void {
-  $visitor = new Code();
+function print_et<TInfer>(ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> $et): void {
+  $visitor = new ExampleDsl();
   $string = $et->visit($visitor);
   echo($string."\n");
 }

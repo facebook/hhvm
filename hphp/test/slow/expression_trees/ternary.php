@@ -4,7 +4,7 @@
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  print_et(Code`true ? 1 : 2`);
+  print_et(ExampleDsl`true ? 1 : 2`);
 }

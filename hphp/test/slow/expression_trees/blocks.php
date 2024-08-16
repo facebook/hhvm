@@ -4,12 +4,12 @@
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  $et = Code`{}`;
+  $et = ExampleDsl`{}`;
   print_et($et);
 
-  $et = Code`{
+  $et = ExampleDsl`{
     1 + 2;
     true || false;
     while(true) {};

@@ -4,5 +4,5 @@
 
 function foo(): void {
   // This syntax isn't legal
-  Code<int>`1`;
+  ExampleDsl<int>`1`;
 }

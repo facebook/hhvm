@@ -14,9 +14,9 @@ class :my-tag {
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  $et = Code`<my-tag x="y">foo <my-tag /></my-tag>`;
+  $et = ExampleDsl`<my-tag x="y">foo <my-tag /></my-tag>`;
 
   print_et($et);
 }

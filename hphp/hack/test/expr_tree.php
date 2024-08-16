@@ -140,8 +140,8 @@ class ExampleDsl {
 
   public function visitUnop(
     ?ExprPos $_,
-    ExampleDsl::TAst $operand,
     string $operator,
+    ExampleDsl::TAst $operand,
   )[]: ExampleDsl::TAst {
     return "$operator $operand";
   }

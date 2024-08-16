@@ -19,9 +19,9 @@
 #include <folly/CppAttributes.h>
 #include <folly/Portability.h>
 #include <thrift/lib/py3/stream.h>
-#include <thrift/lib/py3/stream_api.h> // @manual
 
-#if FOLLY_HAS_COROUTINES
+#if __has_include(<thrift/lib/py3/stream_api.h>) && FOLLY_HAS_COROUTINES
+#include <thrift/lib/py3/stream_api.h> // @manual
 
 namespace thrift {
 namespace py3 {

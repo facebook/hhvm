@@ -637,11 +637,11 @@ void clearUnion(void* object) {
  * Returns the id of the field that is currently set for the given union tuple,
  * or 0 if the union is empty.
  *
- * @param objectPtr A `PyObject**` that points to a "data tuple" for a
- *        thrift-python Union class. Must not be nullptr.
+ * @param object `PyObject*` that points to the "data tuple" for a thrift-python
+ *        Union class. Must not be nullptr.
  */
-int getUnionActiveFieldId(const void* objectPtr) {
-  PyObject* const* unionTuple = toPyObjectPtr(objectPtr);
+int getUnionActiveFieldId(const void* object) {
+  const PyObject* unionTuple = toPyObject(object);
   long id = PyLong_AsLong(PyTuple_GET_ITEM(unionTuple, 0));
   if (id == -1) {
     THRIFT_PY3_CHECK_POSSIBLE_ERROR();

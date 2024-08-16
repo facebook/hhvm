@@ -77,7 +77,7 @@ using RepoUnitSymbols =
 
 /*
  * RepoFileBuilder is used to create a RepoFile (you can either use a
- * RepoFile, or create one, there's no simulataneous creation/use).
+ * RepoFile, or create one, there's no simultaneous creation/use).
  *
  * Usage is simple. Instantiate one, call add() with as many
  * UnitEmitters as needed, then call finish().
@@ -99,7 +99,7 @@ struct RepoFileBuilder {
   explicit RepoFileBuilder(const std::string& path);
   ~RepoFileBuilder();
 
-  // Encoding an UnitEmitter is expensive, so one can do it ahead of
+  // Encoding a UnitEmitter is expensive, so one can do it ahead of
   // time (in different threads), then add it directly.
   struct EncodedUE {
     explicit EncodedUE(const UnitEmitter& ue);

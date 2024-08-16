@@ -15,10 +15,7 @@
 */
 #include "hphp/runtime/base/intercept.h"
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -28,7 +25,6 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/util/configs/jit.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
@@ -187,6 +183,7 @@ bool register_intercept(const String& name, const Variant& callback) {
       StructuredLog::coinflip(Cfg::Jit::InterceptFunctionLogRate)) {
     StructuredLogEntry entry;
     entry.setStr("intercepted_func", interceptedFunc->fullName()->data());
+    entry.setInt("builtin", interceptedFunc->isBuiltin());
     addBacktraceToStructLog(
       createBacktrace(BacktraceArgs()), entry
     );

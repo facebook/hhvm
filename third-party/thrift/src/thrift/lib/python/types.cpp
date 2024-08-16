@@ -611,42 +611,47 @@ void setMutableIsset(void* objectPtr, ptrdiff_t offset, bool value) {
 /**
  * Clears a thrift-python union.
  *
- * @param object A `PyObject*` that corresponds to the "data tuple" for a
+ * @param object A `PyObject*` that corresponds to the "data holder" for a
  *        thrift-python Union class. Must not be nullptr.
  */
-void clearUnion(void* object) {
-  PyObject* unionTuple = toPyObject(object);
+template <typename TDataHolderPolicy>
+void clearUnionDataHolder(void* unionDataHolderObject) {
+  PyObject* const unionDataHolder = toPyObject(unionDataHolderObject);
 
   // Clear field id of "present field" (if any).
-  PyObject* previousActiveFieldId = PyTuple_GET_ITEM(unionTuple, 0);
+  PyObject* const previousActiveFieldId =
+      TDataHolderPolicy::GET_ITEM(unionDataHolder, 0);
   UniquePyObjectPtr zero{PyLong_FromLong(0)};
   if (zero == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  PyTuple_SET_ITEM(unionTuple, 0, zero.release());
+  TDataHolderPolicy::SET_ITEM(unionDataHolder, 0, zero.release());
   Py_XDECREF(previousActiveFieldId);
 
   // Clear value (if any).
-  PyObject* previousValue = PyTuple_GET_ITEM(unionTuple, 1);
-  PyTuple_SET_ITEM(unionTuple, 1, Py_None);
+  PyObject* const previousValue =
+      TDataHolderPolicy::GET_ITEM(unionDataHolder, 1);
+  TDataHolderPolicy::SET_ITEM(unionDataHolder, 1, Py_None);
   Py_INCREF(Py_None);
   Py_XDECREF(previousValue);
 }
 
 void clearImmutableUnion(void* object) {
-  clearUnion(object);
+  clearUnionDataHolder<TupleContainer>(object);
 }
 
 /**
- * Returns the id of the field that is currently set for the given union tuple,
- * or 0 if the union is empty.
+ * Returns the id of the field that is currently set for the given union data
+ * holder, or 0 if the union is empty.
  *
- * @param object `PyObject*` that points to the "data tuple" for a thrift-python
- *        Union class. Must not be nullptr.
+ * @param unionDataHolderObject `PyObject*` that holds the "data holder" for a
+ *        thrift-python Union class. Must not be nullptr.
  */
-int getUnionActiveFieldId(const void* object) {
-  const PyObject* unionTuple = toPyObject(object);
-  long id = PyLong_AsLong(PyTuple_GET_ITEM(unionTuple, 0));
+template <typename TDataHolderPolicy>
+int getUnionDataHolderActiveFieldId(const void* unionDataHolderObject) {
+  const PyObject* const unionDataHolder = toPyObject(unionDataHolderObject);
+  const long id =
+      PyLong_AsLong(TDataHolderPolicy::GET_ITEM(unionDataHolder, 0));
   if (id == -1) {
     THRIFT_PY3_CHECK_POSSIBLE_ERROR();
   }
@@ -654,32 +659,33 @@ int getUnionActiveFieldId(const void* object) {
 }
 
 int getImmutableUnionActiveFieldId(const void* object) {
-  return getUnionActiveFieldId(object);
+  return getUnionDataHolderActiveFieldId<TupleContainer>(object);
 }
 
 /**
- * Updates the given union tuple to indicate that the given fieldId is currently
- * set for that union.
+ * Updates the given union data holder to indicate that the given fieldId is
+ * currently set for that union.
  *
- * @param object A `PyObject*` that corresponds to a "data tuple" for a
- *        thrift-python Union class. Must not be nullptr.
+ * @param unionDataHolderObject A `PyObject*` that corresponds to a "data
+ *        holder" for a thrift-python Union class. Must not be nullptr.
  * @param fieldId of the field that is marked as "present" for the given union.
  *        Should be > 0.
  */
-void setUnionActiveFieldId(void* object, int fieldId) {
+template <typename TDataHolderPolicy>
+void setUnionDataHolderActiveFieldId(void* unionDataHolderObject, int fieldId) {
   UniquePyObjectPtr fieldIdPyObj{PyLong_FromLong(fieldId)};
   if (fieldIdPyObj == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
 
-  PyObject* unionTuple = toPyObject(object);
-  PyObject* previousFieldId = PyTuple_GET_ITEM(unionTuple, 0);
-  PyTuple_SET_ITEM(unionTuple, 0, fieldIdPyObj.release());
+  PyObject* unionDataHolder = toPyObject(unionDataHolderObject);
+  PyObject* previousFieldId = TDataHolderPolicy::GET_ITEM(unionDataHolder, 0);
+  TDataHolderPolicy::SET_ITEM(unionDataHolder, 0, fieldIdPyObj.release());
   Py_DECREF(previousFieldId);
 }
 
 void setImmutableUnionActiveFieldId(void* object, int fieldId) {
-  setUnionActiveFieldId(object, fieldId);
+  setUnionDataHolderActiveFieldId<TupleContainer>(object, fieldId);
 }
 
 const detail::UnionExtN<1> kImmutableUnionExt = {
@@ -1011,27 +1017,28 @@ const detail::TypeInfo
         /* .typeExt */ nullptr,
     };
 
+template <typename TDataHolderPolicy>
 PyObject* createUnionDataHolder() {
-  // Tuple items: (current field enum value, field value)
-  UniquePyObjectPtr tuple{PyTuple_New(2)};
-  if (tuple == nullptr) {
+  // Data items: (current field enum value, field value)
+  UniquePyObjectPtr unionDataHolder{TDataHolderPolicy::New(/* size */ 2)};
+  if (unionDataHolder == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
 
-  // Initialize union tuple to "empty" union, i.e. `(0, Py_None)`. Indeed, 0 is
+  // Initialize union data to "empty" union, i.e. `(0, Py_None)`. Indeed, 0 is
   // the special enum value corresponding to an empty union, for all thrift
   // unions.
-  PyTuple_SET_ITEM(tuple.get(), 0, PyLong_FromLong(0));
-  PyTuple_SET_ITEM(tuple.get(), 1, Py_None);
+  TDataHolderPolicy::SET_ITEM(unionDataHolder.get(), 0, PyLong_FromLong(0));
+  TDataHolderPolicy::SET_ITEM(unionDataHolder.get(), 1, Py_None);
   Py_INCREF(Py_None);
 
-  return tuple.release();
+  return unionDataHolder.release();
 }
 
 } // namespace
 
 PyObject* createUnionTuple() {
-  return createUnionDataHolder();
+  return createUnionDataHolder<TupleContainer>();
 }
 
 template <typename Container>

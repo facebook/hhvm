@@ -62,41 +62,7 @@ class PythonAsyncProcessorFactory
     return {this};
   }
 
-  CreateMethodMetadataResult createMethodMetadata() override {
-    AsyncProcessorFactory::MethodMetadataMap result;
-    const auto processFunc =
-        std::make_shared<PythonAsyncProcessor::PythonMetadata>(
-            PythonAsyncProcessor::getSingleFunc());
-    const auto onewayFunc =
-        std::make_shared<PythonAsyncProcessor::PythonMetadata>(
-            PythonAsyncProcessor::getOnewayFunc());
-    const auto streamFunc =
-        std::make_shared<PythonAsyncProcessor::PythonMetadata>(
-            PythonAsyncProcessor::getStreamFunc());
-
-    for (const auto& [methodName, function] : functions_) {
-      switch (function.first) {
-        case apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
-          result.emplace(methodName, processFunc);
-          break;
-        case apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE:
-          result.emplace(methodName, onewayFunc);
-          break;
-        case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
-          result.emplace(methodName, streamFunc);
-          break;
-        case apache::thrift::RpcKind::SINK:
-          // Leaving this commented out on purpose, as python doesn't support
-          // sink methods yet, but we'll still need this switch branch for when
-          // it does
-
-          // result.emplace(methodName, processFunc); // TODO sink
-          break;
-      }
-    }
-
-    return result;
-  }
+  CreateMethodMetadataResult createMethodMetadata() override;
 
  private:
   folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);

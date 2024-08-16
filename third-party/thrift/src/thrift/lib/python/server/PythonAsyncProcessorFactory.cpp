@@ -73,5 +73,41 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessorFactory::callLifecycle(
   return folly::makeSemiFuture();
 }
 
+PythonAsyncProcessorFactory::CreateMethodMetadataResult
+PythonAsyncProcessorFactory::createMethodMetadata() {
+  AsyncProcessorFactory::MethodMetadataMap result;
+  using PythonMetadataForRpcKind = std::unordered_map<
+      apache::thrift::RpcKind,
+      std::shared_ptr<PythonAsyncProcessor::PythonMetadata>>;
+  static const PythonMetadataForRpcKind kPythonMetadataForRpcKind = []() {
+    PythonMetadataForRpcKind pythonMetadataForRpcKind;
+    for (auto rpcKind :
+         {apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+          apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+          apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE}) {
+      pythonMetadataForRpcKind[rpcKind] =
+          std::make_shared<PythonAsyncProcessor::PythonMetadata>(rpcKind);
+    }
+    return pythonMetadataForRpcKind;
+  }();
+
+  for (const auto& [methodName, function] : functions_) {
+    switch (function.first) {
+      case apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
+      case apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE:
+      case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
+        result.emplace(
+            methodName, kPythonMetadataForRpcKind.at(function.first));
+        break;
+      case apache::thrift::RpcKind::SINK:
+        // Python doesn't support sink yet. Explictly
+        // add this case for visibility when it does support it.
+        break;
+    }
+  }
+
+  return result;
+}
+
 } // namespace python
 } // namespace thrift

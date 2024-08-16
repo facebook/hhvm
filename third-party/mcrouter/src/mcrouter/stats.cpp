@@ -583,6 +583,8 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
         std::min(
             i ? stat_get_uint64(stats, proxy_queue_full_stat) : 0,
             static_cast<uint64_t>(pr->messageQueueFull() ? 1 : 0)));
+    stat_incr(
+        stats, processing_time_us_stat, pr->stats().processingTimeUs().value());
   }
 
   if (router.opts().num_proxies > 0) {
@@ -610,6 +612,8 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
         stats, asynclog_duration_us_stat, router.opts().num_proxies);
     stat_div_internal(
         stats, axon_proxy_duration_us_stat, router.opts().num_proxies);
+    stat_div_internal(
+        stats, processing_time_us_stat, router.opts().num_proxies);
   }
 
   for (int i = 0; i < num_stats; i++) {

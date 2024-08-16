@@ -68,6 +68,10 @@ class ProxyStats {
     return axonProxyDurationUs_;
   }
 
+  ExponentialSmoothData<64>& processingTimeUs() {
+    return processingTimeUs_;
+  }
+
   size_t numBinsUsed() const {
     return numBinsUsed_;
   }
@@ -207,6 +211,9 @@ class ProxyStats {
 
   // Time spent for axonlog writing
   ExponentialSmoothData<64> axonProxyDurationUs_;
+
+  // Time spent in mcrouter, excluding time spent over network.
+  ExponentialSmoothData<64> processingTimeUs_;
 
   // we are wasting some memory here to get faster mapping from stat name to
   // statsBin_[] and statsNumWithinWindow_[] entry. i.e., the statsBin_[]

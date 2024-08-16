@@ -8,6 +8,7 @@
 #pragma once
 
 #include "mcrouter/McrouterFiberContext.h"
+#include "mcrouter/config.h"
 #include "mcrouter/lib/carbon/Result.h"
 #include "mcrouter/lib/carbon/RoutingGroups.h"
 
@@ -22,7 +23,8 @@ struct RequestLoggerContext;
 template <class RouterInfo>
 class ProxyRequestLogger {
  public:
-  explicit ProxyRequestLogger(Proxy<RouterInfo>& proxy) : proxy_(proxy) {}
+  explicit ProxyRequestLogger(Proxy<RouterInfo>& proxy)
+      : proxy_(proxy), loggerCreatedTimeUs_(nowUs()) {}
 
   template <class Request>
   void log(const RequestLoggerContext& loggerContext);
@@ -45,6 +47,8 @@ class ProxyRequestLogger {
   void logDurationByRequestType(
       uint64_t durationUs,
       carbon::OtherThanT<Request, carbon::GetLike<>, carbon::UpdateLike<>> = 0);
+
+  int64_t loggerCreatedTimeUs_ = 0;
 };
 } // namespace mcrouter
 } // namespace memcache

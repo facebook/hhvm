@@ -34,6 +34,10 @@ void ProxyRequestLogger<RouterInfo>::log(
   const auto durationUs = loggerContext.endTimeUs - loggerContext.startTimeUs;
   proxy_.stats().durationUs().insertSample(durationUs);
   logDurationByRequestType<Request>(durationUs);
+
+  proxy_.stats().processingTimeUs().insertSample(
+      loggerContext.startTimeUs - loggerCreatedTimeUs_ -
+      loggerContext.networkTransportTimeUs);
 }
 
 template <class RouterInfo>

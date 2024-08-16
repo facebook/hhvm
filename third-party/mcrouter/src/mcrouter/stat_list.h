@@ -325,6 +325,8 @@ STAT(client_queue_notify_period, stat_double, 0, .dbl = 0.0)
 STAT(asynclog_duration_us, stat_double, 0, .dbl = 0.0)
 // avg time spent appending to axon proxy
 STAT(axon_proxy_duration_us, stat_double, 0, .dbl = 0.0)
+// Time spent in mcrouter, excluding time spent over network.
+STAT(processing_time_us, stat_double, 0, .dbl = 0.0)
 #undef GROUP
 #define GROUP ods_stats | basic_stats | max_stats
 STUI(destination_max_pending_reqs, 0, 1)

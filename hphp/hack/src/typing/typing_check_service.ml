@@ -665,59 +665,73 @@ module ErrorStats = struct
     }
 end
 
-let process_and_merge_typing_results
-    (produced_by_job : Typing_service_types.typing_result)
-    ~(acc : Typing_service_types.typing_result)
-    ~(stream_errors : bool)
-    (error_stats : ErrorStats.t ref) : Typing_service_types.typing_result =
-  error_stats := ErrorStats.update produced_by_job.errors !error_stats;
-  (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
-  if stream_errors then
-    Server_progress.ErrorsWrite.report produced_by_job.errors;
+module Merge : sig
+  val merge :
+    batch_counts_by_worker_id:Counts.t ref ->
+    error_stats:ErrorStats.t ref ->
+    check_info:check_info ->
+    Todo.t ->
+    int ->
+    log_message * typing_result * TypingProgress.t ->
+    typing_result ->
+    typing_result
+end = struct
+  let process_errors errors error_stats ~stream_errors =
+    error_stats := ErrorStats.update errors !error_stats;
+    (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
+    if stream_errors then Server_progress.ErrorsWrite.report errors
 
-  Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
-  Typing_deps.register_discovered_dep_edges acc.dep_edges;
+  let process_and_merge_typing_results
+      (produced_by_job : Typing_service_types.typing_result)
+      ~(acc : Typing_service_types.typing_result)
+      ~(stream_errors : bool)
+      (error_stats : ErrorStats.t ref) : Typing_service_types.typing_result =
+    process_errors produced_by_job.errors error_stats ~stream_errors;
 
-  let produced_by_job =
-    { produced_by_job with dep_edges = Typing_deps.dep_edges_make () }
-  in
-  let acc = { acc with dep_edges = Typing_deps.dep_edges_make () } in
+    Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
+    Typing_deps.register_discovered_dep_edges acc.dep_edges;
 
-  accumulate_job_output produced_by_job acc
+    let produced_by_job =
+      { produced_by_job with dep_edges = Typing_deps.dep_edges_make () }
+    in
+    let acc = { acc with dep_edges = Typing_deps.dep_edges_make () } in
 
-(** Merge the results from multiple workers.
+    accumulate_job_output produced_by_job acc
+
+  (** Merge the results from multiple workers.
 
     We don't really care about which files are left unchecked since we use
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
-let merge
-    ~(batch_counts_by_worker_id : Counts.t ref)
-    ~(error_stats : ErrorStats.t ref)
-    ~(check_info : check_info)
-    (todo : Todo.t)
-    (workitems_initial_count : int)
-    ( (worker_id : string),
-      (produced_by_job : Typing_service_types.typing_result),
-      (progress : TypingProgress.t) )
-    (acc : Typing_service_types.typing_result) :
-    Typing_service_types.typing_result =
-  batch_counts_by_worker_id :=
-    Counts.increment !batch_counts_by_worker_id worker_id;
+  let merge
+      ~(batch_counts_by_worker_id : Counts.t ref)
+      ~(error_stats : ErrorStats.t ref)
+      ~(check_info : check_info)
+      (todo : Todo.t)
+      (workitems_initial_count : int)
+      ( (worker_id : string),
+        (produced_by_job : Typing_service_types.typing_result),
+        (progress : TypingProgress.t) )
+      (acc : Typing_service_types.typing_result) :
+      Typing_service_types.typing_result =
+    batch_counts_by_worker_id :=
+      Counts.increment !batch_counts_by_worker_id worker_id;
 
-  Todo.update progress todo;
+    Todo.update progress todo;
 
-  Server_progress.write_percentage
-    ~operation:"typechecking"
-    ~done_count:(Todo.files_checked_count todo)
-    ~total_count:workitems_initial_count
-    ~unit:"files"
-    ~extra:None;
+    Server_progress.write_percentage
+      ~operation:"typechecking"
+      ~done_count:(Todo.files_checked_count todo)
+      ~total_count:workitems_initial_count
+      ~unit:"files"
+      ~extra:None;
 
-  process_and_merge_typing_results
-    produced_by_job
-    ~acc
-    ~stream_errors:check_info.log_errors
-    error_stats
+    process_and_merge_typing_results
+      produced_by_job
+      ~acc
+      ~stream_errors:check_info.log_errors
+      error_stats
+end
 
 let next
     (workers : MultiWorker.worker list option)
@@ -979,7 +993,7 @@ let process_in_parallel
       ~job
       ~neutral:(neutral ())
       ~merge:
-        (merge
+        (Merge.merge
            ~batch_counts_by_worker_id
            ~error_stats
            ~check_info

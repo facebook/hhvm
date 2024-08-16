@@ -4834,7 +4834,6 @@ let main
   background_status_refresher ide_service;
 
   let client = Jsonrpc.make_t () in
-  let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in
   let ref_event = ref None in
   let ref_unblocked_time = ref (Unix.gettimeofday ()) in
@@ -4853,14 +4852,6 @@ let main
        [respect_cancellation], but its ~finally clause guarantees that it unstops workers
        before it completes i.e. before we continue this [process_next_event] loop. *)
     try%lwt
-      let%lwt () =
-        match !deferred_action with
-        | Some deferred_action ->
-          let%lwt () = deferred_action () in
-          Lwt.return_unit
-        | None -> Lwt.return_unit
-      in
-      deferred_action := None;
       let%lwt event = get_next_event state client ide_service in
       if not (is_tick event) then
         log_debug "next event: %s" (event_to_string event);

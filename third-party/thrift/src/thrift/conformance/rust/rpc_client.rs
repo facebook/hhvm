@@ -78,6 +78,14 @@ fn init_logging(directives: Vec<Directive>) {
 
 use rpc::rpc::ClientInstruction;
 use rpc::rpc::ClientTestResult;
+use rpc::rpc::InteractionConstructorClientInstruction;
+use rpc::rpc::InteractionConstructorClientTestResult;
+use rpc::rpc::InteractionFactoryFunctionClientInstruction;
+use rpc::rpc::InteractionFactoryFunctionClientTestResult;
+use rpc::rpc::InteractionPersistsStateClientInstruction;
+use rpc::rpc::InteractionPersistsStateClientTestResult;
+use rpc::rpc::InteractionTerminationClientInstruction;
+use rpc::rpc::InteractionTerminationClientTestResult;
 use rpc::rpc::RequestResponseBasicClientInstruction;
 use rpc::rpc::RequestResponseBasicClientTestResult;
 use rpc::rpc::RequestResponseDeclaredExceptionClientInstruction;
@@ -90,44 +98,50 @@ use rpc::rpc::RequestResponseUndeclaredExceptionClientTestResult;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::RequestResponseDeclaredExceptionError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::RequestResponseTimeoutError;
 use rpc_clients::rpc::errors::r_p_c_conformance_service::RequestResponseUndeclaredExceptionError;
+use rpc_clients::rpc::BasicInteraction;
 
 async fn test(client: &dyn RPCConformanceService) -> Result<()> {
+    use ClientInstruction::*;
     match &client.getTestCase().await?.clientInstruction {
-        ClientInstruction::requestResponseBasic(instr) => {
-            request_response_basic(client, instr).await
-        }
-        ClientInstruction::requestResponseDeclaredException(instr) => {
-            request_response_declared_exception(client, instr).await
-        }
-        ClientInstruction::requestResponseUndeclaredException(instr) => {
-            request_response_undeclared_exception(client, instr).await
-        }
-        ClientInstruction::requestResponseNoArgVoidResponse(_) => {
-            request_response_no_arg_void_response(client).await
-        }
-        ClientInstruction::requestResponseTimeout(instr) => {
-            request_response_timeout(client, instr).await
-        }
-        ClientInstruction::interactionConstructor(_) => not_implemented(),
-        ClientInstruction::interactionFactoryFunction(_) => not_implemented(),
-        ClientInstruction::interactionPersistsState(_) => not_implemented(),
-        ClientInstruction::interactionTermination(_) => not_implemented(),
-        ClientInstruction::streamBasic(_) => not_implemented(),
-        ClientInstruction::streamChunkTimeout(_) => not_implemented(),
-        ClientInstruction::streamInitialResponse(_) => not_implemented(),
-        ClientInstruction::streamCreditTimeout(_) => not_implemented(),
-        ClientInstruction::streamDeclaredException(_) => not_implemented(),
-        ClientInstruction::streamUndeclaredException(_) => not_implemented(),
-        ClientInstruction::streamInitialDeclaredException(_) => not_implemented(),
-        ClientInstruction::streamInitialUndeclaredException(_) => not_implemented(),
-        ClientInstruction::streamInitialTimeout(_) => not_implemented(),
+        requestResponseBasic(i) => request_response_basic(client, i).await,
+        requestResponseDeclaredException(i) => request_response_declared_exn(client, i).await,
+        requestResponseUndeclaredException(i) => request_response_undeclared_exn(client, i).await,
+        requestResponseNoArgVoidResponse(_) => request_response_no_arg_void_response(client).await,
+        requestResponseTimeout(i) => request_response_timeout(client, i).await,
+        interactionConstructor(i) => interaction_constructor(client, i).await,
+        interactionFactoryFunction(i) => interaction_factory_function(client, i).await,
+        interactionPersistsState(i) => interaction_persists_state(client, i).await,
+        interactionTermination(i) => interaction_termination(client, i).await,
+        streamBasic(_) => not_implemented(),
+        streamChunkTimeout(_) => not_implemented(),
+        streamInitialResponse(_) => not_implemented(),
+        streamCreditTimeout(_) => not_implemented(),
+        streamDeclaredException(_) => not_implemented(),
+        streamUndeclaredException(_) => not_implemented(),
+        streamInitialDeclaredException(_) => not_implemented(),
+        streamInitialUndeclaredException(_) => not_implemented(),
+        streamInitialTimeout(_) => not_implemented(),
         i => Err(anyhow!(format!("not supported: {:?}", i))),
     }
 }
 
+// ---
+
 fn not_implemented() -> Result<()> {
     Err(anyhow!("not implemented"))
 }
+
+async fn create_interaction(
+    client: &dyn RPCConformanceService,
+    initial_sum: &Option<i32>,
+) -> Result<Arc<dyn BasicInteraction>> {
+    Ok(match initial_sum {
+        Some(value) => client.basicInteractionFactoryFunction(*value).await?,
+        None => client.createBasicInteraction()? as Arc<_>,
+    })
+}
+
+// ---
 
 async fn request_response_basic(
     client: &dyn RPCConformanceService,
@@ -142,7 +156,7 @@ async fn request_response_basic(
     Ok(())
 }
 
-async fn request_response_declared_exception(
+async fn request_response_declared_exn(
     client: &dyn RPCConformanceService,
     instr: &RequestResponseDeclaredExceptionClientInstruction,
 ) -> Result<()> {
@@ -167,7 +181,7 @@ async fn request_response_declared_exception(
     }
 }
 
-async fn request_response_undeclared_exception(
+async fn request_response_undeclared_exn(
     client: &dyn RPCConformanceService,
     instr: &RequestResponseUndeclaredExceptionClientInstruction,
 ) -> Result<()> {
@@ -235,4 +249,63 @@ async fn request_response_timeout(
             r
         )),
     }
+}
+
+async fn interaction_constructor(
+    client: &dyn RPCConformanceService,
+    _instr: &InteractionConstructorClientInstruction,
+) -> Result<()> {
+    let i = client.createBasicInteraction()?;
+    let () = i.init().await?;
+    let test_result =
+        ClientTestResult::interactionConstructor(InteractionConstructorClientTestResult {
+            ..Default::default()
+        });
+    client.sendTestResult(&test_result).await?;
+    Ok(())
+}
+
+async fn interaction_factory_function(
+    client: &dyn RPCConformanceService,
+    instr: &InteractionFactoryFunctionClientInstruction,
+) -> Result<()> {
+    let _i = client
+        .basicInteractionFactoryFunction(instr.initialSum)
+        .await?;
+    let test_result =
+        ClientTestResult::interactionFactoryFunction(InteractionFactoryFunctionClientTestResult {
+            ..Default::default()
+        });
+    client.sendTestResult(&test_result).await?;
+    Ok(())
+}
+
+async fn interaction_persists_state(
+    client: &dyn RPCConformanceService,
+    instr: &InteractionPersistsStateClientInstruction,
+) -> Result<()> {
+    let i = create_interaction(client, &instr.initialSum).await?;
+    let mut test_result: InteractionPersistsStateClientTestResult = Default::default();
+    for value in &instr.valuesToAdd {
+        test_result.responses.push(i.add(*value).await?);
+    }
+    client
+        .sendTestResult(&ClientTestResult::interactionPersistsState(test_result))
+        .await?;
+    Ok(())
+}
+
+async fn interaction_termination(
+    client: &dyn RPCConformanceService,
+    instr: &InteractionTerminationClientInstruction,
+) -> Result<()> {
+    let i = create_interaction(client, &instr.initialSum).await?;
+    let () = i.init().await?;
+    drop(i);
+    let test_result =
+        ClientTestResult::interactionTermination(InteractionTerminationClientTestResult {
+            ..Default::default()
+        });
+    client.sendTestResult(&test_result).await?;
+    Ok(())
 }

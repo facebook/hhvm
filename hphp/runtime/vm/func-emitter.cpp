@@ -213,9 +213,8 @@ const StaticString
   s_SoftInternal("__SoftInternal");
 
 namespace {
-  bool is_interceptable(const PreClass* preClass, const StringData* name) {
+  bool is_interceptable(const PreClass* preClass, const StringData* name, Attr attrs) {
     if (RO::RepoAuthoritative) return false;
-    if (Cfg::Eval::NonInterceptableFunctions.empty()) return true;
     auto fullname = [&]() {
       auto n = name->toCppString();
       if (!preClass) {
@@ -223,7 +222,15 @@ namespace {
       }
       return preClass->name()->toCppString() +"::"+ n;
     }();
-    return Cfg::Eval::NonInterceptableFunctions.count(fullname) == 0;
+    if (attrs & AttrBuiltin) {
+      if (Cfg::Jit::BuiltinsInterceptableByDefault) {
+        return true;
+      } else {
+        return (Cfg::Eval::InterceptableBuiltins.count(fullname) == 1);
+      }
+    } else {
+      return Cfg::Eval::NonInterceptableFunctions.count(fullname) == 0;
+    }
   }
 }
 
@@ -234,7 +241,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   assertx(IMPLIES(attrs & AttrPersistent, persistent));
   attrSetter(attrs, persistent, AttrPersistent);
 
-  auto interceptable = is_interceptable(preClass, name);
+  auto interceptable = is_interceptable(preClass, name, attrs);
   attrSetter(attrs, interceptable, AttrInterceptable);
 
   if (!(attrs & AttrPersistent) && attrs & AttrBuiltin) {

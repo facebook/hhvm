@@ -169,9 +169,17 @@ bool register_intercept(const String& name, const Variant& callback) {
       raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
                   "in RepoAuthoritative mode", interceptedFunc->fullName()->data());
     } else {
-      raise_error("fb_intercept2 was used on a non-interceptable function (%s). "
-                  "It appears in the NonInterceptableFunctions blocklist.",
-                  interceptedFunc->fullName()->data());
+      if (interceptedFunc->isBuiltin()) {
+        raise_error("fb_intercept2 was used on a non-interceptable function (%s). "
+                    "Builtins are by default non-interceptable. If you need to "
+                    "intercept a builtin, add it to the InterceptableBuiltins "
+                    "allowlist",
+                    interceptedFunc->fullName()->data());
+      } else {
+        raise_error("fb_intercept2 was used on a non-interceptable function (%s). "
+                    "It appears in the NonInterceptableFunctions blocklist.",
+                    interceptedFunc->fullName()->data());
+      }
     }
   }
 

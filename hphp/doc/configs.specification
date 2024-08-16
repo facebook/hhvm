@@ -244,6 +244,8 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - std::set<std::string> Eval.NonInterceptableFunctions = {}, UNKNOWN, globaldata
 
+- std::set<std::string> Eval.InterceptableBuiltins = {}, UNKNOWN, globaldata
+
 - bool Eval.LogExternCompilerPerf = false, UNKNOWN, hackc(hhbc)
 
   Whether to log extern compiler performance
@@ -449,6 +451,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   1 - All functions can be renamed
   2 - Functions in RenamableFunctions config list can be renamed
 
+- uint32_t Jit.BuiltinsInterceptableByDefault = true, UNKNOWN, globaldata|compileroption(BuiltinsInterceptableByDefault)|unitcacheflag
 - uint32_t Jit.InterceptFunctionLogRate = 1000, UNKNOWN
 - bool Jit.UseVtuneAPI = false, UNKNOWN
 - bool Jit.DisabledByHphpd = false, UNKNOWN

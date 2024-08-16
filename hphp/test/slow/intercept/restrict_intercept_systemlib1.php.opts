@@ -1,2 +1,2 @@
--vEval.NonInterceptableFunctions.*=HH\\Shapes::idx
+-vEval.JitBuiltinsInterceptableByDefault=false
 -vEval.JitEnableRenameFunction=2

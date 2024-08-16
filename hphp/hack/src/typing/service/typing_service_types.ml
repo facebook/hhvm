@@ -19,6 +19,15 @@ type workitem =
   | Declare of (Relative_path.t * string)
 [@@deriving show]
 
+module Workitem = struct
+  type t = workitem
+
+  let is_check (t : t) : bool =
+    match t with
+    | Check _ -> true
+    | _ -> false
+end
+
 module TypingProgress : sig
   type t
 

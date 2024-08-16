@@ -561,11 +561,9 @@ let merge
   errors_so_far := !errors_so_far + Errors.count produced_by_job.errors;
 
   workitems_to_process :=
-    BigList.append (TypingProgress.remaining progress) !workitems_to_process;
-
-  (* Let's also prepend the deferred files! *)
-  workitems_to_process :=
-    BigList.append (TypingProgress.deferred progress) !workitems_to_process;
+    !workitems_to_process
+    |> BigList.append (TypingProgress.remaining progress)
+    |> BigList.append (TypingProgress.deferred progress);
 
   (* If workers can steal work from each other, then it's possible that
      some of the files that the current worker completed checking have already
@@ -576,6 +574,7 @@ let merge
      checked. *)
   let completed_check_count =
     List.fold
+      (TypingProgress.completed progress)
       ~init:0
       ~f:(fun acc workitem ->
         match Hash_set.Poly.strict_remove workitems_in_progress workitem with
@@ -585,20 +584,14 @@ let merge
           | _ -> acc
         end
         | _ -> acc)
-      (TypingProgress.completed progress)
   in
 
   (* Deferred type check computations should be subtracted from completed
      in order to produce an accurate count because they we requeued them, yet
      they were also included in the completed list.
   *)
-  let is_check workitem =
-    match workitem with
-    | Check _ -> true
-    | _ -> false
-  in
   let deferred_check_count =
-    List.count ~f:is_check (TypingProgress.deferred progress)
+    List.count ~f:Workitem.is_check (TypingProgress.deferred progress)
   in
   let completed_check_count = completed_check_count - deferred_check_count in
 

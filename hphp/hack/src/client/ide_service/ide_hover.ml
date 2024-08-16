@@ -429,6 +429,31 @@ let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
             (split_class_name def.SymbolDefinition.full_name)
         | None -> ""
       in
+      let print_targs info =
+        let env = ServerInferType.get_env info in
+        let targs = ServerInferType.get_targs info in
+        let ty = ServerInferType.get_type info in
+        let (_, _, ty) =
+          Typing_utils.strip_supportdyn (Tast_env.tast_env_as_typing_env env) ty
+        in
+        (* Do not include implicit coeffect parameter *)
+        let tparams =
+          match get_node ty with
+          | Tfun fn_type ->
+            List.filter fn_type.ft_tparams ~f:(fun tp ->
+                not (SN.Coeffects.is_generated_generic (snd tp.tp_name)))
+          | _ -> []
+        in
+        (* Don't include extra targ for implicit coeffect *)
+        let targs = List.take targs (List.length tparams) in
+        match
+          List.map2 tparams targs ~f:(fun tp (ty, _hint) ->
+              snd tp.tp_name ^ " = " ^ Tast_env.print_ty env ty)
+        with
+        | List.Or_unequal_lengths.Ok (_ :: _ as targ_strings) ->
+          " where " ^ String.concat ~sep:", " targ_strings
+        | _ -> ""
+      in
       let print_locl_ty_with_identity ?(do_not_strip_dynamic = false) info =
         let env = ServerInferType.get_env info in
         let ty = ServerInferType.get_type info in
@@ -462,7 +487,6 @@ let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
         | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
           let param_name = nth_param ctx recv i in
           Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
-        | ({ type_ = Method _; _ }, Some info)
         | ({ type_ = ClassConst _; _ }, Some info)
         | ({ type_ = Property _; _ }, Some info) ->
           defined_in ^ print_locl_ty_with_identity info
@@ -470,9 +494,12 @@ let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
           (match make_hover_const_definition entry def_opt with
           | Some def_txt -> def_txt
           | None -> print_locl_ty_with_identity info)
+        | ({ type_ = Method _; _ }, Some info) ->
+          defined_in ^ print_locl_ty_with_identity info ^ print_targs info
         | ({ type_ = Function; _ }, Some info) ->
           fun_defined_in def_opt
           ^ print_locl_ty_with_identity ~do_not_strip_dynamic:true info
+          ^ print_targs info
         | (_, Some info) ->
           print_locl_ty_with_identity ~do_not_strip_dynamic:true info
           ^ under_dynamic_result

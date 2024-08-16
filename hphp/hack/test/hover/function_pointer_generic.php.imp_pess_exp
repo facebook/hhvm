@@ -1,0 +1,4 @@
+function make_pair<T1, T2>(int $x, string $y): ~(
+  int,
+  string
+) where T1 = int, T2 = string

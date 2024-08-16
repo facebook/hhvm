@@ -1,0 +1,3 @@
+// Defined in C
+public static
+function meth<T1, T2>(int $x, vec<string> $y): ~int where T1 = int, T2 = string

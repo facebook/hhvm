@@ -90,3 +90,9 @@ let make_n_buckets ~buckets ~split =
       Job { work = split ~bucket:current; bucket = current; total = buckets }
     else
       Done
+
+let map t ~f =
+  match t with
+  | Job x -> Job (f x)
+  | Done -> Done
+  | Wait -> Wait

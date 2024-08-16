@@ -61,3 +61,5 @@ val make_list :
   'a list ->
   unit ->
   'a list
+
+val map : 'a bucket -> f:('a -> 'b) -> 'b bucket

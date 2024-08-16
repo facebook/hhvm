@@ -116,6 +116,113 @@ The paper refers to this approach as "restarting", and further suggests that rec
 the chain of jobs could be used to minimize the number of restarts.
  *)
 
+module Todo : sig
+  (** A todo list of workitems. It remembers which workitems
+    are currently in progress so that these can be cancelled. *)
+  type t
+
+  val create : workitem BigList.t -> t
+
+  (** [update progress todo] updates [todo] with the [progress] made. *)
+  val update : TypingProgress.t -> t -> unit
+
+  (** [consume how_may todo] returns a list of workitems to process next
+    if there are any left. [todo] is updated to remember which
+    workitems are in progress. *)
+  val consume :
+    (to_process_count:int -> int) -> t -> workitem list Bucket.bucket
+
+  (** Cancel all workitems currently in progress and return them to the todo list. *)
+  val cancel : t -> unit
+
+  val files_checked_count : t -> int
+end = struct
+  type t = {
+    to_process: workitem BigList.t ref;
+    in_progress: workitem Hash_set.Poly.t;
+    files_checked_count: int ref;
+  }
+
+  let create items =
+    {
+      to_process = ref items;
+      in_progress = Hash_set.Poly.create ();
+      files_checked_count = ref 0;
+    }
+
+  let update_to_process progress to_process : unit =
+    to_process :=
+      !to_process
+      |> BigList.append (TypingProgress.remaining progress)
+      |> BigList.append (TypingProgress.deferred progress)
+
+  let update_in_progress progress in_progress =
+    (* If workers can steal work from each other, then it's possible that
+       some of the files that the current worker completed checking have already
+       been removed from the in-progress set. Thus, we should keep track of
+       how many type check computations we actually remove from the in-progress
+       set. Note that we also skip counting Declare computations,
+       since they are not relevant for computing how many files we've type
+       checked. *)
+    let completed_check_count =
+      List.fold
+        (TypingProgress.completed progress)
+        ~init:0
+        ~f:(fun acc workitem ->
+          match Hash_set.Poly.strict_remove in_progress workitem with
+          | Ok () -> begin
+            match workitem with
+            | Check _ -> acc + 1
+            | _ -> acc
+          end
+          | _ -> acc)
+    in
+    completed_check_count
+
+  let update_files_check_count
+      progress ~completed_check_count files_checked_count =
+    (* Deferred type check computations should be subtracted from completed
+       in order to produce an accurate count because they we requeued them, yet
+       they were also included in the completed list.
+    *)
+    let deferred_check_count =
+      List.count ~f:Workitem.is_check (TypingProgress.deferred progress)
+    in
+    let completed_check_count = completed_check_count - deferred_check_count in
+
+    files_checked_count := !files_checked_count + completed_check_count
+
+  let update
+      (progress : TypingProgress.t)
+      { to_process; in_progress; files_checked_count } : unit =
+    update_to_process progress to_process;
+    let completed_check_count = update_in_progress progress in_progress in
+    update_files_check_count progress ~completed_check_count files_checked_count
+
+  let files_checked_count t = !(t.files_checked_count)
+
+  let consume
+      (how_many : to_process_count:int -> int)
+      { to_process; in_progress; files_checked_count = _ } =
+    if BigList.is_empty !to_process then
+      if Hash_set.Poly.is_empty in_progress then
+        Bucket.Done
+      else
+        Bucket.Wait
+    else
+      let (next, remaining) =
+        BigList.split_n
+          !to_process
+          (how_many ~to_process_count:(BigList.length !to_process))
+      in
+      to_process := remaining;
+      List.iter next ~f:(Hash_set.Poly.add in_progress);
+      Bucket.Job next
+
+  let cancel { to_process; in_progress; files_checked_count = _ } =
+    to_process := BigList.append (Hash_set.Poly.to_list in_progress) !to_process
+end
+
 type seconds_since_epoch = float
 
 type log_message = string
@@ -545,60 +652,25 @@ let merge
     ~(batch_counts_by_worker_id : Counts.t ref)
     ~(errors_so_far : int ref)
     ~(check_info : check_info)
-    (workitems_to_process : workitem BigList.t ref)
+    (todo : Todo.t)
     (workitems_initial_count : int)
-    (workitems_in_progress : workitem Hash_set.t)
-    (files_checked_count : int ref)
     (time_first_error : seconds_since_epoch option ref)
     ( (worker_id : string),
-      (produced_by_job : typing_result),
+      (produced_by_job : Typing_service_types.typing_result),
       (progress : TypingProgress.t) )
-    (acc : typing_result) : typing_result =
+    (acc : Typing_service_types.typing_result) :
+    Typing_service_types.typing_result =
   batch_counts_by_worker_id :=
     Counts.increment !batch_counts_by_worker_id worker_id;
 
   (* And error count *)
   errors_so_far := !errors_so_far + Errors.count produced_by_job.errors;
 
-  workitems_to_process :=
-    !workitems_to_process
-    |> BigList.append (TypingProgress.remaining progress)
-    |> BigList.append (TypingProgress.deferred progress);
+  Todo.update progress todo;
 
-  (* If workers can steal work from each other, then it's possible that
-     some of the files that the current worker completed checking have already
-     been removed from the in-progress set. Thus, we should keep track of
-     how many type check computations we actually remove from the in-progress
-     set. Note that we also skip counting Declare computations,
-     since they are not relevant for computing how many files we've type
-     checked. *)
-  let completed_check_count =
-    List.fold
-      (TypingProgress.completed progress)
-      ~init:0
-      ~f:(fun acc workitem ->
-        match Hash_set.Poly.strict_remove workitems_in_progress workitem with
-        | Ok () -> begin
-          match workitem with
-          | Check _ -> acc + 1
-          | _ -> acc
-        end
-        | _ -> acc)
-  in
-
-  (* Deferred type check computations should be subtracted from completed
-     in order to produce an accurate count because they we requeued them, yet
-     they were also included in the completed list.
-  *)
-  let deferred_check_count =
-    List.count ~f:Workitem.is_check (TypingProgress.deferred progress)
-  in
-  let completed_check_count = completed_check_count - deferred_check_count in
-
-  files_checked_count := !files_checked_count + completed_check_count;
   Server_progress.write_percentage
     ~operation:"typechecking"
-    ~done_count:!files_checked_count
+    ~done_count:(Todo.files_checked_count todo)
     ~total_count:workitems_initial_count
     ~unit:"files"
     ~extra:None;
@@ -623,58 +695,33 @@ let merge
 
 let next
     (workers : MultiWorker.worker list option)
-    (workitems_to_process : workitem BigList.t ref)
-    (workitems_in_progress : workitem Hash_set.Poly.t)
+    (todo : Todo.t)
     (record : Measure.record) : unit -> TypingProgress.t Bucket.bucket =
   let num_workers =
     match workers with
     | Some w -> List.length w
     | None -> 1
   in
-  let return_bucket_job ~current_bucket ~remaining_jobs =
-    (* Update our shared mutable state, because hey: it's not like we're
-       writing OCaml or anything. *)
-    workitems_to_process := remaining_jobs;
-    List.iter ~f:(Hash_set.Poly.add workitems_in_progress) current_bucket;
-    Bucket.Job (TypingProgress.init current_bucket)
-  in
   fun () ->
     Measure.time ~record "time" @@ fun () ->
-    let workitems_to_process_length = BigList.length !workitems_to_process in
-
-    (* WARNING: the following List.length is costly - for a full init, files_to_process starts
-        out as the size of the entire repo, and we're traversing the entire list. *)
-    match workitems_to_process_length with
-    | 0 when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
-    | 0 -> Bucket.Wait
+    match num_workers with
+    | 0 ->
+      (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
+      Bucket.Job (TypingProgress.init [])
     | _ ->
-      let jobs = !workitems_to_process in
-      begin
-        match num_workers with
-        (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
-        | 0 -> return_bucket_job ~current_bucket:[] ~remaining_jobs:jobs
-        | _ ->
-          let bucket_size =
-            Bucket.calculate_bucket_size
-              ~num_jobs:workitems_to_process_length
-              ~num_workers
-              ()
-          in
-          let (current_bucket, remaining_jobs) =
-            BigList.split_n jobs bucket_size
-          in
-          return_bucket_job ~current_bucket ~remaining_jobs
-      end
+      Todo.consume
+        (fun ~to_process_count ->
+          Bucket.calculate_bucket_size
+            ~num_jobs:to_process_count
+            ~num_workers
+            ())
+        todo
+      |> Bucket.map ~f:TypingProgress.init
 
-let on_cancelled
-    (next : unit -> 'a Bucket.bucket)
-    (files_to_process : 'b Hash_set.Poly.elt BigList.t ref)
-    (files_in_progress : 'b Hash_set.Poly.t) : unit -> 'a list =
+let on_cancelled (next : unit -> 'a Bucket.bucket) (todo : Todo.t) :
+    unit -> 'a list =
  fun () ->
-  (* The size of [files_to_process] is bounded only by repo size, but
-      [files_in_progress] is capped at [(worker count) * (max bucket size)]. *)
-  files_to_process :=
-    BigList.append (Hash_set.Poly.to_list files_in_progress) !files_to_process;
+  Todo.cancel todo;
   let rec add_next acc =
     match next () with
     | Bucket.Job j -> add_next (j :: acc)
@@ -872,15 +919,13 @@ let process_in_parallel
     * seconds_since_epoch option =
   let record = Measure.create () in
   (* [record] is used by [next] *)
-  let workitems_to_process = ref workitems in
-  let workitems_in_progress = Hash_set.Poly.create () in
+  let todo = Todo.create workitems in
   let workitems_initial_count = BigList.length workitems in
-  let workitems_processed_count = ref 0 in
   let time_first_error = ref None in
   let errors_so_far = ref 0 in
   let batch_counts_by_worker_id = ref SMap.empty in
 
-  let next = next workers workitems_to_process workitems_in_progress record in
+  let next = next workers todo record in
   (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
      It is marshalled immediately before being executed. *)
   let job (typing_result : typing_result) (progress : TypingProgress.t) :
@@ -913,14 +958,11 @@ let process_in_parallel
            ~batch_counts_by_worker_id
            ~errors_so_far
            ~check_info
-           workitems_to_process
+           todo
            workitems_initial_count
-           workitems_in_progress
-           workitems_processed_count
            time_first_error)
       ~next
-      ~on_cancelled:
-        (on_cancelled next workitems_to_process workitems_in_progress)
+      ~on_cancelled:(on_cancelled next todo)
       ~interrupt
   in
   let paths_of (unfinished : TypingProgress.t list) : Relative_path.t list =

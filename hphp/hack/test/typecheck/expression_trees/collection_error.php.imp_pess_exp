@@ -4,7 +4,7 @@ ERROR: File "collection_error.php", line 12, characters 14-42:
 Collections in expression trees must have `key => value` entries (Parsing[1002])
 ERROR: File "collection_error.php", line 7, characters 14-35:
 Could not find `exampleKeyedCollection`. (Naming[2006])
-  File "expr_tree.php", line 366, characters 16-37:
+  File "expr_tree.php", line 365, characters 16-37:
   Did you mean `~~E~~xampleKeyedCollection` instead (which only differs by case)?
 ERROR: File "collection_error.php", line 6, characters 14-22:
 Unbound name: `wrongCtor` (an object type) (Naming[2049])

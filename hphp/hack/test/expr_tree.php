@@ -39,8 +39,7 @@ final class ExprTree<TVisitor, TResult, +TInfer>
     private ?ExprPos $pos,
     private ExprTreeInfo<TInfer> $metadata,
     private (function(TVisitor): TResult) $ast,
-    private (function(): TInfer) $err,
-  ) {}
+  )[] {}
 
   public function visit(TVisitor $v): TResult {
     return ($this->ast)($v);
@@ -71,7 +70,7 @@ class ExampleDsl {
     ) $metadata,
     (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[]: ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> {
-    throw new Exception();
+    return new ExprTree($pos, $metadata, $ast);
   }
 
   // Virtual types. These do not have to be implemented, as they are only used

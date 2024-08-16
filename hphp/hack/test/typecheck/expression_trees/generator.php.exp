@@ -10,21 +10,21 @@ ERROR: File "generator.php", line 6, characters 14-32:
 Invalid return type (Typing[4110])
   File "generator.php", line 6, characters 14-32:
   Expected `Generator<_, _, _>` (result of function containing a `yield`)
-  File "expr_tree.php", line 95, characters 38-48:
+  File "expr_tree.php", line 94, characters 38-48:
   But got `ExampleVoid`
 ERROR: File "generator.php", line 6, characters 23-29:
 Invalid `yield` (Typing[4110])
-  File "expr_tree.php", line 61, characters 21-26:
+  File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 72, characters 28-43:
+  File "expr_tree.php", line 71, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "generator.php", line 6, characters 23-29:
   But got `AsyncGenerator<?_, int, nothing>` (result of `async function` with `yield` in the body)
 ERROR: File "generator.php", line 6, characters 23-29:
 Some elements in this collection are incompatible (Typing[4110])
-  File "expr_tree.php", line 61, characters 21-26:
+  File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 166, characters 9-24:
+  File "expr_tree.php", line 165, characters 9-24:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "generator.php", line 6, characters 23-29:
   But got `null` (`$generator->send()` can always send a `null` back to a `yield`)

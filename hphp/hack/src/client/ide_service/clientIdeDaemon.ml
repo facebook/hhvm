@@ -320,30 +320,35 @@ let make_singleton_ctx (common : common_state) (entry : Provider_context.entry)
   let ctx = Provider_context.add_or_overwrite_entry ~ctx entry in
   ctx
 
-(** initialize1 is called by handle_request upon receipt of an "init"
-message from the client. It is synchronous. It sets up global variables and
-glean. The remainder of init work will happen after we return... our caller
-handle_request will kick off async work to load saved-state, and once done
-it will stick a GotNamingTable message into the queue, and handle_one_message
-will subsequently pick up that message and call [initialize2]. *)
-let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
-    dstate =
+(** Initializes:
+  - HackEventLogger and Hh_logger
+  - Root, hhi and tmp paths
+  - Load configs
+  - Local memory for the provider backend *)
+let initialize1
+    ({
+       ClientIdeMessage.Initialize_from_saved_state.root;
+       config;
+       open_files;
+       naming_table_load_info = _;
+       ignore_hh_version = _;
+     } :
+      ClientIdeMessage.Initialize_from_saved_state.t) : dstate =
   log_debug "initialize1";
-  let open ClientIdeMessage.Initialize_from_saved_state in
   let start_time = Unix.gettimeofday () in
-  HackEventLogger.serverless_ide_set_root param.root;
-  set_up_hh_logger_for_client_ide_service param.root;
+  HackEventLogger.serverless_ide_set_root root;
+  set_up_hh_logger_for_client_ide_service root;
 
-  Relative_path.set_path_prefix Relative_path.Root param.root;
+  Relative_path.set_path_prefix Relative_path.Root root;
   let hhi_root = Hhi.get_hhi_root () in
   log "Extracted hhi files to directory %s" (Path.to_string hhi_root);
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
   let server_args =
-    ServerArgs.default_options_with_check_mode ~root:(Path.to_string param.root)
+    ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
   in
-  let server_args = ServerArgs.set_config server_args param.config in
+  let server_args = ServerArgs.set_config server_args config in
   let (config, local_config) = ServerConfig.load ~silent:true server_args in
   (* Ignore package loading errors for now TODO(jjwu) *)
   let open GlobalOptions in
@@ -377,8 +382,8 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
      at this stage, since updated contents will be delivered upon each request.
      (and indeed it's pointless to waste time reading existing contents off disk).
      All we care is that every open file is listed in 'open_files'. *)
-  let open_files =
-    param.open_files
+  let dopen_files =
+    open_files
     |> List.map ~f:(fun path ->
            path |> Path.to_string |> Relative_path.create_detect_prefix)
     |> List.map ~f:(fun path ->
@@ -390,16 +395,13 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     |> Relative_path.Map.of_list
   in
   let start_time =
-    log_startup_time
-      "initialize1"
-      ~count:(List.length param.open_files)
-      start_time
+    log_startup_time "initialize1" ~count:(List.length open_files) start_time
   in
   log_debug "initialize1.done";
   {
     start_time;
     dcommon = { hhi_root; config; local_config; local_memory };
-    dopen_files = open_files;
+    dopen_files;
     changed_files_to_process = Relative_path.Set.empty;
   }
 
@@ -1434,7 +1436,9 @@ let daemon_main
       | _ -> ());
   try
     dbg_set_activity ~key:"main" "run_main";
-    Lwt_utils.run_main (fun () -> serve ~in_fd ~out_fd);
+    ( Lwt_utils.run_main @@ fun () ->
+      (* MAIN ACTION HERE *)
+      serve ~in_fd ~out_fd );
     dbg_set_activity ~key:"main" "done";
     Hh_logger.log "SERVERLESS_IDE_DONE(ok)";
     HackEventLogger.serverless_ide_done None
@@ -1454,7 +1458,7 @@ let daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry
 module Test = struct
   type env = istate
 
-  let init ~custom_config ~naming_sqlite =
+  let init ~custom_config ~naming_sqlite : env =
     let config =
       Option.value custom_config ~default:ServerConfig.default_config
     in

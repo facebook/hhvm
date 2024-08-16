@@ -27,6 +27,77 @@ type _ compute_tast_mode =
   | Compute_tast_only : Compute_tast.t compute_tast_mode
   | Compute_tast_and_errors : Compute_tast_and_errors.t compute_tast_mode
 
+type seconds_since_epoch = float
+
+type start_telemetry = {
+  prev_ctx_telemetry: Telemetry.t;
+  start_gc_telemetry: Telemetry.t;
+  start_tally_state: Counters.t;
+  start_time: seconds_since_epoch;
+}
+
+let prepare_logging ctx : start_telemetry =
+  Provider_context.reset_telemetry ctx;
+  let prev_ctx_telemetry = Provider_context.get_telemetry ctx in
+  Decl_counters.set_mode HackEventLogger.PerFileProfilingConfig.DeclingTopCounts;
+  {
+    prev_ctx_telemetry;
+    start_gc_telemetry = Telemetry.quick_gc_stat ();
+    start_tally_state = Counters.reset ();
+    start_time = Unix.gettimeofday ();
+  }
+
+let log_and_telemetry
+    ctx
+    { prev_ctx_telemetry; start_gc_telemetry; start_tally_state; start_time }
+    entry
+    ~ast_errors
+    ~naming_errors
+    ~typing_errors =
+  let ctx_telemetry =
+    if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
+      Provider_context.get_telemetry ctx
+      |> Telemetry.diff ~all:true ~prev:prev_ctx_telemetry
+    else
+      Provider_context.get_telemetry ctx
+  in
+  let gc_telemetry =
+    if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
+      Telemetry.quick_gc_stat ()
+      |> Telemetry.diff ~all:true ~prev:start_gc_telemetry
+    else
+      Telemetry.quick_gc_stat ()
+  in
+  let telemetry = Counters.get_counters () in
+  Counters.restore_state start_tally_state;
+  let telemetry =
+    telemetry
+    |> Telemetry.object_ ~key:"ctx" ~value:ctx_telemetry
+    |> Telemetry.object_ ~key:"gc" ~value:gc_telemetry
+    |> Telemetry.int_ ~key:"errors.ast" ~value:(Errors.count ast_errors)
+    |> Telemetry.int_ ~key:"errors.nast" ~value:(Errors.count naming_errors)
+    |> Telemetry.int_ ~key:"errors.tast" ~value:(Errors.count typing_errors)
+    |> Telemetry.float_
+         ~key:"duration_decl_and_typecheck"
+         ~value:(Unix.gettimeofday () -. start_time)
+    |> Telemetry.int_
+         ~key:"filesize"
+         ~value:
+           (String.length
+              (Provider_context.get_file_contents_if_present entry
+              |> Option.value ~default:""))
+  in
+
+  Hh_logger.debug
+    "compute_tast: %s\n%s"
+    (Relative_path.suffix entry.Provider_context.path)
+    (Telemetry.to_string telemetry);
+  HackEventLogger.ProfileTypeCheck.compute_tast
+    ~telemetry
+    ~path:entry.Provider_context.path
+    ~start_time;
+  telemetry
+
 let compute_tast_and_errors_unquarantined_internal
     (type a)
     ~(ctx : Provider_context.t)
@@ -40,16 +111,8 @@ let compute_tast_and_errors_unquarantined_internal
   | (Compute_tast_and_errors, Some tast, Some errors) ->
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   | (_, _, _) ->
-    (* prepare logging *)
-    Provider_context.reset_telemetry ctx;
-    let prev_ctx_telemetry = Provider_context.get_telemetry ctx in
-    let prev_gc_telemetry = Telemetry.quick_gc_stat () in
-    Decl_counters.set_mode
-      HackEventLogger.PerFileProfilingConfig.DeclingTopCounts;
-    let prev_tally_state = Counters.reset () in
-    let start_time = Unix.gettimeofday () in
+    let start_telemetry = prepare_logging ctx in
 
-    (* do the work *)
     let ({ Parser_return.ast; _ }, ast_errors) =
       Ast_provider.compute_parser_return_and_ast_errors
         ~popt:(Provider_context.get_popt ctx)
@@ -69,49 +132,16 @@ let compute_tast_and_errors_unquarantined_internal
           Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
     in
 
-    (* Logging... *)
-    let ctx_telemetry =
-      if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
-        Provider_context.get_telemetry ctx
-        |> Telemetry.diff ~all:true ~prev:prev_ctx_telemetry
-      else
-        Provider_context.get_telemetry ctx
-    in
-    let gc_telemetry =
-      if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
-        Telemetry.quick_gc_stat ()
-        |> Telemetry.diff ~all:true ~prev:prev_gc_telemetry
-      else
-        Telemetry.quick_gc_stat ()
-    in
-    let telemetry = Counters.get_counters () in
-    Counters.restore_state prev_tally_state;
     let telemetry =
-      telemetry
-      |> Telemetry.object_ ~key:"ctx" ~value:ctx_telemetry
-      |> Telemetry.object_ ~key:"gc" ~value:gc_telemetry
-      |> Telemetry.int_ ~key:"errors.ast" ~value:(Errors.count ast_errors)
-      |> Telemetry.int_ ~key:"errors.nast" ~value:(Errors.count naming_errors)
-      |> Telemetry.int_ ~key:"errors.tast" ~value:(Errors.count typing_errors)
-      |> Telemetry.float_
-           ~key:"duration_decl_and_typecheck"
-           ~value:(Unix.gettimeofday () -. start_time)
-      |> Telemetry.int_
-           ~key:"filesize"
-           ~value:
-             (String.length
-                (Provider_context.get_file_contents_if_present entry
-                |> Option.value ~default:""))
+      log_and_telemetry
+        ctx
+        start_telemetry
+        entry
+        ~ast_errors
+        ~naming_errors
+        ~typing_errors
     in
 
-    Hh_logger.debug
-      "compute_tast: %s\n%s"
-      (Relative_path.suffix entry.Provider_context.path)
-      (Telemetry.to_string telemetry);
-    HackEventLogger.ProfileTypeCheck.compute_tast
-      ~telemetry
-      ~path:entry.Provider_context.path
-      ~start_time;
     (match mode with
     | Compute_tast_and_errors ->
       let errors =

@@ -643,45 +643,37 @@ module Counts = struct
     SMap.add key (prev_count + 1) map
 end
 
-(** Merge the results from multiple workers.
+module ErrorStats = struct
+  type t = {
+    total_error_count: int;
+    time_first_error: seconds_since_epoch option;
+  }
 
-    We don't really care about which files are left unchecked since we use
-    (gasp) mutation to track that, so combine the errors but always return an
-    empty list for the list of unchecked files. *)
-let merge
-    ~(batch_counts_by_worker_id : Counts.t ref)
-    ~(errors_so_far : int ref)
-    ~(check_info : check_info)
-    (todo : Todo.t)
-    (workitems_initial_count : int)
-    (time_first_error : seconds_since_epoch option ref)
-    ( (worker_id : string),
-      (produced_by_job : Typing_service_types.typing_result),
-      (progress : TypingProgress.t) )
-    (acc : Typing_service_types.typing_result) :
-    Typing_service_types.typing_result =
-  batch_counts_by_worker_id :=
-    Counts.increment !batch_counts_by_worker_id worker_id;
+  let empty = { total_error_count = 0; time_first_error = None }
 
-  (* And error count *)
-  errors_so_far := !errors_so_far + Errors.count produced_by_job.errors;
+  let update errors { total_error_count; time_first_error } : t =
+    {
+      total_error_count = total_error_count + Errors.count errors;
+      time_first_error =
+        (match time_first_error with
+        | Some t -> Some t
+        | None ->
+          if Errors.is_empty errors then
+            None
+          else
+            Some (Unix.gettimeofday ()));
+    }
+end
 
-  Todo.update progress todo;
-
-  Server_progress.write_percentage
-    ~operation:"typechecking"
-    ~done_count:(Todo.files_checked_count todo)
-    ~total_count:workitems_initial_count
-    ~unit:"files"
-    ~extra:None;
-
+let process_and_merge_typing_results
+    (produced_by_job : Typing_service_types.typing_result)
+    ~(acc : Typing_service_types.typing_result)
+    ~(stream_errors : bool)
+    (error_stats : ErrorStats.t ref) : Typing_service_types.typing_result =
+  error_stats := ErrorStats.update produced_by_job.errors !error_stats;
   (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
-  if check_info.log_errors then
+  if stream_errors then
     Server_progress.ErrorsWrite.report produced_by_job.errors;
-  (* Handle errors paradigm (2) - push updates to lsp as well *)
-  if not (Errors.is_empty produced_by_job.errors) then
-    time_first_error :=
-      Some (Option.value !time_first_error ~default:(Unix.gettimeofday ()));
 
   Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
   Typing_deps.register_discovered_dep_edges acc.dep_edges;
@@ -692,6 +684,40 @@ let merge
   let acc = { acc with dep_edges = Typing_deps.dep_edges_make () } in
 
   accumulate_job_output produced_by_job acc
+
+(** Merge the results from multiple workers.
+
+    We don't really care about which files are left unchecked since we use
+    (gasp) mutation to track that, so combine the errors but always return an
+    empty list for the list of unchecked files. *)
+let merge
+    ~(batch_counts_by_worker_id : Counts.t ref)
+    ~(error_stats : ErrorStats.t ref)
+    ~(check_info : check_info)
+    (todo : Todo.t)
+    (workitems_initial_count : int)
+    ( (worker_id : string),
+      (produced_by_job : Typing_service_types.typing_result),
+      (progress : TypingProgress.t) )
+    (acc : Typing_service_types.typing_result) :
+    Typing_service_types.typing_result =
+  batch_counts_by_worker_id :=
+    Counts.increment !batch_counts_by_worker_id worker_id;
+
+  Todo.update progress todo;
+
+  Server_progress.write_percentage
+    ~operation:"typechecking"
+    ~done_count:(Todo.files_checked_count todo)
+    ~total_count:workitems_initial_count
+    ~unit:"files"
+    ~extra:None;
+
+  process_and_merge_typing_results
+    produced_by_job
+    ~acc
+    ~stream_errors:check_info.log_errors
+    error_stats
 
 let next
     (workers : MultiWorker.worker list option)
@@ -921,8 +947,7 @@ let process_in_parallel
   (* [record] is used by [next] *)
   let todo = Todo.create workitems in
   let workitems_initial_count = BigList.length workitems in
-  let time_first_error = ref None in
-  let errors_so_far = ref 0 in
+  let error_stats = ref ErrorStats.empty in
   let batch_counts_by_worker_id = ref SMap.empty in
 
   let next = next workers todo record in
@@ -939,7 +964,7 @@ let process_in_parallel
         ~check_info
         ~typecheck_info
         ~worker_id
-        ~error_count_at_start_of_batch:!errors_so_far
+        ~error_count_at_start_of_batch:!error_stats.ErrorStats.total_error_count
         ~batch_number:
           (SMap.find_opt worker_id !batch_counts_by_worker_id
           |> Option.value ~default:0)
@@ -956,11 +981,10 @@ let process_in_parallel
       ~merge:
         (merge
            ~batch_counts_by_worker_id
-           ~errors_so_far
+           ~error_stats
            ~check_info
            todo
-           workitems_initial_count
-           time_first_error)
+           workitems_initial_count)
       ~next
       ~on_cancelled:(on_cancelled next todo)
       ~interrupt
@@ -983,7 +1007,11 @@ let process_in_parallel
     Option.map cancelled_results ~f:(fun (unfinished, reason) ->
         (paths_of unfinished, reason))
   in
-  (typing_result, telemetry, env, cancelled_results, !time_first_error)
+  ( typing_result,
+    telemetry,
+    env,
+    cancelled_results,
+    !error_stats.ErrorStats.time_first_error )
 
 type 'a job_result =
   'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option

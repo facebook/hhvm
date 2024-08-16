@@ -103,6 +103,11 @@ if (liboqs_FOUND)
   set(FIZZ_HAVE_OQS TRUE)
 endif()
 
+find_package(aegis CONFIG)
+if(aegis_FOUND)
+    set(FIZZ_HAVE_LIBAEGIS TRUE)
+endif()
+
 include(FizzOptions)
 include(FizzSources)
 
@@ -218,6 +223,10 @@ target_link_libraries(fizz
 
 if (liboqs_FOUND)
   target_link_libraries(fizz PRIVATE OQS::oqs)
+endif()
+
+if (aegis_FOUND)
+    target_link_libraries(fizz PRIVATE aegis::aegis)
 endif()
 
 if ($FIZZ_SHINY_DEPENDENCIES)

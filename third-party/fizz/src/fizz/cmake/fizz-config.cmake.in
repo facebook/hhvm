@@ -19,7 +19,9 @@
 set_and_check(FIZZ_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
 set_and_check(FIZZ_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_DIR@")
 
+# Fizz was configured with the following at build time.
 set(FIZZ_HAVE_OQS "@FIZZ_HAVE_OQS@")
+set(FIZZ_HAVE_LIBAEGIS "@FIZZ_HAVE_LIBAEGIS@")
 
 if (NOT TARGET fizz::fizz)
   include("${FIZZ_CMAKE_DIR}/fizz-targets.cmake")
@@ -34,6 +36,9 @@ find_dependency(folly CONFIG)
 find_dependency(ZLIB)
 if(FIZZ_HAVE_OQS)
     find_dependency(liboqs CONFIG)
+endif()
+if(FIZZ_HAVE_LIBAEGIS)
+    find_dependency(aegis CONFIG)
 endif()
 
 if (NOT fizz_FIND_QUIETLY)

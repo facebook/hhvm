@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/diagnostic.h>
 #include <thrift/compiler/whisker/lexer.h>
 
@@ -460,45 +461,45 @@ void lexer::terminate_with(const token& t) {
 void lexer::do_tokenize() {
   assert(state_);
   assert(queued_tokens_.empty());
-
-  auto [tokens, transition] = state_->next(*this);
-
-  if (std::holds_alternative<std::monostate>(tokens)) {
-    // next() wants to transition only
-    assert(transition != nullptr);
-    transition_to(std::move(transition));
-    do_tokenize();
-  }
-
   const auto queue_token = [this](token&& t) -> const token& {
     queued_tokens_.push(std::move(t));
     return queued_tokens_.back();
   };
 
-  if (auto* t = std::get_if<token>(&tokens)) {
-    if (const auto& pushed_token = queue_token(std::move(*t));
-        token_kind::is_terminal(pushed_token.kind)) {
-      // tok::eof or tok::error must terminate lexing
-      assert(transition == nullptr);
-      terminate_with(pushed_token);
-    } else if (transition) {
-      transition_to(std::move(transition));
-    }
-  } else if (auto* many_tokens = std::get_if<std::vector<token>>(&tokens)) {
-    assert(!many_tokens->empty());
-    for (auto t = many_tokens->begin(); t != many_tokens->end(); ++t) {
-      if (const auto& pushed_token = queue_token(std::move(*t));
-          token_kind::is_terminal(pushed_token.kind)) {
-        assert(transition == nullptr);
-        assert(std::next(t) == many_tokens->end());
-        terminate_with(pushed_token);
-        break;
-      }
-    }
-    if (transition) {
-      transition_to(std::move(transition));
-    }
-  }
+  auto next = state_->next(*this);
+  detail::variant_match(
+      std::move(next.tokens),
+      [&](std::monostate) {
+        // next() wants to transition only
+        assert(next.transition != nullptr);
+        transition_to(std::move(next.transition));
+        do_tokenize();
+      },
+      [&](token&& t) {
+        if (const auto& pushed_token = queue_token(std::move(t));
+            token_kind::is_terminal(pushed_token.kind)) {
+          // tok::eof or tok::error must terminate lexing
+          assert(next.transition == nullptr);
+          terminate_with(pushed_token);
+        } else if (next.transition) {
+          transition_to(std::move(next.transition));
+        }
+      },
+      [&](std::vector<token>&& tokens) {
+        assert(!tokens.empty());
+        for (auto t = tokens.begin(); t != tokens.end(); ++t) {
+          if (const auto& pushed_token = queue_token(std::move(*t));
+              token_kind::is_terminal(pushed_token.kind)) {
+            assert(next.transition == nullptr);
+            assert(std::next(t) == tokens.end());
+            terminate_with(pushed_token);
+            break;
+          }
+        }
+        if (next.transition) {
+          transition_to(std::move(next.transition));
+        }
+      });
 
   assert(!queued_tokens_.empty());
 }

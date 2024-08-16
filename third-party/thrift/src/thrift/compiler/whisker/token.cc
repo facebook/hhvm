@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/source_location.h>
 #include <thrift/compiler/whisker/token.h>
 
@@ -179,13 +180,13 @@ std::int64_t token::i64_value() const {
 
 std::string_view token::string_value() const {
   throw_unless_string_like(kind);
-  if (const auto* str = std::get_if<std::string_view>(&data)) {
-    return *str;
-  }
-  if (const auto* str = std::get_if<std::string>(&data)) {
-    return *str;
-  }
-  throw std::logic_error("data is not a string");
+  return detail::variant_match(
+      data,
+      [](const std::string_view& str) -> std::string_view { return str; },
+      [](const std::string& str) -> std::string_view { return str; },
+      [](auto&&) -> std::string_view {
+        throw std::logic_error("data is not a string");
+      });
 }
 
 /* static */ token token::make_i64_literal(

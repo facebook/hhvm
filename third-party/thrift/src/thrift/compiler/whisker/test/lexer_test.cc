@@ -17,6 +17,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/diagnostic.h>
 #include <thrift/compiler/whisker/lexer.h>
 #include <thrift/compiler/whisker/source_location.h>
@@ -35,19 +36,22 @@ struct token_description {
 
   friend std::ostream& operator<<(
       std::ostream& out, const token_description& desc) {
-    if (const auto* value = std::get_if<bool>(&desc.value)) {
-      return out << fmt::format("token[boolean={}]", value ? "true" : "false");
-    }
-    if (const auto* value = std::get_if<std::int64_t>(&desc.value)) {
-      return out << fmt::format("token[i64={}]", *value);
-    }
-    if (const auto* value = std::get_if<std::string>(&desc.value)) {
-      return out << fmt::format(
-                 "token[kind={}, string=\"{}\"]",
-                 to_string(desc.kind),
-                 token::escape(*value));
-    }
-    return out << fmt::format("token[kind='{}']", to_string(desc.kind));
+    std::string str = detail::variant_match(
+        desc.value,
+        [&desc](std::monostate) {
+          return fmt::format("token[kind='{}']", to_string(desc.kind));
+        },
+        [](bool value) {
+          return fmt::format("token[boolean={}]", value ? "true" : "false");
+        },
+        [](std::int64_t value) { return fmt::format("token[i64={}]", value); },
+        [&desc](const std::string& value) {
+          return fmt::format(
+              "token[kind={}, string=\"{}\"]",
+              to_string(desc.kind),
+              token::escape(value));
+        });
+    return out << std::move(str);
   }
 
   friend bool operator==(const token_description& lhs, const token& rhs) {

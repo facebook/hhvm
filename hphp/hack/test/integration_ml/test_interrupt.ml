@@ -90,6 +90,7 @@ let test () =
       ~interrupt
       ~longlived_workers:false
       ~hh_distc_fanout_threshold:None
+      ~warnings_saved_state:None
       ~check_info
   in
   (* Assert that we got the errors in bar2 only... *)

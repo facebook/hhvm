@@ -44,6 +44,7 @@ val go :
     (* Will use hh_distc at the given threshold if provided, otherwise will not use hh_distc.
      * Can be `None` in dev,testing, and non-fb workflows *) ->
   check_info:Typing_service_types.check_info ->
+  warnings_saved_state:Warnings_saved_state.t option ->
   result
 
 (** The last element returned, a list of paths, are the files which have not been
@@ -60,6 +61,7 @@ val go_with_interrupt :
     (* Will use hh_distc at the given threshold if provided, otherwise will not use hh_distc
      *  Can be `None` in dev,testing, and non-fb workflows *) ->
   check_info:Typing_service_types.check_info ->
+  warnings_saved_state:Warnings_saved_state.t option ->
   ('env * result) job_result
 
 module TestMocking : sig

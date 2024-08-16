@@ -670,13 +670,14 @@ module Merge : sig
     batch_counts_by_worker_id:Counts.t ref ->
     error_stats:ErrorStats.t ref ->
     check_info:check_info ->
+    warnings_saved_state:Warnings_saved_state.t option ->
     Todo.t ->
     int ->
     log_message * typing_result * TypingProgress.t ->
     typing_result ->
     typing_result
 end = struct
-  let process_errors errors error_stats ~stream_errors =
+  let process_errors errors error_stats ~stream_errors : unit =
     error_stats := ErrorStats.update errors !error_stats;
     (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
     if stream_errors then Server_progress.ErrorsWrite.report errors
@@ -684,8 +685,18 @@ end = struct
   let process_and_merge_typing_results
       (produced_by_job : Typing_service_types.typing_result)
       ~(acc : Typing_service_types.typing_result)
+      (mergebase_warning_hashes : Warnings_saved_state.t option)
       ~(stream_errors : bool)
       (error_stats : ErrorStats.t ref) : Typing_service_types.typing_result =
+    let produced_by_job =
+      {
+        produced_by_job with
+        errors =
+          Errors.filter_out_mergebase_warnings
+            mergebase_warning_hashes
+            produced_by_job.errors;
+      }
+    in
     process_errors produced_by_job.errors error_stats ~stream_errors;
 
     Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
@@ -707,6 +718,7 @@ end = struct
       ~(batch_counts_by_worker_id : Counts.t ref)
       ~(error_stats : ErrorStats.t ref)
       ~(check_info : check_info)
+      ~(warnings_saved_state : Warnings_saved_state.t option)
       (todo : Todo.t)
       (workitems_initial_count : int)
       ( (worker_id : string),
@@ -729,6 +741,7 @@ end = struct
     process_and_merge_typing_results
       produced_by_job
       ~acc
+      warnings_saved_state
       ~stream_errors:check_info.log_errors
       error_stats
 end
@@ -951,6 +964,7 @@ let process_in_parallel
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
+    ~warnings_saved_state
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result
     * Telemetry.t
@@ -997,6 +1011,7 @@ let process_in_parallel
            ~batch_counts_by_worker_id
            ~error_stats
            ~check_info
+           ~warnings_saved_state
            todo
            workitems_initial_count)
       ~next
@@ -1105,7 +1120,8 @@ let go_with_interrupt
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(longlived_workers : bool)
     ~(hh_distc_fanout_threshold : int option)
-    ~(check_info : check_info) : (_ * result) job_result =
+    ~(check_info : check_info)
+    ~warnings_saved_state : (_ * result) job_result =
   let typecheck_info =
     HackEventLogger.ProfileTypeCheck.get_typecheck_info
       ~init_id:check_info.init_id
@@ -1171,6 +1187,9 @@ let go_with_interrupt
       let profiling_info = Telemetry.create () in
       match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
       | Success (errors, map_reduce_data, dep_edges, env) ->
+        let errors =
+          Errors.filter_out_mergebase_warnings warnings_saved_state errors
+        in
         ( { errors; map_reduce_data; dep_edges; profiling_info },
           telemetry,
           env,
@@ -1208,6 +1227,7 @@ let go_with_interrupt
         ~memory_cap:(Some 500 (* megabytes *))
         ~longlived_workers
         ~check_info
+        ~warnings_saved_state
         ~typecheck_info
     )
   in
@@ -1231,7 +1251,8 @@ let go
     ~(root : Path.t option)
     ~(longlived_workers : bool)
     ~(hh_distc_fanout_threshold : int option)
-    ~(check_info : check_info) : result =
+    ~(check_info : check_info)
+    ~warnings_saved_state : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), unfinished_and_reason) =
     go_with_interrupt
@@ -1244,6 +1265,7 @@ let go
       ~longlived_workers
       ~hh_distc_fanout_threshold
       ~check_info
+      ~warnings_saved_state
   in
   assert (Option.is_none unfinished_and_reason);
   result

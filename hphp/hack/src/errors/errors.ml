@@ -1356,3 +1356,18 @@ let count_errors_and_warnings (error_list : (_, _) User_error.t list) :
         (err_count, warn_count + 1)
       else
         (err_count + 1, warn_count))
+
+let filter_out_mergebase_warnings
+    (mergebase_warning_hashes : Warnings_saved_state.t option) (errors : t) : t
+    =
+  match mergebase_warning_hashes with
+  | None -> errors
+  | Some mergebase_warning_hashes ->
+    filter errors ~f:(fun _path error ->
+        match error.User_error.severity with
+        | User_error.Err -> true
+        | User_error.Warning ->
+          not
+            (Warnings_saved_state.mem
+               (Error.hash_for_saved_state error)
+               mergebase_warning_hashes))

@@ -295,23 +295,9 @@ type type_checking_result = {
   cancel_reason: MultiThreadedCall.cancel_reason option;
 }
 
-let filter_out_mergebase_warnings
-    (env : ServerEnv.env) ~preexisting_warnings errors =
-  if preexisting_warnings then
-    errors
-  else
-    Errors.filter errors ~f:(fun _path error ->
-        match error.User_error.severity with
-        | User_error.Err -> true
-        | User_error.Warning ->
-          not
-            (Warnings_saved_state.mem
-               (Errors.Error.hash_for_saved_state error)
-               env.init_env.mergebase_warning_hashes))
-
 let do_type_checking
-    (genv : genv)
-    (env : env)
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
     ~(errors : Errors.t)
     ~(files_to_check : Relative_path.Set.t)
     ~(lazy_check_later : Relative_path.Set.t)
@@ -368,16 +354,8 @@ let do_type_checking
              ~log_errors:true
              genv
              env)
-    in
-    let (errorl, telemetry) =
-      Telemetry.with_duration
-        ~description:"filter_out_mergebase_warnings"
-        telemetry
-      @@ fun () ->
-      filter_out_mergebase_warnings
-        env
-        ~preexisting_warnings:env.tcopt.GlobalOptions.preexisting_warnings
-        errorl
+        ~warnings_saved_state:
+          (ServerEnv.warnings_saved_state_if_filtering_required env)
     in
     (errorl, telemetry, env, cancelled, time_first_error)
   in

@@ -74,6 +74,7 @@ let test () =
       ~longlived_workers:false
       ~hh_distc_fanout_threshold:None
       ~check_info
+      ~warnings_saved_state:None
   in
   Test.assert_errors errors "";
   let { Typing_check_service.errors; telemetry; _ } =
@@ -86,6 +87,7 @@ let test () =
       ~longlived_workers:false
       ~hh_distc_fanout_threshold:None
       ~check_info
+      ~warnings_saved_state:None
   in
   Test.assert_errors errors "";
 
@@ -99,6 +101,7 @@ let test () =
       ~longlived_workers:false
       ~hh_distc_fanout_threshold:None
       ~check_info
+      ~warnings_saved_state:None
   in
   Test.assert_errors errors expected_errors;
   let { Typing_check_service.errors; _ } =
@@ -111,6 +114,7 @@ let test () =
       ~longlived_workers:false
       ~hh_distc_fanout_threshold:None
       ~check_info
+      ~warnings_saved_state:None
   in
   Test.assert_errors errors expected_errors;
 

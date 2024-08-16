@@ -94,7 +94,10 @@ let handle :
     let (errors, tasts) = ServerStatusSingle.go file_names ctx in
     let errors =
       errors
-      |> ServerTypeCheck.filter_out_mergebase_warnings env ~preexisting_warnings
+      |> Errors.filter_out_mergebase_warnings
+           (Option.some_if
+              (not preexisting_warnings)
+              ServerEnv.(env.init_env.mergebase_warning_hashes))
       |> Errors.get_sorted_error_list
       |> List.map ~f:User_error.to_absolute
       |> Filter_errors.filter error_filter

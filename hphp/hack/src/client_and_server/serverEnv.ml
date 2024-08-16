@@ -374,3 +374,8 @@ let add_changed_files env changed_files =
 
 let show_clock (clock : Watchman.clock option) : string =
   Option.value clock ~default:"[noclock]"
+
+let warnings_saved_state_if_filtering_required env =
+  Option.some_if
+    (not env.tcopt.GlobalOptions.preexisting_warnings)
+    env.init_env.mergebase_warning_hashes

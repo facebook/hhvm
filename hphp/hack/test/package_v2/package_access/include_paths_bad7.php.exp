@@ -20,7 +20,7 @@ PACKAGES.toml:6:11
 5 |
 [3] 6 | [packages.pkg2]
 7 | include_paths=[
-8 |     "include_paths_bad1.php--foo.php",
+8 |     "cross_package_access_internal1.php--foo.php",
 
 error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
 -> This is from include_paths_bad7.php--foo.php, which belongs to package pkg1 [2]
@@ -43,7 +43,7 @@ PACKAGES.toml:6:11
 5 |
 [3]  6 | [packages.pkg2]
 7 | include_paths=[
-8 |     "include_paths_bad1.php--foo.php",
+8 |     "cross_package_access_internal1.php--foo.php",
 
 error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
 -> This is from include_paths_bad7.php--foo.php, which belongs to package pkg1 [2]
@@ -67,7 +67,7 @@ PACKAGES.toml:6:11
 5 |
 [3]  6 | [packages.pkg2]
 7 | include_paths=[
-8 |     "include_paths_bad1.php--foo.php",
+8 |     "cross_package_access_internal1.php--foo.php",
 
 error: Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg2 [1]
 -> This is from include_paths_bad7.php--foo.php, which belongs to package pkg1 [2]
@@ -89,6 +89,6 @@ PACKAGES.toml:6:11
 5 |
 [3]  6 | [packages.pkg2]
 7 | include_paths=[
-8 |     "include_paths_bad1.php--foo.php",
+8 |     "cross_package_access_internal1.php--foo.php",
 
 4 errors found

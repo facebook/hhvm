@@ -20,6 +20,6 @@ PACKAGES.toml:6:11
 5 |
 [3]  6 | [packages.pkg2]
 7 | include_paths=[
-8 |     "include_paths_bad1.php--foo.php",
+8 |     "cross_package_access_internal1.php--foo.php",
 
 1 error found

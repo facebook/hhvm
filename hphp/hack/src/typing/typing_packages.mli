@@ -21,7 +21,7 @@ type package_error_info = {
   * [target_package_override] is not None, its value takes precedence over that calculated from the target
   * file name.
   *)
-val can_access_public :
+val can_access :
   env:Typing_env_types.env ->
   current_module:string option ->
   target_module:string option ->

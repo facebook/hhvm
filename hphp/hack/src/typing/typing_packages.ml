@@ -136,7 +136,7 @@ let satisfies_pkg_rules
             },
             r )
 
-let can_access_public
+let can_access
     ~(env : Typing_env_types.env)
     ~(current_module : string option)
     ~(target_module : string option)

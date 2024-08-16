@@ -38,7 +38,7 @@ val check_top_level_access :
   bool ->
   string option ->
   string option ->
-  Typing_error.t option
+  Typing_error.t list
 
 val check_meth_caller_access :
   use_pos:Pos.t ->

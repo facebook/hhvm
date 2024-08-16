@@ -1358,7 +1358,7 @@ let fun_type_of_id env x tal el =
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_cross_package ~use_pos ~def_pos env ft.ft_cross_package);
-      Option.iter
+      List.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (TVis.check_top_level_access
            ~ignore_package_errors:false
@@ -9528,7 +9528,7 @@ end = struct
                  || Env.package_v2_bypass_package_check_for_class_const env
                     && is_const)
             in
-            Option.iter
+            List.iter
               ~f:(Typing_error_utils.add_typing_error ~env)
               (TVis.check_top_level_access
                  ~in_signature:false

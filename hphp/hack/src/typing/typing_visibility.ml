@@ -147,7 +147,7 @@ let check_internal_access ~in_signature env target pos decl_pos =
   in
   Option.map ~f:Typing_error.modules module_err_opt
 
-let check_public_access
+let check_package_access
     ~ignore_package_errors
     env
     use_pos
@@ -155,7 +155,7 @@ let check_public_access
     target_module
     target_package_override =
   match
-    Typing_packages.can_access_public
+    Typing_packages.can_access
       ~env
       ~current_module:(Env.get_current_module env)
       ~target_module
@@ -340,16 +340,27 @@ let is_visible_for_top_level
     target_package_override
     pos
     decl_pos =
-  if is_internal then
-    check_internal_access ~in_signature env target_module pos decl_pos
-  else
-    check_public_access
+  let module_error =
+    if is_internal then
+      check_internal_access ~in_signature env target_module pos decl_pos
+    else
+      None
+  in
+  let package_error =
+    check_package_access
       ~ignore_package_errors
       env
       pos
       decl_pos
       target_module
       target_package_override
+  in
+  match (module_error, package_error) with
+  | (Some e1, Some e2) -> [e1; e2]
+  | (Some e, _)
+  | (_, Some e) ->
+    [e]
+  | _ -> []
 
 let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =

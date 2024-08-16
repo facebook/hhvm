@@ -6,6 +6,9 @@
  *
  *)
 
+(** Module to filter a list of errors in order to implement the
+  warnings CLI flags like -Wall, -Wnone, -W, -Wno, etc. *)
+
 module Code = Error_codes.Warning
 
 type switch =

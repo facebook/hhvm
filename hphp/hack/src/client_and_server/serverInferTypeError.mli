@@ -1,15 +1,14 @@
-(**
- * Copyright (c) Facebook, Inc. and its affiliates.
+(*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-(** To do with "go to type definition" functionality *)
-val go_quarantined :
+val go_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   line:int ->
   column:int ->
-  ServerCommandTypes.Go_to_type_definition.result
+  InferErrorAtPosService.t option

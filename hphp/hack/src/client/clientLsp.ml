@@ -3321,7 +3321,7 @@ let report_recheck_telemetry
     ~start_handle_time:!ref_unblocked_time;
   ()
 
-(** This function shold be called anytime we've recomputed live squiggles
+(** This function should be called anytime we've recomputed live squiggles
   (e.g. upon didChange, codeAction, didClose). It (1) sends publishDiagnostics
   as necessary, (2) sends an LSP telemetry/event to say what it has done. *)
 let publish_and_report_after_recomputing_live_squiggles
@@ -4770,6 +4770,29 @@ let handle_tick ~(state : state ref) : result_telemetry option Lwt.t =
     ~terminate_on_failure:false;
   Lwt.return_none
 
+let setup_logging ~root ~verbose =
+  (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
+     `stderr`; this is in addition to that. *)
+  let log_filename = ServerFiles.client_lsp_log root in
+  begin
+    try Sys.rename log_filename (log_filename ^ ".old") with
+    | _e -> ()
+  end;
+  Hh_logger.set_log log_filename;
+  (* The --verbose flag in env.verbose is the only thing that controls verbosity
+     to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
+     Why are they different? because we should write to stderr under a test harness,
+     but we should never write to stderr when invoked by VSCode - it's not even guaranteed
+     to drain the stderr pipe. *)
+  if verbose then begin
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug;
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
+  end else begin
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info
+  end;
+  log_filename
+
 let main
     (args : args)
     ~(init_id : string)
@@ -4779,27 +4802,8 @@ let main
 
   let root = args.root_from_cli in
 
-  (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
-     `stderr`; this is in addition to that. *)
-  let client_lsp_log_fn = ServerFiles.client_lsp_log root in
-  begin
-    try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old") with
-    | _e -> ()
-  end;
-  Hh_logger.set_log client_lsp_log_fn;
-  (* The --verbose flag in env.verbose is the only thing that controls verbosity
-     to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
-     Why are they different? because we should write to stderr under a test harness,
-     but we should never write to stderr when invoked by VSCode - it's not even guaranteed
-     to drain the stderr pipe. *)
-  if args.verbose then begin
-    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug;
-    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
-  end else begin
-    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
-    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info
-  end;
-  log "Starting clientLsp at %s" client_lsp_log_fn;
+  let log_filename = setup_logging ~root ~verbose:args.verbose in
+  log "Starting clientLsp at %s" log_filename;
   log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
   log "LSP Init id: %s" init_id;
 
@@ -4824,7 +4828,7 @@ let main
            verbose_to_stderr = args.verbose;
            verbose_to_file = args.verbose;
            shm_handle;
-           client_lsp_log_fn;
+           client_lsp_log_fn = log_filename;
          })
   in
   background_status_refresher ide_service;
@@ -4840,7 +4844,7 @@ let main
       ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
       []
   in
-  (* ref_unblocked_time is the time at which we're no longer blocked on either
+  (* `ref_unblocked_time` is the time at which we're no longer blocked on either
    * clientLsp message-loop or hh_server, and can start actually handling.
    * Everything that blocks will update this variable. *)
   let process_next_event () : unit Lwt.t =

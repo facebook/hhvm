@@ -247,7 +247,7 @@ TEST_F(ProxygenTransportBasicTest, body_after_413) {
     [&]() {
       m_txn.HTTPTransaction::sendEOM();
     }));
-  EXPECT_CALL(m_txn, sendAbort());
+  EXPECT_CALL(m_txn, sendAbort(_));
   m_transport->onHeadersComplete(std::move(req));
   m_transport->onBody(folly::IOBuf::copyBuffer("I still have so much to say"));
   m_transport->onBody(folly::IOBuf::copyBuffer("I still have so much to say"));
@@ -344,7 +344,7 @@ TEST_F(ProxygenTransportBasicTest, overlarge_body) {
     [&]() {
       m_txn.HTTPTransaction::sendEOM();
     }));
-  EXPECT_CALL(m_txn, sendAbort());
+  EXPECT_CALL(m_txn, sendAbort(_));
   m_transport->onHeadersComplete(std::move(req));
   m_transport->setMaxPost(10, 5);
   m_transport->onBody(folly::IOBuf::copyBuffer("More than 10 bytes"));
@@ -431,7 +431,7 @@ TEST_F(ProxygenTransportTest, push_abort_incomplete) {
   m_worker.deliverMessages();
   sendResponse("12345");
 
-  EXPECT_CALL(pushTxn, sendAbort())
+  EXPECT_CALL(pushTxn, sendAbort(_))
     .WillOnce(Invoke([pushHandler] {
           pushHandler->detachTransaction();
         }));
@@ -501,7 +501,7 @@ TEST_F(ProxygenTransportTest, client_timeout_incomplete_reply) {
   // within the MockHTTPTransaction are mocked and thus its internal state is
   // invalid
   EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(false));
-  EXPECT_CALL(m_txn, sendAbort());
+  EXPECT_CALL(m_txn, sendAbort(_));
   m_transport->onError(ex);
 }
 
@@ -562,7 +562,7 @@ TEST_F(ProxygenTransportRepostTest, mid_body_abort) {
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendBody(_))
     .Times(2);
-  EXPECT_CALL(m_txn, sendAbort());
+  EXPECT_CALL(m_txn, sendAbort(_));
   m_transport->onHeadersComplete(std::move(req));
   m_transport->onBody(std::move(body1));
   m_transport->beginPartialPostEcho();

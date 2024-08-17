@@ -1292,7 +1292,7 @@ class HTTPTransaction
    * This function may also cause additional callbacks such as
    * detachTransaction() to the handler either immediately or after it returns.
    */
-  virtual void sendAbort();
+  void sendAbort();
 
   /**
    * Identical to above, but user may supply an error code.

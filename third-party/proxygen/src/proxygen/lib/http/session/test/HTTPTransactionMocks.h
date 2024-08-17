@@ -386,11 +386,14 @@ class MockHTTPTransaction : public HTTPTransaction {
     sendBody(std::shared_ptr<folly::IOBuf>(iob.release()));
   }
 
+  void sendAbort() {
+    return HTTPTransaction::sendAbort();
+  }
+
   MOCK_METHOD(void, sendChunkHeader, (size_t));
   MOCK_METHOD(void, sendChunkTerminator, ());
   MOCK_METHOD(void, sendTrailers, (const HTTPHeaders& trailers));
   MOCK_METHOD(void, sendEOM, ());
-  MOCK_METHOD(void, sendAbort, ());
   MOCK_METHOD(void, sendAbort, (ErrorCode errorCode));
   MOCK_METHOD(void, drop, ());
   MOCK_METHOD(void, pauseIngress, ());

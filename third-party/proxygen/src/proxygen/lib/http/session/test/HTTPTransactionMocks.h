@@ -391,6 +391,7 @@ class MockHTTPTransaction : public HTTPTransaction {
   MOCK_METHOD(void, sendTrailers, (const HTTPHeaders& trailers));
   MOCK_METHOD(void, sendEOM, ());
   MOCK_METHOD(void, sendAbort, ());
+  MOCK_METHOD(void, sendAbort, (ErrorCode errorCode));
   MOCK_METHOD(void, drop, ());
   MOCK_METHOD(void, pauseIngress, ());
   MOCK_METHOD(void, resumeIngress, ());

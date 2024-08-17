@@ -2844,6 +2844,117 @@ TEST_P(HQDownstreamSessionTest, IdleTimeoutResetWithPingAcknowledged) {
 }
 
 /**
+ * Few tests cases here:
+ *     1. Invoking ::sendAbort(NO_ERROR) on a transaction after eom has been
+ * flushed will flush a RST_STREAM/NO_ERROR frame (no need to defer anything in
+ * this specific case)
+ *
+ *     2. Invoking ::sendAbort(NO_ERROR) on a transaction after eom has been
+ * queued, but not flushed, will defer a RST_STREAM/NO_ERROR frame until after
+ * eom has been written to the underlying transport
+ *
+ *     3. Invoking ::sendAbort(NO_ERROR) on a transaction that has not queued an
+ * eom will be translated to ErrorCode::CANCEL
+ */
+TEST_P(HQDownstreamSessionTest, SendNoErrorAfterEomFlush) {
+  // test case #1 where eom is flushed immediately
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&]() {
+    handler->sendHeaders(/*code=*/200, /*content_length=*/0);
+    handler->txn_->sendEOM();
+    handler->txn_->sendAbort(ErrorCode::NO_ERROR);
+  });
+
+  // withold client's eom to verify that the transaction is detached, as abort
+  // will mark ingress and egress complete and destroy the transaction
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  auto streamId = nextStreamId();
+  sendRequest(getPostRequest(), /*eom=*/false, streamId);
+  handler->expectDetachTransaction();
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(2);
+
+  // verify that the server has invoked QuicSocket::stopSending
+  auto& streams = socketDriver_->streams_;
+  EXPECT_NE(streams.find(streamId), streams.end());
+  EXPECT_EQ(streams[streamId].error,
+            folly::make_optional(HTTP3::ErrorCode::HTTP_NO_ERROR));
+
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQDownstreamSessionTest, SendDeferredNoError) {
+  // test case #2 where fin flag is set on data frame
+  auto handler = addSimpleStrictHandler();
+  auto& txn = handler->txn_;
+  handler->expectHeaders([&]() {
+    handler->sendHeaders(/*code=*/200, /*content_length=*/200);
+    txn->pauseIngress();
+    handler->sendBody(100);
+  });
+
+  // withold client's eom to verify that the transaction is detached, as abort
+  // will mark ingress and egress complete and destroy the transaction
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  auto streamId = nextStreamId();
+  sendRequest(getPostRequest(), /*eom=*/false, streamId);
+
+  // should not detach transaction yet since there is a pending eom and abort
+  // will not be invoked until the resp eom is flushed
+  EXPECT_CALL(*handler, _detachTransaction).Times(0);
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(2);
+
+  // resuming ingress and sending the rest of body & eom should detach the
+  // transaction
+  handler->expectDetachTransaction();
+  txn->sendBody(makeBuf(100));
+  txn->sendEOM();
+  txn->sendAbort(ErrorCode::NO_ERROR);
+  txn->resumeEgress(); // unnecessary since pending eom wil resume egress
+                       // anyways
+  evbLoopNonBlockN(2);
+
+  // verify that the server has invoked QuicSocket::stopSending
+  auto& streams = socketDriver_->streams_;
+  EXPECT_NE(streams.find(streamId), streams.end());
+  EXPECT_EQ(streams[streamId].error,
+            folly::make_optional(HTTP3::ErrorCode::HTTP_NO_ERROR));
+
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQDownstreamSessionTest, InvalidNoErrorAbort) {
+  // test case #3 where NO_ERROR is transformed into INTERNAL_ERROR if there is
+  // no pending eom
+  auto handler = addSimpleStrictHandler();
+  auto& txn = handler->txn_;
+  handler->expectHeaders([&]() {
+    handler->sendHeaders(/*code=*/200, /*content_length=*/200);
+    handler->sendBody(100);
+    txn->sendAbort(ErrorCode::NO_ERROR);
+  });
+
+  // withold client's eom to verify that the transaction is detached, as abort
+  // will mark ingress and egress complete and destroy the transaction
+  auto streamId = nextStreamId();
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  sendRequest(getPostRequest(), /*eom=*/false, streamId);
+
+  // this should detach transaction since it is immediately aborted
+  EXPECT_CALL(*handler, _detachTransaction);
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(2);
+
+  auto& streams = socketDriver_->streams_;
+  EXPECT_NE(streams.find(streamId), streams.end());
+  EXPECT_EQ(streams[streamId].error,
+            folly::make_optional(HTTP3::ErrorCode::HTTP_INTERNAL_ERROR));
+
+  hqSession_->closeWhenIdle();
+}
+
+/**
  * Instantiate the Parametrized test cases
  */
 

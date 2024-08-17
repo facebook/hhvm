@@ -472,6 +472,13 @@ class HTTPDownstreamTest : public testing::Test {
     return observer;
   }
 
+  // Utility to loop the evb but avoid blocking if there are no queued events.
+  void evbLoopNonBlockN(size_t count) {
+    for (; count > 0; count--) {
+      eventBase_.loopOnce(EVLOOP_NONBLOCK);
+    }
+  }
+
  protected:
   folly::EventBase eventBase_;
   TestAsyncTransport* transport_; // invalid once httpSession_ is destroyed
@@ -1850,6 +1857,111 @@ TEST_F(HTTP2DownstreamSessionTest, SetByteEventTracker) {
   // handler2 should also be detached immediately because the new
   // ByteEventTracker continues procesing where the old one left off.
   handler2->expectDetachTransaction();
+  gracefulShutdown();
+}
+
+/**
+ * Few tests cases here:
+ *     1. Invoking ::sendAbort(NO_ERROR) on a transaction after eom has been
+ * flushed will flush a RST_STREAM/NO_ERROR frame (no need to defer anything in
+ * this specific case)
+ *
+ *     2. Invoking ::sendAbort(NO_ERROR) on a transaction after eom has been
+ * queued, but not flushed, will defer a RST_STREAM/NO_ERROR frame until after
+ * eom has been written to the underlying transport
+ *
+ *     3. Invoking ::sendAbort(NO_ERROR) on a transaction that has not queued an
+ * eom will be translated to ErrorCode::CANCEL
+ */
+TEST_F(HTTP2DownstreamSessionTest, SendNoErrorAfterEomFlush) {
+  // test case #1 where eom is flushed immediately
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&]() {
+    handler->sendHeaders(/*code=*/200, /*content_length=*/0);
+    handler->txn_->sendEOM();
+    handler->txn_->sendAbort(ErrorCode::NO_ERROR);
+  });
+
+  // withold client's eom to verify that the transaction is detached, as abort
+  // will mark ingress and egress complete and destroy the transaction
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  sendRequest(getPostRequest(), /*eom=*/false);
+  handler->expectDetachTransaction();
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(2);
+
+  EXPECT_CALL(callbacks_, onAbort(_, ErrorCode::NO_ERROR));
+  expectResponse(/*code=*/200,
+                 /*errorCode=*/ErrorCode::NO_ERROR,
+                 /*expect100=*/false,
+                 /*expectGoaway=*/false,
+                 /*expectBody=*/false);
+  gracefulShutdown();
+}
+
+TEST_F(HTTP2DownstreamSessionTest, SendDeferredNoError) {
+  // test case #2 where fin flag is set on data frame
+  auto handler = addSimpleStrictHandler();
+  auto& txn = handler->txn_;
+  handler->expectHeaders([&]() {
+    handler->sendHeaders(/*code=*/200, /*content_length=*/200);
+    txn->pauseIngress();
+    handler->sendBody(100);
+  });
+
+  // withold client's eom to verify that the transaction is detached, as abort
+  // will mark ingress and egress complete and destroy the transaction
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  sendRequest(getPostRequest(), /*eom=*/false);
+
+  // should not detach transaction yet since there is a pending eom and abort
+  // will not be invoked until the resp eom is flushed
+  EXPECT_CALL(*handler, _detachTransaction).Times(0);
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(2);
+
+  // resuming ingress and sending the rest of body & eom should detach the
+  // transaction
+  handler->expectDetachTransaction();
+  txn->sendBody(makeBuf(100));
+  txn->sendEOM();
+  txn->sendAbort(ErrorCode::NO_ERROR);
+  txn->resumeEgress(); // unnecessary since pending eom wil resume egress
+                       // anyways
+  evbLoopNonBlockN(2);
+
+  // since we send two body chunks, we add one additional expectation
+  EXPECT_CALL(callbacks_, onBody(_, _, _)).Times(1);
+  EXPECT_CALL(callbacks_, onAbort(_, ErrorCode::NO_ERROR));
+  expectResponse(/*code=*/200, /*errorCode=*/ErrorCode::NO_ERROR);
+  gracefulShutdown();
+}
+
+TEST_F(HTTP2DownstreamSessionTest, InvalidNoErrorAbort) {
+  // test case #3 where NO_ERROR is transformed into CANCEL if there is no
+  // pending eom
+  auto handler = addSimpleStrictHandler();
+  auto& txn = handler->txn_;
+  handler->expectHeaders([&]() {
+    handler->sendHeaders(/*code=*/200, /*content_length=*/200);
+    handler->sendBody(100);
+    txn->sendAbort(ErrorCode::NO_ERROR);
+  });
+
+  // withold client's eom to verify that the transaction is detached, as abort
+  // will mark ingress and egress complete and destroy the transaction
+  EXPECT_CALL(*handler, _onEOM()).Times(0);
+  sendRequest(getPostRequest(), /*eom=*/false);
+
+  // this should detach transaction since it is immediately aborted
+  EXPECT_CALL(*handler, _detachTransaction);
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(2);
+
+  EXPECT_CALL(callbacks_, onHeadersComplete(_, _));
+  EXPECT_CALL(callbacks_, onAbort(_, ErrorCode::INTERNAL_ERROR));
+
+  parseOutput(*clientCodec_);
   gracefulShutdown();
 }
 

@@ -1295,6 +1295,18 @@ class HTTPTransaction
   virtual void sendAbort();
 
   /**
+   * Identical to above, but user may supply an error code.
+   *
+   * Note:
+   * Downstream sessions invoking ::sendAbort(NO_ERROR) after egressing eom will
+   * queue the RST_STREAM/STOP_SENDING NO_ERROR (if the protocol supports such
+   * sematics). This is different from the typical behaviour of *immediately*
+   * terminating both ingress and egress (and therefore dropping any buffered
+   * data) with other ErrorCodes.
+   */
+  virtual void sendAbort(ErrorCode statusCode);
+
+  /**
    * Pause ingress processing.  Upon pause, the HTTPTransaction
    * will call its Transport's pauseIngress() method.  The Transport
    * should make a best effort to stop invoking the HTTPTransaction's
@@ -1751,11 +1763,8 @@ class HTTPTransaction
    * to it.
    */
   void checkCreateDeferredIngress();
-
-  /**
-   * Implementation of sending an abort for this transaction.
-   */
-  void sendAbort(ErrorCode statusCode);
+  // Implementation of sending an abort for this transaction.
+  size_t sendAbortImpl(ErrorCode statusCode);
 
   // Internal implementations of the ingress-related callbacks
   // that work whether the ingress events are immediate or deferred.
@@ -1838,6 +1847,10 @@ class HTTPTransaction
   bool updateContentLengthRemaining(size_t len);
 
   void rateLimitTimeoutExpired();
+
+  // If deferredNoError_ is set to true, it invokes ::sendAbort() w/ NO_ERROR
+  // and returns the number of bytes written to the transport
+  size_t maybeSendDeferredNoError();
 
   class RateLimitCallback : public folly::HHWheelTimer::Callback {
    public:
@@ -2032,6 +2045,14 @@ class HTTPTransaction
 
   // Whether this HTTPTransaction delegates body sending to another entity.
   bool isDelegated_ : 1;
+
+  /**
+   * If set, the transaction will flush a RST_STREAM/NO_ERROR (h2) or
+   * STOP_SENDING/NO_ERROR (h3) after eom. This is only set if ::abort() is
+   * invoked with ErrorCode::NO_ERROR on a downstream transaction after eom has
+   * been queued.
+   */
+  bool deferredNoError_ : 1;
 
   /**
    * If this transaction represents a request (ie, it is backed by an

@@ -394,6 +394,13 @@ class HQSessionTest
   }
 
  protected:
+  // Utility to loop the evb but avoid blocking if there are no queued events.
+  void evbLoopNonBlockN(size_t count) {
+    for (; count > 0; count--) {
+      eventBase_.loopOnce(EVLOOP_NONBLOCK);
+    }
+  }
+
   proxygen::TransportDirection direction_;
   folly::Optional<TestParams> overrideParams_;
   // Unidirectional Stream Codecs used for Ingress Only

@@ -10,6 +10,7 @@
 
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <fizz/compression/CertificateCompressor.h>
+#include <fizz/protocol/Certificate.h>
 #include <fizz/record/Types.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
@@ -44,6 +45,8 @@ class CertUtils {
    * Create a PeerCert from the ASN1 encoded certData.
    */
   static std::unique_ptr<PeerCert> makePeerCert(Buf certData);
+
+  static std::unique_ptr<PeerCert> makePeerCert(folly::ByteRange certData);
 
   /**
    * Create a PeerCert from a given X509
@@ -94,6 +97,9 @@ class CertUtils {
   static CompressedCertificate cloneCompressedCert(
       const CompressedCertificate& src);
 };
+
+const CertificateSerialization& certificateSerializer();
+
 } // namespace openssl
 } // namespace fizz
 

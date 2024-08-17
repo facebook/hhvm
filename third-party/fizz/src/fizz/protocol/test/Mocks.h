@@ -215,6 +215,20 @@ class MockCertificateVerifier : public CertificateVerifier {
       (const));
 };
 
+class MockCertificateSerialization : public CertificateSerialization {
+ public:
+  MOCK_METHOD(
+      std::unique_ptr<folly::IOBuf>,
+      serialize,
+      (const fizz::Cert&),
+      (const));
+  MOCK_METHOD(
+      std::shared_ptr<const fizz::Cert>,
+      deserialize,
+      (folly::ByteRange),
+      (const));
+};
+
 class MockFactory : public ::fizz::DefaultFactory {
  public:
   MOCK_METHOD(

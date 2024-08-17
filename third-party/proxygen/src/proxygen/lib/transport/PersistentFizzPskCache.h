@@ -8,10 +8,9 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/PskCache.h>
 #include <fizz/client/PskSerializationUtils.h>
-#include <fizz/protocol/DefaultFactory.h>
-#include <fizz/protocol/Factory.h>
 #include <wangle/client/persistence/FilePersistentCache.h>
 
 namespace proxygen {
@@ -26,10 +25,8 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
   ~PersistentFizzPskCache() override = default;
 
   PersistentFizzPskCache(const std::string& filename,
-                         wangle::PersistentCacheConfig config,
-                         std::unique_ptr<fizz::Factory> factory =
-                             std::make_unique<::fizz::DefaultFactory>())
-      : cache_(filename, std::move(config)), factory_(std::move(factory)) {
+                         wangle::PersistentCacheConfig config)
+      : cache_(filename, std::move(config)) {
   }
 
   void setMaxPskUses(size_t maxUses) {
@@ -52,8 +49,8 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
     auto serialized = cache_.get(identity);
     if (serialized) {
       try {
-        auto deserialized =
-            fizz::client::deserializePsk(serialized->serialized, *factory_);
+        auto deserialized = fizz::client::deserializePsk(
+            fizz::openssl::certificateSerializer(), serialized->serialized);
         serialized->uses++;
         if (maxPskUses_ != 0 && serialized->uses >= maxPskUses_) {
           cache_.remove(identity);
@@ -72,7 +69,8 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
   void putPsk(const std::string& identity,
               fizz::client::CachedPsk psk) override {
     PersistentCachedPsk serialized;
-    serialized.serialized = fizz::client::serializePsk(psk);
+    serialized.serialized =
+        fizz::client::serializePsk(fizz::openssl::certificateSerializer(), psk);
     serialized.uses = 0;
     cache_.put(identity, serialized);
   }
@@ -85,8 +83,6 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
   wangle::FilePersistentCache<std::string, PersistentCachedPsk> cache_;
 
   size_t maxPskUses_{5};
-
-  std::unique_ptr<fizz::Factory> factory_;
 };
 } // namespace proxygen
 

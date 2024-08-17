@@ -3,8 +3,7 @@
 #include "fizz/client/PskSerializationUtils.h"
 
 #include <fizz/record/Types.h>
-#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
-#include <folly/ssl/OpenSSLCertUtils.h>
+#include <folly/io/IOBuf.h>
 
 using namespace folly;
 
@@ -12,15 +11,37 @@ namespace fizz {
 
 namespace {
 
-void tryWriteCert(const fizz::Cert* cert, io::Appender& appender) {
-  if (auto opensslCert =
-          dynamic_cast<const folly::OpenSSLTransportCertificate*>(cert)) {
-    auto x509 = opensslCert->getX509();
-    fizz::detail::writeBuf<uint32_t>(
-        x509 ? folly::ssl::OpenSSLCertUtils::derEncode(*x509) : nullptr,
-        appender);
+void tryWriteCert(
+    const CertificateSerialization& serializer,
+    const fizz::Cert* cert,
+    io::Appender& appender) {
+  std::unique_ptr<folly::IOBuf> serializedCert;
+  if (cert) {
+    try {
+      serializedCert = serializer.serialize(*cert);
+    } catch (...) {
+    }
+  }
+
+  if (serializedCert) {
+    fizz::detail::writeBuf<uint32_t>(serializedCert, appender);
   } else {
     fizz::detail::writeBuf<uint32_t>(nullptr, appender);
+  }
+}
+
+std::shared_ptr<const fizz::Cert> tryReadCert(
+    const CertificateSerialization& serializer,
+    folly::io::Cursor& cursor) {
+  std::unique_ptr<folly::IOBuf> serializedCert;
+  fizz::detail::readBuf<uint32_t>(serializedCert, cursor);
+  if (!serializedCert || serializedCert->empty()) {
+    return nullptr;
+  }
+  try {
+    return serializer.deserialize(serializedCert->coalesce());
+  } catch (...) {
+    return nullptr;
   }
 }
 
@@ -45,7 +66,9 @@ std::chrono::system_clock::time_point clampTimePoint(uint64_t value) {
       Duration(std::min(value, kMaxValue)));
 }
 
-std::string serializePsk(const fizz::client::CachedPsk& psk) {
+std::string serializePsk(
+    const CertificateSerialization& serializer,
+    const fizz::client::CachedPsk& psk) {
   uint64_t ticketIssueTime =
       std::chrono::duration_cast<std::chrono::milliseconds>(
           psk.ticketIssueTime.time_since_epoch())
@@ -79,8 +102,8 @@ std::string serializePsk(const fizz::client::CachedPsk& psk) {
   fizz::detail::write(psk.ticketAgeAdd, appender);
   fizz::detail::write(ticketIssueTime, appender);
   fizz::detail::write(ticketExpirationTime, appender);
-  tryWriteCert(psk.serverCert.get(), appender);
-  tryWriteCert(psk.clientCert.get(), appender);
+  tryWriteCert(serializer, psk.serverCert.get(), appender);
+  tryWriteCert(serializer, psk.clientCert.get(), appender);
   fizz::detail::write(psk.maxEarlyDataSize, appender);
   fizz::detail::write(ticketHandshakeTime, appender);
 
@@ -88,8 +111,8 @@ std::string serializePsk(const fizz::client::CachedPsk& psk) {
 }
 
 fizz::client::CachedPsk deserializePsk(
-    const std::string& str,
-    const fizz::Factory& factory) {
+    const CertificateSerialization& serializer,
+    const std::string& str) {
   auto buf = IOBuf::wrapBuffer(str.data(), str.length());
   io::Cursor cursor(buf.get());
   fizz::client::CachedPsk psk;
@@ -131,17 +154,8 @@ fizz::client::CachedPsk deserializePsk(
   psk.ticketExpirationTime =
       clampTimePoint<std::chrono::seconds>(ticketExpirationTime);
 
-  CertificateEntry entry;
-  fizz::detail::readBuf<uint32_t>(entry.cert_data, cursor);
-  if (!entry.cert_data->empty()) {
-    psk.serverCert = factory.makePeerCert(std::move(entry), true);
-  }
-
-  CertificateEntry clientEntry;
-  fizz::detail::readBuf<uint32_t>(clientEntry.cert_data, cursor);
-  if (!clientEntry.cert_data->empty()) {
-    psk.clientCert = factory.makePeerCert(std::move(clientEntry), true);
-  }
+  psk.serverCert = tryReadCert(serializer, cursor);
+  psk.clientCert = tryReadCert(serializer, cursor);
 
   fizz::detail::read(psk.maxEarlyDataSize, cursor);
 

@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/transport/PersistentQuicPskCache.h>
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <folly/Conv.h>
 #include <folly/json/dynamic.h>
 
@@ -19,10 +20,8 @@ constexpr auto USES = "uses";
 
 namespace proxygen {
 PersistentQuicPskCache::PersistentQuicPskCache(
-    const std::string& filename,
-    wangle::PersistentCacheConfig config,
-    std::unique_ptr<fizz::Factory> factory)
-    : cache_(filename, std::move(config)), factory_(std::move(factory)) {
+    const std::string& filename, wangle::PersistentCacheConfig config)
+    : cache_(filename, std::move(config)) {
 }
 
 void PersistentQuicPskCache::setMaxPskUses(size_t maxUses) {
@@ -46,8 +45,8 @@ folly::Optional<quic::QuicCachedPsk> PersistentQuicPskCache::getPsk(
   }
   try {
     quic::QuicCachedPsk quicCachedPsk;
-    quicCachedPsk.cachedPsk =
-        fizz::client::deserializePsk(cachedPsk->fizzPsk, *factory_);
+    quicCachedPsk.cachedPsk = fizz::client::deserializePsk(
+        fizz::openssl::certificateSerializer(), cachedPsk->fizzPsk);
 
     auto buf = folly::IOBuf::wrapBuffer(cachedPsk->quicParams.data(),
                                         cachedPsk->quicParams.length());
@@ -98,7 +97,8 @@ folly::Optional<quic::QuicCachedPsk> PersistentQuicPskCache::getPsk(
 void PersistentQuicPskCache::putPsk(const std::string& identity,
                                     quic::QuicCachedPsk quicCachedPsk) {
   PersistentQuicCachedPsk cachedPsk;
-  cachedPsk.fizzPsk = fizz::client::serializePsk(quicCachedPsk.cachedPsk);
+  cachedPsk.fizzPsk = fizz::client::serializePsk(
+      fizz::openssl::certificateSerializer(), quicCachedPsk.cachedPsk);
 
   auto quicParams = folly::IOBuf::create(0);
   folly::io::Appender appender(quicParams.get(), 512);

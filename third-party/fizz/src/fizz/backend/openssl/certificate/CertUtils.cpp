@@ -116,12 +116,10 @@ CertificateMsg CertUtils::getCertMessage(
   return msg;
 }
 
-std::unique_ptr<PeerCert> CertUtils::makePeerCert(Buf certData) {
-  if (certData->empty()) {
+std::unique_ptr<PeerCert> CertUtils::makePeerCert(folly::ByteRange range) {
+  if (range.size() == 0) {
     throw std::runtime_error("empty peer cert");
   }
-
-  auto range = certData->coalesce();
   const unsigned char* begin = range.data();
   folly::ssl::X509UniquePtr cert(d2i_X509(nullptr, &begin, range.size()));
   if (!cert) {
@@ -131,6 +129,9 @@ std::unique_ptr<PeerCert> CertUtils::makePeerCert(Buf certData) {
     VLOG(1) << "Did not read to end of certificate";
   }
   return makePeerCert(std::move(cert));
+}
+std::unique_ptr<PeerCert> CertUtils::makePeerCert(Buf certData) {
+  return makePeerCert(certData->coalesce());
 }
 
 std::unique_ptr<PeerCert> CertUtils::makePeerCert(
@@ -300,6 +301,31 @@ CompressedCertificate CertUtils::cloneCompressedCert(
       src.compressed_certificate_message->clone();
   ret.uncompressed_length = src.uncompressed_length;
   return ret;
+}
+
+namespace {
+class Serializer : public CertificateSerialization {
+  std::unique_ptr<folly::IOBuf> serialize(
+      const fizz::Cert& cert) const override {
+    if (auto opensslCert =
+            dynamic_cast<const folly::OpenSSLTransportCertificate*>(&cert)) {
+      if (auto x509 = opensslCert->getX509()) {
+        return folly::ssl::OpenSSLCertUtils::derEncode(*x509);
+      }
+    }
+    return nullptr;
+  }
+
+  std::shared_ptr<const fizz::Cert> deserialize(
+      folly::ByteRange range) const override {
+    return CertUtils::makePeerCert(range);
+  }
+};
+} // namespace
+
+const CertificateSerialization& certificateSerializer() {
+  static Serializer instance;
+  return instance;
 }
 
 } // namespace openssl

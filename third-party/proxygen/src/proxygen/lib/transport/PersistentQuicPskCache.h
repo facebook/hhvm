@@ -11,7 +11,6 @@
 #include <proxygen/lib/transport/PersistentFizzPskCache.h>
 
 #include <fizz/client/PskSerializationUtils.h>
-#include <fizz/protocol/DefaultFactory.h>
 #include <folly/Optional.h>
 #include <folly/json/dynamic.h>
 #include <quic/fizz/client/handshake/QuicPskCache.h>
@@ -34,9 +33,7 @@ struct PersistentQuicCachedPsk {
 class PersistentQuicPskCache : public quic::QuicPskCache {
  public:
   PersistentQuicPskCache(const std::string& filename,
-                         wangle::PersistentCacheConfig config,
-                         std::unique_ptr<fizz::Factory> factory =
-                             std::make_unique<::fizz::DefaultFactory>());
+                         wangle::PersistentCacheConfig config);
 
   void setMaxPskUses(size_t maxUses);
 
@@ -54,7 +51,6 @@ class PersistentQuicPskCache : public quic::QuicPskCache {
  private:
   wangle::FilePersistentCache<std::string, PersistentQuicCachedPsk> cache_;
   size_t maxPskUses_{5};
-  std::unique_ptr<fizz::Factory> factory_;
 };
 
 } // namespace proxygen

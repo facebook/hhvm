@@ -3,15 +3,15 @@
 #pragma once
 
 #include <fizz/client/PskCache.h>
-#include <fizz/protocol/Factory.h>
+#include <fizz/protocol/Certificate.h>
 
 namespace fizz {
 namespace client {
-
-std::string serializePsk(const fizz::client::CachedPsk& psk);
+std::string serializePsk(
+    const CertificateSerialization& serializer,
+    const fizz::client::CachedPsk& psk);
 fizz::client::CachedPsk deserializePsk(
-    const std::string& str,
-    const fizz::Factory& factory);
-
+    const CertificateSerialization& serializer,
+    const std::string& str);
 } // namespace client
 } // namespace fizz

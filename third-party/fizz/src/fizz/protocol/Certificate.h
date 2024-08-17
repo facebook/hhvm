@@ -99,4 +99,30 @@ class PeerCert : public PeerCertBase {
       folly::ByteRange toBeSigned,
       folly::ByteRange signature) const = 0;
 };
+
+class CertificateSerialization {
+ public:
+  /**
+   * Given a `fizz::Cert` object, construct a bytestring representation of
+   * the object that will be included in the serialized version of a PSK.
+   *
+   * If the serializer cannot serialize the `fizz::Cert` object, then
+   * `serialize` should return `nullptr`.
+   */
+  virtual std::unique_ptr<folly::IOBuf> serialize(
+      const fizz::Cert& cert) const = 0;
+
+  /**
+   * Given a bytestring representation of a certificate, attempt to reconstruct
+   * the in-memory `fizz::Cert`.
+   *
+   * If the `CertificateSerialization` does not recognize the serialized
+   * representation, then `deserialize` should return `nullptr`.
+   */
+  virtual std::shared_ptr<const fizz::Cert> deserialize(
+      folly::ByteRange range) const = 0;
+
+  virtual ~CertificateSerialization() = default;
+};
+
 } // namespace fizz

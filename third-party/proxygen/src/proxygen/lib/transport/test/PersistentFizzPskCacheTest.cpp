@@ -196,7 +196,8 @@ TEST_F(PersistentFizzPskCacheTest, TestTruncatedEntry) {
   auto otherCache = std::make_unique<
       wangle::FilePersistentCache<std::string, PersistentCachedPsk>>(
       file_, std::move(config));
-  auto psk1Serialized = serializePsk(psk1_);
+  auto psk1Serialized =
+      serializePsk(fizz::openssl::certificateSerializer(), psk1_);
   // Store PSK with last 12 characters (64 bits + 32 bits) truncated
   otherCache->put("facebook.com",
                   PersistentCachedPsk{
@@ -216,7 +217,8 @@ TEST_F(PersistentFizzPskCacheTest, TestTruncatedHandshakeTime) {
   auto otherCache = std::make_unique<
       wangle::FilePersistentCache<std::string, PersistentCachedPsk>>(
       file_, std::move(config));
-  auto psk1Serialized = serializePsk(psk1_);
+  auto psk1Serialized =
+      serializePsk(fizz::openssl::certificateSerializer(), psk1_);
   // Store PSK with last 12 characters (64 bits) truncated
   otherCache->put("facebook.com",
                   PersistentCachedPsk{

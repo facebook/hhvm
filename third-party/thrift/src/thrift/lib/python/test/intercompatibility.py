@@ -16,9 +16,12 @@
 
 
 import unittest
+from typing import Generator, Type
 
 import testing.thrift_types as python_types
 import testing.types as py3_types
+from thrift.py3.serializer import serialize as py3_serialize
+from thrift.python.serializer import deserialize, Protocol
 
 
 class Py3CompatibilityTest(unittest.TestCase):
@@ -60,3 +63,55 @@ class Py3CompatibilityTest(unittest.TestCase):
         py3_easy = py3_types.easy(name="foo")
         python_complex_union = python_types.ComplexUnion(easy_struct=py3_easy)
         self.assertEqual("foo", python_complex_union.easy_struct.name)
+
+
+class DeserializationCompatibilityTest(unittest.TestCase):
+    def assert_struct_ordering(
+        self, py3: py3_types.StructOrderRandom | python_types.StructOrderSorted
+    ) -> None:
+        expected = python_types.StructOrderRandom(**dict(py3))
+        for proto in [Protocol.BINARY, Protocol.COMPACT, Protocol.JSON]:
+            py3_stored = py3_serialize(py3, protocol=proto)
+            python = deserialize(
+                python_types.StructOrderRandom, py3_stored, protocol=proto
+            )
+            self.assertEqual(python, expected, f"Protocol {proto}")
+
+    def gen_structs(
+        self,
+        kls: Type[py3_types.StructOrderRandom] | Type[python_types.StructOrderSorted],
+    ) -> Generator[
+        py3_types.StructOrderRandom | python_types.StructOrderSorted, None, None
+    ]:
+        yield kls(
+            a=0,
+            b="0",
+            c=False,
+            d=True,
+        )
+        yield kls(
+            a=3,
+            b="1234",
+            c=False,
+            d=True,
+        )
+        yield kls(
+            a=1,
+            b="0",
+            c=False,
+            d=True,
+        )
+
+    # Test that deserialize is insensitive to struct field declaration order.
+    # This struct has different field orders in py3, which uses declaration order,
+    # and in python, which uses id/key order. This test verifies that python deserialization
+    # is insensitive to the order of the fields in the serialized data.
+    def test_py3_migration_struct_ordering(self) -> None:
+        for struct in self.gen_structs(py3_types.StructOrderRandom):
+            self.assert_struct_ordering(struct)
+
+    # Test that would verify that python deserialization is insensitive to the order of the fields in the serialized data.
+    # It is not a *live* test until a diff that actually implements change from id-key order to declaration order.
+    def test_python_struct_ordering(self) -> None:
+        for struct in self.gen_structs(python_types.StructOrderSorted):
+            self.assert_struct_ordering(struct)

@@ -422,6 +422,22 @@ struct IOBufListStruct {
   1: list<IOBuf> iobufs;
 } (cpp.noncomparable)
 
+// StructOrder* should have same fields when sorted in key order.
+// They exist to test whether deserialize is insensitive to declartion order.
+struct StructOrderRandom {
+  3: bool c;
+  4: bool d;
+  1: i64 a;
+  2: string b;
+}
+
+struct StructOrderSorted {
+  1: i64 a;
+  2: string b;
+  3: bool c;
+  4: bool d;
+}
+
 service ClientMetadataTestingService {
   string getAgent();
   string getHostname();

@@ -42,7 +42,7 @@ class TestMcrouterProcessingTime(McrouterTestCase):
         scuba_samples = open(self.debug_file, "r").readlines()
         # One error sampler plus three main sampler.
         self.assertEqual(len(scuba_samples), 4)
-        self.assertGreaterEqual(stat["processing_time_us"], 200000)
+        self.assertGreaterEqual(int(stat["processing_time_us"]), 200000)
         for sample in scuba_samples:
             sample_parsed = json.loads(sample)
             self.assertEqual(

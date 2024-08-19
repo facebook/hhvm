@@ -16,7 +16,7 @@
 
 namespace java.swift com.facebook.mojo.example
 
-include "Example2.thrift"
+include "thrift/lib/java/fbthrift-maven-plugin/fbthrift-maven-plugin-example/Example2.thrift"
 
 struct Example1 {
   1: optional i32 bar;

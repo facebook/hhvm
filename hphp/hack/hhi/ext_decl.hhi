@@ -163,6 +163,7 @@ namespace HH {
     ?'is_accept_disposable' => bool,
     ?'is_inout' => bool,
     ?'has_default' => bool,
+    ?'is_optional' => bool,
     ?'is_readonly' => bool,
   );
 
@@ -435,7 +436,7 @@ namespace HH {
     public function getFileTypedefs()[]: vec<ExtDeclTypedef>;
 
     /*
-     * Fetches all keys for the supplied shape name. 
+     * Fetches all keys for the supplied shape name.
      *
      * @param string $name - the name of the shape typedef
      * @return vec<string> - empty if error or no matching shape name

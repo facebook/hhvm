@@ -165,6 +165,7 @@ namespace HH {
     ?'is_inout' => bool,
     ?'has_default' => bool,
     ?'is_readonly' => bool,
+    ?'is_optional' => bool,
   );
 
   type ExtDeclSignature = shape(

@@ -402,6 +402,7 @@ Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
     maybeSetBool(info, param.is_inout, s_is_inout);
     maybeSetBool(info, param.has_default, s_has_default);
     maybeSetBool(info, param.is_readonly, s_is_readonly);
+    maybeSetBool(info, param.is_optional, s_is_optional);
     maybeSet(info, param.def_value, s_default_value, rustToString);
     arr.append(info);
   }

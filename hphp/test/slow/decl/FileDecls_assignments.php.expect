@@ -19,9 +19,18 @@ MyClass::MY_CONSTANT_REF_SELF = self::MY_CONSTANT_BOOL
 MyClass::MY_CONSTANT_REF_STATIC = static::MY_CONSTANT_BOOL
 MyClass::MY_CONSTANT_REF_NAMED = FilePermission::Read
 MyClass::MY_CONSTANT_REF_OP = FilePermission::Read + 5
+required $nodefault
 $nullint = null
+optional $nullint
 $str = 'asdf'
+optional $str
 $emptyvec = vec[]
+optional $emptyvec
 $vecint = vec[10,20]
+optional $vecint
 $someshape = shape("yes" => true)
+optional $someshape
+required $required
+optional $optionalint
+optional $str
 string(4) "'\''"

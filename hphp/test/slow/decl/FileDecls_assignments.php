@@ -49,7 +49,7 @@ function main(): void {
     const int MY_CONSTANT_REF_NAMED = FilePermission::Read;
     const int MY_CONSTANT_REF_OP = FilePermission::Read + 5;
 
-    private function fnWithOptional(
+    private function fnWithDefault(
       int $nodefault,
       ?int $nullint = null,
       ?string $str = \'asdf\',
@@ -57,6 +57,13 @@ function main(): void {
       vec<int> $vecint = vec[10,20],
       shape(...) $someshape = shape("yes" => true)
     ): void {}
+  }
+  interface MyInterface {
+    public function fnWithOptional(
+      int $required,
+      optional ?int $optionalint,
+      optional string $str
+    ): void;
   }');
 
   echo " == \n\n";
@@ -65,10 +72,26 @@ function main(): void {
   printNameValues("FilePermission", $instance->getConsts("FilePermission"));
   printNameValues("MyClass", $instance->getConsts("MyClass"));
 
-  $params = $instance->getMethod('MyClass', 'fnWithOptional')['signature']['params'] ?? vec[];
+  $params = $instance->getMethod('MyClass', 'fnWithDefault')['signature']['params'] ?? vec[];
   foreach ($params as $x) {
     if ((bool)idx($x, 'has_default')) {
       echo $x['name'].' = '.($x['default_value'] ?? '(no value)')."\n";
+    }
+    if ((bool)idx($x, 'is_optional')) {
+      echo 'optional '.$x['name']."\n";
+    }
+    else {
+      echo 'required '.$x['name']."\n";
+    }
+  }
+
+  $params = $instance->getMethod('MyInterface', 'fnWithOptional')['signature']['params'] ?? vec[];
+  foreach ($params as $x) {
+    if ((bool)idx($x, 'is_optional')) {
+      echo 'optional '.$x['name']."\n";
+    }
+    else {
+      echo 'required '.$x['name']."\n";
     }
   }
 

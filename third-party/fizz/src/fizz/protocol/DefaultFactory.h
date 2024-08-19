@@ -8,17 +8,16 @@
 
 #pragma once
 
-#include <fizz/protocol/MultiBackendFactory.h>
+#include <fizz/fizz-config.h>
+
+#include FIZZ_DEFAULT_FACTORY_HEADER
 
 namespace fizz {
-
-// TODO: This needs to be wired up from fizz-config.h
-
 /**
  * DefaultFactory is a type alias that points to a concrete, non-abstract
  * Factory instance that can be used by various internal components of Fizz
  * to get the "default compile time configured" Factory.
  */
-using DefaultFactory = ::fizz::MultiBackendFactory;
+using DefaultFactory = FIZZ_DEFAULT_FACTORY;
 
 } // namespace fizz

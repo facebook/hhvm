@@ -14,3 +14,6 @@
 #cmakedefine01 FIZZ_HAVE_LIBAEGIS
 #cmakedefine01 FIZZ_CERTIFICATE_USE_OPENSSL_CERT
 #cmakedefine01 FIZZ_HAVE_OQS
+
+#define FIZZ_DEFAULT_FACTORY_HEADER <fizz/protocol/MultiBackendFactory.h>
+#define FIZZ_DEFAULT_FACTORY ::fizz::MultiBackendFactory

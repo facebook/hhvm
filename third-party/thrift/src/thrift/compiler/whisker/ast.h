@@ -24,7 +24,7 @@
 
 namespace whisker::ast {
 
-struct text_content;
+struct text;
 struct comment;
 struct section_block;
 struct partial_apply;
@@ -33,12 +33,8 @@ struct variable_lookup;
 /**
  * The top-level types of constructs allowed in a Whisker source file.
  */
-using body = std::variant<
-    text_content,
-    comment,
-    variable_lookup,
-    section_block,
-    partial_apply>;
+using body =
+    std::variant<text, comment, variable_lookup, section_block, partial_apply>;
 using bodies = std::vector<body>;
 
 /**
@@ -52,7 +48,7 @@ struct root {
 /**
  * Raw text content that should be emitted unchanged in the rendered output.
  */
-struct text_content {
+struct text {
   source_range loc;
   std::string text;
 };

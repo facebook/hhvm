@@ -154,7 +154,17 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
 
   void ensureAny(type::AnyStruct ensureAny) {
-    ensureImpl(std::move(ensureAny));
+    if (data_.assign().has_value()) {
+      data_.clear() = true;
+      data_.ensureAny() = std::move(data_.assign().value());
+      data_.assign().reset();
+    }
+
+    if (ensures(ensureAny.type().value())) {
+      return;
+    }
+
+    data_.ensureAny() = std::move(ensureAny);
   }
 
   template <typename VPatch>
@@ -175,7 +185,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
                   BasePatch<typename VPatch::underlying_type, VPatch>,
                   VPatch>);
     using VTag = type::infer_tag<typename VPatch::value_type>;
-    ensureImpl(type::AnyData::toAny<VTag>({}).toThrift());
+    ensureAny(type::AnyData::toAny<VTag>({}).toThrift());
     patchIfTypeIsImpl(patch, true);
   }
 
@@ -226,25 +236,6 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       data_.patchIfTypeIsPrior().value()[std::move(type)].push_back(
           std::move(anyStruct));
     }
-  }
-
-  bool ensureImpl(type::AnyStruct ensureAny) {
-    if (data_.assign().has_value()) {
-      data_.clear() = true;
-      data_.ensureAny() = std::move(data_.assign().value());
-      data_.assign().reset();
-    }
-
-    // TODO(dokwon): Handle PatchIfTypeIsAfter
-
-    if (ensures(ensureAny.type().value())) {
-      return false;
-    }
-
-    // TODO(dokwon): Handle PatchIfTypeIsAfter
-
-    data_.ensureAny() = std::move(ensureAny);
-    return true;
   }
 
   // Needed for merge.

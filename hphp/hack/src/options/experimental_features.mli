@@ -18,8 +18,7 @@ type feature_status =
   | Migration
   | Deprecated
   | OngoingRelease
-      (** An OngoingRelease feature is always considered enabled in the runtime,
-      but not the type checker where it still needs the attribute. *)
+      (** An OngoingRelease feature is always considered enabled. *)
 [@@deriving eq, ord, show]
 
 (** Experimental features are enabled with a file attribute

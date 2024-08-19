@@ -11,7 +11,6 @@ use crate::gen::experimental_features::FeatureName;
 use crate::gen::experimental_features::FeatureName::*;
 use crate::gen::experimental_features::FeatureStatus;
 use crate::gen::experimental_features::FeatureStatus::*;
-use crate::namespace_env::Mode;
 use crate::parser_options::ParserOptions;
 
 impl FeatureName {
@@ -88,20 +87,17 @@ impl FeatureName {
         }
     }
 
-    // Experimental features with an ongoing release should be allowed by the
-    // runtime, but not the typechecker
+    // Experimental features with an ongoing release should be allowed
     pub fn can_use(
         &self,
         po: &ParserOptions,
-        mode: &Mode,
         active_experimental_features: &hash::HashSet<FeatureName>,
     ) -> bool {
         (match self {
             UnionIntersectionTypeHints => po.union_intersection_type_hints,
             _ => false,
         }) || active_experimental_features.contains(self)
-            || (matches!(mode, Mode::ForCodegen)
-                && matches!(self.get_feature_status(po), OngoingRelease))
+            || matches!(self.get_feature_status(po), OngoingRelease)
     }
 
     pub fn enable(

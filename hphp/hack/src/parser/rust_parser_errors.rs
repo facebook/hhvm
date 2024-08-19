@@ -1180,7 +1180,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     ) {
         if !feature.can_use(
             &self.env.parser_options,
-            &self.env.mode,
             &self.env.context.active_experimental_features,
         ) {
             errors.push(make_error_from_node(
@@ -2944,7 +2943,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         let feature = FeatureName::PipeAwait;
         let enabled = feature.can_use(
             &self.env.parser_options,
-            &self.env.mode,
             &self.env.context.active_experimental_features,
         );
         (feature, enabled)

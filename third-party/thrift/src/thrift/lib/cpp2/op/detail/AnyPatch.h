@@ -193,15 +193,18 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     return ensures(type::Type::create<Tag>());
   }
 
-  // If assign has value and specified 'Vpatch' is the corresponding patch type
+  // If assign has value and specified 'VPatch' is the corresponding patch type
   // to the type in 'assign' operation, we ensure the patch is patchable by
   // making it to 'clear' + 'ensureAny' operation.
   template <typename VPatch>
   void tryPatchable() {
     using VType = typename VPatch::value_type;
     using VTag = type::infer_tag<VType>;
+    tryPatchable(type::Type::create<VTag>());
+  }
+  void tryPatchable(const type::Type& type) {
     if (data_.assign().has_value()) {
-      if (data_.assign().value().type() != type::Type::create<VTag>()) {
+      if (data_.assign().value().type() != type) {
         return;
       }
       data_.clear() = true;
@@ -242,6 +245,14 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
     data_.ensureAny() = std::move(ensureAny);
     return true;
+  }
+
+  // Needed for merge.
+  void patchIfTypeIs(
+      const type::Type& type, const std::vector<type::AnyStruct>& patches) {
+    tryPatchable(type);
+    auto& vec = data_.patchIfTypeIsAfter().value()[type];
+    vec.insert(vec.end(), patches.begin(), patches.end());
   }
 };
 

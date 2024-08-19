@@ -525,18 +525,22 @@ module DataType = struct
       env * 'phase t =
     let open Tag in
     let reason = DataTypeReason.(make NoSubreason trail) in
+    let from_tag tag =
+      match tag with
+      | BoolTag -> (env, Set.singleton ~reason BoolData)
+      | IntTag -> (env, Set.singleton ~reason IntData)
+      | StringTag -> (env, Set.singleton ~reason StringData)
+      | ArraykeyTag -> (env, Set.of_list ~reason [IntData; StringData])
+      | FloatTag -> (env, Set.singleton ~reason FloatData)
+      | NumTag -> (env, Set.of_list ~reason [IntData; FloatData])
+      | ResourceTag -> (env, Set.singleton ~reason ResourceData)
+      | NullTag -> (env, Set.singleton ~reason NullData)
+      | ClassTag id -> Class.to_datatypes ~trail env id
+    in
     match predicate with
-    | IsBool -> (env, Set.singleton ~reason BoolData)
-    | IsInt -> (env, Set.singleton ~reason IntData)
-    | IsString -> (env, Set.singleton ~reason StringData)
-    | IsArraykey -> (env, Set.of_list ~reason [IntData; StringData])
-    | IsFloat -> (env, Set.singleton ~reason FloatData)
-    | IsNum -> (env, Set.of_list ~reason [IntData; FloatData])
-    | IsResource -> (env, Set.singleton ~reason ResourceData)
-    | IsNull -> (env, Set.singleton ~reason NullData)
+    | IsTag tag -> from_tag tag
     | IsTupleOf _ -> (env, Set.singleton ~reason VecData)
     | IsShapeOf _ -> (env, Set.singleton ~reason DictData)
-    | IsClass id -> Class.to_datatypes ~trail env id
 
   let rec fromTy ~trail (env : env) (ty : locl_ty) : env * 'phase t =
     let (env, ty) = Env.expand_type env ty in
@@ -860,18 +864,23 @@ module AtomicDataTypes = struct
     | Label -> (env, label)
     | Class name -> DataType.Class.to_datatypes ~trail env name
 
-  let of_predicate env : type_predicate -> env * _ DataType.t = function
-    | IsBool -> of_ty env (Primitive Aast.Tbool)
-    | IsInt -> of_ty env (Primitive Aast.Tint)
-    | IsString -> of_ty env (Primitive Aast.Tstring)
-    | IsArraykey -> of_ty env (Primitive Aast.Tarraykey)
-    | IsFloat -> of_ty env (Primitive Aast.Tfloat)
-    | IsNum -> of_ty env (Primitive Aast.Tnum)
-    | IsResource -> of_ty env (Primitive Aast.Tresource)
-    | IsNull -> of_ty env (Primitive Aast.Tnull)
+  let of_predicate env predicate : env * _ DataType.t =
+    let of_tag env tag =
+      match tag with
+      | BoolTag -> of_ty env (Primitive Aast.Tbool)
+      | IntTag -> of_ty env (Primitive Aast.Tint)
+      | StringTag -> of_ty env (Primitive Aast.Tstring)
+      | ArraykeyTag -> of_ty env (Primitive Aast.Tarraykey)
+      | FloatTag -> of_ty env (Primitive Aast.Tfloat)
+      | NumTag -> of_ty env (Primitive Aast.Tnum)
+      | ResourceTag -> of_ty env (Primitive Aast.Tresource)
+      | NullTag -> of_ty env (Primitive Aast.Tnull)
+      | ClassTag id -> of_ty env (Class id)
+    in
+    match predicate with
+    | IsTag tag -> of_tag env tag
     | IsTupleOf _ -> of_ty env Tuple
     | IsShapeOf _ -> of_ty env Shape
-    | IsClass id -> of_ty env (Class id)
 
   let complement dt = DataType.Set.diff mixed dt
 

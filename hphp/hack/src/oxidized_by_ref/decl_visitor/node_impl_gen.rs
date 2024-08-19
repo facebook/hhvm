@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<892be827797d0c135b8355c96bae4a1c>>
+// @generated SignedSource<<15d7a16a0d8e92d4703e68705644b565>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -574,6 +574,24 @@ impl<'a> Node<'a> for FunType<'a> {
         }
     }
 }
+impl<'a> Node<'a> for TypeTag<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_type_tag(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypeTag::BoolTag => {}
+            TypeTag::IntTag => {}
+            TypeTag::StringTag => {}
+            TypeTag::ArraykeyTag => {}
+            TypeTag::FloatTag => {}
+            TypeTag::NumTag => {}
+            TypeTag::ResourceTag => {}
+            TypeTag::NullTag => {}
+            TypeTag::ClassTag(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for ShapeFieldPredicate<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_shape_field_predicate(self)
@@ -604,15 +622,7 @@ impl<'a> Node<'a> for TypePredicate<'a> {
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            TypePredicate::IsBool => {}
-            TypePredicate::IsInt => {}
-            TypePredicate::IsString => {}
-            TypePredicate::IsArraykey => {}
-            TypePredicate::IsFloat => {}
-            TypePredicate::IsNum => {}
-            TypePredicate::IsResource => {}
-            TypePredicate::IsNull => {}
-            TypePredicate::IsClass(ref __binding_0) => __binding_0.accept(v),
+            TypePredicate::IsTag(ref __binding_0) => __binding_0.accept(v),
             TypePredicate::IsTupleOf(ref __binding_0) => __binding_0.accept(v),
             TypePredicate::IsShapeOf(ref __binding_0) => __binding_0.accept(v),
         }

@@ -42,11 +42,11 @@ type ty_partition = {
       pass and fails the predicate
 
   As an example consider partition the type (num | arraykey | T) where T is a generic type
-    bounded by nonnull over the predicate IsInt
+    bounded by nonnull over the predicate (IsTag IntTag)
 
   This will produce
-    left = int (num & IsInt = int and arraykey & IsInt = int)
-    right = float | string (num & !IsInt = float and arraykey & !IsInt = string)
+    left = int (num & (IsTag IntTag) = int and arraykey & (IsTag IntTag) = int)
+    right = float | string (num & !(IsTag IntTag) = float and arraykey & !(IsTag IntTag) = string)
     span = T (T can contain values that are ints and values that are not ints)
 *)
 val partition_ty :

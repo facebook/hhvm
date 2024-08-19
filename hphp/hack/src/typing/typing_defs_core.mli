@@ -164,6 +164,18 @@ type enforcement =
   | Enforced  (** The consumer enforces the type at runtime *)
 [@@deriving eq, show, ord]
 
+type type_tag =
+  | BoolTag
+  | IntTag
+  | StringTag
+  | ArraykeyTag
+  | FloatTag
+  | NumTag
+  | ResourceTag
+  | NullTag
+  | ClassTag of Ast_defs.id_
+[@@deriving eq, ord, hash, show { with_path = false }]
+
 type shape_field_predicate = {
   (* T196048813 *)
   (* sfp_optional: bool; *)
@@ -184,15 +196,7 @@ and shape_predicate = {
     The predicate would be `is Bool`
   *)
 and type_predicate =
-  | IsBool
-  | IsInt
-  | IsString
-  | IsArraykey
-  | IsFloat
-  | IsNum
-  | IsResource
-  | IsNull
-  | IsClass of Ast_defs.id_
+  | IsTag of type_tag
   | IsTupleOf of type_predicate list
   | IsShapeOf of shape_predicate
 [@@deriving eq, ord, hash, show]

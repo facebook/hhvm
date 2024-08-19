@@ -6869,7 +6869,8 @@ end = struct
     let rec branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
       match (predicate, ivar) with
       (* Legacy case: apply refinements to both lsh and rhs for assignments *)
-      | (IsNull, (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs; rhs })) ->
+      | (IsTag NullTag, (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs; rhs }))
+        ->
         let (env, cond_true_l, cond_false_l) =
           branch_for_type_switch env ~p ~ivar:lhs ~errs ~reason ~predicate
         in
@@ -6885,7 +6886,7 @@ end = struct
             cond_false_r env )
       (* Special case: treat Shapes::idx($s, 'k') is nonnull
          roughly like $s is shape('k' => nonnull, ...) *)
-      | ( IsNull,
+      | ( IsTag NullTag,
           ( _,
             _,
             Aast.Call
@@ -6994,7 +6995,7 @@ end = struct
         ~ivar:te
         ~errs:None
         ~reason:(Reason.witness p)
-        ~predicate:IsNull
+        ~predicate:(IsTag NullTag)
     | Aast.Hole (e, _, _, _) -> condition_dual env e
     | Aast.Is (ivar, hint) -> begin
       let ((env, ty_err_opt), hint_ty) =
@@ -7010,7 +7011,7 @@ end = struct
             ~ivar
             ~errs:ty_err_opt
             ~reason
-            ~predicate:IsNull
+            ~predicate:(IsTag NullTag)
         in
         (env, cond_false, cond_true)
       | _ -> begin

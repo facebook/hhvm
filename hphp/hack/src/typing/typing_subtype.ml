@@ -607,9 +607,9 @@ module Subtype_negation = struct
     let neg_ty =
       match get_node ty with
       | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
-      | Tprim Aast.Tarraykey -> Some (MakeType.neg r IsArraykey)
-      | Tneg IsArraykey -> Some (MakeType.prim_type r Aast.Tarraykey)
-      | Tneg IsNull
+      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (IsTag ArraykeyTag))
+      | Tneg (IsTag ArraykeyTag) -> Some (MakeType.prim_type r Aast.Tarraykey)
+      | Tneg (IsTag NullTag)
       | Tnonnull ->
         Some (MakeType.null r)
       | _ -> None
@@ -883,8 +883,8 @@ end = struct
     let (env, ty2) = Env.expand_type env ty2 in
     match (deref ty1, deref ty2) with
     | ( ((_, Tvar _) as tv),
-        ((_, (Tprim Aast.Tarraykey | Tneg IsArraykey)) as ak) )
-    | ( ((_, (Tprim Aast.Tarraykey | Tneg IsArraykey)) as ak),
+        ((_, (Tprim Aast.Tarraykey | Tneg (IsTag ArraykeyTag))) as ak) )
+    | ( ((_, (Tprim Aast.Tarraykey | Tneg (IsTag ArraykeyTag))) as ak),
         ((_, Tvar _) as tv) ) ->
       (env, Some (tv, ak))
     | _ -> (env, None)
@@ -894,7 +894,7 @@ end = struct
     | (env, Some (tv, ak)) -> (env, (tv, ak))
     | _ ->
       failwith
-        "Expected a pair of types, one of which a [Tvar] and the other [Tprim Tarraykey] or [Tneg IsArraykey]"
+        "Expected a pair of types, one of which a [Tvar] and the other [Tprim Tarraykey] or [Tneg (IsTag ArraykeyTag)]"
 
   let expands_to_var_and_arraykey ty1 ty2 ~env =
     match var_and_arraykey_opt ty1 ty2 ~env with
@@ -4788,9 +4788,9 @@ end = struct
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
     (* -- C-Neg-R ----------------------------------------------------------- *)
-    | (_, (r_super, Tneg (IsClass c_super))) -> begin
+    | (_, (r_super, Tneg (IsTag (ClassTag c_super)))) -> begin
       match deref ty_sub with
-      | (_, Tneg (IsClass c_sub)) ->
+      | (_, Tneg (IsTag (ClassTag c_sub))) ->
         if TUtils.is_sub_class_refl env c_super c_sub then
           valid env
         else
@@ -4812,7 +4812,7 @@ end = struct
             {
               super_like;
               super_supportdyn = false;
-              ty_super = mk (r_super, Tneg (IsClass c_super));
+              ty_super = mk (r_super, Tneg (IsTag (ClassTag c_super)));
             }
           env
     end
@@ -8750,8 +8750,8 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     is_sub_type_for_union_help env ty2 (MakeType.null Reason.none)
   | (_, Tnonnull) ->
     is_sub_type_for_union_help env ty1 (MakeType.null Reason.none)
-  | (Tneg (IsClass c1), Tclass ((_, c2), _, _tyl))
-  | (Tclass ((_, c2), _, _tyl), Tneg (IsClass c1)) ->
+  | (Tneg (IsTag (ClassTag c1)), Tclass ((_, c2), _, _tyl))
+  | (Tclass ((_, c2), _, _tyl), Tneg (IsTag (ClassTag c1))) ->
     (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
        o notin (complement (Union tyl'. c1<tyl'>)), which is just that
        c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then

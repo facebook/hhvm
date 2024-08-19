@@ -57,11 +57,11 @@ let negate_type env r ty ~approx =
       | Some predicate -> MkType.neg r predicate
       | None -> approximated (* void, noreturn *)
     end
-    | Tneg (IsClass c) when Utils.class_has_no_params env c ->
+    | Tneg (IsTag (ClassTag c)) when Utils.class_has_no_params env c ->
       MkType.class_type r c []
     | Tneg predicate -> Typing_refinement.TyPredicate.to_ty r predicate
     | Tnonnull -> MkType.null r
-    | Tclass ((_, c), Nonexact _, _) -> MkType.neg r (IsClass c)
+    | Tclass ((_, c), Nonexact _, _) -> MkType.neg r (IsTag (ClassTag c))
     | _ -> approximated
   in
   (env, neg_ty)

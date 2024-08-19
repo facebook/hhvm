@@ -21,7 +21,7 @@ let prim_type r t = mk (r, Tprim t)
 let neg r neg_t =
   match neg_t with
   (* Represent the negation of Tnull as Tnonnull, instead of Tneg Tnull *)
-  | IsNull -> mk (r, Tnonnull)
+  | IsTag NullTag -> mk (r, Tnonnull)
   | _ -> mk (r, Tneg neg_t)
 
 let traversable r ty = class_type r SN.Collections.cTraversable [ty]

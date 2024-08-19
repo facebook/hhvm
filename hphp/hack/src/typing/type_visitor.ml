@@ -315,16 +315,21 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       this#on_type acc ty2
 
     method on_neg_type acc r neg_ty =
+      let on_tag acc tag =
+        match tag with
+        | ClassTag c -> this#on_tclass acc r (Reason.to_pos r, c) nonexact []
+        | ArraykeyTag
+        | BoolTag
+        | IntTag
+        | StringTag
+        | FloatTag
+        | NumTag
+        | ResourceTag
+        | NullTag ->
+          acc
+      in
       match neg_ty with
-      | IsClass c -> this#on_tclass acc r (Reason.to_pos r, c) nonexact []
-      | IsArraykey
-      | IsBool
-      | IsInt
-      | IsString
-      | IsFloat
-      | IsNum
-      | IsResource
-      | IsNull
+      | IsTag tag -> on_tag acc tag
       | IsTupleOf _
       | IsShapeOf _ ->
         acc

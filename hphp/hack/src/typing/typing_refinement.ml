@@ -162,44 +162,19 @@ let rec split_ty
           | IsTupleOf _np_predicates -> begin
             match predicate with
             | IsTupleOf _predicates -> TyPartition.mk_span ty
-            | IsBool
-            | IsInt
-            | IsString
-            | IsArraykey
-            | IsFloat
-            | IsNum
-            | IsResource
-            | IsNull
             | IsShapeOf _
-            | IsClass _ ->
+            | IsTag _ ->
               TyPartition.mk_right ty
           end
           | IsShapeOf _ -> begin
             match predicate with
             | IsShapeOf _ -> TyPartition.mk_span ty
-            | IsBool
-            | IsInt
-            | IsString
-            | IsArraykey
-            | IsFloat
-            | IsNum
-            | IsResource
-            | IsNull
             | IsTupleOf _
-            | IsClass _ ->
+            | IsTag _ ->
               TyPartition.mk_right ty
           end
           (* The DataType for these are precise *)
-          | IsBool
-          | IsInt
-          | IsString
-          | IsArraykey
-          | IsFloat
-          | IsNum
-          | IsResource
-          | IsNull
-          | IsClass _ ->
-            TyPartition.mk_right ty
+          | IsTag _ -> TyPartition.mk_right ty
         end
         | _ -> TyPartition.mk_right ty
       in
@@ -231,16 +206,7 @@ let rec split_ty
             shape_predicate
         | _ -> (env, TyPartition.mk_span ty)
       end
-      | IsBool
-      | IsInt
-      | IsString
-      | IsArraykey
-      | IsFloat
-      | IsNum
-      | IsResource
-      | IsNull
-      | IsClass _ ->
-        (env, TyPartition.mk_left ty)
+      | IsTag _ -> (env, TyPartition.mk_left ty)
     else
       (env, TyPartition.mk_span ty)
   in
@@ -399,14 +365,14 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
 module TyPredicate = struct
   let rec of_ty env (ty : locl_ty) =
     match get_node ty with
-    | Tprim Aast.Tbool -> Result.Ok IsBool
-    | Tprim Aast.Tint -> Result.Ok IsInt
-    | Tprim Aast.Tstring -> Result.Ok IsString
-    | Tprim Aast.Tarraykey -> Result.Ok IsArraykey
-    | Tprim Aast.Tfloat -> Result.Ok IsFloat
-    | Tprim Aast.Tnum -> Result.Ok IsNum
-    | Tprim Aast.Tresource -> Result.Ok IsResource
-    | Tprim Aast.Tnull -> Result.Ok IsNull
+    | Tprim Aast.Tbool -> Result.Ok (IsTag BoolTag)
+    | Tprim Aast.Tint -> Result.Ok (IsTag IntTag)
+    | Tprim Aast.Tstring -> Result.Ok (IsTag StringTag)
+    | Tprim Aast.Tarraykey -> Result.Ok (IsTag ArraykeyTag)
+    | Tprim Aast.Tfloat -> Result.Ok (IsTag FloatTag)
+    | Tprim Aast.Tnum -> Result.Ok (IsTag NumTag)
+    | Tprim Aast.Tresource -> Result.Ok (IsTag ResourceTag)
+    | Tprim Aast.Tnull -> Result.Ok (IsTag NullTag)
     | Ttuple tys -> begin
       match
         List.fold_left tys ~init:(Result.Ok []) ~f:(fun acc ty ->
@@ -468,16 +434,20 @@ module TyPredicate = struct
     | Tlabel _ -> Result.Error "label"
 
   let rec to_ty reason predicate =
+    let tag_to_ty tag =
+      match tag with
+      | BoolTag -> Typing_make_type.bool reason
+      | IntTag -> Typing_make_type.int reason
+      | StringTag -> Typing_make_type.string reason
+      | ArraykeyTag -> Typing_make_type.arraykey reason
+      | FloatTag -> Typing_make_type.float reason
+      | NumTag -> Typing_make_type.num reason
+      | ResourceTag -> Typing_make_type.resource reason
+      | NullTag -> Typing_make_type.null reason
+      | ClassTag id -> Typing_make_type.class_type reason id []
+    in
     match predicate with
-    | IsBool -> Typing_make_type.bool reason
-    | IsInt -> Typing_make_type.int reason
-    | IsString -> Typing_make_type.string reason
-    | IsArraykey -> Typing_make_type.arraykey reason
-    | IsFloat -> Typing_make_type.float reason
-    | IsNum -> Typing_make_type.num reason
-    | IsResource -> Typing_make_type.resource reason
-    | IsNull -> Typing_make_type.null reason
-    | IsClass id -> Typing_make_type.class_type reason id []
+    | IsTag tag -> tag_to_ty tag
     | IsTupleOf predicates ->
       Typing_make_type.tuple reason (List.map predicates ~f:(to_ty reason))
     | IsShapeOf { sp_fields } ->

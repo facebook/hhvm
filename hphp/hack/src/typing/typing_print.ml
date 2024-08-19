@@ -1157,17 +1157,21 @@ module Full = struct
       (fuel, label_doc)
 
   and type_predicate ~fuel ~negate to_doc predicate =
+    let tag_doc tag =
+      match tag with
+      | BoolTag -> text "bool"
+      | IntTag -> text "int"
+      | StringTag -> text "string"
+      | ArraykeyTag -> text "arraykey"
+      | FloatTag -> text "float"
+      | NumTag -> text "num"
+      | ResourceTag -> text "resource"
+      | NullTag -> text "null"
+      | ClassTag s -> to_doc s
+    in
     let rec predicate_doc predicate =
       match predicate with
-      | IsBool -> text "bool"
-      | IsInt -> text "int"
-      | IsString -> text "string"
-      | IsArraykey -> text "arraykey"
-      | IsFloat -> text "float"
-      | IsNum -> text "num"
-      | IsResource -> text "resource"
-      | IsNull -> text "null"
-      | IsClass s -> to_doc s
+      | IsTag tag -> tag_doc tag
       | IsTupleOf predicates ->
         let texts = List.map predicates ~f:predicate_doc in
         Concat
@@ -1555,17 +1559,21 @@ module ErrorString = struct
     | Taccess (_ty, _id) -> (fuel, "a type constant")
     | Tlabel name -> (fuel, Printf.sprintf "a label (#%s)" name)
     | Tneg predicate ->
+      let tag_str tag =
+        match tag with
+        | BoolTag -> "a bool"
+        | IntTag -> "an int"
+        | StringTag -> "a string"
+        | ArraykeyTag -> "an arraykey"
+        | FloatTag -> "a float"
+        | NumTag -> "a num"
+        | ResourceTag -> "a resource"
+        | NullTag -> "null"
+        | ClassTag s -> "a " ^ strip_ns s
+      in
       let rec str predicate =
         match predicate with
-        | IsBool -> "a bool"
-        | IsInt -> "an int"
-        | IsString -> "a string"
-        | IsArraykey -> "an arraykey"
-        | IsFloat -> "a float"
-        | IsNum -> "a num"
-        | IsResource -> "a resource"
-        | IsNull -> "null"
-        | IsClass s -> "a " ^ strip_ns s
+        | IsTag tag -> tag_str tag
         | IsTupleOf predicates ->
           let strings = List.map predicates ~f:str in
           "(" ^ String.concat ~sep:", " strings ^ ")"
@@ -1772,17 +1780,21 @@ module Json = struct
     | (p, Tprim tp) ->
       obj @@ kind p "primitive" @ name (Aast_defs.string_of_tprim tp)
     | (p, Tneg predicate) ->
+      let tag_json tag =
+        match tag with
+        | BoolTag -> name "isbool"
+        | IntTag -> name "isint"
+        | StringTag -> name "isstring"
+        | ArraykeyTag -> name "isarraykey"
+        | FloatTag -> name "isfloat"
+        | NumTag -> name "isnum"
+        | ResourceTag -> name "isresource"
+        | NullTag -> name "isnull"
+        | ClassTag s -> name s
+      in
       let rec predicate_json predicate =
         match predicate with
-        | IsBool -> name "isbool"
-        | IsInt -> name "isint"
-        | IsString -> name "isstring"
-        | IsArraykey -> name "isarraykey"
-        | IsFloat -> name "isfloat"
-        | IsNum -> name "isnum"
-        | IsResource -> name "isresource"
-        | IsNull -> name "isnull"
-        | IsClass s -> name s
+        | IsTag tag -> tag_json tag
         | IsTupleOf predicates ->
           let predicates_json =
             List.map predicates ~f:(fun p -> obj @@ predicate_json p)

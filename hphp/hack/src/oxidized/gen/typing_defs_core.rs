@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<011c7219f7a1a6ec37c82fc5812183b8>>
+// @generated SignedSource<<55ddc1eb0f788384284446a4c4bdc47d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -493,6 +493,35 @@ pub struct FunType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
+#[repr(C, u8)]
+pub enum TypeTag {
+    BoolTag,
+    IntTag,
+    StringTag,
+    ArraykeyTag,
+    FloatTag,
+    NumTag,
+    ResourceTag,
+    NullTag,
+    ClassTag(ast_defs::Id_),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[repr(C)]
 pub struct ShapeFieldPredicate {
     pub sfp_predicate: TypePredicate,
@@ -538,15 +567,7 @@ pub struct ShapePredicate {
 #[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum TypePredicate {
-    IsBool,
-    IsInt,
-    IsString,
-    IsArraykey,
-    IsFloat,
-    IsNum,
-    IsResource,
-    IsNull,
-    IsClass(ast_defs::Id_),
+    IsTag(TypeTag),
     IsTupleOf(Vec<TypePredicate>),
     IsShapeOf(ShapePredicate),
 }

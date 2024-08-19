@@ -417,8 +417,7 @@ void impl(Patch&& patch, Object& value) {
        PatchOp::PatchPrior,
        PatchOp::EnsureStruct,
        PatchOp::EnsureUnion,
-       PatchOp::PatchAfter,
-       PatchOp::Add});
+       PatchOp::PatchAfter});
   if (applyAssign<type::struct_c>(std::forward<Patch>(patch), value)) {
     return; // Ignore all other ops.
   }
@@ -506,9 +505,6 @@ void impl(Patch&& patch, Object& value) {
           "The `PatchOp::Remove` field in struct/union patch is not `set<i16>`/`list<i16>` but `{}`",
           util::enumNameSafe(to_remove->getType())));
     }
-  }
-  if (auto* addFields = findOp(patch, PatchOp::Add)) {
-    // TODO(afuller): Implement field-wise add.
   }
 }
 

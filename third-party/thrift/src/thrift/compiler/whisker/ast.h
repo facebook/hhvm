@@ -28,13 +28,13 @@ struct text;
 struct comment;
 struct section_block;
 struct partial_apply;
-struct variable_lookup;
+struct variable;
 
 /**
  * The top-level types of constructs allowed in a Whisker source file.
  */
 using body =
-    std::variant<text, comment, variable_lookup, section_block, partial_apply>;
+    std::variant<text, comment, variable, section_block, partial_apply>;
 using bodies = std::vector<body>;
 
 /**
@@ -72,12 +72,17 @@ struct identifier {
   std::string name;
 };
 
+/**
+ * A "path" of identifiers that represent a lookup of a variable or partial.
+ * Unlike variable_lookup, the self-referencing dot is not a valid lookup_path.
+ */
 struct lookup_path {
   source_range loc;
   std::vector<identifier> parts;
 
   std::string as_string(char separator) const;
 };
+
 /**
  * A "path" of identifiers that represent a lookup of a variable where each
  * path component is separated by a dot. This is a subset of Mustache's
@@ -91,6 +96,17 @@ struct variable_lookup {
   std::variant<this_ref, lookup_path> path;
 
   std::string path_string() const;
+};
+
+/**
+ * A top-level variable within a template body. It is similar to variable_lookup
+ * except its source_range includes the surrounding "{{ }}".
+ */
+struct variable {
+  source_range loc;
+  variable_lookup lookup;
+
+  std::string path_string() const { return lookup.path_string(); }
 };
 
 /**

@@ -96,6 +96,11 @@ struct ast_visitor {
         location(variable.loc),
         variable.path_string()));
   }
+  void visit(
+      const ast::variable& variable, const tree_printer::scope& scope) const {
+    scope.println(fmt::format(
+        " variable {} '{}'", location(variable.loc), variable.path_string()));
+  }
   void visit(const ast::body& body, const tree_printer::scope& scope) const {
     // This node is transparent so it does not directly appear in the tree
     detail::variant_match(body, [&](const auto& node) { visit(node, scope); });

@@ -28,6 +28,12 @@ from typing import Any, Mapping, Type, Union
 import apache.thrift.test.terse_write.terse_write.thrift_mutable_types as mutable_terse_types
 import apache.thrift.test.terse_write.terse_write.thrift_types as immutable_terse_types
 
+import python_test.containers.thrift_mutable_types as mutable_containers_types
+import python_test.containers.thrift_types as immutable_containers_types
+
+import testing.thrift_mutable_types as mutable_types
+import testing.thrift_types as immutable_types
+
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
@@ -73,18 +79,16 @@ from testing.thrift_types import (
     StrStrMap,
 )
 from thrift.python.exceptions import Error
-from thrift.python.serializer import (
-    deserialize,
-    deserialize_with_length,
-    Protocol,
-    serialize,
-    serialize_iobuf,
-)
+
+from thrift.python.mutable_types import MutableStructOrUnion
+from thrift.python.serializer import Protocol
 from thrift.python.types import StructOrUnion
 
 
 def thrift_serialization_round_trip(
-    self: unittest.TestCase, control: StructOrUnion, serializer: types.ModuleType
+    self: unittest.TestCase,
+    control: Union[StructOrUnion, MutableStructOrUnion],
+    serializer: types.ModuleType,
 ) -> None:
     for proto in Protocol:
         encoded = serializer.serialize(control, protocol=proto)
@@ -100,61 +104,113 @@ def thrift_serialization_round_trip(
         self.assertEqual(control, decoded_with_full_cache)
 
 
+@parameterized_class(
+    ("test_types", "container_types", "serializer_module"),
+    [
+        (immutable_types, immutable_containers_types, immutable_serializer),
+        (mutable_types, mutable_containers_types, mutable_serializer),
+    ],
+)
 class SerializerTests(unittest.TestCase):
+    def setUp(self) -> None:
+        """
+        The `setUp` method performs these assignments with type hints to enable
+        pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
+        behind `test_types`.
+        """
+        # pyre-ignore[16]: has no attribute `test_types`
+        self.easy: Type[easy] = self.test_types.easy
+        self.hard: Type[hard] = self.test_types.hard
+        self.Integers: Type[Integers] = self.test_types.Integers
+        self.I32List: Type[I32List] = self.test_types.I32List
+        self.StrList2D: Type[StrList2D] = self.test_types.StrList2D
+        self.StringList: Type[StringList] = self.test_types.StringList
+        self.Digits: Type[Digits] = self.test_types.Digits
+        self.ColorGroups: Type[ColorGroups] = self.test_types.ColorGroups
+        self.Color: Type[Color] = self.test_types.Color
+        self.ComplexUnion: Type[ComplexUnion] = self.test_types.ComplexUnion
+        self.Complex: Type[Complex] = self.test_types.Complex
+        self.IOBufListStruct: Type[IOBufListStruct] = self.test_types.IOBufListStruct
+        self.EasyList: Type[EasyList] = self.test_types.EasyList
+        self.EasySet: Type[EasySet] = self.test_types.EasySet
+        self.StrEasyMap: Type[StrEasyMap] = self.test_types.StrEasyMap
+        self.SetI32: Type[SetI32] = self.test_types.SetI32
+        self.SetI32Lists: Type[SetI32Lists] = self.test_types.SetI32Lists
+        self.StrStrMap: Type[StrStrMap] = self.test_types.StrStrMap
+        self.StrI32ListMap: Type[StrI32ListMap] = self.test_types.StrI32ListMap
+        self.StringBucket: Type[StringBucket] = self.test_types.StringBucket
+        self.Reserved: Type[Reserved] = self.test_types.Reserved
+        # pyre-ignore[16]: has no attribute `container_types`
+        self.Sets: Type[Sets] = self.container_types.Sets
+        self.Lists: Type[Lists] = self.container_types.Lists
+        self.Maps: Type[Maps] = self.container_types.Maps
+        self.Foo: Type[Foo] = self.container_types.Foo
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+        # pyre-ignore[16]: has no attribute `serializer_module`
+        self.serializer: types.ModuleType = self.serializer_module
+
     def test_None(self) -> None:
         with self.assertRaises(TypeError):
-            # pyre-ignore[6]: intentionally introduced for testing
-            serialize(None)
+            self.serializer.serialize(None)
 
     def test_sanity(self) -> None:
         with self.assertRaises(TypeError):
-            # pyre-ignore[6]: intentionally introduced for testing
-            serialize(1, Protocol.COMPACT)
+            self.serializer.serialize(1, Protocol.COMPACT)
 
         with self.assertRaises(TypeError):
-            # pyre-ignore[6]: intentionally introduced for testing
-            serialize(easy(), None)
+            self.serializer.serialize(self.easy(), None)
 
         with self.assertRaises(TypeError):
-            # pyre-ignore[6]: intentionally introduced for testing
-            deserialize(Protocol, b"")
+            self.serializer.deserialize(Protocol, b"")
 
     def test_from_thread_pool(self) -> None:
-        control = easy(val=5, val_list=[1, 2, 3, 4])
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
+        control = self.easy(val=5, val_list=[1, 2, 3, 4])
         loop = asyncio.get_event_loop()
-        # pyre-fixme[6]: For 2nd argument expected `(*(*asyncio.events._Ts)) -> _T`
-        #  but got `(struct: sT, protocol: Protocol = ...) -> bytes`.
-        coro = loop.run_in_executor(None, serialize, control)
+        coro = loop.run_in_executor(None, self.serializer.serialize, control)
         encoded = loop.run_until_complete(coro)
-        # pyre-fixme[6]: For 2nd argument expected `(*(*asyncio.events._Ts)) -> _T`
-        #  but got `(klass: Type[Variable[sT (bound to Union[StructOrUnion,
-        #  GeneratedError])]], buf: Union[IOBuf, bytearray, bytes, memoryview],
-        #  protocol: Protocol = ..., fully_populate_cache: bool = ...) -> sT`.
-        coro = loop.run_in_executor(None, deserialize, type(control), encoded)
+        coro = loop.run_in_executor(
+            None, self.serializer.deserialize, type(control), encoded
+        )
         decoded = loop.run_until_complete(coro)
         self.assertEqual(control, decoded)
 
     def test_serialize_iobuf(self) -> None:
-        control = easy(val=5, val_list=[1, 2, 3, 4, 5])
-        iobuf = serialize_iobuf(control)
-        decoded = deserialize(type(control), iobuf)
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
+        control = self.easy(val=5, val_list=[1, 2, 3, 4, 5])
+        iobuf = self.serializer.serialize_iobuf(control)
+        decoded = self.serializer.deserialize(type(control), iobuf)
         self.assertEqual(control, decoded)
 
     def test_bad_deserialize(self) -> None:
         with self.assertRaises(Error):
-            deserialize(easy, b"")
+            self.serializer.deserialize(self.easy, b"")
         with self.assertRaises(Error):
-            deserialize(easy, b"\x05AAAAAAAA")
+            self.serializer.deserialize(self.easy, b"\x05AAAAAAAA")
         with self.assertRaises(Error):
-            deserialize(easy, b"\x02\xDE\xAD\xBE\xEF", protocol=Protocol.BINARY)
+            self.serializer.deserialize(
+                self.easy, b"\x02\xDE\xAD\xBE\xEF", protocol=Protocol.BINARY
+            )
 
-    def thrift_serialization_round_trip(self, control: StructOrUnion) -> None:
-        thrift_serialization_round_trip(self, control, immutable_serializer)
+    def thrift_serialization_round_trip(
+        self, control: Union[StructOrUnion, MutableStructOrUnion]
+    ) -> None:
+        thrift_serialization_round_trip(self, control, self.serializer)
 
     def pickle_round_trip(
         self,
         # pyre-ignore[2]
-        control: Union[StructOrUnion, Sequence, Set, Mapping[Any, Any]],
+        control: Union[
+            StructOrUnion, MutableStructOrUnion, Sequence, Set, Mapping[Any, Any]
+        ],
     ) -> None:
         encoded = pickle.dumps(control, protocol=pickle.HIGHEST_PROTOCOL)
         decoded = pickle.loads(encoded)
@@ -162,81 +218,134 @@ class SerializerTests(unittest.TestCase):
         self.assertEqual(control, decoded)
 
     def test_serialize_easy_struct(self) -> None:
-        control = easy(val=5, val_list=[1, 2, 3, 4])
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
+        control = self.easy(val=5, val_list=[1, 2, 3, 4])
         self.thrift_serialization_round_trip(control)
 
     def test_pickle_easy_struct(self) -> None:
-        val = easy(val=0, val_list=[5, 6, 7])
+        if self.is_mutable_run:
+            # TODO: pickle for mutable types
+            return
+
+        val = self.easy(val=0, val_list=[5, 6, 7])
         self.pickle_round_trip(control=val)
-        self.pickle_round_trip(control=EasyList([val]))
-        self.pickle_round_trip(control=EasySet({val}))
-        self.pickle_round_trip(control=StrEasyMap({"foo": val}))
+        self.pickle_round_trip(control=self.EasyList([val]))
+        self.pickle_round_trip(control=self.EasySet({val}))
+        self.pickle_round_trip(control=self.StrEasyMap({"foo": val}))
 
     def test_serialize_hard_struct(self) -> None:
-        control = hard(
-            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=Integers(tiny=1)
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
+        control = self.hard(
+            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=self.Integers(tiny=1)
         )
         self.thrift_serialization_round_trip(control)
 
     def test_pickle_hard_struct(self) -> None:
-        control = hard(
-            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=Integers(tiny=1)
+        if self.is_mutable_run:
+            # TODO: pickle for mutable types
+            return
+
+        control = self.hard(
+            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=self.Integers(tiny=1)
         )
         self.pickle_round_trip(control)
 
     def test_serialize_Integers_union(self) -> None:
-        control = Integers(medium=1337)
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+        control = self.Integers(medium=1337)
 
         self.thrift_serialization_round_trip(control)
 
     def test_pickle_Integers_union(self) -> None:
-        control = Integers(large=2**32)
+        if self.is_mutable_run:
+            # TODO: pickle for mutable types
+            return
+
+        control = self.Integers(large=2**32)
         self.pickle_round_trip(control)
 
     def test_pickle_sequence(self) -> None:
-        self.pickle_round_trip(control=I32List([1, 2, 3, 4]))
-        self.pickle_round_trip(control=StrList2D([StringList(["foo", "bar"])]))
+        if self.is_mutable_run:
+            # TODO: pickle for mutable types
+            return
 
-        digits = Digits(data=[Integers(tiny=1), Integers(tiny=2), Integers(large=0)])
+        self.pickle_round_trip(control=self.I32List([1, 2, 3, 4]))
+        self.pickle_round_trip(
+            control=self.StrList2D([self.StringList(["foo", "bar"])])
+        )
+
+        digits = self.Digits(
+            data=[self.Integers(tiny=1), self.Integers(tiny=2), self.Integers(large=0)]
+        )
         data = digits.data
         assert data
         self.pickle_round_trip(data)
 
     def test_pickle_set(self) -> None:
-        self.pickle_round_trip(control=SetI32({1, 2, 3, 4}))
-        self.pickle_round_trip(control=SetI32Lists({I32List([1, 2]), I32List([3, 4])}))
+        if self.is_mutable_run:
+            # TODO: pickle for mutable types
+            return
+
+        self.pickle_round_trip(control=self.SetI32({1, 2, 3, 4}))
+        self.pickle_round_trip(
+            control=self.SetI32Lists({self.I32List([1, 2]), self.I32List([3, 4])})
+        )
 
     def test_pickle_mapping(self) -> None:
-        self.pickle_round_trip(control=StrStrMap({"test": "test", "foo": "bar"}))
-        self.pickle_round_trip(control=StrI32ListMap({"a": I32List([1, 2])}))
+        if self.is_mutable_run:
+            # TODO: pickle for mutable types
+            return
+
+        self.pickle_round_trip(control=self.StrStrMap({"test": "test", "foo": "bar"}))
+        self.pickle_round_trip(control=self.StrI32ListMap({"a": self.I32List([1, 2])}))
 
     def test_serialize_Complex(self) -> None:
-        control = Complex(
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
+        control = self.Complex(
             val_bool=True,
             val_i32=42,
             val_i64=1 << 33,
             val_string="hello\u4e16\u754c",
             val_binary=b"\xe5\x92\x8c\xe5\b9\xb3",
             val_iobuf=IOBuf(b"\xe5\x9b\x9b\xe5\x8d\x81\xe4\xba\x8c"),
-            val_enum=Color.green,
-            val_union=ComplexUnion(double_val=1.234),
-            val_set={easy(val=42)},
+            val_enum=self.Color.green,
+            val_union=self.ComplexUnion(double_val=1.234),
+            val_set=(
+                {easy(val=42)}
+                if not self.is_mutable_run
+                else set()  # Mutable types are not hashable.
+            ),
             val_map={"foo": b"foovalue"},
-            val_complex_map={"bar": [{easy(val=42), easy(val_list=[1, 2, 3])}]},
-            val_struct_with_containers=ColorGroups(
-                color_list=[Color.blue, Color.green],
-                color_set={Color.blue, Color.red},
-                color_map={Color.blue: Color.green},
+            val_complex_map=(
+                {"bar": [{self.easy(val=42), self.easy(val_list=[1, 2, 3])}]}
+                if not self.is_mutable_run
+                else {}  # Mutable types are not hashable.
+            ),
+            val_struct_with_containers=self.ColorGroups(
+                color_list=[self.Color.blue, self.Color.green],
+                color_set={self.Color.blue, self.Color.red},
+                color_map={self.Color.blue: self.Color.green},
             ),
         )
         self.thrift_serialization_round_trip(control)
 
     def test_serialize_iobuf_list_struct(self) -> None:
-        control = IOBufListStruct(iobufs=[IOBuf(b"foo"), IOBuf(b"bar")])
+        control = self.IOBufListStruct(iobufs=[IOBuf(b"foo"), IOBuf(b"bar")])
         self.thrift_serialization_round_trip(control)
 
     def test_serialize_lists_struct(self) -> None:
-        control = Lists(
+        control = self.Lists(
             boolList=[True, False],
             byteList=[1, 2, 3],
             i16List=[4, 5, 6],
@@ -246,12 +355,12 @@ class SerializerTests(unittest.TestCase):
             stringList=["foo", "bar"],
             binaryList=[b"foo", b"bar"],
             iobufList=[IOBuf(b"foo"), IOBuf(b"bar")],
-            structList=[Foo(value=1), Foo(value=2)],
+            structList=[self.Foo(value=1), self.Foo(value=2)],
         )
         self.thrift_serialization_round_trip(control)
 
     def test_serialize_set_struct(self) -> None:
-        control = Sets(
+        control = self.Sets(
             boolSet={True, False},
             byteSet={1, 2, 3},
             i16Set={4, 5, 6},
@@ -261,12 +370,16 @@ class SerializerTests(unittest.TestCase):
             stringSet={"foo", "bar"},
             binarySet={b"foo", b"bar"},
             iobufSet={IOBuf(b"foo"), IOBuf(b"bar")},
-            structSet={Foo(value=1), Foo(value=2)},
+            structSet=(
+                {self.Foo(value=1), self.Foo(value=2)}
+                if not self.is_mutable_run
+                else set()  # Mutable types are not hashable.
+            ),
         )
         self.thrift_serialization_round_trip(control)
 
     def test_serialize_map_struct(self) -> None:
-        control = Maps(
+        control = self.Maps(
             boolMap={True: 1, False: 0},
             byteMap={1: 1, 2: 2, 3: 3},
             i16Map={4: 4, 5: 5, 6: 6},
@@ -276,15 +389,26 @@ class SerializerTests(unittest.TestCase):
             stringMap={"foo": "foo", "bar": "bar"},
             binaryMap={b"foo": b"foo", b"bar": b"bar"},
             iobufMap={IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")},
-            structMap={Foo(value=1): Foo(value=1), Foo(value=2): Foo(value=2)},
+            structMap=(
+                {
+                    self.Foo(value=1): self.Foo(value=1),
+                    self.Foo(value=2): self.Foo(value=2),
+                }
+                if not self.is_mutable_run
+                else {}  # Mutable types are not hashable.
+            ),
         )
         self.thrift_serialization_round_trip(control)
 
     def test_deserialize_with_length(self) -> None:
-        control = easy(val=5, val_list=[1, 2, 3, 4, 5])
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
+        control = self.easy(val=5, val_list=[1, 2, 3, 4, 5])
         for proto in Protocol:
-            encoded = serialize(control, protocol=proto)
-            decoded, length = deserialize_with_length(
+            encoded = self.serializer.serialize(control, protocol=proto)
+            decoded, length = self.serializer.deserialize_with_length(
                 type(control), encoded, protocol=proto
             )
             self.assertIsInstance(decoded, type(control))
@@ -293,32 +417,54 @@ class SerializerTests(unittest.TestCase):
 
     def test_string_with_non_utf8_data(self) -> None:
         encoded = b"\x0b\x00\x01\x00\x00\x00\x03foo\x00"
-        sb = deserialize(StringBucket, encoded, protocol=Protocol.BINARY)
+        sb = self.serializer.deserialize(
+            self.StringBucket, encoded, protocol=Protocol.BINARY
+        )
         self.assertEqual("foo", sb.one)
 
         encoded = b"\x0b\x00\x01\x00\x00\x00\x03\xfa\xf0\xef\x00"
-        sb = deserialize(StringBucket, encoded, protocol=Protocol.BINARY)
+        sb = self.serializer.deserialize(
+            self.StringBucket, encoded, protocol=Protocol.BINARY
+        )
         with self.assertRaises(UnicodeDecodeError):
             # Accessing the property is when the string is decoded as UTF-8.
             sb.one
 
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:
+        if self.is_mutable_run:
+            # TODO: Remove this after implementing mutable union serialization.
+            return
+
         json_bytes = b'{"val_bool":false,"val_i32":0,"val_i64":0,"val_string":"abcdef","val_binary":"YWJjZGU","val_iobuf":"YWJjZGVm","val_enum":0,"val_union":{},"val_list":[],"val_map":{},"val_struct_with_containers":{"color_list":[],"color_set":[],"color_map":{}}}'
-        s = Complex(
+        s = self.Complex(
             val_string="abcdef",
             val_binary=b"abcde",
             val_iobuf=IOBuf(b"abcdef"),
         )
-        self.assertEqual(serialize(s, protocol=Protocol.JSON), json_bytes)
-        self.assertEqual(deserialize(Complex, json_bytes, protocol=Protocol.JSON), s)
+        self.assertEqual(
+            self.serializer.serialize(s, protocol=Protocol.JSON), json_bytes
+        )
+        self.assertEqual(
+            self.serializer.deserialize(
+                self.Complex, json_bytes, protocol=Protocol.JSON
+            ),
+            s,
+        )
 
     def test_json_deserialize_python_name(self) -> None:
         json_bytes = b'{"from":"fromVal","nonlocal":0,"ok":"ok","cpdef":true,"move":"","inst":"","changes":"","__mangled_str":"","__mangled_int":0}'
-        r = Reserved(from_="fromVal", ok="ok", is_cpdef=True)
-        print(serialize(r, protocol=Protocol.JSON))
-        self.assertEqual(serialize(r, protocol=Protocol.JSON), json_bytes)
-        self.assertEqual(deserialize(Reserved, json_bytes, protocol=Protocol.JSON), r)
+        r = self.Reserved(from_="fromVal", ok="ok", is_cpdef=True)
+        print(self.serializer.serialize(r, protocol=Protocol.JSON))
+        self.assertEqual(
+            self.serializer.serialize(r, protocol=Protocol.JSON), json_bytes
+        )
+        self.assertEqual(
+            self.serializer.deserialize(
+                self.Reserved, json_bytes, protocol=Protocol.JSON
+            ),
+            r,
+        )
 
 
 @parameterized_class(
@@ -360,7 +506,9 @@ class SerializerTerseWriteTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
-    def thrift_serialization_round_trip(self, control: StructOrUnion) -> None:
+    def thrift_serialization_round_trip(
+        self, control: Union[StructOrUnion, MutableStructOrUnion]
+    ) -> None:
         thrift_serialization_round_trip(self, control, self.serializer)
 
     def test_field_level_terse_write(self) -> None:

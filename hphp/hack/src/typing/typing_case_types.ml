@@ -864,23 +864,17 @@ module AtomicDataTypes = struct
     | Label -> (env, label)
     | Class name -> DataType.Class.to_datatypes ~trail env name
 
-  let of_predicate env predicate : env * _ DataType.t =
-    let of_tag env tag =
-      match tag with
-      | BoolTag -> of_ty env (Primitive Aast.Tbool)
-      | IntTag -> of_ty env (Primitive Aast.Tint)
-      | StringTag -> of_ty env (Primitive Aast.Tstring)
-      | ArraykeyTag -> of_ty env (Primitive Aast.Tarraykey)
-      | FloatTag -> of_ty env (Primitive Aast.Tfloat)
-      | NumTag -> of_ty env (Primitive Aast.Tnum)
-      | ResourceTag -> of_ty env (Primitive Aast.Tresource)
-      | NullTag -> of_ty env (Primitive Aast.Tnull)
-      | ClassTag id -> of_ty env (Class id)
-    in
-    match predicate with
-    | IsTag tag -> of_tag env tag
-    | IsTupleOf _ -> of_ty env Tuple
-    | IsShapeOf _ -> of_ty env Shape
+  let of_tag env tag : env * _ DataType.t =
+    match tag with
+    | BoolTag -> of_ty env (Primitive Aast.Tbool)
+    | IntTag -> of_ty env (Primitive Aast.Tint)
+    | StringTag -> of_ty env (Primitive Aast.Tstring)
+    | ArraykeyTag -> of_ty env (Primitive Aast.Tarraykey)
+    | FloatTag -> of_ty env (Primitive Aast.Tfloat)
+    | NumTag -> of_ty env (Primitive Aast.Tnum)
+    | ResourceTag -> of_ty env (Primitive Aast.Tresource)
+    | NullTag -> of_ty env (Primitive Aast.Tnull)
+    | ClassTag id -> of_ty env (Class id)
 
   let complement dt = DataType.Set.diff mixed dt
 

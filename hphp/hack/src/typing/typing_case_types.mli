@@ -80,7 +80,7 @@ module AtomicDataTypes : sig
 
   val of_ty : env -> atomic_ty -> env * t
 
-  val of_predicate : env -> Typing_defs_core.type_predicate -> env * t
+  val of_tag : env -> Typing_defs_core.type_tag -> env * t
 
   (** Computes the complement for the set of values contained in [t] *)
   val complement : t -> t

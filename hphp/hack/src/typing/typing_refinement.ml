@@ -27,19 +27,14 @@ type ty_partition = {
   right: dnf_ty;
 }
 
-let rec split_ty
+let rec split_ty_by_tuple
     ~(expansions : SSet.t)
+    ~(ty_datatype : DataType.t)
     (env : env)
     (ty : locl_ty)
-    ~(predicate : type_predicate) : env * TyPartition.t =
-  let (env, ety) = Env.expand_type env ty in
-  let (env, predicate_datatype) = DataType.of_predicate env predicate in
-  let predicate_complement_datatype = DataType.complement predicate_datatype in
-  let partition_tuple_by_tuple
-      env
-      ty_reason
-      (tuple_tyl : locl_ty list)
-      (sub_predicates : type_predicate list) : env * TyPartition.t =
+    (sub_predicates : type_predicate list) : env * TyPartition.t =
+  match deref ty with
+  | (ty_reason, Ttuple tuple_tyl) ->
     let predicate_ty_pairs = List.zip sub_predicates tuple_tyl in
     begin
       match predicate_ty_pairs with
@@ -56,12 +51,30 @@ let rec split_ty
         in
         (env, TyPartition.product (Typing_make_type.tuple ty_reason) sub_splits)
     end
-  in
-  let partition_shape_by_shape
-      env
-      ty_reason
-      { s_origin = _; s_unknown_value; s_fields = field_ty_map }
-      { sp_fields = field_predicate_map } =
+  (* We cannot precisely reason about negated tuple predicates.
+     Default to spanning *)
+  | (_, Tneg (IsTupleOf _)) -> (env, TyPartition.mk_span ty)
+  | _ ->
+    (* Tuples are vecs at runtime, thus if the type's data type is disjoint from a vec
+       we can conclude the type must be in the right partition. Otherwise we do not
+       precisely know the relationship with the [IsTupleOf] prediacte so default to
+       spanning
+    *)
+    let (env, predicate_datatype) = DataType.(of_ty env Tuple) in
+    if DataType.are_disjoint env ty_datatype predicate_datatype then
+      (env, TyPartition.mk_right ty)
+    else
+      (env, TyPartition.mk_span ty)
+
+and split_ty_by_shape
+    ~(expansions : SSet.t)
+    ~(ty_datatype : DataType.t)
+    (env : env)
+    (ty : locl_ty)
+    { sp_fields = field_predicate_map } : env * TyPartition.t =
+  match deref ty with
+  | ( ty_reason,
+      Tshape { s_origin = _; s_unknown_value; s_fields = field_ty_map } ) ->
     let has_class_const_field map =
       TShapeMap.exists
         (fun field _val ->
@@ -133,82 +146,48 @@ let rec split_ty
           @@ List.map tys ~f:(fun ty -> { sft_optional = false; sft_ty = ty })
         in
         (env, TyPartition.product mk_shape splits)
-  in
-  let partition_f ((env : env), (ty_datatype : DataType.t)) :
-      env * TyPartition.t =
+  (* We cannot precisely reason about negated shape predicates.
+     Default to spanning *)
+  | (_, Tneg (IsShapeOf _)) -> (env, TyPartition.mk_span ty)
+  | _ ->
+    (* Shapes are dicts at runtime, thus if the type's data type is disjoint from a dict
+       we can conclude the type must be in the right partition. Otherwise we do not
+       precisely know the relationship with the [IsShapeOf] prediacte so default to
+       spanning
+    *)
+    let (env, predicate_datatype) = DataType.(of_ty env Shape) in
     if DataType.are_disjoint env ty_datatype predicate_datatype then
-      (* We use the DataType as a quick check but for some types the DataType is
-         insufficiently precise.
-         If either DataType is an underapproximation, then the disjointness
-         check may not be valid.
-         When we convert a type or predicate to a DataType, this will usually be
-         an overapproximation, but if the type is negative or we otherwise
-         complement the DataType, this becomes an underapproximation.
-         Here, ty_datatype may have come from a negation and will be an
-         underapproximation if the type was a negative of a predicate for which
-         the negated predicate's datatype (before negation) is an
-         overapproximation. This is true for the following negated predicates:
-
-         - IsTupleOf -- in this case, the disjointness check
-           will not hold if predicate is also IsTupleOf; and so we span
-         - IsShapeOf -- in this case, the disjointness check
-           will not hold if predicate is also IsShapeOf; and so we span
-      *)
-      let partition =
-        match get_node ety with
-        | Tneg neg -> begin
-          match neg with
-          (* we'll over-approximate the DataType for IsTupleOf, IsShapeOf *)
-          | IsTupleOf _np_predicates -> begin
-            match predicate with
-            | IsTupleOf _predicates -> TyPartition.mk_span ty
-            | IsShapeOf _
-            | IsTag _ ->
-              TyPartition.mk_right ty
-          end
-          | IsShapeOf _ -> begin
-            match predicate with
-            | IsShapeOf _ -> TyPartition.mk_span ty
-            | IsTupleOf _
-            | IsTag _ ->
-              TyPartition.mk_right ty
-          end
-          (* The DataType for these are precise *)
-          | IsTag _ -> TyPartition.mk_right ty
-        end
-        | _ -> TyPartition.mk_right ty
-      in
-      (env, partition)
-    else if DataType.are_disjoint env ty_datatype predicate_complement_datatype
-    then
-      (* Similar to above, here, predicate_complement_datatype may be an
-         underapproximation if predicate is:
-
-         - IsTupleOf -- in this case, if ty is a Ttuple, we can
-           do a deeper split
-         - IsShapeOf -- in this case, if ty is a Tshape, we can
-           do a deeper split
-      *)
-      match predicate with
-      | IsTupleOf predicates -> begin
-        match get_node ety with
-        | Ttuple tyl ->
-          partition_tuple_by_tuple env (get_reason ty) tyl predicates
-        | _ -> (env, TyPartition.mk_span ty)
-      end
-      | IsShapeOf shape_predicate -> begin
-        match get_node ety with
-        | Tshape shape_type ->
-          partition_shape_by_shape
-            env
-            (get_reason ty)
-            shape_type
-            shape_predicate
-        | _ -> (env, TyPartition.mk_span ty)
-      end
-      | IsTag _ -> (env, TyPartition.mk_left ty)
+      (env, TyPartition.mk_right ty)
     else
       (env, TyPartition.mk_span ty)
+
+and split_ty_by_tag
+    ~(ty_datatype : DataType.t) (env : env) (ty : locl_ty) (tag : type_tag) :
+    env * TyPartition.t =
+  let (env, predicate_datatype) = DataType.of_tag env tag in
+  let predicate_complement_datatype = DataType.complement predicate_datatype in
+  if DataType.are_disjoint env ty_datatype predicate_datatype then
+    (env, TyPartition.mk_right ty)
+  else if DataType.are_disjoint env ty_datatype predicate_complement_datatype
+  then
+    (env, TyPartition.mk_left ty)
+  else
+    (env, TyPartition.mk_span ty)
+
+and split_ty
+    ~(expansions : SSet.t)
+    (env : env)
+    (ty : locl_ty)
+    ~(predicate : type_predicate) : env * TyPartition.t =
+  let (env, ety) = Env.expand_type env ty in
+  let partition_f ((env : env), (ty_datatype : DataType.t)) :
+      env * TyPartition.t =
+    match predicate with
+    | IsTupleOf sub_predicates ->
+      split_ty_by_tuple ~expansions ~ty_datatype env ety sub_predicates
+    | IsShapeOf shape_predicate ->
+      split_ty_by_shape ~expansions ~ty_datatype env ety shape_predicate
+    | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag
   in
   let split_union ~expansions env (tys : locl_ty list) =
     let (env, partitions) =
@@ -248,8 +227,20 @@ let rec split_ty
     | Tshape _ -> partition_f DataType.(of_ty env Shape)
     | Tlabel _ -> partition_f DataType.(of_ty env Label)
     | Tclass ((_, name), _, _) -> partition_f DataType.(of_ty env @@ Class name)
-    | Tneg pred ->
-      let (env, dty) = DataType.of_predicate env pred in
+    | Tneg (IsTag tag) ->
+      let (env, dty) = DataType.of_tag env tag in
+      let dty = DataType.complement dty in
+      partition_f (env, dty)
+    | Tneg (IsTupleOf _) ->
+      (* We lose precision when using the data type representation here.
+         [split_ty_by_tuple] must specially handle this case *)
+      let (env, dty) = DataType.(of_ty env Tuple) in
+      let dty = DataType.complement dty in
+      partition_f (env, dty)
+    | Tneg (IsShapeOf _) ->
+      (* We lose precision when using the data type representation here.
+         [split_ty_by_shape] must specially handle this case *)
+      let (env, dty) = DataType.(of_ty env Shape) in
       let dty = DataType.complement dty in
       partition_f (env, dty)
     | Tprim Aast.Tnoreturn -> (env, TyPartition.mk_bottom)

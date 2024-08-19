@@ -103,4 +103,25 @@ enum PatchOp {
    * - 'invert' for boolean.
    */
   Put = 9,
+
+  /**
+   * Note: Only applicable for Thrift AnyPatch.
+   *
+   * Applies a patch to the stored value in Thrift Any if its type matches to the specified type.
+   */
+  PatchIfTypeIsPrior = 10,
+
+  /**
+   * Note: Only applicable for Thrift AnyPatch.
+   *
+   * Ensures specified type will be stored in Thrift Any.
+   */
+  EnsureAny = 11,
+
+  /**
+   * Note: Only applicable for Thrift AnyPatch.
+   *
+   * Applies a patch to the stored value in Thrift Any if its type matches to the specified type.
+   */
+  PatchIfTypeIsAfter = 12,
 }

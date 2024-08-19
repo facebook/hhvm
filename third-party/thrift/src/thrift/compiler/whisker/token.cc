@@ -68,21 +68,21 @@ constexpr token_kind_info info[] = {
 
     {tok::identifier, "identifier"},
     {tok::text, "text"},
-    {tok::open, "{{"},
-    {tok::close, "}}"},
+    {tok::open, "`{{`"},
+    {tok::close, "`}}`"},
 
     // Punctuation:
-    {tok::dot, "."},
-    {tok::l_paren, "("},
-    {tok::r_paren, ")"},
-    {tok::pound, "#"},
-    {tok::bang, "!"},
-    {tok::caret, "^"},
-    {tok::slash, "/"},
-    {tok::pipe, "|"},
-    {tok::gt, ">"},
+    {tok::dot, "`.`"},
+    {tok::l_paren, "`(`"},
+    {tok::r_paren, "`)`"},
+    {tok::pound, "`#`"},
+    {tok::bang, "`!`"},
+    {tok::caret, "`^`"},
+    {tok::slash, "`/`"},
+    {tok::pipe, "`|`"},
+    {tok::gt, "`>`"},
 
-#define WHISKER_KEYWORD(kw) {tok::kw_##kw, #kw " (keyword)"},
+#define WHISKER_KEYWORD(kw) {tok::kw_##kw, "`" #kw "`"},
     WHISKER_KEYWORDS()
 #undef WHISKER_KEYWORD
 };

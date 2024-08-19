@@ -47,6 +47,13 @@ struct PreprocessParams {
     return folly::get_ptr(headers, transport::THeader::kClientId);
   }
 
+  const std::string* tenantId() const {
+    if (request_ && request_->getTHeader().tenantId()) {
+      return &*request_->getTHeader().tenantId();
+    }
+    return folly::get_ptr(headers, transport::THeader::kTenantId);
+  }
+
   const std::string* getServiceTraceMeta() const {
     if (request_ && request_->getTHeader().serviceTraceMeta()) {
       return &*request_->getTHeader().serviceTraceMeta();

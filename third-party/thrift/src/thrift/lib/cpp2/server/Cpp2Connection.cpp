@@ -594,6 +594,13 @@ void Cpp2Connection::requestReceived(
               kTenantQuotaExceededErrorCode,
               aqe.getMessage().c_str());
         },
+        [&](AppTenantBlocklistedException& atb) {
+          killRequest(
+              std::move(hreq),
+              TApplicationException::TENANT_BLOCKLISTED,
+              kTenantBlocklistedErrorCode,
+              atb.getMessage().c_str());
+        },
         [&](AppServerException& ase) {
           handleAppError(std::move(hreq), ase.name(), ase.getMessage(), false);
         },

@@ -290,7 +290,9 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
                        {kUnimplementedMethodErrorCode,
                         ResponseRpcErrorCode::UNIMPLEMENTED_METHOD},
                        {kTenantQuotaExceededErrorCode,
-                        ResponseRpcErrorCode::TENANT_QUOTA_EXCEEDED}});
+                        ResponseRpcErrorCode::TENANT_QUOTA_EXCEEDED},
+                       {kTenantBlocklistedErrorCode,
+                        ResponseRpcErrorCode::TENANT_BLOCKLISTED}});
                   if (auto errorCode = folly::get_ptr(errorCodeMap, *exPtr)) {
                     return *errorCode;
                   }

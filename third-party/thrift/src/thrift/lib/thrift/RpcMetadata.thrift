@@ -376,6 +376,9 @@ enum ResponseRpcErrorCode {
   // ...
   // ResponseRpcErrorCategory::LOADSHEDDING
   TENANT_QUOTA_EXCEEDED = 17,
+  // Tenant blocklisted
+  // ResponseRpcErrorCategory::TENANT_BLOCKLISTED
+  TENANT_BLOCKLISTED = 18,
 }
 
 struct ResponseRpcError {

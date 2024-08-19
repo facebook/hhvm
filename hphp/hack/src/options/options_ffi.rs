@@ -4,6 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep_ocamlpool::ocaml_ffi;
+use oxidized::experimental_features::FeatureName;
+use oxidized::experimental_features::FeatureStatus;
 use oxidized::saved_state_rollouts::Flag;
 use oxidized::saved_state_rollouts::SavedStateRollouts;
 
@@ -31,5 +33,9 @@ fn make_saved_state_rollouts(
 
 fn default_saved_state_rollouts() -> SavedStateRollouts {
     SavedStateRollouts::default()
+}
+
+fn get_feature_status_deprecated(name: FeatureName) -> FeatureStatus {
+    name.get_feature_status_deprecated()
 }
 }

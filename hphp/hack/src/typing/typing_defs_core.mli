@@ -62,7 +62,7 @@ type pos_byte_string = Pos_or_decl.t * Ast_defs.byte_string
     instead of Pos.t. Aast.shape_field_name is used in shape expressions,
     while this is used in shape types. *)
 type tshape_field_name =
-  | TSFlit_int of pos_string
+  | TSFregex_group of pos_string
   | TSFlit_str of pos_byte_string
   | TSFclass_const of pos_id * pos_string
 [@@deriving eq, ord, show]

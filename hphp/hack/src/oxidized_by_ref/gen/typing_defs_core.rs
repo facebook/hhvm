@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<302504257d3c42aa40ee07f3e1f05566>>
+// @generated SignedSource<<261c8fd523f9c664c7b9151ccdfed2f6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -160,8 +160,8 @@ arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
 #[repr(C, u8)]
 pub enum TshapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "TSFlit_int")]
-    TSFlitInt(&'a PosString<'a>),
+    #[rust_to_ocaml(name = "TSFregex_group")]
+    TSFregexGroup(&'a PosString<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "TSFlit_str")]
     TSFlitStr(&'a PosByteString<'a>),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d2a7bb227670da1983ed08fcf4e7aafd>>
+// @generated SignedSource<<3d85895cae35cc169d59920c98b86bf3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,8 @@
 #![allow(clippy::all)]
 use crate::ast_defs::*;
 impl ShapeFieldName {
-    pub fn mk_sflit_int(p0: Pstring) -> Self {
-        ShapeFieldName::SFlitInt(p0)
+    pub fn mk_sfregex_group(p0: Pstring) -> Self {
+        ShapeFieldName::SFregexGroup(p0)
     }
     pub fn mk_sflit_str(p0: PositionedByteString) -> Self {
         ShapeFieldName::SFlitStr(p0)
@@ -20,9 +20,9 @@ impl ShapeFieldName {
     pub fn mk_sfclass_const(p0: Id, p1: Pstring) -> Self {
         ShapeFieldName::SFclassConst(p0, p1)
     }
-    pub fn is_sflit_int(&self) -> bool {
+    pub fn is_sfregex_group(&self) -> bool {
         match self {
-            ShapeFieldName::SFlitInt(..) => true,
+            ShapeFieldName::SFregexGroup(..) => true,
             _ => false,
         }
     }
@@ -38,9 +38,9 @@ impl ShapeFieldName {
             _ => false,
         }
     }
-    pub fn as_sflit_int(&self) -> Option<&Pstring> {
+    pub fn as_sfregex_group(&self) -> Option<&Pstring> {
         match self {
-            ShapeFieldName::SFlitInt(p0) => Some(p0),
+            ShapeFieldName::SFregexGroup(p0) => Some(p0),
             _ => None,
         }
     }
@@ -56,9 +56,9 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sflit_int_mut(&mut self) -> Option<&mut Pstring> {
+    pub fn as_sfregex_group_mut(&mut self) -> Option<&mut Pstring> {
         match self {
-            ShapeFieldName::SFlitInt(p0) => Some(p0),
+            ShapeFieldName::SFregexGroup(p0) => Some(p0),
             _ => None,
         }
     }
@@ -74,9 +74,9 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sflit_int_into(self) -> Option<Pstring> {
+    pub fn as_sfregex_group_into(self) -> Option<Pstring> {
         match self {
-            ShapeFieldName::SFlitInt(p0) => Some(p0),
+            ShapeFieldName::SFregexGroup(p0) => Some(p0),
             _ => None,
         }
     }

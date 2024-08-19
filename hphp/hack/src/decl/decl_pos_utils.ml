@@ -60,7 +60,8 @@ struct
   and ty_opt x = Option.map x ~f:ty
 
   and shape_field_name = function
-    | Typing_defs.TSFlit_int (p, s) -> Typing_defs.TSFlit_int (pos_or_decl p, s)
+    | Typing_defs.TSFregex_group (p, s) ->
+      Typing_defs.TSFregex_group (pos_or_decl p, s)
     | Typing_defs.TSFlit_str (p, s) -> Typing_defs.TSFlit_str (pos_or_decl p, s)
     | Typing_defs.TSFclass_const (id, s) ->
       Typing_defs.TSFclass_const (positioned_id id, positioned_id s)

@@ -182,7 +182,7 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
     append " => ";
     parse ~is_ctx:false sfi_hint
   and parse_shape_field_name = function
-    | Ast_defs.SFlit_int (_, s) -> append s
+    | Ast_defs.SFregex_group (_, s) -> append s
     | Ast_defs.SFlit_str (_, s) -> append ("'" ^ s ^ "'")
     | Ast_defs.SFclass_const ((pos, c), (_, s)) ->
       append ~annot:pos (Typing_print.strip_ns c);

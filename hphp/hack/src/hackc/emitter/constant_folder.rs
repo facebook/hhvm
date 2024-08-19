@@ -220,7 +220,7 @@ fn shape_to_typed_value(
         .iter()
         .map(|(sf, expr)| {
             let key = match sf {
-                ast_defs::ShapeFieldName::SFlitInt((_, s)) => {
+                ast_defs::ShapeFieldName::SFregexGroup((_, s)) => {
                     let tv = int_expr_to_typed_value(s)?;
                     match tv {
                         TypedValue::Int(_) => tv,

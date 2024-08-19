@@ -58,9 +58,9 @@ fn tshape_field_name_from_decl<P: Pos>(
     use ty::ShapeFieldNamePos as SfnPos;
     use ty::TshapeFieldName;
     match x {
-        Obr::TSFlitInt(&pos_id) => (
+        Obr::TSFregexGroup(&pos_id) => (
             SfnPos::Simple(pos_id.0.into()),
-            TshapeFieldName::TSFlitInt(pos_id.1.into()),
+            TshapeFieldName::TSFregexGroup(pos_id.1.into()),
         ),
         Obr::TSFlitStr(&pos_bytes) => (
             SfnPos::Simple(pos_bytes.0.into()),

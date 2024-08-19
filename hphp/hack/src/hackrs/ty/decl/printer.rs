@@ -208,7 +208,7 @@ fn tshape<R: Reason>(
             write!(f, "?")?
         }
         match name {
-            TshapeFieldName::TSFlitInt(i) => write!(f, "{}", i)?,
+            TshapeFieldName::TSFregexGroup(i) => write!(f, "{}", i)?,
             TshapeFieldName::TSFlitStr(s) => write!(f, "'{}'", String::from_utf8_lossy(s))?,
             TshapeFieldName::TSFclassConst(class_name, const_name) => {
                 write!(f, "{}::{}", strip_ns(class_name), const_name)?;

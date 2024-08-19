@@ -29,7 +29,10 @@ and byte_string = string
 and positioned_byte_string = pos * byte_string
 
 and shape_field_name =
-  | SFlit_int of pstring
+  | SFregex_group of pstring
+      (** TODO(T199271494) Eliminate this group node and its supporting code. It
+       * is conjured by typing for inference of Shapes::idx for regex results,
+       * but is otherwise never emitted. *)
   | SFlit_str of positioned_byte_string
   | SFclass_const of id * pstring
 [@@transform.opaque]
@@ -345,7 +348,7 @@ module ShapeField = struct
    * we have to write our own compare. *)
   let compare x y =
     match (x, y) with
-    | (SFlit_int (_, s1), SFlit_int (_, s2)) -> String.compare s1 s2
+    | (SFregex_group (_, s1), SFregex_group (_, s2)) -> String.compare s1 s2
     | (SFlit_str (_, s1), SFlit_str (_, s2)) -> String.compare s1 s2
     | (SFclass_const ((_, s1), (_, s1')), SFclass_const ((_, s2), (_, s2'))) ->
       Core.Tuple.T2.compare
@@ -353,8 +356,8 @@ module ShapeField = struct
         ~cmp2:String.compare
         (s1, s1')
         (s2, s2')
-    | (SFlit_int _, _) -> -1
-    | (SFlit_str _, SFlit_int _) -> 1
+    | (SFregex_group _, _) -> -1
+    | (SFlit_str _, SFregex_group _) -> 1
     | (SFlit_str _, _) -> -1
     | (SFclass_const _, _) -> 1
 

@@ -41,7 +41,7 @@ mod tests {
     use crate::env::ProgramSpecificOptions;
 
     fn mk_shape_lit_int_field_name(name: &str) -> ShapeFieldName {
-        ShapeFieldName::SFlitInt((Pos::NONE, name.to_string()))
+        ShapeFieldName::SFregexGroup((Pos::NONE, name.to_string()))
     }
 
     fn mk_shape(flds: Vec<(ShapeFieldName, Expr)>) -> Expr {

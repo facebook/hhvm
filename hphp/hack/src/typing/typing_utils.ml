@@ -591,7 +591,7 @@ let get_printable_shape_field_name = Typing_defs.TShapeField.name
 
 let shape_field_name_with_ty_err env (_, p, field) =
   match field with
-  | Aast.Int name -> Ok (Ast_defs.SFlit_int (p, name))
+  | Aast.Int name -> Ok (Ast_defs.SFregex_group (p, name))
   | Aast.String name -> Ok (Ast_defs.SFlit_str (p, name))
   | Aast.Class_const ((_, _, Aast.CI x), y) ->
     Ok (Ast_defs.SFclass_const (x, y))

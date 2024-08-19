@@ -36,13 +36,13 @@ impl<'a> Ord for ShapeField<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         use ShapeFieldName::*;
         match (&self.0, &other.0) {
-            (SFlitInt((_, s1)), SFlitInt((_, s2))) => s1.cmp(s2),
+            (SFregexGroup((_, s1)), SFregexGroup((_, s2))) => s1.cmp(s2),
             (SFlitStr((_, s1)), SFlitStr((_, s2))) => s1.cmp(s2),
             (SFclassConst((Id(_, c1), (_, m1))), SFclassConst((Id(_, c2), (_, m2)))) => {
                 (c1, m1).cmp(&(c2, m2))
             }
-            (SFlitInt(_), _) => Ordering::Less,
-            (SFlitStr(_), SFlitInt(_)) => Ordering::Greater,
+            (SFregexGroup(_), _) => Ordering::Less,
+            (SFlitStr(_), SFregexGroup(_)) => Ordering::Greater,
             (SFlitStr(_), _) => Ordering::Less,
             (SFclassConst(_), _) => Ordering::Greater,
         }

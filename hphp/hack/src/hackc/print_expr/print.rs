@@ -170,7 +170,7 @@ fn print_shape_field_name(
 ) -> Result<()> {
     use ast::ShapeFieldName as S;
     match field {
-        S::SFlitInt((_, s)) => print_expr_int(w, s.as_ref()),
+        S::SFregexGroup((_, s)) => print_expr_int(w, s.as_ref()),
         S::SFlitStr((_, s)) => print_expr_string(w, s),
         S::SFclassConst(_, (_, s)) => print_expr_string(w, s.as_bytes()),
     }

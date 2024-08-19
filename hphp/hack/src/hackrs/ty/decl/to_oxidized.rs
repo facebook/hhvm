@@ -118,10 +118,9 @@ fn oxidize_shape_field_name<'a, P: Pos>(
         SfnPos::ClassConst(..) => panic!("expected ShapeFieldNamePos::Simple"),
     };
     match name {
-        TshapeFieldName::TSFlitInt(x) => Obr::TSFlitInt(arena.alloc(obr::typing_defs::PosString(
-            simple_pos(),
-            x.to_oxidized(arena),
-        ))),
+        TshapeFieldName::TSFregexGroup(x) => Obr::TSFregexGroup(arena.alloc(
+            obr::typing_defs::PosString(simple_pos(), x.to_oxidized(arena)),
+        )),
         TshapeFieldName::TSFlitStr(x) => Obr::TSFlitStr(arena.alloc(
             obr::typing_defs::PosByteString(simple_pos(), x.to_oxidized(arena).into()),
         )),

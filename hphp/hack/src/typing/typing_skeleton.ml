@@ -126,7 +126,7 @@ and of_fun_param fp : string = of_decl_ty fp.fp_type
 and of_shape_field (name : tshape_field_name) sft : string =
   let name_s =
     match name with
-    | TSFlit_int (_, s) -> s
+    | TSFregex_group (_, s) -> s
     | TSFlit_str (_, s) -> Printf.sprintf "\"%s\"" s
     | TSFclass_const ((_, c_name), (_, const_name)) ->
       Printf.sprintf "%s::%s" c_name const_name

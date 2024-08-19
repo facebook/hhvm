@@ -1097,7 +1097,7 @@ fn emit_shape<'a, 'd>(
     ) -> Result<ast::Expr_> {
         use ast_defs::ShapeFieldName as SF;
         Ok(match field {
-            SF::SFlitInt(s) => ast::Expr_::mk_int(s.1.clone()),
+            SF::SFregexGroup(s) => ast::Expr_::mk_int(s.1.clone()),
             SF::SFlitStr(s) => ast::Expr_::mk_string(s.1.clone()),
             SF::SFclassConst(id, p) => {
                 if ClassExpr::is_reified_tparam(&env.scope, &id.1) {

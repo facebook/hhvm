@@ -189,7 +189,7 @@ fn shape_field_name_to_ocamlrep<'a, A: ocamlrep::Allocator, P: ToOcamlRep>(
         ShapeFieldNamePos::ClassConst(..) => panic!("expected ShapeFieldNamePos::Simple"),
     };
     match name {
-        TshapeFieldName::TSFlitInt(x) => {
+        TshapeFieldName::TSFregexGroup(x) => {
             let mut pos_string = alloc.block_with_size(2);
             alloc.set_field(&mut pos_string, 0, simple_pos());
             alloc.set_field(&mut pos_string, 1, alloc.add(x));
@@ -293,7 +293,7 @@ impl<R: Reason> FromOcamlRep for ShapeType<R> {
                 .into_iter()
                 .map(|(k, (optional, ty))| match k {
                     OcamlShapeFieldName::Int(pos_id) => (
-                        TshapeFieldName::TSFlitInt(pos_id.id()),
+                        TshapeFieldName::TSFregexGroup(pos_id.id()),
                         ShapeFieldType {
                             optional,
                             ty,

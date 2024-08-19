@@ -181,7 +181,7 @@ impl<'a> std::fmt::Debug for TshapeFieldName<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use TshapeFieldName::*;
         match self {
-            TSFlitInt(p) => f.debug_tuple("TSFlitInt").field(p).finish(),
+            TSFregexGroup(p) => f.debug_tuple("TSFregexGroup").field(p).finish(),
             TSFlitStr(p) => f.debug_tuple("TSFlitStr").field(p).finish(),
             TSFclassConst((i, p)) => f.debug_tuple("TSFclassConst").field(i).field(p).finish(),
         }

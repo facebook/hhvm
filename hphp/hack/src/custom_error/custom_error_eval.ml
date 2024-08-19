@@ -162,7 +162,7 @@ let split_fields flds =
           int_map )
       | Ty.TSFlit_str (_, nm) ->
         (Map.add_exn ~key:nm ~data:ty str_map, cconst_map, int_map)
-      | Ty.TSFlit_int (_, n) ->
+      | Ty.TSFregex_group (_, n) ->
         (str_map, cconst_map, Map.add_exn ~key:n ~data:ty int_map))
     ~init:(String.Map.empty, String.Map.empty, String.Map.empty)
   @@ Ty.TShapeMap.elements flds

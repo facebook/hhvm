@@ -390,7 +390,7 @@ let to_collection env pos shape_ty res return_type =
             let (env, keys) =
               List.map_env env keys ~f:(fun env key ->
                   match key with
-                  | Typing_defs.TSFlit_int (p, _) ->
+                  | Typing_defs.TSFregex_group (p, _) ->
                     (env, MakeType.int (Reason.witness_from_decl p))
                   | Typing_defs.TSFlit_str (p, _) ->
                     (env, MakeType.string (Reason.witness_from_decl p))
@@ -486,7 +486,7 @@ let to_dict env pos shape_ty res =
       (env, MakeType.dict r key value))
 
 let shape_field_pos = function
-  | Ast_defs.SFlit_int (p, _)
+  | Ast_defs.SFregex_group (p, _)
   | Ast_defs.SFlit_str (p, _) ->
     p
   | Ast_defs.SFclass_const ((cls_pos, _), (mem_pos, _)) ->
@@ -499,7 +499,7 @@ let check_shape_keys_validity env keys =
     (* Empty strings or literals that start with numbers are not
          permitted as shape field names. *)
     match key with
-    | Ast_defs.SFlit_int _ -> (env, key_pos, None)
+    | Ast_defs.SFregex_group _ -> (env, key_pos, None)
     | Ast_defs.SFlit_str (_, key_name) ->
       (if Int.equal 0 (String.length key_name) then
         Typing_error_utils.add_typing_error ~env

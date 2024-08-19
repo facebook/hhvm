@@ -312,7 +312,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
     let add (name : Typing_defs.tshape_field_name) =
       let (code, kind, ty) =
         match name with
-        | Typing_defs.TSFlit_int (pos, str) ->
+        | Typing_defs.TSFregex_group (pos, str) ->
           let reason = Typing_reason.witness_from_decl pos in
           let ty = Typing_defs.Tprim Aast_defs.Tint in
           (str, FileInfo.SI_Literal, Typing_defs.mk (reason, ty))

@@ -31,7 +31,7 @@ let rec int_keys p top bottom acc_i =
       p
       (top - 1)
       bottom
-      (TSFlit_int (Pos_or_decl.of_raw_pos p, string_of_int top) :: acc_i)
+      (TSFregex_group (Pos_or_decl.of_raw_pos p, string_of_int top) :: acc_i)
 
 (* Assumes that names_numbers is sorted in DECREASING order of numbers *)
 let rec keys_aux p top names_numbers acc =
@@ -47,7 +47,7 @@ let rec keys_aux p top names_numbers acc =
 
 (*
  *  Any shape keys for our match type except 0. For re"Hel(\D)(?'o'\D)", this is
- * [ SFlit_int (p, "1"); SFlit_int (p, 'o') ].
+ * [ SFregex_group (p, "1"); SFregex_group (p, 'o') ].
  *
  *)
 let keys p s ~flags =
@@ -88,7 +88,7 @@ let type_match p s ~flags =
   in
   (* Any Regex\Match will contain the entire matched substring at key 0 *)
   let shape_map =
-    TShapeMap.add (TSFlit_int (Pos_or_decl.of_raw_pos p, "0")) sft shape_map
+    TShapeMap.add (TSFregex_group (Pos_or_decl.of_raw_pos p, "0")) sft shape_map
   in
   MakeType.closed_shape r shape_map
 

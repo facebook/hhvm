@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d11e0ec8c704efa46f7001114f7ce22f>>
+// @generated SignedSource<<892be827797d0c135b8355c96bae4a1c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -380,7 +380,7 @@ impl<'a> Node<'a> for TshapeFieldName<'a> {
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            TshapeFieldName::TSFlitInt(ref __binding_0) => __binding_0.accept(v),
+            TshapeFieldName::TSFregexGroup(ref __binding_0) => __binding_0.accept(v),
             TshapeFieldName::TSFlitStr(ref __binding_0) => __binding_0.accept(v),
             TshapeFieldName::TSFclassConst(ref __binding_0) => __binding_0.accept(v),
         }

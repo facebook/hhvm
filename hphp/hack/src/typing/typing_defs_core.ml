@@ -57,7 +57,7 @@ type pos_byte_string = (Pos_or_decl.t[@hash.ignore]) * t_byte_string
 [@@deriving eq, hash, ord, show]
 
 type tshape_field_name =
-  | TSFlit_int of pos_string
+  | TSFregex_group of pos_string
   | TSFlit_str of pos_byte_string
   | TSFclass_const of pos_id * pos_string
 [@@deriving eq, hash, ord, show]
@@ -66,21 +66,21 @@ module TShapeField = struct
   type t = tshape_field_name [@@deriving hash, show { with_path = false }]
 
   let pos : t -> Pos_or_decl.t = function
-    | TSFlit_int (p, _)
+    | TSFregex_group (p, _)
     | TSFlit_str (p, _) ->
       p
     | TSFclass_const ((cls_pos, _), (mem_pos, _)) ->
       Pos_or_decl.btw cls_pos mem_pos
 
   let name = function
-    | TSFlit_int (_, s)
+    | TSFregex_group (_, s)
     | TSFlit_str (_, s) ->
       s
     | TSFclass_const ((_, s1), (_, s2)) -> s1 ^ "::" ^ s2
 
   let of_ast : (Pos.t -> Pos_or_decl.t) -> Ast_defs.shape_field_name -> t =
    fun convert_pos -> function
-    | Ast_defs.SFlit_int (p, s) -> TSFlit_int (convert_pos p, s)
+    | Ast_defs.SFregex_group (p, s) -> TSFregex_group (convert_pos p, s)
     | Ast_defs.SFlit_str (p, s) -> TSFlit_str (convert_pos p, s)
     | Ast_defs.SFclass_const ((pcls, cls), (pconst, const)) ->
       TSFclass_const ((convert_pos pcls, cls), (convert_pos pconst, const))
@@ -91,7 +91,7 @@ module TShapeField = struct
    * we have to write our own compare. *)
   let compare x y =
     match (x, y) with
-    | (TSFlit_int (_, s1), TSFlit_int (_, s2)) -> String.compare s1 s2
+    | (TSFregex_group (_, s1), TSFregex_group (_, s2)) -> String.compare s1 s2
     | (TSFlit_str (_, s1), TSFlit_str (_, s2)) -> String.compare s1 s2
     | (TSFclass_const ((_, s1), (_, s1')), TSFclass_const ((_, s2), (_, s2')))
       ->
@@ -100,8 +100,8 @@ module TShapeField = struct
         ~cmp2:String.compare
         (s1, s1')
         (s2, s2')
-    | (TSFlit_int _, _) -> -1
-    | (TSFlit_str _, TSFlit_int _) -> 1
+    | (TSFregex_group _, _) -> -1
+    | (TSFlit_str _, TSFregex_group _) -> 1
     | (TSFlit_str _, _) -> -1
     | (TSFclass_const _, _) -> 1
 

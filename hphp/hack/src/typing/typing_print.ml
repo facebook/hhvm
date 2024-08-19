@@ -1716,7 +1716,7 @@ module Json = struct
     let shape_field_name_to_json shape_field =
       (* TODO: need to update userland tooling? *)
       match shape_field with
-      | Typing_defs.TSFlit_int (_, s) -> Hh_json.JSON_Number s
+      | Typing_defs.TSFregex_group (_, s) -> Hh_json.JSON_Number s
       | Typing_defs.TSFlit_str (_, s) -> Hh_json.JSON_String s
       | Typing_defs.TSFclass_const ((_, s1), (_, s2)) ->
         Hh_json.JSON_Array [Hh_json.JSON_String s1; Hh_json.JSON_String s2]
@@ -2087,7 +2087,7 @@ module Json = struct
             begin
               match name with
               | Hh_json.JSON_Number name ->
-                Ok (Typing_defs.TSFlit_int (dummy_pos, name))
+                Ok (Typing_defs.TSFregex_group (dummy_pos, name))
               | Hh_json.JSON_String name ->
                 Ok (Typing_defs.TSFlit_str (dummy_pos, name))
               | Hh_json.JSON_Array

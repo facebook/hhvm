@@ -105,7 +105,7 @@ walkable!(CeVisibility => {
 #[derive(Copy, Clone, Debug, Eq, EqModuloPos, Hash, Ord, PartialEq, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub enum TshapeFieldName {
-    TSFlitInt(Symbol),
+    TSFregexGroup(Symbol),
     TSFlitStr(Bytes),
     TSFclassConst(TypeName, Symbol),
 }

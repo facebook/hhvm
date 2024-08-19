@@ -13,7 +13,7 @@ impl ShapeFieldName {
     pub fn get_name(&self) -> &BStr {
         use ShapeFieldName::*;
         match self {
-            SFlitInt((_, name)) | SFclassConst(_, (_, name)) => name.as_bytes().into(),
+            SFregexGroup((_, name)) | SFclassConst(_, (_, name)) => name.as_bytes().into(),
             SFlitStr((_, name)) => name.as_ref(),
         }
     }
@@ -21,7 +21,7 @@ impl ShapeFieldName {
     pub fn get_pos(&self) -> &Pos {
         use ShapeFieldName::*;
         match self {
-            SFlitInt((p, _)) | SFlitStr((p, _)) | SFclassConst(_, (p, _)) => p,
+            SFregexGroup((p, _)) | SFlitStr((p, _)) | SFclassConst(_, (p, _)) => p,
         }
     }
 }

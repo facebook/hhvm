@@ -67,7 +67,7 @@ let rec split_ty
         (fun field _val ->
           match field with
           | TSFclass_const _ -> true
-          | TSFlit_int _
+          | TSFregex_group _
           | TSFlit_str _ ->
             false)
         map

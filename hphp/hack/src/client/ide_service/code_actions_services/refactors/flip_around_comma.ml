@@ -79,7 +79,7 @@ let pos_of_expr = Tuple3.get2
 let pos_of_shape_field_name =
   Ast_defs.(
     function
-    | SFlit_int (pos, _) -> pos
+    | SFregex_group (pos, _) -> pos
     | SFlit_str (pos, _) -> pos
     | SFclass_const (_, (pos, _)) -> pos)
 

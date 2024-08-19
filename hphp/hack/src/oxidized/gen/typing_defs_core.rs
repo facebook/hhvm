@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b538b0f0f08084c9055ca3b5ac8aea98>>
+// @generated SignedSource<<011c7219f7a1a6ec37c82fc5812183b8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -160,8 +160,8 @@ pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum TshapeFieldName {
-    #[rust_to_ocaml(name = "TSFlit_int")]
-    TSFlitInt(PosString),
+    #[rust_to_ocaml(name = "TSFregex_group")]
+    TSFregexGroup(PosString),
     #[rust_to_ocaml(name = "TSFlit_str")]
     TSFlitStr(PosByteString),
     #[rust_to_ocaml(name = "TSFclass_const")]

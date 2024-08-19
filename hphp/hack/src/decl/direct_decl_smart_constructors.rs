@@ -2116,7 +2116,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     fn make_shape_field_name(&self, name: Node<'a>) -> Option<ShapeFieldName<'a>> {
         Some(match name {
             Node::StringLiteral(&(s, pos)) => ShapeFieldName::SFlitStr(self.alloc((pos, s))),
-            // TODO: OCaml decl produces SFlitStr here instead of SFlitInt, so
+            // TODO: OCaml decl produces SFlitStr here instead of SFregexGroup, so
             // we must also. Looks like int literal keys have become a parse
             // error--perhaps that's why.
             Node::IntLiteral(&(s, pos)) => ShapeFieldName::SFlitStr(self.alloc((pos, s.into()))),
@@ -2145,8 +2145,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
     fn make_t_shape_field_name(&self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
         TShapeField(match field {
-            ShapeFieldName::SFlitInt(&(pos, x)) => {
-                TshapeFieldName::TSFlitInt(self.alloc(PosString(pos, x)))
+            ShapeFieldName::SFregexGroup(&(pos, x)) => {
+                TshapeFieldName::TSFregexGroup(self.alloc(PosString(pos, x)))
             }
             ShapeFieldName::SFlitStr(&(pos, x)) => {
                 TshapeFieldName::TSFlitStr(self.alloc(PosByteString(pos, x)))

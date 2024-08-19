@@ -195,7 +195,7 @@ and pp_shape_field ppf Aast.{ sfi_optional; sfi_name; sfi_hint } =
     ((sfi_optional, sfi_name), sfi_hint)
 
 and pp_shape_field_name ppf = function
-  | Ast_defs.SFlit_int (_, s) -> Fmt.string ppf s
+  | Ast_defs.SFregex_group (_, s) -> Fmt.string ppf s
   | Ast_defs.SFlit_str (_, s) -> Fmt.(quote string) ppf s
   | Ast_defs.SFclass_const ((_, c), (_, s)) ->
     Fmt.(pair ~sep:dbl_colon string string) ppf (c, s)

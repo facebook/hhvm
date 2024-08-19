@@ -323,7 +323,7 @@ class lexer::state_comment : public lexer::state_base {
     auto& scan = lex.scan_window_;
 
     if (!init_.has_value()) {
-      char c = scan.advance();
+      [[maybe_unused]] char c = scan.advance();
       assert(c == '!');
       auto bang_token = token(tok::bang, scan.range());
       if (auto found = lex_comment_escape(scan)) {

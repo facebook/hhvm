@@ -19,6 +19,7 @@
 // CHECK: define C$static.__factory($this: *C$static) : *C {
 // CHECK: #b0:
 // CHECK:   n0 = __sil_allocate(<C>)
+// CHECK:   n1 = C._86pinit(n0)
 // CHECK:   ret n0
 // CHECK: }
 

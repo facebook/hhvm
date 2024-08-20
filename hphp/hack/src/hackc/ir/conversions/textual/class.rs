@@ -284,6 +284,12 @@ impl ClassState<'_, '_> {
             &[],
             |fb| {
                 let obj = fb.write_expr_stmt(textual::Expr::Alloc(ty.ty.deref()))?;
+                // call PropInit to initialize the object's properties
+                fb.call_static(
+                    &FunctionName::Intrinsic(Intrinsic::PropInit(self.class.name)),
+                    obj.into(),
+                    (),
+                )?;
                 fb.ret(obj)?;
                 Ok(())
             },

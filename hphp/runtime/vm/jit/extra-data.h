@@ -2789,35 +2789,36 @@ struct LoggingProfileData : IRExtraData {
 };
 
 struct LoggingSpeculateClassData : IRExtraData {
-  LoggingSpeculateClassData(const Class* cls, 
-                            const Class* ctx,
+  LoggingSpeculateClassData(const StringData* clsName, 
+                            const StringData* ctxName,
                             const StringData* methName,
                             Op op,
                             ClassId expectedClsId,
                             bool success)
-    : cls(cls)
-    , ctx(ctx)
+    : clsName(clsName)
+    , ctxName(ctxName)
     , methName(methName)
     , opcode(op)
     , expectedClsId(expectedClsId)
     , success(success) {}
 
   std::string show() const {
-    auto const ctxName = ctx ? ctx->name()->data() : "[no context]";
+    auto const ctxStr = ctxName ? ctxName->data() : "[no context]";
+    auto const methStr = methName ? methName->data() : "[no meth]";
     return folly::sformat(
       "Logging {} for speculation {}::{} in {} for op {} with class id {}",
       success ? "true" : "false",
-      cls->name()->data(),
-      methName->data(),
-      ctxName,
+      clsName,
+      methStr,
+      ctxStr,
       opcodeToName(opcode),
       expectedClsId.id());
   }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
-      cls->stableHash(),
-      ctx->stableHash(),
+      clsName->hash(),
+      ctxName->hash(),
       methName->hash(),
       std::hash<Op>()(opcode),
       std::hash<ClassId::Id>()(expectedClsId.id()),
@@ -2826,16 +2827,16 @@ struct LoggingSpeculateClassData : IRExtraData {
   }
 
   bool equals(const LoggingSpeculateClassData& o) const {
-    return cls == o.cls &&
-      ctx == o.ctx && 
+    return clsName == o.clsName &&
+      ctxName == o.ctxName && 
       methName == o.methName && 
       opcode == o.opcode && 
       expectedClsId == o.expectedClsId &&
       success == o.success;
   }
 
-  const Class* cls;
-  const Class* ctx;
+  const StringData* clsName;
+  const StringData* ctxName;
   const StringData* methName;
   Op opcode;
   ClassId expectedClsId;

@@ -361,7 +361,7 @@ static void logClsSpeculation(
   bool success) {
   StructuredLogEntry entry;
   entry.setStr("cls", clsName->data());
-  entry.setStr("method", methName->data());
+  entry.setStr("method", methName ? methName->data() : "no method");
   entry.setStr("ctx", ctxName ? ctxName->data() : "no context");
   entry.setStr("op", op);
   entry.setInt("expected clsId", clsId);
@@ -373,11 +373,10 @@ void cgLogClsSpeculation(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const extra = inst->extra<LoggingSpeculateClassData>();
   auto const target = CallSpec::direct(logClsSpeculation);
-  auto const ctx =  extra->ctx ? extra->ctx->name() : nullptr;
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
                argGroup(env, inst)
-               .immPtr(extra->cls->name())
-               .immPtr(ctx)
+               .immPtr(extra->clsName)
+               .immPtr(extra->ctxName)
                .immPtr(extra->methName)
                .immPtr(opcodeToName(extra->opcode))
                .imm(extra->expectedClsId.id())

@@ -1548,11 +1548,26 @@ void emitNewObjD(IRGS& env, const StringData* className) {
                                cns(env, className));
     push(env, gen(env, AllocObj, cachedCls));
   };
+  
+  auto const data = [&](const ClassId id, bool success) {
+    return LoggingSpeculateClassData {
+      className,
+      curClass(env) ? curClass(env)->name() : nullptr,
+      nullptr,
+      Op::NewObjD,
+      id,
+      success,
+    };
+  };
 
   switch (lookup.tag) {
     case Class::ClassLookupResult::Exact: return knownClass();
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
+        if (RO::EvalLogClsSpeculation) {
+          ClassId clsId{ClassId::Invalid};
+          gen(env, LogClsSpeculation, data(clsId, false));
+        }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
         gen(env, Jmp, makeExit(env));
         return;
@@ -1570,10 +1585,16 @@ void emitNewObjD(IRGS& env, const StringData* className) {
           gen(env, JmpZero, taken, isEqual);
         },
         [&] {
+          if (RO::EvalLogClsSpeculation) {
+            gen(env, LogClsSpeculation, data(lookup.cls->classId(), true));
+          }
           push(env, allocObjFast(env, cls));
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
+          if (RO::EvalLogClsSpeculation) {
+            gen(env, LogClsSpeculation, data(lookup.cls->classId(), false));
+          }
           slow();
         }
       );
@@ -1757,6 +1778,17 @@ void emitFCallClsMethodD(IRGS& env,
     prepareAndCallProfiled(env, func, fca, ctx, false, false);
   };
 
+  auto const data = [&](const Class* ctx, const ClassId id, bool success) {
+    return LoggingSpeculateClassData {
+      className,
+      ctx ? ctx->name() : nullptr,
+      methodName,
+      Op::FCallClsMethodD,
+      id,
+      success,
+    };
+  };
+
   switch (lookup.tag) {
     case Class::ClassLookupResult::Exact: {
       auto const cls = lookup.cls;
@@ -1770,6 +1802,10 @@ void emitFCallClsMethodD(IRGS& env,
     }
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
+        if (RO::EvalLogClsSpeculation) {
+          ClassId clsId{ClassId::Invalid};
+          gen(env, LogClsSpeculation, data(nullptr, clsId, false));
+        }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
         gen(env, Jmp, makeExit(env));
         return;
@@ -1789,16 +1825,6 @@ void emitFCallClsMethodD(IRGS& env,
 
       gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
       auto const isEqual = gen(env, EqClassId, ClassIdData(lookup.cls));
-      auto const data = [&](bool success) {
-        return LoggingSpeculateClassData {
-          lookup.cls,
-          callCtx.cls(),
-          methodName,
-          Op::FCallClsMethodD,
-          lookup.cls->classId(),
-          success,
-        };
-      };
       return ifThenElse(
         env,
         [&] (Block* taken) {
@@ -1808,18 +1834,22 @@ void emitFCallClsMethodD(IRGS& env,
           updateStackOffset(env);
           auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
           emitModuleBoundaryCheckKnown(env, cls);
-          prepareAndCallKnown(env, func, fca, ctx, false, false);
           if (RO::EvalLogClsSpeculation) {
-            gen(env, LogClsSpeculation, data(true));
+            gen(env, LogClsSpeculation, data(callCtx.cls(),
+                                             lookup.cls->classId(),
+                                             true));
           }
+          prepareAndCallKnown(env, func, fca, ctx, false, false);
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
           updateStackOffset(env);
-          slow();
           if (RO::EvalLogClsSpeculation) {
-            gen(env, LogClsSpeculation, data(false));
+            gen(env, LogClsSpeculation, data(callCtx.cls(),
+                                             lookup.cls->classId(),
+                                             false));
           }
+          slow();
         }
       );
     }

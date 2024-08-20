@@ -18,13 +18,20 @@
 
 #include <thrift/compiler/sema/ast_validator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
+namespace detail {
+
+// Checks if an initializer is compatible with a const or a field it
+// initializes.
+void check_initializer(
+    diagnostic_context& ctx,
+    const t_named& node,
+    const t_type* type,
+    const t_const_value* initializer);
+
+} // namespace detail
 
 // The standard validator for Thrift.
 ast_validator standard_validator();
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

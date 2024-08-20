@@ -43,7 +43,6 @@
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/reserved_identifier_name.h>
 #include <thrift/compiler/lib/uri.h>
-#include <thrift/compiler/sema/const_checker.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 #include <thrift/compiler/sema/scope_validator.h>
 
@@ -573,7 +572,7 @@ void validate_enum_value(diagnostic_context& ctx, const t_enum_value& node) {
 
 void validate_const_type_and_value(
     diagnostic_context& ctx, const t_const& node) {
-  check_const_rec(ctx, node, node.type(), node.value());
+  detail::check_initializer(ctx, node, node.type(), node.value());
   ctx.check(
       !node.find_structured_annotation_or_null(kCppAdapterUri) ||
           has_experimental_annotation(ctx, node),
@@ -584,7 +583,8 @@ void validate_const_type_and_value(
 void validate_field_default_value(
     diagnostic_context& ctx, const t_field& field) {
   if (field.get_default_value() != nullptr) {
-    check_const_rec(ctx, field, &field.type().deref(), field.default_value());
+    detail::check_initializer(
+        ctx, field, &field.type().deref(), field.default_value());
   }
 }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/sema/const_checker.h>
+#include <thrift/compiler/sema/standard_validator.h>
 
 #include <cassert>
 #include <limits>
@@ -28,12 +28,10 @@
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/sema/diagnostic_context.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
-bool is_valid_custom_default_integer(
+bool is_valid_int_initializer(
     const t_primitive_type* type, const t_const_value* value) {
   int64_t min = 0, max = 0;
   if (type->is_byte()) {
@@ -51,24 +49,19 @@ bool is_valid_custom_default_integer(
   return min <= value->get_integer() && value->get_integer() <= max;
 }
 
-bool is_valid_custom_default_float(const t_const_value* value) {
+bool is_valid_float_initializer(const t_const_value* value) {
   return std::numeric_limits<float>::lowest() <= value->get_double() &&
       value->get_double() <= std::numeric_limits<float>::max();
 }
 
 template <typename T>
-bool is_valid_custom_default_float_with_integer_value(
-    const t_const_value* value) {
+bool is_valid_float_initializer_with_integer_value(const t_const_value* value) {
   return value->get_integer() ==
       static_cast<int64_t>(static_cast<T>(value->get_integer()));
 }
 
-} // namespace
-
-namespace {
-
-// Returns the category of a const value (initializer). It is not a real type
-// because the types of initializers are inferred later.
+// Returns the category of an initializer. It is not a real type because the
+// types of initializers are inferred later.
 const char* get_category(const t_const_value* val) {
   switch (val->kind()) {
     case t_const_value::CV_BOOL:
@@ -89,10 +82,9 @@ const char* get_category(const t_const_value* val) {
   return nullptr;
 }
 
-class const_checker {
+class checker {
  public:
-  const_checker(
-      diagnostics_engine& diags, const t_named& node, std::string name)
+  checker(diagnostics_engine& diags, const t_named& node, std::string name)
       : diags_(diags), node_(node), name_(std::move(name)) {}
 
   void check(const t_type* type, const t_const_value* value) {
@@ -177,23 +169,23 @@ class const_checker {
       case t_primitive_type::type::t_i16:
       case t_primitive_type::type::t_i32:
         if (value->kind() == t_const_value::CV_INTEGER &&
-            !is_valid_custom_default_integer(type, value)) {
+            !is_valid_int_initializer(type, value)) {
           report_value_mistmatch();
         }
         break;
       case t_primitive_type::type::t_float:
         if (value->kind() == t_const_value::CV_DOUBLE &&
-            !is_valid_custom_default_float(value)) {
+            !is_valid_float_initializer(value)) {
           report_value_mistmatch();
         }
         if (value->kind() == t_const_value::CV_INTEGER &&
-            !is_valid_custom_default_float_with_integer_value<float>(value)) {
+            !is_valid_float_initializer_with_integer_value<float>(value)) {
           report_value_precision();
         }
         break;
       case t_primitive_type::type::t_double:
         if (value->kind() == t_const_value::CV_INTEGER &&
-            !is_valid_custom_default_float_with_integer_value<double>(value)) {
+            !is_valid_float_initializer_with_integer_value<double>(value)) {
           report_value_precision();
         }
         break;
@@ -211,7 +203,7 @@ class const_checker {
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
         if (value->kind() != t_const_value::CV_STRING) {
-          report_type_mismatch("string");
+          report_incompatible(value, type);
         }
         break;
       case t_primitive_type::type::t_bool:
@@ -318,7 +310,7 @@ class const_checker {
         continue;
       }
       const t_type* field_type = &field->type().deref();
-      const_checker(diags_, node_, fmt::format("{}.{}", name_, field_name))
+      checker(diags_, node_, fmt::format("{}.{}", name_, field_name))
           .check(field_type, value);
     }
   }
@@ -335,8 +327,8 @@ class const_checker {
     const t_type* k_type = &type->key_type().deref();
     const t_type* v_type = &type->val_type().deref();
     for (const auto& entry : value->get_map()) {
-      const_checker(diags_, node_, name_ + "<key>").check(k_type, entry.first);
-      const_checker(diags_, node_, name_ + "<val>").check(v_type, entry.second);
+      checker(diags_, node_, name_ + "<key>").check(k_type, entry.first);
+      checker(diags_, node_, name_ + "<val>").check(v_type, entry.second);
     }
   }
 
@@ -367,20 +359,27 @@ class const_checker {
   void check_elements(
       const t_type* elem_type, const std::vector<t_const_value*>& list) {
     for (const auto& elem : list) {
-      const_checker(diags_, node_, name_ + "<elem>").check(elem_type, elem);
+      checker(diags_, node_, name_ + "<elem>").check(elem_type, elem);
     }
   }
 };
 } // namespace
 
-void check_const_rec(
+// (ffrancet) I managed to trace this comment all the way back to 2008 when
+// thrift was migrated to the fbcode repo. True piece of history here:
+//
+// You know, when I started working on Thrift I really thought it wasn't going
+// to become a programming language because it was just a generator and it
+// wouldn't need runtime type information and all that jazz. But then we
+// decided to add constants, and all of a sudden that means runtime type
+// validation and inference, except the "runtime" is the code generator
+// runtime. Shit. I've been had.
+void detail::check_initializer(
     diagnostic_context& ctx,
     const t_named& node,
     const t_type* type,
-    const t_const_value* value) {
-  const_checker(ctx, node, node.name()).check(type, value);
+    const t_const_value* initializer) {
+  checker(ctx, node, node.name()).check(type, initializer);
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -790,7 +790,7 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     ?'stringData' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4138034353479042532;
+  const int STRUCTURAL_ID = 5914600782954619153;
   /**
    * Original thrift field:-
    * 1: binary binaryData

@@ -100,7 +100,7 @@ add_library(
   parse/parse_ast.h
   parse/token.cc
   parse/token.h
-  sema/const_checker.cc
+  sema/check_initializer.cc
   sema/explicit_include_validator.cc
   sema/scope_validator.cc
   sema/standard_mutator.cc

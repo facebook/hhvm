@@ -1423,7 +1423,7 @@ class MyService_MyInteraction_encode_FinalResponse extends \ThriftSyncStructWith
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 8919842120251162628;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -2077,7 +2077,7 @@ class MyService_MyInteractionFast_encode_FinalResponse extends \ThriftSyncStruct
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 8919842120251162628;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

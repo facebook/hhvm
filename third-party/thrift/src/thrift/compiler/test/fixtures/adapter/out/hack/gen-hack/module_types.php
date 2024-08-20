@@ -3985,7 +3985,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     'double_wrapped_integer' => \facebook\thrift\test\AdaptedInteger,
     'binary_data' => string,
   );
-  const int STRUCTURAL_ID = 9217156058896773800;
+  const int STRUCTURAL_ID = 1886811565365098978;
   /**
    * Original thrift field:-
    * 1: module.DurationMs delay

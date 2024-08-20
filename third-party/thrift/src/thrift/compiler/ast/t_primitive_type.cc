@@ -31,9 +31,7 @@ const t_primitive_type& t_primitive_type::t_string() {
 }
 
 const t_primitive_type& t_primitive_type::t_binary() {
-  // NOTE: thrift compiler used to treat both string and binary as string.
-  // TODO(afuller): Change this to "binary".
-  static t_primitive_type type{"string", type::t_binary};
+  static t_primitive_type type{"binary", type::t_binary};
   return type;
 }
 

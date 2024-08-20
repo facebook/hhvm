@@ -376,7 +376,7 @@ TEST(CompilerTest, const_wrong_type) {
     const i32 wrongInt = "stringVal"; # expected-error: type error: const `wrongInt` was declared as i32.
     const set<string> wrongSet = {1: 2};
       # expected-error@-1: type error: const `wrongSet` was declared as set.
-    const map<i32, i32> wrongMap = [1,32,3];
+    const map<i32, i32> wrongMap = [1, 32, 3];
       # expected-error@-1: type error: const `wrongMap` was declared as map.
     const map<i32, i32> weirdMap = [];
       # expected-warning@-1: type error: map `weirdMap` initialized with empty list.
@@ -385,11 +385,11 @@ TEST(CompilerTest, const_wrong_type) {
     const list<i32> weirdList = {};
       # expected-warning@-1: type error: list `weirdList` initialized with empty map.
     const list<string> badValList = [1];
-      # expected-error@-1: type error: const `badValList<elem>` was declared as string.
+      # expected-error@-1: integer is incompatible with `string`
     const set<string> badValSet = [2];
-      # expected-error@-1: type error: const `badValSet<elem>` was declared as string.
+      # expected-error@-1: integer is incompatible with `string`
     const map<string, i32> badValMap = {1: "str"};
-      # expected-error@-1: type error: const `badValMap<key>` was declared as string.
+      # expected-error@-1: integer is incompatible with `string`
       # expected-error@-2: type error: const `badValMap<val>` was declared as i32.
     struct A {}
     struct B {}
@@ -463,6 +463,15 @@ TEST(CompilerTest, const_double_value) {
 
     const float c4 = -10000000000000001;
     # expected-error@-1: value error: const `c4` cannot be represented precisely as `float` or `double`.
+  )");
+}
+
+TEST(CompilerTest, const_binary) {
+  check_compile(R"(
+    const binary b0 = "foo";
+
+    const binary b1 = 42;
+    # expected-error@-1: integer is incompatible with `binary`
   )");
 }
 

@@ -42,6 +42,8 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+THRIFT_FLAG_DECLARE_bool(rocket_client_binary_rpc_metadata_encoding);
+
 namespace folly {
 class IOBuf;
 } // namespace folly

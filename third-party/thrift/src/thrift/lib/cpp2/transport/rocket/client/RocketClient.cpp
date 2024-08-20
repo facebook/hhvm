@@ -51,8 +51,8 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 THRIFT_FLAG_DEFINE_int64(rocket_server_version_timeout_ms, 500);
-
 THRIFT_FLAG_DEFINE_bool(rocket_client_enable_keep_alive, true);
+THRIFT_FLAG_DEFINE_bool(rocket_client_binary_rpc_metadata_encoding, false);
 
 namespace apache {
 namespace thrift {

@@ -915,13 +915,13 @@ int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
 bool RuntimeOption::Fb303ServerExposeSensitiveMethods = false;
 
-bool RuntimeOption::ThreadTuneDebug = false;
-bool RuntimeOption::ThreadTuneSkipWarmup = false;
-double RuntimeOption::ThreadTuneAdjustmentPct = 0;
-double RuntimeOption::ThreadTuneAdjustmentDownPct = 0;
-double RuntimeOption::ThreadTuneStepPct = 5;
-double RuntimeOption::ThreadTuneCPUThreshold = 95.0;
-double RuntimeOption::ThreadTuneThreadUtilizationThreshold = 90.0;
+bool RuntimeOption::ServerThreadTuneDebug = false;
+bool RuntimeOption::ServerThreadTuneSkipWarmup = false;
+double RuntimeOption::ServerThreadTuneAdjustmentPct = 0;
+double RuntimeOption::ServerThreadTuneAdjustmentDownPct = 0;
+double RuntimeOption::ServerThreadTuneStepPct = 5;
+double RuntimeOption::ServerThreadTuneCPUThreshold = 95.0;
+double RuntimeOption::ServerThreadTuneThreadUtilizationThreshold = 90.0;
 #endif
 
 double RuntimeOption::XenonPeriodSeconds = 0.0;
@@ -1978,34 +1978,34 @@ void RuntimeOption::Load(
     Config::Bind(Fb303ServerExposeSensitiveMethods, ini, config,
                  "Fb303Server.ExposeSensitiveMethods", Fb303ServerExposeSensitiveMethods);
 
-    Config::Bind(ThreadTuneDebug, ini, config,
-                 "ThreadTuneDebug", ThreadTuneDebug);
-    Config::Bind(ThreadTuneDebug, ini, config,
-                 "Server.ThreadTune.Debug", ThreadTuneDebug);
-    Config::Bind(ThreadTuneSkipWarmup, ini, config,
-                 "ThreadTuneSkipWarmup", ThreadTuneSkipWarmup);
-    Config::Bind(ThreadTuneSkipWarmup, ini, config,
-                 "Server.ThreadTune.SkipWarmup", ThreadTuneSkipWarmup);
-    Config::Bind(ThreadTuneAdjustmentPct, ini, config,
-                 "ThreadTuneAdjustmentPct", ThreadTuneAdjustmentPct);
-    Config::Bind(ThreadTuneAdjustmentPct, ini, config,
-                 "Server.ThreadTune.AdjustmentPct", ThreadTuneAdjustmentPct);
-    Config::Bind(ThreadTuneAdjustmentDownPct, ini, config,
-                 "ThreadTuneAdjustmentDownPct", ThreadTuneAdjustmentDownPct);
-    Config::Bind(ThreadTuneAdjustmentDownPct, ini, config,
-                 "Server.ThreadTune.AdjustmentDownPct", ThreadTuneAdjustmentDownPct);
-    Config::Bind(ThreadTuneStepPct, ini, config,
-                 "ThreadTuneStepPct", ThreadTuneStepPct);
-    Config::Bind(ThreadTuneStepPct, ini, config,
-                 "Server.ThreadTune.StepPct", ThreadTuneStepPct);
-    Config::Bind(ThreadTuneCPUThreshold, ini, config,
-                 "ThreadTuneCPUThreshold", ThreadTuneCPUThreshold);
-    Config::Bind(ThreadTuneCPUThreshold, ini, config,
-                 "Server.ThreadTune.CPUThreshold", ThreadTuneCPUThreshold);
-    Config::Bind(ThreadTuneThreadUtilizationThreshold, ini, config,
-                 "ThreadTuneThreadUtilizationThreshold", ThreadTuneThreadUtilizationThreshold);
-    Config::Bind(ThreadTuneThreadUtilizationThreshold, ini, config,
-                 "Server.ThreadTune.ThreadUtilizationThreshold", ThreadTuneThreadUtilizationThreshold);
+    Config::Bind(ServerThreadTuneDebug, ini, config,
+                 "ThreadTuneDebug", ServerThreadTuneDebug);
+    Config::Bind(ServerThreadTuneDebug, ini, config,
+                 "Server.ThreadTune.Debug", ServerThreadTuneDebug);
+    Config::Bind(ServerThreadTuneSkipWarmup, ini, config,
+                 "ThreadTuneSkipWarmup", ServerThreadTuneSkipWarmup);
+    Config::Bind(ServerThreadTuneSkipWarmup, ini, config,
+                 "Server.ThreadTune.SkipWarmup", ServerThreadTuneSkipWarmup);
+    Config::Bind(ServerThreadTuneAdjustmentPct, ini, config,
+                 "ThreadTuneAdjustmentPct", ServerThreadTuneAdjustmentPct);
+    Config::Bind(ServerThreadTuneAdjustmentPct, ini, config,
+                 "Server.ThreadTune.AdjustmentPct", ServerThreadTuneAdjustmentPct);
+    Config::Bind(ServerThreadTuneAdjustmentDownPct, ini, config,
+                 "ThreadTuneAdjustmentDownPct", ServerThreadTuneAdjustmentDownPct);
+    Config::Bind(ServerThreadTuneAdjustmentDownPct, ini, config,
+                 "Server.ThreadTune.AdjustmentDownPct", ServerThreadTuneAdjustmentDownPct);
+    Config::Bind(ServerThreadTuneStepPct, ini, config,
+                 "ThreadTuneStepPct", ServerThreadTuneStepPct);
+    Config::Bind(ServerThreadTuneStepPct, ini, config,
+                 "Server.ThreadTune.StepPct", ServerThreadTuneStepPct);
+    Config::Bind(ServerThreadTuneCPUThreshold, ini, config,
+                 "ThreadTuneCPUThreshold", ServerThreadTuneCPUThreshold);
+    Config::Bind(ServerThreadTuneCPUThreshold, ini, config,
+                 "Server.ThreadTune.CPUThreshold", ServerThreadTuneCPUThreshold);
+    Config::Bind(ServerThreadTuneThreadUtilizationThreshold, ini, config,
+                 "ThreadTuneThreadUtilizationThreshold", ServerThreadTuneThreadUtilizationThreshold);
+    Config::Bind(ServerThreadTuneThreadUtilizationThreshold, ini, config,
+                 "Server.ThreadTune.ThreadUtilizationThreshold", ServerThreadTuneThreadUtilizationThreshold);
   }
 #endif
 

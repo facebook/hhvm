@@ -1017,18 +1017,18 @@ public:
   // defined by the `ThreadTuneAdjustmentPct` of the configured thread count,
   // and the step size is defined by `ThreadTuneStepPct`. Thread tuning is
   // turned off when `ThreadTuneAdjustmentPct` is set to 0 (default).
-  static bool ThreadTuneDebug;
-  static bool ThreadTuneSkipWarmup;
-  static double ThreadTuneAdjustmentPct;
-  static double ThreadTuneAdjustmentDownPct;
-  static double ThreadTuneStepPct;
+  static bool ServerThreadTuneDebug;
+  static bool ServerThreadTuneSkipWarmup;
+  static double ServerThreadTuneAdjustmentPct;
+  static double ServerThreadTuneAdjustmentDownPct;
+  static double ServerThreadTuneStepPct;
   // CPU high threshold is used for determining when to adjust threads. If the
   // host CPU is > this threshold no adjustments will be made.
-  static double ThreadTuneCPUThreshold;
+  static double ServerThreadTuneCPUThreshold;
   // Thread utilization threshold is used for determining when to adjust threads,
   // threads will be increased if other criteria match and the current thread
   // utilization is above this threshold.
-  static double ThreadTuneThreadUtilizationThreshold;
+  static double ServerThreadTuneThreadUtilizationThreshold;
 #endif
 
   // Xenon options

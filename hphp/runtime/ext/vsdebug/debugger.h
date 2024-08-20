@@ -685,9 +685,9 @@ struct NoOpStdoutHook final : ExecutionContext::StdoutHook {
   void operator()(const char* /*str*/, int /*len*/) override {}
 };
 
-struct DebuggerEvalutionContext {
-  DebuggerEvalutionContext(Debugger* debugger);
-  ~DebuggerEvalutionContext();
+struct DebuggerEvaluationContext {
+  DebuggerEvaluationContext(Debugger* debugger);
+  ~DebuggerEvaluationContext();
 private:
   bool m_shouldReset {false};
 };

@@ -241,6 +241,10 @@ std::size_t ExecutionContext::numStdoutHooks() const {
   return m_stdoutHooks.size();
 }
 
+VSDEBUG::DebuggerStdoutHook* ExecutionContext::debuggerStdoutHook() const {
+  return m_debuggerStdoutHook;
+}
+
 void ExecutionContext::addDebuggerStdoutHook(
   VSDEBUG::DebuggerStdoutHook* hook) {
   m_debuggerStdoutHook = hook;
@@ -1989,7 +1993,7 @@ ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
     onLoadWithOptions(file, RepoOptions::forFile(file));
   }
   auto const debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
-  HPHP::VSDEBUG::DebuggerEvalutionContext debuggerContext(debugger);
+  HPHP::VSDEBUG::DebuggerEvaluationContext debuggerContext(debugger);
   return evalPHPDebugger(unit, frame);
 }
 

@@ -2453,14 +2453,17 @@ operator()(const char*, const char* msg, const char* /*ending*/
   m_debugger->sendUserMessage(msg, DebugTransport::OutputLevelStderr);
 }
 
-DebuggerEvalutionContext::DebuggerEvalutionContext(Debugger* debugger) {
-  // In non-server mode, the debugger stdout hook should already be attached.
-  if (!debugger || !RuntimeOption::ServerExecutionMode()) return;
+DebuggerEvaluationContext::DebuggerEvaluationContext(Debugger* debugger) {
+  // If a debugger stdout hook is already attached,
+  // either in non-server execution mode or because this is a
+  // nested DebuggerEvaluationContext,
+  // do not reset it in the destructor of this DebuggerEvaluationContext.
+  if (!debugger || g_context->debuggerStdoutHook()) return;
   g_context->addDebuggerStdoutHook(debugger->getStdoutHook());
   m_shouldReset = true;
 }
 
-DebuggerEvalutionContext::~DebuggerEvalutionContext() {
+DebuggerEvaluationContext::~DebuggerEvaluationContext() {
   if (m_shouldReset) g_context->removeDebuggerStdoutHook();
 }
 

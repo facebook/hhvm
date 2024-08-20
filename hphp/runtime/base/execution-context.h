@@ -227,6 +227,7 @@ public:
   bool removeStdoutHook(StdoutHook*);
   std::size_t numStdoutHooks() const;
 
+  VSDEBUG::DebuggerStdoutHook* debuggerStdoutHook() const;
   void addDebuggerStdoutHook(VSDEBUG::DebuggerStdoutHook*);
   void removeDebuggerStdoutHook();
 

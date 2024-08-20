@@ -1451,40 +1451,48 @@ class ExampleUnion final  {
     return std::move(value_.fieldB);
   }
 
+  /** Glean { "field": "fieldA" } */
   template <typename..., typename T = ::test::fixtures::tablebased::ContainerStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> fieldA_ref() const& {
     return {value_.fieldA, type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
+  /** Glean { "field": "fieldA" } */
   template <typename..., typename T = ::test::fixtures::tablebased::ContainerStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> fieldA_ref() const&& {
     return {std::move(value_.fieldA), type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
+  /** Glean { "field": "fieldA" } */
   template <typename..., typename T = ::test::fixtures::tablebased::ContainerStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> fieldA_ref() & {
     return {value_.fieldA, type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
+  /** Glean { "field": "fieldA" } */
   template <typename..., typename T = ::test::fixtures::tablebased::ContainerStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> fieldA_ref() && {
     return {std::move(value_.fieldA), type_, folly::to_underlying(Type::fieldA), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
+  /** Glean { "field": "fieldB" } */
   template <typename..., typename T = ::test::fixtures::tablebased::TrivialTypesStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> fieldB_ref() const& {
     return {value_.fieldB, type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
+  /** Glean { "field": "fieldB" } */
   template <typename..., typename T = ::test::fixtures::tablebased::TrivialTypesStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> fieldB_ref() const&& {
     return {std::move(value_.fieldB), type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
+  /** Glean { "field": "fieldB" } */
   template <typename..., typename T = ::test::fixtures::tablebased::TrivialTypesStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> fieldB_ref() & {
     return {value_.fieldB, type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
+  /** Glean { "field": "fieldB" } */
   template <typename..., typename T = ::test::fixtures::tablebased::TrivialTypesStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> fieldB_ref() && {
     return {std::move(value_.fieldB), type_, folly::to_underlying(Type::fieldB), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};

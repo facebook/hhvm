@@ -160,6 +160,13 @@ cdef class MutableStructOrUnion:
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
 
 
+def _unpickle_struct(klass, bytes data):
+    cdef IOBuf iobuf = IOBuf(data)
+    inst = klass.__new__(klass)
+    (<MutableStruct>inst)._fbthrift_deserialize(iobuf, Protocol.COMPACT)
+    return inst
+
+
 cdef class MutableStruct(MutableStructOrUnion):
     """
     Base class for all generated (mutable) classes corresponding to Thrift
@@ -324,6 +331,9 @@ cdef class MutableStruct(MutableStructOrUnion):
         cdef MutableStructInfo info = self._fbthrift_mutable_struct_info
         for name in info.name_to_index:
             yield name, getattr(self, name)
+
+    def __reduce__(self):
+        return (_unpickle_struct, (type(self), b''.join(self._fbthrift_serialize(Protocol.COMPACT))))
 
     cdef _fbthrift_reset_field_to_standard_default(self, int16_t index):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info

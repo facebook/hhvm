@@ -14,6 +14,7 @@
 
 import dataclasses
 import importlib
+import pickle
 import types
 import typing
 import unittest
@@ -93,6 +94,15 @@ def _thrift_serialization_round_trip(
         decoded = module.deserialize(type(control), encoded, protocol=proto)
         test.assertIsInstance(decoded, type(control))
         test.assertEqual(control, decoded)
+
+
+def _pickle_round_trip(
+    test, control: typing.Union[MutableStructOrUnion, ImmutableStructOrUnion]
+) -> None:
+    pickled = pickle.dumps(control, protocol=pickle.HIGHEST_PROTOCOL)
+    unpickled = pickle.loads(pickled)
+    test.assertIsInstance(unpickled, type(control))
+    test.assertEqual(control, unpickled)
 
 
 class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
@@ -313,9 +323,11 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             optional_bool=False,
         )
         _thrift_serialization_round_trip(self, immutable_serializer, s)
+        _pickle_round_trip(self, s)
 
         s_default_value = TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable()
         _thrift_serialization_round_trip(self, immutable_serializer, s_default_value)
+        _pickle_round_trip(self, s_default_value)
 
     def test_adapted_types(self) -> None:
         s = ImmutableTestStructAdaptedTypes()
@@ -361,6 +373,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
     )
     def test_adapter_serialization_round_trip(self, struct) -> None:
         _thrift_serialization_round_trip(self, immutable_serializer, struct)
+        _pickle_round_trip(self, struct)
 
     def test_to_immutable_python(self) -> None:
         w = TestStructImmutable(unqualified_string="hello, world!")
@@ -729,9 +742,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s.unqualified_bool = True
         s.optional_bool = False
         _thrift_serialization_round_trip(self, mutable_serializer, s)
+        _pickle_round_trip(self, s)
 
         s_default_value = TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable()
         _thrift_serialization_round_trip(self, mutable_serializer, s_default_value)
+        _pickle_round_trip(self, s_default_value)
 
     def test_create_and_assign_for_list(self) -> None:
         s = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3])
@@ -937,6 +952,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
     )
     def test_container_serialization_round_trip(self, struct) -> None:
         _thrift_serialization_round_trip(self, mutable_serializer, struct)
+        _pickle_round_trip(self, struct)
 
     def test_adapted_types(self) -> None:
         s = MutableTestStructAdaptedTypes()
@@ -978,6 +994,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
     )
     def test_adapter_serialization_round_trip(self, struct) -> None:
         _thrift_serialization_round_trip(self, mutable_serializer, struct)
+        _pickle_round_trip(self, struct)
 
     def test_typedef_simple(self) -> None:
         empty = TestStructEmptyMutable()
@@ -989,6 +1006,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         struct.empty_struct_alias = empty
 
         _thrift_serialization_round_trip(self, mutable_serializer, struct)
+        _pickle_round_trip(self, struct)
 
     def test_create_and_init_for_set(self) -> None:
         # Initializing the `set` member with an iterable that contains duplicate

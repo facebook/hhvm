@@ -147,7 +147,6 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fooCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_foo(apache::thrift::RpcOptions& rpcOptions);
-  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_foo(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
 };
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "createBadInteraction"} */
@@ -271,7 +270,6 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> barCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::int32_t> fbthrift_semifuture_bar(apache::thrift::RpcOptions& rpcOptions);
-  FOLLY_NOINLINE folly::SemiFuture<::std::int32_t> fbthrift_semifuture_bar(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::std::int32_t>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
 };
 

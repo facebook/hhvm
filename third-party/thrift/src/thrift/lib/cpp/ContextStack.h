@@ -106,13 +106,6 @@ class ContextStack {
   }
   folly::coro::Task<void> processClientInterceptorsOnRequest();
   folly::coro::Task<void> processClientInterceptorsOnResponse();
-
-  // These functions simply delegate to the coroutine versions. They exist only
-  // to save extraneous compilation effort when called from.
-  folly::SemiFuture<folly::Unit>
-  semifuture_processClientInterceptorsOnRequest();
-  folly::SemiFuture<folly::Unit>
-  semifuture_processClientInterceptorsOnResponse();
 #endif // FOLLY_HAS_COROUTINES
 
  private:

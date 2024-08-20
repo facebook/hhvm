@@ -154,7 +154,6 @@ class Client<::test::namespace_from_package::module::TestService> : public apach
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> initCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::int64_t> fbthrift_semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1);
-  FOLLY_NOINLINE folly::SemiFuture<::std::int64_t> fbthrift_semifuture_init(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::std::int64_t>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_int1);
  public:
 };
 

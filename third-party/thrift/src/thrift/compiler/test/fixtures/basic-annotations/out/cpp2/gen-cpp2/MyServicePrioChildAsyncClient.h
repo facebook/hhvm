@@ -153,7 +153,6 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pangCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_pang(apache::thrift::RpcOptions& rpcOptions);
-  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_pang(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
 };
 

@@ -145,8 +145,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method1"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method1(::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_method1(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  apache::thrift::SerializedRequest fbthrift_serialize_method1(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_method1(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method1Ctx(apache::thrift::RpcOptions* rpcOptions);
@@ -262,8 +261,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method2"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method2(::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_method2(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
+  apache::thrift::SerializedRequest fbthrift_serialize_method2(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
   template <typename RpcOptions>
   void fbthrift_send_method2(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method2Ctx(apache::thrift::RpcOptions* rpcOptions);
@@ -381,8 +379,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method3"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method3(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_method3(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  apache::thrift::SerializedRequest fbthrift_serialize_method3(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_method3(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method3Ctx(apache::thrift::RpcOptions* rpcOptions);
@@ -500,8 +497,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method4"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method4(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_method4(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
+  apache::thrift::SerializedRequest fbthrift_serialize_method4(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
   template <typename RpcOptions>
   void fbthrift_send_method4(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method4Ctx(apache::thrift::RpcOptions* rpcOptions);
@@ -619,8 +615,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method5"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method5(::test_cpp2::cpp_reflection::struct2& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_method5(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  apache::thrift::SerializedRequest fbthrift_serialize_method5(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_method5(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method5Ctx(apache::thrift::RpcOptions* rpcOptions);
@@ -738,8 +733,7 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method6"} */
   virtual folly::exception_wrapper recv_instance_wrapped_method6(::test_cpp2::cpp_reflection::struct2& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_method6(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
+  apache::thrift::SerializedRequest fbthrift_serialize_method6(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
   template <typename RpcOptions>
   void fbthrift_send_method6(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method6Ctx(apache::thrift::RpcOptions* rpcOptions);

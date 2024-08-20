@@ -30,25 +30,12 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace thrift {
-namespace python {
+namespace thrift::python {
 
 class PythonAsyncProcessorFactory
     : public apache::thrift::AsyncProcessorFactory,
       public apache::thrift::ServiceHandlerBase {
  public:
-  PythonAsyncProcessorFactory(
-      PyObject* python_server,
-      FunctionMapType functions,
-      std::vector<PyObject*> lifecycleFuncs,
-      folly::Executor::KeepAlive<> executor,
-      std::string serviceName)
-      : python_server_(python_server),
-        functions_(std::move(functions)),
-        lifecycleFuncs_(std::move(lifecycleFuncs)),
-        executor(std::move(executor)),
-        serviceName_(std::move(serviceName)) {}
-
   folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
   folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 
@@ -64,6 +51,22 @@ class PythonAsyncProcessorFactory
 
   CreateMethodMetadataResult createMethodMetadata() override;
 
+  /**
+   * This factory function is an extension of the python
+   * PythonAsyncProcessorFactory.create() in python to handle the C++ side of
+   * the python PythonAsyncProcessorFactory.create().
+   *
+   * Callers must use this factory to create a PythonAsyncProcessorFactory
+   * instance.
+   */
+  static std::shared_ptr<PythonAsyncProcessorFactory> create(
+      PyObject* python_server,
+      FunctionMapType functions,
+      std::vector<PyObject*> lifecycleFuncs,
+      folly::Executor::KeepAlive<> executor,
+      std::string serviceName,
+      bool enableResourcePools);
+
  private:
   folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);
 
@@ -72,7 +75,30 @@ class PythonAsyncProcessorFactory
   const std::vector<PyObject*> lifecycleFuncs_;
   folly::Executor::KeepAlive<> executor;
   std::string serviceName_;
+
+  using PythonMetadataForRpcKind = std::unordered_map<
+      apache::thrift::RpcKind,
+      std::shared_ptr<PythonAsyncProcessor::PythonMetadata>>;
+  PythonMetadataForRpcKind pythonMetadataForRpcKind_;
+
+  /**
+   * Callers must use the create() factory function to create a
+   * PythonAsyncProcessorFactory instance. Make the constructor
+   * private to enforce this.
+   */
+  PythonAsyncProcessorFactory(
+      PyObject* python_server,
+      FunctionMapType functions,
+      std::vector<PyObject*> lifecycleFuncs,
+      folly::Executor::KeepAlive<> executor,
+      std::string serviceName,
+      PythonMetadataForRpcKind pythonMetadataForRpcKind)
+      : python_server_(python_server),
+        functions_(std::move(functions)),
+        lifecycleFuncs_(std::move(lifecycleFuncs)),
+        executor(std::move(executor)),
+        serviceName_(std::move(serviceName)),
+        pythonMetadataForRpcKind_(std::move(pythonMetadataForRpcKind)) {}
 };
 
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python

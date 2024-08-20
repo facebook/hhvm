@@ -139,6 +139,8 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         void setQuickExitOnShutdownTimeout(cbool quickExitOnShutdownTimeout)
         void addRoutingHandler(unique_ptr[cTransportRoutingHandler])
         void disableInfoLogging()
+        cbool resourcePoolEnabled() nogil noexcept
+        void requireResourcePools() nogil noexcept
 
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":
@@ -210,6 +212,7 @@ cdef extern from "thrift/lib/cpp2/server/Cpp2ConnContext.h" \
 
 cdef class AsyncProcessorFactory:
     cdef shared_ptr[cAsyncProcessorFactory] _cpp_obj
+    cdef cbool requireResourcePools(AsyncProcessorFactory self)
 
 
 cdef class ServiceInterface(AsyncProcessorFactory):

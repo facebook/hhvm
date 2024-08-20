@@ -245,6 +245,51 @@ void PythonAsyncProcessor::processSerializedCompressedRequestWithMetadata(
       .via(executor_);
 }
 
+void PythonAsyncProcessor::executeRequest(
+    apache::thrift::ServerRequest&& request,
+    const AsyncProcessorFactory::MethodMetadata& untypedMethodMetadata) {
+  const auto& methodMetadata =
+      apache::thrift::AsyncProcessorHelper::expectMetadataOfType<
+          PythonMetadata>(untypedMethodMetadata);
+
+  auto protocol =
+      apache::thrift::detail::ServerRequestHelper::protocol(request);
+  auto* ctx = request.requestContext();
+  auto req =
+      apache::thrift::detail::ServerRequestHelper::request(std::move(request));
+  const char* serviceName = serviceName_.c_str();
+  auto ctxStack = apache::thrift::ContextStack::create(
+      this->getEventHandlersSharedPtr(),
+      serviceName,
+      functionFullNameMap_.at(ctx->getMethodName()).c_str(),
+      ctx);
+
+  auto serializedRequest =
+      std::move(apache::thrift::detail::ServerRequestHelper::compressedRequest(
+                    request))
+          .uncompress();
+
+  auto* eb = apache::thrift::detail::ServerRequestHelper::eventBase(request);
+  auto executor =
+      apache::thrift::detail::ServerRequestHelper::executor(request);
+  auto kind = methodMetadata.rpcKind;
+
+  executeReadEventCallbacks(ctx, ctxStack.get(), serializedRequest, protocol);
+
+  dispatchRequest(
+      protocol,
+      ctx,
+      eb,
+      executor,
+      request.requestData(),
+      std::move(req),
+      std::move(ctxStack),
+      serviceName,
+      std::move(serializedRequest),
+      kind.value())
+      .via(executor_);
+}
+
 folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
     apache::thrift::protocol::PROTOCOL_TYPES protocol,
     apache::thrift::Cpp2RequestContext* ctx,

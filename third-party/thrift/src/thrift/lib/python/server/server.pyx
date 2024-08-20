@@ -326,10 +326,10 @@ cdef api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
     iobuf = serialize_iobuf(metadata, protocol=Protocol.BINARY)
     return cmove((<IOBuf>iobuf)._ours)
 
-# Cython is dumb
-ctypedef PyObject* PyObjPtr
-
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
+    cdef cbool requireResourcePools(PythonAsyncProcessorFactory self):
+        return self.useResourcePools
+
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server):
         cdef cmap[string, pair[RpcKind, PyObjPtr]] funcs
@@ -347,11 +347,20 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
         cdef PythonAsyncProcessorFactory inst = PythonAsyncProcessorFactory.__new__(PythonAsyncProcessorFactory)
         inst.funcMap = funcMap
         inst.lifecycleFuncs = lifecycleFuncs
-        # Store the value of the enable_resource_pools_for_python Trift Flag
-        # so that it is visible in thriftDbg. Subsequent changes will use this value.
+        # To ensure that the decision to use resource pools stays
+        # consistent for the lifetime of the server and decoupled
+        # from changes to the Thrift Flag that drives that decision
+        # at construction, capture the value and use the captured value
+        # from this point forward.
         inst.useResourcePools = cAreResourcePoolsEnabledForPython()
         inst._cpp_obj = static_pointer_cast[cAsyncProcessorFactory, cPythonAsyncProcessorFactory](
-            make_shared[cPythonAsyncProcessorFactory](<PyObject*>server, cmove(funcs), cmove(lifecycle), get_executor(), <bytes>server.service_name()))
+            cCreatePythonAsyncProcessorFactory(
+                <PyObject*>server,
+                cmove(funcs),
+                cmove(lifecycle),
+                get_executor(),
+                <bytes>server.service_name(),
+                inst.useResourcePools))
         return inst
 
 cdef class ThriftServer(ThriftServer_py3):

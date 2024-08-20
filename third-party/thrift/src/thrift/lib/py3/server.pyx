@@ -111,6 +111,25 @@ cdef class AsyncProcessorFactory:
     async def onStopRequested(self):
         pass
 
+    cdef cbool requireResourcePools(AsyncProcessorFactory self):
+        """
+        Override this method to conditionally call the requireResourcePools
+        method of ThriftServer.
+        NOTE: Once resource pools are the only option, it may be possible
+        to remove this method.
+        """
+        # Tests for some implementations that use py3 servers fail
+        # if this function returns True. 
+        # Some py3 tests implementation do not create metadata, which is a
+        # prerequisite to call requireResourcePools() on the ThriftServer.
+        # This function can return False with no adverse effects 
+        # in production. The effect is that py3 tests will not run with
+        # resource pools enabled.
+        # This function is still relevant because derived implementations
+        # like thrift-python may enable resource pools
+        # due to better guarantees about the presence of metadata.
+        return False
+
 
 cdef class ServiceInterface(AsyncProcessorFactory):
     pass
@@ -144,6 +163,14 @@ cdef class ThriftServer:
             self.server.get().setThreadManagerFromExecutor(get_executor(), b'python_executor')
             if handler._cpp_obj:
                 self.server.get().setInterface(handler._cpp_obj)
+                # Per the Thrift Resource Pools documentation, to enable resource pools,
+                # use `requireResourcePools()` on the server before it starts.
+                # Provide the opportunity for the handler implementation to
+                # determine whether to enable resource pools.
+                # For example, python servers have a Thrift Flag that gates the use of
+                # resource pools.
+                if handler.requireResourcePools():
+                    self.server.get().requireResourcePools()
             else:
                 raise RuntimeError(
                     'The handler is not valid, it has no C++ handler. Maybe its not a '
@@ -314,6 +341,10 @@ cdef class ThriftServer:
 
     def disable_info_logging(self):
         self.server.get().disableInfoLogging()
+        
+    def is_resource_pool_enabled(self) -> bool:
+        return self.server.get().resourcePoolEnabled()
+
 
 cdef class ClientMetadata:
     @staticmethod

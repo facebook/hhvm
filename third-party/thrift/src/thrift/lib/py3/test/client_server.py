@@ -108,7 +108,6 @@ class DerivedHandler(Handler, DerivedTestingServiceInterface):
 
 class TestServer:
     server: ThriftServer
-    # pyre-fixme[13]: Attribute `serve_task` is never initialized.
     serve_task: asyncio.Task
 
     def __init__(
@@ -118,6 +117,11 @@ class TestServer:
         handler: ServiceInterface = Handler(),  # noqa: B008
     ) -> None:
         self.server = ThriftServer(handler, ip=ip, path=path)
+        # pyre-fixme[4, 8]: The initialization below eliminates
+        #                   the pyre[13] error, but results in
+        #                   pyre[4] and pyre[8] errors.
+        #                   __aenter__ sets the required value.
+        self.serve_task = None
 
     async def __aenter__(self) -> SocketAddress:
         self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())

@@ -12,13 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cpython.ref cimport PyObject
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
+from libcpp.map cimport map as cmap
+from libcpp.pair cimport pair
+from libcpp.vector cimport vector as cvector
 from folly.iobuf cimport cIOBuf
 from thrift.python.types cimport ServiceInterface as cServiceInterface
-from thrift.py3.server cimport cAsyncProcessorFactory, AsyncProcessorFactory, ThriftServer as ThriftServer_py3
+from thrift.py3.server cimport (
+    cAsyncProcessorFactory,
+    AsyncProcessorFactory,
+    ThriftServer as ThriftServer_py3
+)
 from thrift.python.exceptions cimport cException
+from libcpp.memory cimport shared_ptr
 from libcpp cimport bool as cbool
+from folly.executor cimport cAsyncioExecutor
+
+# cython doesn't support * in template parameters
+# Make a typedef to workaround this.
+ctypedef PyObject* PyObjPtr
+
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
     cpdef enum class RpcKind:
@@ -33,7 +48,20 @@ cdef extern from "thrift/lib/python/server/util.h" namespace "::thrift::python":
 
 cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::thrift::python":
     cdef cppclass cPythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
-        cPythonAsyncProcessorFactory()
+        pass
+
+    cdef shared_ptr[cPythonAsyncProcessorFactory] \
+        cCreatePythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory::create"(
+            PyObject* server,
+            cmap[string, pair[RpcKind, PyObjPtr]] funcs,
+            cvector[PyObjPtr] lifecycle,
+            cAsyncioExecutor* executor,
+            string serviceName,
+            cbool enableResourcePools,
+        ) except +
+
+cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::thrift::python::detail":
+    cdef cbool cAreResourcePoolsEnabledForPython "::thrift::python::detail::areResourcePoolsEnabledForPython"()
 
 cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::thrift::python::detail":
     cdef cbool cAreResourcePoolsEnabledForPython "::thrift::python::detail::areResourcePoolsEnabledForPython"()
@@ -46,6 +74,8 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     cdef dict funcMap
     cdef list lifecycleFuncs
     cdef cbool useResourcePools
+
+    cdef cbool requireResourcePools(PythonAsyncProcessorFactory self)
 
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server)

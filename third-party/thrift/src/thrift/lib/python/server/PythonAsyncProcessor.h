@@ -58,11 +58,13 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
 
   struct PythonMetadata final
       : public apache::thrift::AsyncProcessorFactory::MethodMetadata {
-    explicit PythonMetadata(apache::thrift::RpcKind rpcKind)
+    PythonMetadata(
+        ExecutorType executor,
+        InteractionType interaction,
+        apache::thrift::RpcKind rpcKind)
         : MethodMetadata(
-              apache::thrift::AsyncProcessorFactory::MethodMetadata::
-                  ExecutorType::UNKNOWN,
-              InteractionType::UNKNOWN,
+              executor,
+              interaction,
               rpcKind,
               apache::thrift::concurrency::NORMAL,
               std::nullopt,
@@ -91,6 +93,11 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::Cpp2RequestContext* context,
       folly::EventBase* eb,
       apache::thrift::concurrency::ThreadManager* tm) override;
+
+  void executeRequest(
+      apache::thrift::ServerRequest&& request,
+      const AsyncProcessorFactory::MethodMetadata& untypedMethodMetadata)
+      override;
 
   // Dud method for GeneratedAsyncProcessor
   const char* getServiceName() override { return serviceName_.c_str(); }

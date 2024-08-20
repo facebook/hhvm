@@ -1,6 +1,5 @@
 <?hh
 <<file:__EnableUnstableFeatures('expression_trees')>>
-<<file:__EnableUnstableFeatures('await_in_splice')>>
 
 function myTestFunction1(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   return ExampleDsl`2`;

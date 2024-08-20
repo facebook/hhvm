@@ -1,6 +1,5 @@
 <?hh
 <<file: __EnableUnstableFeatures('expression_trees')>>
-<<file: __EnableUnstableFeatures('await_in_splice')>>
 
 class C<T> {
   public function __construct(public T $x) {}

@@ -45,7 +45,7 @@ impl FeatureName {
             ExpressionTreeMap => OngoingRelease,
             ExpressionTreeNest => Preview,
             SealedMethods => Unstable,
-            AwaitInSplice => Preview,
+            AwaitInSplice => OngoingRelease,
         }
     }
 

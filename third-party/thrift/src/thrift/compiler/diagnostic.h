@@ -18,6 +18,7 @@
 
 #include <array>
 #include <functional>
+#include <iosfwd>
 #include <string>
 #include <utility>
 #include <vector>
@@ -263,6 +264,8 @@ class diagnostics_engine {
   diagnostic_params params_;
   bool has_errors_ = false;
 };
+
+std::ostream& operator<<(std::ostream& out, const diagnostic&);
 
 } // namespace compiler
 } // namespace thrift

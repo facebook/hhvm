@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/diagnostic.h>
 
+#include <ostream>
 #include <string>
 
 using apache::thrift::compiler::diagnostic;
@@ -96,6 +97,10 @@ void diagnostics_engine::do_report(
        std::move(file_name),
        static_cast<int>(line),
        std::move(name)});
+}
+
+std::ostream& operator<<(std::ostream& out, const diagnostic& diag) {
+  return out << diag.str();
 }
 
 } // namespace compiler

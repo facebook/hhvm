@@ -41,12 +41,14 @@ class ParserTest : public testing::Test {
  public:
   std::vector<diagnostic> diagnostics;
 
+  static std::string path_to_file(int id) {
+    return fmt::format("path/to/test-{}.whisker", id);
+  }
+
   std::optional<ast::root> parse_ast(const std::string& source) {
     diagnostics.clear();
     return parse(
-        src_manager.add_virtual_file(
-            fmt::format("path/to/test-{}.whisker", file_id++), source),
-        diags);
+        src_manager.add_virtual_file(path_to_file(file_id++), source), diags);
   }
 
   std::string to_string(const ast::root& ast) {
@@ -79,10 +81,13 @@ TEST_F(ParserTest, basic) {
 TEST_F(ParserTest, empty_template) {
   auto ast = parse_ast("{{ }}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected variable-lookup in variable but found `}}`");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected variable-lookup in variable but found `}}`",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, variable_is_single_id) {
@@ -121,10 +126,13 @@ TEST_F(ParserTest, variable_starts_with_dot) {
 TEST_F(ParserTest, variable_has_extra_stuff_after) {
   auto ast = parse_ast("{{foo.bar!}}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected `}}` to close variable but found `!`");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to close variable but found `!`",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, basic_section) {
@@ -187,19 +195,25 @@ TEST_F(ParserTest, mismatched_section_hierarchy) {
       "  {{/news.has-update?}}\n"
       "{{/update.is-important?}}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "section-block opening 'update.is-important?' does not match closing 'news.has-update?'");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "section-block opening 'update.is-important?' does not match closing 'news.has-update?'",
+          path_to_file(1),
+          5)));
 }
 
 TEST_F(ParserTest, section_open_by_itself) {
   auto ast = parse_ast("{{#news.has-update?}}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected `{{` to close section-block 'news.has-update?' but found EOF");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `{{` to close section-block 'news.has-update?' but found EOF",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, section_with_bad_close) {
@@ -207,41 +221,56 @@ TEST_F(ParserTest, section_with_bad_close) {
   {
     auto ast = parse_ast("{{#news.has-update?}}{{/true}}");
     EXPECT_FALSE(ast.has_value());
-    EXPECT_EQ(diagnostics.size(), 1);
-    EXPECT_EQ(
-        diagnostics[0].message(),
-        "expected variable-lookup to close section-block 'news.has-update?' but found `true`");
+    EXPECT_THAT(
+        diagnostics,
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "expected variable-lookup to close section-block 'news.has-update?' but found `true`",
+            path_to_file(1),
+            1)));
   }
   // missing }}
   {
     auto ast = parse_ast("{{#news.has-update?}}{{/ news.has-update?");
     EXPECT_FALSE(ast.has_value());
-    EXPECT_EQ(diagnostics.size(), 1);
-    EXPECT_EQ(
-        diagnostics[0].message(),
-        "expected `}}` to close section-block 'news.has-update?'");
+    EXPECT_THAT(
+        diagnostics,
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "expected `}}` to close section-block 'news.has-update?'",
+            path_to_file(2),
+            1)));
   }
   // mismatch + missing close
   {
     auto ast = parse_ast("{{#news.has-update?}}{{/ foo-bar?");
     EXPECT_FALSE(ast.has_value());
-    EXPECT_EQ(diagnostics.size(), 2);
-    EXPECT_EQ(
-        diagnostics[0].message(),
-        "section-block opening 'news.has-update?' does not match closing 'foo-bar?'");
-    EXPECT_EQ(
-        diagnostics[1].message(),
-        "expected `}}` to close section-block 'news.has-update?'");
+    EXPECT_THAT(
+        diagnostics,
+        testing::ElementsAre(
+            diagnostic(
+                diagnostic_level::error,
+                "section-block opening 'news.has-update?' does not match closing 'foo-bar?'",
+                path_to_file(3),
+                1),
+            diagnostic(
+                diagnostic_level::error,
+                "expected `}}` to close section-block 'news.has-update?'",
+                path_to_file(3),
+                1)));
   }
 }
 
 TEST_F(ParserTest, section_close_by_itself) {
   auto ast = parse_ast("{{/news.has-update?}}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected text, template, or comment but found `{{`");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected text, template, or comment but found `{{`",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, basic_partial_apply) {
@@ -278,19 +307,25 @@ TEST_F(ParserTest, partial_apply_in_section) {
 TEST_F(ParserTest, partial_apply_no_id) {
   auto ast = parse_ast("{{> }}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected partial-lookup in partial-apply but found `}}`");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected partial-lookup in partial-apply but found `}}`",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, partial_apply_extra_stuff) {
   auto ast = parse_ast("{{ > foo ! }}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected `}}` to close partial-apply 'foo' but found `!`");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to close partial-apply 'foo' but found `!`",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, partial_apply_dotted_path) {
@@ -304,19 +339,25 @@ TEST_F(ParserTest, partial_apply_dotted_path) {
 TEST_F(ParserTest, partial_apply_empty_path_part) {
   auto ast = parse_ast("{{> path/.to.file }}");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected identifier in partial-lookup but found `.`");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier in partial-lookup but found `.`",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, unclosed_partial_apply) {
   auto ast = parse_ast("{{> path/to/file");
   EXPECT_FALSE(ast.has_value());
-  EXPECT_EQ(diagnostics.size(), 1);
-  EXPECT_EQ(
-      diagnostics[0].message(),
-      "expected `}}` to close partial-apply 'path/to/file' but found EOF");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to close partial-apply 'path/to/file' but found EOF",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, comment) {

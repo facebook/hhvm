@@ -91,14 +91,18 @@ class LexerTest : public testing::Test {
  private:
   source_manager source_mgr;
   diagnostics_engine diags;
-  int file_id = 0;
+  int file_id = 1;
 
  public:
   std::vector<diagnostic> diagnostics;
 
+  static std::string path_to_file(int id) {
+    return fmt::format("path/to/test-{}.whisker", id);
+  }
+
   lexer make_lexer(const std::string& source) {
     return lexer(
-        source_mgr.add_virtual_file(std::to_string(file_id++), source), diags);
+        source_mgr.add_virtual_file(path_to_file(file_id++), source), diags);
   }
 
   std::string_view token_range_text(const token& t) {
@@ -218,7 +222,13 @@ TEST_F(LexerTest, unrecognized_token) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(diagnostics.at(0).message(), "unexpected token in input: ~");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unexpected token in input: ~",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, unrecognized_token_against_identifier) {
@@ -230,7 +240,13 @@ TEST_F(LexerTest, unrecognized_token_against_identifier) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(diagnostics.at(0).message(), "unexpected token in input: %");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unexpected token in input: %",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, keywords) {
@@ -361,7 +377,13 @@ TEST_F(LexerTest, lone_minus) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(diagnostics.at(0).message(), "unexpected token in input: -");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unexpected token in input: -",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, identifier_is_greedy_when_digits) {
@@ -423,9 +445,13 @@ TEST_F(LexerTest, i64_past_max) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(
-      diagnostics.at(0).message(),
-      "i64 literal out of range: 9223372036854775808");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "i64 literal out of range: 9223372036854775808",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, i64_past_max_more_digits) {
@@ -436,9 +462,13 @@ TEST_F(LexerTest, i64_past_max_more_digits) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(
-      diagnostics.at(0).message(),
-      "i64 literal out of range: 9223372036854775807000");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "i64 literal out of range: 9223372036854775807000",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, i64_past_min_more_digits) {
@@ -449,9 +479,13 @@ TEST_F(LexerTest, i64_past_min_more_digits) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(
-      diagnostics.at(0).message(),
-      "i64 literal out of range: -9223372036854775808000");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "i64 literal out of range: -9223372036854775808000",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, string_literal) {
@@ -499,9 +533,13 @@ TEST_F(LexerTest, string_literal_bad_escape) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(
-      diagnostics.at(0).message(),
-      "unknown escape character in string literal: '\\f'");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unknown escape character in string literal: '\\f'",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, string_literal_newline_in_middle) {
@@ -512,8 +550,13 @@ TEST_F(LexerTest, string_literal_newline_in_middle) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(
-      diagnostics.at(0).message(), "unexpected newline in string literal");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unexpected newline in string literal",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, string_literal_unterminated) {
@@ -524,7 +567,13 @@ TEST_F(LexerTest, string_literal_unterminated) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_EQ(diagnostics.at(0).message(), "unterminated string literal");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unterminated string literal",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, basic_comment) {

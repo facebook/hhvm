@@ -41,7 +41,6 @@ service TestService {
 
   void sleep(1: i32 timeMs);
 
-  @cpp.GenerateDeprecatedHeaderClientMethods
   void headers();
 
   string hello(1: string name);

@@ -58,6 +58,10 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   virtual folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> future_first(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   virtual folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> semifuture_first(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
+  virtual folly::Future<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_first(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
+  virtual folly::SemiFuture<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_first(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -177,6 +181,10 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   virtual folly::Future<bool> future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual folly::SemiFuture<bool> semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
+  virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
+  virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

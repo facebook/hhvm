@@ -72,7 +72,6 @@ struct TestUnsignedIntMapStruct {
 }
 
 service TestService {
-  @cpp.GenerateDeprecatedHeaderClientMethods
   string sendResponse(1: i64 size);
   oneway void noResponse(1: i64 size);
   string echoRequest(1: string req);
@@ -81,7 +80,6 @@ service TestService {
   @cpp.ProcessInEbThreadUnsafe
   string eventBaseAsync();
   void notCalledBack();
-  @cpp.GenerateDeprecatedHeaderClientMethods
   void voidResponse();
   i32 processHeader();
   IOBufPtr echoIOBuf(1: IOBuf buf);

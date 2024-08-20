@@ -1381,6 +1381,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_five(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_get_five, channel_);
+  get_five(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_five(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_five, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_five(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_five(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   get_five(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -1544,6 +1559,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_add_five, channel_);
+  add_five(rpcOptions, std::move(callback), p_num);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_add_five, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  add_five(rpcOptions, std::move(callback), p_num);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::add_five(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_num) {
   add_five(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_num);
@@ -1707,6 +1737,21 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::py3::simple::SimpleServi
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_do_nothing(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_do_nothing, channel_);
+  do_nothing(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_do_nothing(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_do_nothing, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  do_nothing(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::do_nothing(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   do_nothing(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -1868,6 +1913,21 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::py3::simple::SimpleSer
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_concat, channel_);
+  concat(rpcOptions, std::move(callback), p_first, p_second);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_concat, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  concat(rpcOptions, std::move(callback), p_first, p_second);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::concat(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_first, const ::std::string& p_second) {
   concat(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_first, p_second);
@@ -2029,6 +2089,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_get_value, channel_);
+  get_value(rpcOptions, std::move(callback), p_simple_struct);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_value, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_value(rpcOptions, std::move(callback), p_simple_struct);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_value(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::SimpleStruct& p_simple_struct) {
   get_value(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_simple_struct);
@@ -2192,6 +2267,21 @@ folly::SemiFuture<bool> apache::thrift::Client<::py3::simple::SimpleService>::se
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<bool>>(std::move(promise), recv_wrapped_negate, channel_);
+  negate(rpcOptions, std::move(callback), p_input);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_negate, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  negate(rpcOptions, std::move(callback), p_input);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::negate(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, bool p_input) {
   negate(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_input);
@@ -2355,6 +2445,21 @@ folly::SemiFuture<::std::int8_t> apache::thrift::Client<::py3::simple::SimpleSer
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int8_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int8_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int8_t>>(std::move(promise), recv_wrapped_tiny, channel_);
+  tiny(rpcOptions, std::move(callback), p_input);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int8_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_tiny, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  tiny(rpcOptions, std::move(callback), p_input);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::tiny(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int8_t p_input) {
   tiny(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_input);
@@ -2518,6 +2623,21 @@ folly::SemiFuture<::std::int16_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int16_t>>(std::move(promise), recv_wrapped_small, channel_);
+  small(rpcOptions, std::move(callback), p_input);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_small, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  small(rpcOptions, std::move(callback), p_input);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::small(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_input) {
   small(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_input);
@@ -2681,6 +2801,21 @@ folly::SemiFuture<::std::int64_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int64_t>>(std::move(promise), recv_wrapped_big, channel_);
+  big(rpcOptions, std::move(callback), p_input);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_big, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  big(rpcOptions, std::move(callback), p_input);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::big(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_input) {
   big(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_input);
@@ -2844,6 +2979,21 @@ folly::SemiFuture<double> apache::thrift::Client<::py3::simple::SimpleService>::
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_two(apache::thrift::RpcOptions& rpcOptions, double p_input) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<double>>(std::move(promise), recv_wrapped_two, channel_);
+  two(rpcOptions, std::move(callback), p_input);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_two(apache::thrift::RpcOptions& rpcOptions, double p_input) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_two, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  two(rpcOptions, std::move(callback), p_input);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::two(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, double p_input) {
   two(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_input);
@@ -3007,6 +3157,21 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::py3::simple::SimpleServi
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_expected_exception(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_expected_exception, channel_);
+  expected_exception(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_expected_exception(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_expected_exception, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  expected_exception(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::expected_exception(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   expected_exception(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -3168,6 +3333,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_unexpected_exception(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_unexpected_exception, channel_);
+  unexpected_exception(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_unexpected_exception(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_unexpected_exception, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  unexpected_exception(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::unexpected_exception(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   unexpected_exception(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -3331,6 +3511,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_sum_i16_list, channel_);
+  sum_i16_list(rpcOptions, std::move(callback), p_numbers);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_sum_i16_list, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  sum_i16_list(rpcOptions, std::move(callback), p_numbers);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_i16_list(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::int16_t>& p_numbers) {
   sum_i16_list(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_numbers);
@@ -3494,6 +3689,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_sum_i32_list, channel_);
+  sum_i32_list(rpcOptions, std::move(callback), p_numbers);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_sum_i32_list, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  sum_i32_list(rpcOptions, std::move(callback), p_numbers);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_i32_list(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::int32_t>& p_numbers) {
   sum_i32_list(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_numbers);
@@ -3657,6 +3867,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_sum_i64_list, channel_);
+  sum_i64_list(rpcOptions, std::move(callback), p_numbers);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_sum_i64_list, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  sum_i64_list(rpcOptions, std::move(callback), p_numbers);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_i64_list(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::int64_t>& p_numbers) {
   sum_i64_list(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_numbers);
@@ -3820,6 +4045,21 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::py3::simple::SimpleSer
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_concat_many, channel_);
+  concat_many(rpcOptions, std::move(callback), p_words);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_concat_many, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  concat_many(rpcOptions, std::move(callback), p_words);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::concat_many(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_words) {
   concat_many(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_words);
@@ -3981,6 +4221,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_count_structs, channel_);
+  count_structs(rpcOptions, std::move(callback), p_items);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_count_structs, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  count_structs(rpcOptions, std::move(callback), p_items);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::count_structs(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
   count_structs(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_items);
@@ -4144,6 +4399,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_sum_set, channel_);
+  sum_set(rpcOptions, std::move(callback), p_numbers);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_sum_set, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  sum_set(rpcOptions, std::move(callback), p_numbers);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_set(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::set<::std::int32_t>& p_numbers) {
   sum_set(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_numbers);
@@ -4307,6 +4577,21 @@ folly::SemiFuture<bool> apache::thrift::Client<::py3::simple::SimpleService>::se
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<bool>>(std::move(promise), recv_wrapped_contains_word, channel_);
+  contains_word(rpcOptions, std::move(callback), p_words, p_word);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_contains_word, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  contains_word(rpcOptions, std::move(callback), p_words, p_word);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::contains_word(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
   contains_word(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_words, p_word);
@@ -4470,6 +4755,21 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::py3::simple::SimpleSer
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_get_map_value, channel_);
+  get_map_value(rpcOptions, std::move(callback), p_words, p_key);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_map_value, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_map_value(rpcOptions, std::move(callback), p_words, p_key);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_map_value(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
   get_map_value(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_words, p_key);
@@ -4631,6 +4931,21 @@ folly::SemiFuture<::std::int16_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int16_t>>(std::move(promise), recv_wrapped_map_length, channel_);
+  map_length(rpcOptions, std::move(callback), p_items);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_map_length, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  map_length(rpcOptions, std::move(callback), p_items);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::map_length(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
   map_length(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_items);
@@ -4794,6 +5109,21 @@ folly::SemiFuture<::std::int16_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int16_t>>(std::move(promise), recv_wrapped_sum_map_values, channel_);
+  sum_map_values(rpcOptions, std::move(callback), p_items);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int16_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_sum_map_values, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  sum_map_values(rpcOptions, std::move(callback), p_items);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::sum_map_values(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::int16_t>& p_items) {
   sum_map_values(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_items);
@@ -4957,6 +5287,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_complex_sum_i32, channel_);
+  complex_sum_i32(rpcOptions, std::move(callback), p_counter);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_complex_sum_i32, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  complex_sum_i32(rpcOptions, std::move(callback), p_counter);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::complex_sum_i32(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::ComplexStruct& p_counter) {
   complex_sum_i32(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_counter);
@@ -5120,6 +5465,21 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::py3::simple::SimpleSer
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_repeat_name, channel_);
+  repeat_name(rpcOptions, std::move(callback), p_counter);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_repeat_name, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  repeat_name(rpcOptions, std::move(callback), p_counter);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::repeat_name(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::ComplexStruct& p_counter) {
   repeat_name(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_counter);
@@ -5281,6 +5641,21 @@ folly::SemiFuture<::py3::simple::SimpleStruct> apache::thrift::Client<::py3::sim
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_struct(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::py3::simple::SimpleStruct>>(std::move(promise), recv_wrapped_get_struct, channel_);
+  get_struct(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_struct(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_struct, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_struct(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_struct(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   get_struct(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -5442,6 +5817,21 @@ folly::SemiFuture<::std::vector<::std::int32_t>> apache::thrift::Client<::py3::s
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::vector<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::vector<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::vector<::std::int32_t>>>(std::move(promise), recv_wrapped_fib, channel_);
+  fib(rpcOptions, std::move(callback), p_n);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::vector<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_fib, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  fib(rpcOptions, std::move(callback), p_n);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::fib(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_n) {
   fib(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_n);
@@ -5603,6 +5993,21 @@ folly::SemiFuture<::std::set<::std::string>> apache::thrift::Client<::py3::simpl
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::set<::std::string>>>(std::move(promise), recv_wrapped_unique_words, channel_);
+  unique_words(rpcOptions, std::move(callback), p_words);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_unique_words, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  unique_words(rpcOptions, std::move(callback), p_words);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::unique_words(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_words) {
   unique_words(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_words);
@@ -5764,6 +6169,21 @@ folly::SemiFuture<::std::map<::std::string, ::std::int16_t>> apache::thrift::Cli
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::map<::std::string, ::std::int16_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::map<::std::string, ::std::int16_t>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::map<::std::string, ::std::int16_t>>>(std::move(promise), recv_wrapped_words_count, channel_);
+  words_count(rpcOptions, std::move(callback), p_words);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::map<::std::string, ::std::int16_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_words_count, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  words_count(rpcOptions, std::move(callback), p_words);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::words_count(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_words) {
   words_count(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_words);
@@ -5925,6 +6345,21 @@ folly::SemiFuture<::py3::simple::AnEnum> apache::thrift::Client<::py3::simple::S
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::py3::simple::AnEnum, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::py3::simple::AnEnum, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::py3::simple::AnEnum>>(std::move(promise), recv_wrapped_set_enum, channel_);
+  set_enum(rpcOptions, std::move(callback), p_in_enum);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::py3::simple::AnEnum, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_set_enum, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  set_enum(rpcOptions, std::move(callback), p_in_enum);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::set_enum(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::py3::simple::AnEnum p_in_enum) {
   set_enum(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_in_enum);
@@ -6088,6 +6523,21 @@ folly::SemiFuture<::std::vector<::std::vector<::std::int32_t>>> apache::thrift::
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::vector<::std::vector<::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::vector<::std::vector<::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::vector<::std::vector<::std::int32_t>>>>(std::move(promise), recv_wrapped_list_of_lists, channel_);
+  list_of_lists(rpcOptions, std::move(callback), p_num_lists, p_num_items);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::vector<::std::vector<::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_list_of_lists, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  list_of_lists(rpcOptions, std::move(callback), p_num_lists, p_num_items);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::list_of_lists(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
   list_of_lists(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_num_lists, p_num_items);
@@ -6249,6 +6699,21 @@ folly::SemiFuture<::std::map<::std::string, ::std::map<::std::string, ::std::int
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>(std::move(promise), recv_wrapped_word_character_frequency, channel_);
+  word_character_frequency(rpcOptions, std::move(callback), p_sentence);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_word_character_frequency, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  word_character_frequency(rpcOptions, std::move(callback), p_sentence);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::word_character_frequency(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_sentence) {
   word_character_frequency(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_sentence);
@@ -6410,6 +6875,21 @@ folly::SemiFuture<::std::vector<::std::set<::std::string>>> apache::thrift::Clie
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::vector<::std::set<::std::string>>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::vector<::std::set<::std::string>>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::vector<::std::set<::std::string>>>>(std::move(promise), recv_wrapped_list_of_sets, channel_);
+  list_of_sets(rpcOptions, std::move(callback), p_some_words);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::vector<::std::set<::std::string>>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_list_of_sets, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  list_of_sets(rpcOptions, std::move(callback), p_some_words);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::list_of_sets(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_some_words) {
   list_of_sets(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_some_words);
@@ -6571,6 +7051,21 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::SimpleSe
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_nested_map_argument, channel_);
+  nested_map_argument(rpcOptions, std::move(callback), p_struct_map);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_nested_map_argument, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  nested_map_argument(rpcOptions, std::move(callback), p_struct_map);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::nested_map_argument(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
   nested_map_argument(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_struct_map);
@@ -6734,6 +7229,21 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::py3::simple::SimpleSer
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_make_sentence, channel_);
+  make_sentence(rpcOptions, std::move(callback), p_word_chars);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_make_sentence, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  make_sentence(rpcOptions, std::move(callback), p_word_chars);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::make_sentence(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
   make_sentence(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_word_chars);
@@ -6895,6 +7405,21 @@ folly::SemiFuture<::std::set<::std::int32_t>> apache::thrift::Client<::py3::simp
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::set<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::set<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::set<::std::int32_t>>>(std::move(promise), recv_wrapped_get_union, channel_);
+  get_union(rpcOptions, std::move(callback), p_sets);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::set<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_union, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_union(rpcOptions, std::move(callback), p_sets);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_union(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
   get_union(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_sets);
@@ -7056,6 +7581,21 @@ folly::SemiFuture<::std::set<::std::string>> apache::thrift::Client<::py3::simpl
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::set<::std::string>>>(std::move(promise), recv_wrapped_get_keys, channel_);
+  get_keys(rpcOptions, std::move(callback), p_string_map);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_keys, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_keys(rpcOptions, std::move(callback), p_string_map);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_keys(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
   get_keys(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_string_map);
@@ -7217,6 +7757,21 @@ folly::SemiFuture<double> apache::thrift::Client<::py3::simple::SimpleService>::
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<double>>(std::move(promise), recv_wrapped_lookup_double, channel_);
+  lookup_double(rpcOptions, std::move(callback), p_key);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<double, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_lookup_double, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  lookup_double(rpcOptions, std::move(callback), p_key);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::lookup_double(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int32_t p_key) {
   lookup_double(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_key);
@@ -7380,6 +7935,21 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::py3::simple::SimpleSer
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_retrieve_binary, channel_);
+  retrieve_binary(rpcOptions, std::move(callback), p_something);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_retrieve_binary, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  retrieve_binary(rpcOptions, std::move(callback), p_something);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::retrieve_binary(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::string& p_something) {
   retrieve_binary(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_something);
@@ -7541,6 +8111,21 @@ folly::SemiFuture<::std::set<::std::string>> apache::thrift::Client<::py3::simpl
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::set<::std::string>>>(std::move(promise), recv_wrapped_contain_binary, channel_);
+  contain_binary(rpcOptions, std::move(callback), p_binaries);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::set<::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_contain_binary, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  contain_binary(rpcOptions, std::move(callback), p_binaries);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::contain_binary(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::std::string>& p_binaries) {
   contain_binary(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_binaries);
@@ -7702,6 +8287,21 @@ folly::SemiFuture<::std::vector<::py3::simple::AnEnum>> apache::thrift::Client<:
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::std::vector<::py3::simple::AnEnum>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::vector<::py3::simple::AnEnum>, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::vector<::py3::simple::AnEnum>>>(std::move(promise), recv_wrapped_contain_enum, channel_);
+  contain_enum(rpcOptions, std::move(callback), p_the_enum);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::std::vector<::py3::simple::AnEnum>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_contain_enum, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  contain_enum(rpcOptions, std::move(callback), p_the_enum);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::contain_enum(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
   contain_enum(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_the_enum);
@@ -7863,6 +8463,21 @@ folly::SemiFuture<::py3::simple::BinaryUnionStruct> apache::thrift::Client<::py3
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::py3::simple::BinaryUnionStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::py3::simple::BinaryUnionStruct, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::py3::simple::BinaryUnionStruct>>(std::move(promise), recv_wrapped_get_binary_union_struct, channel_);
+  get_binary_union_struct(rpcOptions, std::move(callback), p_u);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::py3::simple::BinaryUnionStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_binary_union_struct, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_binary_union_struct(rpcOptions, std::move(callback), p_u);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_binary_union_struct(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::py3::simple::BinaryUnion& p_u) {
   get_binary_union_struct(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_u);
@@ -8024,6 +8639,21 @@ folly::SemiFuture<::py3::simple::SimpleStruct> apache::thrift::Client<::py3::sim
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::py3::simple::SimpleStruct>>(std::move(promise), recv_wrapped_get_struct_hidden, channel_);
+  get_struct_hidden(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_struct_hidden, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_struct_hidden(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hidden(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   get_struct_hidden(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));

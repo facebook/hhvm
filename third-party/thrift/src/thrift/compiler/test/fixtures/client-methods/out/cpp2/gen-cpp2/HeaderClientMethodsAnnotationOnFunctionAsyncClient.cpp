@@ -359,6 +359,21 @@ folly::SemiFuture<::cpp2::EchoResponse> apache::thrift::Client<::cpp2::HeaderCli
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::cpp2::EchoResponse, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnFunction>::header_future_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::cpp2::EchoResponse, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::cpp2::EchoResponse>>(std::move(promise), recv_wrapped_echo_2, channel_);
+  echo_2(rpcOptions, std::move(callback), p_request);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::cpp2::EchoResponse, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnFunction>::header_semifuture_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_echo_2, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  echo_2(rpcOptions, std::move(callback), p_request);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnFunction>::echo_2(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::cpp2::EchoRequest& p_request) {
   echo_2(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_request);

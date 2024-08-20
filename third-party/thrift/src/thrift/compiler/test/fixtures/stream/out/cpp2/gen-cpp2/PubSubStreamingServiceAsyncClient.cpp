@@ -414,6 +414,13 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
 }
 
 
+folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_returnstream(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_returnstream, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  returnstream(rpcOptions, std::move(callback), p_i32_from, p_i32_to);
+  return std::move(callbackAndFuture.second);
+}
+
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
@@ -564,6 +571,13 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   return std::move(callbackAndFuture.second);
 }
 
+
+folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_streamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_streamthrows, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  streamthrows(rpcOptions, std::move(callback), p_foo);
+  return std::move(callbackAndFuture.second);
+}
 
 
 #if FOLLY_HAS_COROUTINES
@@ -716,6 +730,13 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
 }
 
 
+folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_servicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_servicethrows, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  servicethrows(rpcOptions, std::move(callback), p_foo);
+  return std::move(callbackAndFuture.second);
+}
+
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
@@ -866,6 +887,13 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   return std::move(callbackAndFuture.second);
 }
 
+
+folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_servicethrows2, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  servicethrows2(rpcOptions, std::move(callback), p_foo);
+  return std::move(callbackAndFuture.second);
+}
 
 
 #if FOLLY_HAS_COROUTINES
@@ -1018,6 +1046,13 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
 }
 
 
+folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_boththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_boththrows, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  boththrows(rpcOptions, std::move(callback), p_foo);
+  return std::move(callbackAndFuture.second);
+}
+
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
@@ -1168,6 +1203,13 @@ folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t
   return std::move(callbackAndFuture.second);
 }
 
+
+folly::SemiFuture<std::pair<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_responseandstreamstreamthrows, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  responseandstreamstreamthrows(rpcOptions, std::move(callback), p_foo);
+  return std::move(callbackAndFuture.second);
+}
 
 
 #if FOLLY_HAS_COROUTINES
@@ -1320,6 +1362,13 @@ folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t
 }
 
 
+folly::SemiFuture<std::pair<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_responseandstreamservicethrows, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  responseandstreamservicethrows(rpcOptions, std::move(callback), p_foo);
+  return std::move(callbackAndFuture.second);
+}
+
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
@@ -1471,6 +1520,13 @@ folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t
 }
 
 
+folly::SemiFuture<std::pair<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_responseandstreamboththrows, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  responseandstreamboththrows(rpcOptions, std::move(callback), p_foo);
+  return std::move(callbackAndFuture.second);
+}
+
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
@@ -1621,6 +1677,13 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   return std::move(callbackAndFuture.second);
 }
 
+
+folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PubSubStreamingService>::header_semifuture_returnstreamFast(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_returnstreamFast, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  returnstreamFast(rpcOptions, std::move(callback), p_i32_from, p_i32_to);
+  return std::move(callbackAndFuture.second);
+}
 
 
 #if FOLLY_HAS_COROUTINES

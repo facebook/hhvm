@@ -53,6 +53,10 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   virtual folly::Future<::std::int64_t> future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   virtual folly::SemiFuture<::std::int64_t> semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
+  virtual folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
+  virtual folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -172,6 +176,10 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   virtual folly::Future<::cpp2::Result> future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   virtual folly::SemiFuture<::cpp2::Result> semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
+  virtual folly::Future<std::pair<::cpp2::Result, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
+  virtual folly::SemiFuture<std::pair<::cpp2::Result, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -291,6 +299,10 @@ class Client<::cpp2::PrimitivesService> : public apache::thrift::GeneratedAsyncC
   virtual folly::Future<folly::Unit> future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

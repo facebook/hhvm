@@ -171,6 +171,10 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   virtual folly::Future<::std::int32_t> future_bar(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_bar(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_bar(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_bar(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

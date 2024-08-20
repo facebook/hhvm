@@ -56,6 +56,10 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
   virtual folly::Future<::facebook::thrift::test::MyI32_4873> future_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
   virtual folly::SemiFuture<::facebook::thrift::test::MyI32_4873> semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
+  virtual folly::Future<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
+  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
+  virtual folly::SemiFuture<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

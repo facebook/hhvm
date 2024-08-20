@@ -58,6 +58,10 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::Future<bool> future_simple_function(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "simple_function"} */
   virtual folly::SemiFuture<bool> semifuture_simple_function(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "simple_function"} */
+  virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_simple_function(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "simple_function"} */
+  virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_simple_function(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -177,6 +181,10 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::Future<folly::Unit> future_throws_function(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_throws_function(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_throws_function(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_throws_function(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -294,6 +302,10 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::Future<bool> future_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
   virtual folly::SemiFuture<bool> semifuture_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
+  virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
+  virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -413,6 +425,10 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::Future<::std::map<::std::int32_t, ::std::string>> future_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2);
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
   virtual folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> semifuture_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
+  virtual folly::Future<std::pair<::std::map<::std::int32_t, ::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
+  virtual folly::SemiFuture<std::pair<::std::map<::std::int32_t, ::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

@@ -52,6 +52,10 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<folly::Unit> future_ping(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "ping"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "ping"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_ping(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "ping"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -169,6 +173,10 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<::std::string> future_getRandomData(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getRandomData"} */
   virtual folly::SemiFuture<::std::string> semifuture_getRandomData(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getRandomData"} */
+  virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_getRandomData(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getRandomData"} */
+  virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_getRandomData(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -288,6 +296,10 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<folly::Unit> future_sink(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sink);
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "sink"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_sink(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sink);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "sink"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_sink(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sink);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "sink"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_sink(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sink);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -405,6 +417,10 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<folly::Unit> future_putDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::std::string& p_data);
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "putDataById"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_putDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::std::string& p_data);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "putDataById"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_putDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::std::string& p_data);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "putDataById"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_putDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::std::string& p_data);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -522,6 +538,10 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<bool> future_hasDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "hasDataById"} */
   virtual folly::SemiFuture<bool> semifuture_hasDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "hasDataById"} */
+  virtual folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_hasDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "hasDataById"} */
+  virtual folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_hasDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -641,6 +661,10 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<::std::string> future_getDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getDataById"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getDataById"} */
+  virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_getDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getDataById"} */
+  virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_getDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -760,6 +784,10 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<folly::Unit> future_deleteDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "deleteDataById"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_deleteDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "deleteDataById"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_deleteDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
+  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "deleteDataById"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_deleteDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

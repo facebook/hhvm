@@ -53,6 +53,10 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<folly::Unit> future_f(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_f(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_f(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_f(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -166,6 +170,8 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::number>> semifuture_numbers();
   /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::number>> semifuture_numbers(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::cpp2::number>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_numbers(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -285,6 +291,10 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<::std::string> future_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
   /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   virtual folly::SemiFuture<::std::string> semifuture_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
+  virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
+  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
+  virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

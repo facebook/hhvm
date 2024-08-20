@@ -182,6 +182,21 @@ folly::SemiFuture<::facebook::thrift::test::CountingStruct> apache::thrift::Clie
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::facebook::thrift::test::CountingStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::AdapterService>::header_future_count(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::facebook::thrift::test::CountingStruct, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::facebook::thrift::test::CountingStruct>>(std::move(promise), recv_wrapped_count, channel_);
+  count(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::facebook::thrift::test::CountingStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::AdapterService>::header_semifuture_count(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_count, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  count(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::facebook::thrift::test::AdapterService>::count(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   count(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -343,6 +358,21 @@ folly::SemiFuture<::facebook::thrift::test::HeapAllocated> apache::thrift::Clien
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::facebook::thrift::test::HeapAllocated, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::AdapterService>::header_future_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::facebook::thrift::test::HeapAllocated, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::facebook::thrift::test::HeapAllocated>>(std::move(promise), recv_wrapped_adaptedTypes, channel_);
+  adaptedTypes(rpcOptions, std::move(callback), p_arg);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::facebook::thrift::test::HeapAllocated, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::AdapterService>::header_semifuture_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_adaptedTypes, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  adaptedTypes(rpcOptions, std::move(callback), p_arg);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::facebook::thrift::test::AdapterService>::adaptedTypes(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::facebook::thrift::test::HeapAllocated& p_arg) {
   adaptedTypes(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_arg);

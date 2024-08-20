@@ -56,6 +56,10 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   virtual folly::Future<::facebook::thrift::test::CountingStruct> future_count(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */
   virtual folly::SemiFuture<::facebook::thrift::test::CountingStruct> semifuture_count(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */
+  virtual folly::Future<std::pair<::facebook::thrift::test::CountingStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_count(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */
+  virtual folly::SemiFuture<std::pair<::facebook::thrift::test::CountingStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_count(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -175,6 +179,10 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   virtual folly::Future<::facebook::thrift::test::HeapAllocated> future_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg);
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
   virtual folly::SemiFuture<::facebook::thrift::test::HeapAllocated> semifuture_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg);
+  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
+  virtual folly::Future<std::pair<::facebook::thrift::test::HeapAllocated, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg);
+  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
+  virtual folly::SemiFuture<std::pair<::facebook::thrift::test::HeapAllocated, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

@@ -52,6 +52,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   virtual folly::Future<folly::Unit> future_mapList(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapList"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_mapList(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapList"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mapList(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapList"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mapList(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -169,6 +173,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   virtual folly::Future<folly::Unit> future_mapSet(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapSet"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_mapSet(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapSet"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mapSet(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "mapSet"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mapSet(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -286,6 +294,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   virtual folly::Future<folly::Unit> future_listMap(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listMap"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_listMap(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listMap"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_listMap(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listMap"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_listMap(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -403,6 +415,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   virtual folly::Future<folly::Unit> future_listSet(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listSet"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_listSet(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listSet"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_listSet(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "listSet"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_listSet(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -520,6 +536,10 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
   virtual folly::Future<folly::Unit> future_turtles(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "turtles"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_turtles(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "turtles"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_turtles(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/params/src/module.thrift", "service": "NestedContainers", "function": "turtles"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_turtles(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

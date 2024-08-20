@@ -57,6 +57,10 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   virtual folly::Future<::apache::thrift::fixtures::types::SomeMap> future_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m);
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "bounce_map"} */
   virtual folly::SemiFuture<::apache::thrift::fixtures::types::SomeMap> semifuture_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m);
+  /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "bounce_map"} */
+  virtual folly::Future<std::pair<::apache::thrift::fixtures::types::SomeMap, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m);
+  /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "bounce_map"} */
+  virtual folly::SemiFuture<std::pair<::apache::thrift::fixtures::types::SomeMap, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -176,6 +180,10 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
   virtual folly::Future<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>> future_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r);
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "binary_keyed_map"} */
   virtual folly::SemiFuture<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>> semifuture_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r);
+  /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "binary_keyed_map"} */
+  virtual folly::Future<std::pair<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r);
+  /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "binary_keyed_map"} */
+  virtual folly::SemiFuture<std::pair<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

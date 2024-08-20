@@ -175,6 +175,10 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public apache::t
   virtual folly::Future<::cpp2::EchoResponse> future_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
   /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo_2"} */
   virtual folly::SemiFuture<::cpp2::EchoResponse> semifuture_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
+  /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo_2"} */
+  virtual folly::Future<std::pair<::cpp2::EchoResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
+  /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo_2"} */
+  virtual folly::SemiFuture<std::pair<::cpp2::EchoResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

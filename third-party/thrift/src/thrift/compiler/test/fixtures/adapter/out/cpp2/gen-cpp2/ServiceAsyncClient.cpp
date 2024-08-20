@@ -155,6 +155,21 @@ folly::SemiFuture<::facebook::thrift::test::MyI32_4873> apache::thrift::Client<:
   return std::move(callbackAndFuture.second);
 }
 
+folly::Future<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::Service>::header_future_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::facebook::thrift::test::MyI32_4873>>(std::move(promise), recv_wrapped_func, channel_);
+  func(rpcOptions, std::move(callback), p_arg1, p_arg2, p_arg3);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::SemiFuture<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::Service>::header_semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_func, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  func(rpcOptions, std::move(callback), p_arg1, p_arg2, p_arg3);
+  return std::move(callbackAndFuture.second);
+}
 
 void apache::thrift::Client<::facebook::thrift::test::Service>::func(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
   func(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_arg1, p_arg2, p_arg3);

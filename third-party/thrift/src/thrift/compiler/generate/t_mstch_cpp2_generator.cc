@@ -853,8 +853,6 @@ class cpp_mstch_function : public mstch_function {
             {"function:sync_returns_by_outparam?",
              &cpp_mstch_function::sync_returns_by_outparam},
             {"function:prefixed_name", &cpp_mstch_function::prefixed_name},
-            {"function:has_deprecated_header_client_methods",
-             &cpp_mstch_function::has_deprecated_header_client_methods},
         });
   }
   mstch::node event_based() {
@@ -889,14 +887,6 @@ class cpp_mstch_function : public mstch_function {
         ? fmt::format(
               "{}_{}", interface_->get_name(), cpp2::get_name(function_))
         : cpp_name();
-  }
-
-  mstch::node has_deprecated_header_client_methods() {
-    return static_cast<bool>(
-        function_->find_structured_annotation_or_null(
-            kCppGenerateDeprecatedHeaderClientMethodsUri) ||
-        interface_->find_structured_annotation_or_null(
-            kCppGenerateDeprecatedHeaderClientMethodsUri));
   }
 
  private:

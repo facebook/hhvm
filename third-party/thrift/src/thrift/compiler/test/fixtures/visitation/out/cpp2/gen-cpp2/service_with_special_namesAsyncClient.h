@@ -55,6 +55,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_get(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "get"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_get(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "get"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "get"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -174,6 +178,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_getter(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "getter"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_getter(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "getter"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_getter(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "getter"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_getter(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -293,6 +301,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_lists(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "lists"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_lists(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "lists"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_lists(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "lists"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_lists(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -412,6 +424,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_maps(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "maps"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_maps(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "maps"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_maps(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "maps"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_maps(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -531,6 +547,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_name(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "name"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_name(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "name"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_name(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "name"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_name(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -650,6 +670,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_name_to_value(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "name_to_value"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_name_to_value(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "name_to_value"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_name_to_value(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "name_to_value"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_name_to_value(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -769,6 +793,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_names(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "names"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_names(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "names"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_names(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "names"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_names(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -888,6 +916,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_prefix_tree(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "prefix_tree"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_prefix_tree(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "prefix_tree"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_prefix_tree(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "prefix_tree"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_prefix_tree(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1007,6 +1039,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_sets(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "sets"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_sets(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "sets"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_sets(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "sets"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_sets(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1126,6 +1162,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_setter(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "setter"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_setter(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "setter"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_setter(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "setter"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_setter(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1245,6 +1285,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_str(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "str"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_str(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "str"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_str(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "str"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_str(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1364,6 +1408,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_strings(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "strings"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_strings(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "strings"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_strings(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "strings"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_strings(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1483,6 +1531,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_type(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "type"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_type(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "type"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_type(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "type"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_type(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1602,6 +1654,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_value(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "value"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_value(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "value"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_value(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "value"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_value(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1721,6 +1777,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_value_to_name(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "value_to_name"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_value_to_name(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "value_to_name"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_value_to_name(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "value_to_name"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_value_to_name(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1840,6 +1900,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_values(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "values"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_values(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "values"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_values(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "values"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_values(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -1959,6 +2023,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_id(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "id"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_id(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "id"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_id(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "id"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_id(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2078,6 +2146,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_ids(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "ids"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_ids(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "ids"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_ids(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "ids"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_ids(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2197,6 +2269,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_descriptor(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "descriptor"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptor(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "descriptor"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_descriptor(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "descriptor"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_descriptor(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2316,6 +2392,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_descriptors(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "descriptors"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptors(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "descriptors"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_descriptors(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "descriptors"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_descriptors(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2435,6 +2515,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_key(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "key"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_key(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "key"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_key(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "key"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_key(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2554,6 +2638,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_keys(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "keys"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_keys(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "keys"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_keys(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "keys"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_keys(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2673,6 +2761,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_annotation(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "annotation"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotation(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "annotation"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_annotation(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "annotation"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_annotation(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2792,6 +2884,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_annotations(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "annotations"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotations(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "annotations"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_annotations(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "annotations"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_annotations(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -2911,6 +3007,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_member(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "member"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_member(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "member"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_member(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "member"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_member(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -3030,6 +3130,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_members(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "members"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_members(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "members"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_members(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "members"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_members(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -3149,6 +3253,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_field(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "field"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_field(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "field"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_field(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "field"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_field(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -3268,6 +3376,10 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::Future<::std::int32_t> future_fields(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "fields"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_fields(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "fields"} */
+  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_fields(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service_with_special_names", "function": "fields"} */
+  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_fields(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

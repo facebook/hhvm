@@ -49,6 +49,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstream"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_returnstream(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstream"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_returnstream(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -164,6 +166,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_streamthrows(::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "streamthrows"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_streamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "streamthrows"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_streamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -279,6 +283,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_servicethrows(::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_servicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_servicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -394,6 +400,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_servicethrows2(::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows2"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows2"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -509,6 +517,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_boththrows(::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "boththrows"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_boththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "boththrows"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_boththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -624,6 +634,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>> semifuture_responseandstreamstreamthrows(::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamstreamthrows"} */
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>> semifuture_responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamstreamthrows"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -739,6 +751,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>> semifuture_responseandstreamservicethrows(::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamservicethrows"} */
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>> semifuture_responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamservicethrows"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -854,6 +868,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>> semifuture_responseandstreamboththrows(::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamboththrows"} */
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>> semifuture_responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamboththrows"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -969,6 +985,8 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_returnstreamFast(::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
   /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstreamFast"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_returnstreamFast(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
+  /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstreamFast"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_returnstreamFast(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

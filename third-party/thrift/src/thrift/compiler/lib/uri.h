@@ -108,8 +108,6 @@ inline constexpr auto kCppTypeUri = "facebook.com/thrift/annotation/cpp/Type";
 inline constexpr auto kCppNameUri = "facebook.com/thrift/annotation/cpp/Name";
 inline constexpr auto kCppProcessInEbThreadUri =
     "facebook.com/thrift/annotation/cpp/ProcessInEbThreadUnsafe";
-inline constexpr auto kCppGenerateDeprecatedHeaderClientMethodsUri =
-    "facebook.com/thrift/annotation/cpp/GenerateDeprecatedHeaderClientMethods";
 
 // java
 inline constexpr auto kJavaMutableUri =

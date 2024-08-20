@@ -52,6 +52,10 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<folly::Unit> future_doBland(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doBland"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_doBland(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doBland"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_doBland(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doBland"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_doBland(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -169,6 +173,10 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<folly::Unit> future_doRaise(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_doRaise(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_doRaise(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_doRaise(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -286,6 +294,10 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<::std::string> future_get200(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
   virtual folly::SemiFuture<::std::string> semifuture_get200(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
+  virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get200(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
+  virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get200(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -405,6 +417,10 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::Future<::std::string> future_get500(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
   virtual folly::SemiFuture<::std::string> semifuture_get500(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
+  virtual folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get500(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
+  virtual folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get500(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

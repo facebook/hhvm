@@ -57,6 +57,10 @@ class Client<::cpp2::MyNode> : public ::cpp2::MyRootAsyncClient {
   virtual folly::Future<folly::Unit> future_do_mid(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyNode", "function": "do_mid"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_do_mid(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyNode", "function": "do_mid"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_do_mid(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyNode", "function": "do_mid"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_do_mid(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

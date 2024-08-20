@@ -183,6 +183,10 @@ class I final : public apache::thrift::InteractionHandle {
   virtual folly::Future<::cpp2::Foo> future_foo(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "A", "function": "foo"} */
   virtual folly::SemiFuture<::cpp2::Foo> semifuture_foo(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "A", "function": "foo"} */
+  virtual folly::Future<std::pair<::cpp2::Foo, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_foo(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "A", "function": "foo"} */
+  virtual folly::SemiFuture<std::pair<::cpp2::Foo, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_foo(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -325,6 +329,10 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
   virtual folly::Future<folly::Unit> future_bar(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::Foo& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "B", "function": "bar"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_bar(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::Foo& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "B", "function": "bar"} */
+  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_bar(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::Foo& p_foo);
+  /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "B", "function": "bar"} */
+  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_bar(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::Foo& p_foo);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -438,6 +446,8 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_stream_stuff();
   /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "B", "function": "stream_stuff"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_stream_stuff(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/single_file_service/src/module.thrift", "service": "B", "function": "stream_stuff"} */
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_stream_stuff(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

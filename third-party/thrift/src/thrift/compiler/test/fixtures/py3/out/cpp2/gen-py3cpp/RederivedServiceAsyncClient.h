@@ -57,10 +57,6 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
   virtual folly::Future<::std::int32_t> future_get_seven(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_seven(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
-  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_seven(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
-  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_seven(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

@@ -26,6 +26,7 @@ service DebugTestService {
 }
 
 service InstrumentationTestService {
+  @cpp.GenerateDeprecatedHeaderClientMethods
   void sendRequest();
   stream<i32> sendStreamingRequest();
   IOBuf sendPayload(1: i32 id, 2: string str);

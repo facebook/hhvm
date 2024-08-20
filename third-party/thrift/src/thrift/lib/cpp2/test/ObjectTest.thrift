@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
+cpp_include "thrift/test/AdapterTest.h"
+
 package "facebook.com/thrift/lib/test"
 
 struct Foo {
@@ -21,7 +25,22 @@ struct Foo {
   2: binary field_2;
 }
 
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+typedef Foo AdaptedFoo
+
 struct Bar {
   10: list<binary> field_3;
   20: Foo field_4;
+}
+
+struct MyStruct {
+  1: optional Foo foo;
+  2: optional list<Foo> foo_vector;
+  3: optional set<Foo> foo_set;
+  4: optional map<Foo, i32> foo_key_map;
+  5: optional map<i32, Foo> foo_value_map;
+  6: optional AdaptedFoo foo_adapted;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  7: optional list<Foo> foo_vector_adapted;
+  8: optional list<AdaptedFoo> foo_adapted_vector;
 }

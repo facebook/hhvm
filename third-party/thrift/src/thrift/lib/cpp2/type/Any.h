@@ -74,6 +74,13 @@ class AnyData : public detail::Wrap<AnyStruct> {
     get<infer_tag<T>>(v);
   }
 
+  template <typename Tag>
+  type::native_type<Tag> get() const {
+    type::native_type<Tag> v;
+    get<Tag>(v);
+    return v;
+  }
+
   bool isValid() const noexcept { return isValid(data_); }
 
   static bool isValid(const AnyStruct& any) noexcept;

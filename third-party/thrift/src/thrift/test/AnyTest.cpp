@@ -103,11 +103,12 @@ TYPED_TEST(AnyTestFixture, ToAny) {
       !std::is_same_v<TypeParam, binary_t>) {
     // Rely on infer_tag if TypeParam is not string_t or binary_t
     any = AnyData::toAny(value);
-    std::as_const(any).get(v1);
+    any.get(v1);
   } else {
     any = toAnyData<TypeParam>();
-    std::as_const(any).get<TypeParam>(v1);
+    any.get<TypeParam>(v1);
   }
+  EXPECT_EQ(v1, any.get<TypeParam>());
   EXPECT_EQ(v1, value);
 
   EXPECT_EQ(any.type(), Type{TypeParam{}});
@@ -143,10 +144,9 @@ bool contains(std::string_view s, std::string_view pattern) {
 
 TEST(AnyTest, GetTypeMismatch) {
   auto any = toAnyData<i32_t>();
-  int16_t i = 0;
   // We don't use EXPECT_THROW since we want to check the content
   try {
-    any.get<i16_t>(i);
+    any.get<i16_t>();
     EXPECT_TRUE(false);
   } catch (std::runtime_error& e) {
     EXPECT_TRUE(contains(e.what(), "Type mismatch"));
@@ -186,9 +186,7 @@ TYPED_TEST(AnyTestFixture, BinaryProtocol) {
   EXPECT_EQ(any.type(), Type{TypeParam{}});
   EXPECT_EQ(any.protocol(), Protocol::get<StandardProtocol::Binary>());
 
-  native_type<TypeParam> v;
-  any.get<TypeParam>(v);
-  EXPECT_EQ(v, value);
+  EXPECT_EQ(any.get<TypeParam>(), value);
 }
 
 TEST(AnyTest, isValid) {

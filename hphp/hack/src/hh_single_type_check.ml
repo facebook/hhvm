@@ -839,10 +839,11 @@ let parse_options () =
         parser_errors_only = default.parser_errors_only;
         no_parser_readonly_check = default.no_parser_readonly_check;
         experimental_features = default.experimental_features;
+        consider_unspecified_experimental_features_released =
+          default.consider_unspecified_experimental_features_released;
         (* These are set specifically for single type check *)
         use_legacy_experimental_feature_config = false;
         allow_unstable_features = true;
-        consider_unspecified_experimental_features_released = true;
         (* The remainder are set by the command line options *)
         is_systemlib = !is_systemlib;
         disable_legacy_soft_typehints = !disable_legacy_soft_typehints;

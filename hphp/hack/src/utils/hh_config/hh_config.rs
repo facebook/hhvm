@@ -224,6 +224,7 @@ impl HhConfig {
         )?;
 
         let default = ParserOptions::default();
+        let experimental_features = hhconfig.get_str("enable_experimental_stx_features");
         let po = ParserOptions {
             hhvm_compat_mode: default.hhvm_compat_mode,
             hhi_mode: default.hhi_mode,
@@ -287,13 +288,13 @@ impl HhConfig {
             unwrap_concurrent: default.unwrap_concurrent,
             stack_size: default.stack_size,
             use_legacy_experimental_feature_config: false,
-            experimental_features: hhconfig
-                .get_str("enable_experimental_stx_features")
-                .map_or(
-                    Ok::<_, anyhow::Error>(default.experimental_features),
-                    parse_experimental_features,
-                )?,
-            consider_unspecified_experimental_features_released: false,
+            experimental_features: experimental_features.map_or(
+                Ok::<_, anyhow::Error>(default.experimental_features),
+                parse_experimental_features,
+            )?,
+            // If there was no experimental features status list in configuration, consider all
+            // existing experimental features to be released and hence usable.
+            consider_unspecified_experimental_features_released: experimental_features.is_none(),
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {

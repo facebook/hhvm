@@ -1144,24 +1144,61 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
         match &arg.children {
             LiteralExpression(x) => {
-                let text = self.text(&x.expression);
-                match FeatureName::from_str(escaper::unquote_str(text)) {
-                    Ok(feature) => feature.enable(
-                        &self.env.parser_options,
-                        self.env.is_hhi_mode(),
-                        &mut self.env.context.active_experimental_features,
-                        text,
-                        &mut |err| self.errors.push(make_error_from_node(node, err)),
-                    ),
-                    Err(_) => error_invalid_argument(
-                        self,
-                        format!(
-                            "there is no feature named {}.\nAvailable features are:\n\t{}",
+                let text = escaper::unquote_str(self.text(&x.expression));
+                let consider_all_possible_features = matches!(self.env.mode, Mode::ForCodegen)
+                    || self.env.is_hhi_mode()
+                    || self
+                        .env
+                        .parser_options
+                        .consider_unspecified_experimental_features_released
+                    || self
+                        .env
+                        .parser_options
+                        .use_legacy_experimental_feature_config;
+                match FeatureName::from_str(text) {
+                    Ok(feature)
+                        if consider_all_possible_features
+                            || self
+                                .env
+                                .parser_options
+                                .experimental_features
+                                .contains_key(text) =>
+                    {
+                        // We will enable a feature if
+                        // - we are in hhvm,
+                        // - we are enabling an experimental feature that is specified in the configuration,
+                        // - we are going to consider all experimental features as OngoingRelease status,
+                        // - we are in an .hhi file, or
+                        // - we are using the legacy hardcoded approach to experimental feature config,
+                        // Otherwise, we are in the typechecker, and the feature wasn't specified in the config, and we
+                        // want to signal an error for attempting to enable an invalid experimental feature.
+                        feature.enable(
+                            &self.env.parser_options,
+                            self.env.is_hhi_mode(),
+                            &mut self.env.context.active_experimental_features,
                             text,
-                            FeatureName::iter().join("\n\t")
+                            &mut |err| self.errors.push(make_error_from_node(node, err)),
                         )
-                        .as_str(),
-                    ),
+                    }
+                    _ => {
+                        let valid_features = if consider_all_possible_features {
+                            FeatureName::iter().join("\n\t")
+                        } else {
+                            self.env
+                                .parser_options
+                                .experimental_features
+                                .keys()
+                                .join("\n\t")
+                        };
+                        error_invalid_argument(
+                            self,
+                            format!(
+                                "there is no feature named {}.\nAvailable features are:\n\t{}",
+                                text, valid_features,
+                            )
+                            .as_str(),
+                        )
+                    }
                 }
             }
             _ => error_invalid_argument(self, "this is not a literal string expression"),

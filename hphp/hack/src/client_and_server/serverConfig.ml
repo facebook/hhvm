@@ -277,6 +277,7 @@ let reasons_config_opt config =
 let load_config config options =
   let ( >?? ) x y = Option.value x ~default:y in
   let po_opt = options.GlobalOptions.po in
+  let experimental_features = config_experimental_stx_features config in
   let po =
     ParserOptions.
       {
@@ -289,6 +290,8 @@ let load_config config options =
         no_parser_readonly_check = po_opt.no_parser_readonly_check;
         unwrap_concurrent = po_opt.unwrap_concurrent;
         parser_errors_only = po_opt.parser_errors_only;
+        use_legacy_experimental_feature_config =
+          po_opt.use_legacy_experimental_feature_config;
         (* The remainder are set in the config file *)
         is_systemlib = bool_opt "is_systemlib" config >?? po_opt.is_systemlib;
         disable_lval_as_an_expression =
@@ -349,11 +352,13 @@ let load_config config options =
         disable_hh_ignore_error =
           int_opt "disable_hh_ignore_error" config
           >?? po_opt.disable_hh_ignore_error;
-        use_legacy_experimental_feature_config = false;
         experimental_features =
-          config_experimental_stx_features config
-          >?? po_opt.experimental_features;
-        consider_unspecified_experimental_features_released = false;
+          experimental_features >?? po_opt.experimental_features;
+        (* If there was no experimental features status list in configuration,
+           consider all existing experimental features to be released and hence
+           usable. *)
+        consider_unspecified_experimental_features_released =
+          Option.is_none experimental_features;
       }
   in
   GlobalOptions.set
@@ -559,8 +564,6 @@ let load ~silent options : t * ServerLocalConfig.t =
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
               parser_errors_only = Option.is_some (ServerArgs.ai_mode options);
-              ParserOptions.consider_unspecified_experimental_features_released =
-                false;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:

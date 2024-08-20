@@ -156,6 +156,7 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> firstCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> fbthrift_semifuture_first(apache::thrift::RpcOptions& rpcOptions);
+  FOLLY_NOINLINE folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> fbthrift_semifuture_first(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::test::fixtures::basic-structured-annotations::annotated_inline_string>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual void second(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count);
@@ -276,6 +277,7 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> secondCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<bool> fbthrift_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
+  FOLLY_NOINLINE folly::SemiFuture<bool> fbthrift_semifuture_second(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<bool>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_count);
  public:
 };
 

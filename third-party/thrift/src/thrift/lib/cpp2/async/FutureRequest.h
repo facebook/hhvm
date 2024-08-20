@@ -42,6 +42,13 @@ class FutureCallbackHelper {
     std::move(result).error().first.throw_exception();
   }
 
+  static ClientReceiveState&& extractClientReceiveState(PromiseResult& result) {
+    if (result.hasValue()) {
+      return std::move(std::move(result).value().second);
+    }
+    return std::move(result).error().second;
+  }
+
   using CallbackProcessorType = std::conditional_t<
       std::is_same_v<Result, folly::Unit>,
       folly::exception_wrapper(ClientReceiveState&),
@@ -67,6 +74,31 @@ class FutureCallbackHelper {
       folly::exception_wrapper&& ew, ClientReceiveState&& state) {
     return folly::makeUnexpected(std::pair{std::move(ew), std::move(state)});
   }
+
+#if FOLLY_HAS_COROUTINES
+  static FOLLY_NOINLINE folly::SemiFuture<Result> executeWithClientInterceptors(
+      apache::thrift::ContextStack& contextStack,
+      folly::Function<folly::SemiFuture<PromiseResult>()>&& send) {
+    return contextStack.semifuture_processClientInterceptorsOnRequest()
+        .defer(
+            [send = std::move(send)](folly::Try<void>&& onRequestTry) mutable {
+              onRequestTry.throwUnlessValue();
+              return send();
+            })
+        .deferValue([](PromiseResult&& result) {
+          apache::thrift::ClientReceiveState clientReceiveState =
+              extractClientReceiveState(result);
+          auto* contextStack = clientReceiveState.ctx();
+          return contextStack->semifuture_processClientInterceptorsOnResponse()
+              .defer([result = std::move(result),
+                      keepAlive = std::move(clientReceiveState)](
+                         folly::Try<void>&& onResponseTry) mutable {
+                onResponseTry.throwUnlessValue();
+                return extractResult(std::move(result));
+              });
+        });
+  }
+#endif // FOLLY_HAS_COROUTINES
 };
 
 } // namespace detail

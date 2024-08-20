@@ -18,7 +18,7 @@ namespace facebook::common::mysql_client {
 
 // An operation representing a pending connection.  Constructed via
 // AsyncMysqlClient::beginConnection.
-class ConnectOperation : public Operation {
+class ConnectOperation : public OperationImpl {
  public:
   ~ConnectOperation() override;
 
@@ -52,7 +52,7 @@ class ConnectOperation : public Operation {
   ConnectOperation& setConnectionContext(
       std::shared_ptr<db::ConnectionContextBase> e) {
     CHECK_THROW(
-        state_ == OperationState::Unstarted, db::OperationStateException);
+        state() == OperationState::Unstarted, db::OperationStateException);
     connection_context_ = std::move(e);
     return *this;
   }
@@ -70,14 +70,14 @@ class ConnectOperation : public Operation {
 
   db::ConnectionContextBase* getConnectionContext() {
     CHECK_THROW(
-        state_ == OperationState::Unstarted, db::OperationStateException);
+        state() == OperationState::Unstarted, db::OperationStateException);
     return connection_context_.get();
   }
 
   const db::ConnectionContextBase* getConnectionContext() const {
     CHECK_THROW(
-        state_ == OperationState::Unstarted ||
-            state_ == OperationState::Completed,
+        state() == OperationState::Unstarted ||
+            state() == OperationState::Completed,
         db::OperationStateException);
     return connection_context_.get();
   }

@@ -20,7 +20,7 @@ using namespace std::chrono_literals;
 ConnectOperation::ConnectOperation(
     MysqlClientBase* mysql_client,
     ConnectionKey conn_key)
-    : Operation(std::make_unique<Operation::OwnedConnection>(
+    : OperationImpl(std::make_unique<OperationImpl::OwnedConnection>(
           mysql_client->createConnection(conn_key, nullptr))),
       conn_key_(std::move(conn_key)),
       flags_(CLIENT_MULTI_STATEMENTS),
@@ -117,7 +117,7 @@ ConnectOperation& ConnectOperation::setTcpTimeout(Duration timeout) {
 
 ConnectOperation& ConnectOperation::setTotalTimeout(Duration total_timeout) {
   conn_options_.setTotalTimeout(total_timeout);
-  Operation::setTimeout(min(timeout_, total_timeout));
+  Operation::setTimeout(min(getTimeout(), total_timeout));
   return *this;
 }
 ConnectOperation& ConnectOperation::setConnectAttempts(uint32_t max_attempts) {
@@ -164,7 +164,7 @@ bool ConnectOperation::shouldCompleteOperation(OperationResult result) {
     return true;
   }
 
-  return stopwatch_->elapsed(conn_options_.getTotalTimeout() + 1ms);
+  return hasOpElapsed(conn_options_.getTotalTimeout() + 1ms);
 }
 
 void ConnectOperation::attemptFailed(OperationResult result) {
@@ -174,8 +174,8 @@ void ConnectOperation::attemptFailed(OperationResult result) {
     return;
   }
 
-  // We need to update opDuration_ here because the logging function needs it.
-  opDuration_ = stopwatch_->elapsed();
+  // We need to update duration_ here because the logging function needs it.
+  setDuration();
   logConnectCompleted(result);
 
   tcp_timeout_handler_.cancelTimeout();
@@ -185,9 +185,9 @@ void ConnectOperation::attemptFailed(OperationResult result) {
   conn().close();
 
   // Adjust timeout
-  Duration timeout_attempt_based =
-      conn_options_.getTimeout() + stopwatch_->elapsed();
-  timeout_ = min(timeout_attempt_based, conn_options_.getTotalTimeout());
+  Duration timeout_attempt_based = conn_options_.getTimeout() + opElapsed();
+  setTimeoutInternal(
+      min(timeout_attempt_based, conn_options_.getTotalTimeout()));
   specializedRun();
 }
 
@@ -204,7 +204,7 @@ void ConnectOperation::specializedRunImpl() {
   }
   removeClientReference();
 
-  conn().setConnectAttributes(attributes_);
+  conn().setConnectAttributes(getAttributes());
 
   if (const auto& optCompressionLib = getCompression()) {
     conn().setCompression(*optCompressionLib);
@@ -233,7 +233,7 @@ void ConnectOperation::specializedRunImpl() {
   }
 
   // If the tcp timeout value is not set in conn options, use the default value
-  auto timeout = std::chrono::duration_cast<std::chrono::milliseconds>(
+  auto timeout = std::chrono::duration_cast<Millis>(
       conn_options_.getConnectTcpTimeout().value_or(
           Duration(FLAGS_async_mysql_connect_tcp_timeout_micros)));
   // Set the connect timeout in mysql options and also on tcp_timeout_handler if
@@ -327,8 +327,7 @@ void ConnectOperation::tcpConnectTimeoutTriggered() {
 void ConnectOperation::timeoutHandler(
     bool isTcpTimeout,
     bool isPoolConnection) {
-  auto deltaUs = stopwatch_->elapsed();
-  auto deltaMs = std::chrono::duration_cast<std::chrono::milliseconds>(deltaUs);
+  auto deltaMs = opElapsedMs();
 
   auto cbDelayUs = client().callbackDelayMicrosAvg();
   bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
@@ -375,8 +374,8 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     client().logConnectionSuccess(
         db::CommonLoggingData(
             getOperationType(),
-            opDuration_,
-            timeout_,
+            elapsed(),
+            getTimeout(),
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
         conn().getKey(),
@@ -391,8 +390,8 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     client().logConnectionFailure(
         db::CommonLoggingData(
             getOperationType(),
-            opDuration_,
-            timeout_,
+            elapsed(),
+            getTimeout(),
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
         reason,
@@ -405,7 +404,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
 
 void ConnectOperation::maybeStoreSSLSession() {
   // If connection was successful
-  if (result_ != OperationResult::Succeeded || !conn().hasInitialized()) {
+  if (result() != OperationResult::Succeeded || !conn().hasInitialized()) {
     return;
   }
 
@@ -434,7 +433,7 @@ void ConnectOperation::specializedCompleteOperation() {
 
   // Can only log this on successful connections because unsuccessful
   // ones call mysql_close_free inside libmysql
-  if (result_ == OperationResult::Succeeded && conn().ok() &&
+  if (result() == OperationResult::Succeeded && conn().ok() &&
       connection_context_) {
     connection_context_->endpointVersion = conn().serverInfo();
   }
@@ -442,11 +441,11 @@ void ConnectOperation::specializedCompleteOperation() {
   // Cancel tcp timeout
   tcp_timeout_handler_.cancelTimeout();
 
-  logConnectCompleted(result_);
+  logConnectCompleted(result());
 
   // If connection_initialized_ is false the only way to complete the
   // operation is by cancellation
-  DCHECK(conn().hasInitialized() || result_ == OperationResult::Cancelled);
+  DCHECK(conn().hasInitialized() || result() == OperationResult::Cancelled);
 
   conn().setConnectionOptions(conn_options_);
   conn().setKillOnQueryTimeout(getKillOnQueryTimeout());

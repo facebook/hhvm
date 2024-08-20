@@ -176,8 +176,7 @@ template <>
 std::string AsyncConnectPoolOperation::createTimeoutErrorMessage(
     const PoolKeyStats& pool_key_stats,
     size_t per_key_limit) {
-  auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(
-      stopwatch_->elapsed());
+  auto delta = opElapsedMs();
   auto cbDelayUs = client().callbackDelayMicrosAvg();
   bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
 

@@ -62,10 +62,8 @@ MysqlHandler::Status SyncMysqlClient::SyncMysqlHandler::tryConnect(
     const ConnectionOptions& opts,
     const ConnectionKey& key,
     int flags) {
-  auto qtmo = std::chrono::duration_cast<std::chrono::milliseconds>(
-      opts.getQueryTimeout());
-  auto ctmo =
-      std::chrono::duration_cast<std::chrono::milliseconds>(opts.getTimeout());
+  auto qtmo = std::chrono::duration_cast<Millis>(opts.getQueryTimeout());
+  auto ctmo = std::chrono::duration_cast<Millis>(opts.getTimeout());
 
   conn.setConnectTimeout(ctmo);
   conn.setReadTimeout(qtmo);

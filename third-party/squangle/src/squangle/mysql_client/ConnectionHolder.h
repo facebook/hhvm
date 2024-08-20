@@ -230,15 +230,15 @@ class ConnectionHolder : public InternalConnection {
     internalConn_->setCertValidatorCallback(cb, context);
   }
 
-  void setConnectTimeout(std::chrono::milliseconds timeout) const override {
+  void setConnectTimeout(Millis timeout) const override {
     internalConn_->setConnectTimeout(timeout);
   }
 
-  void setReadTimeout(std::chrono::milliseconds timeout) const override {
+  void setReadTimeout(Millis timeout) const override {
     internalConn_->setReadTimeout(timeout);
   }
 
-  void setWriteTimeout(std::chrono::milliseconds timeout) const override {
+  void setWriteTimeout(Millis timeout) const override {
     internalConn_->setWriteTimeout(timeout);
   }
 

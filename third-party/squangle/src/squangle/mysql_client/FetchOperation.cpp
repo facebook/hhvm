@@ -22,12 +22,12 @@ namespace facebook::common::mysql_client {
 FetchOperation::FetchOperation(
     std::unique_ptr<ConnectionProxy> conn,
     std::vector<Query>&& queries)
-    : Operation(std::move(conn)), queries_(std::move(queries)) {}
+    : OperationImpl(std::move(conn)), queries_(std::move(queries)) {}
 
 FetchOperation::FetchOperation(
     std::unique_ptr<ConnectionProxy> conn,
     MultiQuery&& multi_query)
-    : Operation(std::move(conn)), queries_(std::move(multi_query)) {}
+    : OperationImpl(std::move(conn)), queries_(std::move(multi_query)) {}
 
 FetchOperation& FetchOperation::setUseChecksum(bool useChecksum) noexcept {
   use_checksum_ = useChecksum;
@@ -55,7 +55,7 @@ void FetchOperation::specializedRunImpl() {
   try {
     rendered_query_ = queries_.renderQuery(&conn().getInternalConnection());
 
-    if (auto ret = conn().setQueryAttributes(attributes_)) {
+    if (auto ret = conn().setQueryAttributes(getAttributes())) {
       setAsyncClientError(ret, "Failed to set query attributes");
       completeOperation(OperationResult::Failed);
       return;
@@ -336,7 +336,7 @@ void FetchOperation::actionable() {
     if (active_fetch_action_ == FetchAction::CompleteOperation) {
       logThreadBlockTimeGuard.dismiss();
       if (cancel_) {
-        state_ = OperationState::Cancelling;
+        setState(OperationState::Cancelling);
         completeOperation(OperationResult::Cancelled);
       } else if (mysql_errno_ != 0) {
         completeOperation(OperationResult::Failed);
@@ -387,8 +387,7 @@ void FetchOperation::resume() {
 
 void FetchOperation::specializedTimeoutTriggered() {
   DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
-  auto deltaUs = stopwatch_->elapsed();
-  auto deltaMs = std::chrono::duration_cast<std::chrono::milliseconds>(deltaUs);
+  auto deltaMs = opElapsedMs();
 
   if (conn().getKillOnQueryTimeout()) {
     killRunningQuery();
@@ -453,20 +452,20 @@ void FetchOperation::specializedTimeoutTriggered() {
 
 void FetchOperation::specializedCompleteOperation() {
   // Stats for query
-  if (result_ == OperationResult::Succeeded) {
+  if (result() == OperationResult::Succeeded) {
     // set last successful query time to MysqlConnectionHolder
     conn().setLastActivityTime(Clock::now());
     db::QueryLoggingData logging_data(
         getOperationType(),
-        elapsed(),
-        timeout_,
+        opElapsed(),
+        getTimeout(),
         num_queries_executed_,
         rendered_query_,
         rows_received_,
         total_result_size_,
         no_index_used_,
         use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
-        attributes_,
+        getAttributes(),
         readResponseAttributes(),
         getMaxThreadBlockTime(),
         getTotalThreadBlockTime(),
@@ -474,23 +473,23 @@ void FetchOperation::specializedCompleteOperation() {
     client().logQuerySuccess(logging_data, conn());
   } else {
     db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
-    if (result_ == OperationResult::Cancelled) {
+    if (result() == OperationResult::Cancelled) {
       reason = db::FailureReason::CANCELLED;
-    } else if (result_ == OperationResult::TimedOut) {
+    } else if (result() == OperationResult::TimedOut) {
       reason = db::FailureReason::TIMEOUT;
     }
     client().logQueryFailure(
         db::QueryLoggingData(
             getOperationType(),
-            elapsed(),
-            timeout_,
+            opElapsed(),
+            getTimeout(),
             num_queries_executed_,
             rendered_query_,
             rows_received_,
             total_result_size_,
             no_index_used_,
             use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
-            attributes_,
+            getAttributes(),
             readResponseAttributes(),
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime(),
@@ -501,13 +500,13 @@ void FetchOperation::specializedCompleteOperation() {
         conn());
   }
 
-  if (result_ != OperationResult::Succeeded) {
-    notifyFailure(result_);
+  if (result() != OperationResult::Succeeded) {
+    notifyFailure(result());
   }
   // This frees the `Operation::wait()` call. We need to free it here because
   // callback can stealConnection and we can't notify anymore.
   conn().notify();
-  notifyOperationCompleted(result_);
+  notifyOperationCompleted(result());
 }
 
 void FetchOperation::mustSucceed() {

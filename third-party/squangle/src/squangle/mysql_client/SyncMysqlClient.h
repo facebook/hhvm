@@ -158,7 +158,7 @@ class SyncConnection : public Connection {
   }
 
   std::shared_ptr<MultiQueryStreamOperation> createOperation(
-      std::unique_ptr<Operation::ConnectionProxy> proxy,
+      std::unique_ptr<OperationImpl::ConnectionProxy> proxy,
       MultiQuery&& multi_query) override {
     return std::make_shared<MultiQueryStreamOperation>(
         std::move(proxy), std::move(multi_query));

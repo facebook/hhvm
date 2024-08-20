@@ -121,7 +121,7 @@ class MysqlClientBase {
 
  protected:
   friend class Connection;
-  friend class Operation;
+  friend class OperationImpl;
   friend class ConnectOperation;
   template <typename Class>
   friend class ConnectPoolOperation;

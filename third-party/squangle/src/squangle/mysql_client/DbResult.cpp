@@ -292,7 +292,7 @@ void MultiQueryStreamHandler::streamCallback(
         op.mysql_errno(),
         op.mysql_error(),
         op.conn().getKey(),
-        op.elapsed());
+        op.opElapsed());
     state_ = State::OperationFailed;
   }
   op.conn().notify();

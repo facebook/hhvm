@@ -139,11 +139,11 @@ class InternalConnection {
       const MysqlCertValidatorCallback& cb,
       void* context) = 0;
 
-  virtual void setConnectTimeout(std::chrono::milliseconds timeout) const = 0;
+  virtual void setConnectTimeout(Millis timeout) const = 0;
 
-  virtual void setReadTimeout(std::chrono::milliseconds timeout) const = 0;
+  virtual void setReadTimeout(Millis timeout) const = 0;
 
-  virtual void setWriteTimeout(std::chrono::milliseconds timeout) const = 0;
+  virtual void setWriteTimeout(Millis timeout) const = 0;
 
   virtual int getSocketDescriptor() const = 0;
 

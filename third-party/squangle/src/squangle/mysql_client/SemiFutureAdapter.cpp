@@ -30,7 +30,7 @@ void handleConnectionCompletion(
         std::move(conn),
         op.result(),
         op.getKey(),
-        op.elapsed(),
+        op.opElapsed(),
         op.attemptsMade()));
   } else {
     // failed - build the exception
@@ -39,7 +39,7 @@ void handleConnectionCompletion(
         op.mysql_errno(),
         op.mysql_error(),
         conn->getKey(),
-        op.elapsed()));
+        op.opElapsed()));
   }
 }
 
@@ -71,7 +71,7 @@ void handleQueryCompletion(
         std::move(conn),
         op.result(),
         std::move(conn_key),
-        op.elapsed());
+        op.opElapsed());
     promise.setValue(std::make_pair(
         std::move(result), std::move(op.callbacks_.post_query_callback_)));
   } else {
@@ -81,7 +81,7 @@ void handleQueryCompletion(
         op.mysql_errno(),
         op.mysql_error(),
         std::move(conn_key),
-        op.elapsed()));
+        op.opElapsed()));
   }
 }
 

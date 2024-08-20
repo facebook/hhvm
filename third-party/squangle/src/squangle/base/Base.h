@@ -14,6 +14,8 @@
 
 namespace facebook::common::mysql_client {
 
+using Millis = std::chrono::milliseconds;
+using Micros = std::chrono::microseconds;
 using Duration = std::chrono::duration<uint64_t, std::micro>;
 using Timepoint = std::chrono::time_point<std::chrono::steady_clock>;
 

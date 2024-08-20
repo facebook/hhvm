@@ -155,7 +155,7 @@ class Connection {
 
   // Experimental
   virtual std::shared_ptr<MultiQueryStreamOperation> createOperation(
-      std::unique_ptr<Operation::ConnectionProxy> proxy,
+      std::unique_ptr<OperationImpl::ConnectionProxy> proxy,
       MultiQuery&& multi_query) {
     return std::make_shared<MultiQueryStreamOperation>(
         std::move(proxy), std::move(multi_query));
@@ -394,17 +394,17 @@ class Connection {
         std::move(callbacks_.post_operation_callback_), std::move(callback));
   }
 
-  void setCallbacks(Operation::Callbacks&& callbacks) {
+  void setCallbacks(OperationImpl::Callbacks&& callbacks) {
     callbacks_.pre_operation_callback_ = setCallback(
         std::move(callbacks_.pre_operation_callback_),
         std::move(callbacks.pre_operation_callback_));
     callbacks_.post_operation_callback_ = setCallback(
         std::move(callbacks_.post_operation_callback_),
         std::move(callbacks.post_operation_callback_));
-    callbacks_.pre_query_callback_ = Operation::appendCallback(
+    callbacks_.pre_query_callback_ = OperationImpl::appendCallback(
         std::move(callbacks_.pre_query_callback_),
         std::move(callbacks.pre_query_callback_));
-    callbacks_.post_query_callback_ = Operation::appendCallback(
+    callbacks_.post_query_callback_ = OperationImpl::appendCallback(
         std::move(callbacks_.post_query_callback_),
         std::move(callbacks.post_query_callback_));
   }
@@ -486,7 +486,7 @@ class Connection {
   friend class AsyncMysqlClient;
   friend class SyncMysqlClient;
   friend class MysqlClientBase;
-  friend class Operation;
+  friend class OperationImpl;
   friend class ConnectOperation;
   template <typename Client>
   friend class ConnectPoolOperation;
@@ -527,7 +527,7 @@ class Connection {
   // that both need to do.
   template <typename QueryType, typename QueryArg>
   static std::shared_ptr<QueryType> beginAnyQuery(
-      std::unique_ptr<Operation::ConnectionProxy> conn_proxy,
+      std::unique_ptr<OperationImpl::ConnectionProxy> conn_proxy,
       QueryArg&& query);
 
   void checkOperationInProgress() {
@@ -622,7 +622,7 @@ class Connection {
     return mysql_connection_->setCertValidatorCallback(cb, context);
   }
 
-  void setConnectTimeout(std::chrono::milliseconds timeout) {
+  void setConnectTimeout(Millis timeout) {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->setConnectTimeout(timeout);
   }
@@ -702,7 +702,7 @@ class Connection {
 
   ConnectionDyingCallback conn_dying_callback_;
 
-  Operation::Callbacks callbacks_;
+  OperationImpl::Callbacks callbacks_;
 
   bool initialized_;
 

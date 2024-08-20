@@ -72,7 +72,7 @@ std::shared_ptr<ResetOperation> Connection::resetConn(
   // operation still exists in operations_to_remove_ queue; in that case,
   // cleanupCompletedOperations() hits FATAL error.
   auto resetOperationPtr = std::make_shared<ResetOperation>(
-      std::make_unique<Operation::OwnedConnection>(std::move(conn)));
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)));
   Duration timeout = resetOperationPtr->conn().conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
     resetOperationPtr->setTimeout(timeout);
@@ -86,7 +86,7 @@ std::shared_ptr<ChangeUserOperation> Connection::changeUser(
     const std::string& password,
     const std::string& database) {
   auto changeUserOperationPtr = std::make_shared<ChangeUserOperation>(
-      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
       user,
       password,
       database);
@@ -104,7 +104,7 @@ std::shared_ptr<QueryOperation> Connection::beginQuery(
     std::unique_ptr<Connection> conn,
     Query&& query) {
   return beginAnyQuery<QueryOperation>(
-      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
       std::move(query));
 }
 
@@ -114,7 +114,7 @@ std::shared_ptr<MultiQueryOperation> Connection::beginMultiQuery(
     std::vector<Query>&& queries) {
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryOperation>(
-      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -131,7 +131,7 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
     std::vector<Query>&& queries) {
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryStreamOperation>(
-      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -144,7 +144,7 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
 
 template <typename QueryType, typename QueryArg>
 std::shared_ptr<QueryType> Connection::beginAnyQuery(
-    std::unique_ptr<Operation::ConnectionProxy> conn_proxy,
+    std::unique_ptr<OperationImpl::ConnectionProxy> conn_proxy,
     QueryArg&& query) {
   CHECK_THROW(conn_proxy.get(), db::InvalidConnectionException);
   CHECK_THROW(conn_proxy->get()->ok(), db::InvalidConnectionException);
@@ -270,7 +270,7 @@ DbQueryResult Connection::internalQuery(
     QueryCallback&& cb,
     QueryOptions&& options) {
   auto op = beginAnyQuery<QueryOperation>(
-      std::make_unique<Operation::ReferencedConnection>(*this),
+      std::make_unique<OperationImpl::ReferencedConnection>(*this),
       std::move(query));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -297,7 +297,7 @@ DbQueryResult Connection::internalQuery(
         op->mysql_errno(),
         op->mysql_error(),
         getKey(),
-        op->elapsed());
+        op->opElapsed());
   }
   DbQueryResult result(
       std::move(op->stealQueryResult()),
@@ -306,7 +306,7 @@ DbQueryResult Connection::internalQuery(
       nullptr,
       op->result(),
       op->conn().getKey(),
-      op->elapsed());
+      op->opElapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the
     // callback's std::variant wrapper
@@ -389,7 +389,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
   auto op = beginAnyQuery<MultiQueryOperation>(
-      std::make_unique<Operation::ReferencedConnection>(*this),
+      std::make_unique<OperationImpl::ReferencedConnection>(*this),
       std::move(queries));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -414,7 +414,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
         op->mysql_errno(),
         op->mysql_error(),
         getKey(),
-        op->elapsed());
+        op->opElapsed());
   }
 
   DbMultiQueryResult result(
@@ -424,7 +424,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
       nullptr,
       op->result(),
       op->conn().getKey(),
-      op->elapsed());
+      op->opElapsed());
   if (op->callbacks_.post_query_callback_) {
     // If we have a callback set, wrap (and then unwrap) the result to/from the
     // callback's std::variant wrapper
@@ -553,7 +553,7 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   // To accomplish that, ~MultiQueryStreamHandler waits until
   // `postOperationEnded` is called.
   auto operation = beginAnyQuery<MultiQueryStreamOperation>(
-      std::make_unique<Operation::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (attributes.size() > 0) {
     operation->setAttributes(attributes);
@@ -565,7 +565,8 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
     std::unique_ptr<Connection> conn,
     MultiQuery&& multi_query,
     const AttributeMap& attributes) {
-  auto proxy = std::make_unique<Operation::OwnedConnection>(std::move(conn));
+  auto proxy =
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn));
   auto* connP = proxy->get();
   auto ret = connP->createOperation(std::move(proxy), std::move(multi_query));
   if (attributes.size() > 0) {

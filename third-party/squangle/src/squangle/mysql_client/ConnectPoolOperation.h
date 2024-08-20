@@ -104,13 +104,11 @@ class ConnectPoolOperation : public ConnectOperation {
     cancelTimeout();
 
     // Adjust timeout
-    std::chrono::duration<uint64_t, std::micro> timeout_attempt_based =
-        getConnectionOptions().getTimeout() +
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            stopwatch_->elapsed());
+    Duration timeout_attempt_based =
+        getConnectionOptions().getTimeout() + opElapsedMs();
 
-    timeout_ =
-        min(timeout_attempt_based, getConnectionOptions().getTotalTimeout());
+    setTimeoutInternal(
+        min(timeout_attempt_based, getConnectionOptions().getTotalTimeout()));
 
     specializedRun();
   }
@@ -135,16 +133,15 @@ class ConnectPoolOperation : public ConnectOperation {
     }
 
     // Set timeout for waiting for connection
-    auto elapsed = stopwatch_->elapsed();
-    if (elapsed >= timeout_) {
+    auto elapsed = Operation::opElapsed();
+    if (elapsed >= getTimeout()) {
       timeoutTriggered();
       return;
     }
 
     if constexpr (uses_one_thread_v<Client>) {
-      scheduleTimeout(std::chrono::duration_cast<std::chrono::milliseconds>(
-                          timeout_ - elapsed)
-                          .count());
+      scheduleTimeout(
+          std::chrono::duration_cast<Millis>(getTimeout() - elapsed).count());
     }
 
     // Remove before to not count against itself
@@ -153,7 +150,7 @@ class ConnectPoolOperation : public ConnectOperation {
     if (auto shared_pool = pool_.lock(); shared_pool) {
       // Sync attributes in conn_options_ with the Operation::attributes_ value
       // as pool key uses the attributes from ConnectionOptions
-      conn_options_.setAttributes(attributes_);
+      conn_options_.setAttributes(getAttributes());
       shared_pool->registerForConnection(this);
     } else {
       VLOG(2) << "Pool is gone, operation must cancel";
@@ -218,7 +215,7 @@ class ConnectPoolOperation : public ConnectOperation {
 
   bool syncWait() {
     DCHECK(baton_);
-    return baton_->try_wait_for(timeout_ - stopwatch_->elapsed());
+    return baton_->try_wait_for(getTimeout() - opElapsed());
   }
 
   void cleanupWait() {

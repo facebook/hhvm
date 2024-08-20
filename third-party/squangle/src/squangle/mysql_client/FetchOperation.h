@@ -27,21 +27,22 @@ class MysqlHandler;
 // This is the only Operation that can be paused, and the pause should only be
 // called from within `notify` calls. That will allow another thread to read
 // the state.
-class FetchOperation : public Operation {
+class FetchOperation : public OperationImpl {
  public:
   using RespAttrs = AttributeMap;
   ~FetchOperation() override = default;
   void mustSucceed() override;
 
   // Number of queries that succeed to execute
-  int numQueriesExecuted() {
-    CHECK_THROW(state_ != OperationState::Pending, db::OperationStateException);
+  int numQueriesExecuted() const {
+    CHECK_THROW(
+        state() != OperationState::Pending, db::OperationStateException);
     return num_queries_executed_;
   }
 
   uint64_t resultSize() const {
     CHECK_THROW(
-        state_ != OperationState::Unstarted, db::OperationStateException);
+        state() != OperationState::Unstarted, db::OperationStateException);
     return total_result_size_;
   }
 

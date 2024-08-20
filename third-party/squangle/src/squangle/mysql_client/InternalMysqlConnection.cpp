@@ -360,24 +360,21 @@ void InternalMysqlConnection::setCertValidatorCallback(
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-void InternalMysqlConnection::setConnectTimeout(
-    std::chrono::milliseconds timeout) const {
+void InternalMysqlConnection::setConnectTimeout(Millis timeout) const {
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_CONNECT_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_CONNECT_TIMEOUT_MS", timeoutInMs, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-void InternalMysqlConnection::setReadTimeout(
-    std::chrono::milliseconds timeout) const {
+void InternalMysqlConnection::setReadTimeout(Millis timeout) const {
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_READ_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_READ_TIMEOUT_MS", timeoutInMs, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-void InternalMysqlConnection::setWriteTimeout(
-    std::chrono::milliseconds timeout) const {
+void InternalMysqlConnection::setWriteTimeout(Millis timeout) const {
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_WRITE_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_WRITE_TIMEOUT_MS", timeoutInMs, ret);

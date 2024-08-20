@@ -53,8 +53,7 @@ class PoolOptions {
   // TimeLiterals.h for Open Source.
   static constexpr Duration kDefaultMaxAge = std::chrono::seconds(60);
   static constexpr Duration kDefaultMaxIdleTime = std::chrono::seconds(4);
-  static constexpr std::chrono::milliseconds kCleanUpTimeout =
-      std::chrono::milliseconds(300);
+  static constexpr Millis kCleanUpTimeout = Millis(300);
   static const int kDefaultMaxOpenConn = 100;
 
   PoolOptions()

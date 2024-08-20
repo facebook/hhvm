@@ -21,10 +21,10 @@ using SpecialOperationCallback =
 
 // SpecialOperation means operations like COM_RESET_CONNECTION,
 // COM_CHANGE_USER, etc.
-class SpecialOperation : public Operation {
+class SpecialOperation : public OperationImpl {
  public:
   explicit SpecialOperation(std::unique_ptr<ConnectionProxy> conn)
-      : Operation(std::move(conn)) {}
+      : OperationImpl(std::move(conn)) {}
 
   void setCallback(SpecialOperationCallback callback) {
     callback_ = std::move(callback);

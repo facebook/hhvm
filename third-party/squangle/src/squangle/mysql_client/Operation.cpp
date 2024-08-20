@@ -13,16 +13,14 @@
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <gflags/gflags.h>
 #include <mysql_async.h>
-#include <squangle/mysql_client/InternalMysqlConnection.h>
-#include <squangle/mysql_client/Row.h>
 #include <atomic>
 
 #include "squangle/base/ExceptionUtil.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Flags.h"
+#include "squangle/mysql_client/InternalMysqlConnection.h"
 #include "squangle/mysql_client/Operation.h"
-#include "squangle/mysql_client/SSLOptionsProviderBase.h"
 
 using namespace std::chrono_literals;
 
@@ -30,50 +28,109 @@ namespace facebook {
 namespace common {
 namespace mysql_client {
 
-Operation::Operation(std::unique_ptr<ConnectionProxy> safe_conn)
-    : EventHandler(safe_conn->get()->mysql_client_.getEventBase()),
-      AsyncTimeout(safe_conn->get()->mysql_client_.getEventBase()),
-      state_(OperationState::Unstarted),
-      result_(OperationResult::Unknown),
-      conn_proxy_(std::move(safe_conn)),
+Operation& Operation::run() {
+  stopwatch_ = std::make_unique<StopWatch>();
+  if (callbacks_.pre_operation_callback_) {
+    CHECK_THROW(
+        state() == OperationState::Unstarted, db::OperationStateException);
+    callbacks_.pre_operation_callback_(*this);
+  }
+
+  {
+    auto locked = cancel_on_run_.wlock();
+    if (*locked) {
+      setState(OperationState::Cancelling);
+      protocolCompleteOperation(OperationResult::Cancelled);
+      return *this;
+    }
+
+    CHECK_THROW(
+        state() == OperationState::Unstarted, db::OperationStateException);
+    setState(OperationState::Pending);
+  }
+
+  if (getOperationType() == db::OperationType::Connect) {
+    setTimeoutInternal(std::min(
+        Duration(FLAGS_async_mysql_max_connect_timeout_micros), getTimeout()));
+  }
+
+  return specializedRun();
+}
+
+void OperationImpl::protocolCompleteOperation(OperationResult result) {
+  conn().runInThread(this, &OperationImpl::completeOperation, result);
+}
+
+Operation& Operation::setAttributes(const AttributeMap& attributes) {
+  CHECK_THROW(
+      state() == OperationState::Unstarted, db::OperationStateException);
+  for (const auto& [key, value] : attributes) {
+    attributes_[key] = value;
+  }
+  return *this;
+}
+
+Operation& Operation::setAttributes(AttributeMap&& attributes) {
+  CHECK_THROW(
+      state() == OperationState::Unstarted, db::OperationStateException);
+  for (auto& [key, value] : attributes) {
+    attributes_[key] = std::move(value);
+  }
+  return *this;
+}
+
+Operation& Operation::setAttribute(
+    const std::string& key,
+    const std::string& value) {
+  CHECK_THROW(
+      state() == OperationState::Unstarted, db::OperationStateException);
+  attributes_[key] = value;
+  return *this;
+}
+
+Operation& Operation::setTimeout(Duration timeout) {
+  CHECK_THROW(
+      state() == OperationState::Unstarted, db::OperationStateException);
+  setTimeoutInternal(timeout);
+  return *this;
+}
+
+OperationImpl::OperationImpl(std::unique_ptr<ConnectionProxy> safe_conn)
+    : Operation(std::move(safe_conn)),
+      EventHandler(conn().mysql_client_.getEventBase()),
+      AsyncTimeout(conn().mysql_client_.getEventBase()),
       mysql_errno_(0),
       observer_callback_(nullptr),
       mysql_client_(conn().mysql_client_) {
-  timeout_ = Duration(FLAGS_async_mysql_timeout_micros);
   conn().resetActionable();
-  request_context_.store(
-      folly::RequestContext::saveContext(), std::memory_order_relaxed);
 }
 
-bool Operation::isInEventBaseThread() const {
+bool OperationImpl::isInEventBaseThread() const {
   return conn().isInEventBaseThread();
 }
 
-bool Operation::isEventBaseSet() const {
+bool OperationImpl::isEventBaseSet() const {
   return conn().getEventBase() != nullptr;
 }
 
-Operation::~Operation() {}
-
-void Operation::invokeActionable() {
+void OperationImpl::invokeActionable() {
   DCHECK(isInEventBaseThread());
-  folly::RequestContextScopeGuard guard(
-      request_context_.load(std::memory_order_relaxed));
+  auto guard = makeRequestGuard();
   actionable();
 }
 
-void Operation::waitForActionable() {
+void OperationImpl::waitForActionable() {
   DCHECK(isInEventBaseThread());
 
   auto event_mask = conn().getReadWriteState();
 
-  if (stopwatch_->elapsed(timeout_)) {
+  if (hasOpElapsed(getTimeout())) {
     timeoutTriggered();
     return;
   }
 
-  auto leftUs = timeout_ - stopwatch_->elapsed();
-  auto leftMs = std::chrono::duration_cast<std::chrono::milliseconds>(leftUs);
+  auto leftUs = getTimeout() - opElapsed();
+  auto leftMs = std::chrono::duration_cast<Millis>(leftUs);
   scheduleTimeout(leftMs.count());
   registerHandler(event_mask);
 }
@@ -87,35 +144,31 @@ void Operation::cancel() {
     // since they both have the combination `check and change` this must
     // be locked
     auto locked = cancel_on_run_.wlock();
-    if (state_ == OperationState::Cancelling ||
-        state_ == OperationState::Completed) {
+    if (state() == OperationState::Cancelling ||
+        state() == OperationState::Completed) {
       // If the cancel was already called we dont do the cancelling
       // process again
       return;
     }
 
-    if (state_ == OperationState::Unstarted) {
+    if (state() == OperationState::Unstarted) {
       *locked = true;
       // wait the user to call "run()" to run the completeOperation
       // otherwise we will throw exception
       return;
     }
 
-    state_ = OperationState::Cancelling;
+    setState(OperationState::Cancelling);
   }
 
-  if (!conn().runInThread(
-          this, &Operation::completeOperation, OperationResult::Cancelled)) {
-    // if a strange error happen in EventBase , mark it cancelled now
-    completeOperationInner(OperationResult::Cancelled);
-  }
+  protocolCompleteOperation(OperationResult::Cancelled);
 }
 
-void Operation::handlerReady(uint16_t /*events*/) noexcept {
+void OperationImpl::handlerReady(uint16_t /*events*/) noexcept {
   DCHECK(conn().isInEventBaseThread());
   CHECK_THROW(
-      state_ != OperationState::Completed &&
-          state_ != OperationState::Unstarted,
+      state() != OperationState::Completed &&
+          state() != OperationState::Unstarted,
       db::OperationStateException);
 
   if (state() == OperationState::Cancelling) {
@@ -125,54 +178,28 @@ void Operation::handlerReady(uint16_t /*events*/) noexcept {
   }
 }
 
-void Operation::timeoutTriggered() {
+void OperationImpl::timeoutTriggered() {
   specializedTimeoutTriggered();
 }
 
-Operation& Operation::run() {
-  stopwatch_ = std::make_unique<StopWatch>();
-  if (callbacks_.pre_operation_callback_) {
-    CHECK_THROW(
-        state() == OperationState::Unstarted, db::OperationStateException);
-    callbacks_.pre_operation_callback_(*this);
-  }
-  {
-    auto locked = cancel_on_run_.wlock();
-    if (*locked) {
-      state_ = OperationState::Cancelling;
-      conn().runInThread(
-          this, &Operation::completeOperation, OperationResult::Cancelled);
-      return *this;
-    }
-    CHECK_THROW(
-        state() == OperationState::Unstarted, db::OperationStateException);
-    state_ = OperationState::Pending;
-  }
-  if (getOperationType() == db::OperationType::Connect) {
-    timeout_ = std::min(
-        Duration(FLAGS_async_mysql_max_connect_timeout_micros), timeout_);
-  }
-  return specializedRun();
-}
-
-void Operation::completeOperation(OperationResult result) {
+void OperationImpl::completeOperation(OperationResult result) {
   DCHECK(isInEventBaseThread());
-  if (state_ == OperationState::Completed) {
+  if (state() == OperationState::Completed) {
     return;
   }
 
   CHECK_THROW(
-      state_ == OperationState::Pending ||
-          state_ == OperationState::Cancelling ||
-          state_ == OperationState::Unstarted,
+      state() == OperationState::Pending ||
+          state() == OperationState::Cancelling ||
+          state() == OperationState::Unstarted,
       db::OperationStateException);
   completeOperationInner(result);
 }
 
-void Operation::completeOperationInner(OperationResult result) {
-  state_ = OperationState::Completed;
-  result_ = result;
-  opDuration_ = stopwatch_->elapsed();
+void OperationImpl::completeOperationInner(OperationResult result) {
+  setState(OperationState::Completed);
+  setResult(result);
+  setDuration();
   if ((result == OperationResult::Cancelled ||
        result == OperationResult::TimedOut) &&
       conn().hasInitialized()) {
@@ -200,13 +227,13 @@ void Operation::completeOperationInner(OperationResult result) {
 
 std::unique_ptr<Connection> Operation::releaseConnection() {
   CHECK_THROW(
-      state_ == OperationState::Completed ||
-          state_ == OperationState::Unstarted,
+      state() == OperationState::Completed ||
+          state() == OperationState::Unstarted,
       db::OperationStateException);
   return conn_proxy_->releaseConnection();
 }
 
-void Operation::snapshotMysqlErrors() {
+void OperationImpl::snapshotMysqlErrors() {
   mysql_errno_ = conn().getErrno();
   if (mysql_errno_ != 0) {
     if (mysql_errno_ == CR_TLS_SERVER_NOT_FOUND) {
@@ -217,18 +244,18 @@ void Operation::snapshotMysqlErrors() {
   }
 }
 
-void Operation::setAsyncClientError(
+void OperationImpl::setAsyncClientError(
     unsigned int mysql_errno,
     folly::StringPiece msg) {
   mysql_errno_ = mysql_errno;
   mysql_error_ = msg.toString();
 }
 
-void Operation::wait() const {
+void OperationImpl::wait() const {
   conn().wait();
 }
 
-MysqlClientBase& Operation::client() const {
+MysqlClientBase& OperationImpl::client() const {
   return mysql_client_;
 }
 
@@ -236,15 +263,16 @@ std::shared_ptr<Operation> Operation::getSharedPointer() {
   return shared_from_this();
 }
 
-const std::string& Operation::host() const {
+const std::string& OperationImpl::host() const {
   return conn().host();
 }
-int Operation::port() const {
+int OperationImpl::port() const {
   return conn().port();
 }
 
-void Operation::setObserverCallback(ObserverCallback obs_cb) {
-  CHECK_THROW(state_ == OperationState::Unstarted, db::OperationStateException);
+void OperationImpl::setObserverCallback(ObserverCallback obs_cb) {
+  CHECK_THROW(
+      state() == OperationState::Unstarted, db::OperationStateException);
   // allow more callbacks to be set
   if (observer_callback_) {
     auto old_dbs_cb = std::move(observer_callback_);
@@ -288,7 +316,7 @@ void Operation::setPostOperationCallback(ChainedCallback chainedCallback) {
       std::move(chainedCallback));
 }
 
-AsyncPreQueryCallback Operation::appendCallback(
+AsyncPreQueryCallback OperationImpl::appendCallback(
     AsyncPreQueryCallback&& callback1,
     AsyncPreQueryCallback&& callback2) {
   if (!callback1) {
@@ -306,7 +334,7 @@ AsyncPreQueryCallback Operation::appendCallback(
   };
 }
 
-AsyncPostQueryCallback Operation::appendCallback(
+AsyncPostQueryCallback OperationImpl::appendCallback(
     AsyncPostQueryCallback&& callback1,
     AsyncPostQueryCallback&& callback2) {
   if (!callback1) {
@@ -325,12 +353,12 @@ AsyncPostQueryCallback Operation::appendCallback(
   };
 }
 
-void Operation::setPreQueryCallback(AsyncPreQueryCallback&& callback) {
+void OperationImpl::setPreQueryCallback(AsyncPreQueryCallback&& callback) {
   callbacks_.pre_query_callback_ = appendCallback(
       std::move(callbacks_.pre_query_callback_), std::move(callback));
 }
 
-void Operation::setPostQueryCallback(AsyncPostQueryCallback&& callback) {
+void OperationImpl::setPostQueryCallback(AsyncPostQueryCallback&& callback) {
   callbacks_.post_query_callback_ = appendCallback(
       std::move(callbacks_.post_query_callback_), std::move(callback));
 }
@@ -407,7 +435,7 @@ folly::StringPiece Operation::toString(OperationResult result) {
 
 // overload of operator<< for OperationResult
 std::ostream& operator<<(std::ostream& os, OperationResult result) {
-  return os << Operation::toString(result);
+  return os << OperationImpl::toString(result);
 }
 
 folly::StringPiece FetchOperation::toString(FetchAction action) {
@@ -439,43 +467,44 @@ std::unique_ptr<Connection> blockingConnectHelper(
         conn_op->mysql_errno(),
         conn_op->mysql_error(),
         conn_op->getKey(),
-        conn_op->elapsed());
+        conn_op->opElapsed());
   }
 
   return conn_op->releaseConnection();
 }
 
-Operation::OwnedConnection::OwnedConnection(std::unique_ptr<Connection>&& conn)
+OperationImpl::OwnedConnection::OwnedConnection(
+    std::unique_ptr<Connection>&& conn)
     : conn_(std::move(conn)) {
   CHECK_THROW(conn_, db::InvalidConnectionException);
 }
 
-Connection* Operation::OwnedConnection::get() {
+Connection* OperationImpl::OwnedConnection::get() {
   return conn_.get();
 }
 
-const Connection* Operation::OwnedConnection::get() const {
+const Connection* OperationImpl::OwnedConnection::get() const {
   return conn_.get();
 }
 
-std::unique_ptr<Connection> Operation::OwnedConnection::releaseConnection() {
+std::unique_ptr<Connection>
+OperationImpl::OwnedConnection::releaseConnection() {
   return std::move(conn_);
 }
 
-std::string Operation::threadOverloadMessage(double cbDelayUs) const {
+std::string OperationImpl::threadOverloadMessage(double cbDelayUs) const {
   return fmt::format(
       "(CLIENT_OVERLOADED: cb delay {}ms, {} active conns)",
       std::lround(cbDelayUs / 1000.0),
       client().numStartedAndOpenConnections());
 }
 
-std::string Operation::timeoutMessage(std::chrono::milliseconds delta) const {
-  auto toMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeout_);
+std::string OperationImpl::timeoutMessage(Millis delta) const {
   return fmt::format(
-      "(took {}ms, timeout was {}ms)", delta.count(), toMs.count());
+      "(took {}ms, timeout was {}ms)", delta.count(), getTimeoutMs().count());
 }
 
-/*static*/ std::string Operation::connectStageString(connect_stage stage) {
+/*static*/ std::string OperationImpl::connectStageString(connect_stage stage) {
   return InternalMysqlConnection::findConnectStageName(stage).value_or("");
 }
 

@@ -619,6 +619,14 @@ void ThriftRocketServerHandler::handleRequestCommon(
       : std::make_shared<folly::RequestContext>(rootid);
   folly::RequestContextScopeGuard rctx(reqCtx);
 
+  auto interactionIdOpt = metadata.interactionId().to_optional();
+  auto interactionCreateOpt = metadata.interactionCreate().to_optional();
+  auto crc32Opt = metadata.crc32c().to_optional();
+  auto compressionOpt = metadata.compression().to_optional();
+  auto frameworkMetadataPtr = metadata.frameworkMetadata()
+      ? (*metadata.frameworkMetadata())->clone()
+      : nullptr;
+
   // A request should not be active until the overload checking is done.
   auto request = makeRequest(
       std::move(metadata), std::move(debugPayload), std::move(reqCtx));
@@ -702,28 +710,27 @@ void ThriftRocketServerHandler::handleRequestCommon(
       observer->activeRequests(serverConfigs_->getActiveRequests());
     }
   }
-  const auto protocolId = request->getProtoId();
-  if (auto interactionId = metadata.interactionId_ref()) {
-    cpp2ReqCtx->setInteractionId(*interactionId);
+  if (interactionIdOpt) {
+    cpp2ReqCtx->setInteractionId(*interactionIdOpt);
   }
-  if (auto interactionCreate = metadata.interactionCreate_ref()) {
-    cpp2ReqCtx->setInteractionCreate(*interactionCreate);
+  if (interactionCreateOpt) {
+    cpp2ReqCtx->setInteractionCreate(*interactionCreateOpt);
     DCHECK_EQ(cpp2ReqCtx->getInteractionId(), 0);
-    cpp2ReqCtx->setInteractionId(*interactionCreate->interactionId_ref());
+    cpp2ReqCtx->setInteractionId(*interactionCreateOpt->interactionId_ref());
   }
 
   cpp2ReqCtx->setRpcKind(expectedKind);
 
-  if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
-    cpp2ReqCtx->setFrameworkMetadata(std::move(**frameworkMetadata));
+  if (frameworkMetadataPtr) {
+    cpp2ReqCtx->setFrameworkMetadata(std::move(*frameworkMetadataPtr));
   }
 
   auto serializedCompressedRequest = SerializedCompressedRequest(
       std::move(data),
-      metadata.crc32c_ref()
-          ? CompressionAlgorithm::NONE
-          : metadata.compression_ref().value_or(CompressionAlgorithm::NONE));
+      crc32Opt ? CompressionAlgorithm::NONE
+               : compressionOpt.value_or(CompressionAlgorithm::NONE));
 
+  const auto protocolId = request->getProtoId();
   Cpp2Worker::dispatchRequest(
       *processorFactory_,
       processor_.get(),

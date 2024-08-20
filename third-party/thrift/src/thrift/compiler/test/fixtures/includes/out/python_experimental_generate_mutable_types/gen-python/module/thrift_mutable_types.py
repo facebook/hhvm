@@ -83,7 +83,6 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 _fbthrift_all_enums = [
 ]
 
-
 _fbthrift_all_structs = [
     MyStruct,
 ]

@@ -219,7 +219,6 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
 _fbthrift_all_enums = [
 ]
 
-
 _fbthrift_all_structs = [
     Fields,
     FieldsInjectedToEmptyStruct,

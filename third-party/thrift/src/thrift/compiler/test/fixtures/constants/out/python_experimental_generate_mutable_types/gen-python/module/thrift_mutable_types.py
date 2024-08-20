@@ -600,6 +600,18 @@ _fbthrift_all_enums = [
     Company,
 ]
 
+_fbthrift_all_structs = [
+    Internship,
+    Range,
+    struct1,
+    struct2,
+    struct3,
+    struct4,
+    union1,
+    union2,
+]
+_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
 
 myInt = 1337
 
@@ -771,16 +783,3 @@ MyCompany = Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)
-
-
-_fbthrift_all_structs = [
-    Internship,
-    Range,
-    struct1,
-    struct2,
-    struct3,
-    struct4,
-    union1,
-    union2,
-]
-_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)

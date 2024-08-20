@@ -137,7 +137,6 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
 _fbthrift_all_enums = [
 ]
 
-
 _fbthrift_all_structs = [
     EchoRequest,
     EchoResponse,

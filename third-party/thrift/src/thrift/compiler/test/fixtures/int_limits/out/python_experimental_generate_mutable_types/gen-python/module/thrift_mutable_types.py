@@ -138,6 +138,11 @@ class Limits(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 _fbthrift_all_enums = [
 ]
 
+_fbthrift_all_structs = [
+    Limits,
+]
+_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
 
 max_i64_const = 9223372036854775807
 
@@ -154,9 +159,3 @@ min_i16_const = -32768
 max_byte_const = 127
 
 min_byte_const = -128
-
-
-_fbthrift_all_structs = [
-    Limits,
-]
-_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)

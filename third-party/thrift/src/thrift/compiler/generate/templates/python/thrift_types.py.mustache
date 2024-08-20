@@ -132,48 +132,4 @@ class {{> structs/unadapted_name}}(metaclass={{!
 {{/struct:has_adapter?}}{{!
 }}{{/program:structs}}
 
-# This unfortunately has to be down here to prevent circular imports
-import {{program:module_path}}.thrift_metadata
-{{> enums/thrift_enums }}
-{{#program:structs}}
-
-
-def _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}():
-    return {{program:module_path}}.thrift_metadata.gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
-{{/program:structs}}
-
-
-_fbthrift_all_structs = [
-    {{#program:structs}}
-    {{> structs/unadapted_name}},
-    {{/program:structs}}
-]
-{{#program:structs?}}
-_fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
-{{/program:structs?}}
-{{> common/constants }}
-{{> common/typedef }}
-{{#program:services?}}
-{{#program:services}}
-
-{{> types/service_arg_types }}
-
-{{#service:interactions}}
-
-{{> types/service_arg_types }}
-
-{{/service:interactions}}
-{{/program:services}}
-
-
-_fbthrift_python_types.fill_specs(
-    {{#program:services}}
-    {{> types/service_arg_type_list}}
-
-    {{#service:interactions}}
-    {{> types/service_arg_type_list}}
-
-    {{/service:interactions}}
-    {{/program:services}}
-)
-{{/program:services?}}
+{{> types/types }}

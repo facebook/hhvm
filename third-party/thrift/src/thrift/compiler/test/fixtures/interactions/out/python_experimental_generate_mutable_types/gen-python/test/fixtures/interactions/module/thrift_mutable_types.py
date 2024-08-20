@@ -61,7 +61,6 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
 _fbthrift_all_enums = [
 ]
 
-
 _fbthrift_all_structs = [
     CustomException,
 ]

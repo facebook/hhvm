@@ -1266,14 +1266,6 @@ _fbthrift_all_enums = [
     AnnoyingEnum,
 ]
 
-uint64 = int
-ui64 = int
-signed_byte = int
-IOBuf = _fbthrift_iobuf.IOBuf
-IOBufPtr = _fbthrift_iobuf.IOBuf
-ListAlias = ListStruct
-
-
 _fbthrift_all_structs = [
     MyStruct,
     MyDataItem,
@@ -1290,3 +1282,10 @@ _fbthrift_all_structs = [
     Onion,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
+uint64 = int
+ui64 = int
+signed_byte = int
+IOBuf = _fbthrift_iobuf.IOBuf
+IOBufPtr = _fbthrift_iobuf.IOBuf
+ListAlias = ListStruct

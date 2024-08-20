@@ -448,9 +448,6 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
 _fbthrift_all_enums = [
 ]
 
-containerTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
-
-
 _fbthrift_all_structs = [
     ComplexUnion,
     ListUnion,
@@ -462,3 +459,5 @@ _fbthrift_all_structs = [
     NonCopyableUnion,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
+containerTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)

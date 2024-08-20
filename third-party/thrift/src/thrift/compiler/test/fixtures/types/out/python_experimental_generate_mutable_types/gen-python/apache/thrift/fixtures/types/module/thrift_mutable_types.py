@@ -1748,20 +1748,6 @@ _fbthrift_all_enums = [
     MyForwardRefEnum,
 ]
 
-TBinary = bytes
-IntTypedef = int
-UintTypedef = int
-SomeListOfTypeMap_2468 = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string))
-TBinary_8623 = bytes
-i32_9314 = int
-list_i32_9187 = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
-map_i32_i32_9565 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
-map_i32_string_1261 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string)
-set_i32_7070 = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-set_i32_7194 = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-string_5252 = str
-
-
 _fbthrift_all_structs = [
     empty_struct,
     decorated_struct,
@@ -1800,6 +1786,19 @@ _fbthrift_all_structs = [
     StructWithDoubleUnderscores,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
+TBinary = bytes
+IntTypedef = int
+UintTypedef = int
+SomeListOfTypeMap_2468 = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string))
+TBinary_8623 = bytes
+i32_9314 = int
+list_i32_9187 = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
+map_i32_i32_9565 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+map_i32_string_1261 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string)
+set_i32_7070 = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
+set_i32_7194 = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
+string_5252 = str
 
 
 

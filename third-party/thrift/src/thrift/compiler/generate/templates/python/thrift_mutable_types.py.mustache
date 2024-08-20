@@ -99,41 +99,4 @@ class {{> structs/unadapted_name}}(metaclass={{!
 raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{> structs/unadapted_name}}")
 {{/struct:has_adapter?}}{{!
 }}{{/program:structs}}
-{{> enums/thrift_enums }}
-
-{{> common/constants }}
-{{> common/typedef }}
-
-
-_fbthrift_all_structs = [
-    {{#program:structs}}
-    {{> structs/unadapted_name}},
-    {{/program:structs}}
-]
-{{#program:structs?}}
-_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
-{{/program:structs?}}
-{{#program:services?}}
-{{#program:services}}
-
-{{> types/service_arg_types }}
-
-{{#service:interactions}}
-
-{{> types/service_arg_types }}
-
-{{/service:interactions}}
-{{/program:services}}
-
-
-_fbthrift_python_mutable_types.fill_specs(
-    {{#program:services}}
-    {{> types/service_arg_type_list}}
-
-    {{#service:interactions}}
-    {{> types/service_arg_type_list}}
-
-    {{/service:interactions}}
-    {{/program:services}}
-)
-{{/program:services?}}
+{{> types/types }}

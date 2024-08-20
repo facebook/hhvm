@@ -587,6 +587,18 @@ _fbthrift_all_enums = [
     HackEnum,
 ]
 
+_fbthrift_all_structs = [
+    MyStruct,
+    Containers,
+    MyDataItem,
+    MyUnion,
+    MyException,
+    MyExceptionWithMessage,
+    ReservedKeyword,
+    UnionToBeRenamed,
+]
+_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
 
 FLAG = True
 
@@ -608,19 +620,6 @@ AMap = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthr
 
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem
-
-
-_fbthrift_all_structs = [
-    MyStruct,
-    Containers,
-    MyDataItem,
-    MyUnion,
-    MyException,
-    MyExceptionWithMessage,
-    ReservedKeyword,
-    UnionToBeRenamed,
-]
-_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 
 
 

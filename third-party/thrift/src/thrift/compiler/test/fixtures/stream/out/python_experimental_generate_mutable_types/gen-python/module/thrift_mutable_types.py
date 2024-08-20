@@ -104,7 +104,6 @@ class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedError
 _fbthrift_all_enums = [
 ]
 
-
 _fbthrift_all_structs = [
     FooStreamEx,
     FooEx,

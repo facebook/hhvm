@@ -376,7 +376,6 @@ _fbthrift_all_enums = [
     MyBitmaskEnum2,
 ]
 
-
 _fbthrift_all_structs = [
     SomeStruct,
     MyStruct,

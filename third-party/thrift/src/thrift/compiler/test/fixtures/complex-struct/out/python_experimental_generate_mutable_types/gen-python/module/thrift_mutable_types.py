@@ -1658,23 +1658,6 @@ _fbthrift_all_enums = [
     MyEnum,
 ]
 
-
-DEFAULT_PORT_NUM = 3456
-
-constEnumUnion = MyUnion(myEnum=MyEnum.MyValue2)
-
-stringTypedef = str
-longTypeDef = int
-mapTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
-listTypedef = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_double)
-floatTypedef = float
-FMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
-binary_4918 = bytes
-i32_1194 = int
-map_i32_FMap_6797 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64))
-map_i64_string_5732 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_string)
-
-
 _fbthrift_all_structs = [
     MyStructFloatFieldThrowExp,
     MyStructMapFloatThrowExp,
@@ -1693,3 +1676,19 @@ _fbthrift_all_structs = [
     complexException,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
+
+DEFAULT_PORT_NUM = 3456
+
+constEnumUnion = MyUnion(myEnum=MyEnum.MyValue2)
+
+stringTypedef = str
+longTypeDef = int
+mapTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
+listTypedef = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_double)
+floatTypedef = float
+FMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
+binary_4918 = bytes
+i32_1194 = int
+map_i32_FMap_6797 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64))
+map_i64_string_5732 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_string)

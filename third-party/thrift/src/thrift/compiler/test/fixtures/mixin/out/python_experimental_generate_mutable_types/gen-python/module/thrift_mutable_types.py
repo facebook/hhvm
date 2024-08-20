@@ -208,9 +208,6 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 _fbthrift_all_enums = [
 ]
 
-Mixin3 = Mixin3Base
-
-
 _fbthrift_all_structs = [
     Mixin1,
     Mixin2,
@@ -218,3 +215,5 @@ _fbthrift_all_structs = [
     Foo,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
+Mixin3 = Mixin3Base

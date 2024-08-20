@@ -135,6 +135,9 @@ cdef class MutableList:
     def __deepcopy__(self, memo):
         return MutableList(self._val_typeinfo, copy.deepcopy(self._list_data, memo))
 
+    def __reduce__(self):
+        return (MutableList, (self._val_typeinfo, self._list_data))
+
     def count(self, value):
         try:
             internal_value = self._val_typeinfo.to_internal_data(value)
@@ -288,6 +291,9 @@ cdef class MutableSet:
     def __deepcopy__(self, memo):
         return MutableSet(self._val_typeinfo, copy.deepcopy(self._set_data, memo))
 
+    def __reduce__(self):
+        return (MutableSet, (self._val_typeinfo, self._set_data))
+
     def union(MutableSet self, other):
         return self | other
 
@@ -415,6 +421,9 @@ cdef class MutableMap:
     def __contains__(self, key):
         internal_key = self._key_typeinfo.to_internal_data(key)
         return internal_key in self._map_data
+
+    def __reduce__(self):
+        return (MutableMap, (self._key_typeinfo, self._val_typeinfo, self._map_data))
 
     def clear(self):
         self._map_data.clear()

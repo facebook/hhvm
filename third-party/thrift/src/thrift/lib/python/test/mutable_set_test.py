@@ -15,6 +15,7 @@
 # pyre-strict
 
 import collections.abc
+import pickle
 import unittest
 
 from thrift.python.mutable_containers import MutableSet
@@ -287,3 +288,11 @@ class MutableSetTest(unittest.TestCase):
 
         mutable_set.clear()
         self.assertEqual(0, len(mutable_set))
+
+    def test_pickle_round_trip(self) -> None:
+        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+
+        pickled = pickle.dumps(mutable_set, protocol=pickle.HIGHEST_PROTOCOL)
+        mutable_set_unpickled = pickle.loads(pickled)
+        self.assertIsInstance(mutable_set_unpickled, MutableSet)
+        self.assertEqual(mutable_set, mutable_set_unpickled)

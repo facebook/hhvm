@@ -182,6 +182,9 @@ cdef class MutableListTypeInfo(TypeInfoBase):
 
         return self.val_info.same_as((<MutableListTypeInfo>other).val_info)
 
+    def __reduce__(self):
+        return (MutableListTypeInfo, (self.val_info,))
+
 
 @cython.final
 cdef class MutableSetTypeInfo(TypeInfoBase):
@@ -253,6 +256,9 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
             return False
 
         return self.val_info.same_as((<MutableSetTypeInfo>other).val_info)
+
+    def __reduce__(self):
+        return (MutableSetTypeInfo, (self.val_info,))
 
 
 @cython.final
@@ -327,3 +333,6 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
 
         return (self.key_info.same_as((<MutableMapTypeInfo>other).key_info) and
             self.val_info.same_as((<MutableMapTypeInfo>other).val_info))
+
+    def __reduce__(self):
+        return (MutableMapTypeInfo, (self.key_info, self.val_info))

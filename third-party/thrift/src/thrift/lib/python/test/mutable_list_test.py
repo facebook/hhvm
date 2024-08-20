@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # pyre-strict
+import pickle
 import unittest
 
 from collections.abc import MutableSequence
@@ -303,3 +304,11 @@ class MutableListTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             # It suppresses `OverflowError` and raises `ValueError`
             _ = mutable_list.index(2**31)
+
+    def test_pickle_round_trip(self) -> None:
+        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+
+        pickled = pickle.dumps(mutable_list, protocol=pickle.HIGHEST_PROTOCOL)
+        mutable_list_unpickled = pickle.loads(pickled)
+        self.assertIsInstance(mutable_list_unpickled, MutableList)
+        self.assertEqual(mutable_list, mutable_list_unpickled)

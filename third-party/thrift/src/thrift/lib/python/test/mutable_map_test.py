@@ -15,6 +15,7 @@
 # pyre-strict
 
 import collections.abc
+import pickle
 import unittest
 
 from thrift.python.mutable_containers import (
@@ -417,3 +418,18 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual([1, 2, 3, 999], mutable_map[1])
         self.assertEqual([4, 5, 999], mutable_map[2])
         self.assertEqual([6, 999], mutable_map[3])
+
+    def test_pickle_round_trip(self) -> None:
+        internal_map = {1: [1, 2, 3], 2: [4, 5], 3: [6]}
+        mutable_map = MutableMap(
+            typeinfo_i32,
+            # pyre-ignore[19]
+            MutableListTypeInfo(typeinfo_i32),
+            # pyre-ignore[6]
+            internal_map,
+        )
+
+        pickled = pickle.dumps(mutable_map, protocol=pickle.HIGHEST_PROTOCOL)
+        mutable_map_unpickled = pickle.loads(pickled)
+        self.assertIsInstance(mutable_map_unpickled, MutableMap)
+        self.assertEqual(mutable_map, mutable_map_unpickled)

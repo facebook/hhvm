@@ -83,6 +83,12 @@ impl AttrValue {
             }
         }
     }
+
+    pub fn value(&self) -> String {
+        match self {
+            Self::Classname(s) | Self::String(s) | Self::Int(s) => s.clone(),
+        }
+    }
 }
 
 pub type Attributes = BTreeMap<String, Vec<AttrValue>>;

@@ -154,6 +154,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_simple_function(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> simple_functionCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<bool> fbthrift_semifuture_simple_function(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
   virtual void throws_function(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -270,6 +272,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_throws_function(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_functionCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_throws_function(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
   virtual void throws_function2(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1);
@@ -388,6 +392,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_throws_function2(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_function2Ctx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<bool> fbthrift_semifuture_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
   virtual void throws_function3(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1, const ::std::string& p_param2);
@@ -506,6 +512,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_throws_function3(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_function3Ctx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> fbthrift_semifuture_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret"} */
   virtual void oneway_void_ret(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -598,6 +606,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_retCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_oneway_void_ret(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_i32_i32_i32_i32_i32_param"} */
   virtual void oneway_void_ret_i32_i32_i32_i32_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
@@ -690,6 +700,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_map_setlist_param"} */
   virtual void oneway_void_ret_map_setlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
@@ -782,6 +794,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_map_setlist_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_struct_param"} */
   virtual void oneway_void_ret_struct_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::MyStruct& p_param1);
@@ -874,6 +888,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_struct_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_oneway_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_listunion_param"} */
   virtual void oneway_void_ret_listunion_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
@@ -966,6 +982,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_listunion_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_oneway_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
  public:
 };
 

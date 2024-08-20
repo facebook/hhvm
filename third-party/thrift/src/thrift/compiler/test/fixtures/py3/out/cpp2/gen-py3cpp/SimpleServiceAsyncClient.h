@@ -148,6 +148,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_five(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_get_five(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "add_five"} */
   virtual void add_five(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_num);
@@ -266,6 +268,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_add_five(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> add_fiveCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_add_five(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_num);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "do_nothing"} */
   virtual void do_nothing(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -382,6 +386,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_do_nothing(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_nothingCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_do_nothing(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat"} */
   virtual void concat(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_first, const ::std::string& p_second);
@@ -500,6 +506,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_concat(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concatCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_concat(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_first, const ::std::string& p_second);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_value"} */
   virtual void get_value(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::SimpleStruct& p_simple_struct);
@@ -618,6 +626,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_value(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_valueCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_get_value(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::SimpleStruct& p_simple_struct);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "negate"} */
   virtual void negate(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_input);
@@ -736,6 +746,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_negate(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> negateCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<bool> fbthrift_semifuture_negate(apache::thrift::RpcOptions& rpcOptions, bool p_input);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "tiny"} */
   virtual void tiny(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_input);
@@ -854,6 +866,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_tiny(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> tinyCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int8_t> fbthrift_semifuture_tiny(apache::thrift::RpcOptions& rpcOptions, ::std::int8_t p_input);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "small"} */
   virtual void small(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_input);
@@ -972,6 +986,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_small(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> smallCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int16_t> fbthrift_semifuture_small(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_input);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "big"} */
   virtual void big(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_input);
@@ -1090,6 +1106,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_big(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bigCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int64_t> fbthrift_semifuture_big(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_input);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "two"} */
   virtual void two(std::unique_ptr<apache::thrift::RequestCallback> callback, double p_input);
@@ -1208,6 +1226,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_two(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> twoCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<double> fbthrift_semifuture_two(apache::thrift::RpcOptions& rpcOptions, double p_input);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "expected_exception"} */
   virtual void expected_exception(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1324,6 +1344,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_expected_exception(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> expected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_expected_exception(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unexpected_exception"} */
   virtual void unexpected_exception(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1442,6 +1464,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_unexpected_exception(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unexpected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_unexpected_exception(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i16_list"} */
   virtual void sum_i16_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int16_t>& p_numbers);
@@ -1560,6 +1584,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_sum_i16_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i16_listCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int16_t>& p_numbers);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i32_list"} */
   virtual void sum_i32_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int32_t>& p_numbers);
@@ -1678,6 +1704,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_sum_i32_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i32_listCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int32_t>& p_numbers);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_i64_list"} */
   virtual void sum_i64_list(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_numbers);
@@ -1796,6 +1824,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_sum_i64_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_i64_listCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_numbers);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "concat_many"} */
   virtual void concat_many(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
@@ -1914,6 +1944,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_concat_many(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> concat_manyCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_concat_many(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "count_structs"} */
   virtual void count_structs(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
@@ -2032,6 +2064,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_count_structs(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> count_structsCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_count_structs(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::SimpleStruct>& p_items);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_set"} */
   virtual void sum_set(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::int32_t>& p_numbers);
@@ -2150,6 +2184,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_sum_set(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_setCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_sum_set(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::int32_t>& p_numbers);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contains_word"} */
   virtual void contains_word(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
@@ -2268,6 +2304,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_contains_word(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contains_wordCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<bool> fbthrift_semifuture_contains_word(apache::thrift::RpcOptions& rpcOptions, const ::std::set<::std::string>& p_words, const ::std::string& p_word);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_map_value"} */
   virtual void get_map_value(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
@@ -2386,6 +2424,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_map_value(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_map_valueCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_get_map_value(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "map_length"} */
   virtual void map_length(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
@@ -2504,6 +2544,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_map_length(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> map_lengthCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int16_t> fbthrift_semifuture_map_length(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "sum_map_values"} */
   virtual void sum_map_values(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int16_t>& p_items);
@@ -2622,6 +2664,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_sum_map_values(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sum_map_valuesCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int16_t> fbthrift_semifuture_sum_map_values(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int16_t>& p_items);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "complex_sum_i32"} */
   virtual void complex_sum_i32(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
@@ -2740,6 +2784,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_complex_sum_i32(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> complex_sum_i32Ctx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "repeat_name"} */
   virtual void repeat_name(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::ComplexStruct& p_counter);
@@ -2858,6 +2904,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_repeat_name(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> repeat_nameCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_repeat_name(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::ComplexStruct& p_counter);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct"} */
   virtual void get_struct(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -2976,6 +3024,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_struct(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_structCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::py3::simple::SimpleStruct> fbthrift_semifuture_get_struct(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "fib"} */
   virtual void fib(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_n);
@@ -3094,6 +3144,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_fib(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fibCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::vector<::std::int32_t>> fbthrift_semifuture_fib(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_n);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "unique_words"} */
   virtual void unique_words(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
@@ -3212,6 +3264,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_unique_words(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unique_wordsCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::set<::std::string>> fbthrift_semifuture_unique_words(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "words_count"} */
   virtual void words_count(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_words);
@@ -3330,6 +3384,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_words_count(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> words_countCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::map<::std::string, ::std::int16_t>> fbthrift_semifuture_words_count(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_words);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "set_enum"} */
   virtual void set_enum(std::unique_ptr<apache::thrift::RequestCallback> callback, ::py3::simple::AnEnum p_in_enum);
@@ -3448,6 +3504,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_set_enum(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> set_enumCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::py3::simple::AnEnum> fbthrift_semifuture_set_enum(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::AnEnum p_in_enum);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_lists"} */
   virtual void list_of_lists(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
@@ -3566,6 +3624,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_list_of_lists(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_listsCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::vector<::std::vector<::std::int32_t>>> fbthrift_semifuture_list_of_lists(apache::thrift::RpcOptions& rpcOptions, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "word_character_frequency"} */
   virtual void word_character_frequency(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_sentence);
@@ -3684,6 +3744,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_word_character_frequency(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> word_character_frequencyCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> fbthrift_semifuture_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_sentence);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "list_of_sets"} */
   virtual void list_of_sets(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_some_words);
@@ -3802,6 +3864,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_list_of_sets(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_of_setsCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::vector<::std::set<::std::string>>> fbthrift_semifuture_list_of_sets(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_some_words);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "nested_map_argument"} */
   virtual void nested_map_argument(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
@@ -3920,6 +3984,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_nested_map_argument(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> nested_map_argumentCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "make_sentence"} */
   virtual void make_sentence(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
@@ -4038,6 +4104,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_make_sentence(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> make_sentenceCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_make_sentence(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::vector<::std::string>>& p_word_chars);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_union"} */
   virtual void get_union(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
@@ -4156,6 +4224,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_union(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_unionCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::set<::std::int32_t>> fbthrift_semifuture_get_union(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::set<::std::int32_t>>& p_sets);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_keys"} */
   virtual void get_keys(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
@@ -4274,6 +4344,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_keys(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_keysCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::set<::std::string>> fbthrift_semifuture_get_keys(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "lookup_double"} */
   virtual void lookup_double(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_key);
@@ -4392,6 +4464,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_lookup_double(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> lookup_doubleCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<double> fbthrift_semifuture_lookup_double(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_key);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "retrieve_binary"} */
   virtual void retrieve_binary(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_something);
@@ -4510,6 +4584,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_retrieve_binary(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> retrieve_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_something);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_binary"} */
   virtual void contain_binary(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::string>& p_binaries);
@@ -4628,6 +4704,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_contain_binary(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_binaryCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::set<::std::string>> fbthrift_semifuture_contain_binary(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::string>& p_binaries);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "contain_enum"} */
   virtual void contain_enum(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
@@ -4746,6 +4824,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_contain_enum(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> contain_enumCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::vector<::py3::simple::AnEnum>> fbthrift_semifuture_contain_enum(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::py3::simple::AnEnum>& p_the_enum);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_binary_union_struct"} */
   virtual void get_binary_union_struct(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::py3::simple::BinaryUnion& p_u);
@@ -4864,6 +4944,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_binary_union_struct(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_binary_union_structCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::py3::simple::BinaryUnionStruct> fbthrift_semifuture_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, const ::py3::simple::BinaryUnion& p_u);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "SimpleService", "function": "get_struct_hidden"} */
   virtual void get_struct_hidden(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -4982,6 +5064,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   template <typename RpcOptions>
   void fbthrift_send_get_struct_hidden(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_struct_hiddenCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::py3::simple::SimpleStruct> fbthrift_semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
 

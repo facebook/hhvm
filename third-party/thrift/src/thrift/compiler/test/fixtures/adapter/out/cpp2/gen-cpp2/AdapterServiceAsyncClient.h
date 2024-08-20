@@ -152,6 +152,8 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   template <typename RpcOptions>
   void fbthrift_send_count(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> countCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::facebook::thrift::test::CountingStruct> fbthrift_semifuture_count(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
   virtual void adaptedTypes(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::facebook::thrift::test::HeapAllocated& p_arg);
@@ -270,6 +272,8 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   template <typename RpcOptions>
   void fbthrift_send_adaptedTypes(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> adaptedTypesCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::facebook::thrift::test::HeapAllocated> fbthrift_semifuture_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg);
  public:
 };
 

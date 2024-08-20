@@ -148,6 +148,8 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   template <typename RpcOptions>
   void fbthrift_send_getDataByKey0(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByKey0Ctx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual void getDataByKey1(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_key);
@@ -266,6 +268,8 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   template <typename RpcOptions>
   void fbthrift_send_getDataByKey1(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByKey1Ctx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
  public:
 };
 

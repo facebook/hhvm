@@ -153,6 +153,8 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
   template <typename RpcOptions>
   void fbthrift_send_get_seven(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_sevenCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_get_seven(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
 

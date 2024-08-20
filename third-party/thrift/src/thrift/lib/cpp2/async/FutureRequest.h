@@ -188,13 +188,36 @@ class OneWayFutureCallback : public FutureCallbackBase<folly::Unit> {
   void replyReceived(ClientReceiveState&& /*state*/) override { CHECK(false); }
 };
 
-class SemiFutureCallback : public RequestCallback {
+template <typename Result>
+class SemiFutureCallback : public FutureCallback<Result> {
+ public:
+  using FutureCallback<Result>::FutureCallback;
+
+  bool isInlineSafe() const override { return true; }
+};
+
+class OneWaySemiFutureCallback : public OneWayFutureCallback {
+ public:
+  using OneWayFutureCallback::OneWayFutureCallback;
+
+  bool isInlineSafe() const override { return true; }
+};
+
+template <typename Result>
+class HeaderSemiFutureCallback : public HeaderFutureCallback<Result> {
+ public:
+  using HeaderFutureCallback<Result>::HeaderFutureCallback;
+
+  bool isInlineSafe() const override { return true; }
+};
+
+class LegacySemiFutureCallback : public RequestCallback {
  public:
   template <typename Result>
   using Processor = folly::exception_wrapper (*)(Result&, ClientReceiveState&);
   using ProcessorVoid = folly::exception_wrapper (*)(ClientReceiveState&);
 
-  explicit SemiFutureCallback(
+  explicit LegacySemiFutureCallback(
       folly::Promise<ClientReceiveState>&& promise,
       std::shared_ptr<apache::thrift::RequestChannel> channel)
       : promise_(std::move(promise)), channel_(std::move(channel)) {}
@@ -216,9 +239,9 @@ class SemiFutureCallback : public RequestCallback {
   std::shared_ptr<apache::thrift::RequestChannel> channel_;
 };
 
-class OneWaySemiFutureCallback : public RequestCallback {
+class LegacyOneWaySemiFutureCallback : public RequestCallback {
  public:
-  OneWaySemiFutureCallback(
+  LegacyOneWaySemiFutureCallback(
       folly::Promise<folly::Unit>&& promise,
       std::shared_ptr<apache::thrift::RequestChannel> channel)
       : promise_(std::move(promise)), channel_(std::move(channel)) {}
@@ -239,15 +262,15 @@ class OneWaySemiFutureCallback : public RequestCallback {
 };
 
 template <typename Result>
-std::pair<std::unique_ptr<SemiFutureCallback>, folly::SemiFuture<Result>>
+std::pair<std::unique_ptr<LegacySemiFutureCallback>, folly::SemiFuture<Result>>
 makeSemiFutureCallback(
-    SemiFutureCallback::Processor<Result> processor,
+    LegacySemiFutureCallback::Processor<Result> processor,
     std::shared_ptr<apache::thrift::RequestChannel> channel) {
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
 
   return {
-      std::make_unique<SemiFutureCallback>(
+      std::make_unique<LegacySemiFutureCallback>(
           std::move(promise), std::move(channel)),
       std::move(future).deferValue([processor](ClientReceiveState&& state) {
         CHECK(!state.isException());
@@ -263,16 +286,17 @@ makeSemiFutureCallback(
       })};
 }
 
-inline std::
-    pair<std::unique_ptr<SemiFutureCallback>, folly::SemiFuture<folly::Unit>>
-    makeSemiFutureCallback(
-        SemiFutureCallback::ProcessorVoid processor,
-        std::shared_ptr<apache::thrift::RequestChannel> channel) {
+inline std::pair<
+    std::unique_ptr<LegacySemiFutureCallback>,
+    folly::SemiFuture<folly::Unit>>
+makeSemiFutureCallback(
+    LegacySemiFutureCallback::ProcessorVoid processor,
+    std::shared_ptr<apache::thrift::RequestChannel> channel) {
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
 
   return {
-      std::make_unique<SemiFutureCallback>(
+      std::make_unique<LegacySemiFutureCallback>(
           std::move(promise), std::move(channel)),
       std::move(future).deferValue([processor](ClientReceiveState&& state) {
         CHECK(!state.isException());
@@ -288,17 +312,17 @@ inline std::
 
 template <typename Result>
 std::pair<
-    std::unique_ptr<SemiFutureCallback>,
+    std::unique_ptr<LegacySemiFutureCallback>,
     folly::SemiFuture<
         std::pair<Result, std::unique_ptr<apache::thrift::transport::THeader>>>>
 makeHeaderSemiFutureCallback(
-    SemiFutureCallback::Processor<Result> processor,
+    LegacySemiFutureCallback::Processor<Result> processor,
     std::shared_ptr<apache::thrift::RequestChannel> channel) {
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
 
   return {
-      std::make_unique<SemiFutureCallback>(
+      std::make_unique<LegacySemiFutureCallback>(
           std::move(promise), std::move(channel)),
       std::move(future).deferValue([processor](ClientReceiveState&& state) {
         CHECK(!state.isException());
@@ -315,18 +339,18 @@ makeHeaderSemiFutureCallback(
 }
 
 inline std::pair<
-    std::unique_ptr<SemiFutureCallback>,
+    std::unique_ptr<LegacySemiFutureCallback>,
     folly::SemiFuture<std::pair<
         folly::Unit,
         std::unique_ptr<apache::thrift::transport::THeader>>>>
 makeHeaderSemiFutureCallback(
-    SemiFutureCallback::ProcessorVoid processor,
+    LegacySemiFutureCallback::ProcessorVoid processor,
     std::shared_ptr<apache::thrift::RequestChannel> channel) {
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
 
   return {
-      std::make_unique<SemiFutureCallback>(
+      std::make_unique<LegacySemiFutureCallback>(
           std::move(promise), std::move(channel)),
       std::move(future).deferValue([processor](ClientReceiveState&& state) {
         CHECK(!state.isException());
@@ -343,14 +367,14 @@ makeHeaderSemiFutureCallback(
 }
 
 inline std::pair<
-    std::unique_ptr<OneWaySemiFutureCallback>,
+    std::unique_ptr<LegacyOneWaySemiFutureCallback>,
     folly::SemiFuture<folly::Unit>>
 makeOneWaySemiFutureCallback(
     std::shared_ptr<apache::thrift::RequestChannel> channel) {
   folly::Promise<folly::Unit> promise;
   auto future = promise.getSemiFuture();
   return {
-      std::make_unique<OneWaySemiFutureCallback>(
+      std::make_unique<LegacyOneWaySemiFutureCallback>(
           std::move(promise), std::move(channel)),
       std::move(future)};
 }

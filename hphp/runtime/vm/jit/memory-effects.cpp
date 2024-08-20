@@ -1849,6 +1849,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LogArrayReach:
   case LogGuardFailure:
+  case LogClsSpeculation:
     return may_load_store(AHeapAny, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:

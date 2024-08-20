@@ -2788,6 +2788,60 @@ struct LoggingProfileData : IRExtraData {
   bool isStatic; // Whether the output is guaranteed to be static
 };
 
+struct LoggingSpeculateClassData : IRExtraData {
+  LoggingSpeculateClassData(const Class* cls, 
+                            const Class* ctx,
+                            const StringData* methName,
+                            Op op,
+                            ClassId expectedClsId,
+                            bool success)
+    : cls(cls)
+    , ctx(ctx)
+    , methName(methName)
+    , opcode(op)
+    , expectedClsId(expectedClsId)
+    , success(success) {}
+
+  std::string show() const {
+    auto const ctxName = ctx ? ctx->name()->data() : "[no context]";
+    return folly::sformat(
+      "Logging {} for speculation {}::{} in {} for op {} with class id {}",
+      success ? "true" : "false",
+      cls->name()->data(),
+      methName->data(),
+      ctxName,
+      opcodeToName(opcode),
+      expectedClsId.id());
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      cls->stableHash(),
+      ctx->stableHash(),
+      methName->hash(),
+      std::hash<Op>()(opcode),
+      std::hash<ClassId::Id>()(expectedClsId.id()),
+      std::hash<bool>()(success)
+    );
+  }
+
+  bool equals(const LoggingSpeculateClassData& o) const {
+    return cls == o.cls &&
+      ctx == o.ctx && 
+      methName == o.methName && 
+      opcode == o.opcode && 
+      expectedClsId == o.expectedClsId &&
+      success == o.success;
+  }
+
+  const Class* cls;
+  const Class* ctx;
+  const StringData* methName;
+  Op opcode;
+  ClassId expectedClsId;
+  bool success;
+};
+
 struct SinkProfileData : IRExtraData {
   explicit SinkProfileData(bespoke::SinkProfile* profile)
     : profile(profile)
@@ -3008,6 +3062,7 @@ X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(IncCallCounter,               FuncData);
 X(LogArrayReach,                SinkProfileData);
+X(LogClsSpeculation,            LoggingSpeculateClassData);
 X(NewLoggingArray,              LoggingProfileData);
 X(BespokeGet,                   BespokeGetData);
 X(Call,                         CallData);

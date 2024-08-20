@@ -352,6 +352,40 @@ void cgEqClassId(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_E, sf, dst};
 }
 
+static void logClsSpeculation(
+  const StringData* clsName,
+  const StringData* ctxName,
+  const StringData* methName,
+  const char* op,
+  ClassId::Id clsId,
+  bool success) {
+  StructuredLogEntry entry;
+  entry.setStr("cls", clsName->data());
+  entry.setStr("method", methName->data());
+  entry.setStr("ctx", ctxName ? ctxName->data() : "no context");
+  entry.setStr("op", op);
+  entry.setInt("expected clsId", clsId);
+  entry.setInt("success", success);
+  StructuredLog::log("hhvm_speculate", entry);
+}
+
+void cgLogClsSpeculation(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const extra = inst->extra<LoggingSpeculateClassData>();
+  auto const target = CallSpec::direct(logClsSpeculation);
+  auto const ctx =  extra->ctx ? extra->ctx->name() : nullptr;
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
+               argGroup(env, inst)
+               .immPtr(extra->cls->name())
+               .immPtr(ctx)
+               .immPtr(extra->methName)
+               .immPtr(opcodeToName(extra->opcode))
+               .imm(extra->expectedClsId.id())
+               .imm(extra->success)
+  );
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(OODeclExists)

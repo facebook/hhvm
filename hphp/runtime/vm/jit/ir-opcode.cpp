@@ -815,6 +815,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LoadBCSP:
   case LockObj:
   case LogArrayReach:
+  case LogClsSpeculation:
   case LogGuardFailure:
   case LookupCls:
   case LookupClsCached:

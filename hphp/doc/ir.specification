@@ -1482,6 +1482,10 @@ To string conversions:
   Log that we failed to guard input S0 to the given type. Useful for catching
   performance bugs in bespoke layout selection, but may have more general use.
 
+| LogClsSpeculation, ND, NA, NF
+
+  Log the result of speculation of a ClassId for sandbox mode.
+
 | NewDictArray, D(Dict), C(Int), PRc
 
   Allocate a new dict with the expected capacity S0.

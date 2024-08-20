@@ -715,6 +715,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdClsMethodCacheFunc:
   case LogArrayReach:
   case LogGuardFailure:
+  case LogClsSpeculation:
   case ProfileInstanceCheck:
   case MemoGetStaticValue:
   case MemoGetStaticCache:

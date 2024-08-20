@@ -1789,6 +1789,16 @@ void emitFCallClsMethodD(IRGS& env,
 
       gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
       auto const isEqual = gen(env, EqClassId, ClassIdData(lookup.cls));
+      auto const data = [&](bool success) {
+        return LoggingSpeculateClassData {
+          lookup.cls,
+          callCtx.cls(),
+          methodName,
+          Op::FCallClsMethodD,
+          lookup.cls->classId(),
+          success,
+        };
+      };
       return ifThenElse(
         env,
         [&] (Block* taken) {
@@ -1799,11 +1809,17 @@ void emitFCallClsMethodD(IRGS& env,
           auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
           emitModuleBoundaryCheckKnown(env, cls);
           prepareAndCallKnown(env, func, fca, ctx, false, false);
+          if (RO::EvalLogClsSpeculation) {
+            gen(env, LogClsSpeculation, data(true));
+          }
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
           updateStackOffset(env);
           slow();
+          if (RO::EvalLogClsSpeculation) {
+            gen(env, LogClsSpeculation, data(false));
+          }
         }
       );
     }

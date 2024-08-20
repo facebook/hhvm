@@ -557,6 +557,7 @@ struct RuntimeOption {
   F(bool, EmitDebuggerIntrCheck,       true)                            \
   /* Log the profile used to optimize array-like gets and sets. */      \
   F(bool, LogArrayAccessProfile,      false)                            \
+  F(bool, LogClsSpeculation,          false)                            \
   F(double, CoeffectFunParamProfileThreshold, 0.10)                     \
   F(bool, AssemblerFoldDefaultValues,  true)                            \
   F(uint64_t, AssemblerMaxScalarSize,  2147483648) /* 2GB */            \

@@ -21,6 +21,23 @@ typedef apache::thrift::ThriftPresult<true> NestedContainers_listSet_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::set<::apache::thrift::type_class::integral>>>>>, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>*>> NestedContainers_turtles_pargs;
 typedef apache::thrift::ThriftPresult<true> NestedContainers_turtles_presult;
 } // namespace cpp2
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_mapList(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo) {
+  ::cpp2::NestedContainers_mapList_pargs args;
+  args.get<0>().value = const_cast<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>*>(&p_foo);
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "mapList",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
 template <typename RpcOptions>
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_send_mapList(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -30,6 +47,23 @@ void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_send_mapList(apa
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "NestedContainers");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+}
+
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_mapSet(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo) {
+  ::cpp2::NestedContainers_mapSet_pargs args;
+  args.get<0>().value = const_cast<::std::map<::std::int32_t, ::std::set<::std::int32_t>>*>(&p_foo);
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "mapSet",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -43,6 +77,23 @@ void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_send_mapSet(apac
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_listMap(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo) {
+  ::cpp2::NestedContainers_listMap_pargs args;
+  args.get<0>().value = const_cast<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>*>(&p_foo);
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "listMap",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
 template <typename RpcOptions>
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_send_listMap(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -54,6 +105,23 @@ void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_send_listMap(apa
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_listSet(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::set<::std::int32_t>>& p_foo) {
+  ::cpp2::NestedContainers_listSet_pargs args;
+  args.get<0>().value = const_cast<::std::vector<::std::set<::std::int32_t>>*>(&p_foo);
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "listSet",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
 template <typename RpcOptions>
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_send_listSet(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -63,6 +131,23 @@ void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_send_listSet(apa
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "NestedContainers");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+}
+
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_turtles(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo) {
+  ::cpp2::NestedContainers_turtles_pargs args;
+  args.get<0>().value = const_cast<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>*>(&p_foo);
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "turtles",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -89,32 +174,15 @@ void apache::thrift::Client<::cpp2::NestedContainers>::mapList(apache::thrift::R
   fbthrift_serialize_and_send_mapList(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_mapList(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo) {
-  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
-    using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::cpp2::NestedContainers_mapList_pargs args;
-    args.get<0>().value = const_cast<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>*>(&p_foo);
-    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
-    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
-    return apache::thrift::preprocessSendT<ProtocolWriter>(
-        &prot,
-        rpcOptions,
-        contextStack,
-        header,
-        "mapList",
-        writer,
-        sizer,
-        channel_->getChecksumSamplingRate());
-  });
-}
-
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_and_send_mapList(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& p_foo, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_mapList(rpcOptions, *header, contextStack, p_foo);
-  if (stealRpcOptions) {
-    fbthrift_send_mapList(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-  } else {
-    fbthrift_send_mapList(std::move(request), rpcOptions, std::move(header), std::move(callback));
-  }
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_mapList(&writer, rpcOptions, *header, contextStack, p_foo);
+    if (stealRpcOptions) {
+      fbthrift_send_mapList(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_mapList(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::NestedContainers>::mapListCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -267,32 +335,15 @@ void apache::thrift::Client<::cpp2::NestedContainers>::mapSet(apache::thrift::Rp
   fbthrift_serialize_and_send_mapSet(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_mapSet(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo) {
-  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
-    using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::cpp2::NestedContainers_mapSet_pargs args;
-    args.get<0>().value = const_cast<::std::map<::std::int32_t, ::std::set<::std::int32_t>>*>(&p_foo);
-    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
-    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
-    return apache::thrift::preprocessSendT<ProtocolWriter>(
-        &prot,
-        rpcOptions,
-        contextStack,
-        header,
-        "mapSet",
-        writer,
-        sizer,
-        channel_->getChecksumSamplingRate());
-  });
-}
-
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_and_send_mapSet(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& p_foo, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_mapSet(rpcOptions, *header, contextStack, p_foo);
-  if (stealRpcOptions) {
-    fbthrift_send_mapSet(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-  } else {
-    fbthrift_send_mapSet(std::move(request), rpcOptions, std::move(header), std::move(callback));
-  }
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_mapSet(&writer, rpcOptions, *header, contextStack, p_foo);
+    if (stealRpcOptions) {
+      fbthrift_send_mapSet(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_mapSet(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::NestedContainers>::mapSetCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -445,32 +496,15 @@ void apache::thrift::Client<::cpp2::NestedContainers>::listMap(apache::thrift::R
   fbthrift_serialize_and_send_listMap(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_listMap(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo) {
-  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
-    using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::cpp2::NestedContainers_listMap_pargs args;
-    args.get<0>().value = const_cast<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>*>(&p_foo);
-    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
-    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
-    return apache::thrift::preprocessSendT<ProtocolWriter>(
-        &prot,
-        rpcOptions,
-        contextStack,
-        header,
-        "listMap",
-        writer,
-        sizer,
-        channel_->getChecksumSamplingRate());
-  });
-}
-
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_and_send_listMap(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& p_foo, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_listMap(rpcOptions, *header, contextStack, p_foo);
-  if (stealRpcOptions) {
-    fbthrift_send_listMap(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-  } else {
-    fbthrift_send_listMap(std::move(request), rpcOptions, std::move(header), std::move(callback));
-  }
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_listMap(&writer, rpcOptions, *header, contextStack, p_foo);
+    if (stealRpcOptions) {
+      fbthrift_send_listMap(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_listMap(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::NestedContainers>::listMapCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -623,32 +657,15 @@ void apache::thrift::Client<::cpp2::NestedContainers>::listSet(apache::thrift::R
   fbthrift_serialize_and_send_listSet(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_listSet(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::set<::std::int32_t>>& p_foo) {
-  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
-    using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::cpp2::NestedContainers_listSet_pargs args;
-    args.get<0>().value = const_cast<::std::vector<::std::set<::std::int32_t>>*>(&p_foo);
-    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
-    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
-    return apache::thrift::preprocessSendT<ProtocolWriter>(
-        &prot,
-        rpcOptions,
-        contextStack,
-        header,
-        "listSet",
-        writer,
-        sizer,
-        channel_->getChecksumSamplingRate());
-  });
-}
-
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_and_send_listSet(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_foo, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_listSet(rpcOptions, *header, contextStack, p_foo);
-  if (stealRpcOptions) {
-    fbthrift_send_listSet(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-  } else {
-    fbthrift_send_listSet(std::move(request), rpcOptions, std::move(header), std::move(callback));
-  }
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_listSet(&writer, rpcOptions, *header, contextStack, p_foo);
+    if (stealRpcOptions) {
+      fbthrift_send_listSet(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_listSet(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::NestedContainers>::listSetCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -801,32 +818,15 @@ void apache::thrift::Client<::cpp2::NestedContainers>::turtles(apache::thrift::R
   fbthrift_serialize_and_send_turtles(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_foo);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_turtles(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo) {
-  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
-    using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::cpp2::NestedContainers_turtles_pargs args;
-    args.get<0>().value = const_cast<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>*>(&p_foo);
-    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
-    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
-    return apache::thrift::preprocessSendT<ProtocolWriter>(
-        &prot,
-        rpcOptions,
-        contextStack,
-        header,
-        "turtles",
-        writer,
-        sizer,
-        channel_->getChecksumSamplingRate());
-  });
-}
-
 void apache::thrift::Client<::cpp2::NestedContainers>::fbthrift_serialize_and_send_turtles(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& p_foo, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_turtles(rpcOptions, *header, contextStack, p_foo);
-  if (stealRpcOptions) {
-    fbthrift_send_turtles(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-  } else {
-    fbthrift_send_turtles(std::move(request), rpcOptions, std::move(header), std::move(callback));
-  }
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_turtles(&writer, rpcOptions, *header, contextStack, p_foo);
+    if (stealRpcOptions) {
+      fbthrift_send_turtles(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_turtles(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::NestedContainers>::turtlesCtx(apache::thrift::RpcOptions* rpcOptions) {

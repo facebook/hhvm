@@ -13,6 +13,25 @@ namespace facebook::thrift::test {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithAdapter_7208*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::std::string*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::facebook::thrift::test::Foo*>> Service_func_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::facebook::thrift::test::MyI32_4873*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>> Service_func_presult;
 } // namespace facebook::thrift::test
+template <typename Protocol_>
+apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::Service>::fbthrift_serialize_func(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
+  ::facebook::thrift::test::Service_func_pargs args;
+  args.get<0>().value = const_cast<::facebook::thrift::test::StringWithAdapter_7208*>(&p_arg1);
+  args.get<1>().value = const_cast<::std::string*>(&p_arg2);
+  args.get<2>().value = const_cast<::facebook::thrift::test::Foo*>(&p_arg3);
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "func",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
 template <typename RpcOptions>
 void apache::thrift::Client<::facebook::thrift::test::Service>::fbthrift_send_func(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -37,34 +56,15 @@ void apache::thrift::Client<::facebook::thrift::test::Service>::func(apache::thr
   fbthrift_serialize_and_send_func(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::Service>::fbthrift_serialize_func(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
-  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
-    using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::facebook::thrift::test::Service_func_pargs args;
-    args.get<0>().value = const_cast<::facebook::thrift::test::StringWithAdapter_7208*>(&p_arg1);
-    args.get<1>().value = const_cast<::std::string*>(&p_arg2);
-    args.get<2>().value = const_cast<::facebook::thrift::test::Foo*>(&p_arg3);
-    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
-    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
-    return apache::thrift::preprocessSendT<ProtocolWriter>(
-        &prot,
-        rpcOptions,
-        contextStack,
-        header,
-        "func",
-        writer,
-        sizer,
-        channel_->getChecksumSamplingRate());
-  });
-}
-
 void apache::thrift::Client<::facebook::thrift::test::Service>::fbthrift_serialize_and_send_func(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_func(rpcOptions, *header, contextStack, p_arg1, p_arg2, p_arg3);
-  if (stealRpcOptions) {
-    fbthrift_send_func(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-  } else {
-    fbthrift_send_func(std::move(request), rpcOptions, std::move(header), std::move(callback));
-  }
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_func(&writer, rpcOptions, *header, contextStack, p_arg1, p_arg2, p_arg3);
+    if (stealRpcOptions) {
+      fbthrift_send_func(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    } else {
+      fbthrift_send_func(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::Service>::funcCtx(apache::thrift::RpcOptions* rpcOptions) {

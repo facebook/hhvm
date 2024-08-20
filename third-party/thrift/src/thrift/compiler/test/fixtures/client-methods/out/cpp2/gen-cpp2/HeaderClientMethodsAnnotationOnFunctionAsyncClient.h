@@ -148,7 +148,8 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public apache::t
   /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo"} */
   virtual folly::exception_wrapper recv_instance_wrapped_echo(::cpp2::EchoResponse& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_echo(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::cpp2::EchoRequest& p_request);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_echo(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::cpp2::EchoRequest& p_request);
   template <typename RpcOptions>
   void fbthrift_send_echo(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> echoCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -266,7 +267,8 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public apache::t
   /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo_2"} */
   virtual folly::exception_wrapper recv_instance_wrapped_echo_2(::cpp2::EchoResponse& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_echo_2(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::cpp2::EchoRequest& p_request);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_echo_2(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::cpp2::EchoRequest& p_request);
   template <typename RpcOptions>
   void fbthrift_send_echo_2(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> echo_2Ctx(apache::thrift::RpcOptions* rpcOptions);

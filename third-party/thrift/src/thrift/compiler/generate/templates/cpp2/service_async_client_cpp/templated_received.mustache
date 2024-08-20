@@ -15,6 +15,32 @@
   limitations under the License.
 
 }}{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+template <typename Protocol_>
+apache::thrift::SerializedRequest {{ > service_common/client_class_name}}::fbthrift_serialize_{{function:cpp_name}}(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function:comma}}{{ > service_common/function_param_list_client}}) {
+  {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
+{{#function:args}}{{#field:type}}
+{{^type:resolves_to_complex_return?}}
+  args.get<{{field:index}}>().value = &p_{{field:cpp_name}};
+{{/type:resolves_to_complex_return?}}
+{{#type:resolves_to_complex_return?}}
+  args.get<{{field:index}}>().value = const_cast<{{type:cpp_type}}*>(&p_{{field:cpp_name}});
+{{/type:resolves_to_complex_return?}}
+{{/field:type}}{{/function:args}}{{!
+
+}}
+  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  const auto writer = [&](Protocol_* p) { args.write(p); };
+  return apache::thrift::preprocessSendT<Protocol_>(
+      prot,
+      rpcOptions,
+      contextStack,
+      header,
+      "{{ > common/function_name}}",
+      writer,
+      sizer,
+      channel_->getChecksumSamplingRate());
+}
+
 template <typename RpcOptions>
 void {{ > service_common/client_class_name}}::fbthrift_send_{{function:cpp_name}}(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}) {
   {{#function:in_or_creates_interaction?}}

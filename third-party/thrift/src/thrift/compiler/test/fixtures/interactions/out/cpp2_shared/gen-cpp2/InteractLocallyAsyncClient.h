@@ -143,7 +143,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift", "service": "SharedInteraction", "function": "init"} */
   static ::std::int32_t recv_init(::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_init(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_init(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_init(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> initCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -247,7 +248,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift", "service": "SharedInteraction", "function": "do_something"} */
   static void recv_do_something(::thrift::shared_interactions::DoSomethingResult& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_do_something(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_do_something(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_do_something(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_somethingCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -349,7 +351,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift", "service": "SharedInteraction", "function": "tear_down"} */
   static void recv_tear_down(::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_tear_down(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_tear_down(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_tear_down(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> tear_downCtx(apache::thrift::RpcOptions* rpcOptions);

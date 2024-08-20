@@ -32,40 +32,15 @@ void {{ > service_common/client_class_name}}::{{function:cpp_name}}(apache::thri
 }
 
 {{/function:sink?}}
-apache::thrift::SerializedRequest {{ > service_common/client_class_name}}::fbthrift_serialize_{{function:cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function:comma}}{{ > service_common/function_param_list_client}}) {
-  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
-    using ProtocolWriter = std::decay_t<decltype(prot)>;
-    {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
-{{#function:args}}{{#field:type}}
-{{^type:resolves_to_complex_return?}}
-    args.get<{{field:index}}>().value = &p_{{field:cpp_name}};
-{{/type:resolves_to_complex_return?}}
-{{#type:resolves_to_complex_return?}}
-    args.get<{{field:index}}>().value = const_cast<{{type:cpp_type}}*>(&p_{{field:cpp_name}});
-{{/type:resolves_to_complex_return?}}
-{{/field:type}}{{/function:args}}{{!
-}}
-    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
-    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
-    return apache::thrift::preprocessSendT<ProtocolWriter>(
-        &prot,
-        rpcOptions,
-        contextStack,
-        header,
-        "{{ > common/function_name}}",
-        writer,
-        sizer,
-        channel_->getChecksumSamplingRate());
-  });
-}
-
 void {{ > service_common/client_class_name}}::fbthrift_serialize_and_send_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{ > types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/function_param_list_client}}, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
-  if (stealRpcOptions) {
-    fbthrift_send_{{function:cpp_name}}(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
-  } else {
-    fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
-  }
+  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
+    apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(&writer, rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
+    if (stealRpcOptions) {
+      fbthrift_send_{{function:cpp_name}}(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
+    } else {
+      fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
+    }
+  });
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> {{ > service_common/client_class_name}}::{{function:cpp_name}}Ctx(apache::thrift::RpcOptions* rpcOptions) {

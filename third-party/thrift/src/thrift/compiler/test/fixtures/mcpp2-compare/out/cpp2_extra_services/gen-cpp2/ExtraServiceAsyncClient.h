@@ -150,7 +150,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "simple_function"} */
   virtual folly::exception_wrapper recv_instance_wrapped_simple_function(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_simple_function(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_simple_function(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_simple_function(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> simple_functionCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -266,7 +267,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
   virtual folly::exception_wrapper recv_instance_wrapped_throws_function(::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_throws_function(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_throws_function(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_throws_function(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_functionCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -384,7 +386,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
   virtual folly::exception_wrapper recv_instance_wrapped_throws_function2(bool& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_throws_function2(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_param1);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_throws_function2(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_param1);
   template <typename RpcOptions>
   void fbthrift_send_throws_function2(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_function2Ctx(apache::thrift::RpcOptions* rpcOptions);
@@ -502,7 +505,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
   virtual folly::exception_wrapper recv_instance_wrapped_throws_function3(::std::map<::std::int32_t, ::std::string>& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_throws_function3(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_param1, const ::std::string& p_param2);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_throws_function3(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_param1, const ::std::string& p_param2);
   template <typename RpcOptions>
   void fbthrift_send_throws_function3(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> throws_function3Ctx(apache::thrift::RpcOptions* rpcOptions);
@@ -594,7 +598,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
 
 
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_retCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -686,7 +691,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
 
 
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_i32_i32_i32_i32_i32_param(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_i32_i32_i32_i32_i32_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -778,7 +784,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
 
 
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_map_setlist_param(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_map_setlist_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_map_setlist_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -870,7 +877,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
 
 
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_struct_param(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::some::valid::ns::MyStruct& p_param1);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_struct_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::some::valid::ns::MyStruct& p_param1);
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_struct_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
@@ -962,7 +970,8 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
 
 
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_listunion_param(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
+  template <typename Protocol_>
+  apache::thrift::SerializedRequest fbthrift_serialize_oneway_void_ret_listunion_param(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
   template <typename RpcOptions>
   void fbthrift_send_oneway_void_ret_listunion_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> oneway_void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions);

@@ -12,9 +12,9 @@
 namespace facebook::common::mysql_client {
 
 QueryOperation::QueryOperation(
-    std::unique_ptr<ConnectionProxy> conn,
+    std::unique_ptr<FetchOperationImpl> impl,
     Query&& query)
-    : FetchOperation(std::move(conn), std::vector<Query>{std::move(query)}),
+    : FetchOperation(std::move(impl), std::vector<Query>{std::move(query)}),
       query_result_(std::make_unique<QueryResult>(0)) {}
 
 void QueryOperation::notifyInitQuery() {
@@ -47,8 +47,7 @@ void QueryOperation::notifyRowsReady() {
 void QueryOperation::notifyQuerySuccess(bool more_results) {
   if (more_results) {
     // Bad usage of QueryOperation, we are going to cancel the query
-    cancel_ = true;
-    setFetchAction(FetchAction::CompleteOperation);
+    cancel();
   }
 
   query_result_->setOperationResult(OperationResult::Succeeded);

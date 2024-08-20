@@ -15,11 +15,11 @@ namespace facebook::common::mysql_client {
 class ChangeUserOperation : public SpecialOperation {
  public:
   explicit ChangeUserOperation(
-      std::unique_ptr<ConnectionProxy> conn,
+      std::unique_ptr<SpecialOperationImpl> impl,
       const std::string& user,
       const std::string& password,
       const std::string& database)
-      : SpecialOperation(std::move(conn)),
+      : SpecialOperation(std::move(impl)),
         user_(user),
         password_(password),
         database_(database) {}

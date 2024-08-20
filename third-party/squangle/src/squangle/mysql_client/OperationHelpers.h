@@ -14,6 +14,6 @@ namespace facebook::common::mysql_client {
 
 RowBlock makeRowBlockFromStream(
     std::shared_ptr<RowFields> row_fields,
-    FetchOperation::RowStream* row_stream);
+    RowStream* row_stream);
 
 } // namespace facebook::common::mysql_client

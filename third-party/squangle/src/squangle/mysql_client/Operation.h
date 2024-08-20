@@ -44,6 +44,7 @@
 #include <string>
 #include <variant>
 
+#include "squangle/logger/DBEventCounter.h"
 #include "squangle/mysql_client/DbResult.h"
 #include "squangle/mysql_client/Flags.h"
 
@@ -51,6 +52,8 @@ namespace facebook::common::mysql_client {
 
 class MysqlClientBase;
 class ConnectOperation;
+template <typename Client>
+class ConnectionPool;
 class QueryOperation;
 class Operation;
 
@@ -133,12 +136,11 @@ enum class StreamState { InitQuery, RowsReady, QueryEnded, Failure, Success };
 // overload of operator<< for StreamState
 std::ostream& operator<<(std::ostream& os, StreamState state);
 
-//  Public facing Operation API
-class Operation : public std::enable_shared_from_this<Operation> {
+class OperationBase {
  protected:
   class ConnectionProxy;
 
-  explicit Operation(std::unique_ptr<ConnectionProxy> safe_conn)
+  explicit OperationBase(std::unique_ptr<ConnectionProxy> safe_conn)
       : conn_proxy_(std::move(safe_conn)) {
     timeout_ = Duration(FLAGS_async_mysql_timeout_micros);
     request_context_.store(
@@ -146,21 +148,19 @@ class Operation : public std::enable_shared_from_this<Operation> {
   }
 
  public:
-  virtual ~Operation() = default;
+  virtual ~OperationBase() = default;
 
   // No default constructor or copy constructor/assignment operators
-  Operation() = delete;
-  Operation(const Operation&) = delete;
-  Operation& operator=(const Operation&) = delete;
+  OperationBase() = delete;
+  explicit OperationBase(const Operation&) = delete;
+  OperationBase& operator=(const Operation&) = delete;
 
-  Operation& run();
+  void run();
 
   // Try to cancel a pending operation.  This is inherently racey with
   // callbacks; it is possible the callback is being invoked *during*
   // the cancel attempt, so a cancelled operation may still succeed.
   void cancel();
-
-  virtual void wait() const = 0;
 
   // Did the operation succeed?
   bool ok() const {
@@ -171,10 +171,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
   bool done() const {
     return state() == OperationState::Completed;
   }
-
-  // Wait for an operation to complete.  Throw a
-  // RequiredOperationFailedException if it fails. Mainly for testing.
-  virtual void mustSucceed() = 0;
 
   virtual unsigned int mysql_errno() const = 0;
   virtual const std::string& mysql_error() const = 0;
@@ -189,9 +185,12 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   virtual void setObserverCallback(ObserverCallback obs_cb) = 0;
 
-  Operation& setAttributes(const AttributeMap& attributes);
-  Operation& setAttributes(AttributeMap&& attributes);
-  Operation& setAttribute(const std::string& key, const std::string& value);
+  virtual void setPreQueryCallback(AsyncPreQueryCallback&& callback) = 0;
+  virtual void setPostQueryCallback(AsyncPostQueryCallback&& callback) = 0;
+
+  void setAttributes(const AttributeMap& attributes);
+  void setAttributes(AttributeMap&& attributes);
+  void setAttribute(const std::string& key, const std::string& value);
 
   const AttributeMap& getAttributes() const {
     return attributes_;
@@ -199,7 +198,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   // Set a timeout; otherwise FLAGS_async_mysql_timeout_micros is
   // used.
-  Operation& setTimeout(Duration timeout);
+  void setTimeout(Duration timeout);
 
   Duration getTimeout() const {
     return timeout_;
@@ -209,17 +208,11 @@ class Operation : public std::enable_shared_from_this<Operation> {
     return std::chrono::duration_cast<Millis>(timeout_);
   }
 
-  virtual db::OperationType getOperationType() const = 0;
-
-  // Retrieve the shared pointer that holds this instance.
-  std::shared_ptr<Operation> getSharedPointer();
-
-  static folly::StringPiece toString(OperationState state);
-  static folly::StringPiece toString(OperationResult result);
-  static folly::StringPiece toString(StreamState state);
-
-  folly::StringPiece resultString() const;
-  folly::StringPiece stateString() const;
+  virtual void setConnectionContext(
+      std::shared_ptr<db::ConnectionContextBase> context) = 0;
+  virtual std::shared_ptr<db::ConnectionContextBase>
+  copyConnectionContextPtr() = 0;
+  virtual db::ConnectionContextBase* getConnectionContext() const = 0;
 
   // Connections are transferred across operations.  At any one time,
   // there is one unique owner of the connection.
@@ -278,7 +271,16 @@ class Operation : public std::enable_shared_from_this<Operation> {
   void setPreOperationCallback(ChainedCallback obs_cb);
   void setPostOperationCallback(ChainedCallback obs_cb);
 
+  Operation& getOp() const {
+    return *op_;
+  }
+  void setOperation(Operation& op) {
+    op_ = &op;
+  }
+
  protected:
+  friend class Operation;
+
   class ConnectionProxy {
    public:
     virtual ~ConnectionProxy() = default;
@@ -374,8 +376,31 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   Callbacks callbacks_;
 
-  virtual Operation& specializedRun() = 0;
+  virtual std::optional<folly::SemiFuture<folly::Unit>> callPreQueryCallback(
+      FetchOperation& op) const = 0;
+  virtual DbQueryResult callPostQueryCallback(DbQueryResult result) const = 0;
+  virtual DbMultiQueryResult callPostQueryCallback(
+      DbMultiQueryResult result) const = 0;
+  virtual AsyncPostQueryCallback stealPostQueryCallback() = 0;
+
+  Operation* op_;
+
+  virtual void specializedRun() = 0;
   virtual void protocolCompleteOperation(OperationResult result) = 0;
+
+ protected:
+  Connection& conn() {
+    auto* conn = connection();
+    CHECK(conn);
+    return *conn;
+  }
+  const Connection& conn() const {
+    auto* conn = connection();
+    CHECK(conn);
+    return *conn;
+  }
+
+  virtual void timeoutTriggered() = 0;
 
  private:
   // Data members; subclasses freely interact with these.
@@ -400,12 +425,14 @@ class Operation : public std::enable_shared_from_this<Operation> {
   folly::Synchronized<bool> cancel_on_run_{false};
 
   folly::atomic_shared_ptr<folly::RequestContext> request_context_;
+
+  friend class MysqlClientBase;
 };
 
 // The abstract base for our available Operations.  Subclasses share
 // intimate knowledge with the Operation class (most member variables
 // are protected).
-class OperationImpl : public Operation,
+class OperationImpl : public OperationBase,
                       public folly::EventHandler,
                       public folly::AsyncTimeout {
  public:
@@ -434,16 +461,9 @@ class OperationImpl : public Operation,
   const std::string& host() const;
   int port() const;
 
-  // Wait for the Operation to complete.
-  void wait() const override;
-
   // Information about why this operation failed.
-  unsigned int mysql_errno() const override {
-    return mysql_errno_;
-  }
-  const std::string& mysql_error() const override {
-    return mysql_error_;
-  }
+  unsigned int mysql_errno() const override;
+  const std::string& mysql_error() const override;
 
   static std::string connectStageString(connect_stage stage);
 
@@ -461,12 +481,14 @@ class OperationImpl : public Operation,
    * are allowed to do post-processing on the results received and returned via
    * rvalue reference.
    */
-  void setPreQueryCallback(AsyncPreQueryCallback&& callback);
-  void setPostQueryCallback(AsyncPostQueryCallback&& callback);
+  void setPreQueryCallback(AsyncPreQueryCallback&& callback) override;
+  void setPostQueryCallback(AsyncPostQueryCallback&& callback) override;
 
   MysqlClientBase& client() const;
 
-  void setAsyncClientError(unsigned int mysql_errno, folly::StringPiece msg);
+  // void setAsyncClientError(
+  //     unsigned int mysql_errno,
+  //     folly::StringPiece msg);
 
  protected:
   // Helper functions to set query callbacks
@@ -480,22 +502,14 @@ class OperationImpl : public Operation,
 
   static constexpr double kCallbackDelayStallThresholdUs = 50 * 1000;
 
+  std::optional<folly::SemiFuture<folly::Unit>> callPreQueryCallback(
+      FetchOperation& op) const override;
+  DbQueryResult callPostQueryCallback(DbQueryResult result) const override;
+  DbMultiQueryResult callPostQueryCallback(
+      DbMultiQueryResult result) const override;
+  AsyncPostQueryCallback stealPostQueryCallback() override;
+
   explicit OperationImpl(std::unique_ptr<ConnectionProxy> conn);
-
-  Connection& conn() {
-    auto* conn = connection();
-    CHECK(conn);
-    return *conn;
-  }
-  const Connection& conn() const {
-    const auto* conn = connection();
-    CHECK(conn);
-    return *conn;
-  }
-
-  // Save any mysql errors that occurred (since we may hand off the
-  // Connection before the user wants this information).
-  void snapshotMysqlErrors();
 
   // Called when an Operation needs to wait for the data to be readable or
   // writable (aka actionable).
@@ -514,7 +528,7 @@ class OperationImpl : public Operation,
   }
 
   // Called by AsyncTimeout::timeoutExpired when the operation timed out
-  void timeoutTriggered();
+  void timeoutTriggered() override;
 
   // Our operation has completed.  During completeOperation,
   // specializedCompleteOperation is invoked for subclasses to perform
@@ -537,10 +551,6 @@ class OperationImpl : public Operation,
   Duration max_thread_block_time_ = Duration(0);
   Duration total_thread_block_time_ = Duration(0);
 
-  // Errors that may have occurred.
-  unsigned int mysql_errno_;
-  std::string mysql_error_;
-
   // Friends because they need to access the query callbacks on this class
   template <typename Operation>
   friend folly::SemiFuture<folly::Unit> handlePreQueryCallback(Operation& op);
@@ -551,17 +561,222 @@ class OperationImpl : public Operation,
       QueryCallbackReason reason,
       folly::Promise<std::pair<ReturnType, AsyncPostQueryCallback>>& promise);
 
+  std::shared_ptr<db::ConnectionContextBase> connection_context_;
+
+  void setConnectionContext(
+      std::shared_ptr<db::ConnectionContextBase> context) override {
+    CHECK_THROW(
+        state() == OperationState::Unstarted, db::OperationStateException);
+    connection_context_ = std::move(context);
+  }
+
+  // Access to connection context
+  std::shared_ptr<db::ConnectionContextBase> copyConnectionContextPtr()
+      override {
+    return connection_context_;
+  }
+  db::ConnectionContextBase* getConnectionContext() const override {
+    return connection_context_.get();
+  }
+  void withOptionalConnectionContext(
+      std::function<void(db::ConnectionContextBase&)> func) {
+    if (connection_context_) {
+      func(*connection_context_);
+    }
+  }
+
  private:
   // Restore folly::RequestContext and also invoke actionable()
   void invokeActionable();
 
   ObserverCallback observer_callback_;
-  std::shared_ptr<db::ConnectionContextBase> connection_context_;
 
   MysqlClientBase& mysql_client_;
 
+  friend class Operation;
   friend class Connection;
+  friend class ConnectOperation;
   friend class SyncConnection;
+  friend class SyncConnectionPool;
+};
+
+//  Public facing Operation API
+class Operation : public std::enable_shared_from_this<Operation> {
+ public:
+  virtual ~Operation() = default;
+
+  // Wait for an operation to complete.  Throw a
+  // RequiredOperationFailedException if it fails. Mainly for testing.
+  virtual void mustSucceed() = 0;
+
+  virtual db::OperationType getOperationType() const = 0;
+
+  // Did the operation succeed?
+  bool ok() const;
+
+  // Is the operation complete (success or failure)?
+  bool done() const;
+
+  OperationResult result() const;
+
+  OperationState state() const;
+
+  Operation& run();
+  void cancel() {
+    impl()->cancel();
+  }
+
+  // Wait for the Operation to complete.
+  void wait() const;
+
+  Operation& setTimeout(Duration timeout);
+
+  Operation& setAttributes(const AttributeMap& attributes);
+  Operation& setAttributes(AttributeMap&& attributes);
+  Operation& setAttribute(const std::string& key, const std::string& value);
+
+  unsigned int mysql_errno() const {
+    return mysql_errno_;
+  }
+  const std::string& mysql_error() const {
+    return mysql_error_;
+  }
+
+  Duration elapsed() const {
+    return impl()->elapsed();
+  }
+
+  // Current time elapsed
+  Duration opElapsed() const {
+    return impl()->opElapsed();
+  }
+  // Current time elapsed in milliseconds
+  Millis opElapsedMs() const {
+    return impl()->opElapsedMs();
+  }
+  // Has a particular time period elapsed
+  bool hasOpElapsed(Duration timeperiod) const {
+    return impl()->hasOpElapsed(timeperiod);
+  }
+
+  const Connection* connection() const {
+    return impl()->connection();
+  }
+  Connection* connection() {
+    return impl()->connection();
+  }
+  std::unique_ptr<Connection> releaseConnection();
+
+  void setObserverCallback(ObserverCallback obs_cb) {
+    impl()->setObserverCallback(std::move(obs_cb));
+  }
+
+  void setPreOperationCallback(ChainedCallback obs_cb) {
+    impl()->setPreOperationCallback(std::move(obs_cb));
+  }
+  void setPostOperationCallback(ChainedCallback obs_cb) {
+    impl()->setPostOperationCallback(std::move(obs_cb));
+  }
+
+  /**
+   * Set callbacks that are invoked asynchronously before/after query operations
+   * (if using asynchronous query APIs). They do not execute on operations that
+   * have failed, and if they fail the operation will fail too.
+   *
+   * PreQueryCallbacks execute after a query operation is initialized and before
+   * it has been run. They are allowed to modify the operation by reference.
+   *
+   * PostQueryCallbacks execute after a query operation returns results. They
+   * are allowed to do post-processing on the results received and returned via
+   * rvalue reference.
+   */
+  void setPreQueryCallback(AsyncPreQueryCallback&& callback) {
+    impl()->setPreQueryCallback(std::move(callback));
+  }
+  void setPostQueryCallback(AsyncPostQueryCallback&& callback) {
+    impl()->setPostQueryCallback(std::move(callback));
+  }
+
+  // Save any mysql errors that occurred (since we may hand off the
+  // Connection before the user wants this information).
+  void snapshotMysqlErrors(unsigned int errnum, std::string error);
+
+  // Same as above, but specify the error code.
+  void setAsyncClientError(unsigned int mysql_errno, folly::StringPiece msg);
+
+  // Retrieve the shared pointer that holds this instance.
+  std::shared_ptr<Operation> getSharedPointer();
+
+  std::optional<folly::SemiFuture<folly::Unit>> callPreQueryCallback(
+      FetchOperation& op) const {
+    return impl()->callPreQueryCallback(op);
+  }
+
+  AsyncPostQueryCallback stealPostQueryCallback() {
+    return impl()->stealPostQueryCallback();
+  }
+
+  folly::StringPiece resultString() const;
+  folly::StringPiece stateString() const;
+
+  const AttributeMap& getAttributes() const {
+    return impl()->getAttributes();
+  }
+
+  void setConnectionContext(
+      std::shared_ptr<db::ConnectionContextBase> context) {
+    impl()->setConnectionContext(std::move(context));
+  }
+
+  std::shared_ptr<db::ConnectionContextBase> copyConnectionContextPtr() {
+    return impl()->copyConnectionContextPtr();
+  }
+
+  db::ConnectionContextBase* getConnectionContext() const {
+    return impl()->getConnectionContext();
+  }
+
+  Timepoint startTime() const {
+    return impl()->startTime();
+  }
+  // End time of the operation (must have completed)
+  Timepoint endTime() const {
+    return impl()->endTime();
+  }
+
+  static folly::StringPiece toString(OperationState state);
+  static folly::StringPiece toString(OperationResult result);
+  static folly::StringPiece toString(StreamState state);
+
+ protected:
+  Operation() : mysql_errno_(0) {}
+
+  virtual OperationBase* impl() = 0;
+  virtual const OperationBase* impl() const = 0;
+
+  const Connection& conn() const {
+    return impl()->conn();
+  }
+  Connection& conn() {
+    return impl()->conn();
+  }
+
+  DbQueryResult callPostQueryCallback(DbQueryResult result) const {
+    return impl()->callPostQueryCallback(std::move(result));
+  }
+  DbMultiQueryResult callPostQueryCallback(DbMultiQueryResult result) const {
+    return impl()->callPostQueryCallback(std::move(result));
+  }
+
+  void timeoutTriggered() {
+    impl()->timeoutTriggered();
+  }
+
+ private:
+  // Errors that may have occurred.
+  unsigned int mysql_errno_;
+  std::string mysql_error_;
+
   friend class SyncConnectionPool;
 };
 

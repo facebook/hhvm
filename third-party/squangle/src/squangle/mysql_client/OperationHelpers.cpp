@@ -28,7 +28,7 @@ void copyRowToRowBlock(RowBlock* block, const EphemeralRow& eph_row) {
 
 RowBlock makeRowBlockFromStream(
     std::shared_ptr<RowFields> row_fields,
-    FetchOperation::RowStream* row_stream) {
+    RowStream* row_stream) {
   RowBlock row_block(std::move(row_fields));
   // Consume row_stream
   while (row_stream->hasNext()) {

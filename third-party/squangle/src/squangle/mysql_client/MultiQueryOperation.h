@@ -77,12 +77,6 @@ class MultiQueryOperation : public FetchOperation {
     query_results_ = std::move(query_results);
   }
 
-  // Don't call this; it's public strictly for Connection to be able
-  // to call make_shared.
-  MultiQueryOperation(
-      std::unique_ptr<ConnectionProxy> connection,
-      std::vector<Query>&& queries);
-
   // Overriding to narrow the return type
   MultiQueryOperation& setTimeout(Duration timeout) {
     Operation::setTimeout(timeout);
@@ -99,6 +93,10 @@ class MultiQueryOperation : public FetchOperation {
   void notifyQuerySuccess(bool more_results) override;
   void notifyFailure(OperationResult result) override;
   void notifyOperationCompleted(OperationResult result) override;
+
+  MultiQueryOperation(
+      std::unique_ptr<FetchOperationImpl> impl,
+      std::vector<Query>&& queries);
 
   // Calls the FetchOperation specializedCompleteOperation and then does
   // callbacks if needed

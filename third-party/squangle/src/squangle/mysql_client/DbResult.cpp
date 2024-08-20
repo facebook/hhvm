@@ -15,9 +15,7 @@
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/Operation.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 std::ostream& operator<<(
     std::ostream& stream,
@@ -61,6 +59,21 @@ DbResult::DbResult(
     : OperationResultBase(std::move(conn_key), elapsed),
       conn_(std::move(conn)),
       result_(result) {}
+
+DbResult::~DbResult() = default;
+
+DbResult::DbResult(DbResult&& other) noexcept : OperationResultBase(other) {
+  conn_ = std::move(other.conn_);
+  result_ = other.result_;
+}
+
+DbResult& DbResult::operator=(DbResult&& other) noexcept {
+  OperationResultBase::operator=(other);
+  conn_ = std::move(other.conn_);
+  result_ = other.result_;
+
+  return *this;
+}
 
 std::unique_ptr<Connection> DbResult::releaseConnection() {
   return std::move(conn_);
@@ -434,6 +447,5 @@ EphemeralRowFields* StreamedQueryResult::getRowFields() const {
       << "Trying to get the row fileds after " << "query end";
   return stream_handler_->operation_->rowStream()->getEphemeralRowFields();
 }
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

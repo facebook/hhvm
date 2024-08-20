@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include "squangle/mysql_client/Operation.h"
+#include "squangle/base/ConnectionKey.h"
+#include "squangle/mysql_client/ConnectionOptions.h"
 
 namespace facebook::common::mysql_client {
 

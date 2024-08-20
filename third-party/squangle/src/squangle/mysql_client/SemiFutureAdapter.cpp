@@ -7,18 +7,16 @@
  */
 
 #include <folly/MoveWrapper.h>
-#include <folly/futures/Future.h>
-#include <folly/futures/Promise.h>
 
 #include "squangle/mysql_client/AsyncHelpers.h"
 #include "squangle/mysql_client/ConnectOperation.h"
-#include "squangle/mysql_client/DbResult.h"
+#include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/MultiQueryOperation.h"
 #include "squangle/mysql_client/Operation.h"
+#include "squangle/mysql_client/QueryOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 void handleConnectionCompletion(
     ConnectOperation& op,
@@ -72,8 +70,8 @@ void handleQueryCompletion(
         op.result(),
         std::move(conn_key),
         op.opElapsed());
-    promise.setValue(std::make_pair(
-        std::move(result), std::move(op.callbacks_.post_query_callback_)));
+    promise.setValue(
+        std::make_pair(std::move(result), op.stealPostQueryCallback()));
   } else {
     promise.setException(QueryException(
         op.numQueriesExecuted(),
@@ -89,8 +87,9 @@ void handleQueryCompletion(
 template <typename Operation>
 folly::SemiFuture<folly::Unit> handlePreQueryCallback(Operation& op) {
   // Use the pre-query callback if we have it, or else an empty SemiFuture
-  if (op.callbacks_.pre_query_callback_) {
-    return op.callbacks_.pre_query_callback_(op);
+  auto optFut = op.callPreQueryCallback(op);
+  if (optFut) {
+    return std::move(*optFut);
   }
 
   return folly::makeSemiFuture(folly::unit);
@@ -163,6 +162,4 @@ folly::SemiFuture<DbMultiQueryResult> toSemiFuture(
       std::vector<QueryResult>>(std::move(mquery_op));
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+} // namespace facebook::common::mysql_client

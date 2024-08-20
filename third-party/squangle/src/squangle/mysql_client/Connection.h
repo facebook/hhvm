@@ -11,7 +11,6 @@
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <mysql.h>
-#include <squangle/base/Base.h>
 
 #include "squangle/base/Base.h"
 #include "squangle/mysql_client/ConnectionHolder.h"
@@ -49,25 +48,6 @@ class Connection {
         conn_key_(std::move(conn_key)),
         mysql_client_(mysql_client),
         initialized_(false) {}
-
-  Connection(
-      MysqlClientBase& mysql_client,
-      ConnectionKey conn_key,
-      MYSQL* existing_conn)
-      : conn_key_(std::move(conn_key)),
-        mysql_client_(mysql_client),
-        initialized_(false) {
-    if (existing_conn) {
-      auto internal_conn = std::make_unique<InternalMysqlConnection>(
-          mysql_client, existing_conn);
-      try {
-        mysql_connection_ = std::make_unique<ConnectionHolder>(
-            mysql_client_, std::move(internal_conn), conn_key_);
-      } catch (const std::exception& e) {
-        LOG(INFO) << "Failed to create internal connection" << e.what();
-      }
-    }
-  }
 
   virtual ~Connection();
 
@@ -157,8 +137,9 @@ class Connection {
   virtual std::shared_ptr<MultiQueryStreamOperation> createOperation(
       std::unique_ptr<OperationImpl::ConnectionProxy> proxy,
       MultiQuery&& multi_query) {
-    return std::make_shared<MultiQueryStreamOperation>(
-        std::move(proxy), std::move(multi_query));
+    auto impl = client().createFetchOperationImpl(std::move(proxy));
+    return MultiQueryStreamOperation::create(
+        std::move(impl), std::move(multi_query));
   }
 
   template <typename... Args>
@@ -487,17 +468,20 @@ class Connection {
   friend class SyncMysqlClient;
   friend class MysqlClientBase;
   friend class OperationImpl;
-  friend class ConnectOperation;
+  friend class ConnectOperationImpl;
   template <typename Client>
   friend class ConnectPoolOperation;
-  friend class FetchOperation;
-  friend class QueryOperation;
-  friend class MultiQueryOperation;
+  friend class FetchOperationImpl;
+  friend class QueryOperationImpl;
+  friend class MultiQueryOperationImpl;
   friend class MultiQueryStreamOperation;
-  friend class SpecialOperation;
+  friend class SpecialOperationImpl;
   friend class ResetOperation;
   friend class ChangeUserOperation;
   friend class ConnectionHolder;
+
+  virtual std::unique_ptr<InternalConnection> createInternalConnection(
+      MysqlClientBase& client_base) = 0;
 
   ChainedCallback setCallback(
       ChainedCallback orgCallback,
@@ -537,8 +521,9 @@ class Connection {
     }
   }
 
-  void setConnectionContext(std::shared_ptr<db::ConnectionContextBase> e) {
-    connection_context_ = std::move(e);
+  void setConnectionContext(
+      std::shared_ptr<db::ConnectionContextBase> context) {
+    connection_context_ = std::move(context);
   }
 
   void mergePersistentQueryAttributes(QueryAttributes& attrs) const;

@@ -20,50 +20,50 @@ const std::string kQueryChecksumKey = "checksum";
 namespace facebook::common::mysql_client {
 
 FetchOperation::FetchOperation(
-    std::unique_ptr<ConnectionProxy> conn,
+    std::unique_ptr<FetchOperationImpl> impl,
     std::vector<Query>&& queries)
-    : OperationImpl(std::move(conn)), queries_(std::move(queries)) {}
+    : FetchOperation(std::move(impl), MultiQuery(std::move(queries))) {}
 
 FetchOperation::FetchOperation(
-    std::unique_ptr<ConnectionProxy> conn,
+    std::unique_ptr<FetchOperationImpl> impl,
     MultiQuery&& multi_query)
-    : OperationImpl(std::move(conn)), queries_(std::move(multi_query)) {}
+    : queries_(std::move(multi_query)), impl_(std::move(impl)) {
+  if (!impl_) {
+    throw std::runtime_error("ConnectOperationImpl is null");
+  }
 
-FetchOperation& FetchOperation::setUseChecksum(bool useChecksum) noexcept {
-  use_checksum_ = useChecksum;
-  return *this;
+  impl_->setOperation(*this);
 }
 
-bool FetchOperation::isStreamAccessAllowed() const {
+bool FetchOperationImpl::isStreamAccessAllowed() const {
   // XOR if isPaused or the caller is coming from IO Thread
   return isPaused() || isInEventBaseThread();
 }
 
-bool FetchOperation::isPaused() const {
+bool FetchOperationImpl::isPaused() const {
   return active_fetch_action_ == FetchAction::WaitForConsumer;
 }
 
-FetchOperation& FetchOperation::specializedRun() {
+void FetchOperationImpl::specializedRun() {
   if (!conn().runInThread([&]() { specializedRunImpl(); })) {
     completeOperationInner(OperationResult::Failed);
   }
-
-  return *this;
 }
 
-void FetchOperation::specializedRunImpl() {
+void FetchOperationImpl::specializedRunImpl() {
   try {
-    rendered_query_ = queries_.renderQuery(&conn().getInternalConnection());
+    rendered_query_ =
+        getOp().queries().renderQuery(&conn().getInternalConnection());
 
     if (auto ret = conn().setQueryAttributes(getAttributes())) {
-      setAsyncClientError(ret, "Failed to set query attributes");
+      getOp().setAsyncClientError(ret, "Failed to set query attributes");
       completeOperation(OperationResult::Failed);
       return;
     }
 
     if ((use_checksum_ || conn().getConnectionOptions().getUseChecksum())) {
       if (auto ret = conn().setQueryAttribute(kQueryChecksumKey, "ON")) {
-        setAsyncClientError(ret, "Failed to set checksum = ON");
+        getOp().setAsyncClientError(ret, "Failed to set checksum = ON");
         completeOperation(OperationResult::Failed);
         return;
       }
@@ -71,14 +71,14 @@ void FetchOperation::specializedRunImpl() {
 
     actionable();
   } catch (std::invalid_argument& e) {
-    setAsyncClientError(
+    getOp().setAsyncClientError(
         static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
         std::string("Unable to parse Query: ") + e.what());
     completeOperation(OperationResult::Failed);
   }
 }
 
-FetchOperation::RowStream::RowStream(
+RowStream::RowStream(
     std::unique_ptr<InternalResult> mysql_query_result,
     std::unique_ptr<InternalRowMetadata> metadata,
     MysqlHandler* handler)
@@ -86,7 +86,7 @@ FetchOperation::RowStream::RowStream(
       row_fields_(std::make_shared<EphemeralRowFields>(std::move(metadata))),
       handler_(handler) {}
 
-EphemeralRow FetchOperation::RowStream::consumeRow() {
+EphemeralRow RowStream::consumeRow() {
   if (!current_row_.has_value()) {
     LOG(DFATAL) << "Illegal operation";
   }
@@ -95,7 +95,7 @@ EphemeralRow FetchOperation::RowStream::consumeRow() {
   return eph_row;
 }
 
-bool FetchOperation::RowStream::hasNext() {
+bool RowStream::hasNext() {
   // Slurp needs to happen after `consumeRow` has been called.
   // Because it will move the buffer.
   slurp();
@@ -103,7 +103,7 @@ bool FetchOperation::RowStream::hasNext() {
   return current_row_.has_value();
 }
 
-bool FetchOperation::RowStream::slurp() {
+bool RowStream::slurp() {
   CHECK_THROW(mysql_query_result_ != nullptr, db::OperationStateException);
   if (current_row_.has_value() || query_finished_) {
     return true;
@@ -123,7 +123,7 @@ bool FetchOperation::RowStream::slurp() {
   return true;
 }
 
-void FetchOperation::setFetchAction(FetchAction action) {
+void FetchOperationImpl::setFetchAction(FetchAction action) {
   if (isPaused()) {
     paused_action_ = action;
   } else {
@@ -131,36 +131,41 @@ void FetchOperation::setFetchAction(FetchAction action) {
   }
 }
 
-uint64_t FetchOperation::currentLastInsertId() const {
+uint64_t FetchOperationImpl::currentLastInsertId() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_last_insert_id_;
 }
 
-uint64_t FetchOperation::currentAffectedRows() const {
+uint64_t FetchOperationImpl::currentAffectedRows() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_affected_rows_;
 }
 
-const std::string& FetchOperation::currentRecvGtid() const {
+const std::string& FetchOperationImpl::currentRecvGtid() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_recv_gtid_;
 }
 
-const AttributeMap& FetchOperation::currentRespAttrs() const {
+const AttributeMap& FetchOperationImpl::currentRespAttrs() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_resp_attrs_;
 }
 
-FetchOperation::RowStream* FetchOperation::rowStream() {
+RowStream* FetchOperationImpl::rowStream() {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_row_stream_.get_pointer();
 }
 
-AttributeMap FetchOperation::readResponseAttributes() {
+AttributeMap FetchOperationImpl::readResponseAttributes() {
   return conn().getResponseAttributes();
 }
 
-void FetchOperation::actionable() {
+FetchOperation& FetchOperationImpl::getOp() const {
+  DCHECK(op_ && dynamic_cast<FetchOperation*>(op_) != nullptr);
+  return *(FetchOperation*)op_;
+}
+
+void FetchOperationImpl::actionable() {
   DCHECK(isInEventBaseThread());
   DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
 
@@ -170,6 +175,8 @@ void FetchOperation::actionable() {
 
   auto& handler = conn().client().getMysqlHandler();
   auto& internalConn = conn().getInternalConnection();
+
+  FetchOperation& op = getOp();
 
   // Add the socket to the FetchOperation so that we can wait on alerts
   changeHandlerFD(folly::NetworkSocket::fromFd(conn().getSocketDescriptor()));
@@ -244,7 +251,7 @@ void FetchOperation::actionable() {
         } else {
           active_fetch_action_ = FetchAction::CompleteQuery;
         }
-        notifyInitQuery();
+        op.notifyInitQuery();
       }
     }
 
@@ -265,8 +272,7 @@ void FetchOperation::actionable() {
       if (current_row_stream_->current_row_.has_value()) {
         // This should help
         LOG(ERROR) << "Rows not consumed. Perhaps missing `pause`?";
-        cancel_ = true;
-        active_fetch_action_ = FetchAction::CompleteQuery;
+        cancel();
         continue;
       }
 
@@ -279,7 +285,7 @@ void FetchOperation::actionable() {
       if (current_row_stream_->hasQueryFinished()) {
         active_fetch_action_ = FetchAction::CompleteQuery;
       } else {
-        notifyRowsReady();
+        op.notifyRowsReady();
       }
     }
 
@@ -297,10 +303,10 @@ void FetchOperation::actionable() {
     //                       no more results to read.
     //  - WaitForConsumer: In case `pause` is called during notification.
     if (active_fetch_action_ == FetchAction::CompleteQuery) {
-      snapshotMysqlErrors();
+      getOp().snapshotMysqlErrors(conn().getErrno(), conn().getErrorMessage());
 
       bool more_results = false;
-      if (mysql_errno_ != 0 || cancel_) {
+      if (mysql_errno() != 0 || cancel_) {
         active_fetch_action_ = FetchAction::CompleteOperation;
       } else {
         current_last_insert_id_ = conn().getLastInsertId();
@@ -326,7 +332,7 @@ void FetchOperation::actionable() {
         ++num_queries_executed_;
         no_index_used_ |= conn().getNoIndexUsed();
         was_slow_ |= conn().wasSlow();
-        notifyQuerySuccess(more_results);
+        op.notifyQuerySuccess(more_results);
       }
       current_row_stream_.reset();
     }
@@ -338,7 +344,7 @@ void FetchOperation::actionable() {
       if (cancel_) {
         setState(OperationState::Cancelling);
         completeOperation(OperationResult::Cancelled);
-      } else if (mysql_errno_ != 0) {
+      } else if (mysql_errno() != 0) {
         completeOperation(OperationResult::Failed);
       } else {
         completeOperation(OperationResult::Succeeded);
@@ -357,7 +363,7 @@ void FetchOperation::actionable() {
   }
 }
 
-void FetchOperation::pauseForConsumer() {
+void FetchOperationImpl::pauseForConsumer() {
   DCHECK(isInEventBaseThread());
   DCHECK(state() == OperationState::Pending);
 
@@ -365,7 +371,7 @@ void FetchOperation::pauseForConsumer() {
   active_fetch_action_ = FetchAction::WaitForConsumer;
 }
 
-void FetchOperation::resumeImpl() {
+void FetchOperationImpl::resumeImpl() {
   CHECK_THROW(isPaused(), db::OperationStateException);
 
   // We should only allow pauses during fetch or between queries.
@@ -380,12 +386,12 @@ void FetchOperation::resumeImpl() {
   actionable();
 }
 
-void FetchOperation::resume() {
+void FetchOperationImpl::resume() {
   DCHECK(active_fetch_action_ == FetchAction::WaitForConsumer);
-  conn().runInThread(this, &FetchOperation::resumeImpl);
+  conn().runInThread(this, &FetchOperationImpl::resumeImpl);
 }
 
-void FetchOperation::specializedTimeoutTriggered() {
+void FetchOperationImpl::specializedTimeoutTriggered() {
   DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
   auto deltaMs = opElapsedMs();
 
@@ -446,17 +452,18 @@ void FetchOperation::specializedTimeoutTriggered() {
     parts.push_back(threadOverloadMessage(cbDelayUs));
   }
 
-  setAsyncClientError(CR_NET_READ_INTERRUPTED, folly::join(" ", parts));
+  getOp().setAsyncClientError(CR_NET_READ_INTERRUPTED, folly::join(" ", parts));
   completeOperation(OperationResult::TimedOut);
 }
 
-void FetchOperation::specializedCompleteOperation() {
+void FetchOperationImpl::specializedCompleteOperation() {
+  FetchOperation& op = getOp();
   // Stats for query
   if (result() == OperationResult::Succeeded) {
     // set last successful query time to MysqlConnectionHolder
     conn().setLastActivityTime(Clock::now());
     db::QueryLoggingData logging_data(
-        getOperationType(),
+        getOp().getOperationType(),
         opElapsed(),
         getTimeout(),
         num_queries_executed_,
@@ -480,7 +487,7 @@ void FetchOperation::specializedCompleteOperation() {
     }
     client().logQueryFailure(
         db::QueryLoggingData(
-            getOperationType(),
+            getOp().getOperationType(),
             opElapsed(),
             getTimeout(),
             num_queries_executed_,
@@ -501,22 +508,23 @@ void FetchOperation::specializedCompleteOperation() {
   }
 
   if (result() != OperationResult::Succeeded) {
-    notifyFailure(result());
+    op.notifyFailure(result());
   }
   // This frees the `Operation::wait()` call. We need to free it here because
   // callback can stealConnection and we can't notify anymore.
   conn().notify();
-  notifyOperationCompleted(result());
+  op.notifyOperationCompleted(result());
 }
 
 void FetchOperation::mustSucceed() {
   run().wait();
   if (!ok()) {
-    throw db::RequiredOperationFailedException("Query failed: " + mysql_error_);
+    throw db::RequiredOperationFailedException(
+        "Query failed: " + mysql_error());
   }
 }
 
-void FetchOperation::killRunningQuery() {
+void FetchOperationImpl::killRunningQuery() {
   /*
    * Send kill command to terminate the current operation on the DB
    * Note that we use KILL <processlist_id> to kill the entire connection
@@ -556,6 +564,26 @@ void FetchOperation::killRunningQuery() {
     }
   });
   conn_op->run();
+}
+
+folly::StringPiece FetchOperationImpl::toString(FetchAction action) {
+  switch (action) {
+    case FetchAction::StartQuery:
+      return "StartQuery";
+    case FetchAction::InitFetch:
+      return "InitFetch";
+    case FetchAction::Fetch:
+      return "Fetch";
+    case FetchAction::WaitForConsumer:
+      return "WaitForConsumer";
+    case FetchAction::CompleteQuery:
+      return "CompleteQuery";
+    case FetchAction::CompleteOperation:
+      return "CompleteOperation";
+  }
+  LOG(DFATAL) << "unable to convert result to string: "
+              << static_cast<int>(action);
+  return "Unknown result";
 }
 
 } // namespace facebook::common::mysql_client

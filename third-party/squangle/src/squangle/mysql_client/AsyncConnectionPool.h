@@ -22,8 +22,7 @@
 //   opening a new connection, requests a connection to the pool it was created
 //   by. The usage and error treat are the same.
 
-#ifndef COMMON_ASYNC_CONNECTION_POOL_H
-#define COMMON_ASYNC_CONNECTION_POOL_H
+#pragma once
 
 #include <folly/String.h>
 #include <folly/container/F14Map.h>
@@ -39,9 +38,7 @@
 #include "squangle/mysql_client/ConnectionPool.h"
 #include "squangle/mysql_client/Operation.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 template <typename Client>
 class ConnectPoolOperation;
@@ -49,6 +46,8 @@ class AsyncConnectionPool;
 class PoolKey;
 
 using AsyncConnectPoolOperation = ConnectPoolOperation<AsyncMysqlClient>;
+using AsyncConnectPoolOperationImpl =
+    ConnectPoolOperationImpl<AsyncMysqlClient>;
 
 class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
  public:
@@ -162,8 +161,4 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
   AsyncConnectionPool& operator=(const AsyncConnectionPool&) = delete;
 };
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
-
-#endif // COMMON_ASYNC_CONNECTION_POOL_H
+} // namespace facebook::common::mysql_client

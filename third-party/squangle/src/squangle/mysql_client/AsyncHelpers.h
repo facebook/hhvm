@@ -6,17 +6,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#ifndef COMMON_ASYNC_HELPER_H
-#define COMMON_ASYNC_HELPER_H
+#pragma once
 
 #include <vector>
 
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/Operation.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 // This will allow callback users to be able to read all rows in the end of
 // operation (Success or Failure).
@@ -31,8 +28,5 @@ typedef std::function<
 QueryCallback resultAppender(QueryAppenderCallback&& callback);
 
 MultiQueryCallback resultAppender(MultiQueryAppenderCallback&& callback);
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
 
-#endif // COMMON_ASYNC_HELPER
+} // namespace facebook::common::mysql_client

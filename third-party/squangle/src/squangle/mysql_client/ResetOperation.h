@@ -16,8 +16,8 @@ namespace facebook::common::mysql_client {
 // connection back to connection pool
 class ResetOperation : public SpecialOperation {
  public:
-  explicit ResetOperation(std::unique_ptr<ConnectionProxy> conn)
-      : SpecialOperation(std::move(conn)) {}
+  explicit ResetOperation(std::unique_ptr<SpecialOperationImpl> impl)
+      : SpecialOperation(std::move(impl)) {}
 
  private:
   MysqlHandler::Status callMysqlHandler() override;

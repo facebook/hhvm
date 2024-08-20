@@ -23,9 +23,7 @@
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 namespace {
 folly::Singleton<AsyncMysqlClient> client(
@@ -198,10 +196,8 @@ std::unique_ptr<Connection> AsyncMysqlClient::connect(
 }
 
 std::unique_ptr<Connection> AsyncMysqlClient::createConnection(
-    ConnectionKey conn_key,
-    MYSQL* mysql_conn) {
-  return std::make_unique<AsyncConnection>(
-      *this, std::move(conn_key), mysql_conn);
+    ConnectionKey conn_key) {
+  return std::make_unique<AsyncConnection>(*this, std::move(conn_key), nullptr);
 }
 
 MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
@@ -260,6 +256,4 @@ AsyncConnection::~AsyncConnection() {
   }
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+} // namespace facebook::common::mysql_client

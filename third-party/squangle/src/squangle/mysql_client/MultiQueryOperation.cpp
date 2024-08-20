@@ -12,9 +12,9 @@
 namespace facebook::common::mysql_client {
 
 MultiQueryOperation::MultiQueryOperation(
-    std::unique_ptr<ConnectionProxy> conn,
+    std::unique_ptr<FetchOperationImpl> impl,
     std::vector<Query>&& queries)
-    : FetchOperation(std::move(conn), std::move(queries)),
+    : FetchOperation(std::move(impl), std::move(queries)),
       current_query_result_(std::make_unique<QueryResult>(0)) {}
 
 void MultiQueryOperation::notifyInitQuery() {

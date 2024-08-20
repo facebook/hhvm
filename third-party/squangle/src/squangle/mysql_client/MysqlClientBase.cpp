@@ -9,6 +9,7 @@
 #include "squangle/mysql_client/MysqlClientBase.h"
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/SpecialOperation.h"
 
 namespace {
 
@@ -107,12 +108,45 @@ std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
 
 std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
     ConnectionKey conn_key) {
-  auto ret = std::make_shared<ConnectOperation>(this, std::move(conn_key));
+  auto impl = createConnectOperationImpl(this, std::move(conn_key));
+  auto ret = ConnectOperation::create(std::move(impl));
   if (connection_cb_) {
     ret->setObserverCallback(connection_cb_);
   }
   addOperation(ret);
   return ret;
+}
+
+std::unique_ptr<ConnectOperationImpl>
+MysqlClientBase::createConnectOperationImpl(
+    MysqlClientBase* client,
+    ConnectionKey conn_key) const {
+  return ConnectOperationImpl::create(client, std::move(conn_key));
+}
+
+std::unique_ptr<FetchOperationImpl> MysqlClientBase::createFetchOperationImpl(
+    std::unique_ptr<OperationImpl::ConnectionProxy> conn) const {
+  return std::make_unique<FetchOperationImpl>(std::move(conn));
+}
+
+std::unique_ptr<SpecialOperationImpl>
+MysqlClientBase::createSpecialOperationImpl(
+    std::unique_ptr<OperationImpl::ConnectionProxy> conn) const {
+  return std::make_unique<SpecialOperationImpl>(std::move(conn));
+}
+
+// Helper versions of the above that take a Connection instead of a
+// ConnectionProxy
+std::unique_ptr<FetchOperationImpl> MysqlClientBase::createFetchOperationImpl(
+    std::unique_ptr<Connection> conn) const {
+  return createFetchOperationImpl(
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)));
+}
+std::unique_ptr<SpecialOperationImpl>
+MysqlClientBase::createSpecialOperationImpl(
+    std::unique_ptr<Connection> conn) const {
+  return createSpecialOperationImpl(
+      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)));
 }
 
 } // namespace facebook::common::mysql_client

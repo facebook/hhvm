@@ -9,9 +9,7 @@
 #include "squangle/mysql_client/SSLOptionsProviderBase.h"
 #include <folly/io/async/SSLContext.h>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 bool SSLOptionsProviderBase::setMysqlSSLOptions(MYSQL* mysql) {
   auto sslContext = getSSLContext();
@@ -42,6 +40,5 @@ bool SSLOptionsProviderBase::storeMysqlSSLSession(MYSQL* mysql) {
   }
   return reused;
 }
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

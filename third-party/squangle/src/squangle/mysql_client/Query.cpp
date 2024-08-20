@@ -15,9 +15,7 @@
 
 #include "squangle/mysql_client/Query.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 #define TYPE_CHECK(expected) \
   if (type_ != expected)     \
@@ -668,7 +666,7 @@ folly::fbstring Query::renderInternal(
 }
 
 std::shared_ptr<folly::fbstring> MultiQuery::renderQuery(
-    const InternalConnection* conn) {
+    const InternalConnection* conn) const {
   if (!rendered_multi_query_) {
     rendered_multi_query_ = std::make_shared<folly::fbstring>(
         Query::renderMultiQuery(conn, queries_));
@@ -677,6 +675,4 @@ std::shared_ptr<folly::fbstring> MultiQuery::renderQuery(
   return rendered_multi_query_;
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+} // namespace facebook::common::mysql_client

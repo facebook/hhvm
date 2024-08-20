@@ -17,11 +17,11 @@ namespace facebook::common::mysql_client {
 
 using namespace std::chrono_literals;
 
-ConnectOperation::ConnectOperation(
+ConnectOperationImpl::ConnectOperationImpl(
     MysqlClientBase* mysql_client,
     ConnectionKey conn_key)
     : OperationImpl(std::make_unique<OperationImpl::OwnedConnection>(
-          mysql_client->createConnection(conn_key, nullptr))),
+          mysql_client->createConnection(conn_key))),
       conn_key_(std::move(conn_key)),
       flags_(CLIENT_MULTI_STATEMENTS),
       active_in_client_(true),
@@ -29,7 +29,7 @@ ConnectOperation::ConnectOperation(
   mysql_client->activeConnectionAdded(&conn_key_);
 }
 
-ConnectOperation& ConnectOperation::setConnectionOptions(
+void ConnectOperationImpl::setConnectionOptions(
     const ConnectionOptions& conn_opts) {
   setTimeout(conn_opts.getTimeout());
   setDefaultQueryTimeout(conn_opts.getQueryTimeout());
@@ -56,44 +56,37 @@ ConnectOperation& ConnectOperation::setConnectionOptions(
         conn_opts.getCertValidationContext(),
         conn_opts.isOpPtrAsValidationContext());
   }
-  return *this;
 }
 
-const ConnectionOptions& ConnectOperation::getConnectionOptions() const {
+const ConnectionOptions& ConnectOperationImpl::getConnectionOptions() const {
   return conn_options_;
 }
 
-ConnectOperation& ConnectOperation::setDefaultQueryTimeout(Duration t) {
+void ConnectOperationImpl::setDefaultQueryTimeout(Duration t) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setQueryTimeout(t);
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::setSniServerName(
-    const std::string& sni_servername) {
+void ConnectOperationImpl::setSniServerName(const std::string& sni_servername) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setSniServerName(sni_servername);
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::enableResetConnBeforeClose() {
+void ConnectOperationImpl::enableResetConnBeforeClose() {
   conn_options_.enableResetConnBeforeClose();
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::enableDelayedResetConn() {
+void ConnectOperationImpl::enableDelayedResetConn() {
   conn_options_.enableDelayedResetConn();
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::enableChangeUser() {
+void ConnectOperationImpl::enableChangeUser() {
   conn_options_.enableChangeUser();
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::setCertValidationCallback(
+void ConnectOperationImpl::setCertValidationCallback(
     CertValidatorCallback callback,
     const void* context,
     bool opPtrAsContext) {
@@ -101,62 +94,52 @@ ConnectOperation& ConnectOperation::setCertValidationCallback(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setCertValidationCallback(
       std::move(callback), context, opPtrAsContext);
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::setTimeout(Duration timeout) {
+void ConnectOperationImpl::setTimeout(Duration timeout) {
   conn_options_.setTimeout(timeout);
-  Operation::setTimeout(timeout);
-  return *this;
+  OperationImpl::setTimeout(timeout);
 }
 
-ConnectOperation& ConnectOperation::setTcpTimeout(Duration timeout) {
+void ConnectOperationImpl::setTcpTimeout(Duration timeout) {
   conn_options_.setConnectTcpTimeout(timeout);
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::setTotalTimeout(Duration total_timeout) {
+void ConnectOperationImpl::setTotalTimeout(Duration total_timeout) {
   conn_options_.setTotalTimeout(total_timeout);
-  Operation::setTimeout(min(getTimeout(), total_timeout));
-  return *this;
+  OperationImpl::setTimeout(min(getTimeout(), total_timeout));
 }
-ConnectOperation& ConnectOperation::setConnectAttempts(uint32_t max_attempts) {
+void ConnectOperationImpl::setConnectAttempts(uint32_t max_attempts) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setConnectAttempts(max_attempts);
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::setDscp(uint8_t dscp) {
+void ConnectOperationImpl::setDscp(uint8_t dscp) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setDscp(dscp);
-  return *this;
 }
 
-ConnectOperation& ConnectOperation::setKillOnQueryTimeout(
-    bool killOnQueryTimeout) {
+void ConnectOperationImpl::setKillOnQueryTimeout(bool killOnQueryTimeout) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   killOnQueryTimeout_ = killOnQueryTimeout;
-  return *this;
 }
-ConnectOperation& ConnectOperation::setSSLOptionsProviderBase(
+void ConnectOperationImpl::setSSLOptionsProviderBase(
     std::unique_ptr<SSLOptionsProviderBase> /*ssl_options_provider*/) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   LOG(ERROR) << "Using deprecated function";
-  return *this;
 }
-ConnectOperation& ConnectOperation::setSSLOptionsProvider(
+void ConnectOperationImpl::setSSLOptionsProvider(
     std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   conn_options_.setSSLOptionsProvider(ssl_options_provider);
-  return *this;
 }
 
-bool ConnectOperation::shouldCompleteOperation(OperationResult result) {
+bool ConnectOperationImpl::shouldCompleteOperation(OperationResult result) {
   // Cancelled doesn't really get to this point, the Operation is forced to
   // complete by Operation, adding this check here just-in-case.
   if (attempts_made_ >= conn_options_.getConnectAttempts() ||
@@ -167,7 +150,7 @@ bool ConnectOperation::shouldCompleteOperation(OperationResult result) {
   return hasOpElapsed(conn_options_.getTotalTimeout() + 1ms);
 }
 
-void ConnectOperation::attemptFailed(OperationResult result) {
+void ConnectOperationImpl::attemptFailed(OperationResult result) {
   ++attempts_made_;
   if (shouldCompleteOperation(result)) {
     completeOperation(result);
@@ -191,12 +174,12 @@ void ConnectOperation::attemptFailed(OperationResult result) {
   specializedRun();
 }
 
-void ConnectOperation::attemptSucceeded(OperationResult result) {
+void ConnectOperationImpl::attemptSucceeded(OperationResult result) {
   ++attempts_made_;
   completeOperation(result);
 }
 
-void ConnectOperation::specializedRunImpl() {
+void ConnectOperationImpl::specializedRunImpl() {
   if (attempts_made_ == 0) {
     conn().initialize();
   } else {
@@ -229,7 +212,7 @@ void ConnectOperation::specializedRunImpl() {
   }
 
   if (conn_options_.getCertValidationCallback()) {
-    conn().setCertValidatorCallback(mysqlCertValidator, this);
+    conn().setCertValidatorCallback(mysqlCertValidator, &getOp());
   }
 
   // If the tcp timeout value is not set in conn options, use the default value
@@ -250,18 +233,29 @@ void ConnectOperation::specializedRunImpl() {
   actionable();
 }
 
-ConnectOperation& ConnectOperation::specializedRun() {
+void ConnectOperationImpl::specializedRun() {
   if (!conn().runInThread([&]() { specializedRunImpl(); })) {
     completeOperationInner(OperationResult::Failed);
   }
-  return *this;
 }
 
-ConnectOperation::~ConnectOperation() {
+ConnectOperationImpl::~ConnectOperationImpl() {
   removeClientReference();
 }
 
-void ConnectOperation::actionable() {
+/*static*/ std::unique_ptr<ConnectOperationImpl> ConnectOperationImpl::create(
+    MysqlClientBase* mysql_client,
+    ConnectionKey conn_key) {
+  // We must do this unusual behavior (with `new`) instead of std::make_unique
+  // because we don't want the constructor for ConnectOperationImpl to be
+  // public. Without a public constructor there is no standard way of allowing
+  // std::make_unique to call the constructor - i.e. no way to mark
+  // std::make_unique as a friend.  So we have to do this weirdness.
+  return std::unique_ptr<ConnectOperationImpl>(
+      new ConnectOperationImpl(mysql_client, std::move(conn_key)));
+}
+
+void ConnectOperationImpl::actionable() {
   DCHECK(isInEventBaseThread());
 
   folly::stop_watch<Duration> sw;
@@ -275,7 +269,7 @@ void ConnectOperation::actionable() {
       conn().getInternalConnection(), conn_options_, conn_key_, flags_);
 
   if (status == ERROR) {
-    snapshotMysqlErrors();
+    getOp().snapshotMysqlErrors(conn().getErrno(), conn().getErrorMessage());
     guard.dismiss();
     attemptFailed(OperationResult::Failed);
   } else {
@@ -290,7 +284,7 @@ void ConnectOperation::actionable() {
       LOG(ERROR) << "Unexpected invalid socket descriptor on completed, "
                  << (status == DONE ? "errorless" : "pending")
                  << " connect.  fd=" << fd;
-      setAsyncClientError(
+      getOp().setAsyncClientError(
           static_cast<uint16_t>(SquangleErrno::SQ_INITIALIZATION_FAILED),
           "mysql_get_socket_descriptor returned an invalid descriptor");
       guard.dismiss();
@@ -309,22 +303,22 @@ void ConnectOperation::actionable() {
   }
 }
 
-bool ConnectOperation::isDoneWithTcpHandShake() {
+bool ConnectOperationImpl::isDoneWithTcpHandShake() {
   return conn().isDoneWithTcpHandShake();
 }
 
-void ConnectOperation::specializedTimeoutTriggered() {
+void ConnectOperationImpl::specializedTimeoutTriggered() {
   timeoutHandler(false);
 }
 
-void ConnectOperation::tcpConnectTimeoutTriggered() {
+void ConnectOperationImpl::tcpConnectTimeoutTriggered() {
   if (!isDoneWithTcpHandShake()) {
     timeoutHandler(true);
   }
   // else  do nothing since we have made progress
 }
 
-void ConnectOperation::timeoutHandler(
+void ConnectOperationImpl::timeoutHandler(
     bool isTcpTimeout,
     bool isPoolConnection) {
   auto deltaMs = opElapsedMs();
@@ -356,11 +350,11 @@ void ConnectOperation::timeoutHandler(
   }
   parts.push_back(fmt::format("(TcpTimeout:{})", (isTcpTimeout ? 1 : 0)));
 
-  setAsyncClientError(CR_SERVER_LOST, folly::join(" ", parts));
+  getOp().setAsyncClientError(CR_SERVER_LOST, folly::join(" ", parts));
   attemptFailed(OperationResult::TimedOut);
 }
 
-void ConnectOperation::logConnectCompleted(OperationResult result) {
+void ConnectOperationImpl::logConnectCompleted(OperationResult result) {
   // If the connection wasn't initialized, it's because the operation
   // was cancelled before anything started, so we don't do the logs
   if (!conn().hasInitialized()) {
@@ -368,12 +362,11 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
   }
   auto* context = connection_context_.get();
   if (result == OperationResult::Succeeded) {
-    if (context) {
-      context->sslVersion = conn().getTlsVersion();
-    }
+    withOptionalConnectionContext(
+        [&](auto& context) { context.sslVersion = conn().getTlsVersion(); });
     client().logConnectionSuccess(
         db::CommonLoggingData(
-            getOperationType(),
+            getOp().getOperationType(),
             elapsed(),
             getTimeout(),
             getMaxThreadBlockTime(),
@@ -389,7 +382,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     }
     client().logConnectionFailure(
         db::CommonLoggingData(
-            getOperationType(),
+            getOp().getOperationType(),
             elapsed(),
             getTimeout(),
             getMaxThreadBlockTime(),
@@ -402,7 +395,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
   }
 }
 
-void ConnectOperation::maybeStoreSSLSession() {
+void ConnectOperationImpl::maybeStoreSSLSession() {
   // If connection was successful
   if (result() != OperationResult::Succeeded || !conn().hasInitialized()) {
     return;
@@ -419,7 +412,7 @@ void ConnectOperation::maybeStoreSSLSession() {
   });
 }
 
-void ConnectOperation::specializedCompleteOperation() {
+void ConnectOperationImpl::specializedCompleteOperation() {
   // Pass the callbacks to the Connection now that we are done with them
   conn().setCallbacks(std::move(callbacks_));
 
@@ -427,7 +420,7 @@ void ConnectOperation::specializedCompleteOperation() {
   // shouldn't update the TLS session because it can propagate the
   // session object from a connection created usisn one client cert
   // to an SSL provider initialized with a different cert.
-  if (getOperationType() == db::OperationType::Connect) {
+  if (getOp().getOperationType() == db::OperationType::Connect) {
     maybeStoreSSLSession();
   }
 
@@ -454,7 +447,7 @@ void ConnectOperation::specializedCompleteOperation() {
   conn().notify();
 
   if (connect_callback_) {
-    connect_callback_(*this);
+    connect_callback_(op());
     // Release callback since no other callbacks will be made
     connect_callback_ = nullptr;
   }
@@ -463,15 +456,20 @@ void ConnectOperation::specializedCompleteOperation() {
   removeClientReference();
 }
 
+ConnectOperation& ConnectOperationImpl::op() const {
+  DCHECK(op_ && dynamic_cast<ConnectOperation*>(op_) != nullptr);
+  return *(ConnectOperation*)op_;
+}
+
 void ConnectOperation::mustSucceed() {
   run().wait();
   if (!ok()) {
     throw db::RequiredOperationFailedException(
-        "Connect failed: " + mysql_error_);
+        "Connect failed: " + mysql_error());
   }
 }
 
-void ConnectOperation::removeClientReference() {
+void ConnectOperationImpl::removeClientReference() {
   if (active_in_client_) {
     // It's safe to call the client since we still have a ref counting
     // it won't die before it goes to 0
@@ -480,7 +478,7 @@ void ConnectOperation::removeClientReference() {
   }
 }
 
-int ConnectOperation::mysqlCertValidator(
+int ConnectOperationImpl::mysqlCertValidator(
     X509* server_cert,
     const void* context,
     const char** errptr) {
@@ -498,11 +496,12 @@ int ConnectOperation::mysqlCertValidator(
   }
 
   const CertValidatorCallback callback =
-      self->conn_options_.getCertValidationCallback();
+      self->getConnectionOptions().getCertValidationCallback();
   CHECK(callback);
-  const void* callbackContext = self->conn_options_.isOpPtrAsValidationContext()
+  const void* callbackContext =
+      self->getConnectionOptions().isOpPtrAsValidationContext()
       ? self
-      : self->conn_options_.getCertValidationContext();
+      : self->getConnectionOptions().getCertValidationContext();
   folly::StringPiece errorMessage;
 
   // "libmysql" expects this callback to return "0" if the cert validation was
@@ -512,6 +511,18 @@ int ConnectOperation::mysqlCertValidator(
     *errptr = errorMessage.data();
   }
   return result;
+}
+
+/*static*/
+std::shared_ptr<ConnectOperation> ConnectOperation::create(
+    std::unique_ptr<ConnectOperationImpl> impl) {
+  // We must do this unusual behavior (with `new`) instead of std::make_shared
+  // because we don't want the constructor for ConnectOperation to be public.
+  // Without a public constructor there is no standard way of allowing
+  // std::make_shared to call the constructor - i.e. no way to mark
+  // std::make_shared as a friend.  So we have to do this weirdness.
+  return std::shared_ptr<ConnectOperation>(
+      new ConnectOperation(std::move(impl)));
 }
 
 } // namespace facebook::common::mysql_client

@@ -11,8 +11,14 @@
 
 namespace facebook::common::mysql_client {
 
-void SpecialOperation::actionable() {
-  auto status = callMysqlHandler();
+SpecialOperation& SpecialOperationImpl::getOp() const {
+  DCHECK(op_ && dynamic_cast<SpecialOperation*>(op_) != nullptr);
+  return *(SpecialOperation*)op_;
+}
+
+void SpecialOperationImpl::actionable() {
+  auto& op = getOp();
+  auto status = op.callMysqlHandler();
   if (status == PENDING) {
     waitForActionable();
   } else {
@@ -20,7 +26,7 @@ void SpecialOperation::actionable() {
                                    : OperationResult::Failed; // ERROR
     completeOperation(result);
     if (callback_) {
-      callback_(*this, result);
+      callback_(op, result);
     }
   }
 }
@@ -29,22 +35,21 @@ void SpecialOperation::mustSucceed() {
   run();
   wait();
   if (!ok()) {
-    throw db::RequiredOperationFailedException(getErrorMsg() + mysql_error_);
+    throw db::RequiredOperationFailedException(getErrorMsg() + mysql_error());
   }
 }
 
-void SpecialOperation::specializedCompleteOperation() {
+void SpecialOperationImpl::specializedCompleteOperation() {
   conn().notify();
 }
 
-void SpecialOperation::specializedTimeoutTriggered() {
+void SpecialOperationImpl::specializedTimeoutTriggered() {
   completeOperation(OperationResult::TimedOut);
 }
 
-SpecialOperation& SpecialOperation::specializedRun() {
+void SpecialOperationImpl::specializedRun() {
   changeHandlerFD(folly::NetworkSocket::fromFd(conn().getSocketDescriptor()));
   actionable();
-  return *this;
 }
 
 } // namespace facebook::common::mysql_client

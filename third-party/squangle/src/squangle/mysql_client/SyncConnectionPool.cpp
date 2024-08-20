@@ -59,7 +59,7 @@ void SyncConnectionPool::openNewConnectionFinish(
 }
 
 template <>
-std::string SyncConnectPoolOperation::createTimeoutErrorMessage(
+std::string SyncConnectPoolOperationImpl::createTimeoutErrorMessage(
     const PoolKeyStats& pool_key_stats,
     size_t per_key_limit) {
   auto delta = opElapsedMs();
@@ -79,10 +79,9 @@ std::string SyncConnectPoolOperation::createTimeoutErrorMessage(
 }
 
 template <>
-SyncConnectPoolOperation& SyncConnectPoolOperation::specializedRun() {
+void SyncConnectPoolOperationImpl::specializedRun() {
   // No special thread manipulation needed for sync client
-  ConnectPoolOperation::specializedRunImpl();
-  return *this;
+  ConnectPoolOperationImpl::specializedRunImpl();
 }
 
 } // namespace facebook::common::mysql_client

@@ -6,8 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#ifndef COMMON_ASYNC_MYSQL_RESULT_H
-#define COMMON_ASYNC_MYSQL_RESULT_H
+#pragma once
 
 #include "squangle/base/Base.h"
 #include "squangle/base/ConnectionKey.h"
@@ -20,9 +19,7 @@
 #include <folly/fibers/Baton.h>
 #include <chrono>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 enum class OperationResult;
 
@@ -32,6 +29,7 @@ class OperationResultBase {
  public:
   OperationResultBase(ConnectionKey conn_key, Duration elapsed_time)
       : conn_key_(std::move(conn_key)), elapsed_time_(elapsed_time) {}
+  virtual ~OperationResultBase() = default;
 
   const ConnectionKey* getConnectionKey() const {
     return &conn_key_;
@@ -42,8 +40,8 @@ class OperationResultBase {
   }
 
  private:
-  const ConnectionKey conn_key_;
-  const Duration elapsed_time_;
+  ConnectionKey conn_key_;
+  Duration elapsed_time_;
 };
 
 // This exception represents a basic mysql error, either during a connection
@@ -118,6 +116,15 @@ class DbResult : public OperationResultBase {
       OperationResult result,
       ConnectionKey conn_key,
       Duration elapsed_time);
+  virtual ~DbResult() override;
+
+  // Default move constructors
+  DbResult(DbResult&& other) noexcept;
+  DbResult& operator=(DbResult&& other) noexcept;
+
+  // Disable copy constructor
+  DbResult(const DbResult&) = delete;
+  DbResult& operator=(const DbResult&) = delete;
 
   bool ok() const;
 
@@ -666,10 +673,7 @@ class MultiQueryStreamHandler {
   std::shared_ptr<MultiQueryStreamOperation> operation_;
 };
 
-typedef FetchResult<std::vector<QueryResult>> DbMultiQueryResult;
-typedef FetchResult<QueryResult> DbQueryResult;
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+using DbMultiQueryResult = FetchResult<std::vector<QueryResult>>;
+using DbQueryResult = FetchResult<QueryResult>;
 
-#endif // COMMON_ASYNC_MYSQL_ROW_H
+} // namespace facebook::common::mysql_client

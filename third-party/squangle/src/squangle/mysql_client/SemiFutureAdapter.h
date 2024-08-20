@@ -13,17 +13,17 @@
  *
  */
 
-#ifndef COMMON_ASYNC_MYSQL_FUTURE_ADAPTER_H
-#define COMMON_ASYNC_MYSQL_FUTURE_ADAPTER_H
+#pragma once
 
 #include "squangle/mysql_client/DbResult.h"
-#include "squangle/mysql_client/Operation.h"
 
 #include <folly/futures/Future.h>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
+
+class ConnectOperation;
+class QueryOperation;
+class MultiQueryOperation;
 
 typedef std::shared_ptr<ConnectOperation> ConnectOperation_ptr;
 typedef std::shared_ptr<QueryOperation> QueryOperation_ptr;
@@ -41,8 +41,4 @@ FOLLY_NODISCARD folly::SemiFuture<DbQueryResult> toSemiFuture(
 FOLLY_NODISCARD folly::SemiFuture<DbMultiQueryResult> toSemiFuture(
     MultiQueryOperation_ptr mquery_op);
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
-
-#endif // COMMON_ASYNC_MYSQL_FUTURE_ADAPTER_H
+} // namespace facebook::common::mysql_client

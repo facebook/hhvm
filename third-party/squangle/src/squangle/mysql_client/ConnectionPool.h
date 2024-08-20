@@ -399,8 +399,9 @@ class ConnectionPool
 
   std::shared_ptr<ConnectOperation> beginConnection(
       const ConnectionKey& conn_key) {
-    auto ret = std::make_shared<ConnectPoolOperation<Client>>(
+    auto impl = std::make_unique<ConnectPoolOperationImpl<Client>>(
         getSelfWeakPointer(), mysql_client_, conn_key);
+    auto ret = std::make_shared<ConnectPoolOperation<Client>>(std::move(impl));
     if (isShuttingDown()) {
       LOG(ERROR)
           << "Attempt to start pool operation while pool is shutting down";
@@ -452,8 +453,8 @@ class ConnectionPool
 
     stats()->incrConnectionsRequested();
     // Pass that to pool
-    auto pool_key = PoolKey(
-        raw_pool_op->getConnectionKey(), raw_pool_op->getConnectionOptions());
+    auto pool_key =
+        PoolKey(raw_pool_op->getKey(), raw_pool_op->getConnectionOptions());
 
     std::unique_ptr<MysqlPooledHolder<Client>> mysql_conn =
         conn_storage_.popConnection(pool_key);
@@ -549,8 +550,7 @@ class ConnectionPool
       ConnectPoolOperation<Client>* rawPoolOp,
       const PoolKey& poolKey,
       std::unique_ptr<MysqlPooledHolder<Client>> mysqlConn) {
-    auto conn =
-        makeNewConnection(rawPoolOp->getConnectionKey(), std::move(mysqlConn));
+    auto conn = makeNewConnection(rawPoolOp->getKey(), std::move(mysqlConn));
     conn->needToCloneConnection_ = false;
     const auto& connKey = poolKey.getConnectionKey();
     auto changeUserOp = Connection::changeUser(
@@ -624,7 +624,7 @@ class ConnectionPool
     // logged with the expected additional logging
     tryRequestNewConnection(
         poolKey,
-        pool_op->connection_context_,
+        pool_op->copyConnectionContextPtr(),
         [&](uint32_t errnum, const std::string& error) {
           pool_op->setAsyncClientError(errnum, error);
           pool_op->attemptFailed(OperationResult::Failed);
@@ -641,8 +641,7 @@ class ConnectionPool
       ConnectPoolOperation<Client>* rawPoolOp,
       const PoolKey& poolKey,
       std::unique_ptr<MysqlPooledHolder<Client>> mysqlConn) {
-    auto conn =
-        makeNewConnection(rawPoolOp->getConnectionKey(), std::move(mysqlConn));
+    auto conn = makeNewConnection(rawPoolOp->getKey(), std::move(mysqlConn));
     conn->needToCloneConnection_ = false;
     auto resetOp = Connection::resetConn(std::move(conn));
 
@@ -698,7 +697,7 @@ class ConnectionPool
   PoolStorage<Client> conn_storage_;
 
  private:
-  friend class ConnectPoolOperation<Client>;
+  friend class ConnectPoolOperationImpl<Client>;
 
   void recycleMysqlConnection(std::unique_ptr<ConnectionHolder> mysql_conn) {
     // this method can run by any thread where the Connection is dying

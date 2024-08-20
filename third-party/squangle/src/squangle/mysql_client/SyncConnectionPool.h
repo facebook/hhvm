@@ -17,6 +17,7 @@
 namespace facebook::common::mysql_client {
 
 using SyncConnectPoolOperation = ConnectPoolOperation<SyncMysqlClient>;
+using SyncConnectPoolOperationImpl = ConnectPoolOperationImpl<SyncMysqlClient>;
 
 class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
  public:

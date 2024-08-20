@@ -21,9 +21,9 @@ using SpecialOperationCallback =
 
 // SpecialOperation means operations like COM_RESET_CONNECTION,
 // COM_CHANGE_USER, etc.
-class SpecialOperation : public OperationImpl {
+class SpecialOperationImpl : public OperationImpl {
  public:
-  explicit SpecialOperation(std::unique_ptr<ConnectionProxy> conn)
+  explicit SpecialOperationImpl(std::unique_ptr<ConnectionProxy> conn)
       : OperationImpl(std::move(conn)) {}
 
   void setCallback(SpecialOperationCallback callback) {
@@ -34,15 +34,46 @@ class SpecialOperation : public OperationImpl {
   void actionable() override;
   void specializedCompleteOperation() override;
   void specializedTimeoutTriggered() override;
-  SpecialOperation& specializedRun() override;
-  void mustSucceed() override;
-
-  SpecialOperationCallback callback_{nullptr};
-  friend class Connection;
+  void specializedRun() override;
 
  private:
+  SpecialOperation& getOp() const;
+
+  SpecialOperationCallback callback_{nullptr};
+};
+
+class SpecialOperation : public Operation {
+ public:
+  void setCallback(SpecialOperationCallback callback) {
+    impl_->setCallback(std::move(callback));
+  }
+
+ protected:
+  explicit SpecialOperation(std::unique_ptr<SpecialOperationImpl> impl)
+      : impl_(std::move(impl)) {
+    if (!impl_) {
+      throw std::runtime_error("ConnectOperationImpl is null");
+    }
+
+    impl_->setOperation(*this);
+  }
+
+  void mustSucceed() override;
+
   virtual MysqlHandler::Status callMysqlHandler() = 0;
+  friend SpecialOperationImpl;
+
+ private:
   virtual const char* getErrorMsg() const = 0;
+
+  virtual OperationBase* impl() override {
+    return (OperationBase*)impl_.get();
+  }
+  virtual const OperationBase* impl() const override {
+    return (OperationBase*)impl_.get();
+  }
+
+  std::unique_ptr<SpecialOperationImpl> impl_;
 };
 
 } // namespace facebook::common::mysql_client

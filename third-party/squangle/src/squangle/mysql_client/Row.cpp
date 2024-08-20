@@ -12,9 +12,7 @@
 #include <chrono>
 #include <numeric>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
   auto num_fields = metadata_->numFields();
@@ -294,6 +292,5 @@ std::chrono::system_clock::time_point parseDateTime(
   chrono_time = chrono_time + std::chrono::microseconds(microseconds);
   return chrono_time;
 }
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

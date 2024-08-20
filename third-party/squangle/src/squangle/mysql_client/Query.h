@@ -90,9 +90,7 @@
 #include "squangle/base/Base.h"
 #include "squangle/mysql_client/InternalConnection.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 using QualifiedColumn = std::tuple<folly::fbstring, folly::fbstring>;
 using AliasedQualifiedColumn =
@@ -399,7 +397,8 @@ class MultiQuery {
     return MultiQuery{multi_query};
   }
 
-  std::shared_ptr<folly::fbstring> renderQuery(const InternalConnection* conn);
+  std::shared_ptr<folly::fbstring> renderQuery(
+      const InternalConnection* conn) const;
 
   const Query& getQuery(size_t index) const {
     CHECK_THROW(index < queries_.size(), std::invalid_argument);
@@ -415,7 +414,7 @@ class MultiQuery {
     rendered_multi_query_ = std::make_shared<folly::fbstring>(multi_query);
   }
 
-  std::shared_ptr<folly::fbstring> rendered_multi_query_;
+  mutable std::shared_ptr<folly::fbstring> rendered_multi_query_;
   std::vector<Query> queries_;
 };
 
@@ -592,9 +591,7 @@ void Query::unpack(Arg&& arg, Args&&... args /* lol */) {
   unpack(std::forward<Args>(args)...);
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+} // namespace facebook::common::mysql_client
 
 // A formatter for the Query class for folly::format
 template <>

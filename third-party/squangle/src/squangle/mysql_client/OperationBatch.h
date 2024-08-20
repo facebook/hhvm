@@ -20,8 +20,7 @@
 // An usage example can be found in the TestOperationBatch UNITTEST
 // from the AsyncMysqlTest.cpp file.
 
-#ifndef COMMON_ASYNC_MYSQL_OPERATION_BATCH_H
-#define COMMON_ASYNC_MYSQL_OPERATION_BATCH_H
+#pragma once
 
 #include <mutex>
 #include <unordered_map>
@@ -29,9 +28,7 @@
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/Operation.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 class OperationBatch {
  public:
@@ -77,8 +74,5 @@ class OperationBatch {
   // Indicator of the success of the batch
   bool successful_;
 };
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
 
-#endif // COMMON_ASYNC_MYSQL_OPERATION_BATCH_H
+} // namespace facebook::common::mysql_client

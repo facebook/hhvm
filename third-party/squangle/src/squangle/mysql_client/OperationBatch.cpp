@@ -11,9 +11,7 @@
 
 #include <thread>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 void OperationBatch::add(std::shared_ptr<Operation> op) {
   CHECK_THROW(
@@ -65,6 +63,5 @@ void OperationBatch::markFailure() {
   std::lock_guard<std::mutex> lock(*mutex_);
   successful_ = false;
 }
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

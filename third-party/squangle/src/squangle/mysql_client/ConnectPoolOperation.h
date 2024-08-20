@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/synchronization/Baton.h>
+
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/PoolStorage.h"
 
@@ -29,46 +30,31 @@ class ConnectionHolder;
 struct PoolKeyStats;
 
 template <typename Client>
-class ConnectPoolOperation : public ConnectOperation {
+class ConnectPoolOperationImpl : public ConnectOperationImpl {
  public:
-  ~ConnectPoolOperation() override {
-    cancelPreOperation();
-  }
-
   // Don't call this; it's public strictly for ConnectionPool to be able to call
   // make_shared.
-  ConnectPoolOperation(
+  ConnectPoolOperationImpl(
       std::weak_ptr<ConnectionPool<Client>> pool,
       std::shared_ptr<Client> client,
       ConnectionKey conn_key)
-      : ConnectOperation(client.get(), std::move(conn_key)), pool_(pool) {}
+      : ConnectOperationImpl(client.get(), std::move(conn_key)), pool_(pool) {}
 
-  db::OperationType getOperationType() const override {
-    return db::OperationType::PoolConnect;
-  }
-
-  bool setPreOperation(std::shared_ptr<Operation> op) {
-    return preOperation_.wlock()->set(std::move(op));
-  }
-
-  void cancelPreOperation() {
-    preOperation_.wlock()->cancel();
-  }
-
-  void resetPreOperation() {
-    preOperation_.wlock()->reset();
+  ConnectPoolOperation<Client>& getConnectPoolOp() const {
+    return *dynamic_cast<ConnectPoolOperation<Client>*>(op_);
   }
 
  protected:
-  ConnectPoolOperation<Client>& specializedRun() override;
+  void specializedRun() override;
 
   void specializedTimeoutTriggered() override {
     if (auto locked_pool = pool_.lock(); locked_pool) {
-      cancelPreOperation();
+      auto& op = getConnectPoolOp();
+      op.cancelPreOperation();
 
       // Check if the timeout happened because of the host is being slow or the
       // pool is lacking resources
-      auto pool_key = PoolKey(getConnectionKey(), getConnectionOptions());
+      auto pool_key = PoolKey(op.getKey(), getConnectionOptions());
       auto key_stats = locked_pool->getPoolKeyStats(pool_key);
       auto num_open = key_stats.open_connections;
       auto num_opening = key_stats.pending_connections;
@@ -82,7 +68,7 @@ class ConnectPoolOperation : public ConnectOperation {
       if (!(num_open == 0 &&
             (num_opening > 0 ||
              locked_pool->canCreateMoreConnections(pool_key)))) {
-        setAsyncClientError(
+        op.setAsyncClientError(
             static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
             createTimeoutErrorMessage(key_stats, locked_pool->perKeyLimit()));
         attemptFailed(OperationResult::TimedOut);
@@ -90,7 +76,7 @@ class ConnectPoolOperation : public ConnectOperation {
       }
     }
 
-    ConnectOperation::timeoutHandler(false, true);
+    ConnectOperationImpl::timeoutHandler(false, true);
   }
 
   void attemptFailed(OperationResult result) override {
@@ -107,33 +93,28 @@ class ConnectPoolOperation : public ConnectOperation {
     Duration timeout_attempt_based =
         getConnectionOptions().getTimeout() + opElapsedMs();
 
-    setTimeoutInternal(
+    OperationImpl::setTimeoutInternal(
         min(timeout_attempt_based, getConnectionOptions().getTotalTimeout()));
 
     specializedRun();
   }
 
  private:
-  friend class ConnectionPool<Client>;
-  friend class PoolStorageData<Client>;
-  friend class AsyncConnectionPool;
-  friend class SyncConnectionPool;
-
-  void specializedRunImpl() {
+  void specializedRunImpl() override {
     // Initialize all we need from our tevent handler
     if (attempts_made_ == 0) {
       conn().initialize(false);
     }
 
-    if (connection_context_) {
+    withOptionalConnectionContext([&](auto& connection_context) {
       conn_options_.withPossibleSSLOptionsProvider(
           [&](const auto& /*provider*/) {
-            connection_context_->isSslConnection = true;
+            connection_context.isSslConnection = true;
           });
-    }
+    });
 
     // Set timeout for waiting for connection
-    auto elapsed = Operation::opElapsed();
+    auto elapsed = OperationImpl::opElapsed();
     if (elapsed >= getTimeout()) {
       timeoutTriggered();
       return;
@@ -151,7 +132,7 @@ class ConnectPoolOperation : public ConnectOperation {
       // Sync attributes in conn_options_ with the Operation::attributes_ value
       // as pool key uses the attributes from ConnectionOptions
       conn_options_.setAttributes(getAttributes());
-      shared_pool->registerForConnection(this);
+      shared_pool->registerForConnection(&getConnectPoolOp());
     } else {
       VLOG(2) << "Pool is gone, operation must cancel";
       cancel();
@@ -169,10 +150,10 @@ class ConnectPoolOperation : public ConnectOperation {
       return;
     }
 
-    if (mysql_errno_) {
+    if (mysql_errno()) {
       LOG_EVERY_N(ERROR, 1000)
           << "Connection pool callback was called with mysql err: "
-          << mysql_errno_;
+          << mysql_errno();
       completeOperation(OperationResult::Failed);
       return;
     }
@@ -192,16 +173,6 @@ class ConnectPoolOperation : public ConnectOperation {
     attemptSucceeded(OperationResult::Succeeded);
 
     signalWaiter();
-  }
-
-  // Called when the connection that the pool is trying to acquire failed
-  void failureCallback(
-      OperationResult failure,
-      unsigned int mysql_errno,
-      const std::string& mysql_error) {
-    mysql_errno_ = mysql_errno;
-    mysql_error_ = mysql_error;
-    attemptFailed(failure);
   }
 
   void actionable() override {
@@ -235,6 +206,64 @@ class ConnectPoolOperation : public ConnectOperation {
   std::weak_ptr<ConnectionPool<Client>> pool_;
 
   std::unique_ptr<folly::Baton<>> baton_;
+
+  friend class AsyncConnectionPool;
+  friend class ConnectPoolOperation<Client>;
+};
+
+template <typename Client>
+class ConnectPoolOperation : public ConnectOperation {
+ public:
+  explicit ConnectPoolOperation(std::unique_ptr<ConnectOperationImpl> impl)
+      : ConnectOperation(std::move(impl)) {}
+
+  ~ConnectPoolOperation() override {
+    cancelPreOperation();
+  }
+
+  db::OperationType getOperationType() const override {
+    return db::OperationType::PoolConnect;
+  }
+
+  void prepWait() {
+    impl()->prepWait();
+  }
+
+  bool syncWait() {
+    return impl()->syncWait();
+  }
+
+  void cleanupWait() {
+    impl()->cleanupWait();
+  }
+
+  bool setPreOperation(std::shared_ptr<Operation> op) {
+    return preOperation_.wlock()->set(std::move(op));
+  }
+
+  void cancelPreOperation() {
+    preOperation_.wlock()->cancel();
+  }
+
+  void resetPreOperation() {
+    preOperation_.wlock()->reset();
+  }
+
+ protected:
+  ConnectPoolOperationImpl<Client>* impl() override {
+    return (ConnectPoolOperationImpl<Client>*)ConnectOperation::impl();
+  }
+  const ConnectPoolOperationImpl<Client>* impl() const override {
+    return (ConnectPoolOperationImpl<Client>*)ConnectOperation::impl();
+  }
+
+  void attemptFailed(OperationResult result) {
+    return impl()->attemptFailed(result);
+  }
+
+ private:
+  friend class ConnectionPool<Client>;
+  friend class PoolStorageData<Client>;
 
   // PreOperation keeps any other operation that needs to be canceled when
   // ConnectPoolOperation is cancelled.
@@ -274,7 +303,23 @@ class ConnectPoolOperation : public ConnectOperation {
   // pre-operation.
   folly::Synchronized<PreOperation> preOperation_;
 
-  friend class AsyncConnectionPool;
+  void connectionCallback(
+      std::unique_ptr<MysqlPooledHolder<Client>> mysql_conn) {
+    impl()->connectionCallback(std::move(mysql_conn));
+  }
+
+  // Called when the connection that the pool is trying to acquire failed
+  void failureCallback(
+      OperationResult failure,
+      unsigned int mysql_errno,
+      const std::string& mysql_error) {
+    setAsyncClientError(mysql_errno, mysql_error);
+    attemptFailed(failure);
+  }
+
+  void specializedRunImpl() {
+    impl()->specializedRunImpl();
+  }
 };
 
 } // namespace facebook::common::mysql_client

@@ -11,9 +11,7 @@
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SyncMysqlClient.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 namespace {
 folly::Singleton<SyncMysqlClient> client([]() { return new SyncMysqlClient; });
@@ -24,10 +22,8 @@ std::shared_ptr<SyncMysqlClient> SyncMysqlClient::defaultClient() {
 }
 
 std::unique_ptr<Connection> SyncMysqlClient::createConnection(
-    ConnectionKey conn_key,
-    MYSQL* mysql_conn) {
-  return std::make_unique<SyncConnection>(
-      *this, std::move(conn_key), mysql_conn);
+    ConnectionKey conn_key) {
+  return std::make_unique<SyncConnection>(*this, std::move(conn_key));
 }
 
 SyncConnection::~SyncConnection() {
@@ -83,6 +79,4 @@ MysqlHandler::Status SyncMysqlClient::SyncMysqlHandler::tryConnect(
       flags);
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+} // namespace facebook::common::mysql_client

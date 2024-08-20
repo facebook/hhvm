@@ -10,9 +10,7 @@
 
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 class SyncConnection;
 
@@ -42,9 +40,7 @@ class SyncMysqlClient : public MysqlClientBase {
   }
 
   // Factory method
-  std::unique_ptr<Connection> createConnection(
-      ConnectionKey conn_key,
-      MYSQL* mysql_conn) override;
+  std::unique_ptr<Connection> createConnection(ConnectionKey conn_key) override;
 
   void drain(bool /*unused*/) {}
 
@@ -129,11 +125,8 @@ class SyncConnection : public Connection {
   SyncConnection(
       MysqlClientBase& client,
       ConnectionKey conn_key,
-      std::unique_ptr<ConnectionHolder> conn)
+      std::unique_ptr<ConnectionHolder> conn = nullptr)
       : Connection(client, conn_key, std::move(conn)) {}
-
-  SyncConnection(MysqlClientBase& client, ConnectionKey conn_key, MYSQL* conn)
-      : Connection(client, conn_key, conn) {}
 
   ~SyncConnection();
 
@@ -160,10 +153,16 @@ class SyncConnection : public Connection {
   std::shared_ptr<MultiQueryStreamOperation> createOperation(
       std::unique_ptr<OperationImpl::ConnectionProxy> proxy,
       MultiQuery&& multi_query) override {
-    return std::make_shared<MultiQueryStreamOperation>(
-        std::move(proxy), std::move(multi_query));
+    auto impl = client().createFetchOperationImpl(std::move(proxy));
+    return MultiQueryStreamOperation::create(
+        std::move(impl), std::move(multi_query));
+  }
+
+ protected:
+  std::unique_ptr<InternalConnection> createInternalConnection(
+      MysqlClientBase& client) override {
+    return std::make_unique<InternalMysqlConnection>(client);
   }
 };
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

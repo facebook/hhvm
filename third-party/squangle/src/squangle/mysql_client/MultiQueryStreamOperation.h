@@ -13,6 +13,7 @@
 namespace facebook::common::mysql_client {
 
 class MultiQueryStreamHandler;
+class SyncConnection;
 
 // This operation only supports one mode: streaming callback. This is a
 // simple layer on top of FetchOperation to adapt from `notify` to
@@ -37,24 +38,30 @@ class MultiQueryStreamOperation : public FetchOperation {
     return *this;
   }
 
-  MultiQueryStreamOperation(
-      std::unique_ptr<ConnectionProxy> connection,
-      MultiQuery&& multi_query);
-
-  MultiQueryStreamOperation(
-      std::unique_ptr<ConnectionProxy> connection,
-      std::vector<Query>&& queries);
-
   db::OperationType getOperationType() const override {
     return db::OperationType::MultiQueryStream;
   }
 
-  template <typename C>
-  void setCallback(C cb) {
+  void setCallback(StreamCallback cb) {
     stream_callback_ = std::move(cb);
   }
 
+ protected:
+  static std::shared_ptr<MultiQueryStreamOperation> create(
+      std::unique_ptr<FetchOperationImpl> opImpl,
+      MultiQuery&& multi_query);
+
+  friend Connection;
+  friend SyncConnection;
+
  private:
+  MultiQueryStreamOperation(
+      std::unique_ptr<FetchOperationImpl> opImpl,
+      MultiQuery&& multi_query);
+  MultiQueryStreamOperation(
+      std::unique_ptr<FetchOperationImpl> opImpl,
+      std::vector<Query>&& queries);
+
   // wrapper to construct CallbackVistor and invoke the
   // right callback
   void invokeCallback(StreamState state);

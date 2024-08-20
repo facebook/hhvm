@@ -24,16 +24,14 @@
 
 using namespace std::chrono_literals;
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
-Operation& Operation::run() {
+void OperationBase::run() {
   stopwatch_ = std::make_unique<StopWatch>();
   if (callbacks_.pre_operation_callback_) {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
-    callbacks_.pre_operation_callback_(*this);
+    callbacks_.pre_operation_callback_(*op_);
   }
 
   {
@@ -41,7 +39,7 @@ Operation& Operation::run() {
     if (*locked) {
       setState(OperationState::Cancelling);
       protocolCompleteOperation(OperationResult::Cancelled);
-      return *this;
+      return;
     }
 
     CHECK_THROW(
@@ -49,57 +47,52 @@ Operation& Operation::run() {
     setState(OperationState::Pending);
   }
 
-  if (getOperationType() == db::OperationType::Connect) {
+  if (getOp().getOperationType() == db::OperationType::Connect) {
     setTimeoutInternal(std::min(
         Duration(FLAGS_async_mysql_max_connect_timeout_micros), getTimeout()));
   }
 
-  return specializedRun();
+  specializedRun();
 }
 
 void OperationImpl::protocolCompleteOperation(OperationResult result) {
   conn().runInThread(this, &OperationImpl::completeOperation, result);
 }
 
-Operation& Operation::setAttributes(const AttributeMap& attributes) {
+void OperationBase::setAttributes(const AttributeMap& attributes) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   for (const auto& [key, value] : attributes) {
     attributes_[key] = value;
   }
-  return *this;
 }
 
-Operation& Operation::setAttributes(AttributeMap&& attributes) {
+void OperationBase::setAttributes(AttributeMap&& attributes) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   for (auto& [key, value] : attributes) {
     attributes_[key] = std::move(value);
   }
-  return *this;
 }
 
-Operation& Operation::setAttribute(
+void OperationBase::setAttribute(
     const std::string& key,
     const std::string& value) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   attributes_[key] = value;
-  return *this;
 }
 
-Operation& Operation::setTimeout(Duration timeout) {
+void OperationBase::setTimeout(Duration timeout) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
   setTimeoutInternal(timeout);
-  return *this;
 }
 
 OperationImpl::OperationImpl(std::unique_ptr<ConnectionProxy> safe_conn)
-    : Operation(std::move(safe_conn)),
+    : OperationBase(std::move(safe_conn)),
       EventHandler(conn().mysql_client_.getEventBase()),
       AsyncTimeout(conn().mysql_client_.getEventBase()),
-      mysql_errno_(0),
       observer_callback_(nullptr),
       mysql_client_(conn().mysql_client_) {
   conn().resetActionable();
@@ -119,6 +112,48 @@ void OperationImpl::invokeActionable() {
   actionable();
 }
 
+std::optional<folly::SemiFuture<folly::Unit>>
+OperationImpl::callPreQueryCallback(FetchOperation& op) const {
+  if (callbacks_.pre_query_callback_) {
+    return callbacks_.pre_query_callback_(op);
+  }
+
+  return std::nullopt;
+}
+
+DbQueryResult OperationImpl::callPostQueryCallback(DbQueryResult result) const {
+  // If we have a callback set, wrap (and then unwrap) the result to/from the
+  // callback's std::variant wrapper
+  if (callbacks_.post_query_callback_) {
+    return callbacks_.post_query_callback_(std::move(result))
+        .deferValue([](auto&& result) {
+          return std::get<DbQueryResult>(std::move(result));
+        })
+        .get();
+  }
+
+  return result;
+}
+
+DbMultiQueryResult OperationImpl::callPostQueryCallback(
+    DbMultiQueryResult result) const {
+  // If we have a callback set, wrap (and then unwrap) the result to/from the
+  // callback's std::variant wrapper
+  if (callbacks_.post_query_callback_) {
+    return callbacks_.post_query_callback_(std::move(result))
+        .deferValue([](auto&& result) {
+          return std::get<DbMultiQueryResult>(std::move(result));
+        })
+        .get();
+  }
+
+  return result;
+}
+
+AsyncPostQueryCallback OperationImpl::stealPostQueryCallback() {
+  return std::move(callbacks_.post_query_callback_);
+}
+
 void OperationImpl::waitForActionable() {
   DCHECK(isInEventBaseThread());
 
@@ -135,7 +170,7 @@ void OperationImpl::waitForActionable() {
   registerHandler(event_mask);
 }
 
-void Operation::cancel() {
+void OperationBase::cancel() {
   folly::RequestContextScopeGuard guard(
       request_context_.exchange(nullptr, std::memory_order_relaxed));
 
@@ -212,20 +247,20 @@ void OperationImpl::completeOperationInner(OperationResult result) {
   cancelTimeout();
 
   if (callbacks_.post_operation_callback_) {
-    callbacks_.post_operation_callback_(*this);
+    callbacks_.post_operation_callback_(*op_);
   }
 
   specializedCompleteOperation();
 
   // call observer callback
   if (observer_callback_) {
-    observer_callback_(*this);
+    observer_callback_(*op_);
   }
 
-  client().deferRemoveOperation(this);
+  client().deferRemoveOperation(op_);
 }
 
-std::unique_ptr<Connection> Operation::releaseConnection() {
+std::unique_ptr<Connection> OperationBase::releaseConnection() {
   CHECK_THROW(
       state() == OperationState::Completed ||
           state() == OperationState::Unstarted,
@@ -233,26 +268,22 @@ std::unique_ptr<Connection> Operation::releaseConnection() {
   return conn_proxy_->releaseConnection();
 }
 
-void OperationImpl::snapshotMysqlErrors() {
-  mysql_errno_ = conn().getErrno();
+void Operation::snapshotMysqlErrors(unsigned int errnum, std::string error) {
+  mysql_errno_ = errnum;
   if (mysql_errno_ != 0) {
     if (mysql_errno_ == CR_TLS_SERVER_NOT_FOUND) {
       mysql_error_ = "Server loadshedded the connection request.";
     } else {
-      mysql_error_ = conn().getErrorMessage();
+      mysql_error_ = std::move(error);
     }
   }
 }
 
-void OperationImpl::setAsyncClientError(
+void Operation::setAsyncClientError(
     unsigned int mysql_errno,
     folly::StringPiece msg) {
   mysql_errno_ = mysql_errno;
   mysql_error_ = msg.toString();
-}
-
-void OperationImpl::wait() const {
-  conn().wait();
 }
 
 MysqlClientBase& OperationImpl::client() const {
@@ -286,7 +317,7 @@ void OperationImpl::setObserverCallback(ObserverCallback obs_cb) {
   }
 }
 
-ChainedCallback Operation::setCallback(
+ChainedCallback OperationBase::setCallback(
     ChainedCallback orgCallback,
     ChainedCallback newCallback) {
   if (!orgCallback) {
@@ -304,13 +335,13 @@ ChainedCallback Operation::setCallback(
   };
 }
 
-void Operation::setPreOperationCallback(ChainedCallback chainedCallback) {
+void OperationBase::setPreOperationCallback(ChainedCallback chainedCallback) {
   callbacks_.pre_operation_callback_ = setCallback(
       std::move(callbacks_.pre_operation_callback_),
       std::move(chainedCallback));
 }
 
-void Operation::setPostOperationCallback(ChainedCallback chainedCallback) {
+void OperationBase::setPostOperationCallback(ChainedCallback chainedCallback) {
   callbacks_.post_operation_callback_ = setCallback(
       std::move(callbacks_.post_operation_callback_),
       std::move(chainedCallback));
@@ -364,11 +395,11 @@ void OperationImpl::setPostQueryCallback(AsyncPostQueryCallback&& callback) {
 }
 
 folly::StringPiece Operation::resultString() const {
-  return Operation::toString(result());
+  return toString(result());
 }
 
 folly::StringPiece Operation::stateString() const {
-  return Operation::toString(state());
+  return toString(state());
 }
 
 folly::StringPiece Operation::toString(StreamState state) {
@@ -435,27 +466,7 @@ folly::StringPiece Operation::toString(OperationResult result) {
 
 // overload of operator<< for OperationResult
 std::ostream& operator<<(std::ostream& os, OperationResult result) {
-  return os << OperationImpl::toString(result);
-}
-
-folly::StringPiece FetchOperation::toString(FetchAction action) {
-  switch (action) {
-    case FetchAction::StartQuery:
-      return "StartQuery";
-    case FetchAction::InitFetch:
-      return "InitFetch";
-    case FetchAction::Fetch:
-      return "Fetch";
-    case FetchAction::WaitForConsumer:
-      return "WaitForConsumer";
-    case FetchAction::CompleteQuery:
-      return "CompleteQuery";
-    case FetchAction::CompleteOperation:
-      return "CompleteOperation";
-  }
-  LOG(DFATAL) << "unable to convert result to string: "
-              << static_cast<int>(action);
-  return "Unknown result";
+  return os << Operation::toString(result);
 }
 
 std::unique_ptr<Connection> blockingConnectHelper(
@@ -504,10 +515,66 @@ std::string OperationImpl::timeoutMessage(Millis delta) const {
       "(took {}ms, timeout was {}ms)", delta.count(), getTimeoutMs().count());
 }
 
+unsigned int OperationImpl::mysql_errno() const {
+  return getOp().mysql_errno();
+}
+const std::string& OperationImpl::mysql_error() const {
+  return getOp().mysql_error();
+}
+
 /*static*/ std::string OperationImpl::connectStageString(connect_stage stage) {
   return InternalMysqlConnection::findConnectStageName(stage).value_or("");
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+bool Operation::ok() const {
+  return impl()->ok();
+}
+
+// Is the operation complete (success or failure)?
+bool Operation::done() const {
+  return impl()->done();
+}
+
+OperationResult Operation::result() const {
+  return impl()->result();
+}
+
+OperationState Operation::state() const {
+  return impl()->state();
+}
+
+Operation& Operation::run() {
+  impl()->run();
+  return *this;
+}
+
+// Wait for the Operation to complete.
+void Operation::wait() const {
+  conn().wait();
+}
+
+Operation& Operation::setTimeout(Duration timeout) {
+  impl()->setTimeout(timeout);
+  return *this;
+}
+
+Operation& Operation::setAttributes(const AttributeMap& attributes) {
+  impl()->setAttributes(attributes);
+  return *this;
+}
+Operation& Operation::setAttributes(AttributeMap&& attributes) {
+  impl()->setAttributes(std::move(attributes));
+  return *this;
+}
+Operation& Operation::setAttribute(
+    const std::string& key,
+    const std::string& value) {
+  impl()->setAttribute(key, value);
+  return *this;
+}
+
+std::unique_ptr<Connection> Operation::releaseConnection() {
+  return impl()->releaseConnection();
+}
+
+} // namespace facebook::common::mysql_client

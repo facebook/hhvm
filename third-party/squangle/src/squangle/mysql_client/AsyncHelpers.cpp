@@ -8,9 +8,7 @@
 
 #include "squangle/mysql_client/AsyncHelpers.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 QueryCallback resultAppender(QueryAppenderCallback&& callback) {
   return [callback = std::move(callback)](
@@ -39,6 +37,5 @@ MultiQueryCallback resultAppender(MultiQueryAppenderCallback&& callback) {
     }
   };
 }
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

@@ -10,15 +10,23 @@
 
 namespace facebook::common::mysql_client {
 
-MultiQueryStreamOperation::MultiQueryStreamOperation(
-    std::unique_ptr<ConnectionProxy> conn,
-    MultiQuery&& multi_query)
-    : FetchOperation(std::move(conn), std::move(multi_query)) {}
+/*static*/
+std::shared_ptr<MultiQueryStreamOperation> MultiQueryStreamOperation::create(
+    std::unique_ptr<FetchOperationImpl> opImpl,
+    MultiQuery&& multi_query) {
+  return std::shared_ptr<MultiQueryStreamOperation>(
+      new MultiQueryStreamOperation(std::move(opImpl), std::move(multi_query)));
+}
 
 MultiQueryStreamOperation::MultiQueryStreamOperation(
-    std::unique_ptr<ConnectionProxy> conn,
+    std::unique_ptr<FetchOperationImpl> opImpl,
+    MultiQuery&& multi_query)
+    : FetchOperation(std::move(opImpl), std::move(multi_query)) {}
+
+MultiQueryStreamOperation::MultiQueryStreamOperation(
+    std::unique_ptr<FetchOperationImpl> opImpl,
     std::vector<Query>&& queries)
-    : FetchOperation(std::move(conn), std::move(queries)) {}
+    : FetchOperation(std::move(opImpl), std::move(queries)) {}
 
 void MultiQueryStreamOperation::invokeCallback(StreamState reason) {
   // Construct a CallbackVistor object and pass to apply_vistor. It will

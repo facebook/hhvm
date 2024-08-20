@@ -11,6 +11,7 @@
 #include <folly/io/async/AsyncTimeout.h>
 #include <chrono>
 
+#include "squangle/base/ConnectionKey.h"
 #include "squangle/mysql_client/ConnectionOptions.h"
 #include "squangle/mysql_client/Operation.h"
 
@@ -18,9 +19,9 @@ namespace facebook::common::mysql_client {
 
 // An operation representing a pending connection.  Constructed via
 // AsyncMysqlClient::beginConnection.
-class ConnectOperation : public OperationImpl {
+class ConnectOperationImpl : public OperationImpl {
  public:
-  ~ConnectOperation() override;
+  virtual ~ConnectOperationImpl() override;
 
   void setCallback(ConnectCallback cb) {
     connect_callback_ = std::move(cb);
@@ -41,26 +42,19 @@ class ConnectOperation : public OperationImpl {
     return conn_key_;
   }
 
-  ConnectOperation& setSSLOptionsProviderBase(
+  void setSSLOptionsProviderBase(
       std::unique_ptr<SSLOptionsProviderBase> ssl_options_provider);
-  ConnectOperation& setSSLOptionsProvider(
+  void setSSLOptionsProvider(
       std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider);
 
   // Default timeout for queries created by the connection this
   // operation will create.
-  ConnectOperation& setDefaultQueryTimeout(Duration t);
-  ConnectOperation& setConnectionContext(
-      std::shared_ptr<db::ConnectionContextBase> e) {
-    CHECK_THROW(
-        state() == OperationState::Unstarted, db::OperationStateException);
-    connection_context_ = std::move(e);
-    return *this;
-  }
-  ConnectOperation& setSniServerName(const std::string& sni_servername);
-  ConnectOperation& enableResetConnBeforeClose();
-  ConnectOperation& enableDelayedResetConn();
-  ConnectOperation& enableChangeUser();
-  ConnectOperation& setCertValidationCallback(
+  void setDefaultQueryTimeout(Duration t);
+  void setSniServerName(const std::string& sni_servername);
+  void enableResetConnBeforeClose();
+  void enableDelayedResetConn();
+  void enableChangeUser();
+  void setCertValidationCallback(
       CertValidatorCallback callback,
       const void* context = nullptr,
       bool opPtrAsContext = false);
@@ -68,55 +62,16 @@ class ConnectOperation : public OperationImpl {
     return conn_options_.getCertValidationCallback();
   }
 
-  db::ConnectionContextBase* getConnectionContext() {
-    CHECK_THROW(
-        state() == OperationState::Unstarted, db::OperationStateException);
-    return connection_context_.get();
-  }
-
-  const db::ConnectionContextBase* getConnectionContext() const {
-    CHECK_THROW(
-        state() == OperationState::Unstarted ||
-            state() == OperationState::Completed,
-        db::OperationStateException);
-    return connection_context_.get();
-  }
-
-  void reportServerCertContent(
-      const std::string& sslCertCn,
-      const std::vector<std::string>& sslCertSan,
-      const std::vector<std::string>& sslCertIdentities,
-      bool isValidated) {
-    if (connection_context_) {
-      if (!sslCertCn.empty()) {
-        connection_context_->sslCertCn = sslCertCn;
-      }
-      if (!sslCertSan.empty()) {
-        connection_context_->sslCertSan = sslCertSan;
-      }
-      if (!sslCertIdentities.empty()) {
-        connection_context_->sslCertIdentities = sslCertIdentities;
-      }
-      connection_context_->isServerCertValidated = isValidated;
-    }
-  }
-
-  // Don't call this; it's public strictly for AsyncMysqlClient to be
-  // able to call make_shared.
-  ConnectOperation(MysqlClientBase* mysql_client, ConnectionKey conn_key);
-
-  void mustSucceed() override;
-
   // Overriding to narrow the return type
   // Each connect attempt will take at most this timeout to retry to acquire
   // the connection.
-  ConnectOperation& setTimeout(Duration timeout);
+  void setTimeout(Duration timeout);
 
   // This timeout allows for clients to fail fast when tcp handshake
   // latency is high . This method allows to override the tcp timeout
   // connection options. These timeouts can either be set directly or by
   // passing in connection options.
-  ConnectOperation& setTcpTimeout(Duration timeout);
+  void setTcpTimeout(Duration timeout);
 
   const folly::Optional<Duration>& getTcpTimeout() const {
     return conn_options_.getConnectTcpTimeout();
@@ -126,65 +81,67 @@ class ConnectOperation : public OperationImpl {
   // Each attempt will take at most `setTimeout`. Use this in case
   // you have strong timeout restrictions but still want the connection to
   // retry.
-  ConnectOperation& setTotalTimeout(Duration total_timeout);
+  void setTotalTimeout(Duration total_timeout);
 
   // Sets the number of attempts this operation will try to acquire a mysql
   // connection.
-  ConnectOperation& setConnectAttempts(uint32_t max_attempts);
+  void setConnectAttempts(uint32_t max_attempts);
 
   // Sets the DSCP (QoS) value associated with this connection
   //
   // See Also ConnectionOptions::setDscp
-  ConnectOperation& setDscp(uint8_t dscp);
+  void setDscp(uint8_t dscp);
 
   folly::Optional<uint8_t> getDscp() const {
     return conn_options_.getDscp();
   }
 
-  uint32_t attemptsMade() const {
+  uint32_t attemptsMade() const noexcept {
     return attempts_made_;
   }
 
-  Duration getAttemptTimeout() const {
+  Duration getAttemptTimeout() const noexcept {
     return conn_options_.getTimeout();
   }
 
   // Set if we should open a new connection to kill a timed out query
   // Should not be used when connecting through a proxy
-  ConnectOperation& setKillOnQueryTimeout(bool killOnQueryTimeout);
+  void setKillOnQueryTimeout(bool killOnQueryTimeout);
 
-  bool getKillOnQueryTimeout() const {
+  bool getKillOnQueryTimeout() const noexcept {
     return killOnQueryTimeout_;
   }
 
-  ConnectOperation& setCompression(
-      folly::Optional<CompressionAlgorithm> compression_lib) {
+  void setCompression(folly::Optional<CompressionAlgorithm> compression_lib) {
     conn_options_.setCompression(std::move(compression_lib));
-    return *this;
   }
 
   const folly::Optional<CompressionAlgorithm>& getCompression() const {
     return conn_options_.getCompression();
   }
 
-  ConnectOperation& setConnectionOptions(const ConnectionOptions& conn_options);
+  void setConnectionOptions(const ConnectionOptions& conn_options);
 
   static constexpr Duration kMinimumViableConnectTimeout =
       std::chrono::microseconds(50);
-
-  db::OperationType getOperationType() const override {
-    return db::OperationType::Connect;
-  }
 
   bool isActive() const {
     return active_in_client_;
   }
 
  protected:
+  friend class MysqlClientBase;
+
+  ConnectOperationImpl(MysqlClientBase* mysql_client, ConnectionKey conn_key);
+
+  static std::unique_ptr<ConnectOperationImpl> create(
+      MysqlClientBase* mysql_client,
+      ConnectionKey conn_key);
+
   virtual void attemptFailed(OperationResult result);
   virtual void attemptSucceeded(OperationResult result);
 
-  ConnectOperation& specializedRun() override;
+  virtual void specializedRun() override;
   void actionable() override;
   void specializedTimeoutTriggered() override;
   void specializedCompleteOperation() override;
@@ -208,11 +165,8 @@ class ConnectOperation : public OperationImpl {
   bool killOnQueryTimeout_ = false;
   ConnectionOptions conn_options_;
 
-  // Context information for logging purposes.
-  std::shared_ptr<db::ConnectionContextBase> connection_context_;
-
  private:
-  void specializedRunImpl();
+  virtual void specializedRunImpl();
 
   void logConnectCompleted(OperationResult result);
 
@@ -239,7 +193,7 @@ class ConnectOperation : public OperationImpl {
    public:
     ConnectTcpTimeoutHandler(
         folly::EventBase* base,
-        ConnectOperation* connect_operation)
+        ConnectOperationImpl* connect_operation)
         : folly::AsyncTimeout(base), op_(connect_operation) {}
 
     ConnectTcpTimeoutHandler() = delete;
@@ -252,13 +206,206 @@ class ConnectOperation : public OperationImpl {
     }
 
    private:
-    ConnectOperation* op_;
+    ConnectOperationImpl* op_;
   };
+
+  ConnectOperation& op() const;
 
   ConnectTcpTimeoutHandler tcp_timeout_handler_;
 
   friend class AsyncMysqlClient;
   friend class MysqlClientBase;
+};
+
+class ConnectOperation : public Operation {
+ public:
+  void setCallback(ConnectCallback cb) {
+    impl()->setCallback(std::move(cb));
+  }
+
+  // Overriding to narrow the return type
+  // Each connect attempt will take at most this timeout to retry to acquire
+  // the connection.
+  ConnectOperation& setTimeout(Duration timeout) {
+    impl()->setTimeout(timeout);
+    return *this;
+  }
+
+  // This timeout allows for clients to fail fast when tcp handshake
+  // latency is high . This method allows to override the tcp timeout
+  // connection options. These timeouts can either be set directly or by
+  // passing in connection options.
+  ConnectOperation& setTcpTimeout(Duration timeout) {
+    impl()->setTcpTimeout(timeout);
+    return *this;
+  }
+  const folly::Optional<Duration>& getTcpTimeout() const {
+    return impl()->getTcpTimeout();
+  }
+
+  // Sets the total timeout that the connect operation will use.
+  // Each attempt will take at most `setTimeout`. Use this in case
+  // you have strong timeout restrictions but still want the connection to
+  // retry.
+  ConnectOperation& setTotalTimeout(Duration total_timeout) {
+    impl()->setTotalTimeout(total_timeout);
+    return *this;
+  }
+
+  // Sets the number of attempts this operation will try to acquire a mysql
+  // connection.
+  ConnectOperation& setConnectAttempts(uint32_t max_attempts) {
+    impl()->setConnectAttempts(max_attempts);
+    return *this;
+  }
+
+  // Sets the DSCP (QoS) value associated with this connection
+  //
+  // See Also ConnectionOptions::setDscp
+  ConnectOperation& setDscp(uint8_t dscp) {
+    impl()->setDscp(dscp);
+    return *this;
+  }
+  folly::Optional<uint8_t> getDscp() const {
+    return impl()->getDscp();
+  }
+
+  uint32_t attemptsMade() const noexcept {
+    return impl()->attemptsMade();
+  }
+
+  Duration getAttemptTimeout() const noexcept {
+    return impl()->getAttemptTimeout();
+  }
+
+  // Set if we should open a new connection to kill a timed out query
+  // Should not be used when connecting through a proxy
+  ConnectOperation& setKillOnQueryTimeout(bool killOnQueryTimeout) {
+    impl()->setKillOnQueryTimeout(killOnQueryTimeout);
+    return *this;
+  }
+  bool getKillOnQueryTimeout() const noexcept {
+    return impl()->getKillOnQueryTimeout();
+  }
+
+  ConnectOperation& setCompression(
+      folly::Optional<CompressionAlgorithm> compression_lib) {
+    impl()->setCompression(std::move(compression_lib));
+    return *this;
+  }
+  const folly::Optional<CompressionAlgorithm>& getCompression() const {
+    return impl()->getCompression();
+  }
+
+  ConnectOperation& setSSLOptionsProviderBase(
+      std::unique_ptr<SSLOptionsProviderBase> ssl_options_provider) {
+    impl()->setSSLOptionsProviderBase(std::move(ssl_options_provider));
+    return *this;
+  }
+  ConnectOperation& setSSLOptionsProvider(
+      std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider) {
+    impl()->setSSLOptionsProvider(std::move(ssl_options_provider));
+    return *this;
+  }
+
+  ConnectOperation& setConnectionOptions(
+      const ConnectionOptions& conn_options) {
+    impl()->setConnectionOptions(conn_options);
+    return *this;
+  }
+  // Default timeout for queries created by the connection this
+  // operation will create.
+  ConnectOperation& setDefaultQueryTimeout(Duration t) {
+    impl()->setDefaultQueryTimeout(t);
+    return *this;
+  }
+  ConnectOperation& setSniServerName(const std::string& sni_servername) {
+    impl()->setSniServerName(sni_servername);
+    return *this;
+  }
+  ConnectOperation& enableResetConnBeforeClose() {
+    impl()->enableResetConnBeforeClose();
+    return *this;
+  }
+  ConnectOperation& enableDelayedResetConn() {
+    impl()->enableDelayedResetConn();
+    return *this;
+  }
+  ConnectOperation& enableChangeUser() {
+    impl()->enableChangeUser();
+    return *this;
+  }
+  ConnectOperation& setCertValidationCallback(
+      CertValidatorCallback callback,
+      const void* context = nullptr,
+      bool opPtrAsContext = false) {
+    impl()->setCertValidationCallback(
+        std::move(callback), context, opPtrAsContext);
+    return *this;
+  }
+
+  const ConnectionOptions& getConnectionOptions() {
+    return impl()->getConnectionOptions();
+  }
+  const ConnectionKey& getKey() const {
+    return impl()->getKey();
+  }
+
+  db::OperationType getOperationType() const override {
+    return db::OperationType::Connect;
+  }
+
+  void reportServerCertContent(
+      const std::string& sslCertCn,
+      const std::vector<std::string>& sslCertSan,
+      const std::vector<std::string>& sslCertIdentities,
+      bool isValidated) {
+    impl()->withOptionalConnectionContext([&](auto& ctx) {
+      if (!sslCertCn.empty()) {
+        ctx.sslCertCn = sslCertCn;
+      }
+      if (!sslCertSan.empty()) {
+        ctx.sslCertSan = sslCertSan;
+      }
+      if (!sslCertIdentities.empty()) {
+        ctx.sslCertIdentities = sslCertIdentities;
+      }
+      ctx.isServerCertValidated = isValidated;
+    });
+  }
+
+  void mustSucceed() override;
+
+  bool isActive() const {
+    return impl()->isActive();
+  }
+
+  const CertValidatorCallback& getCertValidationCallback() const {
+    return impl()->getCertValidationCallback();
+  }
+
+ protected:
+  static std::shared_ptr<ConnectOperation> create(
+      std::unique_ptr<ConnectOperationImpl> impl);
+  friend MysqlClientBase;
+
+  explicit ConnectOperation(std::unique_ptr<ConnectOperationImpl> impl)
+      : impl_(std::move(impl)) {
+    if (!impl_) {
+      throw std::runtime_error("ConnectOperationImpl is null");
+    }
+
+    impl_->setOperation(*this);
+  }
+
+  virtual ConnectOperationImpl* impl() override {
+    return (ConnectOperationImpl*)impl_.get();
+  }
+  virtual const ConnectOperationImpl* impl() const override {
+    return (ConnectOperationImpl*)impl_.get();
+  }
+
+  std::unique_ptr<ConnectOperationImpl> impl_;
 };
 
 } // namespace facebook::common::mysql_client

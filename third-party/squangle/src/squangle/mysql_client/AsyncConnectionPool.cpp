@@ -20,9 +20,7 @@
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 std::shared_ptr<AsyncConnectionPool> AsyncConnectionPool::makePool(
     std::shared_ptr<AsyncMysqlClient> mysql_client,
@@ -128,26 +126,25 @@ std::unique_ptr<Connection> AsyncConnectionPool::connect(
 }
 
 template <>
-AsyncConnectPoolOperation& AsyncConnectPoolOperation::specializedRun() {
-  std::weak_ptr<Operation> weakSelf = getSharedPointer();
-  if (!client().runInThread([weakSelf]() {
+void AsyncConnectPoolOperationImpl::specializedRun() {
+  std::weak_ptr<Operation> weakSelf = getOp().getSharedPointer();
+  if (!client().runInThread([&, wself = std::move(weakSelf)]() {
         // There is a race confition that allows a cancelled or completed
         // operation getting here. The self ptr check ensures that the client
         // has not freed the reference to the operation, and the state() check
         // verifies whether other relevant memebers have been cleaned up by
         // connect callbacks
-        auto self =
-            std::static_pointer_cast<ConnectPoolOperation>(weakSelf.lock());
+        auto self = wself.lock();
         if (!self || (self->state() == OperationState::Completed)) {
           LOG(ERROR) << "ConnectPoolOperation freed before running";
           return;
         }
 
-        self->specializedRunImpl();
+        // `this` is valid if `self` is still alive
+        specializedRunImpl();
       })) {
     completeOperationInner(OperationResult::Failed);
   }
-  return *this;
 }
 
 std::ostream& operator<<(std::ostream& os, ExpirationPolicy policy) {
@@ -173,7 +170,7 @@ std::ostream& operator<<(std::ostream& os, const PoolKey& key) {
 }
 
 template <>
-std::string AsyncConnectPoolOperation::createTimeoutErrorMessage(
+std::string AsyncConnectPoolOperationImpl::createTimeoutErrorMessage(
     const PoolKeyStats& pool_key_stats,
     size_t per_key_limit) {
   auto delta = opElapsedMs();
@@ -200,6 +197,4 @@ std::string AsyncConnectPoolOperation::createTimeoutErrorMessage(
   return folly::join(" ", parts);
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+} // namespace facebook::common::mysql_client

@@ -16,9 +16,7 @@ namespace folly {
 class SSLContext;
 }
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 /* Interface for an SSL connection options Provider */
 class SSLOptionsProviderBase {
@@ -49,6 +47,5 @@ class SSLOptionsProviderBase {
   // Returns if the SSL Session was reused for this connection.
   bool storeMysqlSSLSession(MYSQL* mysql);
 };
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

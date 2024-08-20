@@ -19,7 +19,12 @@ namespace facebook::common::mysql_client {
 
 class Connection;
 class ConnectOperation;
+class ConnectOperationImpl;
+template <typename Client>
+class ConnectPoolOperationImpl;
+class FetchOperationImpl;
 class MysqlHandler;
+class SpecialOperationImpl;
 
 class MysqlClientBase {
  public:
@@ -37,8 +42,7 @@ class MysqlClientBase {
 
   // Factory method
   virtual std::unique_ptr<Connection> createConnection(
-      ConnectionKey conn_key,
-      MYSQL* mysql_conn) = 0;
+      ConnectionKey conn_key) = 0;
 
   virtual folly::EventBase* getEventBase() {
     return nullptr;
@@ -119,16 +123,31 @@ class MysqlClientBase {
     return false;
   }
 
+  virtual std::unique_ptr<ConnectOperationImpl> createConnectOperationImpl(
+      MysqlClientBase* client,
+      ConnectionKey conn_key) const;
+  std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
+      std::unique_ptr<OperationImpl::ConnectionProxy> conn) const;
+  std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
+      std::unique_ptr<OperationImpl::ConnectionProxy> conn) const;
+
+  // Helper versions of the above that take a Connection instead of a
+  // ConnectionProxy
+  std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
+      std::unique_ptr<Connection> conn) const;
+  std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
+      std::unique_ptr<Connection> conn) const;
+
  protected:
   friend class Connection;
   friend class OperationImpl;
-  friend class ConnectOperation;
+  friend class ConnectOperationImpl;
   template <typename Class>
   friend class ConnectPoolOperation;
   template <typename Class>
   friend class ConnectionPool;
-  friend class FetchOperation;
-  friend class SpecialOperation;
+  friend class FetchOperationImpl;
+  friend class SpecialOperationImpl;
   friend class ResetOperation;
   friend class ChangeUserOperation;
   friend class ConnectionHolder;

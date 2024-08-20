@@ -10,7 +10,9 @@
 
 #include <folly/Traits.h>
 #include <folly/container/F14Map.h>
+#include <list>
 
+#include "squangle/mysql_client/DbResult.h"
 #include "squangle/mysql_client/PoolKey.h"
 #include "squangle/mysql_client/TwoLevelCache.h"
 

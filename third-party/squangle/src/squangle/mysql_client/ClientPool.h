@@ -14,9 +14,7 @@
 #include <folly/Singleton.h>
 #include <folly/hash/Hash.h>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 class AsyncMysqlClientFactory {
  public:
@@ -96,6 +94,5 @@ class ClientPool {
  private:
   std::vector<std::shared_ptr<TClient>> client_pool_;
 };
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client

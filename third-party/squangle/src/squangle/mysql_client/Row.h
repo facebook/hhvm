@@ -35,9 +35,7 @@
 
 #include "squangle/mysql_client/InternalConnection.h"
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 class RowBlock;
 
@@ -554,6 +552,4 @@ Optional<T> Row::getOptional(const L& l) const {
   return Optional(get<T>(l));
 }
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+} // namespace facebook::common::mysql_client

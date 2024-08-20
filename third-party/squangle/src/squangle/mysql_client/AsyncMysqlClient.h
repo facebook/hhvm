@@ -43,8 +43,7 @@
 //
 // For more detail and examples, please see the README file.
 
-#ifndef COMMON_ASYNC_MYSQL_CLIENT_H
-#define COMMON_ASYNC_MYSQL_CLIENT_H
+#pragma once
 
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/logger/DBEventLogger.h"
@@ -75,9 +74,7 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 class AsyncConnection;
 class AsyncMysqlClient;
@@ -106,9 +103,7 @@ class AsyncMysqlClient : public MysqlClientBase {
     return logger;
   }
 
-  std::unique_ptr<Connection> createConnection(
-      ConnectionKey conn_key,
-      MYSQL* mysql_conn) override;
+  std::unique_ptr<Connection> createConnection(ConnectionKey conn_key) override;
 
   static void deleter(AsyncMysqlClient* client) {
     // If we are dying in the thread we own, spin up a new thread to
@@ -397,14 +392,8 @@ class AsyncConnection : public Connection {
   AsyncConnection(
       MysqlClientBase& mysql_client,
       ConnectionKey conn_key,
-      std::unique_ptr<ConnectionHolder> conn)
+      std::unique_ptr<ConnectionHolder> conn = nullptr)
       : Connection(mysql_client, conn_key, std::move(conn)) {}
-
-  AsyncConnection(
-      MysqlClientBase& mysql_client,
-      ConnectionKey conn_key,
-      MYSQL* existing_connection)
-      : Connection(mysql_client, std::move(conn_key), existing_connection) {}
 
   virtual ~AsyncConnection() override;
 
@@ -428,12 +417,14 @@ class AsyncConnection : public Connection {
     actionableBaton_.reset();
   }
 
+ protected:
+  std::unique_ptr<InternalConnection> createInternalConnection(
+      MysqlClientBase& client) override {
+    return std::make_unique<InternalMysqlConnection>(client);
+  }
+
  private:
   mutable folly::fibers::Baton actionableBaton_;
 };
 
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
-
-#endif // COMMON_ASYNC_MYSQL_CLIENT_H
+} // namespace facebook::common::mysql_client

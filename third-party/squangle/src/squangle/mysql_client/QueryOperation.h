@@ -88,10 +88,6 @@ class QueryOperation : public FetchOperation {
     query_result_ = std::make_unique<QueryResult>(std::move(query_result));
   }
 
-  // Don't call this; it's public strictly for Connection to be able
-  // to call make_shared.
-  QueryOperation(std::unique_ptr<ConnectionProxy> connection, Query&& query);
-
   // Overriding to narrow the return type
   QueryOperation& setTimeout(Duration timeout) {
     Operation::setTimeout(timeout);
@@ -108,6 +104,8 @@ class QueryOperation : public FetchOperation {
   void notifyQuerySuccess(bool more_results) override;
   void notifyFailure(OperationResult result) override;
   void notifyOperationCompleted(OperationResult result) override;
+
+  QueryOperation(std::unique_ptr<FetchOperationImpl> impl, Query&& query);
 
  private:
   QueryCallback buffered_query_callback_;

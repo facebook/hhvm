@@ -126,23 +126,6 @@ void apache::thrift::Client<::cpp2::MyRoot>::sync_do_root(apache::thrift::RpcOpt
 }
 
 
-template <typename CallbackType>
-folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyRoot>::fbthrift_semifuture_do_root(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto semifuture = promise.getSemiFuture();
-  auto ctxAndHeader = do_rootCtx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_do_root, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  apache::thrift::SerializedRequest request = fbthrift_serialize_do_root(rpcOptions, *header, contextStack);
-  fbthrift_send_do_root(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
-}
-
 folly::Future<folly::Unit> apache::thrift::Client<::cpp2::MyRoot>::future_do_root() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_do_root(rpcOptions);
@@ -154,13 +137,19 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyRoot>::semifutur
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::cpp2::MyRoot>::future_do_root(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::FutureCallback<folly::Unit>;
-  return fbthrift_semifuture_do_root<CallbackType>(rpcOptions).toUnsafeFuture();
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_do_root, channel_);
+  do_root(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyRoot>::semifuture_do_root(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::SemiFutureCallback<folly::Unit>;
-  return fbthrift_semifuture_do_root<CallbackType>(rpcOptions);
+  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_do_root, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  do_root(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
 }
 
 

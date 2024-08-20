@@ -185,23 +185,6 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
   return tryResponse;
 }
 
-template <typename CallbackType>
-folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::string>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto semifuture = promise.getSemiFuture();
-  auto ctxAndHeader = getDataByKey0Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_getDataByKey0, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey0(rpcOptions, *header, contextStack, p_key);
-  fbthrift_send_getDataByKey0(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
-}
-
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey0(const ::std::string& p_key) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_getDataByKey0(rpcOptions, p_key);
@@ -213,13 +196,19 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
 }
 
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  using CallbackType = apache::thrift::FutureCallback<::std::string>;
-  return fbthrift_semifuture_getDataByKey0<CallbackType>(rpcOptions, p_key).toUnsafeFuture();
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::string>>(std::move(promise), recv_wrapped_getDataByKey0, channel_);
+  getDataByKey0(rpcOptions, std::move(callback), p_key);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  using CallbackType = apache::thrift::SemiFutureCallback<::std::string>;
-  return fbthrift_semifuture_getDataByKey0<CallbackType>(rpcOptions, p_key);
+  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_getDataByKey0, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  getDataByKey0(rpcOptions, std::move(callback), p_key);
+  return std::move(callbackAndFuture.second);
 }
 
 
@@ -419,23 +408,6 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
   return tryResponse;
 }
 
-template <typename CallbackType>
-folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::string>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto semifuture = promise.getSemiFuture();
-  auto ctxAndHeader = getDataByKey1Ctx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_getDataByKey1, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey1(rpcOptions, *header, contextStack, p_key);
-  fbthrift_send_getDataByKey1(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
-}
-
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey1(const ::std::string& p_key) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_getDataByKey1(rpcOptions, p_key);
@@ -447,13 +419,19 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
 }
 
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  using CallbackType = apache::thrift::FutureCallback<::std::string>;
-  return fbthrift_semifuture_getDataByKey1<CallbackType>(rpcOptions, p_key).toUnsafeFuture();
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::string>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::string>>(std::move(promise), recv_wrapped_getDataByKey1, channel_);
+  getDataByKey1(rpcOptions, std::move(callback), p_key);
+  return std::move(future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  using CallbackType = apache::thrift::SemiFutureCallback<::std::string>;
-  return fbthrift_semifuture_getDataByKey1<CallbackType>(rpcOptions, p_key);
+  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_getDataByKey1, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  getDataByKey1(rpcOptions, std::move(callback), p_key);
+  return std::move(callbackAndFuture.second);
 }
 
 

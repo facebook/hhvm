@@ -149,8 +149,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   template <typename RpcOptions>
   void fbthrift_send_method1(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method1Ctx(apache::thrift::RpcOptions* rpcOptions);
-  template <typename CallbackType>
-  folly::SemiFuture<folly::Unit> fbthrift_semifuture_method1(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service1", "function": "method2"} */
   virtual void method2(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
@@ -267,8 +265,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   template <typename RpcOptions>
   void fbthrift_send_method2(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method2Ctx(apache::thrift::RpcOptions* rpcOptions);
-  template <typename CallbackType>
-  folly::SemiFuture<folly::Unit> fbthrift_semifuture_method2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service1", "function": "method3"} */
   virtual void method3(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -387,8 +383,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   template <typename RpcOptions>
   void fbthrift_send_method3(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method3Ctx(apache::thrift::RpcOptions* rpcOptions);
-  template <typename CallbackType>
-  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_method3(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service1", "function": "method4"} */
   virtual void method4(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
@@ -507,8 +501,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   template <typename RpcOptions>
   void fbthrift_send_method4(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method4Ctx(apache::thrift::RpcOptions* rpcOptions);
-  template <typename CallbackType>
-  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_method4(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service1", "function": "method5"} */
   virtual void method5(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -627,8 +619,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   template <typename RpcOptions>
   void fbthrift_send_method5(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method5Ctx(apache::thrift::RpcOptions* rpcOptions);
-  template <typename CallbackType>
-  folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> fbthrift_semifuture_method5(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service1", "function": "method6"} */
   virtual void method6(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
@@ -747,8 +737,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   template <typename RpcOptions>
   void fbthrift_send_method6(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method6Ctx(apache::thrift::RpcOptions* rpcOptions);
-  template <typename CallbackType>
-  folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> fbthrift_semifuture_method6(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
  public:
 };
 

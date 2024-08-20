@@ -126,23 +126,6 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 }
 
 
-template <typename CallbackType>
-folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::DerivedService>::fbthrift_semifuture_get_six(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::int32_t>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto semifuture = promise.getSemiFuture();
-  auto ctxAndHeader = get_sixCtx(&rpcOptions);
-  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
-    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_get_six, channel_),
-    std::move(ctxAndHeader.first));
-  auto header = std::move(ctxAndHeader.second);
-  auto* contextStack = wrappedCallbackAndContextStack.second;
-  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
-  apache::thrift::SerializedRequest request = fbthrift_serialize_get_six(rpcOptions, *header, contextStack);
-  fbthrift_send_get_six(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
-}
-
 folly::Future<::std::int32_t> apache::thrift::Client<::py3::simple::DerivedService>::future_get_six() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_get_six(rpcOptions);
@@ -154,13 +137,19 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::DerivedS
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::py3::simple::DerivedService>::future_get_six(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::FutureCallback<::std::int32_t>;
-  return fbthrift_semifuture_get_six<CallbackType>(rpcOptions).toUnsafeFuture();
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::int32_t>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_get_six, channel_);
+  get_six(rpcOptions, std::move(callback));
+  return std::move(future).thenValue(CallbackHelper::extractResult);
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::DerivedService>::semifuture_get_six(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::SemiFutureCallback<::std::int32_t>;
-  return fbthrift_semifuture_get_six<CallbackType>(rpcOptions);
+  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_get_six, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_six(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
 }
 
 

@@ -1,14 +1,14 @@
 //// foo.php
 <?hh
-// package pkg1
+// package pkg2
+<<file: __PackageOverride('pkg2')>>
 type TFoo = int;
 interface IFoo<T> {}
 class Foo {}
 
 //// bar.php
 <?hh
-// package pkg2
-<<file: __PackageOverride('pkg2')>>
+// package pkg1
 type TBar = string;
 interface IBar<T> {}
 class Bar<T> {}

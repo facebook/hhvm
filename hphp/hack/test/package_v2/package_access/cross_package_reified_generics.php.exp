@@ -1,94 +1,94 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg2 [1]
--> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg1 [2]
--> But cross_package_reified_generics.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg2 [2]
+-> But cross_package_reified_generics.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
+
+cross_package_reified_generics.php--bar.php:8:7
+6 | function test(): void {
+7 |   // All error
+[1] 8 |   bar<TFoo>();
+9 |   bar<Foo>();
+10 |   $_ = new Bar<TFoo>();
+
+cross_package_reified_generics.php--foo.php:4:6
+2 | // package pkg2
+3 | <<file: __PackageOverride('pkg2')>>
+[2] 4 | type TFoo = int;
+5 | class Foo {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[3] 3 | [packages.pkg1]
+4 | include_paths=["./*"]
+5 |
+
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg2 [2]
+-> But cross_package_reified_generics.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 
 cross_package_reified_generics.php--bar.php:9:7
-7 | function test(): void {
-8 |   // All error
-[1] 9 |   bar<TFoo>();
-10 |   bar<Foo>();
-11 |   $_ = new Bar<TFoo>();
+7 |   // All error
+8 |   bar<TFoo>();
+[1] 9 |   bar<Foo>();
+10 |   $_ = new Bar<TFoo>();
+11 |   $_ = new Bar<Foo>();
 
-cross_package_reified_generics.php--foo.php:3:6
-1 | <?hh
-2 | // package pkg1
-[2] 3 | type TFoo = int;
-4 | class Foo {}
+cross_package_reified_generics.php--foo.php:5:7
+3 | <<file: __PackageOverride('pkg2')>>
+4 | type TFoo = int;
+[2] 5 | class Foo {}
 
-PACKAGES.toml:6:11
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[3] 3 | [packages.pkg1]
 4 | include_paths=["./*"]
 5 |
-[3] 6 | [packages.pkg2]
-7 | include_paths=[
-8 |     "cross_package_access_internal1.php--foo.php",
 
-error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg2 [1]
--> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg1 [2]
--> But cross_package_reified_generics.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg2 [2]
+-> But cross_package_reified_generics.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 
-cross_package_reified_generics.php--bar.php:10:7
-8 |   // All error
-9 |   bar<TFoo>();
-[1] 10 |   bar<Foo>();
-11 |   $_ = new Bar<TFoo>();
-12 |   $_ = new Bar<Foo>();
+cross_package_reified_generics.php--bar.php:10:16
+8 |   bar<TFoo>();
+9 |   bar<Foo>();
+[1] 10 |   $_ = new Bar<TFoo>();
+11 |   $_ = new Bar<Foo>();
+12 | }
 
-cross_package_reified_generics.php--foo.php:4:7
-2 | // package pkg1
-3 | type TFoo = int;
-[2]  4 | class Foo {}
+cross_package_reified_generics.php--foo.php:4:6
+2 | // package pkg2
+3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TFoo = int;
+5 | class Foo {}
 
-PACKAGES.toml:6:11
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[3]  3 | [packages.pkg1]
 4 | include_paths=["./*"]
 5 |
-[3]  6 | [packages.pkg2]
-7 | include_paths=[
-8 |     "cross_package_access_internal1.php--foo.php",
 
-error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg2 [1]
--> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg1 [2]
--> But cross_package_reified_generics.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg2 [2]
+-> But cross_package_reified_generics.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 
 cross_package_reified_generics.php--bar.php:11:16
-9 |   bar<TFoo>();
-10 |   bar<Foo>();
-[1] 11 |   $_ = new Bar<TFoo>();
-12 |   $_ = new Bar<Foo>();
-13 | }
+9 |   bar<Foo>();
+10 |   $_ = new Bar<TFoo>();
+[1] 11 |   $_ = new Bar<Foo>();
+12 | }
 
-cross_package_reified_generics.php--foo.php:3:6
-1 | <?hh
-2 | // package pkg1
-[2]  3 | type TFoo = int;
-4 | class Foo {}
+cross_package_reified_generics.php--foo.php:5:7
+3 | <<file: __PackageOverride('pkg2')>>
+4 | type TFoo = int;
+[2]  5 | class Foo {}
 
-PACKAGES.toml:6:11
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[3]  3 | [packages.pkg1]
 4 | include_paths=["./*"]
 5 |
-[3]  6 | [packages.pkg2]
-7 | include_paths=[
-8 |     "cross_package_access_internal1.php--foo.php",
-
-error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg2 [1]
--> This is from cross_package_reified_generics.php--foo.php, which belongs to package pkg1 [2]
--> But cross_package_reified_generics.php--bar.php is in package pkg2, and package pkg2 does not include package pkg1 [3]
-
-cross_package_reified_generics.php--bar.php:12:16
-10 |   bar<Foo>();
-11 |   $_ = new Bar<TFoo>();
-[1] 12 |   $_ = new Bar<Foo>();
-13 | }
-
-cross_package_reified_generics.php--foo.php:4:7
-2 | // package pkg1
-3 | type TFoo = int;
-[2]  4 | class Foo {}
-
-PACKAGES.toml:6:11
-4 | include_paths=["./*"]
-5 |
-[3]  6 | [packages.pkg2]
-7 | include_paths=[
-8 |     "cross_package_access_internal1.php--foo.php",
 
 4 errors found

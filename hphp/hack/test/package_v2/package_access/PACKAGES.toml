@@ -9,3 +9,7 @@ include_paths=[
     "illegal_cross_package_basic.php--foo.php",
     "illegal_cross_package_call_to_tests.php--__tests__.php"
 ]
+includes = ["pkg1"]
+
+[packages.pkg3]
+includes = ["pkg2"]

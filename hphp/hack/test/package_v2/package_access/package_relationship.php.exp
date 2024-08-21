@@ -1,0 +1,22 @@
+error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg3 [1]
+-> This is from package_relationship.php--a.php, which belongs to package pkg1 [2]
+-> But package_relationship.php--c.php is in package pkg3, and package pkg3 does not include package pkg1 [3]
+
+package_relationship.php--c.php:6:13
+4 | function test(): void {
+5 |    $b = new B(); // ok
+[1]  6 |    $a = new A(); // error
+7 | }
+
+package_relationship.php--a.php:3:7
+1 | <?hh
+2 | // package pkg1
+[2]  3 | class A {}
+
+PACKAGES.toml:14:11
+12 | includes = ["pkg1"]
+13 |
+[3] 14 | [packages.pkg3]
+15 | includes = ["pkg2"]
+
+1 error found

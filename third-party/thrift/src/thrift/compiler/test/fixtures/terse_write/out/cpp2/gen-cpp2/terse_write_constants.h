@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h"
 
 namespace facebook::thrift::test::terse_write {
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift"} */
 namespace terse_write_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_b2d2455fa6f0dfdd();

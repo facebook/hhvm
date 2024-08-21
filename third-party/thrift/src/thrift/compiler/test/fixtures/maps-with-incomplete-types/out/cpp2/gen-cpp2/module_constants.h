@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/maps-with-incomplete-types/gen-cpp2/module_types.h"
 
 namespace apache::thrift::test {
+/** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift"} */
 namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_da2dbb89aa91c52();

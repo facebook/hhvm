@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types.h"
 
 namespace apache::thrift::test {
+/** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple_deprecated_terse_writes.thrift"} */
 namespace simple_deprecated_terse_writes_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_fdc43d6ffb377768();

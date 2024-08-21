@@ -11,11 +11,15 @@
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift"} */
 namespace includes_constants {
 
+  /** Glean {"constant": "ExampleIncluded"} */
   ::cpp2::Included const& ExampleIncluded();
 
+  /** Glean {"constant": "IncludedConstant"} */
   constexpr ::std::int64_t const IncludedConstant_ = static_cast<::std::int64_t>(42);
+  /** Glean {"constant": "IncludedConstant"} */
   constexpr ::std::int64_t IncludedConstant() {
     return IncludedConstant_;
   }

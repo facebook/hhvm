@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module_no_uri.thrift"} */
 namespace module_no_uri_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_1e06ea14371b6d77();

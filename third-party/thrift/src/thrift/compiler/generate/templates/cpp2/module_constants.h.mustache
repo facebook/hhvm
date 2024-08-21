@@ -23,6 +23,7 @@
 
 {{ > common/namespace_cpp2_begin}}
 
+{{ > common/program_docblock}}
 namespace {{program:name}}_constants {
 
 {{#program:constants}}{{#constant:type}}{{#constant:value}}
@@ -30,12 +31,12 @@ namespace {{program:name}}_constants {
 {{! The generated constants check is intended to cover the schema constant, where the _sinit.cpp target has to use external linkage to break a dependency cycle. }}
 {{^constant:generated?}}
 {{^type:binary?}}
-  constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
+{{ > common/const_docblock}}  constexpr {{ > types/const_value_type}} const {{constant:name}}_ = {{ > common/const_value}};
 {{/type:binary?}}
 {{#type:binary?}}
-  constexpr ::std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
+{{ > common/const_docblock}}  constexpr ::std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
 {{/type:binary?}}
-  constexpr {{ > types/const_value_type}} {{constant:name}}() {
+{{ > common/const_docblock}}  constexpr {{ > types/const_value_type}} {{constant:name}}() {
     return {{constant:name}}_;
   }
 {{/constant:generated?}}
@@ -44,7 +45,7 @@ namespace {{program:name}}_constants {
 {{/constant:generated?}}
 {{/constant:outline_init?}}
 {{#constant:outline_init?}}
-  {{constant:cpp_type}} const& {{constant:name}}();
+{{ > common/const_docblock}}  {{constant:cpp_type}} const& {{constant:name}}();
 {{/constant:outline_init?}}
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}

@@ -11,12 +11,16 @@
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types.h"
 
 namespace module2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/qualified/src/module2.thrift"} */
 namespace module2_constants {
 
+  /** Glean {"constant": "c2"} */
   ::module2::Struct const& c2();
 
+  /** Glean {"constant": "c3"} */
   ::module2::Struct const& c3();
 
+  /** Glean {"constant": "c4"} */
   ::module2::Struct const& c4();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_9188ad030fa5981a();

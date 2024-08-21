@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_types.h"
 
 namespace test::namespace_from_package_without_module_name {
+/** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module.thrift"} */
 namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_d1fc3edb82d57174();

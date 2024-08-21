@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 
 namespace thrift::shared_interactions {
+/** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift"} */
 namespace shared_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_c56c72d4e711dd06();

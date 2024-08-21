@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/empty.thrift"} */
 namespace empty_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_10b98dc8e0307385();

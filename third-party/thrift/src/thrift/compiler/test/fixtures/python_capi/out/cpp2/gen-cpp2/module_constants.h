@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_types.h"
 
 namespace test::fixtures::python_capi {
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift"} */
 namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_1d08748cd3433d4f();

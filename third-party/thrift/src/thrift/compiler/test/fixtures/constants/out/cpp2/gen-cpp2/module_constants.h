@@ -11,310 +11,440 @@
 #include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/constants/src/module.thrift"} */
 namespace module_constants {
 
+  /** Glean {"constant": "myInt"} */
   constexpr ::std::int32_t const myInt_ = static_cast<::std::int32_t>(1337);
+  /** Glean {"constant": "myInt"} */
   constexpr ::std::int32_t myInt() {
     return myInt_;
   }
 
+  /** Glean {"constant": "name"} */
   constexpr char const * const name_ = "Mark Zuckerberg";
+  /** Glean {"constant": "name"} */
   constexpr char const * name() {
     return name_;
   }
 
+  /** Glean {"constant": "multi_line_string"} */
   constexpr char const * const multi_line_string_ = "This\nis a\nmulti line string.\n";
+  /** Glean {"constant": "multi_line_string"} */
   constexpr char const * multi_line_string() {
     return multi_line_string_;
   }
 
+  /** Glean {"constant": "states"} */
   ::std::vector<::std::map<::std::string, ::std::int32_t>> const& states();
 
+  /** Glean {"constant": "x"} */
   constexpr double const x_ = static_cast<double>(1);
+  /** Glean {"constant": "x"} */
   constexpr double x() {
     return x_;
   }
 
+  /** Glean {"constant": "y"} */
   constexpr double const y_ = static_cast<double>(1000000);
+  /** Glean {"constant": "y"} */
   constexpr double y() {
     return y_;
   }
 
+  /** Glean {"constant": "z"} */
   constexpr double const z_ = static_cast<double>(1000000000);
+  /** Glean {"constant": "z"} */
   constexpr double z() {
     return z_;
   }
 
+  /** Glean {"constant": "zeroDoubleValue"} */
   constexpr double const zeroDoubleValue_ = static_cast<double>(0);
+  /** Glean {"constant": "zeroDoubleValue"} */
   constexpr double zeroDoubleValue() {
     return zeroDoubleValue_;
   }
 
+  /** Glean {"constant": "longDoubleValue"} */
   constexpr double const longDoubleValue_ = static_cast<double>(2.59961000990301e-05);
+  /** Glean {"constant": "longDoubleValue"} */
   constexpr double longDoubleValue() {
     return longDoubleValue_;
   }
 
+  /** Glean {"constant": "bin"} */
   constexpr ::std::string_view bin_{"a\000z", 3};
+  /** Glean {"constant": "bin"} */
   constexpr ::std::string_view bin() {
     return bin_;
   }
 
+  /** Glean {"constant": "my_company"} */
   constexpr ::cpp2::MyCompany const my_company_ =  ::cpp2::MyCompany::FACEBOOK;
+  /** Glean {"constant": "my_company"} */
   constexpr ::cpp2::MyCompany my_company() {
     return my_company_;
   }
 
+  /** Glean {"constant": "foo"} */
   constexpr char const * const foo_ = "foo";
+  /** Glean {"constant": "foo"} */
   constexpr char const * foo() {
     return foo_;
   }
 
+  /** Glean {"constant": "bar"} */
   constexpr ::cpp2::MyIntIdentifier const bar_ = static_cast<::cpp2::MyIntIdentifier>(42);
+  /** Glean {"constant": "bar"} */
   constexpr ::cpp2::MyIntIdentifier bar() {
     return bar_;
   }
 
+  /** Glean {"constant": "mymap"} */
   ::cpp2::MyMapIdentifier const& mymap();
 
+  /** Glean {"constant": "instagram"} */
   ::cpp2::Internship const& instagram();
 
+  /** Glean {"constant": "partial_const"} */
   ::cpp2::Internship const& partial_const();
 
+  /** Glean {"constant": "kRanges"} */
   ::std::vector<::cpp2::Range> const& kRanges();
 
+  /** Glean {"constant": "internList"} */
   ::std::vector<::cpp2::Internship> const& internList();
 
+  /** Glean {"constant": "pod_0"} */
   ::cpp2::struct1 const& pod_0();
 
+  /** Glean {"constant": "pod_s_0"} */
   ::cpp2::struct1 const& pod_s_0();
 
+  /** Glean {"constant": "pod_1"} */
   ::cpp2::struct1 const& pod_1();
 
+  /** Glean {"constant": "pod_s_1"} */
   ::cpp2::struct1 const& pod_s_1();
 
+  /** Glean {"constant": "pod_2"} */
   ::cpp2::struct2 const& pod_2();
 
+  /** Glean {"constant": "pod_trailing_commas"} */
   ::cpp2::struct2 const& pod_trailing_commas();
 
+  /** Glean {"constant": "pod_s_2"} */
   ::cpp2::struct2 const& pod_s_2();
 
+  /** Glean {"constant": "pod_3"} */
   ::cpp2::struct3 const& pod_3();
 
+  /** Glean {"constant": "pod_s_3"} */
   ::cpp2::struct3 const& pod_s_3();
 
+  /** Glean {"constant": "pod_4"} */
   ::cpp2::struct4 const& pod_4();
 
+  /** Glean {"constant": "u_1_1"} */
   ::cpp2::union1 const& u_1_1();
 
+  /** Glean {"constant": "u_1_2"} */
   ::cpp2::union1 const& u_1_2();
 
+  /** Glean {"constant": "u_1_3"} */
   ::cpp2::union1 const& u_1_3();
 
+  /** Glean {"constant": "u_2_1"} */
   ::cpp2::union2 const& u_2_1();
 
+  /** Glean {"constant": "u_2_2"} */
   ::cpp2::union2 const& u_2_2();
 
+  /** Glean {"constant": "u_2_3"} */
   ::cpp2::union2 const& u_2_3();
 
+  /** Glean {"constant": "u_2_4"} */
   ::cpp2::union2 const& u_2_4();
 
+  /** Glean {"constant": "u_2_5"} */
   ::cpp2::union2 const& u_2_5();
 
+  /** Glean {"constant": "u_2_6"} */
   ::cpp2::union2 const& u_2_6();
 
+  /** Glean {"constant": "apostrophe"} */
   constexpr char const * const apostrophe_ = "'";
+  /** Glean {"constant": "apostrophe"} */
   constexpr char const * apostrophe() {
     return apostrophe_;
   }
 
+  /** Glean {"constant": "tripleApostrophe"} */
   constexpr char const * const tripleApostrophe_ = "'''";
+  /** Glean {"constant": "tripleApostrophe"} */
   constexpr char const * tripleApostrophe() {
     return tripleApostrophe_;
   }
 
+  /** Glean {"constant": "quotationMark"} */
   constexpr char const * const quotationMark_ = "\"";
+  /** Glean {"constant": "quotationMark"} */
   constexpr char const * quotationMark() {
     return quotationMark_;
   }
 
+  /** Glean {"constant": "backslash"} */
   constexpr char const * const backslash_ = "\\";
+  /** Glean {"constant": "backslash"} */
   constexpr char const * backslash() {
     return backslash_;
   }
 
+  /** Glean {"constant": "escaped_a"} */
   constexpr char const * const escaped_a_ = "a";
+  /** Glean {"constant": "escaped_a"} */
   constexpr char const * escaped_a() {
     return escaped_a_;
   }
 
+  /** Glean {"constant": "char2ascii"} */
   ::std::map<::std::string, ::std::int32_t> const& char2ascii();
 
+  /** Glean {"constant": "escaped_strings"} */
   ::std::vector<::std::string> const& escaped_strings();
 
+  /** Glean {"constant": "false_c"} */
   constexpr bool const false_c_ = false;
+  /** Glean {"constant": "false_c"} */
   constexpr bool false_c() {
     return false_c_;
   }
 
+  /** Glean {"constant": "true_c"} */
   constexpr bool const true_c_ = true;
+  /** Glean {"constant": "true_c"} */
   constexpr bool true_c() {
     return true_c_;
   }
 
+  /** Glean {"constant": "zero_byte"} */
   constexpr ::std::int8_t const zero_byte_ = static_cast<::std::int8_t>(0);
+  /** Glean {"constant": "zero_byte"} */
   constexpr ::std::int8_t zero_byte() {
     return zero_byte_;
   }
 
+  /** Glean {"constant": "zero16"} */
   constexpr ::std::int16_t const zero16_ = static_cast<::std::int16_t>(0);
+  /** Glean {"constant": "zero16"} */
   constexpr ::std::int16_t zero16() {
     return zero16_;
   }
 
+  /** Glean {"constant": "zero32"} */
   constexpr ::std::int32_t const zero32_ = static_cast<::std::int32_t>(0);
+  /** Glean {"constant": "zero32"} */
   constexpr ::std::int32_t zero32() {
     return zero32_;
   }
 
+  /** Glean {"constant": "zero64"} */
   constexpr ::std::int64_t const zero64_ = static_cast<::std::int64_t>(0);
+  /** Glean {"constant": "zero64"} */
   constexpr ::std::int64_t zero64() {
     return zero64_;
   }
 
+  /** Glean {"constant": "zero_dot_zero"} */
   constexpr double const zero_dot_zero_ = static_cast<double>(0);
+  /** Glean {"constant": "zero_dot_zero"} */
   constexpr double zero_dot_zero() {
     return zero_dot_zero_;
   }
 
+  /** Glean {"constant": "empty_string"} */
   constexpr char const * const empty_string_ = "";
+  /** Glean {"constant": "empty_string"} */
   constexpr char const * empty_string() {
     return empty_string_;
   }
 
+  /** Glean {"constant": "empty_int_list"} */
   ::std::vector<::std::int32_t> const& empty_int_list();
 
+  /** Glean {"constant": "empty_string_list"} */
   ::std::vector<::std::string> const& empty_string_list();
 
+  /** Glean {"constant": "empty_int_set"} */
   ::std::set<::std::int32_t> const& empty_int_set();
 
+  /** Glean {"constant": "empty_string_set"} */
   ::std::set<::std::string> const& empty_string_set();
 
+  /** Glean {"constant": "empty_int_int_map"} */
   ::std::map<::std::int32_t, ::std::int32_t> const& empty_int_int_map();
 
+  /** Glean {"constant": "empty_int_string_map"} */
   ::std::map<::std::int32_t, ::std::string> const& empty_int_string_map();
 
+  /** Glean {"constant": "empty_string_int_map"} */
   ::std::map<::std::string, ::std::int32_t> const& empty_string_int_map();
 
+  /** Glean {"constant": "empty_string_string_map"} */
   ::std::map<::std::string, ::std::string> const& empty_string_string_map();
 
+  /** Glean {"constant": "maxIntDec"} */
   constexpr ::std::int64_t const maxIntDec_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxIntDec"} */
   constexpr ::std::int64_t maxIntDec() {
     return maxIntDec_;
   }
 
+  /** Glean {"constant": "maxIntOct"} */
   constexpr ::std::int64_t const maxIntOct_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxIntOct"} */
   constexpr ::std::int64_t maxIntOct() {
     return maxIntOct_;
   }
 
+  /** Glean {"constant": "maxIntHex"} */
   constexpr ::std::int64_t const maxIntHex_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxIntHex"} */
   constexpr ::std::int64_t maxIntHex() {
     return maxIntHex_;
   }
 
+  /** Glean {"constant": "maxIntBin"} */
   constexpr ::std::int64_t const maxIntBin_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxIntBin"} */
   constexpr ::std::int64_t maxIntBin() {
     return maxIntBin_;
   }
 
+  /** Glean {"constant": "maxDub"} */
   constexpr double const maxDub_ = static_cast<double>(1.7976931348623157e+308);
+  /** Glean {"constant": "maxDub"} */
   constexpr double maxDub() {
     return maxDub_;
   }
 
+  /** Glean {"constant": "minDub"} */
   constexpr double const minDub_ = static_cast<double>(2.2250738585072014e-308);
+  /** Glean {"constant": "minDub"} */
   constexpr double minDub() {
     return minDub_;
   }
 
+  /** Glean {"constant": "minSDub"} */
   constexpr double const minSDub_ = static_cast<double>(5e-324);
+  /** Glean {"constant": "minSDub"} */
   constexpr double minSDub() {
     return minSDub_;
   }
 
+  /** Glean {"constant": "maxPIntDec"} */
   constexpr ::std::int64_t const maxPIntDec_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxPIntDec"} */
   constexpr ::std::int64_t maxPIntDec() {
     return maxPIntDec_;
   }
 
+  /** Glean {"constant": "maxPIntOct"} */
   constexpr ::std::int64_t const maxPIntOct_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxPIntOct"} */
   constexpr ::std::int64_t maxPIntOct() {
     return maxPIntOct_;
   }
 
+  /** Glean {"constant": "maxPIntHex"} */
   constexpr ::std::int64_t const maxPIntHex_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxPIntHex"} */
   constexpr ::std::int64_t maxPIntHex() {
     return maxPIntHex_;
   }
 
+  /** Glean {"constant": "maxPIntBin"} */
   constexpr ::std::int64_t const maxPIntBin_ = static_cast<::std::int64_t>(9223372036854775807);
+  /** Glean {"constant": "maxPIntBin"} */
   constexpr ::std::int64_t maxPIntBin() {
     return maxPIntBin_;
   }
 
+  /** Glean {"constant": "maxPDub"} */
   constexpr double const maxPDub_ = static_cast<double>(1.7976931348623157e+308);
+  /** Glean {"constant": "maxPDub"} */
   constexpr double maxPDub() {
     return maxPDub_;
   }
 
+  /** Glean {"constant": "minPDub"} */
   constexpr double const minPDub_ = static_cast<double>(2.2250738585072014e-308);
+  /** Glean {"constant": "minPDub"} */
   constexpr double minPDub() {
     return minPDub_;
   }
 
+  /** Glean {"constant": "minPSDub"} */
   constexpr double const minPSDub_ = static_cast<double>(5e-324);
+  /** Glean {"constant": "minPSDub"} */
   constexpr double minPSDub() {
     return minPSDub_;
   }
 
+  /** Glean {"constant": "minIntDec"} */
   constexpr ::std::int64_t const minIntDec_ = static_cast<::std::int64_t>(-9223372036854775808);
+  /** Glean {"constant": "minIntDec"} */
   constexpr ::std::int64_t minIntDec() {
     return minIntDec_;
   }
 
+  /** Glean {"constant": "minIntOct"} */
   constexpr ::std::int64_t const minIntOct_ = static_cast<::std::int64_t>(-9223372036854775808);
+  /** Glean {"constant": "minIntOct"} */
   constexpr ::std::int64_t minIntOct() {
     return minIntOct_;
   }
 
+  /** Glean {"constant": "minIntHex"} */
   constexpr ::std::int64_t const minIntHex_ = static_cast<::std::int64_t>(-9223372036854775808);
+  /** Glean {"constant": "minIntHex"} */
   constexpr ::std::int64_t minIntHex() {
     return minIntHex_;
   }
 
+  /** Glean {"constant": "minIntBin"} */
   constexpr ::std::int64_t const minIntBin_ = static_cast<::std::int64_t>(-9223372036854775808);
+  /** Glean {"constant": "minIntBin"} */
   constexpr ::std::int64_t minIntBin() {
     return minIntBin_;
   }
 
+  /** Glean {"constant": "maxNDub"} */
   constexpr double const maxNDub_ = static_cast<double>(-1.7976931348623157e+308);
+  /** Glean {"constant": "maxNDub"} */
   constexpr double maxNDub() {
     return maxNDub_;
   }
 
+  /** Glean {"constant": "minNDub"} */
   constexpr double const minNDub_ = static_cast<double>(-2.2250738585072014e-308);
+  /** Glean {"constant": "minNDub"} */
   constexpr double minNDub() {
     return minNDub_;
   }
 
+  /** Glean {"constant": "minNSDub"} */
   constexpr double const minNSDub_ = static_cast<double>(-5e-324);
+  /** Glean {"constant": "minNSDub"} */
   constexpr double minNSDub() {
     return minNSDub_;
   }
 
+  /** Glean {"constant": "I2B"} */
   ::std::map<::std::int32_t, bool> const& I2B();
 
+  /** Glean {"constant": "I2B_REF"} */
   ::std::map<::std::int32_t, bool> const& I2B_REF();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_8493d5f955645dbe();

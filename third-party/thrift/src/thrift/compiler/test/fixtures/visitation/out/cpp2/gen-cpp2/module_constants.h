@@ -11,24 +11,33 @@
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/module_types.h"
 
 namespace test_cpp2::cpp_reflection {
+/** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift"} */
 namespace module_constants {
 
+  /** Glean {"constant": "constant1"} */
   constexpr ::std::int32_t const constant1_ = static_cast<::std::int32_t>(1357);
+  /** Glean {"constant": "constant1"} */
   constexpr ::std::int32_t constant1() {
     return constant1_;
   }
 
+  /** Glean {"constant": "constant2"} */
   constexpr char const * const constant2_ = "hello";
+  /** Glean {"constant": "constant2"} */
   constexpr char const * constant2() {
     return constant2_;
   }
 
+  /** Glean {"constant": "constant3"} */
   constexpr ::test_cpp2::cpp_reflection::enum1 const constant3_ =  ::test_cpp2::cpp_reflection::enum1::field0;
+  /** Glean {"constant": "constant3"} */
   constexpr ::test_cpp2::cpp_reflection::enum1 constant3() {
     return constant3_;
   }
 
+  /** Glean {"constant": "constant_with_special_name"} */
   constexpr ::std::int32_t const constant_with_special_name_ = static_cast<::std::int32_t>(42);
+  /** Glean {"constant": "constant_with_special_name"} */
   constexpr ::std::int32_t constant_with_special_name() {
     return constant_with_special_name_;
   }

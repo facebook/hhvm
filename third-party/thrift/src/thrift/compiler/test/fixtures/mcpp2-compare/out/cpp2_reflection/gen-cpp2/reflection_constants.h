@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/reflection.thrift"} */
 namespace reflection_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_1a6452c3c1199873();

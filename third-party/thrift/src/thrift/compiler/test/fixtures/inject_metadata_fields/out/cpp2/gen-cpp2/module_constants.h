@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift"} */
 namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_2eeb0c928daeecf7();

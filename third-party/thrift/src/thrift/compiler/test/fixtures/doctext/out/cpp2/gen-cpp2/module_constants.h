@@ -11,24 +11,33 @@
 #include "thrift/compiler/test/fixtures/doctext/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift"} */
 namespace module_constants {
 
+  /** Glean {"constant": "FOO"} */
   constexpr char const * const FOO_ = "foo";
+  /** Glean {"constant": "FOO"} */
   constexpr char const * FOO() {
     return FOO_;
   }
 
+  /** Glean {"constant": "BAR"} */
   constexpr ::std::int32_t const BAR_ = static_cast<::std::int32_t>(123);
+  /** Glean {"constant": "BAR"} */
   constexpr ::std::int32_t BAR() {
     return BAR_;
   }
 
+  /** Glean {"constant": "BIFF"} */
   constexpr ::std::int32_t const BIFF_ = static_cast<::std::int32_t>(0);
+  /** Glean {"constant": "BIFF"} */
   constexpr ::std::int32_t BIFF() {
     return BIFF_;
   }
 
+  /** Glean {"constant": "SHOUTY"} */
   constexpr ::std::int32_t const SHOUTY_ = static_cast<::std::int32_t>(11);
+  /** Glean {"constant": "SHOUTY"} */
   constexpr ::std::int32_t SHOUTY() {
     return SHOUTY_;
   }

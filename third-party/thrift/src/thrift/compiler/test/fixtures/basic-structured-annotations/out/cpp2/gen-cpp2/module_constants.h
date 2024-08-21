@@ -11,8 +11,10 @@
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.h"
 
 namespace test::fixtures::basic-structured-annotations {
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift"} */
 namespace module_constants {
 
+  /** Glean {"constant": "MyConst"} */
   ::std::map<::std::string, ::std::string> const& MyConst();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_49a8a875b834f528();

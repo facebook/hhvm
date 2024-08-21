@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/isset_bitpacking/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/isset_bitpacking/src/module.thrift"} */
 namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_840ea0b8f4b56cc8();

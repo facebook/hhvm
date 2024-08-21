@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift"} */
 namespace service_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_819f854565f620aa();

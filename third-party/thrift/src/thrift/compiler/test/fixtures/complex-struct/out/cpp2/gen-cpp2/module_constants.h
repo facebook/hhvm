@@ -11,13 +11,17 @@
 #include "thrift/compiler/test/fixtures/complex-struct/gen-cpp2/module_types.h"
 
 namespace cpp2 {
+/** Glean {"file": "thrift/compiler/test/fixtures/complex-struct/src/module.thrift"} */
 namespace module_constants {
 
+  /** Glean {"constant": "DEFAULT_PORT_NUM"} */
   constexpr ::std::int32_t const DEFAULT_PORT_NUM_ = static_cast<::std::int32_t>(3456);
+  /** Glean {"constant": "DEFAULT_PORT_NUM"} */
   constexpr ::std::int32_t DEFAULT_PORT_NUM() {
     return DEFAULT_PORT_NUM_;
   }
 
+  /** Glean {"constant": "constEnumUnion"} */
   ::cpp2::MyUnion const& constEnumUnion();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_711abdb343f078bf();

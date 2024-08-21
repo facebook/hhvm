@@ -319,3 +319,8 @@ class FlagTests(unittest.TestCase):
         self.assertEqual(Color(0), Color.red)
         self.assertEqual(Color(1), Color.blue)
         self.assertEqual(Color(2), Color.green)
+
+    def test_getitem(self) -> None:
+        self.assertEqual(Color["red"], Color.red)
+        self.assertEqual(Color["blue"], Color.blue)
+        self.assertEqual(Color["green"], Color.green)

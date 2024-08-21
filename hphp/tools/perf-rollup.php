@@ -161,7 +161,7 @@ function categorize_helper($func) {
 function main() {
   require(__DIR__.'/perf-lib.php');
 
-  $argv = $_SERVER['argv'];
+  $argv = HH\global_get('argv');
   ini_set('memory_limit', '64G');
   if (posix_isatty(HH\stdin())) {
     usage($argv[0]);

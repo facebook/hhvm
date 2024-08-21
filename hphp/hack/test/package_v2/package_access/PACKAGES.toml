@@ -6,6 +6,6 @@ include_paths=["./*"]
 [packages.pkg2]
 include_paths=[
     "cross_package_access_internal1.php--foo.php",
-    "include_paths_bad1.php--foo.php",
-    "include_paths_bad4.php--__tests__.php"
+    "illegal_cross_package_basic.php--foo.php",
+    "illegal_cross_package_call_to_tests.php--__tests__.php"
 ]

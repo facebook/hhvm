@@ -3139,4 +3139,16 @@ TEST(FieldMaskTest, NestedMap) {
       allMask());
 }
 
+TEST(FieldMaskTest, testDuplicateEntryInTypeMaskList) {
+  std::vector<protocol::TypeAndMaskEntry> entries;
+  entries.emplace_back().type() = type::infer_tag<Foo>{};
+  entries.emplace_back().type() = type::infer_tag<Foo>{};
+
+  EXPECT_THROW(
+      (::apache::thrift::detail::
+           TypeToMaskAdapter<protocol::TypeAndMaskEntry, Mask>::fromThrift(
+               std::move(entries))),
+      std::runtime_error);
+}
+
 } // namespace apache::thrift::test

@@ -16,10 +16,13 @@
 
 #pragma once
 
+#include <folly/Exception.h>
 #include <folly/container/F14Map.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>
 
 namespace apache::thrift::detail {
+
+std::string debugFormatType(const type::Type& type);
 
 /**
  * Adapter to convert a List<<Type, Mask>> into a Map<Type, Mask>
@@ -48,7 +51,11 @@ class TypeToMaskAdapter {
     AdaptedType adaptedVal;
     adaptedVal.reserve(thriftVal.size());
     for (const Entry& e : thriftVal) {
-      adaptedVal.emplace(*e.type_ref(), *e.mask_ref());
+      if (!adaptedVal.emplace(*e.type_ref(), *e.mask_ref()).second) {
+        folly::throw_exception<std::runtime_error>(
+            "type-mask has mulitple entries for the same type: " +
+            debugFormatType(*e.type_ref()));
+      }
     }
     return adaptedVal;
   }

@@ -32,6 +32,13 @@ HTTPTransactionObserverInterface::TxnBytesEvent::Builder::setNumBytes(
   return std::move(*this);
 }
 
+HTTPTransactionObserverInterface::TxnBytesEvent::Builder&&
+HTTPTransactionObserverInterface::TxnBytesEvent::Builder::setHeaders(
+    const HTTPMessage& headersIn) {
+  maybeHeadersRef = headersIn;
+  return std::move(*this);
+}
+
 HTTPTransactionObserverInterface::TxnBytesEvent
 HTTPTransactionObserverInterface::TxnBytesEvent::Builder::build() && {
   return TxnBytesEvent(*this);
@@ -41,7 +48,8 @@ HTTPTransactionObserverInterface::TxnBytesEvent::TxnBytesEvent(
     const TxnBytesEvent::BuilderFields& builderFields)
     : timestamp(*CHECK_NOTNULL(builderFields.maybeTimestampRef.get_pointer())),
       type(builderFields.type),
-      maybeNumBytes(builderFields.numBytes) {
+      maybeNumBytes(builderFields.numBytes),
+      maybeHeadersRef(builderFields.maybeHeadersRef) {
 }
 
 } // namespace proxygen

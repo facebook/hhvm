@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/Optional.h>
+#include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/utils/Time.h>
 
 namespace proxygen {
@@ -34,11 +35,14 @@ class HTTPTransactionObserverInterface {
       LAST_BODY_BYTE_WRITE,
       LAST_BODY_BYTE_ACK,
       BODY_BYTES_GENERATED,
+      HEADER_BYTES_GENERATED,
     };
 
     const proxygen::TimePoint timestamp;
     const Type type;
     const folly::Optional<size_t> maybeNumBytes;
+    const folly::Optional<std::reference_wrapper<const HTTPMessage>>
+        maybeHeadersRef;
 
     TxnBytesEvent(TxnBytesEvent&&) = delete;
     TxnBytesEvent& operator=(const TxnBytesEvent&) = delete;
@@ -50,6 +54,8 @@ class HTTPTransactionObserverInterface {
           maybeTimestampRef;
       Type type;
       size_t numBytes;
+      folly::Optional<std::reference_wrapper<const HTTPMessage>>
+          maybeHeadersRef;
       explicit BuilderFields() = default;
     };
 
@@ -57,6 +63,7 @@ class HTTPTransactionObserverInterface {
       Builder&& setTimestamp(const proxygen::TimePoint& timestampIn);
       Builder&& setType(Type typeIn);
       Builder&& setNumBytes(const size_t numBytes);
+      Builder&& setHeaders(const proxygen::HTTPMessage& headersIn);
       TxnBytesEvent build() &&;
       explicit Builder() = default;
     };

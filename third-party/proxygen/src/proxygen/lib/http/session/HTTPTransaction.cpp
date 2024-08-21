@@ -1072,6 +1072,22 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   if (transportCallback_) {
     transportCallback_->headerBytesGenerated(size);
   }
+  if (txnObserverContainer_.hasObserversForEvent<
+          HTTPTransactionObserverInterface::Events::TxnBytes>()) {
+    const auto e =
+        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+            .setTimestamp(proxygen::SteadyClock::now())
+            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
+                         HEADER_BYTES_GENERATED)
+            .setNumBytes(size.compressed ? size.compressed : size.uncompressed)
+            .setHeaders(headers)
+            .build();
+    txnObserverContainer_.invokeInterfaceMethod<
+        HTTPTransactionObserverInterface::Events::TxnBytes>(
+        [&e](auto observer, auto observed) {
+          observer->onBytesEvent(observed, e);
+        });
+  }
   updateEgressCompressionInfo(transport_.getCodec().getCompressionInfo());
   if (eom) {
     if (!validateEgressStateTransition(
@@ -1181,16 +1197,30 @@ bool HTTPTransaction::sendHeadersWithDelegate(
   }
   if (txnObserverContainer_.hasObserversForEvent<
           HTTPTransactionObserverInterface::Events::TxnBytes>()) {
-    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
-                       .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(HTTPTransactionObserverInterface::
-                                    TxnBytesEvent::Type::BODY_BYTES_GENERATED)
-                       .setNumBytes(dataFrameHeaderSize)
-                       .build();
+    const auto ts = proxygen::SteadyClock::now();
+    const auto he =
+        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+            .setTimestamp(ts)
+            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
+                         HEADER_BYTES_GENERATED)
+            .setNumBytes(size.compressed ? size.compressed : size.uncompressed)
+            .setHeaders(headers)
+            .build();
     txnObserverContainer_.invokeInterfaceMethod<
         HTTPTransactionObserverInterface::Events::TxnBytes>(
-        [&e](auto observer, auto observed) {
-          observer->onBytesEvent(observed, e);
+        [&he](auto observer, auto observed) {
+          observer->onBytesEvent(observed, he);
+        });
+    const auto be = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+                        .setTimestamp(ts)
+                        .setType(HTTPTransactionObserverInterface::
+                                     TxnBytesEvent::Type::BODY_BYTES_GENERATED)
+                        .setNumBytes(dataFrameHeaderSize)
+                        .build();
+    txnObserverContainer_.invokeInterfaceMethod<
+        HTTPTransactionObserverInterface::Events::TxnBytes>(
+        [&be](auto observer, auto observed) {
+          observer->onBytesEvent(observed, be);
         });
   }
   updateEgressCompressionInfo(transport_.getCodec().getCompressionInfo());

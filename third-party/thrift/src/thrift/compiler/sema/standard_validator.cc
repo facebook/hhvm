@@ -628,7 +628,7 @@ void validate_uri_uniqueness(diagnostic_context& ctx, const t_program& prog) {
   // TODO: use string_view as map key
   std::unordered_map<std::string, const t_named*> uri_to_node;
   basic_ast_visitor<true> visit;
-  visit.add_definition_visitor([&](const t_named& node) {
+  visit.add_named_visitor([&](const t_named& node) {
     const auto& uri = node.uri();
     if (uri.empty() || uri == kTransitiveUri) {
       return;
@@ -1339,7 +1339,7 @@ void forbid_exception_as_const_type(
 
 ast_validator standard_validator() {
   ast_validator validator;
-  validator.add_definition_visitor(&validate_identifier_name_is_not_reserved);
+  validator.add_named_visitor(&validate_identifier_name_is_not_reserved);
 
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_interface_visitor(&validate_function_priority_annotation);
@@ -1380,20 +1380,18 @@ ast_validator standard_validator() {
   validator.add_enum_visitor(&validate_reserved_ids_enum);
   validator.add_enum_value_visitor(&validate_enum_value);
 
-  validator.add_definition_visitor(&validate_structured_annotation);
-  validator.add_definition_visitor(&validate_annotation_scopes);
-  validator.add_definition_visitor(&validate_cpp_adapter_annotation);
-  validator.add_definition_visitor(&validate_hack_adapter_annotation);
-  validator.add_definition_visitor(&validate_hack_wrapper_annotation);
-  validator.add_definition_visitor(
-      &validate_hack_wrapper_and_adapter_annotation);
-  validator.add_definition_visitor(&validate_java_adapter_annotation);
-  validator.add_definition_visitor(&validate_java_wrapper_annotation);
-  validator.add_definition_visitor(
-      &validate_java_wrapper_and_adapter_annotation);
-  validator.add_definition_visitor(&limit_terse_write_on_experimental_mode);
-  validator.add_definition_visitor(&validate_custom_cpp_type_annotations);
-  validator.add_definition_visitor(&deprecate_annotations);
+  validator.add_named_visitor(&validate_structured_annotation);
+  validator.add_named_visitor(&validate_annotation_scopes);
+  validator.add_named_visitor(&validate_cpp_adapter_annotation);
+  validator.add_named_visitor(&validate_hack_adapter_annotation);
+  validator.add_named_visitor(&validate_hack_wrapper_annotation);
+  validator.add_named_visitor(&validate_hack_wrapper_and_adapter_annotation);
+  validator.add_named_visitor(&validate_java_adapter_annotation);
+  validator.add_named_visitor(&validate_java_wrapper_annotation);
+  validator.add_named_visitor(&validate_java_wrapper_and_adapter_annotation);
+  validator.add_named_visitor(&limit_terse_write_on_experimental_mode);
+  validator.add_named_visitor(&validate_custom_cpp_type_annotations);
+  validator.add_named_visitor(&deprecate_annotations);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
 

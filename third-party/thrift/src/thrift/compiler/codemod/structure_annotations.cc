@@ -446,7 +446,7 @@ class structure_annotations {
 
   void run() {
     const_ast_visitor visitor;
-    visitor.add_definition_visitor([=](const auto& node) { visit_def(node); });
+    visitor.add_named_visitor([=](const auto& node) { visit_def(node); });
     visitor(prog_);
 
     fm_.apply_replacements();

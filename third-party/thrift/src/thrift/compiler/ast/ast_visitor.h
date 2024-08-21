@@ -182,7 +182,13 @@ class basic_ast_visitor {
     add_root_definition_visitor(visitor);
     add_function_visitor(visitor);
     add_field_visitor(visitor);
-    add_enum_value_visitor(visitor);
+    add_enum_value_visitor(std::forward<V>(visitor));
+  }
+
+  // Adds a visitor for all IDL named node types.
+  template <typename V>
+  void add_named_visitor(V&& visitor) {
+    add_definition_visitor(visitor);
     add_program_visitor(std::forward<V>(visitor));
   }
 

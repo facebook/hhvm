@@ -440,8 +440,8 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     initial.add_field_visitor(&lower_type_annotations<t_field>);
     initial.add_typedef_visitor(&lower_type_annotations<t_typedef>);
     initial.add_function_visitor(&normalize_return_type);
-    initial.add_definition_visitor(&set_generated);
-    initial.add_definition_visitor(&lower_deprecated_annotations);
+    initial.add_named_visitor(&set_generated);
+    initial.add_named_visitor(&lower_deprecated_annotations);
   }
 
   {
@@ -451,7 +451,7 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     main.add_struct_visitor(&mutate_inject_metadata_fields);
     main.add_const_visitor(&match_const_type_with_value);
     main.add_field_visitor(&match_field_type_with_default_value);
-    main.add_definition_visitor(&match_annotation_types_with_const_values);
+    main.add_named_visitor(&match_annotation_types_with_const_values);
   }
 
   return mutators;

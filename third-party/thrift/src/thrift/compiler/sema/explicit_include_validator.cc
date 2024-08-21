@@ -164,7 +164,7 @@ void add_explicit_include_validators(
       });
 
   // All definitions: annotations
-  validator.add_definition_visitor(
+  validator.add_named_visitor(
       [level](diagnostic_context& ctx, const t_named& n) {
         // Temporary workaround for patch generator
         if (n.generated() ||

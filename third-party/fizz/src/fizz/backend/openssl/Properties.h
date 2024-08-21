@@ -2,13 +2,6 @@
 
 #pragma once
 
-/*
-
-This is the backend for the openssl crypto implementations.
-Include this file to use openssl features.
-
-*/
-
 namespace fizz {
 namespace openssl {
 

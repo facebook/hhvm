@@ -240,7 +240,8 @@ class OperationBase {
   }
   // Current stored time elapsed
   Duration elapsed() const {
-    CHECK_THROW(duration_ != Duration(), db::OperationStateException);
+    CHECK_THROW(
+        state() == OperationState::Completed, db::OperationStateException);
     return duration_;
   }
 

@@ -8,8 +8,6 @@ ERROR: File "invalid_operator.php", line 22, characters 28-45:
 Expression trees do not support `do while` loops. Consider using a `while` loop instead. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 23, characters 43-67:
 Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 26, characters 31-32:
-Expression trees do not support parameters with default values. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 29, characters 38-42:
 Unsupported expression tree syntax. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 32, characters 34-40:
@@ -52,13 +50,7 @@ Invalid return type (Typing[4110])
   But got `(function(): int)`
 ERROR: File "invalid_operator.php", line 29, characters 38-46:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 79, characters 37-46:
+  File "expr_tree.php", line 79, characters 39-48:
   Expected `dynamic`
-  File "expr_tree.php", line 79, characters 37-46:
+  File "expr_tree.php", line 79, characters 39-48:
   Type `ExampleInt` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "invalid_operator.php", line 26, characters 31-32:
-Wrong type hint (Typing[4331])
-  File "invalid_operator.php", line 26, characters 20-29:
-  Expected `ExampleInt`
-  File "invalid_operator.php", line 26, characters 36-36:
-  But got `int`

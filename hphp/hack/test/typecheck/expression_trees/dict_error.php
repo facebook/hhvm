@@ -34,6 +34,15 @@ class DictError {
     ?ExprPos $_,
     vec<string> $_args,
     vec<DictError::TAst> $_body,
+    vec<DictError::TAst> $_optional_args = vec[],
+  ): DictError::TAst {
+    throw new Exception();
+  }
+
+  public function visitOptionalParameter(
+    ?ExprPos $_,
+    string $_name,
+    DictError::TAst $_arg,
   ): DictError::TAst {
     throw new Exception();
   }

@@ -19,7 +19,7 @@ class ExampleDsl {
   const type TAst = string;
 
     // Virtual types (These do not have to be implemented)
-  public static function intType(): ExampleInt {
+  public static function intType()[]: ExampleInt {
     throw new Exception();
   }
   public static function floatType(): ExampleFloat {
@@ -91,6 +91,7 @@ class ExampleDsl {
     ?ExprPos $_,
     vec<string> $args,
     vec<ExampleDsl::TAst> $body,
+    ?vec<Code::TAst> $_optional_params,
   ): ExampleDsl::TAst {
     return "(".concat_arg_list($args).")"." ==> {\n".concat_block($body)."}";
   }
@@ -136,6 +137,14 @@ class ExampleDsl {
     ExampleDsl::TAst $falsy,
   ): ExampleDsl::TAst {
     return $condition." ? ".$truthy." : ".$falsy;
+  }
+
+  public function visitOptionalParameter(
+    ?ExprPos $_,
+    string $name,
+    Code::TAst $arg,
+  ): Code::TAst {
+    return $name." ".$arg;
   }
 
   public function visitIf(

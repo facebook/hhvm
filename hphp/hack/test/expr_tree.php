@@ -76,7 +76,7 @@ class ExampleDsl {
   // Virtual types. These do not have to be implemented, as they are only used
   // in the virtualized version of the expression tree, to work out the virtual type
   // of literals during type checking.
-  public static function intType(): ExampleInt {
+  public static function intType()[]: ExampleInt {
     throw new Exception();
   }
   public static function floatType(): ExampleFloat {
@@ -163,8 +163,13 @@ class ExampleDsl {
     ?ExprPos $_,
     vec<string> $args,
     vec<ExampleDsl::TAst> $body,
+    vec<ExampleDsl::TAst> $args_with_optional_params = vec[],
   )[]: ExampleDsl::TAst {
-    return "(".concat_arg_list($args).")"." ==> {\n".concat_block($body)."}";
+    return "(".concat_arg_list(HH\Lib\Vec\concat($args, $args_with_optional_params)).")"." ==> {\n".concat_block($body)."}";
+  }
+
+  public function visitOptionalParameter(?ExprPos $_, string $param_name, ExampleDsl::TAst $default_value)[]: ExampleDsl::TAst {
+    return $param_name . " = ". $default_value;
   }
 
   public function visitGlobalFunction<T>(

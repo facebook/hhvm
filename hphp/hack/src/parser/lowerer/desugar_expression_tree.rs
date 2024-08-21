@@ -1278,19 +1278,30 @@ impl RewriteState {
                     }
                 }
 
+                let mut desugar_optional_params = Vec::with_capacity(fun_.params.len());
                 let mut param_names = Vec::with_capacity(fun_.params.len());
-                for param in &fun_.params {
-                    match param.info {
-                        ast::FunParamInfo::ParamOptional(Some(_)) => {
-                            self.errors.push((
-                                param.pos.clone(),
-                                "Expression trees do not support parameters with default values."
-                                    .into(),
+                for param in fun_.params.iter_mut() {
+                    match &param.info {
+                        ast::FunParamInfo::ParamOptional(Some(expr)) => {
+                            let rewritten_lambda = self.rewrite_expr(expr.clone(), visitor_name);
+                            let desugar_visit_optional_param_expr = v_meth_call(
+                                et::VISIT_OPTIONAL_PARAMETER,
+                                vec![
+                                    pos_expr.clone(),
+                                    string_literal(param.pos.clone(), &param.name),
+                                    rewritten_lambda.desugar_expr,
+                                ],
+                                &pos,
+                            );
+                            desugar_optional_params.push(desugar_visit_optional_param_expr);
+                            param.info = aast::FunParamInfo::ParamOptional(Some(
+                                rewritten_lambda.virtual_expr,
                             ));
                         }
-                        _ => {}
+                        _ => {
+                            param_names.push(string_literal(param.pos.clone(), &param.name));
+                        }
                     }
-                    param_names.push(string_literal(param.pos.clone(), &param.name));
                 }
 
                 let body = std::mem::take(&mut fun_.body.fb_ast.0);
@@ -1309,16 +1320,16 @@ impl RewriteState {
                         )))),
                     ));
                 }
+                let mut exprs = vec![
+                    pos_expr,
+                    vec_literal(param_names),
+                    vec_literal(desugar_body),
+                ];
+                if !desugar_optional_params.is_empty() {
+                    exprs.push(vec_literal(desugar_optional_params));
+                }
+                let desugar_expr = v_meth_call(et::VISIT_LAMBDA, exprs, &pos);
 
-                let desugar_expr = v_meth_call(
-                    et::VISIT_LAMBDA,
-                    vec![
-                        pos_expr,
-                        vec_literal(param_names),
-                        vec_literal(desugar_body),
-                    ],
-                    &pos,
-                );
                 fun_.body.fb_ast = ast::Block(virtual_body_stmts);
 
                 let virtual_expr = _virtualize_lambda(

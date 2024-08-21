@@ -103,8 +103,10 @@ PythonAsyncProcessorFactory::create(
     folly::Executor::KeepAlive<> executor,
     std::string serviceName,
     bool enableResourcePools) {
-  static const auto makePythonMetadataForRpcKind = [](bool
-                                                          enableResourcePools) {
+  // This should not be const because of the eventual
+  // std::move(pythonMetadataForRpcKind) below. A const here would make that
+  // move perform a copy.
+  static auto makePythonMetadataForRpcKind = [](bool enableResourcePools) {
     PythonMetadataForRpcKind pythonMetadataForRpcKind;
     for (auto rpcKind :
          {apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
@@ -122,9 +124,9 @@ PythonAsyncProcessorFactory::create(
     }
     return pythonMetadataForRpcKind;
   };
-  static const auto kThreadManagerPythonMetadataForRpcKind =
+  static auto kThreadManagerPythonMetadataForRpcKind =
       makePythonMetadataForRpcKind(false);
-  static const auto kResourcePoolPythonMetadataForRpcKind =
+  static auto kResourcePoolPythonMetadataForRpcKind =
       makePythonMetadataForRpcKind(true);
 
   auto pythonMetadataForRpcKind = enableResourcePools

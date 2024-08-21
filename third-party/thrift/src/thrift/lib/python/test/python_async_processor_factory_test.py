@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# pyre-strict
 
 import unittest
 
@@ -129,6 +131,12 @@ class PythonAsyncProcessorFactoryTest(unittest.TestCase):
         rpc_kind: RpcKind,
         expected: bytes,
     ) -> None:
+        """
+        Even though the service creator does not interact directly with
+        CreateMethodMetadata, this test is in python because the cpp
+        code is in a cython library and I wasn't able to successfully
+        make the cpp test depend on a cython_library target.
+        """
         CTests(self).test_create_method_metadata(
             function_name,
             enable_resource_pools_for_python_flag_value,

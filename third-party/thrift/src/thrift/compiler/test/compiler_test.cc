@@ -373,24 +373,8 @@ TEST(CompilerTest, double_overflow_underflow) {
 
 TEST(CompilerTest, const_wrong_type) {
   check_compile(R"(
-    const i32 wrongInt = "stringVal"; # expected-error: type error: const `wrongInt` was declared as i32.
-    const set<string> wrongSet = {1: 2};
-      # expected-error@-1: type error: const `wrongSet` was declared as set.
-    const map<i32, i32> wrongMap = [1, 32, 3];
-      # expected-error@-1: type error: const `wrongMap` was declared as map.
-    const map<i32, i32> weirdMap = [];
-      # expected-warning@-1: type error: map `weirdMap` initialized with empty list.
-    const set<i32> weirdSet = {};
-      # expected-warning@-1: type error: set `weirdSet` initialized with empty map.
-    const list<i32> weirdList = {};
-      # expected-warning@-1: type error: list `weirdList` initialized with empty map.
-    const list<string> badValList = [1];
-      # expected-error@-1: integer is incompatible with `string`
-    const set<string> badValSet = [2];
-      # expected-error@-1: integer is incompatible with `string`
-    const map<string, i32> badValMap = {1: "str"};
-      # expected-error@-1: integer is incompatible with `string`
-      # expected-error@-2: type error: const `badValMap<val>` was declared as i32.
+    const i32 wrongInt = "stringVal";
+      # expected-error@-1: cannot convert string to `i32` in initialization of `wrongInt`
     struct A {}
     struct B {}
     const A wrongStruct = B{}; # expected-error: type mismatch: expected test.A, got test.B
@@ -471,48 +455,125 @@ TEST(CompilerTest, const_binary) {
     const binary b0 = "foo";
 
     const binary b1 = 42;
-    # expected-error@-1: integer is incompatible with `binary`
+    # expected-error@-1: cannot convert integer to `binary` in initialization of `b1`
   )");
 }
 
 TEST(CompilerTest, struct_initializer) {
   check_compile(R"(
     struct S {}
-    const S s1 = {};   # OK
-    const S s2 = 42;   # expected-error: integer is incompatible with `S`
-    const S s3 = 4.2;  # expected-error: floating-point number is incompatible with `S`
-    const S s4 = "";   # expected-error: string is incompatible with `S`
-    const S s5 = true; # expected-error: bool is incompatible with `S`
-    const S s6 = [];   # expected-error: list is incompatible with `S`
+    const S s1 = {}; # OK
+
+    const S s2 = 42;
+    # expected-error@-1: cannot convert integer to `S` in initialization of `s2`
+
+    const S s3 = 4.2;
+    # expected-error@-1: cannot convert floating-point number to `S` in initialization of `s3`
+
+    const S s4 = "";
+    # expected-error@-1: cannot convert string to `S` in initialization of `s4`
+
+    const S s5 = true;
+    # expected-error@-1: cannot convert bool to `S` in initialization of `s5`
+
+    const S s6 = [];
+    # expected-error@-1: cannot convert list to `S` in initialization of `s6`
   )");
 }
 
 TEST(CompilerTest, union_initializer) {
   check_compile(R"(
-    union U {}
-    const U u1 = {};   # OK
-    const U u2 = 42;   # expected-error: integer is incompatible with `U`
-    const U u3 = 4.2;  # expected-error: floating-point number is incompatible with `U`
-    const U u4 = "";   # expected-error: string is incompatible with `U`
-    const U u5 = true; # expected-error: bool is incompatible with `U`
-    const U u6 = [];   # expected-error: list is incompatible with `U`
+    union U {
+      1: i32 a;
+      2: i32 b;
+    }
+
+    const U u1 = {}; # OK
+
+    const U u2 = 42;
+    # expected-error@-1: cannot convert integer to `U` in initialization of `u2`
+
+    const U u3 = 4.2;
+    # expected-error@-1: cannot convert floating-point number to `U` in initialization of `u3`
+
+    const U u4 = "";
+    # expected-error@-1: cannot convert string to `U` in initialization of `u4`
+
+    const U u5 = true;
+    # expected-error@-1: cannot convert bool to `U` in initialization of `u5`
+
+    const U u6 = [];
+    # expected-error@-1: cannot convert list to `U` in initialization of `u6`
+
+    const U u7 = {"a": 1, "b": 2};
+    # expected-error@-1: cannot initialize more than one field in union `U`
   )");
 }
 
 TEST(CompilerTest, enum_initializer) {
   check_compile(R"(
     enum E {A = 1}
-    const E e1 = E.A;   # OK
-    const E e2 = 42;    # expected-warning: const `e2` is defined as enum `E` with a value not of that enum
-    const E e3 = 4.2;   # expected-error: floating-point number is incompatible with `E`
-    const E e4 = "";    # expected-error: string is incompatible with `E`
-    const E e5 = "E.A"; # expected-error: string is incompatible with `E`
-    const E e6 = true;  # expected-error: bool is incompatible with `E`
-    const E e7 = [];    # expected-error: list is incompatible with `E`
+
+    const E e1 = E.A; # OK
+
+    const E e2 = 42;
+    # expected-warning@-1: const `e2` is defined as enum `E` with a value not of that enum
+
+    const E e3 = 4.2;
+    # expected-error@-1: cannot convert floating-point number to `E` in initialization of `e3`
+
+    const E e4 = "";
+    # expected-error@-1: cannot convert string to `E` in initialization of `e4`
+
+    const E e5 = "E.A";
+    # expected-error@-1: cannot convert string to `E` in initialization of `e5`
+
+    const E e6 = true;
+    # expected-error@-1: cannot convert bool to `E` in initialization of `e6`
+
+    const E e7 = [];
+    # expected-error@-1: cannot convert list to `E` in initialization of `e7`
+  )");
+}
+
+TEST(CompilerTest, list_initializer) {
+  check_compile(R"(
+    const list<i32> weirdList = {};
+    # expected-warning@-1: converting empty map to `list` in initialization of `weirdList`
+
+    const list<string> badValList = [1];
+    # expected-error@-1: cannot convert integer to `string` in initialization of `badValList`
+  )");
+}
+
+TEST(CompilerTest, set_initializer) {
+  check_compile(R"(
+    const set<string> wrongSet = {1: 2};
+    # expected-error@-1: cannot convert map to `set` in initialization of `wrongSet`
+
+    const set<i32> weirdSet = {};
+    # expected-warning@-1: converting empty map to `set` in initialization of `weirdSet`
+
+    const set<string> badValSet = [2];
+    # expected-error@-1: cannot convert integer to `string` in initialization of `badValSet`
   )");
 }
 
 TEST(CompilerTest, map_initializer) {
+  check_compile(R"(
+    const map<i32, i32> wrongMap = [1, 32, 3];
+    # expected-error@-1: cannot convert list to `map` in initialization of `wrongMap`
+
+    const map<i32, i32> weirdMap = [];
+    # expected-warning@-1: converting empty list to `map` in initialization of `weirdMap`
+
+    const map<string, i32> badValMap = {1: "str"};
+    # expected-error@-1: cannot convert integer to `string` in initialization of `badValMap`
+    # expected-error@-2: cannot convert string to `i32` in initialization of `badValMap`
+  )");
+}
+
+TEST(CompilerTest, map_item_separator) {
   check_compile(R"(
     const map<i32, i32> m = {
       1: 2,
@@ -533,11 +594,12 @@ TEST(CompilerTest, struct_fields_wrong_type) {
     struct G {}
 
     @Annot{val="hi", otherVal=5, structField=G{}}
-      # expected-error@-1: type error: const `.val` was declared as i32.
-      # expected-error@-2: type error: const `.otherVal` was declared as list.
+      # expected-error@-1: cannot convert string to `i32` in initialization of `val`
+      # expected-error@-2: cannot convert integer to `list` in initialization of `otherVal`
       # expected-error@-3: type mismatch: expected test.F, got test.G
     struct BadFields {
-      1: i32 badInt = "str"; # expected-error: type error: const `badInt` was declared as i32.
+      1: i32 badInt = "str";
+        # expected-error@-1: cannot convert string to `i32` in initialization of `badInt`
       2: F badStruct = G{}; # expected-error: type mismatch: expected test.F, got test.G
     }
   )");
@@ -1181,7 +1243,8 @@ TEST(CompilerTest, nonexistent_field_name) {
   check_compile(R"(
     struct Foo {}
     typedef list<Foo> List
-    const List l = [{"foo": "bar"}]; # expected-error: type error: `Foo` has no field `foo`.
+    const List l = [{"foo": "bar"}];
+    # expected-error@-1: no field named `foo` in `Foo`
   )");
 }
 

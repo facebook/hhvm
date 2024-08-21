@@ -90,23 +90,18 @@ class checker {
   void check(const t_type* type, const t_const_value* value) {
     type = type->get_true_type();
 
-    if (const auto base_type = dynamic_cast<const t_primitive_type*>(type)) {
-      check_base_type(base_type, value);
-      check_base_value(base_type, value);
-    } else if (const auto enum_type = dynamic_cast<const t_enum*>(type)) {
+    if (auto primitive_type = dynamic_cast<const t_primitive_type*>(type)) {
+      check_base_type(primitive_type, value);
+      check_base_value(primitive_type, value);
+    } else if (auto enum_type = dynamic_cast<const t_enum*>(type)) {
       check_enum(enum_type, value);
-    } else if (const auto union_type = dynamic_cast<const t_union*>(type)) {
-      check_union(union_type, value);
-    } else if (
-        const auto exception_type = dynamic_cast<const t_exception*>(type)) {
-      check_exception(exception_type, value);
-    } else if (const auto struct_type = dynamic_cast<const t_struct*>(type)) {
-      check_struct(struct_type, value);
-    } else if (const auto map_type = dynamic_cast<const t_map*>(type)) {
+    } else if (auto structured_type = dynamic_cast<const t_structured*>(type)) {
+      check_structured(structured_type, value);
+    } else if (auto map_type = dynamic_cast<const t_map*>(type)) {
       check_map(map_type, value);
-    } else if (const auto list_type = dynamic_cast<const t_list*>(type)) {
+    } else if (auto list_type = dynamic_cast<const t_list*>(type)) {
       check_list(list_type, value);
-    } else if (const auto set_type = dynamic_cast<const t_set*>(type)) {
+    } else if (auto set_type = dynamic_cast<const t_set*>(type)) {
       check_set(set_type, value);
     } else {
       assert(false); // Should be unreachable.
@@ -140,14 +135,21 @@ class checker {
         "value error: const `{}` has an invalid custom default value.", name_);
   }
 
-  void report_type_mismatch(const char* expected) {
-    error("type error: const `{}` was declared as {}.", name_, expected);
-  }
-
-  void report_incompatible(const t_const_value* value, const t_type* type) {
-    if (const char* category = get_category(value)) {
-      error("{} is incompatible with `{}`", category, type->name());
+  // Report an error when the initializer is incompatible with the type.
+  void report_incompatible(
+      const t_const_value* initializer, const t_type* type) {
+    const char* category = get_category(initializer);
+    if (!category) {
+      return;
     }
+    const std::string& type_name = dynamic_cast<const t_container*>(type)
+        ? t_type::type_name(type->get_type_value())
+        : type->name();
+    error(
+        "cannot convert {} to `{}` in initialization of `{}`",
+        category,
+        type_name,
+        name_);
   }
 
   // For CV_INTEGER, an overflow of int64_t is checked in the parser;
@@ -196,51 +198,36 @@ class checker {
 
   void check_base_type(
       const t_primitive_type* type, const t_const_value* value) {
+    bool compatible = false;
+    const auto kind = value->kind();
     switch (type->primitive_type()) {
       case t_primitive_type::type::t_void:
         error("type error: cannot declare a void const: {}", name_);
-        break;
+        return;
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
-        if (value->kind() != t_const_value::CV_STRING) {
-          report_incompatible(value, type);
-        }
+        compatible = kind == t_const_value::CV_STRING;
         break;
       case t_primitive_type::type::t_bool:
-        if (value->kind() != t_const_value::CV_BOOL &&
-            value->kind() != t_const_value::CV_INTEGER) {
-          report_type_mismatch("bool");
-        }
+        compatible =
+            kind == t_const_value::CV_BOOL || kind == t_const_value::CV_INTEGER;
         break;
       case t_primitive_type::type::t_byte:
-        if (value->kind() != t_const_value::CV_INTEGER) {
-          report_type_mismatch("byte");
-        }
-        break;
       case t_primitive_type::type::t_i16:
-        if (value->kind() != t_const_value::CV_INTEGER) {
-          report_type_mismatch("i16");
-        }
-        break;
       case t_primitive_type::type::t_i32:
-        if (value->kind() != t_const_value::CV_INTEGER) {
-          report_type_mismatch("i32");
-        }
-        break;
       case t_primitive_type::type::t_i64:
-        if (value->kind() != t_const_value::CV_INTEGER) {
-          report_type_mismatch("i64");
-        }
+        compatible = kind == t_const_value::CV_INTEGER;
         break;
       case t_primitive_type::type::t_double:
       case t_primitive_type::type::t_float:
-        if (value->kind() != t_const_value::CV_INTEGER &&
-            value->kind() != t_const_value::CV_DOUBLE) {
-          report_type_mismatch("double");
-        }
+        compatible = kind == t_const_value::CV_INTEGER ||
+            kind == t_const_value::CV_DOUBLE;
         break;
       default:
         assert(false); // Should be unreachable.
+    }
+    if (!compatible) {
+      report_incompatible(value, type);
     }
   }
 
@@ -258,34 +245,17 @@ class checker {
     }
   }
 
-  void check_union(const t_union* type, const t_const_value* value) {
+  void check_structured(const t_structured* type, const t_const_value* value) {
     if (value->kind() != t_const_value::CV_MAP) {
       report_incompatible(value, type);
       return;
     }
     const auto& map = value->get_map();
-    if (map.size() > 1) {
+    if (map.size() > 1 && dynamic_cast<const t_union*>(type)) {
       error(
-          "type error: const `{}` is a union and can't have more than one "
-          "field set.",
-          name_);
+          "cannot initialize more than one field in union `{}`", type->name());
     }
     check_fields(type, map);
-  }
-
-  void check_struct(const t_struct* type, const t_const_value* value) {
-    if (value->kind() == t_const_value::CV_MAP) {
-      check_fields(type, value->get_map());
-      return;
-    }
-    report_incompatible(value, type);
-  }
-
-  void check_exception(const t_exception* type, const t_const_value* value) {
-    if (value->kind() != t_const_value::CV_MAP) {
-      report_type_mismatch("exception");
-    }
-    check_fields(type, value->get_map());
   }
 
   void check_fields(
@@ -302,43 +272,43 @@ class checker {
         continue;
       }
       const auto* field = type->get_field_by_name(field_name);
-      if (field == nullptr) {
-        error(
-            "type error: `{}` has no field `{}`.",
-            type->name(),
-            key->get_string());
+      if (!field) {
+        error("no field named `{}` in `{}`", key->get_string(), type->name());
         continue;
       }
       const t_type* field_type = &field->type().deref();
-      checker(diags_, node_, fmt::format("{}.{}", name_, field_name))
-          .check(field_type, value);
+      std::string name =
+          name_.empty() ? field_name : fmt::format("{}.{}", name_, field_name);
+      checker(diags_, node_, std::move(name)).check(field_type, value);
     }
   }
 
   void check_map(const t_map* type, const t_const_value* value) {
     if (value->kind() == t_const_value::CV_LIST && value->get_list().empty()) {
-      warning("type error: map `{}` initialized with empty list.", name_);
+      warning(
+          "converting empty list to `map` in initialization of `{}`", name_);
       return;
     }
     if (value->kind() != t_const_value::CV_MAP) {
-      report_type_mismatch("map");
+      report_incompatible(value, type);
       return;
     }
-    const t_type* k_type = &type->key_type().deref();
-    const t_type* v_type = &type->val_type().deref();
+    const t_type* key_type = &type->key_type().deref();
+    const t_type* val_type = &type->val_type().deref();
     for (const auto& entry : value->get_map()) {
-      checker(diags_, node_, name_ + "<key>").check(k_type, entry.first);
-      checker(diags_, node_, name_ + "<val>").check(v_type, entry.second);
+      check(key_type, entry.first);
+      check(val_type, entry.second);
     }
   }
 
   void check_list(const t_list* type, const t_const_value* value) {
     if (value->kind() == t_const_value::CV_MAP && value->get_map().empty()) {
-      warning("type error: list `{}` initialized with empty map.", name_);
+      warning(
+          "converting empty map to `list` in initialization of `{}`", name_);
       return;
     }
     if (value->kind() != t_const_value::CV_LIST) {
-      report_type_mismatch("list");
+      report_incompatible(value, type);
       return;
     }
     check_elements(&type->elem_type().deref(), value->get_list());
@@ -346,11 +316,11 @@ class checker {
 
   void check_set(const t_set* type, const t_const_value* value) {
     if (value->kind() == t_const_value::CV_MAP && value->get_map().empty()) {
-      warning("type error: set `{}` initialized with empty map.", name_);
+      warning("converting empty map to `set` in initialization of `{}`", name_);
       return;
     }
     if (value->kind() != t_const_value::CV_LIST) {
-      report_type_mismatch("set");
+      report_incompatible(value, type);
       return;
     }
     check_elements(&type->elem_type().deref(), value->get_list());
@@ -359,7 +329,7 @@ class checker {
   void check_elements(
       const t_type* elem_type, const std::vector<t_const_value*>& list) {
     for (const auto& elem : list) {
-      checker(diags_, node_, name_ + "<elem>").check(elem_type, elem);
+      check(elem_type, elem);
     }
   }
 };

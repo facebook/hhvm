@@ -324,3 +324,6 @@ class FlagTests(unittest.TestCase):
         self.assertEqual(Color["red"], Color.red)
         self.assertEqual(Color["blue"], Color.blue)
         self.assertEqual(Color["green"], Color.green)
+
+    def test_is_thrift_enum(self) -> None:
+        self.assertTrue(hasattr(Color, "__members__"))

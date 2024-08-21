@@ -3311,7 +3311,20 @@ end = struct
             ~meth_caller:true
             ~coerce_from_ty:None
             ~explicit_targs:[]
-            ~class_id:(CI (pos, class_name))
+              (* The CIstatic mode causes `this` to be interpreted as the non-exact type of the
+                 receiver, rather than an exact type. For example, meth_caller(C::class, 'get') for
+                 class C {
+                   get():this { return $this; }
+                 }
+                 should not be typed as
+                   (function(C):exact C)
+                 but rather as
+                   (function(C):C)
+                 because it might be called through a subclass. Ideally, if we supported first-class
+                 generics, we'd type it as
+                   (function<Tthis as C>(Tthis):Tthis)
+              *)
+            ~class_id:CIstatic
             ~member_id:meth_name
             ~on_error:Typing_error.Callback.unify_error
             env

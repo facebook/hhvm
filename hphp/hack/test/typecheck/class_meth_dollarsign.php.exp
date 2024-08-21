@@ -4,7 +4,5 @@ ERROR: File "class_meth_dollarsign.php", line 7, characters 32-37:
 No instance method `bar$` in `Foo` (Typing[4053])
   File "class_meth_dollarsign.php", line 7, characters 8-38:
   This is why I think it is an object of type Foo
-  File "class_meth_dollarsign.php", line 7, characters 20-22:
-    where the class `Foo` was referenced here
   File "class_meth_dollarsign.php", line 3, characters 7-9:
   Declaration of `Foo` is here

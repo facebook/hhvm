@@ -62,24 +62,28 @@ class PayloadSerialzer {
       std::unique_ptr<folly::IOBuf>&& payload,
       Metadata* metadata,
       folly::SocketFds fds) {
+    applyCompressionIfNeeded(payload, metadata);
+    FdMetadata fdMetadata;
+    handleFds(fds, metadata, fdMetadata);
+    return finalizePayload(
+        std::move(payload), metadata, std::move(fds), fdMetadata);
+  }
+
+  template <typename Metadata>
+  void applyCompressionIfNeeded(
+      std::unique_ptr<folly::IOBuf>& payload, Metadata* metadata) {
     if (auto compress = metadata->compression_ref()) {
       apache::thrift::rocket::detail::compressPayload(payload, *compress);
     }
+  }
+
+  template <typename Metadata>
+  void handleFds(
+      folly::SocketFds& fds, Metadata* metadata, FdMetadata& fdMetadata) {
     auto numFds = fds.size();
     if (numFds) {
-      FdMetadata fdMetadata;
-
-      // The kernel maximum is actually much lower (at least on Linux, and
-      // MacOS doesn't seem to document it at all), but that will only fail in
-      // in `AsyncFdSocket`.
-      constexpr auto numFdsTypeMax = std::numeric_limits<
-          op::get_native_type<FdMetadata, ident::numFds>>::max();
-      if (UNLIKELY(numFds > numFdsTypeMax)) {
-        LOG(DFATAL) << numFds << " would overflow FdMetadata::numFds";
-        fdMetadata.numFds() = numFdsTypeMax;
-        // This will cause "AsyncFdSocket::writeChainWithFds" to error out.
-        fdMetadata.fdSeqNum() = folly::SocketFds::kNoSeqNum;
-      } else {
+      handleFdOverflow(numFds, fdMetadata);
+      if (!fdMetadata.numFds().has_value()) {
         // When received, the request will know to retrieve this many FDs.
         fdMetadata.numFds() = numFds;
         // FD sequence numbers count the total number of FDs sent on this
@@ -100,13 +104,34 @@ class PayloadSerialzer {
         fdMetadata.fdSeqNum() =
             injectFdSocketSeqNumIntoFdsToSend(transport_, &fds);
       }
-
       DCHECK(!metadata->fdMetadata().has_value());
       metadata->fdMetadata() = fdMetadata;
     }
+  }
+
+  void handleFdOverflow(size_t numFds, FdMetadata& fdMetadata) {
+    // The kernel maximum is actually much lower (at least on Linux, and
+    // MacOS doesn't seem to document it at all), but that will only fail in
+    // in `AsyncFdSocket`.
+    constexpr auto numFdsTypeMax = std::numeric_limits<
+        op::get_native_type<FdMetadata, ident::numFds>>::max();
+    if (UNLIKELY(numFds > numFdsTypeMax)) {
+      LOG(DFATAL) << numFds << " would overflow FdMetadata::numFds";
+      fdMetadata.numFds() = numFdsTypeMax;
+      // This will cause "AsyncFdSocket::writeChainWithFds" to error out.
+      fdMetadata.fdSeqNum() = folly::SocketFds::kNoSeqNum;
+    }
+  }
+
+  template <typename Metadata>
+  rocket::Payload finalizePayload(
+      std::unique_ptr<folly::IOBuf>&& payload,
+      Metadata* metadata,
+      folly::SocketFds fds,
+      FdMetadata& fdMetadata) {
     auto ret = apache::thrift::rocket::detail::makePayload(
         *metadata, std::move(payload));
-    if (numFds) {
+    if (fdMetadata.numFds().has_value() && *fdMetadata.numFds() > 0) {
       ret.fds = std::move(fds.dcheckToSendOrEmpty());
     }
     return ret;

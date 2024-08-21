@@ -11,8 +11,6 @@ from __future__ import annotations
 # EXPERIMENTAL - DO NOT USE !!!
 # See `experimental_generate_mutable_types` documentation in thrift compiler
 
-import dataclasses
-
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions

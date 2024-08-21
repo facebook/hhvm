@@ -19,61 +19,100 @@ namespace facebook::common::mysql_client {
 // for debugging purposes and to use as keys in other maps
 class ConnectionKey {
  public:
-  ConnectionKey(
-      folly::StringPiece sp_host,
-      int sp_port,
-      folly::StringPiece sp_db_name,
-      folly::StringPiece sp_user,
-      folly::StringPiece sp_password,
+  virtual ~ConnectionKey() = default;
+
+  [[nodiscard]] virtual size_t hash() const = 0;
+
+  [[nodiscard]] virtual size_t partial_hash() const = 0;
+
+  [[nodiscard]] virtual bool partialEqual(
+      const ConnectionKey& rhs) const noexcept = 0;
+
+  [[nodiscard]] virtual std::string getDisplayString(
+      bool level2 = false) const = 0;
+
+  [[nodiscard]] virtual const std::string& host() const noexcept = 0;
+
+  [[nodiscard]] virtual const std::string& db_name() const noexcept = 0;
+
+  [[nodiscard]] virtual const std::string& user() const noexcept = 0;
+
+  [[nodiscard]] virtual const std::string& password() const noexcept = 0;
+
+  [[nodiscard]] virtual int port() const noexcept = 0;
+
+  [[nodiscard]] virtual const std::string& special_tag() const noexcept = 0;
+
+  [[nodiscard]] virtual bool operator==(
+      const ConnectionKey& rhs) const noexcept = 0;
+
+  [[nodiscard]] bool operator!=(const ConnectionKey& rhs) const noexcept {
+    return !(*this == rhs);
+  }
+};
+
+class MysqlConnectionKey : public ConnectionKey {
+ public:
+  explicit MysqlConnectionKey(
+      folly::StringPiece sp_host = "",
+      int sp_port = 0,
+      folly::StringPiece sp_db_name = "",
+      folly::StringPiece sp_user = "",
+      folly::StringPiece sp_password = "",
       folly::StringPiece sp_special_tag = "",
       bool sp_ignore_db_name = false,
       folly::StringPiece sp_unixSocketPath = "");
 
-  FOLLY_NODISCARD bool partialEqual(const ConnectionKey& rhs) const noexcept;
+  [[nodiscard]] bool partialEqual(
+      const ConnectionKey& rhs) const noexcept override;
 
-  FOLLY_NODISCARD bool operator==(const ConnectionKey& rhs) const noexcept;
+  [[nodiscard]] bool operator==(const MysqlConnectionKey& rhs) const noexcept;
 
-  FOLLY_NODISCARD bool operator!=(const ConnectionKey& rhs) const noexcept {
+  [[nodiscard]] bool operator!=(const MysqlConnectionKey& rhs) const noexcept {
     return !(*this == rhs);
   }
 
-  FOLLY_NODISCARD const std::string& host() const noexcept {
+  [[nodiscard]] virtual bool operator==(
+      const ConnectionKey& rhs) const noexcept override;
+
+  [[nodiscard]] const std::string& host() const noexcept override {
     return host_;
   }
 
-  FOLLY_NODISCARD const std::string& db_name() const noexcept {
+  [[nodiscard]] const std::string& db_name() const noexcept override {
     return dbName_;
   }
 
-  FOLLY_NODISCARD const std::string& user() const noexcept {
+  [[nodiscard]] const std::string& user() const noexcept override {
     return user_;
   }
 
-  FOLLY_NODISCARD const std::string& password() const noexcept {
+  [[nodiscard]] const std::string& password() const noexcept override {
     return password_;
   }
 
-  FOLLY_NODISCARD const std::string& unixSocketPath() const noexcept {
+  [[nodiscard]] const std::string& unixSocketPath() const noexcept {
     return unixSocketPath_;
   }
 
-  FOLLY_NODISCARD size_t hash() const noexcept {
+  [[nodiscard]] size_t hash() const noexcept override {
     return hash_;
   }
 
-  FOLLY_NODISCARD size_t partial_hash() const noexcept {
+  [[nodiscard]] size_t partial_hash() const noexcept override {
     return partialHash_;
   }
 
-  FOLLY_NODISCARD int port() const noexcept {
+  [[nodiscard]] int port() const noexcept override {
     return port_;
   }
 
-  FOLLY_NODISCARD const std::string& special_tag() const noexcept {
+  [[nodiscard]] const std::string& special_tag() const noexcept override {
     return specialTag_;
   }
 
-  FOLLY_NODISCARD std::string getDisplayString(bool level2 = false) const;
+  [[nodiscard]] std::string getDisplayString(
+      bool level2 = false) const override;
 
  private:
   std::string host_;
@@ -96,6 +135,14 @@ template <>
 struct hash<facebook::common::mysql_client::ConnectionKey> {
   size_t operator()(
       const facebook::common::mysql_client::ConnectionKey& k) const {
+    return k.hash();
+  }
+};
+
+template <>
+struct hash<facebook::common::mysql_client::MysqlConnectionKey> {
+  size_t operator()(
+      const facebook::common::mysql_client::MysqlConnectionKey& k) const {
     return k.hash();
   }
 };

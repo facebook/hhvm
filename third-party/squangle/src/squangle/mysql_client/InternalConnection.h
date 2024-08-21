@@ -16,6 +16,9 @@
 
 namespace facebook::common::mysql_client {
 
+class ConnectionKey;
+class ConnectionOptions;
+
 using MysqlCertValidatorCallback =
     int (*)(X509* server_cert, const void* context, const char** errptr);
 
@@ -170,12 +173,8 @@ class InternalConnection {
   virtual bool ping() const = 0;
 
   virtual Status tryConnect(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
+      const ConnectionOptions& opts,
+      std::shared_ptr<const ConnectionKey> conn_key,
       int flags) const = 0;
 
   virtual Status runQuery(std::string_view query) const = 0;
@@ -183,9 +182,7 @@ class InternalConnection {
   virtual Status resetConn() const = 0;
 
   virtual Status changeUser(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const = 0;
+      std::shared_ptr<const ConnectionKey> conn_key) const = 0;
 
   virtual Status nextResult() const = 0;
 

@@ -27,9 +27,11 @@ class ConnectionHolder : public InternalConnection {
   ConnectionHolder(
       MysqlClientBase& client,
       std::unique_ptr<InternalConnection> internalConn,
-      ConnectionKey key);
+      std::shared_ptr<const ConnectionKey> key);
 
-  ConnectionHolder(ConnectionHolder& other, ConnectionKey key);
+  ConnectionHolder(
+      ConnectionHolder& other,
+      std::shared_ptr<const ConnectionKey> key);
 
   virtual ~ConnectionHolder() override;
 
@@ -46,25 +48,25 @@ class ConnectionHolder : public InternalConnection {
     return client_;
   }
 
-  [[nodiscard]] const std::string& host() const {
-    return key_.host();
-  }
+  // [[nodiscard]] const std::string& host() const {
+  //   return key_.host();
+  // }
 
-  [[nodiscard]] int port() const {
-    return key_.port();
-  }
+  // [[nodiscard]] int port() const {
+  //   return key_.port();
+  // }
 
-  [[nodiscard]] const std::string& user() const {
-    return key_.user();
-  }
+  // [[nodiscard]] const std::string& user() const {
+  //   return key_.user();
+  // }
 
-  [[nodiscard]] const std::string& database() const {
-    return key_.db_name();
-  }
+  // [[nodiscard]] const std::string& database() const {
+  //   return key_.db_name();
+  // }
 
-  [[nodiscard]] const std::string& password() const {
-    return key_.password();
-  }
+  // [[nodiscard]] const std::string& password() const {
+  //   return key_.password();
+  // }
 
   void setConnectionContext(
       std::shared_ptr<db::ConnectionContextBase> context) {
@@ -87,7 +89,7 @@ class ConnectionHolder : public InternalConnection {
     return lastActiveTime_;
   }
 
-  [[nodiscard]] const ConnectionKey& getKey() const {
+  [[nodiscard]] std::shared_ptr<const ConnectionKey> getKey() const {
     return key_;
   }
 
@@ -295,15 +297,10 @@ class ConnectionHolder : public InternalConnection {
   }
 
   [[nodiscard]] Status tryConnect(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
+      const ConnectionOptions& opts,
+      std::shared_ptr<const ConnectionKey> conn_key,
       int flags) const override {
-    return internalConn_->tryConnect(
-        host, user, password, db_name, port, unixSocket, flags);
+    return internalConn_->tryConnect(opts, std::move(conn_key), flags);
   }
 
   [[nodiscard]] Status runQuery(std::string_view query) const override {
@@ -315,10 +312,8 @@ class ConnectionHolder : public InternalConnection {
   }
 
   [[nodiscard]] Status changeUser(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const override {
-    return internalConn_->changeUser(user, password, database);
+      std::shared_ptr<const ConnectionKey> conn_key) const override {
+    return internalConn_->changeUser(std::move(conn_key));
   }
 
   [[nodiscard]] Status nextResult() const override {
@@ -343,7 +338,7 @@ class ConnectionHolder : public InternalConnection {
 
  protected:
   // Used to update the connection key when updating to a pooled connection
-  void updateConnectionKey(ConnectionKey new_key);
+  void updateConnectionKey(std::shared_ptr<const ConnectionKey> new_key);
 
   void onClose();
 
@@ -354,7 +349,7 @@ class ConnectionHolder : public InternalConnection {
   MysqlClientBase& client_;
   std::unique_ptr<InternalConnection> internalConn_;
   std::shared_ptr<db::ConnectionContextBase> context_;
-  ConnectionKey key_;
+  std::shared_ptr<const ConnectionKey> key_;
   bool opened_{false};
   Timepoint createTime_;
   Timepoint lastActiveTime_;

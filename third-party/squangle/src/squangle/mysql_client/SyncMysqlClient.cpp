@@ -7,6 +7,7 @@
  */
 
 #include <folly/Singleton.h>
+#include <memory>
 
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SyncMysqlClient.h"
@@ -22,7 +23,7 @@ std::shared_ptr<SyncMysqlClient> SyncMysqlClient::defaultClient() {
 }
 
 std::unique_ptr<Connection> SyncMysqlClient::createConnection(
-    ConnectionKey conn_key) {
+    std::shared_ptr<const ConnectionKey> conn_key) {
   return std::make_unique<SyncConnection>(*this, std::move(conn_key));
 }
 
@@ -56,7 +57,7 @@ SyncConnection::~SyncConnection() {
 MysqlHandler::Status SyncMysqlClient::SyncMysqlHandler::tryConnect(
     const InternalConnection& conn,
     const ConnectionOptions& opts,
-    const ConnectionKey& key,
+    std::shared_ptr<const ConnectionKey> key,
     int flags) {
   auto qtmo = std::chrono::duration_cast<Millis>(opts.getQueryTimeout());
   auto ctmo = std::chrono::duration_cast<Millis>(opts.getTimeout());
@@ -65,18 +66,7 @@ MysqlHandler::Status SyncMysqlClient::SyncMysqlHandler::tryConnect(
   conn.setReadTimeout(qtmo);
   conn.setWriteTimeout(qtmo);
 
-  const auto usingUnixSocket = !key.unixSocketPath().empty();
-
-  // When using unix socket (AF_UNIX), host/port do not matter.
-  static const std::string kEmptyString = "";
-  return conn.tryConnect(
-      usingUnixSocket ? kEmptyString : key.host(),
-      key.user(),
-      key.password(),
-      key.db_name(),
-      usingUnixSocket ? 0 : key.port(),
-      usingUnixSocket ? key.unixSocketPath() : kEmptyString,
-      flags);
+  return conn.tryConnect(opts, std::move(key), flags);
 }
 
 } // namespace facebook::common::mysql_client

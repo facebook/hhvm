@@ -648,13 +648,13 @@ Object HHVM_STATIC_METHOD(
     const String& sni_server_name /* = "" */,
     const String& serverCertExtNames /* = "" */,
     const String& serverCertExtValues /* = "" */) {
-  am::ConnectionKey key(
+  auto key = std::make_shared<const am::MysqlConnectionKey>(
       static_cast<std::string>(host),
       port,
       static_cast<std::string>(dbname),
       static_cast<std::string>(user),
       static_cast<std::string>(password));
-  auto op = getClient()->beginConnection(key);
+  auto op = getClient()->beginConnection(std::move(key));
   if (!sslContextProvider.isNull()) {
     auto* mysslContextProvider = getSSLContextProvider(
             sslContextProvider.toObject());
@@ -695,13 +695,13 @@ Object HHVM_STATIC_METHOD(
     const String& user,
     const String& password,
     const Object& asyncMysqlConnOpts) {
-  am::ConnectionKey key(
+  auto key = std::make_shared<const am::MysqlConnectionKey>(
       static_cast<std::string>(host),
       port,
       static_cast<std::string>(dbname),
       static_cast<std::string>(user),
       static_cast<std::string>(password));
-  auto op = getClient()->beginConnection(key);
+  auto op = getClient()->beginConnection(std::move(key));
 
   auto* obj = getConnectionOptions(asyncMysqlConnOpts);
   const auto& connOpts = obj->getConnectionOptions();
@@ -722,7 +722,7 @@ Object HHVM_STATIC_METHOD(
     const Object& asyncMysqlConnOpts,
     const Array& queryAttributes) {
 
-  am::ConnectionKey key(
+  auto key = std::make_shared<const am::MysqlConnectionKey>(
       static_cast<std::string>(host),
       port,
       static_cast<std::string>(dbname),

@@ -15,7 +15,6 @@
 #include <memory>
 
 #include "squangle/base/Base.h"
-#include "squangle/base/ConnectionKey.h"
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/mysql_client/ChangeUserOperation.h"
 #include "squangle/mysql_client/ConnectPoolOperation.h"
@@ -29,6 +28,7 @@
 
 namespace facebook::common::mysql_client {
 
+class ConnectionKey;
 template <typename Client>
 class ConnectionPool;
 
@@ -387,7 +387,7 @@ class ConnectionPool
       const std::string& user,
       const std::string& password,
       const std::string& special_tag = "") {
-    return beginConnection(ConnectionKey(
+    return beginConnection(std::make_shared<const MysqlConnectionKey>(
         host,
         port,
         database_name,
@@ -398,9 +398,9 @@ class ConnectionPool
   }
 
   std::shared_ptr<ConnectOperation> beginConnection(
-      const ConnectionKey& conn_key) {
+      std::shared_ptr<const ConnectionKey> conn_key) {
     auto impl = std::make_unique<ConnectPoolOperationImpl<Client>>(
-        getSelfWeakPointer(), mysql_client_, conn_key);
+        getSelfWeakPointer(), mysql_client_, std::move(conn_key));
     auto ret = std::make_shared<ConnectPoolOperation<Client>>(std::move(impl));
     if (isShuttingDown()) {
       LOG(ERROR)
@@ -552,9 +552,8 @@ class ConnectionPool
       std::unique_ptr<MysqlPooledHolder<Client>> mysqlConn) {
     auto conn = makeNewConnection(rawPoolOp->getKey(), std::move(mysqlConn));
     conn->needToCloneConnection_ = false;
-    const auto& connKey = poolKey.getConnectionKey();
-    auto changeUserOp = Connection::changeUser(
-        std::move(conn), connKey.user(), connKey.password(), connKey.db_name());
+    auto changeUserOp =
+        Connection::changeUser(std::move(conn), poolKey.getConnectionKey());
 
     changeUserOp->setCallback(
         [this, rawPoolOp, poolKey, poolPtr = getSelfWeakPointer()](
@@ -792,7 +791,7 @@ class ConnectionPool
       const PoolKey& pool_key) = 0;
 
   virtual std::unique_ptr<Connection> makeNewConnection(
-      const ConnectionKey& conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       std::unique_ptr<MysqlPooledHolder<Client>> mysqlConn) = 0;
 };
 

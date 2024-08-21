@@ -144,9 +144,10 @@ AsyncMysqlClient::~AsyncMysqlClient() {
 }
 
 db::SquangleLoggingData AsyncMysqlClient::makeSquangleLoggingData(
-    const ConnectionKey& connKey,
+    std::shared_ptr<const ConnectionKey> connKey,
     const db::ConnectionContextBase* connContext) {
-  return db::SquangleLoggingData(connKey, connContext, collectPerfStats());
+  return db::SquangleLoggingData(
+      std::move(connKey), connContext, collectPerfStats());
 }
 
 void AsyncMysqlClient::cleanupCompletedOperations() {
@@ -196,27 +197,16 @@ std::unique_ptr<Connection> AsyncMysqlClient::connect(
 }
 
 std::unique_ptr<Connection> AsyncMysqlClient::createConnection(
-    ConnectionKey conn_key) {
+    std::shared_ptr<const ConnectionKey> conn_key) {
   return std::make_unique<AsyncConnection>(*this, std::move(conn_key), nullptr);
 }
 
 MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
     const InternalConnection& conn,
-    const ConnectionOptions& /*opts*/,
-    const ConnectionKey& conn_key,
+    const ConnectionOptions& opts,
+    std::shared_ptr<const ConnectionKey> conn_key,
     int flags) {
-  static std::string kEmptyString;
-  const auto usingUnixSocket = !conn_key.unixSocketPath().empty();
-
-  // When using unix socket (AF_UNIX), host/port do not matter.
-  return conn.tryConnect(
-      usingUnixSocket ? kEmptyString : conn_key.host(),
-      conn_key.user(),
-      conn_key.password(),
-      conn_key.db_name(),
-      usingUnixSocket ? 0 : conn_key.port(),
-      usingUnixSocket ? conn_key.unixSocketPath() : kEmptyString,
-      flags);
+  return conn.tryConnect(opts, std::move(conn_key), flags);
 }
 
 InternalResult::FetchRowRet AsyncMysqlClient::AsyncMysqlHandler::fetchRow(

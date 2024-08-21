@@ -41,7 +41,7 @@ class Connection {
  public:
   Connection(
       MysqlClientBase& mysql_client,
-      ConnectionKey conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       std::unique_ptr<ConnectionHolder> conn)
       : mysql_connection_(std::move(conn)),
         conn_key_(std::move(conn_key)),
@@ -274,20 +274,20 @@ class Connection {
   }
 
   const std::string& host() const {
-    return getKey().host();
+    return getKeyRef().host();
   }
   int port() const {
-    return getKey().port();
+    return getKeyRef().port();
   }
   const std::string& user() const {
-    return getKey().user();
+    return getKeyRef().user();
   }
   const std::string& database() const {
-    return getKey().db_name();
+    return getKeyRef().db_name();
   }
 
   const std::string& password() const {
-    return getKey().password();
+    return getKeyRef().password();
   }
 
   MysqlClientBase& client() const {
@@ -311,8 +311,12 @@ class Connection {
     return std::move(mysql_connection_);
   }
 
-  const ConnectionKey& getKey() const {
+  std::shared_ptr<const ConnectionKey> getKey() const {
     return conn_key_;
+  }
+
+  const ConnectionKey& getKeyRef() const {
+    return *conn_key_;
   }
 
   void setReusable(bool reusable) {
@@ -426,7 +430,7 @@ class Connection {
 
   void setConnectionHolder(std::unique_ptr<ConnectionHolder> conn) {
     CHECK_THROW(mysql_connection_ == nullptr, db::InvalidConnectionException);
-    CHECK_THROW(getKey() == conn->getKey(), db::InvalidConnectionException);
+    CHECK_THROW(*getKey() == *conn->getKey(), db::InvalidConnectionException);
     mysql_connection_ = std::move(conn);
   }
 
@@ -440,9 +444,7 @@ class Connection {
 
   static std::shared_ptr<ChangeUserOperation> changeUser(
       std::unique_ptr<Connection> conn,
-      const std::string& user,
-      const std::string& password,
-      const std::string& database);
+      std::shared_ptr<const ConnectionKey> key);
 
   const db::ConnectionContextBase* getConnectionContext() const {
     return connection_context_.get();
@@ -672,7 +674,7 @@ class Connection {
 
   std::unique_ptr<ConnectionHolder> mysql_connection_;
 
-  ConnectionKey conn_key_;
+  std::shared_ptr<const ConnectionKey> conn_key_;
   ConnectionOptions conn_options_;
 
   bool killOnQueryTimeout_ = false;

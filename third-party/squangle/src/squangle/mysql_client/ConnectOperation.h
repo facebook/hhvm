@@ -28,18 +28,21 @@ class ConnectOperationImpl : public OperationImpl {
   }
 
   const std::string& database() const {
-    return conn_key_.db_name();
+    return conn_key_->db_name();
   }
   const std::string& user() const {
-    return conn_key_.user();
+    return conn_key_->user();
   }
 
-  const ConnectionKey& getConnectionKey() const {
+  std::shared_ptr<const MysqlConnectionKey> getConnectionKey() const {
     return conn_key_;
   }
   const ConnectionOptions& getConnectionOptions() const;
-  const ConnectionKey& getKey() const {
+  std::shared_ptr<const MysqlConnectionKey> getKey() const {
     return conn_key_;
+  }
+  const MysqlConnectionKey getKeyRef() const {
+    return *conn_key_;
   }
 
   void setSSLOptionsProviderBase(
@@ -132,11 +135,13 @@ class ConnectOperationImpl : public OperationImpl {
  protected:
   friend class MysqlClientBase;
 
-  ConnectOperationImpl(MysqlClientBase* mysql_client, ConnectionKey conn_key);
+  ConnectOperationImpl(
+      MysqlClientBase* mysql_client,
+      std::shared_ptr<const ConnectionKey> conn_key);
 
   static std::unique_ptr<ConnectOperationImpl> create(
       MysqlClientBase* mysql_client,
-      ConnectionKey conn_key);
+      std::shared_ptr<const ConnectionKey> conn_key);
 
   virtual void attemptFailed(OperationResult result);
   virtual void attemptSucceeded(OperationResult result);
@@ -179,7 +184,7 @@ class ConnectOperationImpl : public OperationImpl {
       const void* context,
       const char** errptr);
 
-  const ConnectionKey conn_key_;
+  std::shared_ptr<const MysqlConnectionKey> conn_key_;
 
   int flags_;
 
@@ -347,7 +352,7 @@ class ConnectOperation : public Operation {
   const ConnectionOptions& getConnectionOptions() {
     return impl()->getConnectionOptions();
   }
-  const ConnectionKey& getKey() const {
+  std::shared_ptr<const ConnectionKey> getKey() const {
     return impl()->getKey();
   }
 

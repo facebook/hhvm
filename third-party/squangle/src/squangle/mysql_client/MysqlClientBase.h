@@ -38,11 +38,12 @@ class MysqlClientBase {
       const std::string& user,
       const std::string& password);
 
-  std::shared_ptr<ConnectOperation> beginConnection(ConnectionKey conn_key);
+  std::shared_ptr<ConnectOperation> beginConnection(
+      std::shared_ptr<const ConnectionKey> conn_key);
 
   // Factory method
   virtual std::unique_ptr<Connection> createConnection(
-      ConnectionKey conn_key) = 0;
+      std::shared_ptr<const ConnectionKey> conn_key) = 0;
 
   virtual folly::EventBase* getEventBase() {
     return nullptr;
@@ -61,13 +62,13 @@ class MysqlClientBase {
 
   void logConnectionSuccess(
       const db::CommonLoggingData& logging_data,
-      const ConnectionKey& conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       const db::ConnectionContextBase* extra_logging_data);
 
   void logConnectionFailure(
       const db::CommonLoggingData& logging_data,
       db::FailureReason reason,
-      const ConnectionKey& conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       unsigned int mysqlErrno,
       const std::string& error,
       const db::ConnectionContextBase* extra_logging_data);
@@ -125,7 +126,7 @@ class MysqlClientBase {
 
   virtual std::unique_ptr<ConnectOperationImpl> createConnectOperationImpl(
       MysqlClientBase* client,
-      ConnectionKey conn_key) const;
+      std::shared_ptr<const ConnectionKey> conn_key) const;
   std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
       std::unique_ptr<OperationImpl::ConnectionProxy> conn) const;
   std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
@@ -154,11 +155,13 @@ class MysqlClientBase {
   friend class AsyncConnection;
   friend class SyncConnection;
   virtual db::SquangleLoggingData makeSquangleLoggingData(
-      const ConnectionKey& connKey,
+      std::shared_ptr<const ConnectionKey> connKey,
       const db::ConnectionContextBase* connContext) = 0;
 
-  virtual void activeConnectionAdded(const ConnectionKey* key) = 0;
-  virtual void activeConnectionRemoved(const ConnectionKey* key) = 0;
+  virtual void activeConnectionAdded(
+      std::shared_ptr<const ConnectionKey> key) = 0;
+  virtual void activeConnectionRemoved(
+      std::shared_ptr<const ConnectionKey> key) = 0;
   virtual void addOperation(std::shared_ptr<Operation> op) = 0;
   virtual void deferRemoveOperation(Operation* op) = 0;
 

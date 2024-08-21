@@ -23,7 +23,7 @@ QueryException getInvalidConnException() {
       OperationResult::Failed,
       static_cast<int>(SquangleErrno::SQ_INVALID_CONN),
       "Invalid argument, connection is null",
-      ConnectionKey("", 0, "", "", ""),
+      std::make_shared<MysqlConnectionKey>(),
       0ms);
 }
 } // namespace
@@ -85,15 +85,10 @@ std::shared_ptr<ResetOperation> Connection::resetConn(
 
 std::shared_ptr<ChangeUserOperation> Connection::changeUser(
     std::unique_ptr<Connection> conn,
-    const std::string& user,
-    const std::string& password,
-    const std::string& database) {
+    std::shared_ptr<const ConnectionKey> key) {
   const auto& client = conn->mysql_client_;
   auto changeUserOperationPtr = std::make_shared<ChangeUserOperation>(
-      client.createSpecialOperationImpl(std::move(conn)),
-      user,
-      password,
-      database);
+      client.createSpecialOperationImpl(std::move(conn)), std::move(key));
   Duration timeout =
       changeUserOperationPtr->connection()->conn_options_.getTimeout();
   if (timeout.count() > 0) {

@@ -14,16 +14,18 @@ namespace facebook::common::mysql_client {
 ConnectionHolder::ConnectionHolder(
     MysqlClientBase& client,
     std::unique_ptr<InternalConnection> internalConn,
-    ConnectionKey key)
+    std::shared_ptr<const ConnectionKey> key)
     : client_(client),
       internalConn_(std::move(internalConn)),
       key_(std::move(key)),
       opened_(false) {
   createTime_ = std::chrono::steady_clock::now();
-  client_.activeConnectionAdded(&key_);
+  client_.activeConnectionAdded(key_);
 }
 
-ConnectionHolder::ConnectionHolder(ConnectionHolder& other, ConnectionKey key)
+ConnectionHolder::ConnectionHolder(
+    ConnectionHolder& other,
+    std::shared_ptr<const ConnectionKey> key)
     : client_(other.client_),
       internalConn_(other.stealInternalConnection()),
       context_(other.context_),
@@ -31,13 +33,14 @@ ConnectionHolder::ConnectionHolder(ConnectionHolder& other, ConnectionKey key)
       opened_(other.opened_),
       createTime_(other.createTime_),
       lastActiveTime_(other.lastActiveTime_) {
-  client_.activeConnectionAdded(&key_);
+  client_.activeConnectionAdded(key_);
 }
 
-void ConnectionHolder::updateConnectionKey(ConnectionKey key) {
-  client_.activeConnectionRemoved(&key_);
+void ConnectionHolder::updateConnectionKey(
+    std::shared_ptr<const ConnectionKey> key) {
+  client_.activeConnectionRemoved(key_);
   key_ = std::move(key);
-  client_.activeConnectionAdded(&key_);
+  client_.activeConnectionAdded(key_);
 }
 
 ConnectionHolder::~ConnectionHolder() {
@@ -51,7 +54,7 @@ ConnectionHolder::~ConnectionHolder() {
 
     onClose();
   }
-  client_.activeConnectionRemoved(&key_);
+  client_.activeConnectionRemoved(key_);
 }
 
 void ConnectionHolder::onClose() {

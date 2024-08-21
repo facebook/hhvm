@@ -64,7 +64,7 @@ std::string SyncConnectPoolOperationImpl::createTimeoutErrorMessage(
     size_t per_key_limit) {
   auto delta = opElapsedMs();
 
-  const auto& key = getConnectionKey();
+  const auto& key = getKeyRef();
   return fmt::format(
       "[{}]({})Connection to {}:{} timed out in pool "
       "(open {}, opening {}, key limit {}) {}",

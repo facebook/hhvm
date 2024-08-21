@@ -28,7 +28,7 @@ MysqlException::MysqlException(
     OperationResult failure_type,
     unsigned int mysql_errno,
     const std::string& mysql_error,
-    ConnectionKey conn_key,
+    std::shared_ptr<const ConnectionKey> conn_key,
     Duration elapsed_time)
     : Exception(
           (failure_type == OperationResult::Failed ||
@@ -38,9 +38,9 @@ MysqlException::MysqlException(
                     "Mysql error {}. {} to db {} at {}:{}",
                     mysql_errno,
                     mysql_error,
-                    conn_key.db_name(),
-                    conn_key.host(),
-                    conn_key.port())
+                    conn_key->db_name(),
+                    conn_key->host(),
+                    conn_key->port())
               : std::string(Operation::toString(failure_type))),
       OperationResultBase(std::move(conn_key), elapsed_time),
       failure_type_(failure_type),
@@ -54,7 +54,7 @@ bool DbResult::ok() const {
 DbResult::DbResult(
     std::unique_ptr<Connection>&& conn,
     OperationResult result,
-    ConnectionKey conn_key,
+    std::shared_ptr<const ConnectionKey> conn_key,
     Duration elapsed)
     : OperationResultBase(std::move(conn_key), elapsed),
       conn_(std::move(conn)),
@@ -82,7 +82,7 @@ std::unique_ptr<Connection> DbResult::releaseConnection() {
 ConnectResult::ConnectResult(
     std::unique_ptr<Connection>&& conn,
     OperationResult result,
-    ConnectionKey conn_key,
+    std::shared_ptr<const ConnectionKey> conn_key,
     Duration elapsed_time,
     uint32_t num_attempts)
     : DbResult(std::move(conn), result, std::move(conn_key), elapsed_time),

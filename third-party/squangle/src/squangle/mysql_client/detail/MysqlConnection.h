@@ -248,12 +248,8 @@ class MysqlConnection : public InternalConnection {
 
 class AsyncMysqlConnection : public MysqlConnection {
   [[nodiscard]] Status tryConnect(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
+      const ConnectionOptions& opts,
+      std::shared_ptr<const ConnectionKey> conn_key,
       int flags) const override;
 
   [[nodiscard]] Status runQuery(std::string_view query) const override;
@@ -261,9 +257,7 @@ class AsyncMysqlConnection : public MysqlConnection {
   [[nodiscard]] Status resetConn() const override;
 
   [[nodiscard]] Status changeUser(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const override;
+      std::shared_ptr<const ConnectionKey> conn_key) const override;
 
   [[nodiscard]] Status nextResult() const override;
 
@@ -272,12 +266,8 @@ class AsyncMysqlConnection : public MysqlConnection {
 
 class SyncMysqlConnection : public MysqlConnection {
   [[nodiscard]] Status tryConnect(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
+      const ConnectionOptions& opts,
+      std::shared_ptr<const ConnectionKey> conn_key,
       int flags) const override;
 
   [[nodiscard]] Status runQuery(std::string_view query) const override;
@@ -285,9 +275,7 @@ class SyncMysqlConnection : public MysqlConnection {
   [[nodiscard]] Status resetConn() const override;
 
   [[nodiscard]] Status changeUser(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const override;
+      std::shared_ptr<const ConnectionKey> conn_key) const override;
 
   [[nodiscard]] Status nextResult() const override;
 

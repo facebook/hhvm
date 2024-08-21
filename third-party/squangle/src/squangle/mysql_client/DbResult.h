@@ -27,12 +27,14 @@ enum class OperationResult;
 // common between failure and success should come here.
 class OperationResultBase {
  public:
-  OperationResultBase(ConnectionKey conn_key, Duration elapsed_time)
+  OperationResultBase(
+      std::shared_ptr<const ConnectionKey> conn_key,
+      Duration elapsed_time)
       : conn_key_(std::move(conn_key)), elapsed_time_(elapsed_time) {}
   virtual ~OperationResultBase() = default;
 
-  const ConnectionKey* getConnectionKey() const {
-    return &conn_key_;
+  std::shared_ptr<const ConnectionKey> getConnectionKey() const {
+    return conn_key_;
   }
 
   Duration elapsed() const {
@@ -40,7 +42,7 @@ class OperationResultBase {
   }
 
  private:
-  ConnectionKey conn_key_;
+  std::shared_ptr<const ConnectionKey> conn_key_;
   Duration elapsed_time_;
 };
 
@@ -53,7 +55,7 @@ class MysqlException : public db::Exception, public OperationResultBase {
       OperationResult failure_type,
       unsigned int mysql_errno,
       const std::string& mysql_error,
-      ConnectionKey conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       Duration elapsed_time);
 
   unsigned int mysql_errno() const {
@@ -88,7 +90,7 @@ class QueryException : public MysqlException {
       OperationResult failure_type,
       unsigned int mysql_errno,
       const std::string& mysql_error,
-      ConnectionKey conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       Duration elapsed_time)
       : MysqlException(
             failure_type,
@@ -114,7 +116,7 @@ class DbResult : public OperationResultBase {
   DbResult(
       std::unique_ptr<Connection>&& conn,
       OperationResult result,
-      ConnectionKey conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       Duration elapsed_time);
   virtual ~DbResult() override;
 
@@ -147,7 +149,7 @@ class ConnectResult : public DbResult {
   ConnectResult(
       std::unique_ptr<Connection>&& conn,
       OperationResult result,
-      ConnectionKey conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       Duration elapsed_time,
       uint32_t num_attempts);
 
@@ -168,7 +170,7 @@ class FetchResult : public DbResult {
       uint64_t result_size,
       std::unique_ptr<Connection>&& conn,
       OperationResult result,
-      ConnectionKey conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       Duration elapsed)
       : DbResult(std::move(conn), result, std::move(conn_key), elapsed),
         fetch_result_(std::move(query_result)),

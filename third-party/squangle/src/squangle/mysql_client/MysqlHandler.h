@@ -24,7 +24,7 @@ class MysqlHandler {
   virtual Status tryConnect(
       const InternalConnection& conn,
       const ConnectionOptions& opts,
-      const ConnectionKey& key,
+      std::shared_ptr<const ConnectionKey> key,
       int flags) = 0;
   virtual Status runQuery(
       const InternalConnection& conn,
@@ -37,9 +37,7 @@ class MysqlHandler {
   virtual Status resetConn(const InternalConnection& conn) = 0;
   virtual Status changeUser(
       const InternalConnection& conn,
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) = 0;
+      std::shared_ptr<const ConnectionKey> key) = 0;
 };
 
 } // namespace facebook::common::mysql_client

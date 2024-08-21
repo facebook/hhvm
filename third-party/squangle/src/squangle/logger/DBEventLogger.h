@@ -96,15 +96,25 @@ typedef std::chrono::duration<uint64_t, std::micro> Duration;
 class SquangleLoggingData {
  public:
   SquangleLoggingData(
-      const common::mysql_client::ConnectionKey& conn_key,
+      std::shared_ptr<const common::mysql_client::ConnectionKey> conn_key,
       const ConnectionContextBase* conn_context,
       db::ClientPerfStats clientPerfStats = db::ClientPerfStats())
-      : connKey_(conn_key),
+      : connKey_(std::move(conn_key)),
         connContext_(conn_context),
-        clientPerfStats_(clientPerfStats) {}
+        clientPerfStats_(clientPerfStats) {
+    if (!connKey_) {
+      connKey_ = std::make_shared<common::mysql_client::MysqlConnectionKey>();
+    }
+  }
 
-  [[nodiscard]] const common::mysql_client::ConnectionKey& getConnKey() const {
+  [[nodiscard]] std::shared_ptr<const common::mysql_client::ConnectionKey>
+  getConnKey() const {
     return connKey_;
+  }
+
+  [[nodiscard]] const common::mysql_client::ConnectionKey& getConnKeyRef()
+      const {
+    return *connKey_;
   }
 
   [[nodiscard]] const ConnectionContextBase* getConnContext() const {
@@ -116,7 +126,7 @@ class SquangleLoggingData {
   }
 
  private:
-  const common::mysql_client::ConnectionKey& connKey_;
+  std::shared_ptr<const common::mysql_client::ConnectionKey> connKey_;
   const ConnectionContextBase* connContext_;
   db::ClientPerfStats clientPerfStats_;
 };

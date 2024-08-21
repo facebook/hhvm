@@ -7,6 +7,7 @@
  */
 
 #include <mysql_async.h>
+#include <memory>
 #include <string>
 
 #include "squangle/mysql_client/detail/MysqlConnection.h"
@@ -455,13 +456,24 @@ bool MysqlConnection::hasMoreResults() const {
 }
 
 InternalConnection::Status SyncMysqlConnection::tryConnect(
-    const std::string& host,
-    const std::string& user,
-    const std::string& password,
-    const std::string& db_name,
-    uint16_t port,
-    const std::string& unixSocket,
+    const ConnectionOptions& /*opts*/,
+    std::shared_ptr<const ConnectionKey> conn_key,
     int flags) const {
+  static std::string kEmptyString;
+  auto mysqlConnKey =
+      std::dynamic_pointer_cast<const MysqlConnectionKey>(conn_key);
+  DCHECK(mysqlConnKey);
+
+  const auto& unixSocket = mysqlConnKey->unixSocketPath();
+  const auto usingUnixSocket = !unixSocket.empty();
+
+  const auto& host = usingUnixSocket ? kEmptyString : mysqlConnKey->host();
+  const auto& user = mysqlConnKey->user();
+  const auto& password = mysqlConnKey->password();
+  const auto& db_name = mysqlConnKey->db_name();
+  auto port = usingUnixSocket ? 0 : mysqlConnKey->port();
+
+  // When using unix socket (AF_UNIX), host/port do not matter.
   auto ret = mysql_real_connect(
       mysql_,
       host.c_str(),
@@ -486,13 +498,24 @@ InternalConnection::Status SyncMysqlConnection::tryConnect(
 }
 
 InternalConnection::Status AsyncMysqlConnection::tryConnect(
-    const std::string& host,
-    const std::string& user,
-    const std::string& password,
-    const std::string& db_name,
-    uint16_t port,
-    const std::string& unixSocket,
+    const ConnectionOptions& /*opts*/,
+    std::shared_ptr<const ConnectionKey> conn_key,
     int flags) const {
+  static std::string kEmptyString;
+  auto mysqlConnKey =
+      std::dynamic_pointer_cast<const MysqlConnectionKey>(conn_key);
+  DCHECK(mysqlConnKey);
+
+  const auto& unixSocket = mysqlConnKey->unixSocketPath();
+  const auto usingUnixSocket = !unixSocket.empty();
+
+  const auto& host = usingUnixSocket ? kEmptyString : mysqlConnKey->host();
+  const auto& user = mysqlConnKey->user();
+  const auto& password = mysqlConnKey->password();
+  const auto& db_name = mysqlConnKey->db_name();
+  auto port = usingUnixSocket ? 0 : mysqlConnKey->port();
+
+  // When using unix socket (AF_UNIX), host/port do not matter.
   auto ret = mysql_real_connect_nonblocking(
       mysql_,
       host.empty() ? nullptr : host.c_str(),
@@ -555,9 +578,13 @@ InternalConnection::Status AsyncMysqlConnection::resetConn() const {
 }
 
 InternalConnection::Status SyncMysqlConnection::changeUser(
-    const std::string& user,
-    const std::string& password,
-    const std::string& database) const {
+    std::shared_ptr<const ConnectionKey> connKey) const {
+  auto mysqlConnKey =
+      std::dynamic_pointer_cast<const MysqlConnectionKey>(connKey);
+  DCHECK(mysqlConnKey);
+  auto user = mysqlConnKey->user();
+  auto password = mysqlConnKey->password();
+  auto database = mysqlConnKey->db_name();
   auto ret = mysql_change_user(
       mysql_, user.c_str(), password.c_str(), database.c_str());
   VLOG(4) << fmt::format(
@@ -571,9 +598,13 @@ InternalConnection::Status SyncMysqlConnection::changeUser(
 }
 
 InternalConnection::Status AsyncMysqlConnection::changeUser(
-    const std::string& user,
-    const std::string& password,
-    const std::string& database) const {
+    std::shared_ptr<const ConnectionKey> connKey) const {
+  auto mysqlConnKey =
+      std::dynamic_pointer_cast<const MysqlConnectionKey>(connKey);
+  DCHECK(mysqlConnKey);
+  auto user = mysqlConnKey->user();
+  auto password = mysqlConnKey->password();
+  auto database = mysqlConnKey->db_name();
   auto ret = mysql_change_user_nonblocking(
       mysql_, user.c_str(), password.c_str(), database.c_str());
   VLOG(4) << fmt::format(

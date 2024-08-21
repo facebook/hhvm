@@ -121,12 +121,14 @@ void ConnectionPoolBase::displayOpenConnections() {
   counters_.withRLock([](const auto& locked) {
     LOG(INFO) << "*** Open connections";
     for (const auto& [key, value] : locked.open_connections) {
-      LOG(INFO) << key.getConnectionKey().getDisplayString() << ": " << value;
+      LOG(INFO) << key.getConnectionKeyRef().getDisplayString() << ": "
+                << value;
     }
 
     LOG(INFO) << "*** Pending connections";
     for (const auto& [key, value] : locked.pending_connections) {
-      LOG(INFO) << key.getConnectionKey().getDisplayString() << ": " << value;
+      LOG(INFO) << key.getConnectionKeyRef().getDisplayString() << ": "
+                << value;
     }
   });
 }

@@ -37,7 +37,7 @@ class ConnectPoolOperationImpl : public ConnectOperationImpl {
   ConnectPoolOperationImpl(
       std::weak_ptr<ConnectionPool<Client>> pool,
       std::shared_ptr<Client> client,
-      ConnectionKey conn_key)
+      std::shared_ptr<const ConnectionKey> conn_key)
       : ConnectOperationImpl(client.get(), std::move(conn_key)), pool_(pool) {}
 
   ConnectPoolOperation<Client>& getConnectPoolOp() const {

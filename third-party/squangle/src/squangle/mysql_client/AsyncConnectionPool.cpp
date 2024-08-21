@@ -164,7 +164,7 @@ std::ostream& operator<<(std::ostream& os, const PoolOptions& options) {
 }
 
 std::ostream& operator<<(std::ostream& os, const PoolKey& key) {
-  return os << "{key:" << key.getConnectionKey().getDisplayString()
+  return os << "{key:" << key.getConnectionKeyRef().getDisplayString()
             << ",options:" << key.getConnectionOptions().getDisplayString()
             << "}";
 }
@@ -178,7 +178,7 @@ std::string AsyncConnectPoolOperationImpl::createTimeoutErrorMessage(
   bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
 
   std::vector<std::string> parts;
-  const auto& key = getConnectionKey();
+  const auto& key = getKeyRef();
   parts.push_back(fmt::format(
       "[{}]({})Connection to {}:{} timed out in pool",
       static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),

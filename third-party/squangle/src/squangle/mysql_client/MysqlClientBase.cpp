@@ -69,18 +69,19 @@ void MysqlClientBase::logQueryFailure(
 
 void MysqlClientBase::logConnectionSuccess(
     const db::CommonLoggingData& logging_data,
-    const ConnectionKey& conn_key,
+    std::shared_ptr<const ConnectionKey> conn_key,
     const db::ConnectionContextBase* connection_context) {
   if (db_logger_) {
     db_logger_->logConnectionSuccess(
-        logging_data, makeSquangleLoggingData(conn_key, connection_context));
+        logging_data,
+        makeSquangleLoggingData(std::move(conn_key), connection_context));
   }
 }
 
 void MysqlClientBase::logConnectionFailure(
     const db::CommonLoggingData& logging_data,
     db::FailureReason reason,
-    const ConnectionKey& conn_key,
+    std::shared_ptr<const ConnectionKey> conn_key,
     unsigned int mysqlErrno,
     const std::string& error,
     const db::ConnectionContextBase* connection_context) {
@@ -92,7 +93,7 @@ void MysqlClientBase::logConnectionFailure(
         reason,
         mysqlErrno,
         error,
-        makeSquangleLoggingData(conn_key, connection_context));
+        makeSquangleLoggingData(std::move(conn_key), connection_context));
   }
 }
 
@@ -102,12 +103,12 @@ std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
     const std::string& database_name,
     const std::string& user,
     const std::string& password) {
-  return beginConnection(
-      ConnectionKey(host, port, database_name, user, password));
+  return beginConnection(std::make_shared<const MysqlConnectionKey>(
+      host, port, database_name, user, password));
 }
 
 std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
-    ConnectionKey conn_key) {
+    std::shared_ptr<const ConnectionKey> conn_key) {
   auto impl = createConnectOperationImpl(this, std::move(conn_key));
   auto ret = ConnectOperation::create(std::move(impl));
   if (connection_cb_) {
@@ -120,7 +121,7 @@ std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
 std::unique_ptr<ConnectOperationImpl>
 MysqlClientBase::createConnectOperationImpl(
     MysqlClientBase* client,
-    ConnectionKey conn_key) const {
+    std::shared_ptr<const ConnectionKey> conn_key) const {
   return ConnectOperationImpl::create(client, std::move(conn_key));
 }
 

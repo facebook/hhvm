@@ -35,13 +35,14 @@ class SyncMysqlClient : public MysqlClientBase {
   }
 
   db::SquangleLoggingData makeSquangleLoggingData(
-      const ConnectionKey& connKey,
+      std::shared_ptr<const ConnectionKey> connKey,
       const db::ConnectionContextBase* connContext) override {
-    return db::SquangleLoggingData(connKey, connContext);
+    return db::SquangleLoggingData(std::move(connKey), connContext);
   }
 
   // Factory method
-  std::unique_ptr<Connection> createConnection(ConnectionKey conn_key) override;
+  std::unique_ptr<Connection> createConnection(
+      std::shared_ptr<const ConnectionKey> conn_key) override;
 
   void drain(bool /*unused*/) {}
 
@@ -69,8 +70,8 @@ class SyncMysqlClient : public MysqlClientBase {
 
   // These functions matter more to Async client, which keeps track of
   // existing operations.
-  void activeConnectionAdded(const ConnectionKey*) override {}
-  void activeConnectionRemoved(const ConnectionKey*) override {}
+  void activeConnectionAdded(std::shared_ptr<const ConnectionKey>) override {}
+  void activeConnectionRemoved(std::shared_ptr<const ConnectionKey>) override {}
   void addOperation(std::shared_ptr<Operation>) override {}
   void deferRemoveOperation(Operation*) override {}
 
@@ -84,7 +85,7 @@ class SyncMysqlClient : public MysqlClientBase {
     Status tryConnect(
         const InternalConnection& conn,
         const ConnectionOptions& opts,
-        const ConnectionKey& key,
+        std::shared_ptr<const ConnectionKey> key,
         int flags) override;
 
     Status runQuery(const InternalConnection& conn, std::string_view queryStmt)
@@ -110,10 +111,8 @@ class SyncMysqlClient : public MysqlClientBase {
     }
     Status changeUser(
         const InternalConnection& conn,
-        const std::string& user,
-        const std::string& password,
-        const std::string& database) override {
-      return conn.changeUser(user, password, database);
+        std::shared_ptr<const ConnectionKey> conn_key) override {
+      return conn.changeUser(std::move(conn_key));
     }
   } mysql_handler_;
 };
@@ -125,9 +124,9 @@ class SyncConnection : public Connection {
  public:
   SyncConnection(
       MysqlClientBase& client,
-      ConnectionKey conn_key,
+      std::shared_ptr<const ConnectionKey> conn_key,
       std::unique_ptr<ConnectionHolder> conn = nullptr)
-      : Connection(client, conn_key, std::move(conn)) {}
+      : Connection(client, std::move(conn_key), std::move(conn)) {}
 
   ~SyncConnection();
 

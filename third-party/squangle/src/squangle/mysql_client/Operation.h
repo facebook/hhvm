@@ -457,9 +457,9 @@ class OperationImpl : public OperationBase,
     total_thread_block_time_ += block_time;
   }
 
-  // host and port we are connected to (or will be connected to).
-  const std::string& host() const;
-  int port() const;
+  // // host and port we are connected to (or will be connected to).
+  // const std::string& host() const;
+  // int port() const;
 
   // Information about why this operation failed.
   unsigned int mysql_errno() const override;

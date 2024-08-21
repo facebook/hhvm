@@ -14,7 +14,7 @@ namespace facebook {
 namespace common {
 namespace mysql_client {
 
-ConnectionKey::ConnectionKey(
+MysqlConnectionKey::MysqlConnectionKey(
     folly::StringPiece host,
     int port,
     folly::StringPiece db_name,
@@ -35,20 +35,38 @@ ConnectionKey::ConnectionKey(
       port_(port),
       ignoreDbName_(ignore_db_name) {}
 
-bool ConnectionKey::operator==(const ConnectionKey& rhs) const noexcept {
+bool MysqlConnectionKey::operator==(
+    const MysqlConnectionKey& rhs) const noexcept {
   return hash_ == rhs.hash_ && host_ == rhs.host_ && port_ == rhs.port_ &&
       (ignoreDbName_ || dbName_ == rhs.dbName_) && user_ == rhs.user_ &&
       password_ == rhs.password_ && specialTag_ == rhs.specialTag_ &&
       unixSocketPath_ == rhs.unixSocketPath_;
 }
 
-bool ConnectionKey::partialEqual(const ConnectionKey& rhs) const noexcept {
-  return partialHash_ == rhs.partialHash_ && host_ == rhs.host_ &&
-      port_ == rhs.port_ && user_ == rhs.user_ && password_ == rhs.password_ &&
-      specialTag_ == rhs.specialTag_ && unixSocketPath_ == rhs.unixSocketPath_;
+bool MysqlConnectionKey::operator==(const ConnectionKey& rhs) const noexcept {
+  try {
+    const auto& key = dynamic_cast<const MysqlConnectionKey&>(rhs);
+    return *this == key;
+  } catch (const std::bad_cast& /*e*/) {
+    // `rhs` was not a MysqlConnectionKey object
+    return false;
+  }
 }
 
-std::string ConnectionKey::getDisplayString(bool level2) const {
+bool MysqlConnectionKey::partialEqual(const ConnectionKey& rhs) const noexcept {
+  try {
+    const auto& key = dynamic_cast<const MysqlConnectionKey&>(rhs);
+    return partialHash_ == key.partialHash_ && host_ == key.host_ &&
+        port_ == key.port_ && user_ == key.user_ &&
+        password_ == key.password_ && specialTag_ == key.specialTag_ &&
+        unixSocketPath_ == key.unixSocketPath_;
+  } catch (const std::bad_cast& /*e*/) {
+    // `rhs` was not a MysqlConnectionKey object
+    return false;
+  }
+}
+
+std::string MysqlConnectionKey::getDisplayString(bool level2) const {
   if (unixSocketPath_.empty()) {
     return fmt::format(
         "{} [{}] ({}@{}:{})",

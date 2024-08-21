@@ -293,12 +293,12 @@ std::shared_ptr<Operation> Operation::getSharedPointer() {
   return shared_from_this();
 }
 
-const std::string& OperationImpl::host() const {
-  return conn().host();
-}
-int OperationImpl::port() const {
-  return conn().port();
-}
+// const std::string& OperationImpl::host() const {
+//   return conn().host();
+// }
+// int OperationImpl::port() const {
+//   return conn().port();
+// }
 
 void OperationImpl::setObserverCallback(ObserverCallback obs_cb) {
   CHECK_THROW(

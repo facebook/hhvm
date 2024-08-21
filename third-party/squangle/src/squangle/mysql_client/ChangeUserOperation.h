@@ -16,13 +16,8 @@ class ChangeUserOperation : public SpecialOperation {
  public:
   explicit ChangeUserOperation(
       std::unique_ptr<SpecialOperationImpl> impl,
-      const std::string& user,
-      const std::string& password,
-      const std::string& database)
-      : SpecialOperation(std::move(impl)),
-        user_(user),
-        password_(password),
-        database_(database) {}
+      std::shared_ptr<const ConnectionKey> key)
+      : SpecialOperation(std::move(impl)), key_(key) {}
 
  private:
   MysqlHandler::Status callMysqlHandler() override;
@@ -35,9 +30,7 @@ class ChangeUserOperation : public SpecialOperation {
     return errorMsg;
   }
 
-  const std::string user_;
-  const std::string password_;
-  const std::string database_;
+  std::shared_ptr<const ConnectionKey> key_;
 
   static constexpr const char* errorMsg = "Change user failed: ";
 };

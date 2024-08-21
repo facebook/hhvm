@@ -7,6 +7,7 @@
  */
 
 #include <chrono>
+#include <memory>
 
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
@@ -19,14 +20,15 @@ using namespace std::chrono_literals;
 
 ConnectOperationImpl::ConnectOperationImpl(
     MysqlClientBase* mysql_client,
-    ConnectionKey conn_key)
+    std::shared_ptr<const ConnectionKey> conn_key)
     : OperationImpl(std::make_unique<OperationImpl::OwnedConnection>(
           mysql_client->createConnection(conn_key))),
-      conn_key_(std::move(conn_key)),
+      conn_key_(std::dynamic_pointer_cast<const MysqlConnectionKey>(conn_key)),
       flags_(CLIENT_MULTI_STATEMENTS),
       active_in_client_(true),
       tcp_timeout_handler_(mysql_client->getEventBase(), this) {
-  mysql_client->activeConnectionAdded(&conn_key_);
+  DCHECK(conn_key_); // The connection key is a MySQL connection key
+  mysql_client->activeConnectionAdded(conn_key_);
 }
 
 void ConnectOperationImpl::setConnectionOptions(
@@ -245,7 +247,7 @@ ConnectOperationImpl::~ConnectOperationImpl() {
 
 /*static*/ std::unique_ptr<ConnectOperationImpl> ConnectOperationImpl::create(
     MysqlClientBase* mysql_client,
-    ConnectionKey conn_key) {
+    std::shared_ptr<const ConnectionKey> conn_key) {
   // We must do this unusual behavior (with `new`) instead of std::make_unique
   // because we don't want the constructor for ConnectOperationImpl to be
   // public. Without a public constructor there is no standard way of allowing
@@ -263,7 +265,7 @@ void ConnectOperationImpl::actionable() {
 
   auto& handler = conn().client().getMysqlHandler();
   // MYSQL* mysql = conn()->mysql();
-  const auto usingUnixSocket = !conn_key_.unixSocketPath().empty();
+  const auto usingUnixSocket = !conn_key_->unixSocketPath().empty();
 
   auto status = handler.tryConnect(
       conn().getInternalConnection(), conn_options_, conn_key_, flags_);
@@ -338,8 +340,8 @@ void ConnectOperationImpl::timeoutHandler(
                   : SquangleErrno::SQ_ERRNO_CONN_TIMEOUT),
       kErrorPrefix,
       isPoolConnection ? "Pool" : "",
-      host(),
-      port()));
+      conn_key_->host(),
+      conn_key_->port()));
   if (!isPoolConnection) {
     parts.push_back(fmt::format("at stage {}", conn().getConnectStageName()));
   }
@@ -474,7 +476,7 @@ void ConnectOperationImpl::removeClientReference() {
     // It's safe to call the client since we still have a ref counting
     // it won't die before it goes to 0
     active_in_client_ = false;
-    client().activeConnectionRemoved(&conn_key_);
+    client().activeConnectionRemoved(conn_key_);
   }
 }
 

@@ -17,54 +17,60 @@ class PoolKey {
  public:
   // Hashes Connections and Operations waiting for connections based on basic
   // Connection info (ConnectionKey) and Connection Attributes.
-  PoolKey(ConnectionKey conn_key, ConnectionOptions conn_opts)
+  PoolKey(
+      std::shared_ptr<const ConnectionKey> conn_key,
+      ConnectionOptions conn_opts)
       : connKey_(std::move(conn_key)), connOptions_(std::move(conn_opts)) {
     options_hash_ = folly::hash::hash_range(
         connOptions_.getAttributes().begin(),
         connOptions_.getAttributes().end());
     partial_hash_ =
-        folly::hash::hash_combine(connKey_.partial_hash(), options_hash_);
-    full_hash_ = folly::hash::hash_combine(connKey_.hash(), options_hash_);
+        folly::hash::hash_combine(connKey_->partial_hash(), options_hash_);
+    full_hash_ = folly::hash::hash_combine(connKey_->hash(), options_hash_);
   }
 
-  FOLLY_NODISCARD bool operator==(const PoolKey& rhs) const noexcept {
+  [[nodiscard]] bool operator==(const PoolKey& rhs) const noexcept {
     return full_hash_ == rhs.full_hash_ && options_hash_ == rhs.options_hash_ &&
-        connKey_ == rhs.connKey_;
+        *connKey_ == *rhs.connKey_;
   }
 
-  FOLLY_NODISCARD bool operator!=(const PoolKey& rhs) const noexcept {
+  [[nodiscard]] bool operator!=(const PoolKey& rhs) const noexcept {
     return !(*this == rhs);
   }
 
-  FOLLY_NODISCARD bool partialCompare(const PoolKey& rhs) const noexcept {
+  [[nodiscard]] bool partialCompare(const PoolKey& rhs) const noexcept {
     return partial_hash_ == rhs.partial_hash_ &&
         options_hash_ == rhs.options_hash_ &&
-        connKey_.partialEqual(rhs.connKey_);
+        connKey_->partialEqual(*rhs.connKey_);
   }
 
-  FOLLY_NODISCARD const ConnectionKey& getConnectionKey() const noexcept {
+  [[nodiscard]] std::shared_ptr<const ConnectionKey> getConnectionKey()
+      const noexcept {
     return connKey_;
   }
 
-  FOLLY_NODISCARD const ConnectionOptions& getConnectionOptions()
-      const noexcept {
+  [[nodiscard]] const ConnectionKey& getConnectionKeyRef() const noexcept {
+    return *connKey_;
+  }
+
+  [[nodiscard]] const ConnectionOptions& getConnectionOptions() const noexcept {
     return connOptions_;
   }
 
-  FOLLY_NODISCARD size_t getHash() const noexcept {
+  [[nodiscard]] size_t getHash() const noexcept {
     return full_hash_;
   }
 
-  FOLLY_NODISCARD size_t getPartialHash() const noexcept {
+  [[nodiscard]] size_t getPartialHash() const noexcept {
     return partial_hash_;
   }
 
-  FOLLY_NODISCARD size_t getOptionsHash() const noexcept {
+  [[nodiscard]] size_t getOptionsHash() const noexcept {
     return options_hash_;
   }
 
  private:
-  ConnectionKey connKey_;
+  std::shared_ptr<const ConnectionKey> connKey_;
   ConnectionOptions connOptions_;
 
   size_t options_hash_;

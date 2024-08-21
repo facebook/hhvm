@@ -38,9 +38,7 @@
 #include <thrift/lib/cpp2/protocol/TableBasedForwardTypes.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 using FieldID = std::int16_t;
 
@@ -90,7 +88,7 @@ enum class FieldQualifier {
   Terse,
 };
 
-struct FieldInfo {
+struct FieldInfo final {
   // Field id in thrift definition.
   FieldID id;
 
@@ -120,7 +118,7 @@ struct FieldInfo {
   const TypeInfo* typeInfo;
 };
 
-struct UnionExt {
+struct UnionExt final {
   /**
    * Clears the given union data object.
    *
@@ -156,15 +154,36 @@ struct UnionExt {
 
   FOLLY_PUSH_WARNING
   FOLLY_CLANG_DISABLE_WARNING("-Wc99-extensions")
-  // Value initialized using placement new into the member.
-  // Generated code should order this list by fields key order.
+
+  /**
+   * Optional field member initialization methods.
+   *
+   * This array can be empty (i.e., `initMember[0] == nullptr`), in which case
+   * it is ignored.
+   *
+   * If not empty, this array must have exactly one (function pointer) value for
+   * each field in the union, ordered by field id (i.e., the index of the
+   * function for a given field in this array is the same as in the
+   * corresponding `StructInfo.fieldInfos`).  These functions will be called
+   * when deserializing a Thrift union (whose `StructInfo.unionExt` points to
+   * this), with a single argument: a (type-erased, i.e. `void*`) pointer to the
+   * value for this field.
+   *
+   * In practice, when this array is populated, it is done so by leveraging the
+   * `placementNewUnionValue()` template methods, to default-create new values
+   * directly in the given (allocated) memory (via placement-new).
+   */
   VoidFuncPtr initMember[];
+
   FOLLY_POP_WARNING
 };
 
-// Templatized version to const initialize with the exact array length.
+/**
+ * Convenience template class, to initialize a `UnionExt` with the correct
+ * layout for the number of specified fields.
+ */
 template <std::int16_t NumFields>
-struct UnionExtN {
+struct UnionExtN final {
   VoidFuncPtr clear;
   ptrdiff_t unionTypeOffset;
   int (*getActiveId)(const void*);
@@ -172,28 +191,56 @@ struct UnionExtN {
   VoidFuncPtr initMember[NumFields];
 };
 
-struct StructInfo {
+/**
+ * Holds all information and operations required to (de)serialize a type-erased
+ * "target object" corresponding to a structured Thrift type (i.e., a Thrift
+ * struct, union or exception).
+ *
+ * Instances of this type are core to the "Table-Based" serialization logic, as
+ * they bridge the gap between the generic (de)serialization logic and the
+ * type-specific API that is unknown to the former (since the "target object"
+ * is a type-erased `void*`).
+ */
+struct StructInfo final {
   /**
    * Number of fields in `fieldInfos`.
    */
   std::int16_t numFields;
 
+  /**
+   * Name of this structured type.
+   */
   const char* name;
 
-  // This should be set to nullptr when not a union.
+  /**
+   * Information and operations specific to Thrift unions, if and only if the
+   * type of the target object for this `StructInfo` is a Thrift union.
+   *
+   * Otherwise (i.e., if the target object type is not a Thrift union), this
+   * field must be `nullptr`.
+   */
   const UnionExt* unionExt = nullptr;
 
   /**
    * Returns the value of the "isset" flag at the given `offset` for the given
-   * `object`.
+   * `targetObject`.
    *
-   * @param object
+   * This function can only be present (i.e., not nullptr) if this StructInfo
+   * does NOT correspond to a Thrift union (i.e., `unionExt` is null).
+   *
+   * @param object A (type-erased) target object whose actual type corresponds
+   *        to this `StructInfo`.
+   *
    * @param offset of the isset flag to check for a given field, corresponding
    *        to the value of `FieldInfo::issetOffset` for that field.
    */
-  bool (*getIsset)(const void* /* object */, ptrdiff_t /* offset */);
+  bool (*getIsset)(const void* /* targetObject */, ptrdiff_t /* offset */);
 
-  void (*setIsset)(void* /* object */, ptrdiff_t /* offset */, bool /*set */);
+  /**
+   * Analoguous to `getIsset`, but sets the flag to the given value.
+   */
+  void (*setIsset)(
+      void* /* targetObject */, ptrdiff_t /* offset */, bool /* set */);
 
   // Use for other languages to pass in additional information.
   const void* customExt;
@@ -212,7 +259,7 @@ struct StructInfo {
 
 // Templatized version to const initialize with the exact array length.
 template <std::int16_t NumFields>
-struct StructInfoN {
+struct StructInfoN final {
   std::int16_t numFields = NumFields;
   const char* name;
   const void* unionExt = nullptr;
@@ -228,7 +275,7 @@ FOLLY_ERASE const StructInfo& toStructInfo(
   return reinterpret_cast<const StructInfo&>(templatizedInfo);
 }
 
-struct ListFieldExt {
+struct ListFieldExt final {
   const TypeInfo* valInfo;
   std::uint32_t (*size)(const void* object);
   void (*clear)(void* object);
@@ -247,7 +294,7 @@ struct ListFieldExt {
       size_t (*writer)(const void* context, const void* val));
 };
 
-struct SetFieldExt {
+struct SetFieldExt final {
   const TypeInfo* valInfo;
   std::uint32_t (*size)(const void* object);
   void (*clear)(void* object);
@@ -267,7 +314,7 @@ struct SetFieldExt {
       size_t (*writer)(const void* context, const void* val));
 };
 
-struct MapFieldExt {
+struct MapFieldExt final {
   const TypeInfo* keyInfo;
   const TypeInfo* valInfo;
   std::uint32_t (*size)(const void* object);
@@ -296,6 +343,9 @@ void clearUnion(void* object) {
   apache::thrift::clear(*reinterpret_cast<ThriftUnion*>(object));
 }
 
+/**
+ * Holds a thrift value in its default target type for cpp2.
+ */
 union ThriftValue {
   explicit ThriftValue(bool value) : boolValue(value) {}
   explicit ThriftValue(std::int8_t value) : int8Value(value) {}
@@ -779,13 +829,11 @@ constexpr ptrdiff_t issetOffset(std::int16_t fieldIndex);
 template <class ThriftUnion>
 constexpr ptrdiff_t unionTypeOffset();
 
-template <class Protocol_>
-void read(Protocol_* iprot, const StructInfo& structInfo, void* object);
+template <class TProtocol>
+void read(TProtocol* iprot, const StructInfo& structInfo, void* targetObject);
 
-template <class Protocol_>
+template <class TProtocol>
 size_t write(
-    Protocol_* iprot, const StructInfo& structInfo, const void* object);
+    TProtocol* iprot, const StructInfo& structInfo, const void* targetObject);
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

@@ -26,9 +26,7 @@
 #include <thrift/lib/cpp2/protocol/TableBasedSerializerImpl.h>
 #include <thrift/lib/python/types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
+namespace apache::thrift::python {
 
 template <typename Writer>
 std::unique_ptr<folly::IOBuf> serialize_type(
@@ -38,7 +36,7 @@ std::unique_ptr<folly::IOBuf> serialize_type(
   writer.setOutput(&queue);
   auto value = typeInfo.get(&object, typeInfo);
   if (value.hasValue()) {
-    detail::write(&writer, typeInfo, value.value());
+    detail::writeThriftValue(&writer, typeInfo, value.value());
   }
   return queue.move();
 }
@@ -50,7 +48,7 @@ PyObject* deserialize_type(
   reader.setInput(buf);
   detail::ProtocolReaderStructReadState<Reader> readState;
   PyObject* obj = nullptr;
-  detail::read(&reader, typeInfo, readState, &obj);
+  detail::readThriftValue(&reader, typeInfo, readState, &obj);
   return obj;
 }
 
@@ -88,6 +86,4 @@ PyObject* deserialize_type(
   }
 }
 
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python

@@ -18,5 +18,6 @@ PACKAGES.toml:14:11
 13 |
 [3] 14 | [packages.pkg3]
 15 | includes = ["pkg2"]
+16 |
 
 1 error found

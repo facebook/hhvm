@@ -1,0 +1,22 @@
+error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg3 [1]
+-> This is from cross_package_with_package_syntax_loop.php--pkg1.php, which belongs to package pkg1 [2]
+-> But cross_package_with_package_syntax_loop.php--pkg3.php is in package pkg3, and package pkg3 does not include package pkg1 [3]
+
+cross_package_with_package_syntax_loop.php--pkg3.php:20:3
+18 |   };
+19 |
+[1] 20 |   pkg1_call(); // error; package info doesn't transfer after while statement
+21 | }
+
+cross_package_with_package_syntax_loop.php--pkg1.php:2:10
+1 | <?hh
+[2]  2 | function pkg1_call(): void {}
+
+PACKAGES.toml:14:11
+12 | includes = ["pkg1"]
+13 |
+[3] 14 | [packages.pkg3]
+15 | includes = ["pkg2"]
+16 |
+
+1 error found

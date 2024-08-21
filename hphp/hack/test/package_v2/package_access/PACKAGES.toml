@@ -13,3 +13,5 @@ includes = ["pkg1"]
 
 [packages.pkg3]
 includes = ["pkg2"]
+
+[packages.pkg4]

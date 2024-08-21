@@ -87,7 +87,9 @@ cdef class TypeInfoBase:
         raise NotImplementedError("Not implemented on base TypeInfoBase class")
 
     def __eq__(self, other):
-        raise NotImplementedError("Use the 'same_as' method for comparing TypeInfoBase instances.")
+        raise NotImplementedError(
+            "Use the 'same_as' method for comparing TypeInfoBase instances."
+        )
 
     def same_as(TypeInfoBase self, other):
         """
@@ -120,7 +122,10 @@ cdef class TypeInfo(TypeInfoBase):
     # validate and convert to format serializer may understand
     cpdef to_internal_data(self, object value):
         if not isinstance(value, self.pytypes):
-            raise TypeError(f'value {value} is not a {self.pytypes !r}, is actually of type {type(value)}')
+            raise TypeError(
+                f'value {value} is not a {self.pytypes !r}, is actually of type '
+                f'{type(value)}'
+            )
         return value
 
     # convert deserialized data to user format
@@ -1081,7 +1086,9 @@ cdef class Struct(StructOrUnion):
         return f"{type(self).__name__}({fields})"
 
     def __reduce__(self):
-        return (_unpickle_struct, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
+        return (
+            _unpickle_struct, (type(self), b''.join(self._serialize(Protocol.COMPACT)))
+        )
 
     cdef folly.iobuf.IOBuf _serialize(self, Protocol proto):
         cdef StructInfo info = self._fbthrift_struct_info
@@ -1091,12 +1098,16 @@ cdef class Struct(StructOrUnion):
 
     cdef uint32_t _deserialize(self, folly.iobuf.IOBuf buf, Protocol proto) except? 0:
         cdef StructInfo info = self._fbthrift_struct_info
-        cdef uint32_t len = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
+        cdef uint32_t len = cdeserialize(
+            deref(info.cpp_obj), buf._this, self._fbthrift_data, proto
+        )
         self._fbthrift_populate_primitive_fields()
         return len
 
     cdef _fbthrift_get_field_value(self, int16_t index):
-        cdef PyObject* cached_value = PyTuple_GET_ITEM(self._fbthrift_field_cache, index)
+        cdef PyObject* cached_value = PyTuple_GET_ITEM(
+            self._fbthrift_field_cache, index
+        )
         if cached_value != NULL:
             return <object>cached_value
 
@@ -1106,7 +1117,9 @@ cdef class Struct(StructOrUnion):
         adapter_info = field_info.adapter_info
         data = self._fbthrift_data[index + 1]
         if data is not None:
-            py_value = (<TypeInfoBase>struct_info.type_infos[index]).to_python_value(data)
+            py_value = (
+                (<TypeInfoBase>struct_info.type_infos[index]).to_python_value(data)
+            )
             if adapter_info is not None:
                 adapter_class, transitive_annotation = adapter_info
                 py_value = adapter_class.from_thrift_field(

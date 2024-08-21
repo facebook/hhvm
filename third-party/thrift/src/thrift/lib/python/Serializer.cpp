@@ -34,14 +34,17 @@ std::unique_ptr<folly::IOBuf> serialize(
     PROTOCOL_TYPES protocol) {
   switch (protocol) {
     case PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
-      return serialize<CompactProtocolWriter>(dynamicStructInfo, object);
+      return serializeWithWriter<CompactProtocolWriter>(
+          dynamicStructInfo, object);
     case PROTOCOL_TYPES::T_BINARY_PROTOCOL:
-      return serialize<BinaryProtocolWriter>(dynamicStructInfo, object);
+      return serializeWithWriter<BinaryProtocolWriter>(
+          dynamicStructInfo, object);
     case PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
-      return serialize<SimpleJSONProtocolWriter>(dynamicStructInfo, object);
+      return serializeWithWriter<SimpleJSONProtocolWriter>(
+          dynamicStructInfo, object);
     // Deprecated, remove as soon as thrift-python migration complete
     case PROTOCOL_TYPES::T_JSON_PROTOCOL:
-      return serialize<JSONProtocolWriter>(dynamicStructInfo, object);
+      return serializeWithWriter<JSONProtocolWriter>(dynamicStructInfo, object);
     default:
       throw TProtocolException(
           TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");
@@ -62,14 +65,17 @@ size_t deserialize(
     PROTOCOL_TYPES protocol) {
   switch (protocol) {
     case PROTOCOL_TYPES::T_COMPACT_PROTOCOL:
-      return deserialize<CompactProtocolReader>(dynamicStructInfo, buf, object);
+      return deserializeWithReader<CompactProtocolReader>(
+          dynamicStructInfo, buf, object);
     case PROTOCOL_TYPES::T_BINARY_PROTOCOL:
-      return deserialize<BinaryProtocolReader>(dynamicStructInfo, buf, object);
+      return deserializeWithReader<BinaryProtocolReader>(
+          dynamicStructInfo, buf, object);
     case PROTOCOL_TYPES::T_SIMPLE_JSON_PROTOCOL:
-      return deserialize<SimpleJSONProtocolReader>(
+      return deserializeWithReader<SimpleJSONProtocolReader>(
           dynamicStructInfo, buf, object);
     case PROTOCOL_TYPES::T_JSON_PROTOCOL:
-      return deserialize<JSONProtocolReader>(dynamicStructInfo, buf, object);
+      return deserializeWithReader<JSONProtocolReader>(
+          dynamicStructInfo, buf, object);
     default:
       throw TProtocolException(
           TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");

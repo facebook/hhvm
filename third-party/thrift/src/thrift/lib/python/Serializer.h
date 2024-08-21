@@ -22,26 +22,24 @@
 
 #include <thrift/lib/python/types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
+namespace apache::thrift::python {
 
-template <typename Writer>
-std::unique_ptr<folly::IOBuf> serialize(
+template <typename TProtocolWriter>
+std::unique_ptr<folly::IOBuf> serializeWithWriter(
     const DynamicStructInfo& dynamicStructInfo, const PyObject* object) {
-  auto queue = folly::IOBufQueue{folly::IOBufQueue::cacheChainLength()};
-  Writer writer(SHARE_EXTERNAL_BUFFER);
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  TProtocolWriter writer(SHARE_EXTERNAL_BUFFER);
   writer.setOutput(&queue);
   detail::write(&writer, dynamicStructInfo.getStructInfo(), object);
   return queue.move();
 }
 
-template <typename Reader>
-size_t deserialize(
+template <typename TProtocolReader>
+size_t deserializeWithReader(
     const DynamicStructInfo& dynamicStructInfo,
     const folly::IOBuf* buf,
     PyObject* object) {
-  Reader reader(SHARE_EXTERNAL_BUFFER);
+  TProtocolReader reader(SHARE_EXTERNAL_BUFFER);
   reader.setInput(buf);
   detail::read(&reader, dynamicStructInfo.getStructInfo(), object);
   return reader.getCursor().getCurrentPosition();
@@ -83,6 +81,4 @@ size_t mutable_deserialize(
     void* object,
     PROTOCOL_TYPES protocol);
 
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python

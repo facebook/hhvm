@@ -376,21 +376,19 @@ struct ListContainer final {
   static Py_ssize_t Size(PyObject* p) { return PyList_Size(p); }
 };
 
+/**
+ * Returns pointer to a contiguous memory area of at least `numFields` bytes,
+ * each one of which holds the "is set" flag of the corresponding field (in the
+ * order of the corresponding `StructInfo.fieldInfos`).
+ */
 template <typename Container>
-const char* getIssetFlags(const PyObject* container) {
-  PyObject* isset = Container::GET_ITEM(container, 0);
+const char* getDataHolderIssetFlags(const PyObject* structDataHolder) {
+  PyObject* isset = Container::GET_ITEM(structDataHolder, 0);
   const char* issetFlags = PyBytes_AsString(isset);
   if (issetFlags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
   return issetFlags;
-}
-
-/**
- * Returns the first element of "struct tuple" which is an array of isset flags.
- */
-const char* getIssetFlags(const PyObject* structTuple) {
-  return getIssetFlags<TupleContainer>(structTuple);
 }
 
 /**
@@ -496,7 +494,7 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
 
   const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
-  const char* issetFlags = getIssetFlags<Container>(container);
+  const char* issetFlags = getDataHolderIssetFlags<Container>(container);
   for (int i = 0; i < numFields; ++i) {
     // If the field is already set, this implies that the constructor has
     // already assigned a value to the field. In this case, we skip it and
@@ -570,8 +568,13 @@ void* setUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
   return setPyObject(objectPtr, UniquePyObjectPtr{createUnionTuple()});
 }
 
-bool getIsset(const void* objectPtr, ptrdiff_t offset) {
-  const char* flags = getIssetFlags(static_cast<const PyObject*>(objectPtr));
+/**
+ * @param object The (`PyObject*`) data holder of the target immutable struct
+ * instance. This should correspond to a `PyTuple` instance.
+ */
+bool getImmutableIsset(const void* object, ptrdiff_t offset) {
+  const char* flags = getDataHolderIssetFlags<TupleContainer>(
+      static_cast<const PyObject*>(object));
   return flags[offset];
 }
 
@@ -700,13 +703,22 @@ const detail::UnionExtN<1> kImmutableUnionExt = {
  * Creates a new (table-based) serializer StructInfo for the thrift-python
  * structured type (struct, union or exception) with the given properties.
  *
+ * The returned StructInfo holds (pointers to) methods that can perform the
+ * operations required for (de)serializing instances of this type, given a
+ * type-erased (i.e., `void*`) "target object".
+ *
+ * For immutable Thrift structs, the target object corresponds to the "data
+ * holder" container, i.e. a PyTuple instance of size `numFields + 1`.
+ *
+ * TODO: immutable Thrift unions? mutable structs? mutable unions?
+ *
  * @param namePtr Name of the Thrift type. The returned object holds a pointer
  *        to this string, but does not take ownership.
  * @param fieldValues Map of default values for the fields of the returned type.
  *        The return StructInfo maintains a pointer to this map (as its
  *        `customExt`), but does not take ownership.
  */
-detail::StructInfo* newStructInfo(
+detail::StructInfo* newTableBasedSerializerStructInfo(
     const char* namePtr,
     int16_t numFields,
     bool isUnion,
@@ -720,7 +732,7 @@ detail::StructInfo* newStructInfo(
   structInfo->unionExt = isUnion
       ? reinterpret_cast<const detail::UnionExt*>(&kImmutableUnionExt)
       : nullptr;
-  structInfo->getIsset = isMutable ? getMutableIsset : getIsset;
+  structInfo->getIsset = isMutable ? getMutableIsset : getImmutableIsset;
   structInfo->setIsset = isMutable ? setMutableIsset : setIsset;
   structInfo->customExt = &fieldValues;
   return structInfo;
@@ -1451,7 +1463,7 @@ void MutableMapTypeInfo::consumeElem(
 DynamicStructInfo::DynamicStructInfo(
     const char* name, int16_t numFields, bool isUnion, bool isMutable)
     : name_{name},
-      tableBasedSerializerStructInfo_{newStructInfo(
+      tableBasedSerializerStructInfo_{newTableBasedSerializerStructInfo(
           name_.c_str(), numFields, isUnion, fieldValues_, isMutable)} {
   // reserve vector as we are assigning const char* from the string in
   // vector

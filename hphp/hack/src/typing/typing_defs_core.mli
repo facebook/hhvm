@@ -195,11 +195,12 @@ and shape_predicate = {
 
     The predicate would be `is Bool`
   *)
-and type_predicate =
+and type_predicate_ =
   | IsTag of type_tag
   | IsTupleOf of type_predicate list
   | IsShapeOf of shape_predicate
-[@@deriving eq, ord, hash, show]
+
+and type_predicate = Reason.t * type_predicate_ [@@deriving eq, ord, hash, show]
 
 (** Because Tfun is currently used as both a decl and locl ty, without this,
   the HH\Contexts\defaults alias must be stored in shared memory for a

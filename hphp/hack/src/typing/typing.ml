@@ -6867,7 +6867,7 @@ end = struct
         (fun env -> condition_single env false te) )
     in
     let rec branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
-      match (predicate, ivar) with
+      match (snd predicate, ivar) with
       (* Legacy case: apply refinements to both lsh and rhs for assignments *)
       | (IsTag NullTag, (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs; rhs }))
         ->
@@ -6989,13 +6989,14 @@ end = struct
           lhs = te;
           rhs = (_, _, Aast.Null);
         } ->
+      let reason = Reason.equal p in
       branch_for_type_switch
         env
         ~p
         ~ivar:te
         ~errs:None
-        ~reason:(Reason.witness p)
-        ~predicate:(IsTag NullTag)
+        ~reason
+        ~predicate:(reason, IsTag NullTag)
     | Aast.Hole (e, _, _, _) -> condition_dual env e
     | Aast.Is (ivar, hint) -> begin
       let ((env, ty_err_opt), hint_ty) =
@@ -7011,20 +7012,20 @@ end = struct
             ~ivar
             ~errs:ty_err_opt
             ~reason
-            ~predicate:(IsTag NullTag)
+            ~predicate:(reason, IsTag NullTag)
         in
         (env, cond_false, cond_true)
       | _ -> begin
         match Result.ok @@ Typing_refinement.TyPredicate.of_ty env hint_ty with
         | None -> default_branch env
-        | Some predicate ->
+        | Some (_, predicate) ->
           branch_for_type_switch
             env
             ~p
             ~ivar
             ~errs:ty_err_opt
             ~reason
-            ~predicate
+            ~predicate:(reason, predicate)
       end
     end
     | Aast.Unop (Ast_defs.Unot, e) ->

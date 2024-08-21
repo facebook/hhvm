@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1f123b0e8174ff94c99f5e7d8807e724>>
+// @generated SignedSource<<1633ec17f360ad6cb9dc27aa3797841a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -549,9 +549,8 @@ arena_deserializer::impl_deserialize_in_arena!(ShapePredicate<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C, u8)]
-pub enum TypePredicate<'a> {
+pub enum TypePredicate_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     IsTag(&'a TypeTag<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -559,6 +558,32 @@ pub enum TypePredicate<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     IsShapeOf(&'a ShapePredicate<'a>),
 }
+impl<'a> TrivialDrop for TypePredicate_<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypePredicate_<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
+#[repr(C)]
+pub struct TypePredicate<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::Reason<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub TypePredicate_<'a>,
+);
 impl<'a> TrivialDrop for TypePredicate<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypePredicate<'arena>);
 

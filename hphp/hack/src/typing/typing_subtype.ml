@@ -607,11 +607,11 @@ module Subtype_negation = struct
     let neg_ty =
       match get_node ty with
       | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
-      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (IsTag ArraykeyTag))
-      | Tneg (IsTag ArraykeyTag) -> Some (MakeType.prim_type r Aast.Tarraykey)
-      | Tneg (IsTag NullTag)
-      | Tnonnull ->
-        Some (MakeType.null r)
+      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (r, IsTag ArraykeyTag))
+      | Tneg (r, IsTag ArraykeyTag) ->
+        Some (MakeType.prim_type r Aast.Tarraykey)
+      | Tneg (r, IsTag NullTag) -> Some (MakeType.null r)
+      | Tnonnull -> Some (MakeType.null r)
       | _ -> None
     in
     (env, neg_ty)
@@ -883,8 +883,8 @@ end = struct
     let (env, ty2) = Env.expand_type env ty2 in
     match (deref ty1, deref ty2) with
     | ( ((_, Tvar _) as tv),
-        ((_, (Tprim Aast.Tarraykey | Tneg (IsTag ArraykeyTag))) as ak) )
-    | ( ((_, (Tprim Aast.Tarraykey | Tneg (IsTag ArraykeyTag))) as ak),
+        ((_, (Tprim Aast.Tarraykey | Tneg (_, IsTag ArraykeyTag))) as ak) )
+    | ( ((_, (Tprim Aast.Tarraykey | Tneg (_, IsTag ArraykeyTag))) as ak),
         ((_, Tvar _) as tv) ) ->
       (env, Some (tv, ak))
     | _ -> (env, None)
@@ -4788,9 +4788,9 @@ end = struct
           ~rhs:{ super_supportdyn; super_like; ty_super }
           env)
     (* -- C-Neg-R ----------------------------------------------------------- *)
-    | (_, (r_super, Tneg (IsTag (ClassTag c_super)))) -> begin
+    | (_, (r_super, Tneg (r_pred, IsTag (ClassTag c_super)))) -> begin
       match deref ty_sub with
-      | (_, Tneg (IsTag (ClassTag c_sub))) ->
+      | (_, Tneg (_, IsTag (ClassTag c_sub))) ->
         if TUtils.is_sub_class_refl env c_super c_sub then
           valid env
         else
@@ -4812,7 +4812,7 @@ end = struct
             {
               super_like;
               super_supportdyn = false;
-              ty_super = mk (r_super, Tneg (IsTag (ClassTag c_super)));
+              ty_super = mk (r_super, Tneg (r_pred, IsTag (ClassTag c_super)));
             }
           env
     end
@@ -6720,8 +6720,7 @@ end = struct
       in
 
       let refine_true tyl =
-        intersect
-          (Typing_refinement.TyPredicate.to_ty reason_super predicate :: tyl)
+        intersect (Typing_refinement.TyPredicate.to_ty predicate :: tyl)
       in
       let refine_false tyl =
         let neg = MakeType.neg reason_super predicate in
@@ -8750,8 +8749,8 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     is_sub_type_for_union_help env ty2 (MakeType.null Reason.none)
   | (_, Tnonnull) ->
     is_sub_type_for_union_help env ty1 (MakeType.null Reason.none)
-  | (Tneg (IsTag (ClassTag c1)), Tclass ((_, c2), _, _tyl))
-  | (Tclass ((_, c2), _, _tyl), Tneg (IsTag (ClassTag c1))) ->
+  | (Tneg (_, IsTag (ClassTag c1)), Tclass ((_, c2), _, _tyl))
+  | (Tclass ((_, c2), _, _tyl), Tneg (_, IsTag (ClassTag c1))) ->
     (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
        o notin (complement (Union tyl'. c1<tyl'>)), which is just that
        c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
@@ -8769,12 +8768,12 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
     is_sub_type_for_union_help
       env
       ty2
-      (Typing_refinement.TyPredicate.to_ty Reason.none pred1)
+      (Typing_refinement.TyPredicate.to_ty pred1)
   | (_, Tneg pred2) ->
     is_sub_type_for_union_help
       env
       ty1
-      (Typing_refinement.TyPredicate.to_ty Reason.none pred2)
+      (Typing_refinement.TyPredicate.to_ty pred2)
   | (Tprim tp1, Tprim tp2) -> Subtype_negation.is_tprim_disjoint tp1 tp2
   | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
   | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))

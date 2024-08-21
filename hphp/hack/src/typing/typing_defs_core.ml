@@ -254,10 +254,18 @@ and shape_predicate = {
   sp_fields: shape_field_predicate TShapeMap.t;
 }
 
-and type_predicate =
+and type_predicate_ =
   | IsTag of type_tag
   | IsTupleOf of type_predicate list
   | IsShapeOf of shape_predicate
+
+and type_predicate =
+  (Reason.t
+  [@hash.ignore]
+  [@equal (fun _ _ -> true)]
+  [@compare (fun _ _ -> 0)]
+  [@printer (fun _ _ -> ())])
+  * type_predicate_
 [@@deriving eq, ord, hash, show { with_path = false }]
 
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)

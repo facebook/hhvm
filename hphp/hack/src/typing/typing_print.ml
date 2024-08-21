@@ -1170,7 +1170,7 @@ module Full = struct
       | ClassTag s -> to_doc s
     in
     let rec predicate_doc predicate =
-      match predicate with
+      match snd predicate with
       | IsTag tag -> tag_doc tag
       | IsTupleOf predicates ->
         let texts = List.map predicates ~f:predicate_doc in
@@ -1575,7 +1575,7 @@ module ErrorString = struct
         match predicate with
         | IsTag tag -> tag_str tag
         | IsTupleOf predicates ->
-          let strings = List.map predicates ~f:str in
+          let strings = List.map predicates ~f:(fun (_, pred) -> str pred) in
           "(" ^ String.concat ~sep:", " strings ^ ")"
         | IsShapeOf { sp_fields } ->
           let texts =
@@ -1594,13 +1594,13 @@ module ErrorString = struct
                     Typing_defs.TShapeField.name key;
                     key_delim;
                     " => ";
-                    str sfp_predicate;
+                    str (snd sfp_predicate);
                   ])
           in
           "shape(" ^ String.concat texts ~sep:", " ^ ")"
         (* TODO: T196048813, dedupe?, optional, open, fuel? *)
       in
-      (fuel, "anything but " ^ str predicate)
+      (fuel, "anything but " ^ str @@ snd predicate)
 
   and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
@@ -1793,7 +1793,7 @@ module Json = struct
         | ClassTag s -> name s
       in
       let rec predicate_json predicate =
-        match predicate with
+        match snd predicate with
         | IsTag tag -> tag_json tag
         | IsTupleOf predicates ->
           let predicates_json =

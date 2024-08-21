@@ -61,6 +61,5 @@ module TyPredicate : sig
     Typing_defs.locl_ty ->
     (Typing_defs.type_predicate, string) Result.t
 
-  val to_ty :
-    Typing_defs.Reason.t -> Typing_defs.type_predicate -> Typing_defs.locl_ty
+  val to_ty : Typing_defs.type_predicate -> Typing_defs.locl_ty
 end

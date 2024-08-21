@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55ddc1eb0f788384284446a4c4bdc47d>>
+// @generated SignedSource<<cd99be56accdb63126e1dabb18f0540c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -564,13 +564,32 @@ pub struct ShapePredicate {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C, u8)]
-pub enum TypePredicate {
+pub enum TypePredicate_ {
     IsTag(TypeTag),
     IsTupleOf(Vec<TypePredicate>),
     IsShapeOf(ShapePredicate),
 }
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
+#[repr(C)]
+pub struct TypePredicate(pub reason::Reason, pub TypePredicate_);
 
 #[derive(
     Clone,

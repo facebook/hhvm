@@ -19,7 +19,7 @@ let prim_type r t = mk (r, Tprim t)
 
 (* Make a negation type *)
 let neg r neg_t =
-  match neg_t with
+  match snd neg_t with
   (* Represent the negation of Tnull as Tnonnull, instead of Tneg Tnull *)
   | IsTag NullTag -> mk (r, Tnonnull)
   | _ -> mk (r, Tneg neg_t)

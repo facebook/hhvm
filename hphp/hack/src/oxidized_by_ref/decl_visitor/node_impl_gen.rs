@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<15d7a16a0d8e92d4703e68705644b565>>
+// @generated SignedSource<<3152e1d1d6d6860f783be0be2c3a21cd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -616,15 +616,30 @@ impl<'a> Node<'a> for ShapePredicate<'a> {
         }
     }
 }
+impl<'a> Node<'a> for TypePredicate_<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_type_predicate_(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypePredicate_::IsTag(ref __binding_0) => __binding_0.accept(v),
+            TypePredicate_::IsTupleOf(ref __binding_0) => __binding_0.accept(v),
+            TypePredicate_::IsShapeOf(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for TypePredicate<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_type_predicate(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            TypePredicate::IsTag(ref __binding_0) => __binding_0.accept(v),
-            TypePredicate::IsTupleOf(ref __binding_0) => __binding_0.accept(v),
-            TypePredicate::IsShapeOf(ref __binding_0) => __binding_0.accept(v),
+            TypePredicate(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
         }
     }
 }

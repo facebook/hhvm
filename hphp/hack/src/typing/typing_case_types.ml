@@ -537,7 +537,7 @@ module DataType = struct
       | NullTag -> (env, Set.singleton ~reason NullData)
       | ClassTag id -> Class.to_datatypes ~trail env id
     in
-    match predicate with
+    match snd predicate with
     | IsTag tag -> from_tag tag
     | IsTupleOf _ -> (env, Set.singleton ~reason VecData)
     | IsShapeOf _ -> (env, Set.singleton ~reason DictData)

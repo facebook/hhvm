@@ -262,10 +262,7 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   end
   | Tneg predicate -> begin
     match
-      Typing_defs.get_node
-      @@ Typing_refinement.TyPredicate.to_ty
-           (Typing_defs.get_reason ty)
-           predicate
+      Typing_defs.get_node @@ Typing_refinement.TyPredicate.to_ty predicate
     with
     | Tprim prim -> ValueSet.(symbolic_diff universe (prim_to_values prim))
     | _ -> ValueSet.universe

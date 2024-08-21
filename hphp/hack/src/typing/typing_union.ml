@@ -340,12 +340,12 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
       (env, Some (mk (r, Tfun ft)))
     | ((_, Tunapplied_alias _), _) ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | ((_, Tneg (IsTag (ClassTag c1))), (_, Tclass ((_, c2), Exact, [])))
-    | ((_, Tclass ((_, c2), Exact, [])), (_, Tneg (IsTag (ClassTag c1))))
+    | ((_, Tneg (_, IsTag (ClassTag c1))), (_, Tclass ((_, c2), Exact, [])))
+    | ((_, Tclass ((_, c2), Exact, [])), (_, Tneg (_, IsTag (ClassTag c1))))
       when String.equal c1 c2 ->
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (IsTag (ClassTag c1))), (_, Tclass ((_, c2), Nonexact _, [])))
-    | ((_, Tclass ((_, c2), Nonexact _, [])), (_, Tneg (IsTag (ClassTag c1))))
+    | ((_, Tneg (_, IsTag (ClassTag c1))), (_, Tclass ((_, c2), Nonexact _, [])))
+    | ((_, Tclass ((_, c2), Nonexact _, [])), (_, Tneg (_, IsTag (ClassTag c1))))
       when Utils.is_sub_class_refl env c1 c2 ->
       (* This union is mixed iff for all objects o,
          o not in complement (union tyl. c1<tyl>) implies o in c2,
@@ -355,10 +355,10 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
          c2 has no type parameters.
       *)
       (env, Some (MakeType.mixed r))
-    | ( (_, Tneg (IsTag (ClassTag c1))),
+    | ( (_, Tneg (_, IsTag (ClassTag c1))),
         (_, Tclass ((_, c2), Nonexact _, _ :: _)) )
     | ( (_, Tclass ((_, c2), Nonexact _, _ :: _)),
-        (_, Tneg (IsTag (ClassTag c1))) )
+        (_, Tneg (_, IsTag (ClassTag c1))) )
       when approx_cancel_neg && Utils.is_sub_class_refl env c1 c2 ->
       (* Unlike the case where c2 has no parameters, here we can get a situation
          where c1 is a sub-class of c2, but they don't union to mixed. For example,
@@ -366,16 +366,16 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
          we can still approximate up to mixed when it would be both sound and convenient,
          as controlled by the approx_cancel_neg flag. *)
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (IsTag (ClassTag c1))), (_, Tclass ((_, c2), Exact, _ :: _)))
-    | ((_, Tclass ((_, c2), Exact, _ :: _)), (_, Tneg (IsTag (ClassTag c1))))
+    | ((_, Tneg (_, IsTag (ClassTag c1))), (_, Tclass ((_, c2), Exact, _ :: _)))
+    | ((_, Tclass ((_, c2), Exact, _ :: _)), (_, Tneg (_, IsTag (ClassTag c1))))
       when approx_cancel_neg && String.equal c1 c2 ->
       (env, Some (MakeType.mixed r))
-    | ((_, Tneg (IsTag NumTag)), (_, Tprim Aast.Tarraykey))
-    | ((_, Tprim Aast.Tarraykey), (_, Tneg (IsTag NumTag))) ->
-      (env, Some (MakeType.neg r (IsTag FloatTag)))
-    | ((_, Tneg (IsTag ArraykeyTag)), (_, Tprim Aast.Tnum))
-    | ((_, Tprim Aast.Tnum), (_, Tneg (IsTag ArraykeyTag))) ->
-      (env, Some (MakeType.neg r (IsTag StringTag)))
+    | ((_, Tneg (_, IsTag NumTag)), (_, Tprim Aast.Tarraykey))
+    | ((_, Tprim Aast.Tarraykey), (_, Tneg (_, IsTag NumTag))) ->
+      (env, Some (MakeType.neg r (r, IsTag FloatTag)))
+    | ((_, Tneg (_, IsTag ArraykeyTag)), (_, Tprim Aast.Tnum))
+    | ((_, Tprim Aast.Tnum), (_, Tneg (_, IsTag ArraykeyTag))) ->
+      (env, Some (MakeType.neg r (r, IsTag StringTag)))
     | ((r1, Tintersection tyl1), (r2, Tintersection tyl2)) ->
       (match Typing_algebra.factorize_common_types tyl1 tyl2 with
       | ([], _, _) ->

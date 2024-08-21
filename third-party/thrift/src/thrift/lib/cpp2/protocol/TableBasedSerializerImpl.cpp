@@ -19,6 +19,20 @@
 
 namespace apache::thrift::detail {
 
+const void* getFieldValuesBasePtr(
+    const StructInfo& structInfo, const void* targetObject) {
+  const auto getFieldValuesBasePtrFn = structInfo.getFieldValuesBasePtr;
+
+  return getFieldValuesBasePtrFn != nullptr
+      ? getFieldValuesBasePtrFn(targetObject)
+      : targetObject;
+}
+
+void* getFieldValuesBasePtr(const StructInfo& structInfo, void* targetObject) {
+  return const_cast<void*>(
+      getFieldValuesBasePtr(structInfo, const_cast<const void*>(targetObject)));
+}
+
 // Returns active field id for a Thrift union object.
 int getActiveId(const void* unionObject, const StructInfo& info) {
   auto* getActiveIdFunc = info.unionExt->getActiveId;

@@ -734,6 +734,7 @@ detail::StructInfo* newTableBasedSerializerStructInfo(
       : nullptr;
   structInfo->getIsset = isMutable ? getMutableIsset : getImmutableIsset;
   structInfo->setIsset = isMutable ? setMutableIsset : setIsset;
+  structInfo->getFieldValuesBasePtr = nullptr;
   structInfo->customExt = &fieldValues;
   return structInfo;
 }

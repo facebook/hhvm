@@ -214,6 +214,7 @@ constexpr ::apache::thrift::detail::StructInfoN<5> __fbthrift_struct_info_Trivia
   /* .unionExt */ nullptr,
   /* .getIsset */ nullptr,
   /* .setIsset */ nullptr,
+  /* .getFieldValuesBasePtr */ nullptr,
   /* .customExt */ nullptr,
   /* .fieldInfos */ {
   {
@@ -445,6 +446,7 @@ constexpr ::apache::thrift::detail::StructInfoN<8> __fbthrift_struct_info_Contai
   /* .unionExt */ nullptr,
   /* .getIsset */ nullptr,
   /* .setIsset */ nullptr,
+  /* .getFieldValuesBasePtr */ nullptr,
   /* .customExt */ nullptr,
   /* .fieldInfos */ {
   {
@@ -646,6 +648,7 @@ constexpr ::apache::thrift::detail::StructInfoN<2> __fbthrift_struct_info_Exampl
   /* .unionExt */ &ExampleUnion_unionExt,
   /* .getIsset */ nullptr,
   /* .setIsset */ nullptr,
+  /* .getFieldValuesBasePtr */ nullptr,
   /* .customExt */ nullptr,
   /* .fieldInfos */ {
   {

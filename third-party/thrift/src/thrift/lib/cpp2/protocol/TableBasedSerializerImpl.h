@@ -39,13 +39,18 @@ void skip(
   readState.readFieldBeginNoInline(iprot);
 }
 
+void* getFieldValuesBasePtr(const StructInfo& structInfo, void* targetObject);
+
+const void* getFieldValuesBasePtr(
+    const StructInfo& structInfo, const void* targetObject);
+
 /**
  * Returns a pointer to the memory holding the value of the field corresponding
  * to `fieldInfo`, in the given target `object`.
  */
 inline const void* getFieldValuePtr(
-    const FieldInfo& fieldInfo, const void* fieldValueArray) {
-  return static_cast<const char*>(fieldValueArray) + fieldInfo.memberOffset;
+    const FieldInfo& fieldInfo, const void* fieldValuesBasePtr) {
+  return static_cast<const char*>(fieldValuesBasePtr) + fieldInfo.memberOffset;
 }
 
 /**
@@ -53,8 +58,8 @@ inline const void* getFieldValuePtr(
  * to `fieldInfo`, in the given target `object`.
  */
 inline void* getFieldValuePtr(
-    const FieldInfo& fieldInfo, void* fieldValueArray) {
-  return static_cast<char*>(fieldValueArray) + fieldInfo.memberOffset;
+    const FieldInfo& fieldInfo, void* fieldValuesBasePtr) {
+  return static_cast<char*>(fieldValuesBasePtr) + fieldInfo.memberOffset;
 }
 
 inline OptionalThriftValue getValue(
@@ -599,13 +604,15 @@ void readThriftUnion(
     readState.readStructEnd(iprot);
     return;
   }
+
+  void* const fieldValuesBasePtr =
+      getFieldValuesBasePtr(structInfo, unionObject);
   if (const FieldInfo* fieldInfo =
           findFieldInfo(iprot, readState, structInfo)) {
     if (getActiveId(unionObject, structInfo) != 0) {
       unionExt.clear(unionObject);
     }
-    void* fieldValuePtr =
-        getFieldValuePtr(*fieldInfo, /* fieldValueArray = */ unionObject);
+    void* fieldValuePtr = getFieldValuePtr(*fieldInfo, fieldValuesBasePtr);
     if (unionExt.initMember[0] != nullptr) {
       unionExt.initMember[fieldInfo - structInfo.fieldInfos](fieldValuePtr);
     }
@@ -624,19 +631,21 @@ void readThriftUnion(
 }
 
 template <class TProtocol>
-void read(TProtocol* iprot, const StructInfo& structInfo, void* object) {
-  DCHECK(object);
+void read(TProtocol* iprot, const StructInfo& structInfo, void* targetObject) {
+  DCHECK(targetObject);
 
   if (UNLIKELY(structInfo.unionExt != nullptr)) {
-    readThriftUnion(iprot, structInfo, object);
+    readThriftUnion(iprot, structInfo, targetObject);
     return;
   }
+
+  void* const fieldValuesBasePtr =
+      getFieldValuesBasePtr(structInfo, targetObject);
 
   // Clear terse fields to intrinsic default values before deserialization.
   for (std::int16_t i = 0; i < structInfo.numFields; i++) {
     const auto& fieldInfo = structInfo.fieldInfos[i];
-    clearTerseField(
-        getFieldValuePtr(fieldInfo, /* fieldValueArray = */ object), fieldInfo);
+    clearTerseField(getFieldValuePtr(fieldInfo, fieldValuesBasePtr), fieldInfo);
   }
 
   // Define out of loop to call advanceToNextField after the loop ends.
@@ -690,8 +699,8 @@ void read(TProtocol* iprot, const StructInfo& structInfo, void* object) {
         iprot,
         *fieldInfo->typeInfo,
         readState,
-        getFieldValuePtr(*fieldInfo, /* fieldValueArray = */ object));
-    markFieldAsSet(object, *fieldInfo, structInfo);
+        getFieldValuePtr(*fieldInfo, fieldValuesBasePtr));
+    markFieldAsSet(targetObject, *fieldInfo, structInfo);
   }
 }
 
@@ -712,9 +721,12 @@ size_t writeUnion(
       });
 
   if (foundFieldInfo != fieldInfosEnd && foundFieldInfo->id == activeFieldId) {
-    const OptionalThriftValue value = getValue(
-        *foundFieldInfo->typeInfo,
-        getFieldValuePtr(*foundFieldInfo, /* fieldValueArray = */ unionObject));
+    const void* const fieldValuesBasePtr =
+        getFieldValuesBasePtr(structInfo, unionObject);
+    const void* const fieldValuePtr =
+        getFieldValuePtr(*foundFieldInfo, fieldValuesBasePtr);
+    const OptionalThriftValue value =
+        getValue(*foundFieldInfo->typeInfo, fieldValuePtr);
     if (value.hasValue()) {
       written += writeField(iprot, *foundFieldInfo, value.value());
     } else if (foundFieldInfo->typeInfo->type == protocol::TType::T_STRUCT) {
@@ -743,6 +755,9 @@ size_t write(
     return writeUnion(*iprot, structInfo, targetObject);
   }
 
+  const void* const fieldValuesBasePtr =
+      getFieldValuesBasePtr(structInfo, targetObject);
+
   size_t written = iprot->writeStructBegin(structInfo.name);
   for (std::int16_t index = 0; index < structInfo.numFields; index++) {
     const FieldInfo& fieldInfo = structInfo.fieldInfos[index];
@@ -750,8 +765,7 @@ size_t write(
       continue;
     }
 
-    const void* fieldValuePtr =
-        getFieldValuePtr(fieldInfo, /* fieldValueArray = */ targetObject);
+    const void* fieldValuePtr = getFieldValuePtr(fieldInfo, fieldValuesBasePtr);
     OptionalThriftValue optionalValue =
         getValue(*fieldInfo.typeInfo, fieldValuePtr);
     if (!optionalValue) {

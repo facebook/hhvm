@@ -242,6 +242,36 @@ struct StructInfo final {
   void (*setIsset)(
       void* /* targetObject */, ptrdiff_t /* offset */, bool /* set */);
 
+  /**
+   * If set, this function returns the base address of a contiguous area of
+   * memory from which the values of the fields for the given Thrift struct
+   * `targetObject` can be retrieved (see below).
+   *
+   * If not set, this is equivalent to returning the address of the input
+   * argument itself (i.e., `targetObject`).
+   *
+   * The value of a specific field for a given target object is accessed as
+   * follows:
+   *   1. Compute the "field values base pointer" by calling the method below
+   *      (i.e., `StructInfo.getFieldValuesBasePtr()`) with the target object
+   *      as argument.
+   *   2. Compute the specific "field value pointer" by adding the value of
+   *      `FieldInfo.memberOffset` (where `FieldInfo` corresponds to the desired
+   *      field from this `StructInfo.fieldInfos[]`) to the previously obtained
+   *      "base pointer", i.e.:
+   *      ```
+   *      fieldValuePtr = fieldValuesBasePtr + fieldInfo.memberOffset
+   *      ```
+   *   3. Finally, call the `get` or `set` methods of the corresponding
+   *      `TypeInfo`, passing the previously obtained `fieldValuePtr` as
+   *      argument, i.e.:
+   *      ```
+   *      fieldInfo.typeInfo->get(fieldValuePtr, *fieldInfo.typeInfo);
+   *      ```
+   */
+  const void* (*getFieldValuesBasePtr)(const void* /* targetObject */) =
+      nullptr;
+
   // Use for other languages to pass in additional information.
   const void* customExt;
 
@@ -265,6 +295,7 @@ struct StructInfoN final {
   const void* unionExt = nullptr;
   bool (*getIsset)(const void*, ptrdiff_t);
   void (*setIsset)(void*, ptrdiff_t, bool);
+  const void* (*getFieldValuesBasePtr)(const void*);
   const void* customExt;
   FieldInfo fieldInfos[NumFields];
 };

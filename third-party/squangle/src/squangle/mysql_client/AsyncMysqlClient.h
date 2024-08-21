@@ -55,6 +55,7 @@
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/Row.h"
+#include "squangle/mysql_client/detail/MysqlConnection.h"
 
 #include <atomic>
 #include <chrono>
@@ -265,11 +266,11 @@ class AsyncMysqlClient : public MysqlClientBase {
 
     Status runQuery(const InternalConnection& conn, std::string_view query)
         override {
-      return conn.runQueryNonBlocking(query);
+      return conn.runQuery(query);
     }
 
     Status nextResult(const InternalConnection& conn) override {
-      return conn.nextResultNonBlocking();
+      return conn.nextResult();
     }
 
     size_t getFieldCount(const InternalConnection& conn) override {
@@ -279,7 +280,7 @@ class AsyncMysqlClient : public MysqlClientBase {
     InternalResult::FetchRowRet fetchRow(InternalResult& res) override;
 
     Status resetConn(const InternalConnection& conn) override {
-      return conn.resetConnNonBlocking();
+      return conn.resetConn();
     }
 
     Status changeUser(
@@ -287,7 +288,7 @@ class AsyncMysqlClient : public MysqlClientBase {
         const std::string& user,
         const std::string& password,
         const std::string& database) override {
-      return conn.changeUserNonBlocking(user, password, database);
+      return conn.changeUser(user, password, database);
     }
 
     std::unique_ptr<InternalResult> getResult(
@@ -418,9 +419,8 @@ class AsyncConnection : public Connection {
   }
 
  protected:
-  std::unique_ptr<InternalConnection> createInternalConnection(
-      MysqlClientBase& client) override {
-    return std::make_unique<InternalMysqlConnection>(client);
+  std::unique_ptr<InternalConnection> createInternalConnection() override {
+    return std::make_unique<detail::AsyncMysqlConnection>();
   }
 
  private:

@@ -42,7 +42,13 @@ void ConnectionHolder::updateConnectionKey(ConnectionKey key) {
 
 ConnectionHolder::~ConnectionHolder() {
   if (internalConn_) {
-    internalConn_->close();
+    if (auto func = internalConn_->getCloseFunction()) {
+      if (!client_.runInThread([func = std::move(func)]() { func(); })) {
+        LOG(DFATAL)
+            << "Connection couldn't be closed: error in folly::EventBase";
+      }
+    }
+
     onClose();
   }
   client_.activeConnectionRemoved(&key_);

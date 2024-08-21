@@ -209,7 +209,7 @@ MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
   const auto usingUnixSocket = !conn_key.unixSocketPath().empty();
 
   // When using unix socket (AF_UNIX), host/port do not matter.
-  return conn.tryConnectNonBlocking(
+  return conn.tryConnect(
       usingUnixSocket ? kEmptyString : conn_key.host(),
       conn_key.user(),
       conn_key.password(),
@@ -221,7 +221,7 @@ MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
 
 InternalResult::FetchRowRet AsyncMysqlClient::AsyncMysqlHandler::fetchRow(
     InternalResult& result) {
-  auto res = result.fetchRowNonBlocking();
+  auto res = result.fetchRow();
   DCHECK_NE(res.first, InternalConnection::Status::ERROR);
   return res;
 }

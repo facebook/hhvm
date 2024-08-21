@@ -15,7 +15,6 @@
 #include "squangle/base/Base.h"
 #include "squangle/mysql_client/ConnectionHolder.h"
 #include "squangle/mysql_client/ConnectionOptions.h"
-#include "squangle/mysql_client/InternalMysqlConnection.h"
 #include "squangle/mysql_client/MultiQueryOperation.h"
 #include "squangle/mysql_client/MultiQueryStreamOperation.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
@@ -480,8 +479,7 @@ class Connection {
   friend class ChangeUserOperation;
   friend class ConnectionHolder;
 
-  virtual std::unique_ptr<InternalConnection> createInternalConnection(
-      MysqlClientBase& client_base) = 0;
+  virtual std::unique_ptr<InternalConnection> createInternalConnection() = 0;
 
   ChainedCallback setCallback(
       ChainedCallback orgCallback,

@@ -13,14 +13,13 @@
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <gflags/gflags.h>
 #include <mysql_async.h>
-#include <atomic>
 
 #include "squangle/base/ExceptionUtil.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Flags.h"
-#include "squangle/mysql_client/InternalMysqlConnection.h"
 #include "squangle/mysql_client/Operation.h"
+#include "squangle/mysql_client/detail/MysqlConnection.h"
 
 using namespace std::chrono_literals;
 
@@ -523,7 +522,7 @@ const std::string& OperationImpl::mysql_error() const {
 }
 
 /*static*/ std::string OperationImpl::connectStageString(connect_stage stage) {
-  return InternalMysqlConnection::findConnectStageName(stage).value_or("");
+  return detail::MysqlConnection::findConnectStageName(stage).value_or("");
 }
 
 bool Operation::ok() const {

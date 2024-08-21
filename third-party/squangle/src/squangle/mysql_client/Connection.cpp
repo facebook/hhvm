@@ -8,7 +8,6 @@
 
 #include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/ChangeUserOperation.h"
-#include "squangle/mysql_client/InternalMysqlConnection.h"
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
 
@@ -39,7 +38,7 @@ void Connection::initMysqlOnly() {
   CHECK_THROW(mysql_connection_ == nullptr, db::InvalidConnectionException);
   try {
     mysql_connection_ = std::make_unique<ConnectionHolder>(
-        mysql_client_, createInternalConnection(mysql_client_), conn_key_);
+        mysql_client_, createInternalConnection(), conn_key_);
     if (!mysql_client_.supportsLocalFiles()) {
       mysql_connection_->disableLocalFiles();
     }

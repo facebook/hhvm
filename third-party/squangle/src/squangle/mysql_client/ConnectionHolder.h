@@ -167,10 +167,10 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->escapeString(out, src, length);
   }
 
-  bool close() override {
+  std::function<void()> getCloseFunction() override {
     // We shouldn't be calling this version
     DCHECK(false);
-    return false;
+    return nullptr;
   }
 
   [[nodiscard]] folly::EventHandler::EventFlags getReadWriteState()
@@ -294,7 +294,7 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->getAutocommit();
   }
 
-  [[nodiscard]] Status tryConnectBlocking(
+  [[nodiscard]] Status tryConnect(
       const std::string& host,
       const std::string& user,
       const std::string& password,
@@ -302,62 +302,31 @@ class ConnectionHolder : public InternalConnection {
       uint16_t port,
       const std::string& unixSocket,
       int flags) const override {
-    return internalConn_->tryConnectBlocking(
-        host, user, password, db_name, port, unixSocket, flags);
-  }
-  [[nodiscard]] Status tryConnectNonBlocking(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
-      int flags) const override {
-    return internalConn_->tryConnectNonBlocking(
+    return internalConn_->tryConnect(
         host, user, password, db_name, port, unixSocket, flags);
   }
 
-  [[nodiscard]] Status runQueryBlocking(std::string_view query) const override {
-    return internalConn_->runQueryBlocking(query);
-  }
-  [[nodiscard]] Status runQueryNonBlocking(
-      std::string_view query) const override {
-    return internalConn_->runQueryNonBlocking(query);
+  [[nodiscard]] Status runQuery(std::string_view query) const override {
+    return internalConn_->runQuery(query);
   }
 
-  [[nodiscard]] Status resetConnBlocking() const override {
-    return internalConn_->resetConnBlocking();
-  }
-  [[nodiscard]] Status resetConnNonBlocking() const override {
-    return internalConn_->resetConnNonBlocking();
+  [[nodiscard]] Status resetConn() const override {
+    return internalConn_->resetConn();
   }
 
-  [[nodiscard]] Status changeUserBlocking(
+  [[nodiscard]] Status changeUser(
       const std::string& user,
       const std::string& password,
       const std::string& database) const override {
-    return internalConn_->changeUserBlocking(user, password, database);
-  }
-  [[nodiscard]] Status changeUserNonBlocking(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const override {
-    return internalConn_->changeUserNonBlocking(user, password, database);
+    return internalConn_->changeUser(user, password, database);
   }
 
-  [[nodiscard]] Status nextResultBlocking() const override {
-    return internalConn_->nextResultNonBlocking();
-  }
-  [[nodiscard]] Status nextResultNonBlocking() const override {
-    return internalConn_->nextResultNonBlocking();
+  [[nodiscard]] Status nextResult() const override {
+    return internalConn_->nextResult();
   }
 
   [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override {
     return internalConn_->getResult();
-  }
-
-  [[nodiscard]] std::unique_ptr<InternalResult> storeResult() const override {
-    return internalConn_->storeResult();
   }
 
   [[nodiscard]] size_t getFieldCount() const override {

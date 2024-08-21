@@ -9,6 +9,7 @@
 #pragma once
 
 #include "squangle/mysql_client/AsyncMysqlClient.h"
+#include "squangle/mysql_client/detail/MysqlConnection.h"
 
 namespace facebook::common::mysql_client {
 
@@ -88,31 +89,31 @@ class SyncMysqlClient : public MysqlClientBase {
 
     Status runQuery(const InternalConnection& conn, std::string_view queryStmt)
         override {
-      return conn.runQueryBlocking(queryStmt);
+      return conn.runQuery(queryStmt);
     }
     Status nextResult(const InternalConnection& conn) override {
-      return conn.nextResultBlocking();
+      return conn.nextResult();
     }
     size_t getFieldCount(const InternalConnection& conn) override {
       return conn.getFieldCount();
     }
     InternalResult::FetchRowRet fetchRow(InternalResult& result) override {
-      return result.fetchRowBlocking();
+      return result.fetchRow();
     }
     std::unique_ptr<InternalResult> getResult(
         const InternalConnection& conn) override {
-      return conn.storeResult();
+      return conn.getResult();
     }
 
     Status resetConn(const InternalConnection& conn) override {
-      return conn.resetConnBlocking();
+      return conn.resetConn();
     }
     Status changeUser(
         const InternalConnection& conn,
         const std::string& user,
         const std::string& password,
         const std::string& database) override {
-      return conn.changeUserBlocking(user, password, database);
+      return conn.changeUser(user, password, database);
     }
   } mysql_handler_;
 };
@@ -159,9 +160,8 @@ class SyncConnection : public Connection {
   }
 
  protected:
-  std::unique_ptr<InternalConnection> createInternalConnection(
-      MysqlClientBase& client) override {
-    return std::make_unique<InternalMysqlConnection>(client);
+  std::unique_ptr<InternalConnection> createInternalConnection() override {
+    return std::make_unique<detail::SyncMysqlConnection>();
   }
 };
 

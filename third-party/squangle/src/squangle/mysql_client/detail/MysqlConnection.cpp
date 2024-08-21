@@ -9,101 +9,66 @@
 #include <mysql_async.h>
 #include <string>
 
-#include "squangle/mysql_client/InternalMysqlConnection.h"
-#include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/detail/MysqlConnection.h"
+#include "squangle/mysql_client/detail/MysqlResult.h"
 
-namespace facebook::common::mysql_client {
+namespace facebook::common::mysql_client::detail {
 
-size_t InternalMysqlResult::numFields() const {
-  auto ret = mysql_num_fields(res_.get());
-  VLOG(4) << fmt::format(
-      "mysql_num_fields({}) returned {}", (void*)res_.get(), ret);
-  return ret;
-}
+MysqlConnection::MysqlConnection(MYSQL* mysql) : mysql_(mysql) {}
 
-MYSQL_FIELD* InternalMysqlResult::fields() const {
-  auto ret = mysql_fetch_fields(res_.get());
-  VLOG(4) << fmt::format(
-      "mysql_fetch_fields({}) returned {}", (void*)res_.get(), (void*)ret);
-  return ret;
-}
-
-size_t InternalMysqlResult::numRows() const {
-  auto ret = mysql_num_rows(res_.get());
-  VLOG(4) << fmt::format(
-      "mysql_num_rows({}) returned {}", (void*)res_.get(), ret);
-  return ret;
-}
-
-std::unique_ptr<InternalRowMetadata> InternalMysqlResult::getRowMetadata()
-    const {
-  return std::make_unique<InternalMysqlRowMetadata>(*this);
-}
-
-InternalMysqlConnection::InternalMysqlConnection(
-    MysqlClientBase& client,
-    MYSQL* mysql)
-    : client_(client), mysql_(mysql) {}
-
-InternalMysqlConnection::~InternalMysqlConnection() {
+MysqlConnection::~MysqlConnection() {
   DCHECK(mysql_ == nullptr);
 }
 
-bool InternalMysqlConnection::close() {
+std::function<void()> MysqlConnection::getCloseFunction() {
   if (closeFdOnDestroy_ && mysql_) {
     auto mysql = mysql_;
     mysql_ = nullptr;
     // Close our connection in the thread from which it was created.
-    if (!client_.runInThread([mysql = mysql]() {
-          // Unregister server cert validation callback
-          const void* callback{nullptr};
-          auto ret =
-              mysql_options(mysql, MYSQL_OPT_TLS_CERT_CALLBACK, &callback);
-          VLOG(4) << logMysqlOptionsImpl(
-              mysql, "MYSQL_OPT_TLS_CERT_CALLBACK", callback, ret);
-          DCHECK_EQ(ret, 0); // should always succeed
+    return [=]() {
+      // Unregister server cert validation callback
+      const void* callback{nullptr};
+      auto ret = mysql_options(mysql, MYSQL_OPT_TLS_CERT_CALLBACK, &callback);
+      VLOG(4) << logMysqlOptionsImpl(
+          mysql, "MYSQL_OPT_TLS_CERT_CALLBACK", callback, ret);
+      DCHECK_EQ(ret, 0); // should always succeed
 
-          mysql_close(mysql);
-          VLOG(4) << fmt::format("mysql_close({})", (void*)mysql);
-        })) {
-      LOG(DFATAL)
-          << "Mysql connection couldn't be closed: error in folly::EventBase";
-    }
-
-    return true;
+      mysql_close(mysql);
+      VLOG(4) << fmt::format("mysql_close({})", (void*)mysql);
+    };
   }
 
-  return false;
+  return nullptr;
 }
 
-std::string InternalMysqlConnection::serverInfo() const {
+std::string MysqlConnection::serverInfo() const {
   auto ret = mysql_get_server_info(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_server_info({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-long InternalMysqlConnection::threadId() const {
+long MysqlConnection::threadId() const {
   auto ret = mysql_thread_id(mysql_);
   VLOG(4) << fmt::format("mysql_thread_id({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-void InternalMysqlConnection::disableSSL() {
+void MysqlConnection::disableSSL() {
   enum mysql_ssl_mode ssl_mode = SSL_MODE_DISABLED;
   auto ret = mysql_options(mysql_, MYSQL_OPT_SSL_MODE, &ssl_mode);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_SSL_MODE", ssl_mode, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 };
 
-bool InternalMysqlConnection::sslSessionReused() const {
+bool MysqlConnection::sslSessionReused() const {
   auto ret = mysql_get_ssl_session_reused(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_ssl_session_reused({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-std::string InternalMysqlConnection::getTlsVersion() const {
+std::string MysqlConnection::getTlsVersion() const {
   auto version = mysql_get_ssl_version(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_ssl_version({}) returned {}",
@@ -116,12 +81,11 @@ std::string InternalMysqlConnection::getTlsVersion() const {
   return "";
 }
 
-int InternalMysqlConnection::warningCount() const {
+int MysqlConnection::warningCount() const {
   return mysql_warning_count(mysql_);
 }
 
-std::string InternalMysqlConnection::escapeString(
-    std::string_view unescaped) const {
+std::string MysqlConnection::escapeString(std::string_view unescaped) const {
   std::string escaped;
   escaped.resize((2 * unescaped.size()) + 1);
   auto size = escapeString(escaped.data(), unescaped.data(), unescaped.size());
@@ -129,10 +93,8 @@ std::string InternalMysqlConnection::escapeString(
   return escaped;
 }
 
-size_t InternalMysqlConnection::escapeString(
-    char* ptr,
-    const char* src,
-    size_t length) const {
+size_t MysqlConnection::escapeString(char* ptr, const char* src, size_t length)
+    const {
   auto ret = mysql_real_escape_string(mysql_, ptr, src, length);
   VLOG(4) << fmt::format(
       "mysql_real_escape_string({}, {}, {:.60} ({}), {}) returned {}",
@@ -145,8 +107,7 @@ size_t InternalMysqlConnection::escapeString(
   return ret;
 }
 
-folly::EventHandler::EventFlags InternalMysqlConnection::getReadWriteState()
-    const {
+folly::EventHandler::EventFlags MysqlConnection::getReadWriteState() const {
   NET_ASYNC* net_async = NET_ASYNC_DATA(&mysql_->net);
   // net_async can be null during some stages of connecting
   auto async_blocking_state =
@@ -164,20 +125,19 @@ folly::EventHandler::EventFlags InternalMysqlConnection::getReadWriteState()
   LOG(FATAL) << "Unknown nonblocking state " << async_blocking_state;
 }
 
-unsigned int InternalMysqlConnection::getErrno() const {
+unsigned int MysqlConnection::getErrno() const {
   auto ret = mysql_errno(mysql_);
   VLOG(4) << fmt::format("mysql_errno({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-std::string InternalMysqlConnection::getErrorMessage() const {
+std::string MysqlConnection::getErrorMessage() const {
   auto ret = mysql_error(mysql_);
   VLOG(4) << fmt::format("mysql_error({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-void InternalMysqlConnection::setConnectAttributes(
-    const AttributeMap& attributes) {
+void MysqlConnection::setConnectAttributes(const AttributeMap& attributes) {
   // reset all connection attributes on the MYSQL connection
   auto ret = mysql_options(mysql_, MYSQL_OPT_CONNECT_ATTR_RESET, nullptr);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_CONNECT_ATTR_RESET", nullptr, ret);
@@ -192,8 +152,7 @@ void InternalMysqlConnection::setConnectAttributes(
   }
 }
 
-int InternalMysqlConnection::setQueryAttributes(
-    const AttributeMap& attributes) {
+int MysqlConnection::setQueryAttributes(const AttributeMap& attributes) {
   // reset all connection attributes on the MYSQL connection
   auto ret = mysql_options(mysql_, MYSQL_OPT_QUERY_ATTR_RESET, nullptr);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_QUERY_ATTR_RESET", nullptr, ret);
@@ -211,7 +170,7 @@ int InternalMysqlConnection::setQueryAttributes(
   return 0;
 }
 
-int InternalMysqlConnection::setQueryAttribute(
+int MysqlConnection::setQueryAttribute(
     const std::string& key,
     const std::string& value) {
   auto ret = mysql_options4(
@@ -292,7 +251,7 @@ readNextResponseAtribute(MYSQL* mysql) {
 
 } // namespace
 
-AttributeMap InternalMysqlConnection::getResponseAttributes() const {
+AttributeMap MysqlConnection::getResponseAttributes() const {
   AttributeMap attrs;
 
   for (auto attr = readFirstResponseAtribute(mysql_); attr;
@@ -303,7 +262,7 @@ AttributeMap InternalMysqlConnection::getResponseAttributes() const {
   return attrs;
 }
 
-void InternalMysqlConnection::setCompression(CompressionAlgorithm algo) {
+void MysqlConnection::setCompression(CompressionAlgorithm algo) {
   auto ret = mysql_options(mysql_, MYSQL_OPT_COMPRESS, nullptr);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_COMPRESS", nullptr, ret);
   DCHECK_EQ(ret, 0); // should always succeed
@@ -311,12 +270,11 @@ void InternalMysqlConnection::setCompression(CompressionAlgorithm algo) {
   setCompressionOption(mysql_, algo);
 }
 
-bool InternalMysqlConnection::setSSLOptionsProvider(
-    SSLOptionsProviderBase& provider) {
+bool MysqlConnection::setSSLOptionsProvider(SSLOptionsProviderBase& provider) {
   return provider.setMysqlSSLOptions(mysql_);
 }
 
-std::optional<std::string> InternalMysqlConnection::getSniServerName() const {
+std::optional<std::string> MysqlConnection::getSniServerName() const {
   const char* opt_val = nullptr;
   auto ret = mysql_get_option(mysql_, MYSQL_OPT_TLS_SNI_SERVERNAME, &opt_val);
   VLOG(4) << fmt::format(
@@ -332,13 +290,13 @@ std::optional<std::string> InternalMysqlConnection::getSniServerName() const {
   return std::nullopt;
 }
 
-void InternalMysqlConnection::setSniServerName(const std::string& name) {
+void MysqlConnection::setSniServerName(const std::string& name) {
   auto ret = mysql_options(mysql_, MYSQL_OPT_TLS_SNI_SERVERNAME, name.c_str());
   VLOG(4) << logMysqlOptions("MYSQL_OPT_COMPRESS", name, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-bool InternalMysqlConnection::setDscp(uint8_t dscp) {
+bool MysqlConnection::setDscp(uint8_t dscp) {
   // DS field (QOS/TOS level) is 8 bits with DSCP packed into the most
   // significant 6 bits.
   uint dsf = dscp << 2;
@@ -347,7 +305,7 @@ bool InternalMysqlConnection::setDscp(uint8_t dscp) {
   return ret;
 }
 
-void InternalMysqlConnection::setCertValidatorCallback(
+void MysqlConnection::setCertValidatorCallback(
     const MysqlCertValidatorCallback& cb,
     void* context) {
   auto ret = mysql_options(mysql_, MYSQL_OPT_TLS_CERT_CALLBACK, &cb);
@@ -360,36 +318,36 @@ void InternalMysqlConnection::setCertValidatorCallback(
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-void InternalMysqlConnection::setConnectTimeout(Millis timeout) const {
+void MysqlConnection::setConnectTimeout(Millis timeout) const {
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_CONNECT_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_CONNECT_TIMEOUT_MS", timeoutInMs, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-void InternalMysqlConnection::setReadTimeout(Millis timeout) const {
+void MysqlConnection::setReadTimeout(Millis timeout) const {
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_READ_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_READ_TIMEOUT_MS", timeoutInMs, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-void InternalMysqlConnection::setWriteTimeout(Millis timeout) const {
+void MysqlConnection::setWriteTimeout(Millis timeout) const {
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_WRITE_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_WRITE_TIMEOUT_MS", timeoutInMs, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
-int InternalMysqlConnection::getSocketDescriptor() const {
+int MysqlConnection::getSocketDescriptor() const {
   auto ret = mysql_get_socket_descriptor(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_socket_descriptor({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-/*static*/ std::optional<std::string>
-InternalMysqlConnection::findConnectStageName(connect_stage stage) {
+/*static*/ std::optional<std::string> MysqlConnection::findConnectStageName(
+    connect_stage stage) {
   // enum connect_stage is defined in mysql at include/mysql_com.h
   // and this provides a way to log the string version of this enum
   static const folly::F14FastMap<connect_stage, std::string> stageToStringMap =
@@ -429,20 +387,20 @@ InternalMysqlConnection::findConnectStageName(connect_stage stage) {
   return std::nullopt;
 }
 
-uint64_t InternalMysqlConnection::getLastInsertId() const {
+uint64_t MysqlConnection::getLastInsertId() const {
   auto ret = mysql_insert_id(mysql_);
   VLOG(4) << fmt::format("mysql_insert_id({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-uint64_t InternalMysqlConnection::getAffectedRows() const {
+uint64_t MysqlConnection::getAffectedRows() const {
   auto ret = mysql_affected_rows(mysql_);
   VLOG(4) << fmt::format(
       "mysql_affected_rows({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-std::string InternalMysqlConnection::getConnectStageName() const {
+std::string MysqlConnection::getConnectStageName() const {
   auto stage = getMySqlConnectStage();
   if (auto optStageName = findConnectStageName(stage)) {
     return std::move(*optStageName);
@@ -451,7 +409,7 @@ std::string InternalMysqlConnection::getConnectStageName() const {
   return fmt::format("Unexpected connect_stage: {}", (int)stage);
 }
 
-std::optional<std::string> InternalMysqlConnection::getRecvGtid() const {
+std::optional<std::string> MysqlConnection::getRecvGtid() const {
   const char* data;
   size_t length;
   auto ret = mysql_session_track_get_first(
@@ -470,7 +428,7 @@ std::optional<std::string> InternalMysqlConnection::getRecvGtid() const {
   return std::nullopt;
 }
 
-std::optional<std::string> InternalMysqlConnection::getSchemaChanged() const {
+std::optional<std::string> MysqlConnection::getSchemaChanged() const {
   const char* data;
   size_t length;
   auto ret = mysql_session_track_get_first(
@@ -489,29 +447,14 @@ std::optional<std::string> InternalMysqlConnection::getSchemaChanged() const {
   return std::nullopt;
 }
 
-bool InternalMysqlConnection::hasMoreResults() const {
+bool MysqlConnection::hasMoreResults() const {
   auto ret = mysql_more_results(mysql_);
   VLOG(4) << fmt::format(
       "mysql_more_results({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-namespace {
-
-static inline InternalConnection::Status toHandlerStatus(
-    net_async_status status) {
-  if (status == NET_ASYNC_ERROR) {
-    return InternalConnection::Status::ERROR;
-  } else if (status == NET_ASYNC_COMPLETE) {
-    return InternalConnection::Status::DONE;
-  } else {
-    return InternalConnection::Status::PENDING;
-  }
-}
-
-} // namespace
-
-InternalConnection::Status InternalMysqlConnection::tryConnectBlocking(
+InternalConnection::Status SyncMysqlConnection::tryConnect(
     const std::string& host,
     const std::string& user,
     const std::string& password,
@@ -542,7 +485,7 @@ InternalConnection::Status InternalMysqlConnection::tryConnectBlocking(
   return ret == nullptr ? ERROR : DONE;
 }
 
-InternalConnection::Status InternalMysqlConnection::tryConnectNonBlocking(
+InternalConnection::Status AsyncMysqlConnection::tryConnect(
     const std::string& host,
     const std::string& user,
     const std::string& password,
@@ -573,7 +516,7 @@ InternalConnection::Status InternalMysqlConnection::tryConnectNonBlocking(
   return toHandlerStatus(ret);
 }
 
-InternalConnection::Status InternalMysqlConnection::runQueryBlocking(
+InternalConnection::Status SyncMysqlConnection::runQuery(
     std::string_view query) const {
   auto ret = mysql_real_query(mysql_, query.data(), query.size());
   VLOG(4) << fmt::format(
@@ -585,7 +528,7 @@ InternalConnection::Status InternalMysqlConnection::runQueryBlocking(
   return ret ? ERROR : DONE;
 }
 
-InternalConnection::Status InternalMysqlConnection::runQueryNonBlocking(
+InternalConnection::Status AsyncMysqlConnection::runQuery(
     std::string_view query) const {
   auto ret = mysql_real_query_nonblocking(mysql_, query.data(), query.size());
   VLOG(4) << fmt::format(
@@ -597,22 +540,21 @@ InternalConnection::Status InternalMysqlConnection::runQueryNonBlocking(
   return toHandlerStatus(ret);
 }
 
-InternalConnection::Status InternalMysqlConnection::resetConnBlocking() const {
+InternalConnection::Status SyncMysqlConnection::resetConn() const {
   auto ret = mysql_reset_connection(mysql_);
   VLOG(4) << fmt::format(
       "mysql_reset_connection({}) returned {}", (void*)mysql_, ret);
   return ret ? ERROR : DONE;
 }
 
-InternalConnection::Status InternalMysqlConnection::resetConnNonBlocking()
-    const {
+InternalConnection::Status AsyncMysqlConnection::resetConn() const {
   auto ret = mysql_reset_connection_nonblocking(mysql_);
   VLOG(4) << fmt::format(
       "mysql_reset_connection_nonblocking({}) returned {}", (void*)mysql_, ret);
   return toHandlerStatus(ret);
 }
 
-InternalConnection::Status InternalMysqlConnection::changeUserBlocking(
+InternalConnection::Status SyncMysqlConnection::changeUser(
     const std::string& user,
     const std::string& password,
     const std::string& database) const {
@@ -628,7 +570,7 @@ InternalConnection::Status InternalMysqlConnection::changeUserBlocking(
   return ret ? ERROR : DONE;
 }
 
-InternalConnection::Status InternalMysqlConnection::changeUserNonBlocking(
+InternalConnection::Status AsyncMysqlConnection::changeUser(
     const std::string& user,
     const std::string& password,
     const std::string& database) const {
@@ -644,113 +586,63 @@ InternalConnection::Status InternalMysqlConnection::changeUserNonBlocking(
   return toHandlerStatus(ret);
 }
 
-InternalConnection::Status InternalMysqlConnection::nextResultBlocking() const {
+InternalConnection::Status SyncMysqlConnection::nextResult() const {
   auto ret = mysql_next_result(mysql_);
   VLOG(4) << fmt::format(
       "mysql_next_result({}) returned {}", (void*)mysql_, ret);
   return ret ? ERROR : DONE;
 }
 
-InternalConnection::Status InternalMysqlConnection::nextResultNonBlocking()
-    const {
+InternalConnection::Status AsyncMysqlConnection::nextResult() const {
   auto ret = mysql_next_result_nonblocking(mysql_);
   VLOG(4) << fmt::format(
       "mysql_next_result_nonblocking({}) returned {}", (void*)mysql_, ret);
   return toHandlerStatus(ret);
 }
 
-namespace {
-
-InternalResult::FetchRowRet InternalMysqlRowFactory(
-    MYSQL_RES* result,
-    MYSQL_ROW mysqlRow) {
-  std::unique_ptr<InternalRow> row;
-  if (mysqlRow) {
-    auto* lengths = mysql_fetch_lengths(result);
-    VLOG(4) << fmt::format(
-        "mysql_fetch_lengths({}) returned {}", (void*)result, (void*)lengths);
-
-    auto numFields = mysql_num_fields(result);
-    VLOG(4) << fmt::format(
-        "mysql_num_fields({}) returned {}", (void*)result, numFields);
-
-    row = std::make_unique<InternalMysqlRow>(mysqlRow, numFields, lengths);
-  }
-
-  return std::make_pair(DONE, std::move(row));
-}
-
-} // namespace
-
-InternalResult::FetchRowRet InternalMysqlResult::fetchRowBlocking() const {
-  auto mysqlRow = mysql_fetch_row(res_.get());
-  VLOG(4) << fmt::format(
-      "mysql_fetch_row({}) returned {}", (void*)res_.get(), (void*)mysqlRow);
-
-  return InternalMysqlRowFactory(res_.get(), mysqlRow);
-}
-
-InternalResult::FetchRowRet InternalMysqlResult::fetchRowNonBlocking() const {
-  std::unique_ptr<InternalRow> row;
-
-  MYSQL_ROW mysqlRow;
-  auto ret = mysql_fetch_row_nonblocking(res_.get(), &mysqlRow);
-  VLOG(4) << fmt::format(
-      "mysql_fetch_row_nonblocking({}) returned {}, MYSQL_ROW = {}",
-      (void*)res_.get(),
-      ret,
-      (void*)mysqlRow);
-
-  if (ret == NET_ASYNC_COMPLETE) {
-    return InternalMysqlRowFactory(res_.get(), mysqlRow);
-  }
-
-  return std::make_pair(toHandlerStatus(ret), std::move(row));
-}
-
-std::unique_ptr<InternalResult> InternalMysqlConnection::getResult() const {
-  MYSQL_RES* res = mysql_use_result(mysql_);
-  VLOG(4) << fmt::format(
-      "mysql_use_result({}) returned {}", (void*)mysql_, (void*)res);
-  return std::make_unique<InternalMysqlResult>(res);
-}
-
-std::unique_ptr<InternalResult> InternalMysqlConnection::storeResult() const {
+std::unique_ptr<InternalResult> SyncMysqlConnection::getResult() const {
   MYSQL_RES* res = mysql_store_result(mysql_);
   VLOG(4) << fmt::format(
       "mysql_store_result({}) returned {}", (void*)mysql_, (void*)res);
-  return std::make_unique<InternalMysqlResult>(res);
+  return std::make_unique<SyncMysqlResult>(res);
 }
 
-size_t InternalMysqlConnection::getFieldCount() const {
+std::unique_ptr<InternalResult> AsyncMysqlConnection::getResult() const {
+  MYSQL_RES* res = mysql_use_result(mysql_);
+  VLOG(4) << fmt::format(
+      "mysql_use_result({}) returned {}", (void*)mysql_, (void*)res);
+  return std::make_unique<AsyncMysqlResult>(res);
+}
+
+size_t MysqlConnection::getFieldCount() const {
   auto ret = mysql_field_count(mysql_);
   VLOG(4) << fmt::format(
       "mysql_field_count({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-bool InternalMysqlConnection::dumpDebugInfo() const {
+bool MysqlConnection::dumpDebugInfo() const {
   auto ret = mysql_dump_debug_info(mysql_);
   VLOG(4) << fmt::format(
       "mysql_dump_debug_info({}) returned {}", (void*)mysql_, ret);
   return ret == 0;
 }
 
-bool InternalMysqlConnection::ping() const {
+bool MysqlConnection::ping() const {
   auto ret = mysql_ping(mysql_);
   VLOG(4) << fmt::format("mysql_ping({}) returned {}", (void*)mysql_, ret);
   return ret == 0;
 }
 
-InternalMysqlConnection::MySqlConnectStage
-InternalMysqlConnection::getMySqlConnectStage() const {
+MysqlConnection::MySqlConnectStage MysqlConnection::getMySqlConnectStage()
+    const {
   auto ret = mysql_get_connect_stage(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_connect_stage({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
-/*static*/ MYSQL* InternalMysqlConnection::createMysql() {
+/*static*/ MYSQL* MysqlConnection::createMysql() {
   auto ret = mysql_init(nullptr);
   VLOG(4) << fmt::format("mysql_init({}) returned {}", nullptr, (void*)ret);
   MYSQL* mysql = static_cast<MYSQL*>(ret);
@@ -760,7 +652,7 @@ InternalMysqlConnection::getMySqlConnectStage() const {
   return mysql;
 }
 
-std::string InternalMysqlConnection::logMysqlOptionsImpl(
+std::string MysqlConnection::logMysqlOptionsImpl(
     MYSQL* mysql,
     std::string_view opt,
     const void* param,
@@ -769,7 +661,7 @@ std::string InternalMysqlConnection::logMysqlOptionsImpl(
       "mysql_options({}, {}, {}) returned {}", (void*)mysql, opt, param, ret);
 }
 
-std::string InternalMysqlConnection::logMysqlOptionsImpl(
+std::string MysqlConnection::logMysqlOptionsImpl(
     MYSQL* mysql,
     std::string_view opt,
     int param,
@@ -778,7 +670,7 @@ std::string InternalMysqlConnection::logMysqlOptionsImpl(
       "mysql_options({}, {}, {}) returned {}", (void*)mysql, opt, param, ret);
 }
 
-std::string InternalMysqlConnection::logMysqlOptionsImpl(
+std::string MysqlConnection::logMysqlOptionsImpl(
     MYSQL* mysql,
     std::string_view opt,
     const std::string& param,
@@ -787,7 +679,7 @@ std::string InternalMysqlConnection::logMysqlOptionsImpl(
       "mysql_options({}, {}, {}) returned {}", (void*)mysql, opt, param, ret);
 }
 
-std::string InternalMysqlConnection::logMysqlOptions4Impl(
+std::string MysqlConnection::logMysqlOptions4Impl(
     MYSQL* mysql,
     std::string_view opt,
     const std::string& param1,
@@ -802,4 +694,4 @@ std::string InternalMysqlConnection::logMysqlOptions4Impl(
       ret);
 }
 
-} // namespace facebook::common::mysql_client
+} // namespace facebook::common::mysql_client::detail

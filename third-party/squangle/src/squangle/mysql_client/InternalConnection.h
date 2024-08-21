@@ -57,9 +57,7 @@ class InternalResult {
 
   using FetchRowRet = std::pair<InternalStatus, std::unique_ptr<InternalRow>>;
 
-  virtual FetchRowRet fetchRowBlocking() const = 0;
-
-  virtual FetchRowRet fetchRowNonBlocking() const = 0;
+  virtual FetchRowRet fetchRow() const = 0;
 
   virtual size_t numRows() const = 0;
 
@@ -107,7 +105,7 @@ class InternalConnection {
   virtual size_t escapeString(char* out, const char* src, size_t length)
       const = 0;
 
-  virtual bool close() = 0;
+  virtual std::function<void()> getCloseFunction() = 0;
 
   virtual folly::EventHandler::EventFlags getReadWriteState() const = 0;
 
@@ -171,15 +169,7 @@ class InternalConnection {
 
   virtual bool ping() const = 0;
 
-  virtual Status tryConnectBlocking(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
-      int flags) const = 0;
-  virtual Status tryConnectNonBlocking(
+  virtual Status tryConnect(
       const std::string& host,
       const std::string& user,
       const std::string& password,
@@ -188,27 +178,18 @@ class InternalConnection {
       const std::string& unixSocket,
       int flags) const = 0;
 
-  virtual Status runQueryBlocking(std::string_view query) const = 0;
-  virtual Status runQueryNonBlocking(std::string_view query) const = 0;
+  virtual Status runQuery(std::string_view query) const = 0;
 
-  virtual Status resetConnBlocking() const = 0;
-  virtual Status resetConnNonBlocking() const = 0;
+  virtual Status resetConn() const = 0;
 
-  virtual Status changeUserBlocking(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const = 0;
-  virtual Status changeUserNonBlocking(
+  virtual Status changeUser(
       const std::string& user,
       const std::string& password,
       const std::string& database) const = 0;
 
-  virtual Status nextResultBlocking() const = 0;
-  virtual Status nextResultNonBlocking() const = 0;
+  virtual Status nextResult() const = 0;
 
   virtual std::unique_ptr<InternalResult> getResult() const = 0;
-
-  virtual std::unique_ptr<InternalResult> storeResult() const = 0;
 
   virtual size_t getFieldCount() const = 0;
 

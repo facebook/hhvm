@@ -15,122 +15,23 @@
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/InternalConnection.h"
 
-namespace facebook::common::mysql_client {
+namespace facebook::common::mysql_client::detail {
 
 class AsyncConnectionPool;
-class InternalMysqlResult;
-class InternalMysqlRowMetadata;
-class MysqlClientBase;
-
-class InternalMysqlRow : public InternalRow {
- public:
-  InternalMysqlRow(MYSQL_ROW row, size_t numCols, unsigned long* lengths)
-      : row_(std::move(row)), numCols_(numCols), lengths_(lengths) {
-    DCHECK(row_);
-    DCHECK(numCols_);
-    DCHECK(lengths_);
-  }
-
-  [[nodiscard]] bool isNull(size_t col) const override {
-    DCHECK_LT(col, numCols_);
-    return !row_[col];
-  }
-
-  [[nodiscard]] folly::StringPiece column(size_t col) const override {
-    DCHECK_LT(col, numCols_);
-    DCHECK(row_[col]);
-    return folly::StringPiece(row_[col], lengths_[col]);
-  }
-
-  [[nodiscard]] size_t columnLength(size_t col) const override {
-    DCHECK_LT(col, numCols_);
-    return lengths_[col];
-  }
-
- private:
-  MYSQL_ROW row_;
-  size_t numCols_;
-  unsigned long* lengths_;
-};
-
-class InternalMysqlResult : public InternalResult {
- public:
-  explicit InternalMysqlResult(MYSQL_RES* res) : res_(res) {}
-
-  [[nodiscard]] FetchRowRet fetchRowBlocking() const override;
-
-  [[nodiscard]] FetchRowRet fetchRowNonBlocking() const override;
-
-  [[nodiscard]] size_t numFields() const;
-
-  [[nodiscard]] MYSQL_FIELD* fields() const;
-
-  [[nodiscard]] size_t numRows() const override;
-
-  void close() override {
-    res_->handle = nullptr;
-  }
-
-  [[nodiscard]] std::unique_ptr<InternalRowMetadata> getRowMetadata()
-      const override;
-
- private:
-  using MysqlResultDeleter =
-      folly::static_function_deleter<MYSQL_RES, mysql_free_result>;
-  using MysqlResultPtr = std::unique_ptr<MYSQL_RES, MysqlResultDeleter>;
-
-  MysqlResultPtr res_;
-};
-
-class InternalMysqlRowMetadata : public InternalRowMetadata {
- public:
-  explicit InternalMysqlRowMetadata(const InternalMysqlResult& result)
-      : num_fields_(result.numFields()), fields_(result.fields()) {}
-
-  [[nodiscard]] size_t numFields() const noexcept override {
-    return num_fields_;
-  }
-
-  [[nodiscard]] folly::StringPiece getTableName(size_t index) const override {
-    DCHECK_LT(index, num_fields_);
-    return folly::StringPiece(
-        fields_[index].table, fields_[index].table_length);
-  }
-
-  [[nodiscard]] folly::StringPiece getFieldName(size_t index) const override {
-    DCHECK_LT(index, num_fields_);
-    return folly::StringPiece(fields_[index].name, fields_[index].name_length);
-  }
-
-  [[nodiscard]] enum_field_types getFieldType(size_t index) const override {
-    DCHECK_LT(index, num_fields_);
-    return fields_[index].type;
-  }
-
-  [[nodiscard]] uint64_t getFieldFlags(size_t index) const override {
-    DCHECK_LT(index, num_fields_);
-    return fields_[index].flags;
-  }
-
- private:
-  size_t num_fields_;
-  const MYSQL_FIELD* fields_;
-};
+class MysqlResult;
+class MysqlRowMetadata;
 
 // Holds the mysql connection for easier re use
-class InternalMysqlConnection : public InternalConnection {
+class MysqlConnection : public InternalConnection {
  public:
-  explicit InternalMysqlConnection(
-      MysqlClientBase& client,
-      MYSQL* mysql = createMysql());
+  explicit MysqlConnection(MYSQL* mysql = createMysql());
 
   // Closes the connection in hold
-  virtual ~InternalMysqlConnection() override;
+  virtual ~MysqlConnection() override;
 
   // copy not allowed
-  InternalMysqlConnection() = delete;
-  InternalMysqlConnection(const InternalMysqlConnection&) = delete;
-  InternalMysqlConnection& operator=(const InternalMysqlConnection&) = delete;
+  MysqlConnection(const MysqlConnection&) = delete;
+  MysqlConnection& operator=(const MysqlConnection&) = delete;
 
   void setReusable(bool reusable) override {
     canReuse_ = reusable;
@@ -186,7 +87,7 @@ class InternalMysqlConnection : public InternalConnection {
   [[nodiscard]] size_t escapeString(char* out, const char* src, size_t length)
       const override;
 
-  bool close() override;
+  std::function<void()> getCloseFunction() override;
 
   [[nodiscard]] folly::EventHandler::EventFlags getReadWriteState()
       const override;
@@ -262,54 +163,23 @@ class InternalMysqlConnection : public InternalConnection {
     return mysql_->server_status & SERVER_STATUS_AUTOCOMMIT;
   }
 
-  [[nodiscard]] Status tryConnectBlocking(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
-      int flags) const override;
-  [[nodiscard]] Status tryConnectNonBlocking(
-      const std::string& host,
-      const std::string& user,
-      const std::string& password,
-      const std::string& db_name,
-      uint16_t port,
-      const std::string& unixSocket,
-      int flags) const override;
-
-  [[nodiscard]] Status runQueryBlocking(std::string_view query) const override;
-  [[nodiscard]] Status runQueryNonBlocking(
-      std::string_view query) const override;
-
-  [[nodiscard]] Status resetConnBlocking() const override;
-  [[nodiscard]] Status resetConnNonBlocking() const override;
-
-  [[nodiscard]] Status changeUserBlocking(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const override;
-  [[nodiscard]] Status changeUserNonBlocking(
-      const std::string& user,
-      const std::string& password,
-      const std::string& database) const override;
-
-  [[nodiscard]] Status nextResultBlocking() const override;
-  [[nodiscard]] Status nextResultNonBlocking() const override;
-
-  [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override;
-
-  [[nodiscard]] std::unique_ptr<InternalResult> storeResult() const override;
-
   [[nodiscard]] size_t getFieldCount() const override;
 
   [[nodiscard]] bool dumpDebugInfo() const override;
 
   [[nodiscard]] bool ping() const override;
 
- private:
-  MysqlClientBase& client_;
+  static inline Status toHandlerStatus(net_async_status status) {
+    if (status == NET_ASYNC_ERROR) {
+      return Status::ERROR;
+    } else if (status == NET_ASYNC_COMPLETE) {
+      return Status::DONE;
+    } else {
+      return Status::PENDING;
+    }
+  }
+
+ protected:
   // Our MYSQL handle.
   MYSQL* mysql_;
   std::optional<std::string> current_schema_;
@@ -376,4 +246,52 @@ class InternalMysqlConnection : public InternalConnection {
       MySqlConnectStage::CONNECT_STAGE_NET_COMPLETE_CONNECT;
 };
 
-} // namespace facebook::common::mysql_client
+class AsyncMysqlConnection : public MysqlConnection {
+  [[nodiscard]] Status tryConnect(
+      const std::string& host,
+      const std::string& user,
+      const std::string& password,
+      const std::string& db_name,
+      uint16_t port,
+      const std::string& unixSocket,
+      int flags) const override;
+
+  [[nodiscard]] Status runQuery(std::string_view query) const override;
+
+  [[nodiscard]] Status resetConn() const override;
+
+  [[nodiscard]] Status changeUser(
+      const std::string& user,
+      const std::string& password,
+      const std::string& database) const override;
+
+  [[nodiscard]] Status nextResult() const override;
+
+  [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override;
+};
+
+class SyncMysqlConnection : public MysqlConnection {
+  [[nodiscard]] Status tryConnect(
+      const std::string& host,
+      const std::string& user,
+      const std::string& password,
+      const std::string& db_name,
+      uint16_t port,
+      const std::string& unixSocket,
+      int flags) const override;
+
+  [[nodiscard]] Status runQuery(std::string_view query) const override;
+
+  [[nodiscard]] Status resetConn() const override;
+
+  [[nodiscard]] Status changeUser(
+      const std::string& user,
+      const std::string& password,
+      const std::string& database) const override;
+
+  [[nodiscard]] Status nextResult() const override;
+
+  [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override;
+};
+
+} // namespace facebook::common::mysql_client::detail

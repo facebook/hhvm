@@ -69,7 +69,7 @@ MysqlHandler::Status SyncMysqlClient::SyncMysqlHandler::tryConnect(
 
   // When using unix socket (AF_UNIX), host/port do not matter.
   static const std::string kEmptyString = "";
-  return conn.tryConnectBlocking(
+  return conn.tryConnect(
       usingUnixSocket ? kEmptyString : key.host(),
       key.user(),
       key.password(),

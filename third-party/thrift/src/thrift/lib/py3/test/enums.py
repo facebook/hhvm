@@ -298,3 +298,24 @@ class FlagTests(unittest.TestCase):
     def test_combo_repr(self) -> None:
         x = Perm(7)
         self.assertEqual("<Perm.read|write|execute: 7>", repr(x))
+
+    @brokenInAutoMigrate()
+    def test_get_all_names_equivalent(self) -> None:
+        # pyre-ignore[16]
+        self.assertEqual(list(Color._fbthrift_get_all_names()), [e.name for e in Color])
+
+    def test_iter_forward_compatible(self) -> None:
+        # test that replacement for _fbthrift_get_all_names()
+        # works as expected and is forward-compatible in thrift-python
+        self.assertEqual([e.name for e in Color], ["red", "blue", "green"])
+
+    @brokenInAutoMigrate()
+    def test_get_by_value_equivalent(self) -> None:
+        for i in range(len(Color)):
+            # pyre-ignore[16]
+            self.assertEqual(Color._fbthrift_get_by_value(i), Color(i))
+
+    def test_enum_call_forward_compatible(self) -> None:
+        self.assertEqual(Color(0), Color.red)
+        self.assertEqual(Color(1), Color.blue)
+        self.assertEqual(Color(2), Color.green)

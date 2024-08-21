@@ -9,8 +9,6 @@
 #ifndef COMMON_DB_EVENT_LOGGER_H
 #define COMMON_DB_EVENT_LOGGER_H
 
-#include <errmsg.h> // MySQL
-
 #include <chrono>
 #include <string>
 

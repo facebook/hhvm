@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/transport/rocket/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/client/KeepAliveWatcher.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
@@ -448,6 +449,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
       std::unique_ptr<SetupFrame> setupFrame,
       int32_t keepAliveTimeoutMs = 0,
       std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
+  rocket::PayloadSerialzer payloadSerializer_;
 
  private:
   template <class OnError>

@@ -105,7 +105,8 @@ RocketClient::RocketClient(
       detachableLoopCallback_(*this),
       closeLoopCallback_(*this),
       eventBaseDestructionCallback_(*this),
-      setupFrame_(std::move(setupFrame)) {
+      setupFrame_(std::move(setupFrame)),
+      payloadSerializer_(socket.get()) {
   DCHECK(socket_ != nullptr);
   socket_->setReadCB(&parser_);
   if (auto socket_2 = dynamic_cast<folly::AsyncSocket*>(socket_.get())) {
@@ -1067,7 +1068,7 @@ bool RocketClient::sendPayload(
     StreamId streamId, StreamPayload&& payload, Flags flags) {
   return sendFrame(
       PayloadFrame(
-          streamId, pack(std::move(payload), getTransportWrapper()), flags),
+          streamId, payloadSerializer_.serialize(std::move(payload)), flags),
       [this,
        dg = DestructorGuard(this),
        g = makeRequestCountGuard(RequestType::INTERNAL)](

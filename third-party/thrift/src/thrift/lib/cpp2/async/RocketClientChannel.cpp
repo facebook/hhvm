@@ -873,11 +873,8 @@ void RocketClientChannel::sendRequestStream(
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
 
-  auto payload = rocket::packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      getTransportWrapper());
+  auto payload =
+      payloadSerializer_.serialize(std::move(buf), &metadata, rpcOptions);
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestStream(
       std::move(payload),
@@ -918,11 +915,8 @@ void RocketClientChannel::sendRequestSink(
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
 
-  auto payload = rocket::packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      getTransportWrapper());
+  auto payload =
+      payloadSerializer_.serialize(std::move(buf), &metadata, rpcOptions);
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestSink(
       std::move(payload),
@@ -994,11 +988,8 @@ void RocketClientChannel::sendSingleRequestNoResponse(
     RequestRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
-  auto requestPayload = rocket::packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      getTransportWrapper());
+  auto requestPayload =
+      payloadSerializer_.serialize(std::move(buf), &metadata, rpcOptions);
   const bool isSync = cb->isSync();
   SingleRequestNoResponseCallback callback(std::move(cb));
 
@@ -1019,11 +1010,8 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
   const auto requestSerializedSize = buf->computeChainDataLength();
-  auto requestPayload = rocket::packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      getTransportWrapper());
+  auto requestPayload =
+      payloadSerializer_.serialize(std::move(buf), &metadata, rpcOptions);
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =
       requestPayload.metadataAndDataSize();

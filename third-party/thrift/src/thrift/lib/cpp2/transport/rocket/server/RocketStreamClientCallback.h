@@ -20,6 +20,7 @@
 #include <folly/io/async/HHWheelTimer.h>
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/transport/rocket/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
 namespace folly {
@@ -92,6 +93,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   std::unique_ptr<CompressionConfig> compressionConfig_;
   std::string rpcMethodName_{"<unknown_stream_method>"};
   StreamMetricCallback& streamMetricCallback_;
+  rocket::PayloadSerialzer payloadSerializer_;
 
   void scheduleTimeout();
   void cancelTimeout();

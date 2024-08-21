@@ -62,7 +62,8 @@ RocketStreamClientCallback::RocketStreamClientCallback(
     : streamId_(streamId),
       connection_(connection),
       tokens_(initialRequestN),
-      streamMetricCallback_(streamMetricCallback) {}
+      streamMetricCallback_(streamMetricCallback),
+      payloadSerializer_(connection.getRawSocket()) {}
 
 bool RocketStreamClientCallback::onFirstResponse(
     FirstResponsePayload&& firstResponse,
@@ -93,7 +94,7 @@ bool RocketStreamClientCallback::onFirstResponse(
 
   connection_.sendPayload(
       streamId_,
-      pack(std::move(firstResponse), connection_.getRawSocket()),
+      payloadSerializer_.serialize(std::move(firstResponse)),
       Flags().next(true));
 
   if (tokens) {
@@ -112,9 +113,7 @@ void RocketStreamClientCallback::onFirstResponseError(
             DCHECK(encodedError.encoded.payload);
             connection_.sendPayload(
                 streamId_,
-                pack(
-                    std::move(encodedError.encoded),
-                    connection_.getRawSocket()),
+                payloadSerializer_.serialize(std::move(encodedError.encoded)),
                 Flags().next(true).complete(true));
           });
   DCHECK(isEncodedError);
@@ -141,7 +140,7 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
   streamMetricCallback_.onStreamNext(rpcMethodName_);
   connection_.sendPayload(
       streamId_,
-      pack(std::move(payload), connection_.getRawSocket()),
+      payloadSerializer_.serialize(std::move(payload)),
       Flags().next(true));
 
   return true;
@@ -180,7 +179,7 @@ void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
         }
         connection_.sendPayload(
             streamId_,
-            pack(std::move(err.encoded), connection_.getRawSocket()),
+            payloadSerializer_.serialize(std::move(err.encoded)),
             Flags().next(true).complete(true));
       },
       [this, &ew](...) {

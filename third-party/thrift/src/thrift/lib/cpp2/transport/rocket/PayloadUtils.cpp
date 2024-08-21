@@ -16,13 +16,10 @@
 
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace detail {
+namespace apache::thrift::rocket::detail {
 
 template <class Metadata>
-Payload makePayload(
+rocket::Payload makePayload(
     const Metadata& metadata, std::unique_ptr<folly::IOBuf> data) {
   CompactProtocolWriter writer;
   // Default is to leave some headroom for rsocket headers
@@ -51,7 +48,7 @@ Payload makePayload(
     data->advance(start - data->tail());
     data->append(origLen);
 
-    return Payload::makeCombined(std::move(data), metadataLen);
+    return rocket::Payload::makeCombined(std::move(data), metadataLen);
   } else {
     constexpr size_t kMinAllocBytes = 1024;
     auto buf = folly::IOBuf::create(
@@ -61,17 +58,14 @@ Payload makePayload(
     writer.setOutput(&queue);
     auto metadataLen = metadata.write(&writer);
     queue.append(std::move(data));
-    return Payload::makeCombined(queue.move(), metadataLen);
+    return rocket::Payload::makeCombined(queue.move(), metadataLen);
   }
 }
 
-template Payload makePayload<>(
+template rocket::Payload makePayload<>(
     const RequestRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
-template Payload makePayload<>(
+template rocket::Payload makePayload<>(
     const ResponseRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
-template Payload makePayload<>(
+template rocket::Payload makePayload<>(
     const StreamPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
-} // namespace detail
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::detail

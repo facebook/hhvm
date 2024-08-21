@@ -45,7 +45,9 @@ namespace rocket {
 // RocketSinkClientCallback methods
 RocketSinkClientCallback::RocketSinkClientCallback(
     StreamId streamId, RocketServerConnection& connection)
-    : streamId_(streamId), connection_(connection) {}
+    : streamId_(streamId),
+      connection_(connection),
+      payloadSerializer_(connection.getRawSocket()) {}
 
 bool RocketSinkClientCallback::onFirstResponse(
     FirstResponsePayload&& firstResponse,
@@ -63,7 +65,7 @@ bool RocketSinkClientCallback::onFirstResponse(
 
   connection_.sendPayload(
       streamId_,
-      pack(std::move(firstResponse), connection_.getRawSocket()),
+      payloadSerializer_.serialize(std::move(firstResponse)),
       Flags().next(true));
   return true;
 }
@@ -78,9 +80,7 @@ void RocketSinkClientCallback::onFirstResponseError(
             DCHECK(encodedError.encoded.payload);
             connection_.sendPayload(
                 streamId_,
-                pack(
-                    std::move(encodedError.encoded),
-                    connection_.getRawSocket()),
+                payloadSerializer_.serialize(std::move(encodedError.encoded)),
                 Flags().next(true).complete(true));
           });
   DCHECK(isEncodedError);
@@ -103,7 +103,7 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
 
   connection_.sendPayload(
       streamId_,
-      pack(std::move(finalResponse), connection_.getRawSocket()),
+      payloadSerializer_.serialize(std::move(finalResponse)),
       Flags().next(true).complete(true));
   auto state = state_;
   auto& connection = connection_;
@@ -132,7 +132,7 @@ void RocketSinkClientCallback::onFinalResponseError(
         }
         connection_.sendPayload(
             streamId_,
-            pack(std::move(err.encoded), connection_.getRawSocket()),
+            payloadSerializer_.serialize(std::move(err.encoded)),
             Flags().next(true).complete(true));
       },
       [&](...) {

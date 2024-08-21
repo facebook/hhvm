@@ -58,23 +58,6 @@ class render_node {
     m_ctx.out += value ? "true" : "false";
   }
 
-  void operator()(const lambda& value) const {
-    // Reset m_ctx to an empty output.
-    std::string prior_output;
-    std::swap(prior_output, m_ctx.out);
-
-    // Render the lamdba's lazy value into m_ctx.
-    value([this](const node& n) { n.visit(render_node(m_ctx)); });
-
-    // Parse a template out of the lambda's output.
-    template_type interpreted{m_ctx.out};
-
-    // Restore the original value of m_ctx, and continue rendering with the
-    // obtained template.
-    m_ctx.out = std::move(prior_output);
-    render_context::push(m_ctx).render(interpreted);
-  }
-
   void operator()(const std::string& value) const { m_ctx.out += value; }
 
  private:

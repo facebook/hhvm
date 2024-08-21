@@ -51,29 +51,6 @@ class render_section {
     render_context::push(m_ctx, t).render(m_section);
   }
 
-  void operator()(const lambda& fun) const {
-    // Concatenate the unrendered contents of this section.
-    std::string section_str;
-    for (auto& token : m_section)
-      section_str += token.raw();
-
-    // Reset m_ctx to an empty output.
-    std::string prior_output;
-    std::swap(prior_output, m_ctx.out);
-
-    // Pass unrendered section content to lambda, and render lambda's lazy value
-    // into m_ctx.
-    fun([this](const node& n) { n.visit(render_node(m_ctx)); }, section_str);
-
-    // Parse a template out of the lamdba's output.
-    template_type interpreted{m_ctx.out};
-
-    // Restore the original value of m_ctx, and continue rendering with the
-    // obtained template.
-    m_ctx.out = std::move(prior_output);
-    render_context::push(m_ctx).render(interpreted);
-  }
-
   void operator()(const array& array) const {
     if (m_flag == flag::keep_array)
       render_context::push(m_ctx, array).render(m_section);

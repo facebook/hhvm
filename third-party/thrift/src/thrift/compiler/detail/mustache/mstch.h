@@ -119,56 +119,6 @@ class object_t {
   std::unordered_map<std::string, std::function<const N&()>> methods_;
 };
 
-template <class T, class N>
-class is_fun {
- private:
-  using not_fun = char;
-  using fun_without_args = char[2];
-  using fun_with_args = char[3];
-  template <typename U, U>
-  struct really_has;
-  template <typename C>
-  static fun_without_args& test(really_has<N (C::*)() const, &C::operator()>*);
-  template <typename C>
-  static fun_with_args& test(
-      really_has<N (C::*)(const std::string&) const, &C::operator()>*);
-  template <typename>
-  static not_fun& test(...);
-
- public:
-  static const bool no_args = sizeof(test<T>(0)) == sizeof(fun_without_args);
-  static const bool has_args = sizeof(test<T>(0)) == sizeof(fun_with_args);
-};
-
-template <class N>
-using node_renderer = std::function<void(const N& n)>;
-
-template <class N>
-class lambda_t {
- public:
-  template <class F>
-  /* implicit */ lambda_t(
-      F f, typename std::enable_if<is_fun<F, N>::no_args>::type* = 0)
-      : fun([f](node_renderer<N> renderer, const std::string&) {
-          return renderer(f());
-        }) {}
-
-  template <class F>
-  /* implicit */ lambda_t(
-      F f, typename std::enable_if<is_fun<F, N>::has_args>::type* = 0)
-      : fun([f](node_renderer<N> renderer, const std::string& text) {
-          return renderer(f(text));
-        }) {}
-
-  void operator()(
-      node_renderer<N> renderer, const std::string& text = "") const {
-    fun(renderer, text);
-  }
-
- private:
-  std::function<void(node_renderer<N> renderer, const std::string&)> fun;
-};
-
 template <typename Node>
 using node_base = std::variant<
     std::nullptr_t,
@@ -176,7 +126,6 @@ using node_base = std::variant<
     int,
     double,
     bool,
-    internal::lambda_t<Node>,
     std::shared_ptr<internal::object_t<Node>>,
     std::map<const std::string, Node>,
     std::vector<Node>>;
@@ -213,7 +162,6 @@ node make_shared_node(A&&... a) {
 }
 
 using object = internal::object_t<node>;
-using lambda = internal::lambda_t<node>;
 using map = std::map<const std::string, node>;
 using array = std::vector<node>;
 

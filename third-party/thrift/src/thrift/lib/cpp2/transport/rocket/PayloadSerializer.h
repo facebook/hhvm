@@ -25,20 +25,26 @@ class PayloadSerialzer {
   explicit PayloadSerialzer(folly::AsyncTransport* transport)
       : transport_(transport) {}
 
-  template <typename Payload, typename Metadata>
+  template <typename Metadata>
   rocket::Payload serialize(
-      Payload&& payload, Metadata* metadata, const RpcOptions& rpcOptions) {
+      std::unique_ptr<folly::IOBuf>&& payload,
+      Metadata* metadata,
+      const RpcOptions& rpcOptions) {
     return serializeWithFds(
-        std::forward<Payload>(payload),
+        std::forward<std::unique_ptr<folly::IOBuf>>(payload),
         metadata,
         rpcOptions.copySocketFdsToSend());
   }
 
-  template <typename Payload, typename Metadata>
+  template <typename Metadata>
   rocket::Payload serialize(
-      Payload&& payload, Metadata* metadata, transport::THeader* headers) {
+      std::unique_ptr<folly::IOBuf>&& payload,
+      Metadata* metadata,
+      transport::THeader* headers) {
     return serializeWithFds(
-        std::forward<Payload>(payload), metadata, std::move(headers->fds));
+        std::forward<std::unique_ptr<folly::IOBuf>>(payload),
+        metadata,
+        std::move(headers->fds));
   }
 
   template <class T>
@@ -51,13 +57,13 @@ class PayloadSerialzer {
   }
 
  private:
-  template <typename Payload, typename Metadata>
+  template <typename Metadata>
   rocket::Payload serializeWithFds(
-      Payload&& payload, Metadata* metadata, folly::SocketFds fds) {
-    auto serializedPayload = packCompact(std::forward<Payload>(payload));
+      std::unique_ptr<folly::IOBuf>&& payload,
+      Metadata* metadata,
+      folly::SocketFds fds) {
     if (auto compress = metadata->compression_ref()) {
-      apache::thrift::rocket::detail::compressPayload(
-          serializedPayload, *compress);
+      apache::thrift::rocket::detail::compressPayload(payload, *compress);
     }
     auto numFds = fds.size();
     if (numFds) {
@@ -99,7 +105,7 @@ class PayloadSerialzer {
       metadata->fdMetadata() = fdMetadata;
     }
     auto ret = apache::thrift::rocket::detail::makePayload(
-        *metadata, std::move(serializedPayload));
+        *metadata, std::move(payload));
     if (numFds) {
       ret.fds = std::move(fds.dcheckToSendOrEmpty());
     }

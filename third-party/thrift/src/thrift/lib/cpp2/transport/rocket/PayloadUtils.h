@@ -118,12 +118,6 @@ std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
   return queue.move();
 }
 
-template <>
-inline std::unique_ptr<folly::IOBuf> packCompact(
-    std::unique_ptr<folly::IOBuf>&& data) {
-  return std::move(data);
-}
-
 } // namespace rocket
 } // namespace thrift
 } // namespace apache

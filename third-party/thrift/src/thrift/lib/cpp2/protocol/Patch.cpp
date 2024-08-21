@@ -35,7 +35,6 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
-#include <thrift/lib/thrift/gen-cpp2/any_patch_detail_types.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_op_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
@@ -418,10 +417,7 @@ void impl(Patch&& patch, Object& value) {
        PatchOp::PatchPrior,
        PatchOp::EnsureStruct,
        PatchOp::EnsureUnion,
-       PatchOp::PatchAfter,
-       PatchOp::PatchIfTypeIsPrior,
-       PatchOp::EnsureAny,
-       PatchOp::PatchIfTypeIsAfter});
+       PatchOp::PatchAfter});
   if (applyAssign<type::struct_c>(std::forward<Patch>(patch), value)) {
     return; // Ignore all other ops.
   }
@@ -510,66 +506,6 @@ void impl(Patch&& patch, Object& value) {
           util::enumNameSafe(to_remove->getType())));
     }
   }
-
-  // Handling Thrift AnyPatch operations.
-  const auto* typePatchPriorVal = findOp(patch, PatchOp::PatchIfTypeIsPrior);
-  const auto* ensureAnyVal = findOp(patch, PatchOp::EnsureAny);
-  const auto* typePatchAfterVal = findOp(patch, PatchOp::PatchIfTypeIsAfter);
-
-  if (!typePatchPriorVal && !ensureAnyVal && !typePatchAfterVal) {
-    return;
-  }
-
-  type::AnyStruct anyStruct;
-  if (!ProtocolValueToThriftValue<type::struct_t<type::AnyStruct>>{}(
-          value, anyStruct)) {
-    throw std::runtime_error("Failed to convert current object to AnyStruct");
-  }
-
-  auto applyTypePatch = [&](const auto& typePatchList) {
-    for (const auto& typePatchVal : typePatchList.as_list()) {
-      op::TypeToPatchInternalDoNotUse type_to_patch;
-      if (!ProtocolValueToThriftValue<
-              type::struct_t<op::TypeToPatchInternalDoNotUse>>{}(
-              typePatchVal, type_to_patch)) {
-        throw std::runtime_error("Invalid AnyPatch PatchIfTypeIsPrior/After");
-      }
-      if (type_to_patch.type() == anyStruct.type().value()) {
-        auto val = protocol::detail::parseValueFromAny(anyStruct);
-        for (const auto& p : type_to_patch.patches().value()) {
-          auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-          ApplyPatch{}(dynPatch, val);
-        }
-        anyStruct =
-            protocol::detail::toAny(
-                val, anyStruct.type().value(), anyStruct.protocol().value())
-                .toThrift();
-        break;
-      }
-    }
-    return;
-  };
-
-  if (typePatchPriorVal) {
-    applyTypePatch(*typePatchPriorVal);
-  }
-
-  if (ensureAnyVal) {
-    type::AnyStruct ensureAny;
-    if (!ProtocolValueToThriftValue<type::struct_t<type::AnyStruct>>{}(
-            *ensureAnyVal, ensureAny)) {
-      throw std::runtime_error("Invalid AnyPatch ensureAny");
-    }
-    if (ensureAny.type() != anyStruct.type()) {
-      anyStruct = std::move(ensureAny);
-    }
-  }
-
-  if (typePatchAfterVal) {
-    applyTypePatch(*typePatchAfterVal);
-  }
-
-  value = asValueStruct<type::struct_t<type::AnyStruct>>(anyStruct).as_object();
 }
 
 void ApplyPatch::operator()(const Object& patch, Object& value) const {

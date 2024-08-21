@@ -43,32 +43,6 @@ namespace apache::thrift::protocol {
 
 namespace detail {
 
-template <typename Tag>
-struct HasStructuredTag : std::false_type {};
-template <typename Tag>
-struct HasStructuredTag<type::list<Tag>> : HasStructuredTag<Tag> {};
-template <typename Tag>
-struct HasStructuredTag<type::set<Tag>> : HasStructuredTag<Tag> {};
-template <typename KTag, typename VTag>
-struct HasStructuredTag<type::map<KTag, VTag>> {
-  static constexpr bool value =
-      HasStructuredTag<KTag>::value || HasStructuredTag<VTag>::value;
-};
-template <typename Adapter, typename Tag>
-struct HasStructuredTag<type::adapted<Adapter, Tag>> : HasStructuredTag<Tag> {};
-template <typename Tag, typename FieldContext>
-struct HasStructuredTag<type::field<Tag, FieldContext>>
-    : HasStructuredTag<Tag> {};
-template <typename T>
-struct HasStructuredTag<type::struct_t<T>> : std::true_type {};
-template <typename T>
-struct HasStructuredTag<type::union_t<T>> : std::true_type {};
-template <typename T>
-struct HasStructuredTag<type::exception_t<T>> : std::true_type {};
-
-template <typename Tag>
-inline constexpr bool has_structured_tag_v = HasStructuredTag<Tag>::value;
-
 template <typename C, typename T>
 decltype(auto) forward_elem(T& elem) {
   if constexpr (std::is_lvalue_reference_v<C>) {
@@ -1003,19 +977,15 @@ struct ProtocolValueToThriftValue<type::list<Tag>> {
     if (!p) {
       return false;
     }
-    bool ret = true;
     list.clear();
     folly::reserve_if_available(list, p->size());
     for (auto&& v : *p) {
       if (!ProtocolValueToThriftValue<Tag>{}(v, list.emplace_back())) {
-        if constexpr (!has_structured_tag_v<Tag>) {
-          return false;
-        }
-        ret = false;
+        return false;
       }
     }
 
-    return ret;
+    return true;
   }
 };
 
@@ -1032,19 +1002,15 @@ struct ProtocolValueToThriftValue<type::set<Tag>> {
 
     set.clear();
     folly::reserve_if_available(set, p->size());
-    bool ret = true;
     for (auto&& v : *p) {
       apache::thrift::op::clear<Tag>(elem);
       if (!ProtocolValueToThriftValue<Tag>{}(v, elem)) {
-        if constexpr (!has_structured_tag_v<Tag>) {
-          return false;
-        }
-        ret = false;
+        return false;
       }
       set.emplace_hint(set.end(), std::move(elem));
     }
 
-    return ret;
+    return true;
   }
 };
 
@@ -1060,25 +1026,18 @@ struct ProtocolValueToThriftValue<type::map<KeyTag, ValueTag>> {
     }
     map.clear();
     folly::reserve_if_available(map, p->size());
-    bool ret = true;
     for (auto&& [k, v] : *p) {
       apache::thrift::op::clear<KeyTag>(key);
       apache::thrift::op::clear<ValueTag>(val);
       if (!ProtocolValueToThriftValue<KeyTag>{}(k, key)) {
-        if constexpr (!has_structured_tag_v<KeyTag>) {
-          return false;
-        }
-        ret = false;
+        return false;
       }
       if (!ProtocolValueToThriftValue<ValueTag>{}(v, val)) {
-        if constexpr (!has_structured_tag_v<ValueTag>) {
-          return false;
-        }
-        ret = false;
+        return false;
       }
       map.emplace_hint(map.end(), std::move(key), std::move(val));
     }
-    return ret;
+    return true;
   }
 };
 
@@ -1135,43 +1094,33 @@ struct ProtocolValueToThriftValue<
 
 template <class T>
 struct ProtocolValueToThriftValueStructure {
-  // Returns true if all fields are successfully converted.
   bool operator()(const Object& obj, T& s) const {
-    bool ret = true;
     for (auto&& kv : obj) {
       op::invoke_by_field_id<T>(
           static_cast<FieldId>(kv.first),
           [&](auto id) {
             using Id = decltype(id);
-            using FieldTag = op::get_field_tag<T, Id>;
-            using FieldType = op::get_native_type<T, Id>;
-            FieldType t;
-            if (!ProtocolValueToThriftValue<FieldTag>{}(kv.second, t, s)) {
-              ret = false;
-              if constexpr (!has_structured_tag_v<FieldTag>) {
-                return;
+            op::get_native_type<T, Id> t;
+            if (ProtocolValueToThriftValue<op::get_field_tag<T, Id>>{}(
+                    kv.second, t, s)) {
+              using Ref = op::get_field_ref<T, Id>;
+              if constexpr (apache::thrift::detail::is_shared_or_unique_ptr_v<
+                                Ref>) {
+                op::get<Id>(s) =
+                    std::make_unique<op::get_native_type<T, Id>>(std::move(t));
+              } else {
+                op::get<Id>(s) = std::move(t);
               }
             }
-
-            using Ref = op::get_field_ref<T, Id>;
-            if constexpr (apache::thrift::detail::is_shared_or_unique_ptr_v<
-                              Ref>) {
-              op::get<Id>(s) =
-                  std::make_unique<op::get_native_type<T, Id>>(std::move(t));
-            } else {
-              op::get<Id>(s) = std::move(t);
-            }
           },
-          [&] {
-            // Missing field in T.
-            ret = false;
-          });
+          [] {});
     }
-    return ret;
+    return true;
   }
   bool operator()(const Value& value, T& s) const {
     if (auto p = value.if_object()) {
-      return operator()(*p, s);
+      operator()(*p, s);
+      return true;
     }
     return false;
   }

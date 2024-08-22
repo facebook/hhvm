@@ -25,7 +25,6 @@
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 
@@ -128,7 +127,6 @@ class ThriftServerRequestResponse final : public RocketThriftRequest {
  private:
   const int32_t version_;
   std::chrono::milliseconds maxResponseWriteTime_;
-  rocket::PayloadSerialzer payloadSerializer_;
 };
 
 // Object corresponding to rsocket REQUEST_FNF request (one-way request)

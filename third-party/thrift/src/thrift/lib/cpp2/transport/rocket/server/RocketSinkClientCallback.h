@@ -23,7 +23,6 @@
 #include <folly/io/async/HHWheelTimer.h>
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
@@ -101,7 +100,6 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   std::unique_ptr<TimeoutCallback> timeout_;
   protocol::PROTOCOL_TYPES protoId_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
-  rocket::PayloadSerialzer payloadSerializer_;
 };
 
 } // namespace rocket

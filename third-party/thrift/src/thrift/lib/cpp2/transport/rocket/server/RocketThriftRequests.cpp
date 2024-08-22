@@ -454,8 +454,7 @@ ThriftServerRequestResponse::ThriftServerRequestResponse(
           evb,
           std::move(context)),
       version_(version),
-      maxResponseWriteTime_(maxResponseWriteTime),
-      payloadSerializer_(context_.connection().getRawSocket()) {
+      maxResponseWriteTime_(maxResponseWriteTime) {
   new (colocationParams.debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
       *this,
@@ -483,9 +482,11 @@ void ThriftServerRequestResponse::sendThriftResponse(
     context_.sendError(std::move(ex), std::move(cb));
     return;
   }
-
-  auto payload = payloadSerializer_.serialize(
-      std::move(data), &metadata, getRequestContext()->getHeader());
+  auto payload = packWithFds(
+      &metadata,
+      std::move(data),
+      std::move(getRequestContext()->getHeader()->fds),
+      context_.connection().getRawSocket());
 
   if (maxResponseWriteTime_ > std::chrono::milliseconds{0}) {
     cb = apache::thrift::MessageChannel::SendCallbackPtr(

@@ -19,7 +19,6 @@
 #include <fmt/core.h>
 #include <folly/Try.h>
 #include <folly/io/async/AsyncTransport.h>
-#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
@@ -118,6 +117,81 @@ std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
   return queue.move();
 }
 
+template <>
+inline std::unique_ptr<folly::IOBuf> packCompact(
+    std::unique_ptr<folly::IOBuf>&& data) {
+  return std::move(data);
+}
+
+// NB: If `fds` is non-empty, populates `metadata.{numFds,fdSeqNum}` and
+// `fds.seqNum()`.  Then, moves the FDs into `Payload::fds`.
+template <typename Payload, typename Metadata>
+rocket::Payload packWithFds(
+    Metadata* metadata,
+    Payload&& payload,
+    folly::SocketFds fds,
+    folly::AsyncTransport* transport) {
+  auto serializedPayload = packCompact(std::forward<Payload>(payload));
+  if (auto compress = metadata->compression_ref()) {
+    apache::thrift::rocket::detail::compressPayload(
+        serializedPayload, *compress);
+  }
+  auto numFds = fds.size();
+  if (numFds) {
+    FdMetadata fdMetadata;
+
+    // The kernel maximum is actually much lower (at least on Linux, and
+    // MacOS doesn't seem to document it at all), but that will only fail in
+    // in `AsyncFdSocket`.
+    constexpr auto numFdsTypeMax = std::numeric_limits<
+        op::get_native_type<FdMetadata, ident::numFds>>::max();
+    if (UNLIKELY(numFds > numFdsTypeMax)) {
+      LOG(DFATAL) << numFds << " would overflow FdMetadata::numFds";
+      fdMetadata.numFds() = numFdsTypeMax;
+      // This will cause "AsyncFdSocket::writeChainWithFds" to error out.
+      fdMetadata.fdSeqNum() = folly::SocketFds::kNoSeqNum;
+    } else {
+      // When received, the request will know to retrieve this many FDs.
+      fdMetadata.numFds() = numFds;
+      // FD sequence numbers count the total number of FDs sent on this
+      // socket, and are used to detect & fail on the dire class of bugs where
+      // the wrong FDs are about to be associated with a message.
+      //
+      // We currently require message bytes and FDs to be both sent and
+      // received in a coherent order, so sequence numbers here in `pack*` are
+      // expected to exactly match the sequencing of socket sends, and also the
+      // sequencing of `popNextReceivedFds` on the receiving side.
+      //
+      // NB: If `transport` is not backed by a `AsyncFdSocket*`, this will
+      // store `fdSeqNum == -1`, which cannot happen otherwise, thanks to
+      // AsyncFdSocket's 2^63 -> 0 wrap-around logic.  Furthermore, the
+      // subsequent `writeChainWithFds` will discard `fds`.  As a result, the
+      // recipient will see read errors on the FDs due to both `numFds` not
+      // matching, and `fdSeqNum` not matching.
+      fdMetadata.fdSeqNum() =
+          injectFdSocketSeqNumIntoFdsToSend(transport, &fds);
+    }
+
+    DCHECK(!metadata->fdMetadata().has_value());
+    metadata->fdMetadata() = fdMetadata;
+  }
+  auto ret = apache::thrift::rocket::detail::makePayload(
+      *metadata, std::move(serializedPayload));
+  if (numFds) {
+    ret.fds = std::move(fds.dcheckToSendOrEmpty());
+  }
+  return ret;
+}
+
+template <class T>
+rocket::Payload pack(T&& payload, folly::AsyncTransport* transport) {
+  auto metadata = std::forward<T>(payload).metadata;
+  return packWithFds(
+      &metadata,
+      std::forward<T>(payload).payload,
+      std::forward<T>(payload).fds,
+      transport);
+}
 } // namespace rocket
 } // namespace thrift
 } // namespace apache

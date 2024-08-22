@@ -39,15 +39,8 @@ class HQConnector : public HQSession::ConnectCallback {
 
   explicit HQConnector(Callback* callback,
                        std::chrono::milliseconds transactionTimeout,
-                       bool useConnectionEndWithErrorCallback = false)
-      : cb_(CHECK_NOTNULL(callback)),
-        transactionTimeout_(transactionTimeout),
-        useConnectionEndWithErrorCallback_(useConnectionEndWithErrorCallback) {
-  }
-
-  ~HQConnector() override {
-    reset();
-  }
+                       bool useConnectionEndWithErrorCallback = false);
+  ~HQConnector() override;
 
   void setTransportSettings(quic::TransportSettings transportSettings);
   void setSupportedQuicVersions(

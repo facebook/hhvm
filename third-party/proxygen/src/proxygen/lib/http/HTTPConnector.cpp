@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/logging/xlog.h>
 #include <proxygen/lib/http/HTTPConnector.h>
 
 #include <folly/io/SocketOptionMap.h>
@@ -170,10 +171,12 @@ void HTTPConnector::connectSuccess() noexcept {
                                                          transportInfo_,
                                                          nullptr);
 
+  XLOG(DBG5) << " connectSuccess, HTTPUpstreamSession " << session;
   cb_->connectSuccess(session);
 }
 
 void HTTPConnector::connectErr(const AsyncSocketException& ex) noexcept {
+  XLOG(DBG3) << " connectErr " << ex.what();
   socket_.reset();
   if (cb_) {
     cb_->connectError(ex);

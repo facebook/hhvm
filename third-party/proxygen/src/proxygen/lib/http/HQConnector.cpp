@@ -10,6 +10,7 @@
 
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncSSLSocket.h>
+#include <folly/logging/xlog.h>
 #include <proxygen/lib/http/session/HQSession.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/common/events/FollyQuicEventBase.h>
@@ -22,6 +23,20 @@ using namespace fizz::client;
 
 namespace proxygen {
 
+HQConnector::HQConnector(Callback* callback,
+                         std::chrono::milliseconds transactionTimeout,
+                         bool useConnectionEndWithErrorCallback)
+    : cb_(CHECK_NOTNULL(callback)),
+      transactionTimeout_(transactionTimeout),
+      useConnectionEndWithErrorCallback_(useConnectionEndWithErrorCallback) {
+  XLOG(DBG5) << "HQConnector";
+}
+
+HQConnector::~HQConnector() {
+  XLOG(DBG5) << "~HQConnector";
+  reset();
+}
+
 std::chrono::microseconds HQConnector::timeElapsed() {
   if (timePointInitialized(connectStart_)) {
     return microsecondsSince(connectStart_);
@@ -30,6 +45,7 @@ std::chrono::microseconds HQConnector::timeElapsed() {
 }
 
 void HQConnector::reset() {
+  XLOG(DBG5) << "reset";
   if (session_) {
     // This destroys the session
     session_->dropConnection();
@@ -60,7 +76,7 @@ void HQConnector::connect(
     std::shared_ptr<quic::LoopDetectorCallback> quicLoopDetectorCallback,
     std::shared_ptr<quic::QuicTransportStatsCallback>
         quicTransportStatsCallback) {
-
+  XLOG(DBG5) << "connect, timeout=" << connectTimeout.count() << "ms";
   DCHECK(!isBusy());
   auto qEvb = std::make_shared<quic::FollyQuicEventBase>(eventBase);
   auto sock = std::make_unique<quic::FollyQuicAsyncUDPSocket>(qEvb);
@@ -119,6 +135,7 @@ void HQConnector::onReplaySafe() noexcept {
 }
 
 void HQConnector::connectError(quic::QuicError error) noexcept {
+  XLOG(DBG4) << "connectError, error=" << error.code;
   CHECK(session_);
   reset();
   if (cb_) {

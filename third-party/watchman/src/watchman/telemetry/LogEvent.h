@@ -86,6 +86,7 @@ struct DispatchCommand {
   std::string command;
   std::string args;
   pid_t client_pid = 0;
+  std::string client_name;
 
   void populate(DynamicEvent& event) const {
     meta.populate(event);
@@ -95,6 +96,9 @@ struct DispatchCommand {
     }
     if (client_pid != 0) {
       event.addInt("client_pid", client_pid);
+    }
+    if (!client_name.empty()) {
+      event.addString("client", client_name);
     }
   }
 };

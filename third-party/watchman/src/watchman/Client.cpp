@@ -183,6 +183,11 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
             eventCount != samplingRate ? 0 : eventCount;
         dispatchCommand.args = renderedString;
         dispatchCommand.client_pid = peerPid_;
+        auto processName = peerInfo_.get().name;
+        std::replace(processName.begin(), processName.end(), '\0', ' ');
+        auto cleanName = folly::rtrimWhitespace(processName);
+        dispatchCommand.client_name = cleanName;
+
         getLogger()->logEvent(dispatchCommand);
       }
 

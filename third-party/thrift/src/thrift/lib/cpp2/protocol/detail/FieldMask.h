@@ -86,8 +86,7 @@ getIntegerMapMask(const Mask& mask);
 getStringMapMask(const Mask& mask);
 
 // If mask is an AnyMask, return it, otherwise return nullptr
-[[nodiscard]] const MapTypeToMask* FOLLY_NULLABLE
-getTypeMapMask(const Mask& mask);
+[[nodiscard]] const MapTypeToMask* FOLLY_NULLABLE getTypeMask(const Mask& mask);
 
 // If mask is an any-mask, return it, otherwise return nullptr
 // TODO

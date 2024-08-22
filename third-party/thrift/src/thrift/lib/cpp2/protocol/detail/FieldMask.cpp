@@ -65,7 +65,7 @@ const MapStringToMask* FOLLY_NULLABLE getStringMapMask(const Mask& mask) {
 }
 
 [[nodiscard]] const MapTypeToMask* FOLLY_NULLABLE
-getTypeMapMask(const Mask& mask) {
+getTypeMask(const Mask& mask) {
   if (mask.includes_type_ref()) {
     return &*mask.includes_type_ref();
   }
@@ -121,7 +121,7 @@ void throwIfContainsMapMask(const Mask& mask) {
       mask.includes_string_map_ref() || mask.excludes_string_map_ref()) {
     folly::throw_exception<std::runtime_error>("map mask is not implemented");
   }
-  if (auto* typeMapPtr = getTypeMapMask(mask)) {
+  if (auto* typeMapPtr = getTypeMask(mask)) {
     for (const auto& [_, nestedMask] : *typeMapPtr) {
       throwIfContainsMapMask(nestedMask);
     }

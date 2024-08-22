@@ -138,6 +138,12 @@ const Mask& getMask(const MapStringToMask& map, const std::string& key) {
   return folly::get_ref_default(map, key, field_mask_constants::noneMask());
 }
 
+// Gets the mask of the given type if it exists in the type map, otherwise,
+// returns noneMask.
+const Mask& getMask(const MapTypeToMask& map, const type::Type& type) {
+  return folly::get_ref_default(map, type, field_mask_constants::noneMask());
+}
+
 void MaskRef::throwIfNotFieldMask() const {
   if (!isFieldMask()) {
     folly::throw_exception<std::runtime_error>("not a field mask");
@@ -159,6 +165,12 @@ void MaskRef::throwIfNotIntegerMapMask() const {
 void MaskRef::throwIfNotStringMapMask() const {
   if (!isStringMapMask()) {
     folly::throw_exception<std::runtime_error>("not a string map mask");
+  }
+}
+
+void MaskRef::throwIfNotTypeMask() const {
+  if (!isTypeMask()) {
+    folly::throw_exception<std::runtime_error>("not a type mask");
   }
 }
 
@@ -192,6 +204,20 @@ MaskRef MaskRef::get(const std::string& key) const {
   }
   return MaskRef{
       getMask(mask.excludes_string_map_ref().value(), key), !is_exclusion};
+}
+
+MaskRef MaskRef::get(const type::Type& type) const {
+  if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
+    return *this;
+  }
+  throwIfNotTypeMask();
+  if (mask.includes_type_ref()) {
+    return MaskRef{
+        getMask(mask.includes_type_ref().value(), type), is_exclusion};
+  } else {
+    return MaskRef{
+        getMask(mask.excludes_type_ref().value(), type), !is_exclusion};
+  }
 }
 
 bool MaskRef::isAllMask() const {

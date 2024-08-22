@@ -211,11 +211,27 @@ const MapIdToMask& toIntegerMapMask(const Mask& mask) {
   folly::throw_exception<std::runtime_error>("Incompatible masks");
 }
 
+const MapTypeToMask& toTypeMask(const Mask& mask) {
+  if (const auto* mapMask = detail::getTypeMask(mask)) {
+    return *mapMask;
+  }
+
+  if (detail::isAllMask(mask) || detail::isNoneMask(mask)) {
+    static const MapTypeToMask map;
+    return map;
+  }
+
+  // The mask can't be applied to Any since it's not a type mask or
+  // allMask/noneMask
+  folly::throw_exception<std::runtime_error>("Incompatible masks");
+}
+
 template <class Func>
 Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
   using detail::getFieldMask;
   using detail::getIntegerMapMask;
   using detail::getStringMapMask;
+  using detail::getTypeMask;
 
   Mask mask;
 
@@ -234,9 +250,9 @@ Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
     return mask;
   }
 
-  if (lhs.includes_type_ref() || lhs.excludes_type_ref() ||
-      rhs.includes_type_ref() || rhs.excludes_type_ref()) {
-    folly::throw_exception<std::runtime_error>("Anymask not implemented");
+  if (getTypeMask(lhs) || getTypeMask(rhs)) {
+    mask.includes_type_ref() = func(toTypeMask(lhs), toTypeMask(rhs));
+    return mask;
   }
 
   mask.includes_ref() = func(*getFieldMask(lhs), *getFieldMask(rhs));

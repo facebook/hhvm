@@ -51,6 +51,11 @@ class MaskRef {
   // map mask.
   MaskRef get(const std::string& key) const;
 
+  // Get nested MaskRef for the given type. If the type does not exist in the
+  // map, it returns noneMask or allMask depending on whether the field should
+  // be included. Throws a runtime exception if the mask is not a type map mask.
+  MaskRef get(const type::Type& type) const;
+
   // Returns whether the ref includes all fields.
   bool isAllMask() const;
 
@@ -120,5 +125,6 @@ class MaskRef {
   void throwIfNotMapMask() const;
   void throwIfNotIntegerMapMask() const;
   void throwIfNotStringMapMask() const;
+  void throwIfNotTypeMask() const;
 };
 } // namespace apache::thrift::protocol

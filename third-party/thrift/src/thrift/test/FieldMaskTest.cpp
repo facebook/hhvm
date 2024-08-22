@@ -15,6 +15,7 @@
  */
 
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/test/gen-cpp2/FieldMask_types.h>
@@ -51,6 +52,18 @@ void assertSmartPointerStructHasAllValues(SmartPointerStruct& obj) {
   assertPointerHasAllValues(obj.shared_ref());
   assertPointerHasAllValues(obj.boxed_ref());
 }
+
+static Mask noTypeMask = []() {
+  Mask m;
+  m.includes_type_ref().ensure();
+  return m;
+}();
+
+static Mask allTypeMask = []() {
+  Mask m;
+  m.excludes_type_ref().ensure();
+  return m;
+}();
 
 TEST(FieldMaskTest, ExampleFieldMask) {
   // includes{7: excludes{},
@@ -412,6 +425,22 @@ TEST(FieldMaskTest, MaskRefGetMask) {
     EXPECT_EQ(getFieldMask(m), nullptr);
     EXPECT_EQ(getIntegerMapMask(m), nullptr);
     EXPECT_EQ(getStringMapMask(m), &*m.excludes_string_map_ref());
+  }
+  {
+    Mask m;
+    m.includes_type_ref().ensure();
+    EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getIntegerMapMask(m), nullptr);
+    EXPECT_EQ(getStringMapMask(m), nullptr);
+    EXPECT_EQ(getTypeMask(m), &*m.includes_type_ref());
+  }
+  {
+    Mask m;
+    m.excludes_type_ref().ensure();
+    EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getIntegerMapMask(m), nullptr);
+    EXPECT_EQ(getStringMapMask(m), nullptr);
+    EXPECT_EQ(getTypeMask(m), &*m.excludes_type_ref());
   }
 }
 
@@ -1979,6 +2008,73 @@ TEST(FieldMaskTest, LogicalOpSimpleStringMap) {
   testLogicalOperations(maskA, maskB);
 }
 
+TEST(FieldMaskTest, LogicalOpAny) {
+  Mask includesFoo;
+  includesFoo.includes_type_ref().ensure()[type::infer_tag<Foo>{}] = allMask();
+
+  // maskA = includes_type{Foo: allMask(), Any: includes_type{Foo: allMask()}}
+  Mask maskA;
+  {
+    auto& includes_type = maskA.includes_type_ref().ensure();
+    includes_type[type::infer_tag<Foo>{}] = allMask();
+    includes_type[type::infer_tag<type::AnyStruct>{}] = includesFoo;
+  }
+
+  // maskB = includes_type{Any: excludes_type{}, Baz: allMask()}
+  Mask maskB;
+  {
+    auto& includes_type = maskB.includes_type_ref().ensure();
+    includes_type[type::infer_tag<type::AnyStruct>{}] = allTypeMask;
+    includes_type[type::infer_tag<Baz>{}] = allMask();
+  }
+
+  // includes_type{Foo: allMask(), Any: excludes_type{}, Baz: allMask()}
+  Mask maskUnion;
+  {
+    auto& includes_type = maskUnion.includes_type_ref().ensure();
+    includes_type[type::infer_tag<Foo>{}] = allMask();
+    includes_type[type::infer_tag<type::AnyStruct>{}] = allTypeMask;
+    includes_type[type::infer_tag<Baz>{}] = allMask();
+  }
+  EXPECT_EQ(maskUnion, maskA | maskB);
+
+  // maskIntersect = includes_type{Any: includes_type{Foo: allMask()}}
+  Mask maskIntersect;
+  maskIntersect.includes_type_ref()
+      .ensure()[type::infer_tag<type::AnyStruct>{}] = includesFoo;
+  EXPECT_EQ(maskIntersect, maskA & maskB);
+
+  // subtractAB = includes_type{Foo: allMask(), Any: includes_type{}}
+  Mask subtractAB;
+  {
+    auto& includes_type = subtractAB.includes_type_ref().ensure();
+    includes_type[type::infer_tag<Foo>{}] = allMask();
+    includes_type[type::infer_tag<type::AnyStruct>{}] = []() {
+      Mask m;
+      m.includes_type_ref().emplace();
+      return m;
+    }();
+  }
+  EXPECT_EQ(subtractAB, maskA - maskB);
+
+  // subtractBA = includes_type{Any: excludes_type{Foo: allMask()}, Baz:
+  //                            allMask()}
+  Mask subtractBA;
+  {
+    auto& includes_type = subtractBA.includes_type_ref().ensure();
+    includes_type[type::infer_tag<type::AnyStruct>{}] = []() {
+      Mask excludesFoo;
+      excludesFoo.excludes_type_ref().ensure()[type::infer_tag<Foo>{}] =
+          allMask();
+      return excludesFoo;
+    }();
+    includes_type[type::infer_tag<Baz>{}] = allMask();
+  }
+  EXPECT_EQ(subtractBA, maskB - maskA);
+
+  testLogicalOperations(maskA, maskB);
+}
+
 TEST(FieldMaskTest, LogicalOpBothIncludes) {
   // maskA = includes{1: includes{2: excludes{}},
   //                  3: includes{4: excludes{},
@@ -2922,6 +3018,30 @@ TEST(FieldMaskTest, ReverseStringMapMask) {
   auto& excludes = exclusiveMask.excludes_string_map_ref().emplace();
   excludes["1"] = allMask();
   excludes["2"].includes_ref().emplace()[3] = allMask();
+
+  EXPECT_EQ(reverseMask(inclusiveMask), exclusiveMask);
+  EXPECT_EQ(reverseMask(exclusiveMask), inclusiveMask);
+}
+
+TEST(FieldMaskTest, ReverseTypeMask) {
+  EXPECT_EQ(reverseMask(noTypeMask), allTypeMask);
+  EXPECT_EQ(noTypeMask, reverseMask(allTypeMask));
+
+  // m = includes_type{Foo: allMap(), Any: includes_type{Foo: allMap()}}
+  Mask inclusiveMask;
+  {
+    auto& includes_type = inclusiveMask.includes_type_ref().ensure();
+    includes_type[type::infer_tag<Foo>{}] = allMask();
+    includes_type[type::infer_tag<type::Any>{}] = allMask();
+  }
+
+  // m = excludes_type{Foo: allMap(), Any: includes_type{Foo: allMap()},
+  Mask exclusiveMask;
+  {
+    auto& excludes_type = exclusiveMask.excludes_type_ref().ensure();
+    excludes_type[type::infer_tag<Foo>{}] = allMask();
+    excludes_type[type::infer_tag<type::Any>{}] = allMask();
+  }
 
   EXPECT_EQ(reverseMask(inclusiveMask), exclusiveMask);
   EXPECT_EQ(reverseMask(exclusiveMask), inclusiveMask);

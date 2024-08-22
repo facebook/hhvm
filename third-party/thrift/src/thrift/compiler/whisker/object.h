@@ -23,6 +23,7 @@
 #include <iosfwd>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -80,12 +81,34 @@ using array = std::vector<object>;
  * to a whisker::object type (including possibly another native_object!).
  *
  * Whisker also does not require that all property names exposed by a
- * native_object are statically (or finitely) enumerable.
+ * native_object are statically (or finitely) enumerable. This allows a few
+ * freedoms for implementers:
+ *   - Properties can be lazily computed at lookup time.
+ *   - Property lookup can have side-effects (not recommended, but possible).
  */
 class native_object {
  public:
   using ptr = std::shared_ptr<native_object>;
   virtual ~native_object() = default;
+
+  /**
+   * Searches for a property on the object referred to by the provided
+   * identifier, returning a non-empty optional if present, or std::nullopt
+   * otherwise.
+   *
+   * The returned object is by value because it may outlive this native_object
+   * instance. For most whisker::object types, this is fine because they are
+   * self-contained.
+   * If this property lookup returns a native_object, `foo`, and that object
+   * depends on `this`, then `foo` should keep a shared_ptr` to `this` to ensure
+   * that `this` outlives `foo`. The Whisker runtime does not provide any
+   * lifetime guarantees for `this`.
+   *
+   * Preconditions:
+   *   - The provided string is a valid Whisker identifier
+   */
+  virtual std::optional<object> lookup_property(
+      std::string_view identifier) const = 0;
 };
 
 namespace detail {

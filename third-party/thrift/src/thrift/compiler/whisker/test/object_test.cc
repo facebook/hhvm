@@ -23,6 +23,14 @@ namespace w = whisker::make;
 
 namespace whisker {
 
+namespace {
+class basic_native_object : public native_object {
+  std::optional<object> lookup_property(std::string_view) const override {
+    return std::nullopt;
+  }
+};
+} // namespace
+
 TEST(ObjectTest, empty) {
   object o;
   EXPECT_TRUE(o.is_null());
@@ -130,7 +138,7 @@ TEST(ObjectTest, map) {
 }
 
 TEST(ObjectTest, native_object) {
-  native_object::ptr ptr = std::make_shared<native_object>();
+  native_object::ptr ptr = std::make_shared<basic_native_object>();
 
   object o = w::native_object(ptr);
   EXPECT_TRUE(o.is_native_object());
@@ -144,7 +152,7 @@ TEST(ObjectTest, native_object) {
 }
 
 TEST(ObjectTest, copy) {
-  native_object::ptr ptr = std::make_shared<native_object>();
+  native_object::ptr ptr = std::make_shared<basic_native_object>();
 
   object o1 = w::array(
       {w::i64(1),
@@ -175,7 +183,7 @@ TEST(ObjectTest, copy) {
 }
 
 TEST(ObjectTest, move) {
-  native_object::ptr ptr = std::make_shared<native_object>();
+  native_object::ptr ptr = std::make_shared<basic_native_object>();
 
   object o1 = w::array(
       {w::i64(1),
@@ -208,8 +216,8 @@ TEST(ObjectTest, move) {
 }
 
 TEST(ObjectTest, swap) {
-  native_object::ptr ptr1 = std::make_shared<native_object>();
-  native_object::ptr ptr2 = std::make_shared<native_object>();
+  native_object::ptr ptr1 = std::make_shared<basic_native_object>();
+  native_object::ptr ptr2 = std::make_shared<basic_native_object>();
 
   object o1 = w::array(
       {w::i64(1),
@@ -278,7 +286,7 @@ TEST(ObjectTest, assign_copy_alternatives) {
     EXPECT_EQ(m, (w::map({{"foo", w::i64(3)}, {"bar", w::string("baz")}})));
   }
   {
-    native_object::ptr ptr = std::make_shared<native_object>();
+    native_object::ptr ptr = std::make_shared<basic_native_object>();
     o = ptr;
     EXPECT_EQ(ptr, o);
     EXPECT_NE(ptr, nullptr);
@@ -293,7 +301,7 @@ TEST(ObjectTest, to_string) {
            {w::string("foo"),
             w::boolean(true),
             w::native_object(
-                native_object::ptr(std::make_shared<native_object>()))})},
+                native_object::ptr(std::make_shared<basic_native_object>()))})},
       {"abc", w::null},
       {"fun",
        w::array(

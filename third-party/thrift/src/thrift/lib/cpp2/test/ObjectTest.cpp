@@ -310,6 +310,144 @@ TEST(ObjectTest, StructWithSet) {
       asValueStruct<type::set<type::i64_t>>(setValues));
 }
 
+TEST(ObjectTest, ProtocolValueToThriftValueStructureMissingField) {
+  using facebook::thrift::lib::test::Foo;
+  // Field 4 does not exist in Foo.
+  Object obj;
+  obj[FieldId{1}] = asValueStruct<type::i32_t>(1);
+  obj[FieldId{4}] = asValueStruct<type::i32_t>(42);
+  Foo foo;
+  EXPECT_FALSE(
+      detail::ProtocolValueToThriftValue<type::struct_t<Foo>>{}(obj, foo));
+  EXPECT_EQ(foo.field_1(), 1);
+}
+
+TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
+  using facebook::thrift::lib::test::Foo;
+  using facebook::thrift::lib::test::MyStruct;
+
+  // Field 4 does not exist in Foo.
+  Value faultyFooVal;
+  faultyFooVal.emplace_object();
+  faultyFooVal.as_object()[FieldId{1}] = asValueStruct<type::i32_t>(1);
+  faultyFooVal.as_object()[FieldId{4}] = asValueStruct<type::i32_t>(42);
+
+  {
+    Object myStructObj;
+    myStructObj[FieldId{1}] = faultyFooVal;
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo().has_value());
+    EXPECT_EQ(myStruct.foo().value().field_1(), 1);
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{2}].emplace_list().push_back(faultyFooVal);
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_vector().has_value());
+    EXPECT_EQ(
+        myStruct,
+        CompactSerializer::deserialize<MyStruct>(
+            serializeObject<CompactProtocolWriter>(myStructObj)->toString()));
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{3}].emplace_set().insert(faultyFooVal);
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_set().has_value());
+    EXPECT_EQ(
+        myStruct,
+        CompactSerializer::deserialize<MyStruct>(
+            serializeObject<CompactProtocolWriter>(myStructObj)->toString()));
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{4}].emplace_map().emplace(
+        faultyFooVal, asValueStruct<type::i32_t>(42));
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_key_map().has_value());
+    EXPECT_EQ(
+        myStruct,
+        CompactSerializer::deserialize<MyStruct>(
+            serializeObject<CompactProtocolWriter>(myStructObj)->toString()));
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{5}].emplace_map().emplace(
+        asValueStruct<type::i32_t>(42), faultyFooVal);
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_value_map().has_value());
+    EXPECT_EQ(
+        myStruct,
+        CompactSerializer::deserialize<MyStruct>(
+            serializeObject<CompactProtocolWriter>(myStructObj)->toString()));
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{6}] = faultyFooVal;
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_adapted().has_value());
+    EXPECT_EQ(myStruct.foo_adapted().value().value.field_1(), 1);
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{7}].emplace_list().push_back(faultyFooVal);
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_vector_adapted().has_value());
+    EXPECT_EQ(
+        myStruct,
+        CompactSerializer::deserialize<MyStruct>(
+            serializeObject<CompactProtocolWriter>(myStructObj)->toString()));
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{8}].emplace_list().push_back(faultyFooVal);
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_adapted_vector().has_value());
+    EXPECT_EQ(
+        myStruct,
+        CompactSerializer::deserialize<MyStruct>(
+            serializeObject<CompactProtocolWriter>(myStructObj)->toString()));
+  }
+  {
+    Object myStructObj;
+    myStructObj[FieldId{9}].emplace_map().emplace(
+        asValueStruct<type::i32_t>(42), faultyFooVal);
+
+    MyStruct myStruct;
+    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+        myStructObj, myStruct));
+    EXPECT_TRUE(myStruct.foo_value_cpp_map().has_value());
+    EXPECT_EQ(
+        myStruct,
+        CompactSerializer::deserialize<MyStruct>(
+            serializeObject<CompactProtocolWriter>(myStructObj)->toString()));
+  }
+}
+
 TEST(ObjectTest, DirectlyAdaptedStruct) {
   apache::thrift::test::basic::DirectlyAdaptedStruct s;
   s.value.data() = 42;

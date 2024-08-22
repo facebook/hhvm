@@ -14,12 +14,10 @@
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 
-using namespace proxygen;
-
 template <class T>
 class PeriodicStatsTestHelper {
  public:
-  PeriodicStatsTestHelper(PeriodicStats<T>* psUT) {
+  PeriodicStatsTestHelper(proxygen::PeriodicStats<T>* psUT) {
     psUT_ = psUT;
 
     std::function<void()> refreshCb(
@@ -64,5 +62,5 @@ class PeriodicStatsTestHelper {
   std::atomic<folly::Baton<>*> updateCachedDataBaton_{nullptr};
 
   // Wrapped PeriodicStats insance under test.
-  PeriodicStats<T>* psUT_;
+  proxygen::PeriodicStats<T>* psUT_;
 };

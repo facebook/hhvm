@@ -19,9 +19,7 @@
 #include <vector>
 #include <fmt/format.h>
 #include <folly/container/F14Map.h>
-#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
-#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_detail_types.h>
@@ -34,6 +32,8 @@ namespace op {
 class TypeToPatchInternalDoNotUse;
 
 namespace detail {
+
+[[noreturn]] void throwIfDuplicatedType(const type::Type& type);
 
 struct TypeToPatchMapAdapter {
   using StandardType = std::vector<TypeToPatchInternalDoNotUse>;
@@ -48,9 +48,7 @@ struct TypeToPatchMapAdapter {
                   typeToPatchStruct.type().value(),
                   std::move(typeToPatchStruct.patches().value()))
                .second) {
-        folly::throw_exception<std::runtime_error>(fmt::format(
-            "duplicated key: {}",
-            debugStringViaEncode(typeToPatchStruct.type().value())));
+        throwIfDuplicatedType(typeToPatchStruct.type().value());
       }
     }
     return map;
@@ -106,9 +104,7 @@ struct TypeToPatchMapAdapter {
                     typeToPatchStruct.type().value(),
                     std::move(typeToPatchStruct.patches().value()))
                  .second) {
-          folly::throw_exception<std::runtime_error>(fmt::format(
-              "duplicated key: {}",
-              debugStringViaEncode(typeToPatchStruct.type().value())));
+          throwIfDuplicatedType(typeToPatchStruct.type().value());
         }
       }
     }

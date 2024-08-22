@@ -89,6 +89,22 @@ type::AnyData toAny(
   return type::AnyData{std::move(semiAny)};
 }
 
+void clearValueInner(Value& value) {
+  auto discriminant =
+      static_cast<FieldId>(folly::to_underlying(value.getType()));
+  op::invoke_by_field_id<Value>(
+      discriminant,
+      folly::overload(
+          [&](auto id) {
+            op::clear<op::get_type_tag<Value, decltype(id)>>(
+                *op::get<decltype(id)>(value));
+          },
+          [] {
+            folly::throw_exception<std::runtime_error>(
+                "Illegal value discriminant");
+          }));
+}
+
 Value parseValueFromAny(const type::AnyData& any) {
   if (any.protocol() == type::StandardProtocol::Binary) {
     BinaryProtocolReader reader;

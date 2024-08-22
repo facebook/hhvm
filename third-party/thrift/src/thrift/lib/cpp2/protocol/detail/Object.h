@@ -171,6 +171,11 @@ Value asValueStruct(T&& value) {
   return result;
 }
 
+// Clears whatever value-variant is set (instead of clearing the union itself)
+// Eg. if value is a string, this will clear the string instead of setting value
+// to empty-union
+void clearValueInner(Value& value);
+
 class BaseObjectAdapter {
  public:
   static constexpr ProtocolType protocolType() { return {}; }

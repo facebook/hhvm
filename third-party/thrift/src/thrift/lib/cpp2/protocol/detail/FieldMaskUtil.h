@@ -251,6 +251,13 @@ void ensure_fields(MaskRef ref, T& t) {
   }
 }
 
+void clear_fields(MaskRef ref, type::AnyStruct& t);
+
+inline void clear_fields(MaskRef ref, type::AnyData& t) {
+  static_assert(std::is_same_v<type::AnyStruct&, decltype(t.toThrift())>);
+  clear_fields(std::move(ref), t.toThrift());
+}
+
 // Clears the masked fields in the given thrift struct.
 template <typename T>
 void clear_fields(MaskRef ref, T& t) {

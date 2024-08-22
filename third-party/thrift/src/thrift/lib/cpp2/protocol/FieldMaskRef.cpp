@@ -23,6 +23,7 @@
 #include <folly/Utility.h>
 #include <thrift/lib/cpp2/protocol/FieldMaskRef.h>
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/detail/Object.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
@@ -40,24 +41,6 @@ bool containsId(const T& t, Id id) {
   }
 }
 
-// call clear based on the type of the value.
-void clear(MaskRef ref, Value& value) {
-  if (value.is_object()) {
-    if (ref.isTypeMask()) {
-      folly::throw_exception<std::runtime_error>(
-          "TODO: Support typeMask clear");
-    }
-    ref.clear(value.as_object());
-    return;
-  }
-  if (value.is_map()) {
-    ref.clear(value.as_map());
-    return;
-  }
-  folly::throw_exception<std::runtime_error>(
-      "The mask and object are incompatible.");
-}
-
 template <typename T, typename Id>
 void clear_impl(MaskRef ref, T& obj, Id id, Value& value) {
   // Id doesn't exist in mask, skip.
@@ -69,7 +52,7 @@ void clear_impl(MaskRef ref, T& obj, Id id, Value& value) {
     obj.erase(id);
     return;
   }
-  clear(ref, value);
+  ref.clear(value);
 }
 
 // call copy based on the type of the value.
@@ -276,7 +259,46 @@ bool MaskRef::isTypeMask() const {
   return mask.includes_type_ref() || mask.excludes_type_ref();
 }
 
+void MaskRef::clear(protocol::Value& value) const {
+  if (isAllMask()) {
+    clearValueInner(value);
+    return;
+  }
+  if (value.is_object()) {
+    this->clear(value.as_object());
+    return;
+  }
+  if (value.is_map()) {
+    this->clear(value.as_map());
+    return;
+  }
+  folly::throw_exception<std::runtime_error>(
+      "The mask and object are incompatible.");
+}
+
 void MaskRef::clear(protocol::Object& obj) const {
+  if (isTypeMask()) {
+    // obj -> thrift.Any!
+    type::AnyData any;
+    if (!detail::ProtocolValueToThriftValue<type::infer_tag<type::AnyData>>{}(
+            obj, any)) {
+      folly::throw_exception<std::runtime_error>(
+          "Incompatible mask and data: expected Any for type-mask");
+    };
+
+    // get mask for the type in any
+    auto nestedMask = get(any.type());
+    if (!nestedMask.isNoneMask()) {
+      // recurse
+      auto value = detail::parseValueFromAny(any);
+      nestedMask.clear(value);
+      any = detail::toAny(value, any.type(), any.protocol());
+      obj =
+          detail::asValueStruct<type::infer_tag<type::AnyData>>(std::move(any))
+              .as_object();
+    }
+    return;
+  }
   throwIfNotFieldMask();
   for (auto& [id, value] : obj) {
     MaskRef ref = get(FieldId{id});

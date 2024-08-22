@@ -1820,6 +1820,87 @@ TEST(FieldMaskTest, ClearUnion) {
   }
 }
 
+// Tests that schemaful + schemless clear do the same thing
+template <typename T>
+void applyClear(const Mask& m, T& val) {
+  auto obj = protocol::asObject(val);
+  protocol::clear(m, val);
+  protocol::clear(m, obj);
+  EXPECT_EQ(val, protocol::fromObjectStruct<type::infer_tag<T>>(obj));
+}
+
+template <typename Tag, typename T = type::native_type<Tag>>
+void testClearAnyStruct(T data) {
+  // Baz is used for type mismatch test
+  static_assert(!std::is_same_v<T, Baz>);
+  auto wrappedData = type::AnyData::toAny<Tag>(folly::copy(data)).toThrift();
+
+  MaskBuilder<type::AnyStruct> m;
+
+  // noneMask
+  m.reset_to_none();
+  applyClear(m.toThrift(), wrappedData);
+  EXPECT_EQ(data, type::AnyData(wrappedData).get<Tag>());
+
+  // type mismatch
+  m.reset_to_none().includes_type<>(type::infer_tag<Baz>{});
+  applyClear(m.toThrift(), wrappedData);
+  EXPECT_EQ(data, type::AnyData(wrappedData).get<Tag>());
+
+  // type match
+  m.reset_to_none().includes_type<>(Tag{});
+  applyClear(m.toThrift(), wrappedData);
+  EXPECT_EQ(op::getDefault<Tag>(), type::AnyData(wrappedData).get<Tag>());
+}
+
+TEST(FieldMaskTest, ClearAnyStruct) {
+  Foo foo;
+  foo.field1_ref() = 123;
+  MaskBuilder<Foo> fooMask;
+  fooMask.reset_to_none().includes<ident::field1>();
+
+  testClearAnyStruct<type::bool_t>(true);
+  testClearAnyStruct<type::i32_t>(123);
+  testClearAnyStruct<type::binary_t>("foobar");
+  testClearAnyStruct<type::list<type::float_t>>(std::vector<float>{1.0, 3.0});
+  testClearAnyStruct<type::set<type::i64_t>>(std::set<int64_t>{1, 2, 3});
+  testClearAnyStruct<type::map<type::binary_t, type::i64_t>>(
+      std::map<std::string, int64_t>{{"1", 1}, {"3", 3}});
+  testClearAnyStruct<type::infer_tag<Foo>>(foo);
+
+  // nested field clear
+  StructWithAny s;
+  s.rawAny_ref() = type::AnyData::toAny<type::infer_tag<Foo>>(foo).toThrift();
+  MaskBuilder<StructWithAny> m;
+  m.reset_to_none().includes_type<ident::rawAny>(
+      type::infer_tag<Foo>{}, fooMask.toThrift());
+  m.clear(s);
+  EXPECT_EQ(
+      0,
+      *type::AnyData(*s.rawAny_ref()).get<type::infer_tag<Foo>>().field1_ref());
+
+  // Nested any
+  // StructWithAny -> Any -> Any -> Foo
+  s.rawAny_ref() =
+      type::AnyData::toAny<type::infer_tag<type::AnyStruct>>(
+          type::AnyData::toAny<type::infer_tag<Foo>>(foo).toThrift())
+          .toThrift();
+  m.reset_to_none().includes_type<ident::rawAny>(
+      type::infer_tag<type::AnyStruct>{}, [&]() {
+        MaskBuilder<type::AnyStruct> m1;
+        m1.reset_to_none().includes_type<>(
+            type::infer_tag<Foo>{}, fooMask.toThrift());
+        return m1.toThrift();
+      }());
+  m.clear(s);
+  EXPECT_EQ(
+      0,
+      *type::AnyData(type::AnyData(*s.rawAny_ref())
+                         .get<type::infer_tag<type::AnyStruct>>())
+           .get<type::infer_tag<Foo>>()
+           .field1_ref());
+}
+
 void testLogicalOperations(Mask A, Mask B) {
   Mask maskUnion = A | B;
   Mask maskIntersect = A & B;

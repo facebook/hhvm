@@ -68,6 +68,9 @@ class Client : public std::enable_shared_from_this<Client> {
   std::shared_ptr<Publisher::Subscriber> errorSub;
 
  protected:
+  const pid_t peerPid_;
+  const facebook::eden::ProcessInfoHandle peerInfo_;
+
   void sendErrorResponse(std::string_view formatted);
 
   template <typename T, typename... Rest>
@@ -239,8 +242,6 @@ class UserClient final : public Client {
   void clientThread() noexcept;
 
   const std::chrono::system_clock::time_point since_;
-  const pid_t peerPid_;
-  const facebook::eden::ProcessInfoHandle peerInfo_;
 
   ClientStatus status_;
 };

@@ -92,9 +92,32 @@ bool is_compatible_with_structured(const Mask& mask) {
   return isValid;
 }
 
+inline bool is_compatible_with_any(const Mask& mask) {
+  MaskRef ref{mask};
+  if (ref.isTypeMask()) {
+    return true;
+  } else {
+    // Backwards compatibility
+    return is_compatible_with_structured<type::AnyStruct>(mask);
+  }
+}
+
 template <typename T>
 bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
   return is_compatible_with_structured<T>(mask);
+}
+
+inline bool is_compatible_with_impl(
+    type::struct_t<type::AnyStruct>, const Mask& mask) {
+  return is_compatible_with_any(mask);
+}
+
+inline bool is_compatible_with_impl(
+    type::adapted<
+        apache::thrift::InlineAdapter<::apache::thrift::type::AnyData>,
+        type::struct_t<type::AnyStruct>>,
+    const Mask& mask) {
+  return is_compatible_with_any(mask);
 }
 
 template <typename T>

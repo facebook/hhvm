@@ -17,9 +17,11 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/field_mask.thrift"
+include "thrift/lib/thrift/any.thrift"
 
 cpp_include "thrift/test/AdapterTest.h"
 cpp_include "thrift/lib/cpp2/protocol/FieldMask.h"
+cpp_include "thrift/lib/cpp2/type/Any.h"
 
 package "apache.org/thrift/test"
 
@@ -104,4 +106,14 @@ struct MaskStruct {
   @cpp.Adapter{name = "::apache::thrift::protocol::MaskAdapter<Bar>"}
   1: field_mask.Mask mask;
   2: TypedBarMask mask2;
+}
+
+@cpp.Adapter{
+  name = "::apache::thrift::InlineAdapter<::apache::thrift::type::AnyData>",
+}
+typedef any.Any AdaptedAny
+
+struct StructWithAny {
+  1: any.Any rawAny;
+  2: AdaptedAny adaptedAny;
 }

@@ -2718,6 +2718,56 @@ TEST(FieldMaskTest, MaskBuilderUnion) {
     EXPECT_EQ(builder.toThrift(), expected);
   }
 }
+TEST(FieldMaskTest, MaskBuilderAny) {
+  MaskBuilder<Foo> fooMask(noneMask());
+  fooMask.includes<ident::field1>();
+
+  Mask simpleExpected;
+  simpleExpected.includes_ref()
+      .emplace()[1]
+      .includes_type_ref()
+      .emplace()[type::infer_tag<Foo>{}] = fooMask.toThrift();
+
+  Mask nestedExpected;
+  nestedExpected.includes_ref()
+      .emplace()[1]
+      .includes_type_ref()
+      .emplace()[type::infer_tag<StructWithAny>{}] = simpleExpected;
+
+  MaskBuilder<StructWithAny> b(noneMask());
+  b.includes_type<ident::rawAny>(type::infer_tag<Foo>{}, fooMask.toThrift());
+  EXPECT_EQ(b.toThrift(), simpleExpected);
+
+  b.reset_to_none().includes_type<ident::rawAny>(
+      type::infer_tag<StructWithAny>{}, simpleExpected);
+  EXPECT_EQ(b.toThrift(), nestedExpected);
+}
+
+TEST(FieldMaskTest, MaskBuilderAdaptedAny) {
+  MaskBuilder<Foo> fooMask(noneMask());
+  fooMask.includes<ident::field1>();
+
+  Mask simpleExpected;
+  simpleExpected.includes_ref()
+      .emplace()[2]
+      .includes_type_ref()
+      .emplace()[type::infer_tag<Foo>{}] = fooMask.toThrift();
+
+  Mask nestedExpected;
+  nestedExpected.includes_ref()
+      .emplace()[2]
+      .includes_type_ref()
+      .emplace()[type::infer_tag<StructWithAny>{}] = simpleExpected;
+
+  MaskBuilder<StructWithAny> b(noneMask());
+  b.includes_type<ident::adaptedAny>(
+      type::infer_tag<Foo>{}, fooMask.toThrift());
+  EXPECT_EQ(b.toThrift(), simpleExpected);
+
+  b.reset_to_none().includes_type<ident::adaptedAny>(
+      type::infer_tag<StructWithAny>{}, simpleExpected);
+  EXPECT_EQ(b.toThrift(), nestedExpected);
+}
 
 TEST(FieldMaskTest, MaskBuilderWithFieldNameError) {
   MaskBuilder<Bar2> builder(noneMask());

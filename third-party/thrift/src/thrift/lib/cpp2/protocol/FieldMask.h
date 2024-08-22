@@ -180,6 +180,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     return *this;
   }
 
+  template <typename... Id, typename TypeTag>
+  MaskBuilder& includes_type(TypeTag, const Mask& mask = allMask()) {
+    detail::errorIfNotCompatible<TypeTag>(mask);
+    Mask typeMap;
+    typeMap.includes_type_ref().emplace()[type::Type(TypeTag{})] = mask;
+    return includes<Id...>(typeMap);
+  }
+
   // Excludes the field specified by the list of Ids/field names with
   // the given mask.
   // The field is t.field1().field2() ...

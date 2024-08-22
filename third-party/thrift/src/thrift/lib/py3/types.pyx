@@ -654,9 +654,6 @@ cdef class EnumMeta(type):
         for name in cls._fbthrift_get_all_names():
             yield getattr(cls, name)
 
-    def __reversed__(cls):
-        return reversed(iter(cls))
-
     def __contains__(cls, item):
         if not isinstance(item, cls):
             return False

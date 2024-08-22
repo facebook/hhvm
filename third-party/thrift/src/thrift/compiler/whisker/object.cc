@@ -20,8 +20,6 @@
 #include <ostream>
 #include <sstream>
 
-#include <fmt/core.h>
-
 namespace whisker {
 
 namespace tree_printer = detail::tree_printer;
@@ -29,47 +27,43 @@ namespace tree_printer = detail::tree_printer;
 namespace {
 
 struct to_string_visitor {
-  static void visit(i64 value, const tree_printer::scope& scope) {
-    scope.println(fmt::format("i64({})", value));
+  static void visit(i64 value, tree_printer::scope scope) {
+    scope.println("i64({})", value);
   }
 
-  static void visit(f64 value, const tree_printer::scope& scope) {
-    scope.println(fmt::format("f64({})", value));
+  static void visit(f64 value, tree_printer::scope scope) {
+    scope.println("f64({})", value);
   }
 
-  static void visit(
-      const std::string& value, const tree_printer::scope& scope) {
-    scope.println(fmt::format("'{}'", tree_printer::escape(value)));
+  static void visit(const std::string& value, tree_printer::scope scope) {
+    scope.println("'{}'", tree_printer::escape(value));
   }
 
-  static void visit(bool value, const tree_printer::scope& scope) {
-    scope.println(value ? "true" : "false");
+  static void visit(bool value, tree_printer::scope scope) {
+    scope.println("{}", value ? "true" : "false");
   }
 
-  static void visit(null, const tree_printer::scope& scope) {
-    scope.println("null");
-  }
+  static void visit(null, tree_printer::scope scope) { scope.println("null"); }
 
-  static void visit(const array& arr, const tree_printer::scope& scope) {
-    scope.println(fmt::format("array (size={})", arr.size()));
+  static void visit(const array& arr, tree_printer::scope scope) {
+    scope.println("array (size={})", arr.size());
     for (std::size_t i = 0; i < arr.size(); ++i) {
       auto element_scope = scope.open_property();
-      element_scope.println(fmt::format("[{}]", i));
+      element_scope.println("[{}]", i);
       visit(arr[i], element_scope.open_node());
     }
   }
 
-  static void visit(const map& m, const tree_printer::scope& scope) {
-    scope.println(fmt::format("map (size={})", m.size()));
+  static void visit(const map& m, tree_printer::scope scope) {
+    scope.println("map (size={})", m.size());
     for (const auto& [key, value] : m) {
       auto element_scope = scope.open_property();
-      element_scope.println(fmt::format("'{}'", key));
+      element_scope.println("'{}'", key);
       visit(value, element_scope.open_node());
     }
   }
 
-  static void visit(
-      const native_object::ptr&, const tree_printer::scope& scope) {
+  static void visit(const native_object::ptr&, tree_printer::scope scope) {
     scope.println("<native_object>");
   }
 
@@ -79,7 +73,7 @@ struct to_string_visitor {
   template <
       typename T = object,
       typename = std::enable_if_t<std::is_same_v<T, object>>>
-  static void visit(const T& value, const tree_printer::scope& scope) {
+  static void visit(const T& value, tree_printer::scope scope) {
     value.visit([&](auto&& alternative) { visit(alternative, scope); });
   }
 };

@@ -53,68 +53,62 @@ struct ast_visitor {
     return to_string(loc, src_manager);
   }
 
-  void visit(
-      const ast::identifier& id, const tree_printer::scope& scope) const {
-    scope.println(fmt::format(" identifier '{}'", id.name));
+  void visit(const ast::identifier& id, tree_printer::scope scope) const {
+    scope.println(" identifier '{}'", id.name);
   }
-  void visit(const ast::text& text, const tree_printer::scope& scope) const {
-    scope.println(fmt::format(
-        " text {} '{}'", location(text.loc), tree_printer::escape(text.text)));
+  void visit(const ast::text& text, tree_printer::scope scope) const {
+    scope.println(
+        " text {} '{}'", location(text.loc), tree_printer::escape(text.text));
   }
   void visit(
-      const ast::section_block& section,
-      const tree_printer::scope& scope) const {
-    scope.println(fmt::format(
+      const ast::section_block& section, tree_printer::scope scope) const {
+    scope.println(
         " section-block{} {}",
         section.inverted ? " <inverted>" : "",
-        location(section.loc)));
+        location(section.loc));
     visit(section.variable, scope.open_property());
     for (const auto& body : section.bodies) {
       visit(body, scope.open_node());
     }
   }
-  void visit(
-      const ast::partial_apply& partial_apply,
-      const tree_printer::scope& scope) const {
-    scope.println(fmt::format(
+  void visit(const ast::partial_apply& partial_apply, tree_printer::scope scope)
+      const {
+    scope.println(
         " partial-apply {} '{}'",
         location(partial_apply.loc),
-        partial_apply.path.as_string('/')));
+        partial_apply.path.as_string('/'));
   }
-  void visit(
-      const ast::comment& comment, const tree_printer::scope& scope) const {
-    scope.println(fmt::format(
+  void visit(const ast::comment& comment, tree_printer::scope scope) const {
+    scope.println(
         " comment {} '{}'",
         location(comment.loc),
-        tree_printer::escape(comment.text)));
+        tree_printer::escape(comment.text));
   }
   void visit(
-      const ast::variable_lookup& variable,
-      const tree_printer::scope& scope) const {
-    scope.println(fmt::format(
+      const ast::variable_lookup& variable, tree_printer::scope scope) const {
+    scope.println(
         " variable-lookup {} '{}'",
         location(variable.loc),
-        variable.path_string()));
+        variable.path_string());
   }
-  void visit(
-      const ast::variable& variable, const tree_printer::scope& scope) const {
-    scope.println(fmt::format(
-        " variable {} '{}'", location(variable.loc), variable.path_string()));
+  void visit(const ast::variable& variable, tree_printer::scope scope) const {
+    scope.println(
+        " variable {} '{}'", location(variable.loc), variable.path_string());
   }
-  void visit(const ast::body& body, const tree_printer::scope& scope) const {
+  void visit(const ast::body& body, tree_printer::scope scope) const {
     // This node is transparent so it does not directly appear in the tree
-    detail::variant_match(body, [&](const auto& node) { visit(node, scope); });
+    detail::variant_match(
+        body, [&](const auto& node) { visit(node, std::move(scope)); });
   }
-  void visit(
-      const ast::bodies& bodies, const tree_printer::scope& scope) const {
+  void visit(const ast::bodies& bodies, tree_printer::scope scope) const {
     // This node is transparent so it does not directly appear in the tree
     for (const auto& body : bodies) {
       visit(body, scope);
     }
   }
-  void visit(const ast::root& root, const tree_printer::scope& scope) const {
-    scope.println(fmt::format(
-        "root [{}]", resolved_location(root.loc, src_manager).file_name()));
+  void visit(const ast::root& root, tree_printer::scope scope) const {
+    scope.println(
+        "root [{}]", resolved_location(root.loc, src_manager).file_name());
     auto root_scope = scope.open_node();
     visit(root.bodies, root_scope);
   }

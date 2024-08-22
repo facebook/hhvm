@@ -22,6 +22,8 @@
 #include <string>
 #include <string_view>
 
+#include <fmt/core.h>
+
 // This file implements building blocks that can be used to print a tree
 // structure to an output stream.
 //
@@ -94,9 +96,10 @@ class scope {
     return scope(*out_, nesting_context_->open_property());
   }
 
-  void println(std::string_view line) const {
-    *out_ << *nesting_context_;
-    *out_ << line << '\n';
+  template <typename... T>
+  void println(fmt::format_string<T...> msg, T&&... args) {
+    *out_ << *nesting_context_ << fmt::format(msg, std::forward<T>(args)...)
+          << '\n';
   }
 
   static scope make_root(std::ostream& out) {

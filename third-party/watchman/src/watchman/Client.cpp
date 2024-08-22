@@ -282,7 +282,7 @@ ClientDebugStatus UserClient::getDebugStatus() const {
     rv.peer.emplace();
     rv.peer->pid = peerPid_;
     // May briefly, once, block on the ProcessInfoCache thread.
-    rv.peer->name = peerInfo_.get().name;
+    rv.peer->name = std::move(peerInfo_.get().name);
   }
   rv.since = std::chrono::system_clock::to_time_t(since_);
   return rv;

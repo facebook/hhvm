@@ -47,6 +47,11 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
     private java.lang.Object value;
     private short id;
 
+    public enum Type {
+      V1,
+      V2,
+    }
+
     public static ValUnion from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -141,6 +146,17 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
+    }
+
+    public Type getThriftType() {
+      switch(this.id) {
+        case 1:
+          return Type.V1;
+        case 2:
+          return Type.V2;
+        default:
+          throw new IllegalStateException("unreachable");
+      }
     }
 
     public String getThriftName() {

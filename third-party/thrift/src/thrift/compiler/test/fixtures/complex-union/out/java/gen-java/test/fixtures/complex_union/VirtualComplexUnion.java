@@ -47,6 +47,11 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
     private java.lang.Object value;
     private short id;
 
+    public enum Type {
+      THING_ONE,
+      THING_TWO,
+    }
+
     public static VirtualComplexUnion from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -141,6 +146,17 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
+    }
+
+    public Type getThriftType() {
+      switch(this.id) {
+        case 1:
+          return Type.THING_ONE;
+        case 2:
+          return Type.THING_TWO;
+        default:
+          throw new IllegalStateException("unreachable");
+      }
     }
 
     public String getThriftName() {

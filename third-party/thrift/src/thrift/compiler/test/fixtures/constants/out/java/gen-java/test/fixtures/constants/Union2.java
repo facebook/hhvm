@@ -57,6 +57,13 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     private java.lang.Object value;
     private short id;
 
+    public enum Type {
+      I,
+      D,
+      S,
+      U,
+    }
+
     public static Union2 from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -219,6 +226,21 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
+    }
+
+    public Type getThriftType() {
+      switch(this.id) {
+        case 1:
+          return Type.I;
+        case 2:
+          return Type.D;
+        case 3:
+          return Type.S;
+        case 4:
+          return Type.U;
+        default:
+          throw new IllegalStateException("unreachable");
+      }
     }
 
     public String getThriftName() {

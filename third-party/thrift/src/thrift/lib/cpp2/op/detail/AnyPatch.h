@@ -242,8 +242,13 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   void patchIfTypeIs(
       const type::Type& type, const std::vector<type::AnyStruct>& patches) {
     tryPatchable(type);
-    auto& vec = data_.patchIfTypeIsAfter().value()[type];
-    vec.insert(vec.end(), patches.begin(), patches.end());
+    if (ensures(type)) {
+      auto& vec = data_.patchIfTypeIsAfter().value()[type];
+      vec.insert(vec.end(), patches.begin(), patches.end());
+    } else {
+      auto& vec = data_.patchIfTypeIsPrior().value()[type];
+      vec.insert(vec.end(), patches.begin(), patches.end());
+    }
   }
 };
 

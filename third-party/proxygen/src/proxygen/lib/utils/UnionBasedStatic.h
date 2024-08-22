@@ -38,10 +38,10 @@
   DECLARE_UNION_STATIC_UNION_IMPL(type, name) var
 
 #define DEFINE_UNION_STATIC_UNION_CONST_IMPL(type, name, var) \
-  DECLARE_UNION_STATIC_UNION_IMPL(type, name) const var
+  DECLARE_UNION_STATIC_UNION_IMPL(type const, name) var
 
 #define DEFINE_UNION_STATIC_UNION_CONST_ARRAY_IMPL(type, size, name, var) \
-  DECLARE_UNION_STATIC_UNION_ARRAY_IMPL(type, size, name) const var
+  DECLARE_UNION_STATIC_UNION_ARRAY_IMPL(type const, size, name) var
 
 #if defined(_MSC_VER) && !defined(__clang__)
 #define ATTRIBUTE_CONSTRUCTOR

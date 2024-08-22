@@ -1090,11 +1090,9 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
     """
     a = arch(target)
 
-    # TODO check that this is the architecture string returned from the first part
-    #      of the `arch()` triple when running on ARM
     if a == "aarch64":
         return {
-            "fp": "x29",
+            "fp": "fp",
             "sp": "sp",
             "ip": "pc",
             "cross_jit_save": [
@@ -1127,7 +1125,7 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
         }
 
 
-def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
+def reg(common_name: str, frame: lldb.SBFrame) -> lldb.SBValue:
     """Get the value of a register given its common name (e.g. "fp", "sp", etc.)
 
     Arguments:
@@ -1138,7 +1136,7 @@ def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
         The value of the register, wrapped in a lldb.SBValue. If unrecognized,
         the returned SBValue will be invalid (check with .isValid()).
     """
-    name = arch_regs(frame.thread.process.target)[name]
+    name = arch_regs(frame.thread.process.target)[common_name]
     return frame.register[name]
 
 

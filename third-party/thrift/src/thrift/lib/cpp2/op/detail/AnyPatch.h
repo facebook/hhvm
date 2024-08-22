@@ -67,7 +67,53 @@ struct TypeToPatchMapAdapter {
     return vec;
   }
 
-  // TODO(dokwon): Add customizations to optimize operators in adapted type.
+  template <typename Tag, typename Protocol>
+  static uint32_t encode(
+      Protocol& prot, const TypeToPatchMapAdapter::AdaptedType& map) {
+    uint32_t s = 0;
+    s += prot.writeListBegin(protocol::TType::T_STRUCT, map.size());
+    for (const auto& [type, patches] : map) {
+      s += prot.writeStructBegin(
+          op::get_class_name_v<TypeToPatchInternalDoNotUse>.data());
+      s += prot.writeFieldBegin("type", protocol::TType::T_STRUCT, 1);
+      s += op::encode<type::infer_tag<type::Type>>(prot, type);
+      s += prot.writeFieldEnd();
+      s += prot.writeFieldBegin("patches", protocol::TType::T_LIST, 2);
+      s += op::encode<type::list<type::struct_t<type::AnyStruct>>>(
+          prot, patches);
+      s += prot.writeFieldEnd();
+      s += prot.writeStructEnd();
+    }
+    s += prot.writeListEnd();
+    return s;
+  }
+
+  template <typename Tag, typename Protocol>
+  static void decode(Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map) {
+    protocol::TType t;
+    uint32_t s;
+    prot.readListBegin(t, s);
+    if (t != typeTagToTType<Tag>) {
+      while (s--) {
+        prot.skip(t);
+      }
+    } else {
+      while (s--) {
+        TypeToPatchInternalDoNotUse typeToPatchStruct;
+        op::decode<type::struct_t<TypeToPatchInternalDoNotUse>>(
+            prot, typeToPatchStruct);
+        if (!map.emplace(
+                    typeToPatchStruct.type().value(),
+                    std::move(typeToPatchStruct.patches().value()))
+                 .second) {
+          folly::throw_exception<std::runtime_error>(fmt::format(
+              "duplicated key: {}",
+              debugStringViaEncode(typeToPatchStruct.type().value())));
+        }
+      }
+    }
+    prot.readListEnd();
+  }
 };
 
 /// Patch for Thrift Any.

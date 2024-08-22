@@ -424,3 +424,54 @@ class FlagTests(unittest.TestCase):
     def test_combo_repr(self) -> None:
         x = self.Perm(7)
         self.assertEqual("<Perm.read|write|execute: 7>", repr(x))
+
+
+@parameterized_class(
+    ("test_types", "serializer_module"),
+    [
+        (immutable_types, immutable_serializer),
+        (mutable_types, mutable_serializer),
+    ],
+)
+class EnumMetaTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.Color: Type[Color] = self.test_types.Color
+        self.Kind: Type[Kind] = self.test_types.Kind
+        self.Perm: Type[Perm] = self.test_types.Perm
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+
+    def test_enum_metaclass_contains(self) -> None:
+        self.assertIn(self.Color.red, self.Color)
+        self.assertIn(self.Color.blue, self.Color)
+        self.assertIn(self.Color.green, self.Color)
+        self.assertNotIn("red", self.Color)
+        self.assertNotIn(self.Perm.read, self.Color)
+
+        self.assertNotIn(-1, self.Color)
+        self.assertNotIn(3, self.Color)
+
+        # this is more lenient behavior than thrift-py3
+        self.assertIn(0, self.Color)
+        self.assertIn(1, self.Color)
+        self.assertIn(2, self.Color)
+
+    def test_enum_metaclass_dir(self) -> None:
+        attrs = set(dir(self.Color))
+        self.assertIn("red", attrs)
+        self.assertIn("blue", attrs)
+        self.assertIn("green", attrs)
+        self.assertIn("__class__", attrs)
+        self.assertIn("__doc__", attrs)
+        self.assertIn("__members__", attrs)
+        self.assertIn("__module__", attrs)
+
+    def test_changing_member(self) -> None:
+        with self.assertRaises(AttributeError):
+            # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
+            self.Color.red = "lol"
+
+    def test_delete(self) -> None:
+        with self.assertRaises(AttributeError):
+            del self.Color.red

@@ -36,7 +36,6 @@ class EnumTests(unittest.TestCase):
         self.assertIn("name_", BadMembers.__members__)
         self.assertIn("value_", BadMembers.__members__)
 
-    @brokenInAutoMigrate()
     def test_normal_enum(self) -> None:
         with self.assertRaises(TypeError):
             # Enums are not ints
@@ -46,10 +45,15 @@ class EnumTests(unittest.TestCase):
         self.assertIsInstance(x.type, Kind)
         self.assertEqual(x.type, Kind.DIR)
         self.assertNotEqual(x.type, Kind.SOCK)
-        self.assertNotEqual(x.type, 4, "Enums are not Ints")
-        self.assertNotIsInstance(4, Kind, "Enums are not Ints")
         self.assertIn(x.type, Kind)
         self.assertEqual(int(x.type), 4)
+
+    @brokenInAutoMigrate()
+    def test_normal_enum_not_int(self) -> None:
+        x = File(name="/etc", type=Kind.DIR)
+        # in thrift-python they are int
+        self.assertNotEqual(x.type, 4, "Enums are not Ints")
+        self.assertNotIsInstance(4, Kind, "Enums are not Ints")
 
     def test_enum_value_rename(self) -> None:
         """The value name is None but we auto rename it to None_"""
@@ -164,7 +168,7 @@ class EnumTests(unittest.TestCase):
                 else:
                     self.assertBadEnum(cast(BadEnum, v), Color, 8)
 
-    def assertBadEnum(self, e: BadEnum, cls: Type[_E], val: int) -> None:
+    def assertBadEnum(self, e: BadEnum | Enum, cls: Type[_E], val: int) -> None:
         self.assertIsInstance(e, BadEnum)
         self.assertEqual(e.value, val)
         self.assertEqual(e.enum, cls)
@@ -175,15 +179,13 @@ class EnumTests(unittest.TestCase):
         green = pickle.loads(serialized)
         self.assertIs(green, Color.green)
 
-    @brokenInAutoMigrate()
     def test_adding_member(self) -> None:
-        with self.assertRaises(TypeError):
+        with self.assertRaises((AttributeError, TypeError)):
             # pyre-fixme[16]: `Type` has no attribute `black`.
             Color.black = 3
 
-    @brokenInAutoMigrate()
-    def etst_delete(self) -> None:
-        with self.assertRaises(TypeError):
+    def test_delete(self) -> None:
+        with self.assertRaises((AttributeError, TypeError)):
             del Color.red
 
     def test_bool_of_class(self) -> None:
@@ -192,16 +194,11 @@ class EnumTests(unittest.TestCase):
     def test_bool_of_members(self) -> None:
         self.assertTrue(bool(Color.blue))
 
-    @brokenInAutoMigrate()
     def test_changing_member(self) -> None:
-        with self.assertRaises(TypeError):
+        with self.assertRaises((AttributeError, TypeError)):
             # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
+            # raises TypeError in thrift-py3, AttributeError in thrift-python
             Color.red = "lol"
-
-    @brokenInAutoMigrate()
-    def test_contains(self) -> None:
-        self.assertIn(Color.blue, Color)
-        self.assertNotIn(1, Color)
 
     def test_hash(self) -> None:
         colors = {}
@@ -276,6 +273,33 @@ class EnumMetaTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             for _ in reversed(Color):
                 pass
+
+    def test_enum_metaclass_contains(self) -> None:
+        self.assertIn(Color.red, Color)
+        self.assertIn(Color.blue, Color)
+        self.assertIn(Color.green, Color)
+        self.assertNotIn("red", Color)
+        self.assertNotIn(Perm.read, Color)
+
+        self.assertNotIn(-1, Color)
+        self.assertNotIn(3, Color)
+
+    @brokenInAutoMigrate()
+    def test_enum_metaclass_contains_int(self) -> None:
+        # in thrift-python, this works because enums are int-like
+        self.assertNotIn(0, Color)
+        self.assertNotIn(1, Color)
+        self.assertNotIn(2, Color)
+
+    def test_enum_metaclass_dir(self) -> None:
+        attrs = set(dir(Color))
+        self.assertIn("red", attrs)
+        self.assertIn("blue", attrs)
+        self.assertIn("green", attrs)
+        self.assertIn("__class__", attrs)
+        self.assertIn("__doc__", attrs)
+        self.assertIn("__members__", attrs)
+        self.assertIn("__module__", attrs)
 
 
 class FlagTests(unittest.TestCase):

@@ -2180,7 +2180,9 @@ class EnumMeta(type):
     def __new__(metacls, classname, bases, dct):
         # if no bases, it's creating Enum or Flag base class, no need to parse members.
         attrs = {
+            # name -> arm
             "__members__": {},
+            # value -> arm
             "__reversed_map__": {},
         }
         if not bases:
@@ -2197,12 +2199,12 @@ class EnumMeta(type):
         for name, value in dct.items():
             if not isinstance(value, int):
                 continue
-            option = klass.__new__(klass, value)
-            option._fbthrift_name_ = name
-            option._fbthrift_value_ = value
-            klass.__members__[name] = option
-            klass.__reversed_map__[value] = option
-            type.__setattr__(klass, name, option)
+            arm = klass.__new__(klass, value)
+            arm._fbthrift_name_ = name
+            arm._fbthrift_value_ = value
+            klass.__members__[name] = arm
+            klass.__reversed_map__[value] = arm
+            type.__setattr__(klass, name, arm)
         return klass
 
     def __len__(cls):

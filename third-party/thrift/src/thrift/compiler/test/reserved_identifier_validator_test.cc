@@ -26,7 +26,7 @@
 
 using apache::thrift::compiler::test::check_compile;
 
-TEST(ReservedIdentifierNameValidatorTest, ProgramNameIsReservedAndShouldError) {
+TEST(ReservedIdentifierValidatorTest, ProgramNameIsReservedAndShouldError) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/fbthrift_should_error.thrift"] = R"(
     # expected-error@1: `fbthrift_should_error` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
@@ -36,7 +36,7 @@ TEST(ReservedIdentifierNameValidatorTest, ProgramNameIsReservedAndShouldError) {
 }
 
 TEST(
-    ReservedIdentifierNameValidatorTest,
+    ReservedIdentifierValidatorTest,
     ProgramNameIsReservedAndIsAnnotatedToAllowTheReservedName) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/fbthrift_should_not_error_due_to_bypass.thrift"] =
@@ -53,7 +53,7 @@ TEST(
       "path/to/fbthrift_should_not_error_due_to_bypass.thrift");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, ServiceNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, ServiceNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -67,7 +67,7 @@ TEST(ReservedIdentifierNameValidatorTest, ServiceNameIsReserved) {
   )");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, InteractionNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, InteractionNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -81,7 +81,7 @@ TEST(ReservedIdentifierNameValidatorTest, InteractionNameIsReserved) {
   )");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, StructNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, StructNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -103,7 +103,7 @@ TEST(ReservedIdentifierNameValidatorTest, StructNameIsReserved) {
   )");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, UnionNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, UnionNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -117,7 +117,7 @@ TEST(ReservedIdentifierNameValidatorTest, UnionNameIsReserved) {
   )");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, ExceptionNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, ExceptionNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -131,7 +131,7 @@ TEST(ReservedIdentifierNameValidatorTest, ExceptionNameIsReserved) {
   )");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, EnumNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, EnumNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -151,7 +151,7 @@ TEST(ReservedIdentifierNameValidatorTest, EnumNameIsReserved) {
   )");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, ConstNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, ConstNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -165,7 +165,7 @@ TEST(ReservedIdentifierNameValidatorTest, ConstNameIsReserved) {
   )");
 }
 
-TEST(ReservedIdentifierNameValidatorTest, TypedefNameIsReserved) {
+TEST(ReservedIdentifierValidatorTest, TypedefNameIsReserved) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
@@ -262,11 +262,10 @@ std::array<definition_factory, 11> node_factories = {
     },
 };
 
-class GeneratedReservedIdentifierNameValidatorTest
+class GeneratedReservedIdentifierValidatorTest
     : public testing::TestWithParam<definition_factory> {};
 
-TEST_P(
-    GeneratedReservedIdentifierNameValidatorTest, GeneratedNodeMustNotError) {
+TEST_P(GeneratedReservedIdentifierValidatorTest, GeneratedNodeMustNotError) {
   t_program program("path/to/program.thrift");
   source_manager source_mgr;
   auto loc = source_mgr.add_virtual_file(program.path(), "").start;
@@ -285,8 +284,8 @@ TEST_P(
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ReservedIdentifierNameValidatorTest,
-    GeneratedReservedIdentifierNameValidatorTest,
+    ReservedIdentifierValidatorTest,
+    GeneratedReservedIdentifierValidatorTest,
     ::testing::ValuesIn(node_factories));
 
 } // namespace apache::thrift::compiler

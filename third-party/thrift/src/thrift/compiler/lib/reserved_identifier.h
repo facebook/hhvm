@@ -21,7 +21,7 @@
 
 namespace apache::thrift::compiler {
 
-inline bool is_reserved_identifier_name(std::string_view name) {
+inline bool is_reserved_identifier(std::string_view name) {
   const std::string_view prefix = "fbthrift";
 
   auto pos = name.find_first_not_of("_");

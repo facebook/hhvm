@@ -117,24 +117,16 @@ std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
   return queue.move();
 }
 
-template <>
-inline std::unique_ptr<folly::IOBuf> packCompact(
-    std::unique_ptr<folly::IOBuf>&& data) {
-  return std::move(data);
-}
-
 // NB: If `fds` is non-empty, populates `metadata.{numFds,fdSeqNum}` and
 // `fds.seqNum()`.  Then, moves the FDs into `Payload::fds`.
-template <typename Payload, typename Metadata>
+template <typename Metadata>
 rocket::Payload packWithFds(
     Metadata* metadata,
-    Payload&& payload,
+    std::unique_ptr<folly::IOBuf>&& payload,
     folly::SocketFds fds,
     folly::AsyncTransport* transport) {
-  auto serializedPayload = packCompact(std::forward<Payload>(payload));
   if (auto compress = metadata->compression_ref()) {
-    apache::thrift::rocket::detail::compressPayload(
-        serializedPayload, *compress);
+    apache::thrift::rocket::detail::compressPayload(payload, *compress);
   }
   auto numFds = fds.size();
   if (numFds) {
@@ -176,20 +168,20 @@ rocket::Payload packWithFds(
     metadata->fdMetadata() = fdMetadata;
   }
   auto ret = apache::thrift::rocket::detail::makePayload(
-      *metadata, std::move(serializedPayload));
+      *metadata, std::move(payload));
   if (numFds) {
     ret.fds = std::move(fds.dcheckToSendOrEmpty());
   }
   return ret;
 }
 
-template <class T>
-rocket::Payload pack(T&& payload, folly::AsyncTransport* transport) {
-  auto metadata = std::forward<T>(payload).metadata;
+template <class PayloadType>
+rocket::Payload pack(PayloadType&& payload, folly::AsyncTransport* transport) {
+  auto metadata = std::forward<PayloadType>(payload).metadata;
   return packWithFds(
       &metadata,
-      std::forward<T>(payload).payload,
-      std::forward<T>(payload).fds,
+      std::forward<PayloadType>(payload).payload,
+      std::forward<PayloadType>(payload).fds,
       transport);
 }
 } // namespace rocket

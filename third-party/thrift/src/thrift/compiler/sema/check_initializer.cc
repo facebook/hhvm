@@ -91,7 +91,7 @@ class checker {
     type = type->get_true_type();
 
     if (auto primitive_type = dynamic_cast<const t_primitive_type*>(type)) {
-      check_base_type(primitive_type, value);
+      check_primitive_type(primitive_type, value);
       check_base_value(primitive_type, value);
     } else if (auto enum_type = dynamic_cast<const t_enum*>(type)) {
       check_enum(enum_type, value);
@@ -191,18 +191,15 @@ class checker {
           report_value_precision();
         }
         break;
-      default:
-        assert(false); // Should be unreachable.
     }
   }
 
-  void check_base_type(
+  void check_primitive_type(
       const t_primitive_type* type, const t_const_value* value) {
     bool compatible = false;
     const auto kind = value->kind();
     switch (type->primitive_type()) {
       case t_primitive_type::type::t_void:
-        error("type error: cannot declare a void const: {}", name_);
         return;
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
@@ -223,8 +220,6 @@ class checker {
         compatible = kind == t_const_value::CV_INTEGER ||
             kind == t_const_value::CV_DOUBLE;
         break;
-      default:
-        assert(false); // Should be unreachable.
     }
     if (!compatible) {
       report_incompatible(value, type);

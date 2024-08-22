@@ -371,6 +371,15 @@ TEST(CompilerTest, double_overflow_underflow) {
   )");
 }
 
+TEST(CompilerTest, void_data) {
+  check_compile(R"(
+    const void v = 42; # expected-error: `void` cannot be used as a data type
+    struct S {
+      1: void v; # expected-error: `void` cannot be used as a data type
+    }
+  )");
+}
+
 TEST(CompilerTest, const_wrong_type) {
   check_compile(R"(
     const i32 wrongInt = "stringVal";

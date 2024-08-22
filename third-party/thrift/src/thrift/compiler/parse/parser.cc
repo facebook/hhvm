@@ -778,6 +778,10 @@ class parser {
             std::move(value_type),
             try_parse_deprecated_annotations());
       }
+      case tok::kw_void:
+        report_error("`void` cannot be used as a data type");
+        consume_token();
+        return t_type_ref::from_ptr(&t_primitive_type::t_void(), range);
       default:
         report_expected("type");
     }

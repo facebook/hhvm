@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <iosfwd>
 #include <map>
 #include <memory>
 #include <string>
@@ -360,6 +361,10 @@ class object final : private detail::object_base<object> {
     return !(lhs == rhs);
   }
 };
+
+std::string to_string(const object&);
+
+std::ostream& operator<<(std::ostream&, const object&);
 
 // The make::* functions are syntactic sugar for constructing whisker::object
 namespace make {

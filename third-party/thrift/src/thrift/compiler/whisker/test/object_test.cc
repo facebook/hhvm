@@ -285,4 +285,53 @@ TEST(ObjectTest, assign_copy_alternatives) {
   }
 }
 
+TEST(ObjectTest, to_string) {
+  object o = w::map({
+      {"foo", w::i64(1)},
+      {"baz",
+       w::array(
+           {w::string("foo"),
+            w::boolean(true),
+            w::native_object(
+                native_object::ptr(std::make_shared<native_object>()))})},
+      {"abc", w::null},
+      {"fun",
+       w::array(
+           {w::f64(2.f),
+            w::array({w::string("foo")}),
+            w::map({{"bar", w::i64(1)}, {"baz", w::array({w::null})}})})},
+  });
+  EXPECT_EQ(
+      to_string(o),
+      "map (size=4)\n"
+      "`-'abc'\n"
+      "  |-null\n"
+      "`-'baz'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-'foo'\n"
+      "  | `-[1]\n"
+      "  |   |-true\n"
+      "  | `-[2]\n"
+      "  |   |-<native_object>\n"
+      "`-'foo'\n"
+      "  |-i64(1)\n"
+      "`-'fun'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-f64(2)\n"
+      "  | `-[1]\n"
+      "  |   |-array (size=1)\n"
+      "  |   | `-[0]\n"
+      "  |   |   |-'foo'\n"
+      "  | `-[2]\n"
+      "  |   |-map (size=2)\n"
+      "  |   | `-'bar'\n"
+      "  |   |   |-i64(1)\n"
+      "  |   | `-'baz'\n"
+      "  |   |   |-array (size=1)\n"
+      "  |   |   | `-[0]\n"
+      "  |   |   |   |-null\n");
+}
+
 } // namespace whisker

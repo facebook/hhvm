@@ -98,9 +98,13 @@ struct P521 {
   static constexpr int keyShareLength = coordinateLength * 2 + 1;
 };
 
+struct X25519 {};
+
 // KEMs
 struct Kyber512 {};
 struct Kyber768 {};
+
+enum class KeyType { RSA, P256, P384, P521, ED25519 };
 
 using HashFunc = void (*)(const folly::IOBuf&, folly::MutableByteRange);
 using HmacFunc =

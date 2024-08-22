@@ -289,6 +289,7 @@ endif()
 add_library(fizz_test_support
   crypto/aead/test/TestUtil.cpp
   crypto/test/TestUtil.cpp
+  crypto/test/TestKeys.cpp
   protocol/ech/test/TestUtil.cpp
 )
 

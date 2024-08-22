@@ -176,7 +176,7 @@ TEST(EvalContextTest, self_reference) {
 }
 
 TEST(EvalContextTest, native_object_basic) {
-  eval_context ctx{w::native_object(std::make_shared<double_property_name>())};
+  eval_context ctx{w::make_native_object<double_property_name>()};
   EXPECT_EQ(ctx.lookup_object({"foo"}), string("foofoo"));
   EXPECT_EQ(ctx.lookup_object({"bar"}), string("barbar"));
 }
@@ -185,7 +185,7 @@ TEST(EvalContextTest, native_object_delegator) {
   native_object::ptr doubler_ref = std::make_shared<double_property_name>();
 
   object doubler = w::native_object(doubler_ref);
-  object delegator = w::native_object(std::make_shared<delegate_to>(doubler));
+  object delegator = w::make_native_object<delegate_to>(doubler);
 
   eval_context ctx{delegator};
   EXPECT_EQ(ctx.lookup_object({"foo"}), doubler);

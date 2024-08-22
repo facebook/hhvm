@@ -531,6 +531,18 @@ inline object native_object(native_object::ptr value) {
   return object(std::move(value));
 }
 
+/**
+ * Creates a native_object::ptr of a concrete type with the given arguments.
+ *
+ * Postconditions:
+ *   object::is_native_object() == true
+ *   object::as_native_object() == value
+ */
+template <typename T, typename... Args>
+object make_native_object(Args&&... args) {
+  return native_object(std::make_shared<T>(std::forward<Args>(args)...));
+}
+
 } // namespace make
 
 } // namespace whisker

@@ -300,8 +300,7 @@ TEST(ObjectTest, to_string) {
        w::array(
            {w::string("foo"),
             w::boolean(true),
-            w::native_object(
-                native_object::ptr(std::make_shared<basic_native_object>()))})},
+            w::make_native_object<basic_native_object>()})},
       {"abc", w::null},
       {"fun",
        w::array(

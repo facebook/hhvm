@@ -20,6 +20,7 @@ type logged_type =
   | SupportdynOfMixed
   | Dynamic
   | Tany
+  | CapturedLike
 [@@deriving ord]
 
 type category =
@@ -44,6 +45,7 @@ type count = {
 (** Summary for one file, only counting like types. **)
 type summary = {
   num_like_types: int;
+  num_captured_like_types: int;
   num_non_like_types: int;
   num_mixed: int;
   num_supportdyn_of_mixed: int;

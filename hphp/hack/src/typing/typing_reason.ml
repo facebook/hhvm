@@ -2650,6 +2650,11 @@ module Predicates = struct
     | Instantiate _ -> true
     | _ -> false
 
+  let is_captured_like r =
+    match r with
+    | From_witness_locl (Captured_like _) -> true
+    | _ -> false
+
   let is_hint r =
     match r with
     | From_witness_decl (Hint _) -> true

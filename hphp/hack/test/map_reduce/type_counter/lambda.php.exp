@@ -1,9 +1,9 @@
 {
   "type_counter": {
-    "function_decl.php": {
-      "num_like_types": 1,
-      "num_captured_like_types": 0,
-      "num_non_like_types": 3,
+    "lambda.php": {
+      "num_like_types": 5,
+      "num_captured_like_types": 1,
+      "num_non_like_types": 8,
       "num_mixed": 0,
       "num_supportdyn_of_mixed": 0,
       "num_dynamic": 0,

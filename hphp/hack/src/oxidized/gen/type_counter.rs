@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6a21fbf57fe95708045046c9692443e9>>
+// @generated SignedSource<<16057a04ba16efa16b93aef27b54b7dd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -88,6 +88,7 @@ pub enum LoggedType {
     SupportdynOfMixed,
     Dynamic,
     Tany,
+    CapturedLike,
 }
 impl TrivialDrop for LoggedType {}
 arena_deserializer::impl_deserialize_in_arena!(LoggedType);
@@ -174,6 +175,7 @@ pub struct Count {
 #[repr(C)]
 pub struct Summary {
     pub like_types: isize,
+    pub captured_like_types: isize,
     pub non_like_types: isize,
     pub mixed: isize,
     pub supportdyn_of_mixed: isize,

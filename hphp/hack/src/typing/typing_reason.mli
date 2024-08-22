@@ -559,6 +559,8 @@ module Predicates : sig
 
   val is_hint : t -> bool
 
+  val is_captured_like : t -> bool
+
   val unpack_expr_dep_type_opt :
     'phase t_ -> ('phase t_ * Pos_or_decl.t * expr_dep_type_reason) option
 

@@ -1,4 +1,0 @@
-(readonly function<T1, T2>(int $x, string $y): (
-  int,
-  string
-))

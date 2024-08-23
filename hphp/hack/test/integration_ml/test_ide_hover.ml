@@ -578,7 +578,7 @@ let special_cases_cases =
             "function idx<Tk as arraykey, Tv>(
   ?KeyedContainer<int, int> $collection,
   ?int $index
-)[]: ?int where Tk = int, Tv = int";
+)[]: ?int";
           addendum =
             [
               "Index into the given KeyedContainer using the provided key.\n\nIf the key doesn't exist, the key is `null`, or the collection is `null`,\nreturn the provided default value instead, or `null` if no default value was\nprovided. If the key is `null`, the default value will be returned even if\n`null` is a valid key in the container.";

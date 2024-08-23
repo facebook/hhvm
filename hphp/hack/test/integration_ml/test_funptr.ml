@@ -119,7 +119,7 @@ let identify_tests =
         [
           {
             HoverService.snippet =
-              "// Defined in Cardoor\npublic static function bar<T>(string $x): string where T = string";
+              "// Defined in Cardoor\npublic static function bar<T>(string $x): string";
             addendum = ["bar_docblock"];
             pos = pos_at (20, 17) (20, 19);
           };

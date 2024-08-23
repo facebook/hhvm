@@ -1,2 +1,0 @@
-// Defined in C
-public function pairwith<Tu>(string $x): (int, string) where Tu = string

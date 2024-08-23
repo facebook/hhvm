@@ -1,1 +1,1 @@
-function identity<T>(int $x, mixed $_): ~int where T = int
+function identity<T>(int $x, mixed $_): ~int

@@ -27,7 +27,8 @@ let get_env (x : t) = x.env
 
 let mk_info env ty : t = { env; ty = Tast_expand.expand_ty env ty; targs = [] }
 
-let add_targs info targs = { info with targs }
+let mk_info_with_targs env ty targs : t =
+  { env; ty = Tast_expand.expand_ty env ty; targs }
 
 (* Is this expression indexing into a value of type shape?
  * E.g. $some_shope['foo'].
@@ -121,6 +122,14 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
           else
             None)
 
+    method private select_pos_targs pos env ty targs =
+      let correct_assumptions = self#correct_assumptions env in
+      List.map line_char_pairs ~f:(fun (line, char) ->
+          if Pos.inside pos line char && correct_assumptions then
+            Some (pos, mk_info_with_targs env ty targs)
+          else
+            None)
+
     method private correct_assumptions env =
       let is_under_dynamic_assumptions =
         (Tast_env.tast_env_as_typing_env env).Typing_env_types.checked
@@ -153,18 +162,8 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
       in
       List.map2_exn lhss rhss ~f:merge_opt
 
-    (* Add targs to all results *)
-    method private add_targs res targs =
-      List.map res ~f:(Option.map ~f:(fun (pos, x) -> (pos, add_targs x targs)))
-
-    method! on_expr env ((ty, pos, expr_) as expr) =
+    method! on_expr env ((ty, pos, _) as expr) =
       let res = self#select_pos pos env ty in
-      let res =
-        match expr_ with
-        (* If this is a function pointer node then add targs to the result *)
-        | Aast.FunctionPointer (_, targs) -> self#add_targs res targs
-        | _ -> res
-      in
       match shape_indexing_receiver env expr with
       | Some recv when human_friendly ->
         (* If we're looking at a shape indexing expression, we don't
@@ -201,11 +200,13 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
         let res = self#select_pos pos env ty in
         self#plus res (super#on_class_id env cid)
 
-    (* For calls, add type arguments to the info gathered from the func if present. This is only possible for
-     * calls of the form id<targs>(args) or obj->id<targs>(args) or C::id<targs>(args)
-     *)
-    method! on_Call env (Aast.{ func; targs; _ } as call) =
-      let res = self#add_targs (self#on_expr env func) targs in
+    method! on_Call env (Aast.{ func = (ty, pos, _); targs; _ } as call) =
+      let res =
+        if under_dynamic then
+          self#select_pos pos env ty
+        else
+          self#select_pos_targs pos env ty targs
+      in
       self#plus res (super#on_Call env call)
 
     method! on_class_const env cc =

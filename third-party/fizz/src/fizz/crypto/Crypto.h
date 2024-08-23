@@ -104,6 +104,14 @@ struct X25519 {};
 struct Kyber512 {};
 struct Kyber768 {};
 
+constexpr size_t kEcMaxPublicKeyshareLength =
+    256; // The max possible size of a buffer storing an EC keyshare. Please
+         // keep this definition in close proximity to the EC Curve tag types.
+
+constexpr size_t kEcMaxSharedSecretLength =
+    256; // The max possible size of a buffer storing an EC shared secret.
+         // Please keep this definition in close proximity to the tag types.
+
 enum class KeyType { RSA, P256, P384, P521, ED25519 };
 
 using HashFunc = void (*)(const folly::IOBuf&, folly::MutableByteRange);

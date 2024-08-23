@@ -244,9 +244,17 @@ TEST_P(ECDHTest, TestKexClone) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TestVectors,
+    TestP256Vectors,
     ECDHTest,
-    ::testing::ValuesIn(kKeyParams));
+    ::testing::ValuesIn(kP256KeyParams));
+INSTANTIATE_TEST_SUITE_P(
+    TestP384Vectors,
+    ECDHTest,
+    ::testing::ValuesIn(kP384KeyParams));
+INSTANTIATE_TEST_SUITE_P(
+    TestP521Vectors,
+    ECDHTest,
+    ::testing::ValuesIn(kP521KeyParams));
 
 } // namespace test
 } // namespace openssl

@@ -399,7 +399,8 @@ struct Params {
  */
 
 // clang-format off
-inline const std::vector<Params> kKeyParams = {
+// P256
+inline const std::vector<Params> kP256KeyParams = {
     Params{
         "e19007eb245d6995ffa8b3ede1e59193aa6cfaaf4cc1e1d126948610c9b3f44c",
         "758b2f0e79a3d0a94f521ae31dcff50fabd394bb4bbec8fa37d1566f463444e7",
@@ -449,10 +450,10 @@ inline const std::vector<Params> kKeyParams = {
         "b1e3bb9b5f12a3b5ae788535d4554bd8c46e0e6130075e4e437d3854cf8f1c34",
         "c0147c3c2691b450b5edc08b51aea224d9f4359ff67aab6da3146f396dbceaea",
         false,
-        KeyType::P256},
-    /*
-     * P384
-     */
+        KeyType::P256}};
+
+// P384
+inline const std::vector<Params> kP384KeyParams = {
     Params{
         "0e5c98ff2d2a3aab14ad0067b60dbe64e4f541ab5bed11c5a0c55ae1e60b51ff5faaf377837977d80cbfdc33c2ff542b",
         "d1bf2ac21637d66d6398aac01dcd56ac6f065fb45d1f6f16747bab9e9b01b4630b59b20927aea147355bf41838acb482",
@@ -502,11 +503,11 @@ inline const std::vector<Params> kKeyParams = {
         "04c6e45983485529e9dacba8d609cffaec849f7c5e5cf4a025ce2c0ff9ae6679b4564b9af58fab58c7f92837597b830b",
         "5e77e466aeae9c10ff8d255e07cf0ad9eae50c8a6fd2c7cd889d73d968c423a15c0462b05bf985cbf679a629e380ce80",
         false,
-        KeyType::P384},
-    /*
-     * P521
-     */
-    Params{
+        KeyType::P384}};
+
+// P521
+inline const std::vector<Params> kP521KeyParams = {
+   Params{
         "0000002fef62381162942889a6094a6bb9ac1f4ddf66d9cda9f618232d31b90c50d7da78a47ed91d40cae946898571db972dc294b109815f38feee9eaac0d5f7c3250728",
         "0000004b05ffa025113390797f2736174aa1c784f4dd34e764ee40d40e4d2442677ebea3498086c9473e5c92789cbdb02bb327bbd61d58690f6a83d9ca73bccbde37dec4",
         "0000004da67cffc98070b82af61feba78787efefb13bd810d80ff92304788e49a4e5b634b3565474a8ecb1615d7b1b77a7a27875adb73a8a5d8f3f84e5e8b744cda250b0",

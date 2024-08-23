@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<430a20a7591995518bbbfcf5021baab3>>
+// @generated SignedSource<<d9b789a4ad7fa645897a8b460f5b7072>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -192,7 +192,7 @@ pub struct ShapeField {
 #[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show)")]
 #[repr(C, u8)]
 pub enum ShapeLabel {
+    RegGroupLabel(String),
     StrLbl(String),
-    IntLbl(String),
     CConstLbl { cls_nm: String, cnst_nm: String },
 }

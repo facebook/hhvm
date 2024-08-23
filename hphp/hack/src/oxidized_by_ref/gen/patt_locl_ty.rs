@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aa45e2fb159a23c74735657cd6d33618>>
+// @generated SignedSource<<87865213946894c594401d41770b268e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -192,9 +192,9 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeField<'arena>);
 #[repr(C, u8)]
 pub enum ShapeLabel<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    StrLbl(&'a str),
+    RegGroupLabel(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    IntLbl(&'a str),
+    StrLbl(&'a str),
     CConstLbl {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         cls_nm: &'a str,

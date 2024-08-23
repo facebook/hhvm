@@ -238,7 +238,7 @@ fn shape_field_name_to_ocamlrep<'a, A: ocamlrep::Allocator, P: ToOcamlRep>(
 // See comment on `shape_field_name_to_ocamlrep`.
 #[derive(FromOcamlRep)]
 enum OcamlShapeFieldName<P> {
-    Int(pos::Positioned<pos::Symbol, P>),
+    RegexGroup(pos::Positioned<pos::Symbol, P>),
     Str(pos::Positioned<pos::Bytes, P>),
     ClassConst(
         pos::Positioned<pos::TypeName, P>,
@@ -292,7 +292,7 @@ impl<R: Reason> FromOcamlRep for ShapeType<R> {
             ocamlrep::vec_from_ocaml_map(block[2])?
                 .into_iter()
                 .map(|(k, (optional, ty))| match k {
-                    OcamlShapeFieldName::Int(pos_id) => (
+                    OcamlShapeFieldName::RegexGroup(pos_id) => (
                         TshapeFieldName::TSFregexGroup(pos_id.id()),
                         ShapeFieldType {
                             optional,

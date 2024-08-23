@@ -81,8 +81,8 @@ and shape_field = {
 
 (** Matches a Hack shape label *)
 and shape_label =
+  | RegGroupLabel of string
   | StrLbl of string
-  | IntLbl of string
   | CConstLbl of {
       cls_nm: string;
       cnst_nm: string;

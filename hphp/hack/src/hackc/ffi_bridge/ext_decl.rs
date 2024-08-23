@@ -603,12 +603,12 @@ fn build_type_structure(outer_ty: &Ty<'_>) -> ExtDeclTypeStructure {
                 .map(
                     |(shape_field, shape_field_type)| ExtDeclTypeStructureSubType {
                         name: match shape_field.0 {
+                            TshapeFieldName::TSFregexGroup(field_name) => field_name.1.to_string(),
                             TshapeFieldName::TSFlitStr(field_name) => field_name.1.to_string(),
                             TshapeFieldName::TSFclassConst(((_pos, classish_name), field_name)) => {
                                 let cname = fmt_type(classish_name);
                                 format!("{}::{}", cname, field_name.1)
                             }
-                            TshapeFieldName::TSFregexGroup(field_name) => field_name.1.to_string(),
                         },
                         type_: build_type_structure(shape_field_type.ty),
                         optional: shape_field_type.optional,

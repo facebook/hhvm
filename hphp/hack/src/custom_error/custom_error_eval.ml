@@ -152,19 +152,34 @@ and matches_namespace patt_namespace ~scrut ~env =
 
 (* -- Types ----------------------------------------------------------------- *)
 
+type shape_fields_split = {
+  groups: Ty.locl_phase Ty.shape_field_type String.Map.t;
+  strs: Ty.locl_phase Ty.shape_field_type String.Map.t;
+  cconsts: Ty.locl_phase Ty.shape_field_type String.Map.t;
+}
+
 let split_fields flds =
+  let init =
+    {
+      groups = String.Map.empty;
+      strs = String.Map.empty;
+      cconsts = String.Map.empty;
+    }
+  in
   List.fold
-    ~f:(fun (str_map, cconst_map, int_map) (k, ty) ->
+    ~f:(fun acc (k, ty) ->
       match k with
-      | Ty.TSFclass_const ((_, cls_nm), (_, cnst_nm)) ->
-        ( str_map,
-          Map.add_exn ~key:(cls_nm ^ "::" ^ cnst_nm) ~data:ty cconst_map,
-          int_map )
-      | Ty.TSFlit_str (_, nm) ->
-        (Map.add_exn ~key:nm ~data:ty str_map, cconst_map, int_map)
       | Ty.TSFregex_group (_, n) ->
-        (str_map, cconst_map, Map.add_exn ~key:n ~data:ty int_map))
-    ~init:(String.Map.empty, String.Map.empty, String.Map.empty)
+        { acc with groups = Map.add_exn ~key:n ~data:ty acc.groups }
+      | Ty.TSFlit_str (_, nm) ->
+        { acc with strs = Map.add_exn ~key:nm ~data:ty acc.strs }
+      | Ty.TSFclass_const ((_, cls_nm), (_, cnst_nm)) ->
+        {
+          acc with
+          cconsts =
+            Map.add_exn ~key:(cls_nm ^ "::" ^ cnst_nm) ~data:ty acc.cconsts;
+        })
+    ~init
   @@ Ty.TShapeMap.elements flds
 
 let matches_locl_ty ?(env = Env.empty) t ~scrut =
@@ -215,74 +230,63 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
     | (Shape patt_flds, Ty.(Tshape { s_fields = flds; _ })) ->
       (* Split [TShapeMap.t] into three [String.Map.t]s, eliminating positional
          information *)
-      let (str_flds, cconst_flds, int_flds) = split_fields flds in
-      aux_shape patt_flds (str_flds, cconst_flds, int_flds) ~env
+      let splits = split_fields flds in
+      aux_shape patt_flds splits ~env
     (* -- Mismatches -------------------------------------------------------- *)
     | ((Apply _ | Option _ | Tuple _ | Prim _ | Dynamic | Nonnull | Shape _), _)
       ->
       Match.no_match
     | (Invalid (errs, _), _) -> Match.match_err errs
-  and aux_shape t (str_flds, cconst_flds, int_flds) ~env =
+  and aux_shape t splits ~env =
     match t with
     | Fld { patt_fld; patt_rest } ->
-      (match
-         aux_shape_field patt_fld (str_flds, cconst_flds, int_flds) ~env
-       with
-      | Match.Matched (str_flds, cconst_flds, int_flds, env) ->
-        aux_shape patt_rest (str_flds, cconst_flds, int_flds) ~env
+      (match aux_shape_field patt_fld splits ~env with
+      | Match.Matched (splits, env) -> aux_shape patt_rest splits ~env
       | Match.No_match -> Match.No_match
       | Match.Match_err err -> Match.match_err err)
     (* -- Open matches any remaining shape fields --------------------------- *)
     | Open -> Match.matched env
     (* -- Closed matches when we have no remaining shape fields ------------- *)
     | Closed
-      when Map.is_empty str_flds
-           && Map.is_empty cconst_flds
-           && Map.is_empty int_flds ->
+      when Map.is_empty splits.groups
+           && Map.is_empty splits.strs
+           && Map.is_empty splits.cconsts ->
       Match.matched env
     | Closed -> Match.no_match
-  and aux_shape_field fld (str_flds, cconst_flds, int_flds) ~env =
-    match fld.lbl with
-    | StrLbl str ->
+  and aux_shape_field fld splits ~env =
+    let aux ~get ~set str =
+      let split = get splits in
       Option.value_map
         ~default:Match.no_match
         ~f:(fun Ty.{ sft_optional; sft_ty } ->
           if Bool.(sft_optional = fld.optional) then
             match aux fld.patt sft_ty ~env with
             | Match.Matched env ->
-              Match.matched (Map.remove str_flds str, cconst_flds, int_flds, env)
+              Match.matched (set splits (Map.remove split str), env)
             | Match.No_match -> Match.No_match
             | Match.Match_err err -> Match.Match_err err
           else
             Match.no_match)
-      @@ Map.find str_flds str
+      @@ Map.find split str
+    in
+    (* These funcs can be derived with ppx_sexp_conv *)
+    match fld.lbl with
+    | RegGroupLabel n ->
+      aux
+        ~get:(fun splits -> splits.groups)
+        ~set:(fun splits groups -> { splits with groups })
+        n
+    | StrLbl str ->
+      aux
+        ~get:(fun splits -> splits.strs)
+        ~set:(fun splits strs -> { splits with strs })
+        str
     | CConstLbl { cls_nm; cnst_nm } ->
       let str = cls_nm ^ "::" ^ cnst_nm in
-      Option.value_map
-        ~default:Match.no_match
-        ~f:(fun Ty.{ sft_optional; sft_ty } ->
-          if Bool.(sft_optional = fld.optional) then
-            match aux fld.patt sft_ty ~env with
-            | Match.Matched env ->
-              Match.matched (str_flds, Map.remove cconst_flds str, int_flds, env)
-            | Match.No_match -> Match.No_match
-            | Match.Match_err err -> Match.Match_err err
-          else
-            Match.no_match)
-      @@ Map.find cconst_flds str
-    | IntLbl n ->
-      Option.value_map
-        ~default:Match.no_match
-        ~f:(fun Ty.{ sft_optional; sft_ty } ->
-          if Bool.(sft_optional = fld.optional) then
-            match aux fld.patt sft_ty ~env with
-            | Match.Matched env ->
-              Match.matched (str_flds, cconst_flds, Map.remove int_flds n, env)
-            | Match.No_match -> Match.No_match
-            | Match.Match_err err -> Match.Match_err err
-          else
-            Match.no_match)
-      @@ Map.find int_flds n
+      aux
+        ~get:(fun splits -> splits.cconsts)
+        ~set:(fun splits cconsts -> { splits with cconsts })
+        str
   and aux_params t tys ~env =
     match (t, tys) with
     | (Cons { patt_hd; patt_tl }, ty :: tys) ->

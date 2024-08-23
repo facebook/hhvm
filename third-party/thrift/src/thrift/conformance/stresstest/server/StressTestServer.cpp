@@ -22,6 +22,9 @@
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
+#include <folly/executors/CPUThreadPoolExecutor.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
+
 DEFINE_int32(port, 5000, "Server port");
 DEFINE_int32(io_threads, 0, "Number of IO threads (0 == number of cores)");
 DEFINE_int32(cpu_threads, 0, "Number of CPU threads (0 == number of cores)");
@@ -30,6 +33,7 @@ DEFINE_int32(
     -1,
     "Configures max requests, 0 will disable max request limit");
 DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
+DEFINE_bool(no_resource_pile_or_cc, false, "Disable resource pile and cc");
 DEFINE_string(
     certPath,
     "folly/io/async/test/certs/tests-cert.pem",
@@ -125,6 +129,17 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (!FLAGS_certPath.empty() && !FLAGS_keyPath.empty() &&
       !FLAGS_caPath.empty()) {
     server->setSSLConfig(getSSLConfig());
+  }
+  if (FLAGS_no_resource_pile_or_cc) {
+    server->resourcePoolSet().setResourcePool(
+        apache::thrift::ResourcePoolHandle::defaultAsync(),
+        nullptr,
+        std::make_shared<folly::CPUThreadPoolExecutor>(
+            sanitizeNumThreads(FLAGS_cpu_threads)),
+        nullptr);
+
+    server->ensureResourcePools();
+    server->requireResourcePools();
   }
   return server;
 }

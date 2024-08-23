@@ -18,6 +18,16 @@
 
 namespace apache::thrift::protocol::detail {
 
+void ensure_fields(MaskRef ref, type::AnyStruct& t) {
+  if (ref.isTypeMask()) {
+    folly::throw_exception<std::runtime_error>(
+        "Cannot ensure Any field (schemaless ensure is unsafe)");
+  }
+
+  // backwards compatiblity with field mask
+  return ensure_fields<type::AnyStruct>(ref, t);
+}
+
 void clear_fields(MaskRef ref, type::AnyStruct& t) {
   if (ref.isFieldMask()) {
     // Retain field-mask support for backwards compatibility

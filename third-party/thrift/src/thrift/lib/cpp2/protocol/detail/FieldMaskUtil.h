@@ -213,6 +213,8 @@ Mask path(
       "Path contains a non thrift struct/union field.");
 }
 
+void ensure_fields(MaskRef ref, type::AnyStruct&);
+
 // Ensures the masked fields in the given thrift struct.
 template <typename T>
 void ensure_fields(MaskRef ref, T& t) {

@@ -1613,6 +1613,13 @@ TEST(FieldMaskTest, EnsureUnion) {
   }
 }
 
+TEST(FieldMaskTest, EnsureAny) {
+  MaskBuilder<StructWithAny> m(noneMask());
+  m.includes_type<ident::rawAny>(type::infer_tag<Foo>{});
+  StructWithAny s;
+  EXPECT_THROW(m.ensure(s), std::runtime_error);
+}
+
 TEST(FieldMaskTest, SchemafulClear) {
   Mask mask;
   // mask = includes{1: includes{2: excludes{}},

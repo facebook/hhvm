@@ -15,10 +15,10 @@
   limitations under the License.
 
 }}{{!
-Generated Python classes for mutable thrift-python types.
-}}
-
-# EXPERIMENTAL - DO NOT USE !!!
-# See `experimental_generate_mutable_types` documentation in thrift compiler
-
-{{> types/types }}
+This is the metaclass for Thrift exception
+}}{{#program:generate_mutable_types}}{{!
+}}_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta{{!
+}}{{/program:generate_mutable_types}}{{!
+}}{{^program:generate_mutable_types}}{{!
+}}_fbthrift_python_exceptions.GeneratedErrorMeta{{!
+}}{{/program:generate_mutable_types}}

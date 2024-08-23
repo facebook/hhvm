@@ -17,6 +17,158 @@
 }}{{!
 Generated Python classes for Thrift types
 }}
+{{> common/auto_generated_py}}
+import folly.iobuf as _fbthrift_iobuf
+import {{program:base_library_package}}.types as _fbthrift_python_types
+{{^program:generate_mutable_types}}
+import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
+{{/program:generate_mutable_types}}
+{{#program:generate_mutable_types}}
+import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutable_types
+import {{program:base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import {{program:base_library_package}}.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
+{{/program:generate_mutable_types}}
+
+{{^program:generate_mutable_types}}
+{{#program:include_namespaces}}
+{{#has_types?}}
+
+import {{included_module_path}}.thrift_types
+{{/has_types?}}
+{{/program:include_namespaces}}
+{{/program:generate_mutable_types}}
+{{#program:adapter_modules}}
+import {{module_path}}
+{{/program:adapter_modules}}
+{{#program:structs}}
+
+
+class {{> structs/unadapted_name}}(metaclass={{!
+        }}{{#struct:union?}}{{> types/union_metaclass}}{{/struct:union?}}{{!
+        }}{{^struct:union?}}{{!
+        }}{{#struct:exception?}}{{> types/exception_metaclass}}{{/struct:exception?}}{{!
+        }}{{^struct:exception?}}{{> types/struct_metaclass}}{{/struct:exception?}}{{!
+        }}{{/struct:union?}}{{!
+        }}):
+    _fbthrift_SPEC = (
+        {{#struct:fields_ordered_by_id}}
+        _fbthrift_python_types.FieldInfo(
+            {{field:key}},  # id
+            _fbthrift_python_types.{{field:tablebased_qualifier}}, # qualifier
+            "{{field:name}}",  # name
+            "{{field:py_name}}",  # python name (from @python.Name annotation)
+            {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:user_default_value}}{{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{/field:type}}{{> types/constant_value }}{{/field:user_default_value}}{{!
+            }}{{^field:user_default_value}}None{{/field:user_default_value}},  # default value
+            {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive{{!
+}}{{#program:generate_mutable_types}}
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum){{!
+}}{{/program:generate_mutable_types}}
+        ),
+        {{/struct:fields_ordered_by_id}}
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{> structs/unadapted_name}}"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return {{#struct:thrift_uri}}"{{struct:thrift_uri}}"{{/struct:thrift_uri}}{{!
+            }}{{^struct:thrift_uri}}None{{/struct:thrift_uri}}
+
+{{^program:generate_mutable_types}}
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
+    {{!
+      makes reflection work in auto-migrated thrift-py3
+    }}{{#program:py3_auto_migrate?}}
+
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("{{program:module_path}}.types_reflection")
+        return types_reflection.get_reflection__{{struct:py_name}}()
+    {{/program:py3_auto_migrate?}}
+{{/program:generate_mutable_types}}
+{{#program:generate_mutable_types}}
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+{{/program:generate_mutable_types}}
+
+    {{#struct:exception?}}
+    {{#struct:exception_message?}}
+
+    def __str__(self):
+        field = self.{{struct:exception_message}}
+        if field is None:
+            {{! optional field, stringify }}
+            return str(field)
+        return field
+
+    {{/struct:exception_message?}}
+    {{/struct:exception?}}
+    {{#struct:legacy_api?}}
+{{#program:generate_mutable_types}}
+
+    def _to_python(self):
+        import thrift.python.converter
+        import importlib
+        immutable_types = importlib.import_module("{{program:module_path}}.thrift_types")
+        return thrift.python.converter.to_python_struct(immutable_types.{{> structs/unadapted_name}}, self)
+
+    def _to_mutable_python(self):
+        return self
+{{/program:generate_mutable_types}}
+{{^program:generate_mutable_types}}
+    def _to_python(self):
+        return self
+{{#program:generate_to_mutable_python_conversion_methods?}}
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("{{program:module_path}}.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{> structs/unadapted_name}}, self)
+{{/program:generate_to_mutable_python_conversion_methods?}}
+
+    def _to_py3(self):
+    {{^program:py3_auto_migrate?}}
+        import importlib
+        py3_types = importlib.import_module("{{program:module_path}}.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.{{> structs/unadapted_name}}, self)
+    {{/program:py3_auto_migrate?}}
+    {{#program:py3_auto_migrate?}}
+        return self
+    {{/program:py3_auto_migrate?}}
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
+{{/program:generate_mutable_types}}
+    {{/struct:legacy_api?}}
+{{#struct:has_adapter?}}
+
+
+{{^program:generate_mutable_types}}
+{{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
+{{/program:generate_mutable_types}}
+{{#program:generate_mutable_types}}
+raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{> structs/unadapted_name}}")
+{{/program:generate_mutable_types}}
+{{/struct:has_adapter?}}{{!
+}}{{/program:structs}}
+
 {{^program:generate_mutable_types}}
 # This unfortunately has to be down here to prevent circular imports
 import {{program:module_path}}.thrift_metadata

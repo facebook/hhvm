@@ -18,11 +18,19 @@ namespace java.swift test.fixtures.swift.enumstrict
 namespace java test.fixtures.enumstrict
 namespace cpp2 test.fixtures.enumstrict
 namespace py3 test.fixtures.enumstrict
+include "thrift/annotation/java.thrift"
 
 enum EmptyEnum {
 }
 
 enum MyEnum {
+  ONE = 1,
+  TWO = 2,
+}
+
+@java.UseIntrinsicDefault
+enum MyUseIntrinsicDefaultEnum {
+  ZERO = 0,
   ONE = 1,
   TWO = 2,
 }

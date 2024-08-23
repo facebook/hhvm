@@ -242,6 +242,127 @@ where
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct MyUseIntrinsicDefaultEnum(pub ::std::primitive::i32);
+
+impl MyUseIntrinsicDefaultEnum {
+    pub const ZERO: Self = MyUseIntrinsicDefaultEnum(0i32);
+    pub const ONE: Self = MyUseIntrinsicDefaultEnum(1i32);
+    pub const TWO: Self = MyUseIntrinsicDefaultEnum(2i32);
+}
+
+impl ::fbthrift::ThriftEnum for MyUseIntrinsicDefaultEnum {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
+        &[
+            (Self::ZERO, "ZERO"),
+            (Self::ONE, "ONE"),
+            (Self::TWO, "TWO"),
+        ]
+    }
+
+    fn variants() -> &'static [&'static ::std::primitive::str] {
+        &[
+            "ZERO",
+            "ONE",
+            "TWO",
+        ]
+    }
+
+    fn variant_values() -> &'static [Self] {
+        &[
+            Self::ZERO,
+            Self::ONE,
+            Self::TWO,
+        ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for MyUseIntrinsicDefaultEnum {
+    fn default() -> Self {
+        Self(0)
+    }
+}
+
+impl<'a> ::std::convert::From<&'a MyUseIntrinsicDefaultEnum> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a MyUseIntrinsicDefaultEnum) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<MyUseIntrinsicDefaultEnum> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: MyUseIntrinsicDefaultEnum) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for MyUseIntrinsicDefaultEnum {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for MyUseIntrinsicDefaultEnum {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("ZERO", 0),
+            ("ONE", 1),
+            ("TWO", 2),
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for MyUseIntrinsicDefaultEnum {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "MyUseIntrinsicDefaultEnum::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for MyUseIntrinsicDefaultEnum {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("ONE", 1),
+            ("TWO", 2),
+            ("ZERO", 0),
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyUseIntrinsicDefaultEnum").map(Self)
+    }
+}
+
+impl ::fbthrift::GetTType for MyUseIntrinsicDefaultEnum {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl<P> ::fbthrift::Serialize<P> for MyUseIntrinsicDefaultEnum
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for MyUseIntrinsicDefaultEnum
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyBigEnum(pub ::std::primitive::i32);
 
 impl MyBigEnum {

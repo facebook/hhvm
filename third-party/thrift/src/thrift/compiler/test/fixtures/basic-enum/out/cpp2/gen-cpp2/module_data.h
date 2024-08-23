@@ -34,6 +34,21 @@ template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum> {
   }};
 };
 
+template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
+  using type = ::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum;
+  static constexpr const std::size_t size = 3;
+  static constexpr std::array<type, size> values = { {
+      type::ZERO,
+      type::ONE,
+      type::TWO,
+  }};
+  static constexpr std::array<std::string_view, size> names = { {
+      "ZERO"sv,
+      "ONE"sv,
+      "TWO"sv,
+  }};
+};
+
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum> {
   using type = ::test::fixtures::enumstrict::MyBigEnum;
   static constexpr const std::size_t size = 20;

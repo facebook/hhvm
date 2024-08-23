@@ -28,6 +28,11 @@ class EnumMetadata<::test::fixtures::enumstrict::MyEnum> {
   static void gen(ThriftMetadata& metadata);
 };
 template <>
+class EnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
 class EnumMetadata<::test::fixtures::enumstrict::MyBigEnum> {
  public:
   static void gen(ThriftMetadata& metadata);

@@ -15,6 +15,18 @@ MyEnum = __MyEnum_enum__(
     TWO = __StarlarkEnum__(name="TWO", value=2),
 )
 
+__MyUseIntrinsicDefaultEnum_enum__ = record(
+    ZERO = __StarlarkEnum__,
+    ONE = __StarlarkEnum__,
+    TWO = __StarlarkEnum__,
+)
+
+MyUseIntrinsicDefaultEnum = __MyUseIntrinsicDefaultEnum_enum__(
+    ZERO = __StarlarkEnum__(name="ZERO", value=0),
+    ONE = __StarlarkEnum__(name="ONE", value=1),
+    TWO = __StarlarkEnum__(name="TWO", value=2),
+)
+
 __MyBigEnum_enum__ = record(
     UNKNOWN = __StarlarkEnum__,
     ONE = __StarlarkEnum__,

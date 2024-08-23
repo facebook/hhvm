@@ -15,6 +15,7 @@ namespace enumstrict {
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::EnumMetadata<EmptyEnum>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<MyEnum>::gen(metadata);
+  ::apache::thrift::detail::md::EnumMetadata<MyUseIntrinsicDefaultEnum>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<MyBigEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   return metadata;

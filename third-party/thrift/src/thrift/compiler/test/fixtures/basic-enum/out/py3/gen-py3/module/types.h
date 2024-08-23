@@ -42,6 +42,17 @@ inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumT
 
 template<>
 inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+    ::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::namesmap() {
+  static const folly::Indestructible<NamesMap> pairs {
+    {
+    }
+  };
+  return *pairs;
+}
+
+
+template<>
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enumstrict::MyBigEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {

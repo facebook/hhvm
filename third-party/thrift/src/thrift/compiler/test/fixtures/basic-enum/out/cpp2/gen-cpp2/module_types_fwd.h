@@ -18,6 +18,7 @@ class MyStruct;
 namespace test::fixtures::enumstrict {
 enum class EmptyEnum;
 enum class MyEnum;
+enum class MyUseIntrinsicDefaultEnum;
 enum class MyBigEnum;
 } // namespace test::fixtures::enumstrict
 // END forward_declare_enums

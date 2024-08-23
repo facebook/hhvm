@@ -46,6 +46,15 @@ enum class MyEnum {
 
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyUseIntrinsicDefaultEnum", "kind": "enum" } */
+enum class MyUseIntrinsicDefaultEnum {
+  ZERO = 0,
+  ONE = 1,
+  TWO = 2,
+};
+
+
+
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-enum/src/module.thrift", "name": "MyBigEnum", "kind": "enum" } */
 enum class MyBigEnum {
   UNKNOWN = 0,
@@ -79,6 +88,8 @@ template<> struct hash<::test::fixtures::enumstrict::EmptyEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::EmptyEnum> {};
 template<> struct hash<::test::fixtures::enumstrict::MyEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::MyEnum> {};
+template<> struct hash<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> :
+  ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {};
 template<> struct hash<::test::fixtures::enumstrict::MyBigEnum> :
   ::apache::thrift::detail::enum_hash<::test::fixtures::enumstrict::MyBigEnum> {};
 } // std
@@ -124,6 +135,28 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
     return ret.data();
   }
   static constexpr type min() { return type::ONE; }
+  static constexpr type max() { return type::TWO; }
+};
+
+
+template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>;
+
+template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
+  using type = ::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum;
+
+  static constexpr std::size_t const size = 3;
+  static folly::Range<type const*> const values;
+  static folly::Range<std::string_view const*> const names;
+
+  static bool findName(type value, std::string_view* out) noexcept;
+  static bool findValue(std::string_view name, type* out) noexcept;
+
+  static char const* findName(type value) noexcept {
+    std::string_view ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+  static constexpr type min() { return type::ZERO; }
   static constexpr type max() { return type::TWO; }
 };
 

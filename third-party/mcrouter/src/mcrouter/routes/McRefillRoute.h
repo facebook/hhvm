@@ -170,6 +170,14 @@ typename RouterInfo::RouteHandlePtr makeMcRefillRoute(
       factory.create(json["primary"]), factory.create(json["refill"]));
 }
 
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeMcRefillRouteUsePrimaryAndRefill(
+    typename RouterInfo::RouteHandlePtr primary,
+    typename RouterInfo::RouteHandlePtr refill) {
+  return makeRouteHandleWithInfo<RouterInfo, McRefillRoute>(
+      std::move(primary), std::move(refill));
+}
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

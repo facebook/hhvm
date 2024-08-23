@@ -34,6 +34,7 @@
 #include "mcrouter/routes/FailoverRoute.h"
 #include "mcrouter/routes/HashRouteFactory.h"
 #include "mcrouter/routes/McBucketRoute.h"
+#include "mcrouter/routes/McRefillRoute.h"
 #include "mcrouter/routes/PoolRouteUtils.h"
 #include "mcrouter/routes/RateLimitRoute.h"
 #include "mcrouter/routes/RateLimiter.h"
@@ -581,6 +582,26 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
     route = std::move(makeShadowRoutes(
         factory, json, {std::move(route)}, proxy_, *extraProvider_)[0]);
   }
+
+  if constexpr (RouterInfo::hasMcRefillRoute) {
+    bool refillOnMiss = false;
+    if (auto* jRefillOnMiss = json.get_ptr("refill_on_miss")) {
+      refillOnMiss = parseBool(*jRefillOnMiss, "refill_on_miss");
+    }
+    if (refillOnMiss) {
+      auto jRefillFromTier = json.get_ptr("refill_from_tier");
+      checkLogic(
+          jRefillFromTier != nullptr,
+          "SRroute: 'refill_from_tier' property is missing");
+      folly::dynamic refillJson = json;
+      refillJson["service_name"] = *jRefillFromTier;
+      refillJson["type"] = "SRRoute";
+
+      route = makeMcRefillRouteUsePrimaryAndRefill<RouterInfo>(
+          route, factoryFunc(factory, refillJson, proxy_));
+    }
+  }
+
   route = bucketize(std::move(route), json);
 
   if (needAsynclog) {

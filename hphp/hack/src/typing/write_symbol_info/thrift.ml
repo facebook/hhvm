@@ -194,9 +194,7 @@ let get_thrift_from_comment t ~doc =
       let name = QualName.(Key { file; name = member_name }) in
       Some XRefTarget.(Constant Constant.(Key { name }))
   with
-  | _ ->
-    Hh_logger.log "Couldn't parse thrift comment %s" doc;
-    None
+  | _ -> None
 
 let get_thrift_from_enum t member_name =
   t.cur_container >>= fun { name; kind } ->

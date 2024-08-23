@@ -263,7 +263,7 @@ std::string to_string(const token& token) {
           to_string(token.kind),
           token::escape(token.string_value()));
     case token_value_kind::none:
-      return fmt::format("token[kind='{}']", to_string(token.kind));
+      return fmt::format("token[kind={}]", to_string(token.kind));
   }
 }
 

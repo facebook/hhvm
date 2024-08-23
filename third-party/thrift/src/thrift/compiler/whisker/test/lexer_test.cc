@@ -39,7 +39,7 @@ struct token_description {
     std::string str = detail::variant_match(
         desc.value,
         [&desc](std::monostate) {
-          return fmt::format("token[kind='{}']", to_string(desc.kind));
+          return fmt::format("token[kind={}]", to_string(desc.kind));
         },
         [](bool value) {
           return fmt::format("token[boolean={}]", value ? "true" : "false");

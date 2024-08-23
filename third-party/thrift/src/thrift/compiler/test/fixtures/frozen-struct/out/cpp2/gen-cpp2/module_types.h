@@ -560,7 +560,7 @@ class ModuleA final  {
   }
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field_ref() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
+  [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
   ::std::int32_t& set_i32Field(::std::int32_t i32Field_) {
     i32Field_ref() = i32Field_;
     return __fbthrift_field_i32Field;
@@ -578,7 +578,7 @@ class ModuleA final  {
 
   /** Glean { "field": "strField" } */
   template <typename T_ModuleA_strField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.strField_ref() = BAR;` instead of `FOO.set_strField(BAR);`")]]
+  [[deprecated("Use `FOO.strField() = BAR;` instead of `FOO.set_strField(BAR);`")]]
   ::std::string& set_strField(T_ModuleA_strField_struct_setter&& strField_) {
     strField_ref() = std::forward<T_ModuleA_strField_struct_setter>(strField_);
     return __fbthrift_field_strField;
@@ -590,7 +590,7 @@ class ModuleA final  {
 
   /** Glean { "field": "listField" } */
   template <typename T_ModuleA_listField_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.listField_ref() = BAR;` instead of `FOO.set_listField(BAR);`")]]
+  [[deprecated("Use `FOO.listField() = BAR;` instead of `FOO.set_listField(BAR);`")]]
   ::std::vector<::std::int16_t>& set_listField(T_ModuleA_listField_struct_setter&& listField_) {
     listField_ref() = std::forward<T_ModuleA_listField_struct_setter>(listField_);
     return __fbthrift_field_listField;
@@ -602,7 +602,7 @@ class ModuleA final  {
 
   /** Glean { "field": "mapField" } */
   template <typename T_ModuleA_mapField_struct_setter = ::std::map<::std::string, ::std::int32_t>>
-  [[deprecated("Use `FOO.mapField_ref() = BAR;` instead of `FOO.set_mapField(BAR);`")]]
+  [[deprecated("Use `FOO.mapField() = BAR;` instead of `FOO.set_mapField(BAR);`")]]
   ::std::map<::std::string, ::std::int32_t>& set_mapField(T_ModuleA_mapField_struct_setter&& mapField_) {
     mapField_ref() = std::forward<T_ModuleA_mapField_struct_setter>(mapField_);
     return __fbthrift_field_mapField;
@@ -614,7 +614,7 @@ class ModuleA final  {
 
   /** Glean { "field": "inclAField" } */
   template <typename T_ModuleA_inclAField_struct_setter = ::some::ns::IncludedA>
-  [[deprecated("Use `FOO.inclAField_ref() = BAR;` instead of `FOO.set_inclAField(BAR);`")]]
+  [[deprecated("Use `FOO.inclAField() = BAR;` instead of `FOO.set_inclAField(BAR);`")]]
   ::some::ns::IncludedA& set_inclAField(T_ModuleA_inclAField_struct_setter&& inclAField_) {
     inclAField_ref() = std::forward<T_ModuleA_inclAField_struct_setter>(inclAField_);
     return __fbthrift_field_inclAField;
@@ -626,7 +626,7 @@ class ModuleA final  {
 
   /** Glean { "field": "inclBField" } */
   template <typename T_ModuleA_inclBField_struct_setter = ::some::ns::IncludedB>
-  [[deprecated("Use `FOO.inclBField_ref() = BAR;` instead of `FOO.set_inclBField(BAR);`")]]
+  [[deprecated("Use `FOO.inclBField() = BAR;` instead of `FOO.set_inclBField(BAR);`")]]
   ::some::ns::IncludedB& set_inclBField(T_ModuleA_inclBField_struct_setter&& inclBField_) {
     inclBField_ref() = std::forward<T_ModuleA_inclBField_struct_setter>(inclBField_);
     return __fbthrift_field_inclBField;
@@ -841,7 +841,7 @@ class ModuleB final  {
   }
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field_ref() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
+  [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
   ::std::int32_t& set_i32Field(::std::int32_t i32Field_) {
     i32Field_ref() = i32Field_;
     return __fbthrift_field_i32Field;
@@ -853,7 +853,7 @@ class ModuleB final  {
   }
 
   /** Glean { "field": "inclEnumB" } */
-  [[deprecated("Use `FOO.inclEnumB_ref() = BAR;` instead of `FOO.set_inclEnumB(BAR);`")]]
+  [[deprecated("Use `FOO.inclEnumB() = BAR;` instead of `FOO.set_inclEnumB(BAR);`")]]
   ::some::ns::EnumB& set_inclEnumB(::some::ns::EnumB inclEnumB_) {
     inclEnumB_ref() = inclEnumB_;
     return __fbthrift_field_inclEnumB;
@@ -1016,7 +1016,7 @@ class DirectlyAdapted final  {
   }
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
     return __fbthrift_field_field;

@@ -242,7 +242,7 @@ class A final  {
   }
 
   /** Glean { "field": "useless_field" } */
-  [[deprecated("Use `FOO.useless_field_ref() = BAR;` instead of `FOO.set_useless_field(BAR);`")]]
+  [[deprecated("Use `FOO.useless_field() = BAR;` instead of `FOO.set_useless_field(BAR);`")]]
   ::std::int32_t& set_useless_field(::std::int32_t useless_field_) {
     useless_field_ref() = useless_field_;
     return __fbthrift_field_useless_field;
@@ -702,7 +702,7 @@ class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   template <typename T_Bang_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_Bang_message_struct_setter&& message_) {
     message_ref() = std::forward<T_Bang_message_struct_setter>(message_);
     return __fbthrift_field_message;

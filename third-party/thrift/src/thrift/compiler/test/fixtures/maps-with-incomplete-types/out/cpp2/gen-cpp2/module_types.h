@@ -191,7 +191,7 @@ class B final  {
   ::std::int32_t* get_field() && = delete;
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
     return __fbthrift_field_field;
@@ -356,7 +356,7 @@ class A final  {
 
   /** Glean { "field": "some_map" } */
   template <typename T_A_some_map_struct_setter = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
-  [[deprecated("Use `FOO.some_map_ref() = BAR;` instead of `FOO.set_some_map(BAR);`")]]
+  [[deprecated("Use `FOO.some_map() = BAR;` instead of `FOO.set_some_map(BAR);`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>& set_some_map(T_A_some_map_struct_setter&& some_map_) {
     some_map_ref() = std::forward<T_A_some_map_struct_setter>(some_map_);
     return __fbthrift_field_some_map;

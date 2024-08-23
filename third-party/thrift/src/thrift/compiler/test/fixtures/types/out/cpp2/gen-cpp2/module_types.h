@@ -818,7 +818,7 @@ class decorated_struct final  {
 
   /** Glean { "field": "field" } */
   template <typename T_decorated_struct_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::string& set_field(T_decorated_struct_field_struct_setter&& field_) {
     field_ref() = std::forward<T_decorated_struct_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -1346,7 +1346,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldA" } */
   template <typename T_ContainerStruct_fieldA_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.fieldA_ref() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
   ::std::vector<::std::int32_t>& set_fieldA(T_ContainerStruct_fieldA_struct_setter&& fieldA_) {
     fieldA_ref() = std::forward<T_ContainerStruct_fieldA_struct_setter>(fieldA_);
     return __fbthrift_field_fieldA;
@@ -1358,7 +1358,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldB" } */
   template <typename T_ContainerStruct_fieldB_struct_setter = std::list<::std::int32_t>>
-  [[deprecated("Use `FOO.fieldB_ref() = BAR;` instead of `FOO.set_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.fieldB() = BAR;` instead of `FOO.set_fieldB(BAR);`")]]
   std::list<::std::int32_t>& set_fieldB(T_ContainerStruct_fieldB_struct_setter&& fieldB_) {
     fieldB_ref() = std::forward<T_ContainerStruct_fieldB_struct_setter>(fieldB_);
     return __fbthrift_field_fieldB;
@@ -1370,7 +1370,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldC" } */
   template <typename T_ContainerStruct_fieldC_struct_setter = std::deque<::std::int32_t>>
-  [[deprecated("Use `FOO.fieldC_ref() = BAR;` instead of `FOO.set_fieldC(BAR);`")]]
+  [[deprecated("Use `FOO.fieldC() = BAR;` instead of `FOO.set_fieldC(BAR);`")]]
   std::deque<::std::int32_t>& set_fieldC(T_ContainerStruct_fieldC_struct_setter&& fieldC_) {
     fieldC_ref() = std::forward<T_ContainerStruct_fieldC_struct_setter>(fieldC_);
     return __fbthrift_field_fieldC;
@@ -1382,7 +1382,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldD" } */
   template <typename T_ContainerStruct_fieldD_struct_setter = folly::fbvector<::std::int32_t>>
-  [[deprecated("Use `FOO.fieldD_ref() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
+  [[deprecated("Use `FOO.fieldD() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
   folly::fbvector<::std::int32_t>& set_fieldD(T_ContainerStruct_fieldD_struct_setter&& fieldD_) {
     fieldD_ref() = std::forward<T_ContainerStruct_fieldD_struct_setter>(fieldD_);
     return __fbthrift_field_fieldD;
@@ -1394,7 +1394,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldE" } */
   template <typename T_ContainerStruct_fieldE_struct_setter = folly::small_vector<::std::int32_t>>
-  [[deprecated("Use `FOO.fieldE_ref() = BAR;` instead of `FOO.set_fieldE(BAR);`")]]
+  [[deprecated("Use `FOO.fieldE() = BAR;` instead of `FOO.set_fieldE(BAR);`")]]
   folly::small_vector<::std::int32_t>& set_fieldE(T_ContainerStruct_fieldE_struct_setter&& fieldE_) {
     fieldE_ref() = std::forward<T_ContainerStruct_fieldE_struct_setter>(fieldE_);
     return __fbthrift_field_fieldE;
@@ -1406,7 +1406,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldF" } */
   template <typename T_ContainerStruct_fieldF_struct_setter = ::apache::thrift::fixtures::types::set_i32_7194>
-  [[deprecated("Use `FOO.fieldF_ref() = BAR;` instead of `FOO.set_fieldF(BAR);`")]]
+  [[deprecated("Use `FOO.fieldF() = BAR;` instead of `FOO.set_fieldF(BAR);`")]]
   ::apache::thrift::fixtures::types::set_i32_7194& set_fieldF(T_ContainerStruct_fieldF_struct_setter&& fieldF_) {
     fieldF_ref() = std::forward<T_ContainerStruct_fieldF_struct_setter>(fieldF_);
     return __fbthrift_field_fieldF;
@@ -1418,7 +1418,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldG" } */
   template <typename T_ContainerStruct_fieldG_struct_setter = folly::sorted_vector_map<::std::int32_t, ::std::string>>
-  [[deprecated("Use `FOO.fieldG_ref() = BAR;` instead of `FOO.set_fieldG(BAR);`")]]
+  [[deprecated("Use `FOO.fieldG() = BAR;` instead of `FOO.set_fieldG(BAR);`")]]
   folly::sorted_vector_map<::std::int32_t, ::std::string>& set_fieldG(T_ContainerStruct_fieldG_struct_setter&& fieldG_) {
     fieldG_ref() = std::forward<T_ContainerStruct_fieldG_struct_setter>(fieldG_);
     return __fbthrift_field_fieldG;
@@ -1430,7 +1430,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldH" } */
   template <typename T_ContainerStruct_fieldH_struct_setter = ::apache::thrift::fixtures::types::SomeMap>
-  [[deprecated("Use `FOO.fieldH_ref() = BAR;` instead of `FOO.set_fieldH(BAR);`")]]
+  [[deprecated("Use `FOO.fieldH() = BAR;` instead of `FOO.set_fieldH(BAR);`")]]
   ::apache::thrift::fixtures::types::SomeMap& set_fieldH(T_ContainerStruct_fieldH_struct_setter&& fieldH_) {
     fieldH_ref() = std::forward<T_ContainerStruct_fieldH_struct_setter>(fieldH_);
     return __fbthrift_field_fieldH;
@@ -1594,7 +1594,7 @@ class CppTypeStruct final  {
 
   /** Glean { "field": "fieldA" } */
   template <typename T_CppTypeStruct_fieldA_struct_setter = std::list<int32_t>>
-  [[deprecated("Use `FOO.fieldA_ref() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
   std::list<int32_t>& set_fieldA(T_CppTypeStruct_fieldA_struct_setter&& fieldA_) {
     fieldA_ref() = std::forward<T_CppTypeStruct_fieldA_struct_setter>(fieldA_);
     return __fbthrift_field_fieldA;
@@ -1759,7 +1759,7 @@ class VirtualStruct  {
   }
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField_ref() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
@@ -1975,7 +1975,7 @@ class MyStructWithForwardRefEnum final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a_ref() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
   ::apache::thrift::fixtures::types::MyForwardRefEnum& set_a(::apache::thrift::fixtures::types::MyForwardRefEnum a_) {
     a_ref() = a_;
     return __fbthrift_field_a;
@@ -1987,7 +1987,7 @@ class MyStructWithForwardRefEnum final  {
   }
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b_ref() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
   ::apache::thrift::fixtures::types::MyForwardRefEnum& set_b(::apache::thrift::fixtures::types::MyForwardRefEnum b_) {
     b_ref() = b_;
     return __fbthrift_field_b;
@@ -2203,7 +2203,7 @@ class TrivialNumeric final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a_ref() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
   ::std::int32_t& set_a(::std::int32_t a_) {
     a_ref() = a_;
     return __fbthrift_field_a;
@@ -2215,7 +2215,7 @@ class TrivialNumeric final  {
   }
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b_ref() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
   bool& set_b(bool b_) {
     b_ref() = b_;
     return __fbthrift_field_b;
@@ -2431,7 +2431,7 @@ class TrivialNestedWithDefault final  {
   }
 
   /** Glean { "field": "z" } */
-  [[deprecated("Use `FOO.z_ref() = BAR;` instead of `FOO.set_z(BAR);`")]]
+  [[deprecated("Use `FOO.z() = BAR;` instead of `FOO.set_z(BAR);`")]]
   ::std::int32_t& set_z(::std::int32_t z_) {
     z_ref() = z_;
     return __fbthrift_field_z;
@@ -2443,7 +2443,7 @@ class TrivialNestedWithDefault final  {
 
   /** Glean { "field": "n" } */
   template <typename T_TrivialNestedWithDefault_n_struct_setter = ::apache::thrift::fixtures::types::TrivialNumeric>
-  [[deprecated("Use `FOO.n_ref() = BAR;` instead of `FOO.set_n(BAR);`")]]
+  [[deprecated("Use `FOO.n() = BAR;` instead of `FOO.set_n(BAR);`")]]
   ::apache::thrift::fixtures::types::TrivialNumeric& set_n(T_TrivialNestedWithDefault_n_struct_setter&& n_) {
     n_ref() = std::forward<T_TrivialNestedWithDefault_n_struct_setter>(n_);
     return __fbthrift_field_n;
@@ -2665,7 +2665,7 @@ class ComplexString final  {
 
   /** Glean { "field": "a" } */
   template <typename T_ComplexString_a_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.a_ref() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
   ::std::string& set_a(T_ComplexString_a_struct_setter&& a_) {
     a_ref() = std::forward<T_ComplexString_a_struct_setter>(a_);
     return __fbthrift_field_a;
@@ -2677,7 +2677,7 @@ class ComplexString final  {
 
   /** Glean { "field": "b" } */
   template <typename T_ComplexString_b_struct_setter = ::std::map<::std::string, ::std::int32_t>>
-  [[deprecated("Use `FOO.b_ref() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
   ::std::map<::std::string, ::std::int32_t>& set_b(T_ComplexString_b_struct_setter&& b_) {
     b_ref() = std::forward<T_ComplexString_b_struct_setter>(b_);
     return __fbthrift_field_b;
@@ -2899,7 +2899,7 @@ class ComplexNestedWithDefault final  {
 
   /** Glean { "field": "z" } */
   template <typename T_ComplexNestedWithDefault_z_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.z_ref() = BAR;` instead of `FOO.set_z(BAR);`")]]
+  [[deprecated("Use `FOO.z() = BAR;` instead of `FOO.set_z(BAR);`")]]
   ::std::string& set_z(T_ComplexNestedWithDefault_z_struct_setter&& z_) {
     z_ref() = std::forward<T_ComplexNestedWithDefault_z_struct_setter>(z_);
     return __fbthrift_field_z;
@@ -2911,7 +2911,7 @@ class ComplexNestedWithDefault final  {
 
   /** Glean { "field": "n" } */
   template <typename T_ComplexNestedWithDefault_n_struct_setter = ::apache::thrift::fixtures::types::ComplexString>
-  [[deprecated("Use `FOO.n_ref() = BAR;` instead of `FOO.set_n(BAR);`")]]
+  [[deprecated("Use `FOO.n() = BAR;` instead of `FOO.set_n(BAR);`")]]
   ::apache::thrift::fixtures::types::ComplexString& set_n(T_ComplexNestedWithDefault_n_struct_setter&& n_) {
     n_ref() = std::forward<T_ComplexNestedWithDefault_n_struct_setter>(n_);
     return __fbthrift_field_n;
@@ -3283,7 +3283,7 @@ class MinPadding final  {
   }
 
   /** Glean { "field": "small" } */
-  [[deprecated("Use `FOO.small_ref() = BAR;` instead of `FOO.set_small(BAR);`")]]
+  [[deprecated("Use `FOO.small() = BAR;` instead of `FOO.set_small(BAR);`")]]
   ::std::int8_t& set_small(::std::int8_t small_) {
     small_ref() = small_;
     return __fbthrift_field_small;
@@ -3295,7 +3295,7 @@ class MinPadding final  {
   }
 
   /** Glean { "field": "big" } */
-  [[deprecated("Use `FOO.big_ref() = BAR;` instead of `FOO.set_big(BAR);`")]]
+  [[deprecated("Use `FOO.big() = BAR;` instead of `FOO.set_big(BAR);`")]]
   ::std::int64_t& set_big(::std::int64_t big_) {
     big_ref() = big_;
     return __fbthrift_field_big;
@@ -3307,7 +3307,7 @@ class MinPadding final  {
   }
 
   /** Glean { "field": "medium" } */
-  [[deprecated("Use `FOO.medium_ref() = BAR;` instead of `FOO.set_medium(BAR);`")]]
+  [[deprecated("Use `FOO.medium() = BAR;` instead of `FOO.set_medium(BAR);`")]]
   ::std::int16_t& set_medium(::std::int16_t medium_) {
     medium_ref() = medium_;
     return __fbthrift_field_medium;
@@ -3319,7 +3319,7 @@ class MinPadding final  {
   }
 
   /** Glean { "field": "biggish" } */
-  [[deprecated("Use `FOO.biggish_ref() = BAR;` instead of `FOO.set_biggish(BAR);`")]]
+  [[deprecated("Use `FOO.biggish() = BAR;` instead of `FOO.set_biggish(BAR);`")]]
   ::std::int32_t& set_biggish(::std::int32_t biggish_) {
     biggish_ref() = biggish_;
     return __fbthrift_field_biggish;
@@ -3331,7 +3331,7 @@ class MinPadding final  {
   }
 
   /** Glean { "field": "tiny" } */
-  [[deprecated("Use `FOO.tiny_ref() = BAR;` instead of `FOO.set_tiny(BAR);`")]]
+  [[deprecated("Use `FOO.tiny() = BAR;` instead of `FOO.set_tiny(BAR);`")]]
   ::std::int8_t& set_tiny(::std::int8_t tiny_) {
     tiny_ref() = tiny_;
     return __fbthrift_field_tiny;
@@ -3703,7 +3703,7 @@ class MinPaddingWithCustomType final  {
   }
 
   /** Glean { "field": "small" } */
-  [[deprecated("Use `FOO.small_ref() = BAR;` instead of `FOO.set_small(BAR);`")]]
+  [[deprecated("Use `FOO.small() = BAR;` instead of `FOO.set_small(BAR);`")]]
   ::std::int8_t& set_small(::std::int8_t small_) {
     small_ref() = small_;
     return __fbthrift_field_small;
@@ -3715,7 +3715,7 @@ class MinPaddingWithCustomType final  {
   }
 
   /** Glean { "field": "big" } */
-  [[deprecated("Use `FOO.big_ref() = BAR;` instead of `FOO.set_big(BAR);`")]]
+  [[deprecated("Use `FOO.big() = BAR;` instead of `FOO.set_big(BAR);`")]]
   ::std::int64_t& set_big(::std::int64_t big_) {
     big_ref() = big_;
     return __fbthrift_field_big;
@@ -3727,7 +3727,7 @@ class MinPaddingWithCustomType final  {
   }
 
   /** Glean { "field": "biggish" } */
-  [[deprecated("Use `FOO.biggish_ref() = BAR;` instead of `FOO.set_biggish(BAR);`")]]
+  [[deprecated("Use `FOO.biggish() = BAR;` instead of `FOO.set_biggish(BAR);`")]]
   ::std::int32_t& set_biggish(::std::int32_t biggish_) {
     biggish_ref() = biggish_;
     return __fbthrift_field_biggish;
@@ -3739,7 +3739,7 @@ class MinPaddingWithCustomType final  {
   }
 
   /** Glean { "field": "tiny" } */
-  [[deprecated("Use `FOO.tiny_ref() = BAR;` instead of `FOO.set_tiny(BAR);`")]]
+  [[deprecated("Use `FOO.tiny() = BAR;` instead of `FOO.set_tiny(BAR);`")]]
   ::std::int8_t& set_tiny(::std::int8_t tiny_) {
     tiny_ref() = tiny_;
     return __fbthrift_field_tiny;
@@ -4149,7 +4149,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField_ref() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
@@ -4167,7 +4167,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyStringField_ref() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
+  [[deprecated("Use `FOO.MyStringField() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
   ::std::string& set_MyStringField(T_MyStruct_MyStringField_struct_setter&& MyStringField_) {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
@@ -4179,7 +4179,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "majorVer" } */
-  [[deprecated("Use `FOO.majorVer_ref() = BAR;` instead of `FOO.set_majorVer(BAR);`")]]
+  [[deprecated("Use `FOO.majorVer() = BAR;` instead of `FOO.set_majorVer(BAR);`")]]
   ::std::int64_t& set_majorVer(::std::int64_t majorVer_) {
     majorVer_ref() = majorVer_;
     return __fbthrift_field_majorVer;
@@ -4191,7 +4191,7 @@ class MyStruct final  {
 
   /** Glean { "field": "data" } */
   template <typename T_MyStruct_data_struct_setter = ::apache::thrift::fixtures::types::MyDataItem>
-  [[deprecated("Use `FOO.data_ref() = BAR;` instead of `FOO.set_data(BAR);`")]]
+  [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
   ::apache::thrift::fixtures::types::MyDataItem& set_data(T_MyStruct_data_struct_setter&& data_) {
     data_ref() = std::forward<T_MyStruct_data_struct_setter>(data_);
     return __fbthrift_field_data;
@@ -4354,7 +4354,7 @@ class Renamed final  {
   }
 
   /** Glean { "field": "bar" } */
-  [[deprecated("Use `FOO.bar_ref() = BAR;` instead of `FOO.set_bar(BAR);`")]]
+  [[deprecated("Use `FOO.bar() = BAR;` instead of `FOO.set_bar(BAR);`")]]
   ::std::int64_t& set_bar(::std::int64_t bar_) {
     bar_ref() = bar_;
     return __fbthrift_field_bar;
@@ -4576,7 +4576,7 @@ class AnnotatedTypes final  {
 
   /** Glean { "field": "binary_field" } */
   template <typename T_AnnotatedTypes_binary_field_struct_setter = ::apache::thrift::fixtures::types::TBinary_8623>
-  [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.binary_field() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::apache::thrift::fixtures::types::TBinary_8623& set_binary_field(T_AnnotatedTypes_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_AnnotatedTypes_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
@@ -4588,7 +4588,7 @@ class AnnotatedTypes final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_AnnotatedTypes_list_field_struct_setter = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& set_list_field(T_AnnotatedTypes_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_AnnotatedTypes_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -4952,7 +4952,7 @@ class ForwardUsageRoot final  {
 
   /** Glean { "field": "ForwardUsageStruct" } */
   template <typename T_ForwardUsageRoot_ForwardUsageStruct_struct_setter = ::apache::thrift::fixtures::types::ForwardUsageStruct>
-  [[deprecated("Use `FOO.ForwardUsageStruct_ref() = BAR;` instead of `FOO.set_ForwardUsageStruct(BAR);`")]]
+  [[deprecated("Use `FOO.ForwardUsageStruct() = BAR;` instead of `FOO.set_ForwardUsageStruct(BAR);`")]]
   ::apache::thrift::fixtures::types::ForwardUsageStruct& set_ForwardUsageStruct(T_ForwardUsageRoot_ForwardUsageStruct_struct_setter&& ForwardUsageStruct_) {
     ForwardUsageStruct_ref() = std::forward<T_ForwardUsageRoot_ForwardUsageStruct_struct_setter>(ForwardUsageStruct_);
     return __fbthrift_field_ForwardUsageStruct;
@@ -5266,7 +5266,7 @@ class IncompleteMap final  {
 
   /** Glean { "field": "field" } */
   template <typename T_IncompleteMap_field_struct_setter = ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>& set_field(T_IncompleteMap_field_struct_setter&& field_) {
     field_ref() = std::forward<T_IncompleteMap_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -5624,7 +5624,7 @@ class CompleteMap final  {
 
   /** Glean { "field": "field" } */
   template <typename T_CompleteMap_field_struct_setter = std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>& set_field(T_CompleteMap_field_struct_setter&& field_) {
     field_ref() = std::forward<T_CompleteMap_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -5790,7 +5790,7 @@ class IncompleteList final  {
 
   /** Glean { "field": "field" } */
   template <typename T_IncompleteList_field_struct_setter = ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>& set_field(T_IncompleteList_field_struct_setter&& field_) {
     field_ref() = std::forward<T_IncompleteList_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -6148,7 +6148,7 @@ class CompleteList final  {
 
   /** Glean { "field": "field" } */
   template <typename T_CompleteList_field_struct_setter = folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>& set_field(T_CompleteList_field_struct_setter&& field_) {
     field_ref() = std::forward<T_CompleteList_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -6314,7 +6314,7 @@ class AdaptedList final  {
 
   /** Glean { "field": "field" } */
   template <typename T_AdaptedList_field_struct_setter = ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>& set_field(T_AdaptedList_field_struct_setter&& field_) {
     field_ref() = std::forward<T_AdaptedList_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -6476,7 +6476,7 @@ class AdaptedListDep final  {
 
   /** Glean { "field": "field" } */
   template <typename T_AdaptedListDep_field_struct_setter = ::apache::thrift::fixtures::types::AdaptedList>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::apache::thrift::fixtures::types::AdaptedList& set_field(T_AdaptedListDep_field_struct_setter&& field_) {
     field_ref() = std::forward<T_AdaptedListDep_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -6797,7 +6797,7 @@ class DependentAdaptedList final  {
 
   /** Glean { "field": "field" } */
   template <typename T_DependentAdaptedList_field_struct_setter = ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>& set_field(T_DependentAdaptedList_field_struct_setter&& field_) {
     field_ref() = std::forward<T_DependentAdaptedList_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -7308,7 +7308,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_list" } */
   template <typename T_AllocatorAware_aa_list_struct_setter = ::apache::thrift::fixtures::types::list_i32_9187>
-  [[deprecated("Use `FOO.aa_list_ref() = BAR;` instead of `FOO.set_aa_list(BAR);`")]]
+  [[deprecated("Use `FOO.aa_list() = BAR;` instead of `FOO.set_aa_list(BAR);`")]]
   ::apache::thrift::fixtures::types::list_i32_9187& set_aa_list(T_AllocatorAware_aa_list_struct_setter&& aa_list_) {
     aa_list_ref() = std::forward<T_AllocatorAware_aa_list_struct_setter>(aa_list_);
     return __fbthrift_field_aa_list;
@@ -7320,7 +7320,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_set" } */
   template <typename T_AllocatorAware_aa_set_struct_setter = ::apache::thrift::fixtures::types::set_i32_7070>
-  [[deprecated("Use `FOO.aa_set_ref() = BAR;` instead of `FOO.set_aa_set(BAR);`")]]
+  [[deprecated("Use `FOO.aa_set() = BAR;` instead of `FOO.set_aa_set(BAR);`")]]
   ::apache::thrift::fixtures::types::set_i32_7070& set_aa_set(T_AllocatorAware_aa_set_struct_setter&& aa_set_) {
     aa_set_ref() = std::forward<T_AllocatorAware_aa_set_struct_setter>(aa_set_);
     return __fbthrift_field_aa_set;
@@ -7332,7 +7332,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_map" } */
   template <typename T_AllocatorAware_aa_map_struct_setter = ::apache::thrift::fixtures::types::map_i32_i32_9565>
-  [[deprecated("Use `FOO.aa_map_ref() = BAR;` instead of `FOO.set_aa_map(BAR);`")]]
+  [[deprecated("Use `FOO.aa_map() = BAR;` instead of `FOO.set_aa_map(BAR);`")]]
   ::apache::thrift::fixtures::types::map_i32_i32_9565& set_aa_map(T_AllocatorAware_aa_map_struct_setter&& aa_map_) {
     aa_map_ref() = std::forward<T_AllocatorAware_aa_map_struct_setter>(aa_map_);
     return __fbthrift_field_aa_map;
@@ -7350,7 +7350,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_string" } */
   template <typename T_AllocatorAware_aa_string_struct_setter = ::apache::thrift::fixtures::types::string_5252>
-  [[deprecated("Use `FOO.aa_string_ref() = BAR;` instead of `FOO.set_aa_string(BAR);`")]]
+  [[deprecated("Use `FOO.aa_string() = BAR;` instead of `FOO.set_aa_string(BAR);`")]]
   ::apache::thrift::fixtures::types::string_5252& set_aa_string(T_AllocatorAware_aa_string_struct_setter&& aa_string_) {
     aa_string_ref() = std::forward<T_AllocatorAware_aa_string_struct_setter>(aa_string_);
     return __fbthrift_field_aa_string;
@@ -7362,7 +7362,7 @@ class AllocatorAware final  {
   }
 
   /** Glean { "field": "not_a_container" } */
-  [[deprecated("Use `FOO.not_a_container_ref() = BAR;` instead of `FOO.set_not_a_container(BAR);`")]]
+  [[deprecated("Use `FOO.not_a_container() = BAR;` instead of `FOO.set_not_a_container(BAR);`")]]
   ::std::int32_t& set_not_a_container(::std::int32_t not_a_container_) {
     not_a_container_ref() = not_a_container_;
     return __fbthrift_field_not_a_container;
@@ -7600,7 +7600,7 @@ class AllocatorAware2 final  {
   }
 
   /** Glean { "field": "not_a_container" } */
-  [[deprecated("Use `FOO.not_a_container_ref() = BAR;` instead of `FOO.set_not_a_container(BAR);`")]]
+  [[deprecated("Use `FOO.not_a_container() = BAR;` instead of `FOO.set_not_a_container(BAR);`")]]
   ::std::int32_t& set_not_a_container(::std::int32_t not_a_container_) {
     not_a_container_ref() = not_a_container_;
     return __fbthrift_field_not_a_container;
@@ -7868,7 +7868,7 @@ class TypedefStruct final  {
   }
 
   /** Glean { "field": "i32_field" } */
-  [[deprecated("Use `FOO.i32_field_ref() = BAR;` instead of `FOO.set_i32_field(BAR);`")]]
+  [[deprecated("Use `FOO.i32_field() = BAR;` instead of `FOO.set_i32_field(BAR);`")]]
   ::std::int32_t& set_i32_field(::std::int32_t i32_field_) {
     i32_field_ref() = i32_field_;
     return __fbthrift_field_i32_field;
@@ -7880,7 +7880,7 @@ class TypedefStruct final  {
   }
 
   /** Glean { "field": "IntTypedef_field" } */
-  [[deprecated("Use `FOO.IntTypedef_field_ref() = BAR;` instead of `FOO.set_IntTypedef_field(BAR);`")]]
+  [[deprecated("Use `FOO.IntTypedef_field() = BAR;` instead of `FOO.set_IntTypedef_field(BAR);`")]]
   ::apache::thrift::fixtures::types::IntTypedef& set_IntTypedef_field(::apache::thrift::fixtures::types::IntTypedef IntTypedef_field_) {
     IntTypedef_field_ref() = IntTypedef_field_;
     return __fbthrift_field_IntTypedef_field;
@@ -7892,7 +7892,7 @@ class TypedefStruct final  {
   }
 
   /** Glean { "field": "UintTypedef_field" } */
-  [[deprecated("Use `FOO.UintTypedef_field_ref() = BAR;` instead of `FOO.set_UintTypedef_field(BAR);`")]]
+  [[deprecated("Use `FOO.UintTypedef_field() = BAR;` instead of `FOO.set_UintTypedef_field(BAR);`")]]
   ::apache::thrift::fixtures::types::UintTypedef& set_UintTypedef_field(::apache::thrift::fixtures::types::UintTypedef UintTypedef_field_) {
     UintTypedef_field_ref() = UintTypedef_field_;
     return __fbthrift_field_UintTypedef_field;
@@ -8055,7 +8055,7 @@ class StructWithDoubleUnderscores final  {
   }
 
   /** Glean { "field": "__field" } */
-  [[deprecated("Use `FOO.__field_ref() = BAR;` instead of `FOO.set___field(BAR);`")]]
+  [[deprecated("Use `FOO.__field() = BAR;` instead of `FOO.set___field(BAR);`")]]
   ::std::int32_t& set___field(::std::int32_t __field_) {
     __field_ref() = __field_;
     return __fbthrift_field___field;

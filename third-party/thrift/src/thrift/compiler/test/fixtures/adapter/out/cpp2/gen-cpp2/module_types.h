@@ -1978,7 +1978,7 @@ class DirectlyAdapted final  {
   }
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
     return __fbthrift_field_field;
@@ -2464,7 +2464,7 @@ class Bar final  {
 
   /** Glean { "field": "structListField" } */
   template <typename T_Bar_structListField_struct_setter = ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>>
-  [[deprecated("Use `FOO.structListField_ref() = BAR;` instead of `FOO.set_structListField(BAR);`")]]
+  [[deprecated("Use `FOO.structListField() = BAR;` instead of `FOO.set_structListField(BAR);`")]]
   ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>& set_structListField(T_Bar_structListField_struct_setter&& structListField_) {
     structListField_ref() = std::forward<T_Bar_structListField_struct_setter>(structListField_);
     return __fbthrift_field_structListField;
@@ -2478,7 +2478,7 @@ class Bar final  {
 
   /** Glean { "field": "optionalStructListField" } */
   template <typename T_Bar_optionalStructListField_struct_setter = ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>>
-  [[deprecated("Use `FOO.optionalStructListField_ref() = BAR;` instead of `FOO.set_optionalStructListField(BAR);`")]]
+  [[deprecated("Use `FOO.optionalStructListField() = BAR;` instead of `FOO.set_optionalStructListField(BAR);`")]]
   ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>& set_optionalStructListField(T_Bar_optionalStructListField_struct_setter&& optionalStructListField_) {
     optionalStructListField_ref() = std::forward<T_Bar_optionalStructListField_struct_setter>(optionalStructListField_);
     return __fbthrift_field_optionalStructListField;
@@ -2769,7 +2769,7 @@ class ThriftAdaptedStruct final  {
   }
 
   /** Glean { "field": "data" } */
-  [[deprecated("Use `FOO.data_ref() = BAR;` instead of `FOO.set_data(BAR);`")]]
+  [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
   ::std::int64_t& set_data(::std::int64_t data_) {
     data_ref() = data_;
     return __fbthrift_field_data;
@@ -2935,7 +2935,7 @@ class DirectlyAdaptedStruct final  {
   }
 
   /** Glean { "field": "data" } */
-  [[deprecated("Use `FOO.data_ref() = BAR;` instead of `FOO.set_data(BAR);`")]]
+  [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
   ::std::int64_t& set_data(::std::int64_t data_) {
     data_ref() = data_;
     return __fbthrift_field_data;
@@ -3170,7 +3170,7 @@ class MyAnnotation final  {
 
   /** Glean { "field": "signature" } */
   template <typename T_MyAnnotation_signature_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.signature_ref() = BAR;` instead of `FOO.set_signature(BAR);`")]]
+  [[deprecated("Use `FOO.signature() = BAR;` instead of `FOO.set_signature(BAR);`")]]
   ::std::string& set_signature(T_MyAnnotation_signature_struct_setter&& signature_) {
     signature_ref() = std::forward<T_MyAnnotation_signature_struct_setter>(signature_);
     return __fbthrift_field_signature;
@@ -3182,7 +3182,7 @@ class MyAnnotation final  {
   }
 
   /** Glean { "field": "color" } */
-  [[deprecated("Use `FOO.color_ref() = BAR;` instead of `FOO.set_color(BAR);`")]]
+  [[deprecated("Use `FOO.color() = BAR;` instead of `FOO.set_color(BAR);`")]]
   ::facebook::thrift::test::Color& set_color(::facebook::thrift::test::Color color_) {
     color_ref() = color_;
     return __fbthrift_field_color;
@@ -3346,7 +3346,7 @@ class IndependentDirectlyAdapted final  {
   }
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
     return __fbthrift_field_field;
@@ -4224,7 +4224,7 @@ class Config final  {
 
   /** Glean { "field": "path" } */
   template <typename T_Config_path_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.path_ref() = BAR;` instead of `FOO.set_path(BAR);`")]]
+  [[deprecated("Use `FOO.path() = BAR;` instead of `FOO.set_path(BAR);`")]]
   ::std::string& set_path(T_Config_path_struct_setter&& path_) {
     path_ref() = std::forward<T_Config_path_struct_setter>(path_);
     return __fbthrift_field_path;
@@ -4439,7 +4439,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
     return __fbthrift_field_field;
@@ -5076,7 +5076,7 @@ class AdaptTestStruct final  {
 
   /** Glean { "field": "meta" } */
   template <typename T_AdaptTestStruct_meta_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.meta_ref() = BAR;` instead of `FOO.set_meta(BAR);`")]]
+  [[deprecated("Use `FOO.meta() = BAR;` instead of `FOO.set_meta(BAR);`")]]
   ::std::string& set_meta(T_AdaptTestStruct_meta_struct_setter&& meta_) {
     meta_ref() = std::forward<T_AdaptTestStruct_meta_struct_setter>(meta_);
     return __fbthrift_field_meta;
@@ -6480,7 +6480,7 @@ class AdaptTemplatedNestedTestStruct final  {
 
   /** Glean { "field": "adaptedStruct" } */
   template <typename T_AdaptTemplatedNestedTestStruct_adaptedStruct_struct_setter = ::facebook::thrift::test::AdaptTemplatedTestStruct>
-  [[deprecated("Use `FOO.adaptedStruct_ref() = BAR;` instead of `FOO.set_adaptedStruct(BAR);`")]]
+  [[deprecated("Use `FOO.adaptedStruct() = BAR;` instead of `FOO.set_adaptedStruct(BAR);`")]]
   ::facebook::thrift::test::AdaptTemplatedTestStruct& set_adaptedStruct(T_AdaptTemplatedNestedTestStruct_adaptedStruct_struct_setter&& adaptedStruct_) {
     adaptedStruct_ref() = std::forward<T_AdaptTemplatedNestedTestStruct_adaptedStruct_struct_setter>(adaptedStruct_);
     return __fbthrift_field_adaptedStruct;
@@ -7383,7 +7383,7 @@ class CircularAdaptee final  {
 
   /** Glean { "field": "field" } */
   template <typename T_CircularAdaptee_field_struct_setter = ::facebook::thrift::test::CircularStruct>
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::facebook::thrift::test::CircularStruct& set_field(T_CircularAdaptee_field_struct_setter&& field_) {
     field_ref() = std::forward<T_CircularAdaptee_field_struct_setter>(field_);
     return __fbthrift_field_field;
@@ -7794,7 +7794,7 @@ class UnderlyingRenamedStruct final  {
   }
 
   /** Glean { "field": "data" } */
-  [[deprecated("Use `FOO.data_ref() = BAR;` instead of `FOO.set_data(BAR);`")]]
+  [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
   ::std::int64_t& set_data(::std::int64_t data_) {
     data_ref() = data_;
     return __fbthrift_field_data;
@@ -7959,7 +7959,7 @@ class UnderlyingSameNamespaceStruct final  {
   }
 
   /** Glean { "field": "data" } */
-  [[deprecated("Use `FOO.data_ref() = BAR;` instead of `FOO.set_data(BAR);`")]]
+  [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
   ::std::int64_t& set_data(::std::int64_t data_) {
     data_ref() = data_;
     return __fbthrift_field_data;
@@ -8981,7 +8981,7 @@ class Person final  {
 
   /** Glean { "field": "name" } */
   template <typename T_Person_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_Person_name_struct_setter&& name_) {
     name_ref() = std::forward<T_Person_name_struct_setter>(name_);
     return __fbthrift_field_name;
@@ -9151,7 +9151,7 @@ class Person2 final  {
 
   /** Glean { "field": "name" } */
   template <typename T_Person2_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_Person2_name_struct_setter&& name_) {
     name_ref() = std::forward<T_Person2_name_struct_setter>(name_);
     return __fbthrift_field_name;

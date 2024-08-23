@@ -294,7 +294,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "name" } */
   template <typename T_CustomException_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_CustomException_name_struct_setter&& name_) {
     name_ref() = std::forward<T_CustomException_name_struct_setter>(name_);
     return __fbthrift_field_name;
@@ -306,7 +306,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "result" } */
-  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
+  [[deprecated("Use `FOO.result() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::cpp2::Result& set_result(::cpp2::Result result_) {
     result_ref() = result_;
     return __fbthrift_field_result;

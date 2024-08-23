@@ -801,7 +801,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "is_on" } */
-  [[deprecated("Use `FOO.is_on_ref() = BAR;` instead of `FOO.set_is_on(BAR);`")]]
+  [[deprecated("Use `FOO.is_on() = BAR;` instead of `FOO.set_is_on(BAR);`")]]
   bool& set_is_on(bool is_on_) {
     is_on_ref() = is_on_;
     return __fbthrift_field_is_on;
@@ -813,7 +813,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "tiny_int" } */
-  [[deprecated("Use `FOO.tiny_int_ref() = BAR;` instead of `FOO.set_tiny_int(BAR);`")]]
+  [[deprecated("Use `FOO.tiny_int() = BAR;` instead of `FOO.set_tiny_int(BAR);`")]]
   ::std::int8_t& set_tiny_int(::std::int8_t tiny_int_) {
     tiny_int_ref() = tiny_int_;
     return __fbthrift_field_tiny_int;
@@ -825,7 +825,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "small_int" } */
-  [[deprecated("Use `FOO.small_int_ref() = BAR;` instead of `FOO.set_small_int(BAR);`")]]
+  [[deprecated("Use `FOO.small_int() = BAR;` instead of `FOO.set_small_int(BAR);`")]]
   ::std::int16_t& set_small_int(::std::int16_t small_int_) {
     small_int_ref() = small_int_;
     return __fbthrift_field_small_int;
@@ -837,7 +837,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "nice_sized_int" } */
-  [[deprecated("Use `FOO.nice_sized_int_ref() = BAR;` instead of `FOO.set_nice_sized_int(BAR);`")]]
+  [[deprecated("Use `FOO.nice_sized_int() = BAR;` instead of `FOO.set_nice_sized_int(BAR);`")]]
   ::std::int32_t& set_nice_sized_int(::std::int32_t nice_sized_int_) {
     nice_sized_int_ref() = nice_sized_int_;
     return __fbthrift_field_nice_sized_int;
@@ -849,7 +849,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "big_int" } */
-  [[deprecated("Use `FOO.big_int_ref() = BAR;` instead of `FOO.set_big_int(BAR);`")]]
+  [[deprecated("Use `FOO.big_int() = BAR;` instead of `FOO.set_big_int(BAR);`")]]
   ::std::int64_t& set_big_int(::std::int64_t big_int_) {
     big_int_ref() = big_int_;
     return __fbthrift_field_big_int;
@@ -861,7 +861,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "real" } */
-  [[deprecated("Use `FOO.real_ref() = BAR;` instead of `FOO.set_real(BAR);`")]]
+  [[deprecated("Use `FOO.real() = BAR;` instead of `FOO.set_real(BAR);`")]]
   double& set_real(double real_) {
     real_ref() = real_;
     return __fbthrift_field_real;
@@ -873,7 +873,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "smaller_real" } */
-  [[deprecated("Use `FOO.smaller_real_ref() = BAR;` instead of `FOO.set_smaller_real(BAR);`")]]
+  [[deprecated("Use `FOO.smaller_real() = BAR;` instead of `FOO.set_smaller_real(BAR);`")]]
   float& set_smaller_real(float smaller_real_) {
     smaller_real_ref() = smaller_real_;
     return __fbthrift_field_smaller_real;
@@ -885,7 +885,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "hidden_field" } */
-  [[deprecated("Use `FOO.hidden_field_ref() = BAR;` instead of `FOO.set_hidden_field(BAR);`")]]
+  [[deprecated("Use `FOO.hidden_field() = BAR;` instead of `FOO.set_hidden_field(BAR);`")]]
   ::std::int16_t& set_hidden_field(::std::int16_t hidden_field_) {
     hidden_field_ref() = hidden_field_;
     return __fbthrift_field_hidden_field;
@@ -1265,7 +1265,7 @@ class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "err_code" } */
-  [[deprecated("Use `FOO.err_code_ref() = BAR;` instead of `FOO.set_err_code(BAR);`")]]
+  [[deprecated("Use `FOO.err_code() = BAR;` instead of `FOO.set_err_code(BAR);`")]]
   ::std::int16_t& set_err_code(::std::int16_t err_code_) {
     err_code_ref() = err_code_;
     return __fbthrift_field_err_code;
@@ -1439,7 +1439,7 @@ class OptionalRefStruct final  {
 
   /** Glean { "field": "optional_blob" } */
   template <typename T_OptionalRefStruct_optional_blob_struct_setter = ::py3::simple::IOBufPtr>
-  [[deprecated("Use `FOO.optional_blob_ref() = BAR;` instead of `FOO.set_optional_blob(BAR);`")]]
+  [[deprecated("Use `FOO.optional_blob() = BAR;` instead of `FOO.set_optional_blob(BAR);`")]]
   ::py3::simple::IOBufPtr& set_optional_blob(T_OptionalRefStruct_optional_blob_struct_setter&& optional_blob_) {
     optional_blob_ref() = std::forward<T_OptionalRefStruct_optional_blob_struct_setter>(optional_blob_);
     return __fbthrift_field_optional_blob;
@@ -1705,7 +1705,7 @@ class HiddenTypeFieldsStruct final  {
 
   /** Glean { "field": "field2" } */
   template <typename T_HiddenTypeFieldsStruct_field2_struct_setter = ::std::vector<::py3::simple::AdaptedTypeDef>>
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::vector<::py3::simple::AdaptedTypeDef>& set_field2(T_HiddenTypeFieldsStruct_field2_struct_setter&& field2_) {
     field2_ref() = std::forward<T_HiddenTypeFieldsStruct_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
@@ -1717,7 +1717,7 @@ class HiddenTypeFieldsStruct final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_HiddenTypeFieldsStruct_field3_struct_setter = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& set_field3(T_HiddenTypeFieldsStruct_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_HiddenTypeFieldsStruct_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -1886,7 +1886,7 @@ class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "test" } */
-  [[deprecated("Use `FOO.test_ref() = BAR;` instead of `FOO.set_test(BAR);`")]]
+  [[deprecated("Use `FOO.test() = BAR;` instead of `FOO.set_test(BAR);`")]]
   ::std::int16_t& set_test(::std::int16_t test_) {
     test_ref() = test_;
     return __fbthrift_field_test;
@@ -2469,7 +2469,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "structOne" } */
   template <typename T_ComplexStruct_structOne_struct_setter = ::py3::simple::SimpleStruct>
-  [[deprecated("Use `FOO.structOne_ref() = BAR;` instead of `FOO.set_structOne(BAR);`")]]
+  [[deprecated("Use `FOO.structOne() = BAR;` instead of `FOO.set_structOne(BAR);`")]]
   ::py3::simple::SimpleStruct& set_structOne(T_ComplexStruct_structOne_struct_setter&& structOne_) {
     structOne_ref() = std::forward<T_ComplexStruct_structOne_struct_setter>(structOne_);
     return __fbthrift_field_structOne;
@@ -2481,7 +2481,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "structTwo" } */
   template <typename T_ComplexStruct_structTwo_struct_setter = ::py3::simple::SimpleStruct>
-  [[deprecated("Use `FOO.structTwo_ref() = BAR;` instead of `FOO.set_structTwo(BAR);`")]]
+  [[deprecated("Use `FOO.structTwo() = BAR;` instead of `FOO.set_structTwo(BAR);`")]]
   ::py3::simple::SimpleStruct& set_structTwo(T_ComplexStruct_structTwo_struct_setter&& structTwo_) {
     structTwo_ref() = std::forward<T_ComplexStruct_structTwo_struct_setter>(structTwo_);
     return __fbthrift_field_structTwo;
@@ -2493,7 +2493,7 @@ class ComplexStruct final  {
   }
 
   /** Glean { "field": "an_integer" } */
-  [[deprecated("Use `FOO.an_integer_ref() = BAR;` instead of `FOO.set_an_integer(BAR);`")]]
+  [[deprecated("Use `FOO.an_integer() = BAR;` instead of `FOO.set_an_integer(BAR);`")]]
   ::std::int32_t& set_an_integer(::std::int32_t an_integer_) {
     an_integer_ref() = an_integer_;
     return __fbthrift_field_an_integer;
@@ -2511,7 +2511,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "name" } */
   template <typename T_ComplexStruct_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_ComplexStruct_name_struct_setter&& name_) {
     name_ref() = std::forward<T_ComplexStruct_name_struct_setter>(name_);
     return __fbthrift_field_name;
@@ -2523,7 +2523,7 @@ class ComplexStruct final  {
   }
 
   /** Glean { "field": "an_enum" } */
-  [[deprecated("Use `FOO.an_enum_ref() = BAR;` instead of `FOO.set_an_enum(BAR);`")]]
+  [[deprecated("Use `FOO.an_enum() = BAR;` instead of `FOO.set_an_enum(BAR);`")]]
   ::py3::simple::AnEnum& set_an_enum(::py3::simple::AnEnum an_enum_) {
     an_enum_ref() = an_enum_;
     return __fbthrift_field_an_enum;
@@ -2541,7 +2541,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "some_bytes" } */
   template <typename T_ComplexStruct_some_bytes_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.some_bytes_ref() = BAR;` instead of `FOO.set_some_bytes(BAR);`")]]
+  [[deprecated("Use `FOO.some_bytes() = BAR;` instead of `FOO.set_some_bytes(BAR);`")]]
   ::std::string& set_some_bytes(T_ComplexStruct_some_bytes_struct_setter&& some_bytes_) {
     some_bytes_ref() = std::forward<T_ComplexStruct_some_bytes_struct_setter>(some_bytes_);
     return __fbthrift_field_some_bytes;
@@ -2559,7 +2559,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "from" } */
   template <typename T_ComplexStruct_from_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.from_ref() = BAR;` instead of `FOO.set_from(BAR);`")]]
+  [[deprecated("Use `FOO.from() = BAR;` instead of `FOO.set_from(BAR);`")]]
   ::std::string& set_from(T_ComplexStruct_from_struct_setter&& from_) {
     from_ref() = std::forward<T_ComplexStruct_from_struct_setter>(from_);
     return __fbthrift_field_from;
@@ -2577,7 +2577,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "cdef" } */
   template <typename T_ComplexStruct_cdef_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.cdef_ref() = BAR;` instead of `FOO.set_cdef(BAR);`")]]
+  [[deprecated("Use `FOO.cdef() = BAR;` instead of `FOO.set_cdef(BAR);`")]]
   ::std::string& set_cdef(T_ComplexStruct_cdef_struct_setter&& cdef_) {
     cdef_ref() = std::forward<T_ComplexStruct_cdef_struct_setter>(cdef_);
     return __fbthrift_field_cdef;
@@ -2595,7 +2595,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "bytes_with_cpp_type" } */
   template <typename T_ComplexStruct_bytes_with_cpp_type_struct_setter = ::py3::simple::foo_bar>
-  [[deprecated("Use `FOO.bytes_with_cpp_type_ref() = BAR;` instead of `FOO.set_bytes_with_cpp_type(BAR);`")]]
+  [[deprecated("Use `FOO.bytes_with_cpp_type() = BAR;` instead of `FOO.set_bytes_with_cpp_type(BAR);`")]]
   ::py3::simple::foo_bar& set_bytes_with_cpp_type(T_ComplexStruct_bytes_with_cpp_type_struct_setter&& bytes_with_cpp_type_) {
     bytes_with_cpp_type_ref() = std::forward<T_ComplexStruct_bytes_with_cpp_type_struct_setter>(bytes_with_cpp_type_);
     return __fbthrift_field_bytes_with_cpp_type;
@@ -2968,7 +2968,7 @@ class BinaryUnionStruct final  {
 
   /** Glean { "field": "u" } */
   template <typename T_BinaryUnionStruct_u_struct_setter = ::py3::simple::BinaryUnion>
-  [[deprecated("Use `FOO.u_ref() = BAR;` instead of `FOO.set_u(BAR);`")]]
+  [[deprecated("Use `FOO.u() = BAR;` instead of `FOO.set_u(BAR);`")]]
   ::py3::simple::BinaryUnion& set_u(T_BinaryUnionStruct_u_struct_setter&& u_) {
     u_ref() = std::forward<T_BinaryUnionStruct_u_struct_setter>(u_);
     return __fbthrift_field_u;

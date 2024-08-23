@@ -688,7 +688,7 @@ class MyDataItem final  {
 
   /** Glean { "field": "s" } */
   template <typename T_MyDataItem_s_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.s_ref() = BAR;` instead of `FOO.set_s(BAR);`")]]
+  [[deprecated("Use `FOO.s() = BAR;` instead of `FOO.set_s(BAR);`")]]
   ::std::string& set_s(T_MyDataItem_s_struct_setter&& s_) {
     s_ref() = std::forward<T_MyDataItem_s_struct_setter>(s_);
     return __fbthrift_field_s;
@@ -1216,7 +1216,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "inty" } */
-  [[deprecated("Use `FOO.inty_ref() = BAR;` instead of `FOO.set_inty(BAR);`")]]
+  [[deprecated("Use `FOO.inty() = BAR;` instead of `FOO.set_inty(BAR);`")]]
   ::std::int64_t& set_inty(::std::int64_t inty_) {
     inty_ref() = inty_;
     return __fbthrift_field_inty;
@@ -1234,7 +1234,7 @@ class MyStruct final  {
 
   /** Glean { "field": "stringy" } */
   template <typename T_MyStruct_stringy_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.stringy_ref() = BAR;` instead of `FOO.set_stringy(BAR);`")]]
+  [[deprecated("Use `FOO.stringy() = BAR;` instead of `FOO.set_stringy(BAR);`")]]
   ::std::string& set_stringy(T_MyStruct_stringy_struct_setter&& stringy_) {
     stringy_ref() = std::forward<T_MyStruct_stringy_struct_setter>(stringy_);
     return __fbthrift_field_stringy;
@@ -1246,7 +1246,7 @@ class MyStruct final  {
 
   /** Glean { "field": "myItemy" } */
   template <typename T_MyStruct_myItemy_struct_setter = ::test::fixtures::python_capi::MyDataItem>
-  [[deprecated("Use `FOO.myItemy_ref() = BAR;` instead of `FOO.set_myItemy(BAR);`")]]
+  [[deprecated("Use `FOO.myItemy() = BAR;` instead of `FOO.set_myItemy(BAR);`")]]
   ::test::fixtures::python_capi::MyDataItem& set_myItemy(T_MyStruct_myItemy_struct_setter&& myItemy_) {
     myItemy_ref() = std::forward<T_MyStruct_myItemy_struct_setter>(myItemy_);
     return __fbthrift_field_myItemy;
@@ -1258,7 +1258,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myEnumy" } */
-  [[deprecated("Use `FOO.myEnumy_ref() = BAR;` instead of `FOO.set_myEnumy(BAR);`")]]
+  [[deprecated("Use `FOO.myEnumy() = BAR;` instead of `FOO.set_myEnumy(BAR);`")]]
   ::test::fixtures::python_capi::MyEnum& set_myEnumy(::test::fixtures::python_capi::MyEnum myEnumy_) {
     myEnumy_ref() = myEnumy_;
     return __fbthrift_field_myEnumy;
@@ -1270,7 +1270,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "boulet" } */
-  [[deprecated("Use `FOO.boulet_ref() = BAR;` instead of `FOO.set_boulet(BAR);`")]]
+  [[deprecated("Use `FOO.boulet() = BAR;` instead of `FOO.set_boulet(BAR);`")]]
   bool& set_boulet(bool boulet_) {
     boulet_ref() = boulet_;
     return __fbthrift_field_boulet;
@@ -1282,7 +1282,7 @@ class MyStruct final  {
 
   /** Glean { "field": "floatListy" } */
   template <typename T_MyStruct_floatListy_struct_setter = ::std::vector<float>>
-  [[deprecated("Use `FOO.floatListy_ref() = BAR;` instead of `FOO.set_floatListy(BAR);`")]]
+  [[deprecated("Use `FOO.floatListy() = BAR;` instead of `FOO.set_floatListy(BAR);`")]]
   ::std::vector<float>& set_floatListy(T_MyStruct_floatListy_struct_setter&& floatListy_) {
     floatListy_ref() = std::forward<T_MyStruct_floatListy_struct_setter>(floatListy_);
     return __fbthrift_field_floatListy;
@@ -1294,7 +1294,7 @@ class MyStruct final  {
 
   /** Glean { "field": "strMappy" } */
   template <typename T_MyStruct_strMappy_struct_setter = ::std::map<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.strMappy_ref() = BAR;` instead of `FOO.set_strMappy(BAR);`")]]
+  [[deprecated("Use `FOO.strMappy() = BAR;` instead of `FOO.set_strMappy(BAR);`")]]
   ::std::map<::std::string, ::std::string>& set_strMappy(T_MyStruct_strMappy_struct_setter&& strMappy_) {
     strMappy_ref() = std::forward<T_MyStruct_strMappy_struct_setter>(strMappy_);
     return __fbthrift_field_strMappy;
@@ -1306,7 +1306,7 @@ class MyStruct final  {
 
   /** Glean { "field": "intSetty" } */
   template <typename T_MyStruct_intSetty_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.intSetty_ref() = BAR;` instead of `FOO.set_intSetty(BAR);`")]]
+  [[deprecated("Use `FOO.intSetty() = BAR;` instead of `FOO.set_intSetty(BAR);`")]]
   ::std::set<::std::int32_t>& set_intSetty(T_MyStruct_intSetty_struct_setter&& intSetty_) {
     intSetty_ref() = std::forward<T_MyStruct_intSetty_struct_setter>(intSetty_);
     return __fbthrift_field_intSetty;
@@ -1625,7 +1625,7 @@ class DoubledPair final  {
 
   /** Glean { "field": "s" } */
   template <typename T_DoubledPair_s_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.s_ref() = BAR;` instead of `FOO.set_s(BAR);`")]]
+  [[deprecated("Use `FOO.s() = BAR;` instead of `FOO.set_s(BAR);`")]]
   ::std::string& set_s(T_DoubledPair_s_struct_setter&& s_) {
     s_ref() = std::forward<T_DoubledPair_s_struct_setter>(s_);
     return __fbthrift_field_s;
@@ -1637,7 +1637,7 @@ class DoubledPair final  {
   }
 
   /** Glean { "field": "x" } */
-  [[deprecated("Use `FOO.x_ref() = BAR;` instead of `FOO.set_x(BAR);`")]]
+  [[deprecated("Use `FOO.x() = BAR;` instead of `FOO.set_x(BAR);`")]]
   ::std::int32_t& set_x(::std::int32_t x_) {
     x_ref() = x_;
     return __fbthrift_field_x;
@@ -1861,7 +1861,7 @@ class StringPair final  {
 
   /** Glean { "field": "normal" } */
   template <typename T_StringPair_normal_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.normal_ref() = BAR;` instead of `FOO.set_normal(BAR);`")]]
+  [[deprecated("Use `FOO.normal() = BAR;` instead of `FOO.set_normal(BAR);`")]]
   ::std::string& set_normal(T_StringPair_normal_struct_setter&& normal_) {
     normal_ref() = std::forward<T_StringPair_normal_struct_setter>(normal_);
     return __fbthrift_field_normal;
@@ -2898,7 +2898,7 @@ class PrimitiveStruct final  {
   }
 
   /** Glean { "field": "booly" } */
-  [[deprecated("Use `FOO.booly_ref() = BAR;` instead of `FOO.set_booly(BAR);`")]]
+  [[deprecated("Use `FOO.booly() = BAR;` instead of `FOO.set_booly(BAR);`")]]
   bool& set_booly(bool booly_) {
     booly_ref() = booly_;
     return __fbthrift_field_booly;
@@ -2910,7 +2910,7 @@ class PrimitiveStruct final  {
   }
 
   /** Glean { "field": "charry" } */
-  [[deprecated("Use `FOO.charry_ref() = BAR;` instead of `FOO.set_charry(BAR);`")]]
+  [[deprecated("Use `FOO.charry() = BAR;` instead of `FOO.set_charry(BAR);`")]]
   ::test::fixtures::python_capi::signed_byte& set_charry(::test::fixtures::python_capi::signed_byte charry_) {
     charry_ref() = charry_;
     return __fbthrift_field_charry;
@@ -2922,7 +2922,7 @@ class PrimitiveStruct final  {
   }
 
   /** Glean { "field": "shortay" } */
-  [[deprecated("Use `FOO.shortay_ref() = BAR;` instead of `FOO.set_shortay(BAR);`")]]
+  [[deprecated("Use `FOO.shortay() = BAR;` instead of `FOO.set_shortay(BAR);`")]]
   uint16_t& set_shortay(uint16_t shortay_) {
     shortay_ref() = shortay_;
     return __fbthrift_field_shortay;
@@ -2934,7 +2934,7 @@ class PrimitiveStruct final  {
   }
 
   /** Glean { "field": "inty" } */
-  [[deprecated("Use `FOO.inty_ref() = BAR;` instead of `FOO.set_inty(BAR);`")]]
+  [[deprecated("Use `FOO.inty() = BAR;` instead of `FOO.set_inty(BAR);`")]]
   ::std::int32_t& set_inty(::std::int32_t inty_) {
     inty_ref() = inty_;
     return __fbthrift_field_inty;
@@ -2946,7 +2946,7 @@ class PrimitiveStruct final  {
   }
 
   /** Glean { "field": "longy" } */
-  [[deprecated("Use `FOO.longy_ref() = BAR;` instead of `FOO.set_longy(BAR);`")]]
+  [[deprecated("Use `FOO.longy() = BAR;` instead of `FOO.set_longy(BAR);`")]]
   uint64_t& set_longy(uint64_t longy_) {
     longy_ref() = longy_;
     return __fbthrift_field_longy;
@@ -2965,7 +2965,7 @@ class PrimitiveStruct final  {
   float* get_floaty() && = delete;
 
   /** Glean { "field": "floaty" } */
-  [[deprecated("Use `FOO.floaty_ref() = BAR;` instead of `FOO.set_floaty(BAR);`")]]
+  [[deprecated("Use `FOO.floaty() = BAR;` instead of `FOO.set_floaty(BAR);`")]]
   float& set_floaty(float floaty_) {
     floaty_ref() = floaty_;
     return __fbthrift_field_floaty;
@@ -2983,7 +2983,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "buffy" } */
   template <typename T_PrimitiveStruct_buffy_struct_setter = ::test::fixtures::python_capi::IOBuf>
-  [[deprecated("Use `FOO.buffy_ref() = BAR;` instead of `FOO.set_buffy(BAR);`")]]
+  [[deprecated("Use `FOO.buffy() = BAR;` instead of `FOO.set_buffy(BAR);`")]]
   ::test::fixtures::python_capi::IOBuf& set_buffy(T_PrimitiveStruct_buffy_struct_setter&& buffy_) {
     buffy_ref() = std::forward<T_PrimitiveStruct_buffy_struct_setter>(buffy_);
     return __fbthrift_field_buffy;
@@ -3001,7 +3001,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "pointbuffy" } */
   template <typename T_PrimitiveStruct_pointbuffy_struct_setter = ::test::fixtures::python_capi::IOBufPtr>
-  [[deprecated("Use `FOO.pointbuffy_ref() = BAR;` instead of `FOO.set_pointbuffy(BAR);`")]]
+  [[deprecated("Use `FOO.pointbuffy() = BAR;` instead of `FOO.set_pointbuffy(BAR);`")]]
   ::test::fixtures::python_capi::IOBufPtr& set_pointbuffy(T_PrimitiveStruct_pointbuffy_struct_setter&& pointbuffy_) {
     pointbuffy_ref() = std::forward<T_PrimitiveStruct_pointbuffy_struct_setter>(pointbuffy_);
     return __fbthrift_field_pointbuffy;
@@ -3013,7 +3013,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "patched_struct" } */
   template <typename T_PrimitiveStruct_patched_struct_struct_setter = ::test::fixtures::python_capi::MyStruct>
-  [[deprecated("Use `FOO.patched_struct_ref() = BAR;` instead of `FOO.set_patched_struct(BAR);`")]]
+  [[deprecated("Use `FOO.patched_struct() = BAR;` instead of `FOO.set_patched_struct(BAR);`")]]
   ::test::fixtures::python_capi::MyStruct& set_patched_struct(T_PrimitiveStruct_patched_struct_struct_setter&& patched_struct_) {
     patched_struct_ref() = std::forward<T_PrimitiveStruct_patched_struct_struct_setter>(patched_struct_);
     return __fbthrift_field_patched_struct;
@@ -3025,7 +3025,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "empty_struct" } */
   template <typename T_PrimitiveStruct_empty_struct_struct_setter = ::test::fixtures::python_capi::VapidStruct>
-  [[deprecated("Use `FOO.empty_struct_ref() = BAR;` instead of `FOO.set_empty_struct(BAR);`")]]
+  [[deprecated("Use `FOO.empty_struct() = BAR;` instead of `FOO.set_empty_struct(BAR);`")]]
   ::test::fixtures::python_capi::VapidStruct& set_empty_struct(T_PrimitiveStruct_empty_struct_struct_setter&& empty_struct_) {
     empty_struct_ref() = std::forward<T_PrimitiveStruct_empty_struct_struct_setter>(empty_struct_);
     return __fbthrift_field_empty_struct;
@@ -3043,7 +3043,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "fbstring" } */
   template <typename T_PrimitiveStruct_fbstring_struct_setter = folly::fbstring>
-  [[deprecated("Use `FOO.fbstring_ref() = BAR;` instead of `FOO.set_fbstring(BAR);`")]]
+  [[deprecated("Use `FOO.fbstring() = BAR;` instead of `FOO.set_fbstring(BAR);`")]]
   folly::fbstring& set_fbstring(T_PrimitiveStruct_fbstring_struct_setter&& fbstring_) {
     fbstring_ref() = std::forward<T_PrimitiveStruct_fbstring_struct_setter>(fbstring_);
     return __fbthrift_field_fbstring;
@@ -3061,7 +3061,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "managed_string_view" } */
   template <typename T_PrimitiveStruct_managed_string_view_struct_setter = ::apache::thrift::ManagedStringViewWithConversions>
-  [[deprecated("Use `FOO.managed_string_view_ref() = BAR;` instead of `FOO.set_managed_string_view(BAR);`")]]
+  [[deprecated("Use `FOO.managed_string_view() = BAR;` instead of `FOO.set_managed_string_view(BAR);`")]]
   ::apache::thrift::ManagedStringViewWithConversions& set_managed_string_view(T_PrimitiveStruct_managed_string_view_struct_setter&& managed_string_view_) {
     managed_string_view_ref() = std::forward<T_PrimitiveStruct_managed_string_view_struct_setter>(managed_string_view_);
     return __fbthrift_field_managed_string_view;
@@ -3073,7 +3073,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "some_error" } */
   template <typename T_PrimitiveStruct_some_error_struct_setter = ::test::fixtures::python_capi::SomeError>
-  [[deprecated("Use `FOO.some_error_ref() = BAR;` instead of `FOO.set_some_error(BAR);`")]]
+  [[deprecated("Use `FOO.some_error() = BAR;` instead of `FOO.set_some_error(BAR);`")]]
   ::test::fixtures::python_capi::SomeError& set_some_error(T_PrimitiveStruct_some_error_struct_setter&& some_error_) {
     some_error_ref() = std::forward<T_PrimitiveStruct_some_error_struct_setter>(some_error_);
     return __fbthrift_field_some_error;
@@ -3392,7 +3392,7 @@ class AdaptedFields final  {
 
   /** Glean { "field": "list_adapted_int" } */
   template <typename T_AdaptedFields_list_adapted_int_struct_setter = ::std::vector<::apache::thrift::type::FieldId>>
-  [[deprecated("Use `FOO.list_adapted_int_ref() = BAR;` instead of `FOO.set_list_adapted_int(BAR);`")]]
+  [[deprecated("Use `FOO.list_adapted_int() = BAR;` instead of `FOO.set_list_adapted_int(BAR);`")]]
   ::std::vector<::apache::thrift::type::FieldId>& set_list_adapted_int(T_AdaptedFields_list_adapted_int_struct_setter&& list_adapted_int_) {
     list_adapted_int_ref() = std::forward<T_AdaptedFields_list_adapted_int_struct_setter>(list_adapted_int_);
     return __fbthrift_field_list_adapted_int;
@@ -3404,7 +3404,7 @@ class AdaptedFields final  {
 
   /** Glean { "field": "set_adapted_int" } */
   template <typename T_AdaptedFields_set_adapted_int_struct_setter = ::apache::thrift::type::AnnotationIds>
-  [[deprecated("Use `FOO.set_adapted_int_ref() = BAR;` instead of `FOO.set_set_adapted_int(BAR);`")]]
+  [[deprecated("Use `FOO.set_adapted_int() = BAR;` instead of `FOO.set_set_adapted_int(BAR);`")]]
   ::apache::thrift::type::AnnotationIds& set_set_adapted_int(T_AdaptedFields_set_adapted_int_struct_setter&& set_adapted_int_) {
     set_adapted_int_ref() = std::forward<T_AdaptedFields_set_adapted_int_struct_setter>(set_adapted_int_);
     return __fbthrift_field_set_adapted_int;
@@ -3981,7 +3981,7 @@ class ListStruct final  {
 
   /** Glean { "field": "boolz" } */
   template <typename T_ListStruct_boolz_struct_setter = ::std::vector<bool>>
-  [[deprecated("Use `FOO.boolz_ref() = BAR;` instead of `FOO.set_boolz(BAR);`")]]
+  [[deprecated("Use `FOO.boolz() = BAR;` instead of `FOO.set_boolz(BAR);`")]]
   ::std::vector<bool>& set_boolz(T_ListStruct_boolz_struct_setter&& boolz_) {
     boolz_ref() = std::forward<T_ListStruct_boolz_struct_setter>(boolz_);
     return __fbthrift_field_boolz;
@@ -3995,7 +3995,7 @@ class ListStruct final  {
 
   /** Glean { "field": "intz" } */
   template <typename T_ListStruct_intz_struct_setter = ::std::vector<::std::int64_t>>
-  [[deprecated("Use `FOO.intz_ref() = BAR;` instead of `FOO.set_intz(BAR);`")]]
+  [[deprecated("Use `FOO.intz() = BAR;` instead of `FOO.set_intz(BAR);`")]]
   ::std::vector<::std::int64_t>& set_intz(T_ListStruct_intz_struct_setter&& intz_) {
     intz_ref() = std::forward<T_ListStruct_intz_struct_setter>(intz_);
     return __fbthrift_field_intz;
@@ -4007,7 +4007,7 @@ class ListStruct final  {
 
   /** Glean { "field": "encoded" } */
   template <typename T_ListStruct_encoded_struct_setter = std::deque<::std::string>>
-  [[deprecated("Use `FOO.encoded_ref() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
+  [[deprecated("Use `FOO.encoded() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
   std::deque<::std::string>& set_encoded(T_ListStruct_encoded_struct_setter&& encoded_) {
     encoded_ref() = std::forward<T_ListStruct_encoded_struct_setter>(encoded_);
     return __fbthrift_field_encoded;
@@ -4019,7 +4019,7 @@ class ListStruct final  {
 
   /** Glean { "field": "uidz" } */
   template <typename T_ListStruct_uidz_struct_setter = std::deque<uint64_t>>
-  [[deprecated("Use `FOO.uidz_ref() = BAR;` instead of `FOO.set_uidz(BAR);`")]]
+  [[deprecated("Use `FOO.uidz() = BAR;` instead of `FOO.set_uidz(BAR);`")]]
   std::deque<uint64_t>& set_uidz(T_ListStruct_uidz_struct_setter&& uidz_) {
     uidz_ref() = std::forward<T_ListStruct_uidz_struct_setter>(uidz_);
     return __fbthrift_field_uidz;
@@ -4031,7 +4031,7 @@ class ListStruct final  {
 
   /** Glean { "field": "matrix" } */
   template <typename T_ListStruct_matrix_struct_setter = ::std::vector<::std::vector<double>>>
-  [[deprecated("Use `FOO.matrix_ref() = BAR;` instead of `FOO.set_matrix(BAR);`")]]
+  [[deprecated("Use `FOO.matrix() = BAR;` instead of `FOO.set_matrix(BAR);`")]]
   ::std::vector<::std::vector<double>>& set_matrix(T_ListStruct_matrix_struct_setter&& matrix_) {
     matrix_ref() = std::forward<T_ListStruct_matrix_struct_setter>(matrix_);
     return __fbthrift_field_matrix;
@@ -4043,7 +4043,7 @@ class ListStruct final  {
 
   /** Glean { "field": "ucharz" } */
   template <typename T_ListStruct_ucharz_struct_setter = folly::small_vector<folly::small_vector<uint8_t>>>
-  [[deprecated("Use `FOO.ucharz_ref() = BAR;` instead of `FOO.set_ucharz(BAR);`")]]
+  [[deprecated("Use `FOO.ucharz() = BAR;` instead of `FOO.set_ucharz(BAR);`")]]
   folly::small_vector<folly::small_vector<uint8_t>>& set_ucharz(T_ListStruct_ucharz_struct_setter&& ucharz_) {
     ucharz_ref() = std::forward<T_ListStruct_ucharz_struct_setter>(ucharz_);
     return __fbthrift_field_ucharz;
@@ -4055,7 +4055,7 @@ class ListStruct final  {
 
   /** Glean { "field": "voxels" } */
   template <typename T_ListStruct_voxels_struct_setter = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
-  [[deprecated("Use `FOO.voxels_ref() = BAR;` instead of `FOO.set_voxels(BAR);`")]]
+  [[deprecated("Use `FOO.voxels() = BAR;` instead of `FOO.set_voxels(BAR);`")]]
   folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& set_voxels(T_ListStruct_voxels_struct_setter&& voxels_) {
     voxels_ref() = std::forward<T_ListStruct_voxels_struct_setter>(voxels_);
     return __fbthrift_field_voxels;
@@ -4067,7 +4067,7 @@ class ListStruct final  {
 
   /** Glean { "field": "buf_ptrs" } */
   template <typename T_ListStruct_buf_ptrs_struct_setter = ::std::vector<::test::fixtures::python_capi::IOBufPtr>>
-  [[deprecated("Use `FOO.buf_ptrs_ref() = BAR;` instead of `FOO.set_buf_ptrs(BAR);`")]]
+  [[deprecated("Use `FOO.buf_ptrs() = BAR;` instead of `FOO.set_buf_ptrs(BAR);`")]]
   ::std::vector<::test::fixtures::python_capi::IOBufPtr>& set_buf_ptrs(T_ListStruct_buf_ptrs_struct_setter&& buf_ptrs_) {
     buf_ptrs_ref() = std::forward<T_ListStruct_buf_ptrs_struct_setter>(buf_ptrs_);
     return __fbthrift_field_buf_ptrs;
@@ -4543,7 +4543,7 @@ class SetStruct final  {
 
   /** Glean { "field": "enumz" } */
   template <typename T_SetStruct_enumz_struct_setter = ::std::set<::test::fixtures::python_capi::MyEnum>>
-  [[deprecated("Use `FOO.enumz_ref() = BAR;` instead of `FOO.set_enumz(BAR);`")]]
+  [[deprecated("Use `FOO.enumz() = BAR;` instead of `FOO.set_enumz(BAR);`")]]
   ::std::set<::test::fixtures::python_capi::MyEnum>& set_enumz(T_SetStruct_enumz_struct_setter&& enumz_) {
     enumz_ref() = std::forward<T_SetStruct_enumz_struct_setter>(enumz_);
     return __fbthrift_field_enumz;
@@ -4557,7 +4557,7 @@ class SetStruct final  {
 
   /** Glean { "field": "intz" } */
   template <typename T_SetStruct_intz_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.intz_ref() = BAR;` instead of `FOO.set_intz(BAR);`")]]
+  [[deprecated("Use `FOO.intz() = BAR;` instead of `FOO.set_intz(BAR);`")]]
   ::std::set<::std::int32_t>& set_intz(T_SetStruct_intz_struct_setter&& intz_) {
     intz_ref() = std::forward<T_SetStruct_intz_struct_setter>(intz_);
     return __fbthrift_field_intz;
@@ -4569,7 +4569,7 @@ class SetStruct final  {
 
   /** Glean { "field": "encoded" } */
   template <typename T_SetStruct_encoded_struct_setter = std::unordered_set<::std::string>>
-  [[deprecated("Use `FOO.encoded_ref() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
+  [[deprecated("Use `FOO.encoded() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
   std::unordered_set<::std::string>& set_encoded(T_SetStruct_encoded_struct_setter&& encoded_) {
     encoded_ref() = std::forward<T_SetStruct_encoded_struct_setter>(encoded_);
     return __fbthrift_field_encoded;
@@ -4581,7 +4581,7 @@ class SetStruct final  {
 
   /** Glean { "field": "uidz" } */
   template <typename T_SetStruct_uidz_struct_setter = std::unordered_set<uint64_t>>
-  [[deprecated("Use `FOO.uidz_ref() = BAR;` instead of `FOO.set_uidz(BAR);`")]]
+  [[deprecated("Use `FOO.uidz() = BAR;` instead of `FOO.set_uidz(BAR);`")]]
   std::unordered_set<uint64_t>& set_uidz(T_SetStruct_uidz_struct_setter&& uidz_) {
     uidz_ref() = std::forward<T_SetStruct_uidz_struct_setter>(uidz_);
     return __fbthrift_field_uidz;
@@ -4593,7 +4593,7 @@ class SetStruct final  {
 
   /** Glean { "field": "charz" } */
   template <typename T_SetStruct_charz_struct_setter = folly::F14FastSet<uint8_t>>
-  [[deprecated("Use `FOO.charz_ref() = BAR;` instead of `FOO.set_charz(BAR);`")]]
+  [[deprecated("Use `FOO.charz() = BAR;` instead of `FOO.set_charz(BAR);`")]]
   folly::F14FastSet<uint8_t>& set_charz(T_SetStruct_charz_struct_setter&& charz_) {
     charz_ref() = std::forward<T_SetStruct_charz_struct_setter>(charz_);
     return __fbthrift_field_charz;
@@ -4605,7 +4605,7 @@ class SetStruct final  {
 
   /** Glean { "field": "setz" } */
   template <typename T_SetStruct_setz_struct_setter = ::std::vector<::std::set<::std::int64_t>>>
-  [[deprecated("Use `FOO.setz_ref() = BAR;` instead of `FOO.set_setz(BAR);`")]]
+  [[deprecated("Use `FOO.setz() = BAR;` instead of `FOO.set_setz(BAR);`")]]
   ::std::vector<::std::set<::std::int64_t>>& set_setz(T_SetStruct_setz_struct_setter&& setz_) {
     setz_ref() = std::forward<T_SetStruct_setz_struct_setter>(setz_);
     return __fbthrift_field_setz;
@@ -5236,7 +5236,7 @@ class MapStruct final  {
 
   /** Glean { "field": "enumz" } */
   template <typename T_MapStruct_enumz_struct_setter = ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>>
-  [[deprecated("Use `FOO.enumz_ref() = BAR;` instead of `FOO.set_enumz(BAR);`")]]
+  [[deprecated("Use `FOO.enumz() = BAR;` instead of `FOO.set_enumz(BAR);`")]]
   ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>& set_enumz(T_MapStruct_enumz_struct_setter&& enumz_) {
     enumz_ref() = std::forward<T_MapStruct_enumz_struct_setter>(enumz_);
     return __fbthrift_field_enumz;
@@ -5250,7 +5250,7 @@ class MapStruct final  {
 
   /** Glean { "field": "intz" } */
   template <typename T_MapStruct_intz_struct_setter = ::std::map<::std::int32_t, ::std::string>>
-  [[deprecated("Use `FOO.intz_ref() = BAR;` instead of `FOO.set_intz(BAR);`")]]
+  [[deprecated("Use `FOO.intz() = BAR;` instead of `FOO.set_intz(BAR);`")]]
   ::std::map<::std::int32_t, ::std::string>& set_intz(T_MapStruct_intz_struct_setter&& intz_) {
     intz_ref() = std::forward<T_MapStruct_intz_struct_setter>(intz_);
     return __fbthrift_field_intz;
@@ -5262,7 +5262,7 @@ class MapStruct final  {
 
   /** Glean { "field": "encoded" } */
   template <typename T_MapStruct_encoded_struct_setter = std::unordered_map<::std::string, double>>
-  [[deprecated("Use `FOO.encoded_ref() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
+  [[deprecated("Use `FOO.encoded() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
   std::unordered_map<::std::string, double>& set_encoded(T_MapStruct_encoded_struct_setter&& encoded_) {
     encoded_ref() = std::forward<T_MapStruct_encoded_struct_setter>(encoded_);
     return __fbthrift_field_encoded;
@@ -5274,7 +5274,7 @@ class MapStruct final  {
 
   /** Glean { "field": "flotz" } */
   template <typename T_MapStruct_flotz_struct_setter = std::unordered_map<uint64_t, float>>
-  [[deprecated("Use `FOO.flotz_ref() = BAR;` instead of `FOO.set_flotz(BAR);`")]]
+  [[deprecated("Use `FOO.flotz() = BAR;` instead of `FOO.set_flotz(BAR);`")]]
   std::unordered_map<uint64_t, float>& set_flotz(T_MapStruct_flotz_struct_setter&& flotz_) {
     flotz_ref() = std::forward<T_MapStruct_flotz_struct_setter>(flotz_);
     return __fbthrift_field_flotz;
@@ -5286,7 +5286,7 @@ class MapStruct final  {
 
   /** Glean { "field": "map_list" } */
   template <typename T_MapStruct_map_list_struct_setter = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
-  [[deprecated("Use `FOO.map_list_ref() = BAR;` instead of `FOO.set_map_list(BAR);`")]]
+  [[deprecated("Use `FOO.map_list() = BAR;` instead of `FOO.set_map_list(BAR);`")]]
   ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& set_map_list(T_MapStruct_map_list_struct_setter&& map_list_) {
     map_list_ref() = std::forward<T_MapStruct_map_list_struct_setter>(map_list_);
     return __fbthrift_field_map_list;
@@ -5298,7 +5298,7 @@ class MapStruct final  {
 
   /** Glean { "field": "list_map" } */
   template <typename T_MapStruct_list_map_struct_setter = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
-  [[deprecated("Use `FOO.list_map_ref() = BAR;` instead of `FOO.set_list_map(BAR);`")]]
+  [[deprecated("Use `FOO.list_map() = BAR;` instead of `FOO.set_list_map(BAR);`")]]
   ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& set_list_map(T_MapStruct_list_map_struct_setter&& list_map_) {
     list_map_ref() = std::forward<T_MapStruct_list_map_struct_setter>(list_map_);
     return __fbthrift_field_list_map;
@@ -5310,7 +5310,7 @@ class MapStruct final  {
 
   /** Glean { "field": "fast_list_map" } */
   template <typename T_MapStruct_fast_list_map_struct_setter = folly::F14FastMap<int, folly::fbvector<double>>>
-  [[deprecated("Use `FOO.fast_list_map_ref() = BAR;` instead of `FOO.set_fast_list_map(BAR);`")]]
+  [[deprecated("Use `FOO.fast_list_map() = BAR;` instead of `FOO.set_fast_list_map(BAR);`")]]
   folly::F14FastMap<int, folly::fbvector<double>>& set_fast_list_map(T_MapStruct_fast_list_map_struct_setter&& fast_list_map_) {
     fast_list_map_ref() = std::forward<T_MapStruct_fast_list_map_struct_setter>(fast_list_map_);
     return __fbthrift_field_fast_list_map;
@@ -5322,7 +5322,7 @@ class MapStruct final  {
 
   /** Glean { "field": "buf_map" } */
   template <typename T_MapStruct_buf_map_struct_setter = ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>>
-  [[deprecated("Use `FOO.buf_map_ref() = BAR;` instead of `FOO.set_buf_map(BAR);`")]]
+  [[deprecated("Use `FOO.buf_map() = BAR;` instead of `FOO.set_buf_map(BAR);`")]]
   ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& set_buf_map(T_MapStruct_buf_map_struct_setter&& buf_map_) {
     buf_map_ref() = std::forward<T_MapStruct_buf_map_struct_setter>(buf_map_);
     return __fbthrift_field_buf_map;
@@ -5334,7 +5334,7 @@ class MapStruct final  {
 
   /** Glean { "field": "unsigned_list_map" } */
   template <typename T_MapStruct_unsigned_list_map_struct_setter = ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>>
-  [[deprecated("Use `FOO.unsigned_list_map_ref() = BAR;` instead of `FOO.set_unsigned_list_map(BAR);`")]]
+  [[deprecated("Use `FOO.unsigned_list_map() = BAR;` instead of `FOO.set_unsigned_list_map(BAR);`")]]
   ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>& set_unsigned_list_map(T_MapStruct_unsigned_list_map_struct_setter&& unsigned_list_map_) {
     unsigned_list_map_ref() = std::forward<T_MapStruct_unsigned_list_map_struct_setter>(unsigned_list_map_);
     return __fbthrift_field_unsigned_list_map;
@@ -5962,7 +5962,7 @@ class ComposeStruct final  {
   }
 
   /** Glean { "field": "enum_" } */
-  [[deprecated("Use `FOO.enum__ref() = BAR;` instead of `FOO.set_enum_(BAR);`")]]
+  [[deprecated("Use `FOO.enum_() = BAR;` instead of `FOO.set_enum_(BAR);`")]]
   ::test::fixtures::python_capi::MyEnum& set_enum_(::test::fixtures::python_capi::MyEnum enum__) {
     enum__ref() = enum__;
     return __fbthrift_field_enum_;
@@ -5974,7 +5974,7 @@ class ComposeStruct final  {
   }
 
   /** Glean { "field": "renamed_" } */
-  [[deprecated("Use `FOO.renamed__ref() = BAR;` instead of `FOO.set_renamed_(BAR);`")]]
+  [[deprecated("Use `FOO.renamed_() = BAR;` instead of `FOO.set_renamed_(BAR);`")]]
   ::test::fixtures::python_capi::NormalDecentEnum& set_renamed_(::test::fixtures::python_capi::NormalDecentEnum renamed__) {
     renamed__ref() = renamed__;
     return __fbthrift_field_renamed_;
@@ -5986,7 +5986,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "primitive" } */
   template <typename T_ComposeStruct_primitive_struct_setter = ::test::fixtures::python_capi::PrimitiveStruct>
-  [[deprecated("Use `FOO.primitive_ref() = BAR;` instead of `FOO.set_primitive(BAR);`")]]
+  [[deprecated("Use `FOO.primitive() = BAR;` instead of `FOO.set_primitive(BAR);`")]]
   ::test::fixtures::python_capi::PrimitiveStruct& set_primitive(T_ComposeStruct_primitive_struct_setter&& primitive_) {
     primitive_ref() = std::forward<T_ComposeStruct_primitive_struct_setter>(primitive_);
     return __fbthrift_field_primitive;
@@ -5998,7 +5998,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "xstruct" } */
   template <typename T_ComposeStruct_xstruct_struct_setter = ::test::fixtures::python_capi::DepStruct>
-  [[deprecated("Use `FOO.xstruct_ref() = BAR;` instead of `FOO.set_xstruct(BAR);`")]]
+  [[deprecated("Use `FOO.xstruct() = BAR;` instead of `FOO.set_xstruct(BAR);`")]]
   ::test::fixtures::python_capi::DepStruct& set_xstruct(T_ComposeStruct_xstruct_struct_setter&& xstruct_) {
     xstruct_ref() = std::forward<T_ComposeStruct_xstruct_struct_setter>(xstruct_);
     return __fbthrift_field_xstruct;
@@ -6010,7 +6010,7 @@ class ComposeStruct final  {
   }
 
   /** Glean { "field": "xenum" } */
-  [[deprecated("Use `FOO.xenum_ref() = BAR;` instead of `FOO.set_xenum(BAR);`")]]
+  [[deprecated("Use `FOO.xenum() = BAR;` instead of `FOO.set_xenum(BAR);`")]]
   ::test::fixtures::python_capi::DepEnum& set_xenum(::test::fixtures::python_capi::DepEnum xenum_) {
     xenum_ref() = xenum_;
     return __fbthrift_field_xenum;
@@ -6022,7 +6022,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "serial_struct" } */
   template <typename T_ComposeStruct_serial_struct_struct_setter = ::test::fixtures::python_capi::SerializedStruct>
-  [[deprecated("Use `FOO.serial_struct_ref() = BAR;` instead of `FOO.set_serial_struct(BAR);`")]]
+  [[deprecated("Use `FOO.serial_struct() = BAR;` instead of `FOO.set_serial_struct(BAR);`")]]
   ::test::fixtures::python_capi::SerializedStruct& set_serial_struct(T_ComposeStruct_serial_struct_struct_setter&& serial_struct_) {
     serial_struct_ref() = std::forward<T_ComposeStruct_serial_struct_struct_setter>(serial_struct_);
     return __fbthrift_field_serial_struct;
@@ -6034,7 +6034,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "friends" } */
   template <typename T_ComposeStruct_friends_struct_setter = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  [[deprecated("Use `FOO.friends_ref() = BAR;` instead of `FOO.set_friends(BAR);`")]]
+  [[deprecated("Use `FOO.friends() = BAR;` instead of `FOO.set_friends(BAR);`")]]
   ::std::vector<::test::fixtures::python_capi::DepStruct>& set_friends(T_ComposeStruct_friends_struct_setter&& friends_) {
     friends_ref() = std::forward<T_ComposeStruct_friends_struct_setter>(friends_);
     return __fbthrift_field_friends;
@@ -6046,7 +6046,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "serial_union" } */
   template <typename T_ComposeStruct_serial_union_struct_setter = ::test::fixtures::python_capi::SerializedUnion>
-  [[deprecated("Use `FOO.serial_union_ref() = BAR;` instead of `FOO.set_serial_union(BAR);`")]]
+  [[deprecated("Use `FOO.serial_union() = BAR;` instead of `FOO.set_serial_union(BAR);`")]]
   ::test::fixtures::python_capi::SerializedUnion& set_serial_union(T_ComposeStruct_serial_union_struct_setter&& serial_union_) {
     serial_union_ref() = std::forward<T_ComposeStruct_serial_union_struct_setter>(serial_union_);
     return __fbthrift_field_serial_union;
@@ -6058,7 +6058,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "serial_error" } */
   template <typename T_ComposeStruct_serial_error_struct_setter = ::test::fixtures::python_capi::SerializedError>
-  [[deprecated("Use `FOO.serial_error_ref() = BAR;` instead of `FOO.set_serial_error(BAR);`")]]
+  [[deprecated("Use `FOO.serial_error() = BAR;` instead of `FOO.set_serial_error(BAR);`")]]
   ::test::fixtures::python_capi::SerializedError& set_serial_error(T_ComposeStruct_serial_error_struct_setter&& serial_error_) {
     serial_error_ref() = std::forward<T_ComposeStruct_serial_error_struct_setter>(serial_error_);
     return __fbthrift_field_serial_error;

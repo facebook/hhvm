@@ -864,7 +864,7 @@ class containerStruct2 final  {
   }
 
   /** Glean { "field": "fieldA" } */
-  [[deprecated("Use `FOO.fieldA_ref() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
   bool& set_fieldA(bool fieldA_) {
     fieldA_ref() = fieldA_;
     return __fbthrift_field_fieldA;
@@ -876,7 +876,7 @@ class containerStruct2 final  {
   }
 
   /** Glean { "field": "req_fieldA" } */
-  [[deprecated("Use `FOO.req_fieldA_ref() = BAR;` instead of `FOO.set_req_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldA() = BAR;` instead of `FOO.set_req_fieldA(BAR);`")]]
   bool& set_req_fieldA(bool req_fieldA_) {
     req_fieldA_ref() = req_fieldA_;
     return __fbthrift_field_req_fieldA;
@@ -895,7 +895,7 @@ class containerStruct2 final  {
   bool* get_opt_fieldA() && = delete;
 
   /** Glean { "field": "opt_fieldA" } */
-  [[deprecated("Use `FOO.opt_fieldA_ref() = BAR;` instead of `FOO.set_opt_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldA() = BAR;` instead of `FOO.set_opt_fieldA(BAR);`")]]
   bool& set_opt_fieldA(bool opt_fieldA_) {
     opt_fieldA_ref() = opt_fieldA_;
     return __fbthrift_field_opt_fieldA;
@@ -907,7 +907,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldB" } */
   template <typename T_containerStruct2_fieldB_struct_setter = ::std::map<::std::string, bool>>
-  [[deprecated("Use `FOO.fieldB_ref() = BAR;` instead of `FOO.set_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.fieldB() = BAR;` instead of `FOO.set_fieldB(BAR);`")]]
   ::std::map<::std::string, bool>& set_fieldB(T_containerStruct2_fieldB_struct_setter&& fieldB_) {
     fieldB_ref() = std::forward<T_containerStruct2_fieldB_struct_setter>(fieldB_);
     return __fbthrift_field_fieldB;
@@ -919,7 +919,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "req_fieldB" } */
   template <typename T_containerStruct2_req_fieldB_struct_setter = ::std::map<::std::string, bool>>
-  [[deprecated("Use `FOO.req_fieldB_ref() = BAR;` instead of `FOO.set_req_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldB() = BAR;` instead of `FOO.set_req_fieldB(BAR);`")]]
   ::std::map<::std::string, bool>& set_req_fieldB(T_containerStruct2_req_fieldB_struct_setter&& req_fieldB_) {
     req_fieldB_ref() = std::forward<T_containerStruct2_req_fieldB_struct_setter>(req_fieldB_);
     return __fbthrift_field_req_fieldB;
@@ -933,7 +933,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldB" } */
   template <typename T_containerStruct2_opt_fieldB_struct_setter = ::std::map<::std::string, bool>>
-  [[deprecated("Use `FOO.opt_fieldB_ref() = BAR;` instead of `FOO.set_opt_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldB() = BAR;` instead of `FOO.set_opt_fieldB(BAR);`")]]
   ::std::map<::std::string, bool>& set_opt_fieldB(T_containerStruct2_opt_fieldB_struct_setter&& opt_fieldB_) {
     opt_fieldB_ref() = std::forward<T_containerStruct2_opt_fieldB_struct_setter>(opt_fieldB_);
     return __fbthrift_field_opt_fieldB;
@@ -945,7 +945,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldC" } */
   template <typename T_containerStruct2_fieldC_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.fieldC_ref() = BAR;` instead of `FOO.set_fieldC(BAR);`")]]
+  [[deprecated("Use `FOO.fieldC() = BAR;` instead of `FOO.set_fieldC(BAR);`")]]
   ::std::set<::std::int32_t>& set_fieldC(T_containerStruct2_fieldC_struct_setter&& fieldC_) {
     fieldC_ref() = std::forward<T_containerStruct2_fieldC_struct_setter>(fieldC_);
     return __fbthrift_field_fieldC;
@@ -957,7 +957,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "req_fieldC" } */
   template <typename T_containerStruct2_req_fieldC_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.req_fieldC_ref() = BAR;` instead of `FOO.set_req_fieldC(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldC() = BAR;` instead of `FOO.set_req_fieldC(BAR);`")]]
   ::std::set<::std::int32_t>& set_req_fieldC(T_containerStruct2_req_fieldC_struct_setter&& req_fieldC_) {
     req_fieldC_ref() = std::forward<T_containerStruct2_req_fieldC_struct_setter>(req_fieldC_);
     return __fbthrift_field_req_fieldC;
@@ -971,7 +971,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldC" } */
   template <typename T_containerStruct2_opt_fieldC_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.opt_fieldC_ref() = BAR;` instead of `FOO.set_opt_fieldC(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldC() = BAR;` instead of `FOO.set_opt_fieldC(BAR);`")]]
   ::std::set<::std::int32_t>& set_opt_fieldC(T_containerStruct2_opt_fieldC_struct_setter&& opt_fieldC_) {
     opt_fieldC_ref() = std::forward<T_containerStruct2_opt_fieldC_struct_setter>(opt_fieldC_);
     return __fbthrift_field_opt_fieldC;
@@ -989,7 +989,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldD" } */
   template <typename T_containerStruct2_fieldD_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.fieldD_ref() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
+  [[deprecated("Use `FOO.fieldD() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
   ::std::string& set_fieldD(T_containerStruct2_fieldD_struct_setter&& fieldD_) {
     fieldD_ref() = std::forward<T_containerStruct2_fieldD_struct_setter>(fieldD_);
     return __fbthrift_field_fieldD;
@@ -1007,7 +1007,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldE" } */
   template <typename T_containerStruct2_fieldE_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.fieldE_ref() = BAR;` instead of `FOO.set_fieldE(BAR);`")]]
+  [[deprecated("Use `FOO.fieldE() = BAR;` instead of `FOO.set_fieldE(BAR);`")]]
   ::std::string& set_fieldE(T_containerStruct2_fieldE_struct_setter&& fieldE_) {
     fieldE_ref() = std::forward<T_containerStruct2_fieldE_struct_setter>(fieldE_);
     return __fbthrift_field_fieldE;
@@ -1025,7 +1025,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "req_fieldE" } */
   template <typename T_containerStruct2_req_fieldE_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.req_fieldE_ref() = BAR;` instead of `FOO.set_req_fieldE(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldE() = BAR;` instead of `FOO.set_req_fieldE(BAR);`")]]
   ::std::string& set_req_fieldE(T_containerStruct2_req_fieldE_struct_setter&& req_fieldE_) {
     req_fieldE_ref() = std::forward<T_containerStruct2_req_fieldE_struct_setter>(req_fieldE_);
     return __fbthrift_field_req_fieldE;
@@ -1045,7 +1045,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldE" } */
   template <typename T_containerStruct2_opt_fieldE_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.opt_fieldE_ref() = BAR;` instead of `FOO.set_opt_fieldE(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldE() = BAR;` instead of `FOO.set_opt_fieldE(BAR);`")]]
   ::std::string& set_opt_fieldE(T_containerStruct2_opt_fieldE_struct_setter&& opt_fieldE_) {
     opt_fieldE_ref() = std::forward<T_containerStruct2_opt_fieldE_struct_setter>(opt_fieldE_);
     return __fbthrift_field_opt_fieldE;

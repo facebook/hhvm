@@ -685,7 +685,7 @@ class SomeStruct final  {
   }
 
   /** Glean { "field": "reasonable" } */
-  [[deprecated("Use `FOO.reasonable_ref() = BAR;` instead of `FOO.set_reasonable(BAR);`")]]
+  [[deprecated("Use `FOO.reasonable() = BAR;` instead of `FOO.set_reasonable(BAR);`")]]
   ::test::fixtures::enums::Metasyntactic& set_reasonable(::test::fixtures::enums::Metasyntactic reasonable_) {
     reasonable_ref() = reasonable_;
     return __fbthrift_field_reasonable;
@@ -697,7 +697,7 @@ class SomeStruct final  {
   }
 
   /** Glean { "field": "fine" } */
-  [[deprecated("Use `FOO.fine_ref() = BAR;` instead of `FOO.set_fine(BAR);`")]]
+  [[deprecated("Use `FOO.fine() = BAR;` instead of `FOO.set_fine(BAR);`")]]
   ::test::fixtures::enums::Metasyntactic& set_fine(::test::fixtures::enums::Metasyntactic fine_) {
     fine_ref() = fine_;
     return __fbthrift_field_fine;
@@ -709,7 +709,7 @@ class SomeStruct final  {
   }
 
   /** Glean { "field": "questionable" } */
-  [[deprecated("Use `FOO.questionable_ref() = BAR;` instead of `FOO.set_questionable(BAR);`")]]
+  [[deprecated("Use `FOO.questionable() = BAR;` instead of `FOO.set_questionable(BAR);`")]]
   ::test::fixtures::enums::Metasyntactic& set_questionable(::test::fixtures::enums::Metasyntactic questionable_) {
     questionable_ref() = questionable_;
     return __fbthrift_field_questionable;
@@ -721,7 +721,7 @@ class SomeStruct final  {
 
   /** Glean { "field": "tags" } */
   template <typename T_SomeStruct_tags_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.tags_ref() = BAR;` instead of `FOO.set_tags(BAR);`")]]
+  [[deprecated("Use `FOO.tags() = BAR;` instead of `FOO.set_tags(BAR);`")]]
   ::std::set<::std::int32_t>& set_tags(T_SomeStruct_tags_struct_setter&& tags_) {
     tags_ref() = std::forward<T_SomeStruct_tags_struct_setter>(tags_);
     return __fbthrift_field_tags;
@@ -1043,7 +1043,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me2_3" } */
-  [[deprecated("Use `FOO.me2_3_ref() = BAR;` instead of `FOO.set_me2_3(BAR);`")]]
+  [[deprecated("Use `FOO.me2_3() = BAR;` instead of `FOO.set_me2_3(BAR);`")]]
   ::test::fixtures::enums::MyEnum2& set_me2_3(::test::fixtures::enums::MyEnum2 me2_3_) {
     me2_3_ref() = me2_3_;
     return __fbthrift_field_me2_3;
@@ -1055,7 +1055,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me3_n3" } */
-  [[deprecated("Use `FOO.me3_n3_ref() = BAR;` instead of `FOO.set_me3_n3(BAR);`")]]
+  [[deprecated("Use `FOO.me3_n3() = BAR;` instead of `FOO.set_me3_n3(BAR);`")]]
   ::test::fixtures::enums::MyEnum3& set_me3_n3(::test::fixtures::enums::MyEnum3 me3_n3_) {
     me3_n3_ref() = me3_n3_;
     return __fbthrift_field_me3_n3;
@@ -1067,7 +1067,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me1_t1" } */
-  [[deprecated("Use `FOO.me1_t1_ref() = BAR;` instead of `FOO.set_me1_t1(BAR);`")]]
+  [[deprecated("Use `FOO.me1_t1() = BAR;` instead of `FOO.set_me1_t1(BAR);`")]]
   ::test::fixtures::enums::MyEnum1& set_me1_t1(::test::fixtures::enums::MyEnum1 me1_t1_) {
     me1_t1_ref() = me1_t1_;
     return __fbthrift_field_me1_t1;
@@ -1079,7 +1079,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me1_t2" } */
-  [[deprecated("Use `FOO.me1_t2_ref() = BAR;` instead of `FOO.set_me1_t2(BAR);`")]]
+  [[deprecated("Use `FOO.me1_t2() = BAR;` instead of `FOO.set_me1_t2(BAR);`")]]
   ::test::fixtures::enums::MyEnum1& set_me1_t2(::test::fixtures::enums::MyEnum1 me1_t2_) {
     me1_t2_ref() = me1_t2_;
     return __fbthrift_field_me1_t2;

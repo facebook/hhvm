@@ -236,7 +236,7 @@ class IncludedA final  {
   }
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field_ref() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
+  [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
   ::std::int32_t& set_i32Field(::std::int32_t i32Field_) {
     i32Field_ref() = i32Field_;
     return __fbthrift_field_i32Field;
@@ -254,7 +254,7 @@ class IncludedA final  {
 
   /** Glean { "field": "strField" } */
   template <typename T_IncludedA_strField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.strField_ref() = BAR;` instead of `FOO.set_strField(BAR);`")]]
+  [[deprecated("Use `FOO.strField() = BAR;` instead of `FOO.set_strField(BAR);`")]]
   ::std::string& set_strField(T_IncludedA_strField_struct_setter&& strField_) {
     strField_ref() = std::forward<T_IncludedA_strField_struct_setter>(strField_);
     return __fbthrift_field_strField;

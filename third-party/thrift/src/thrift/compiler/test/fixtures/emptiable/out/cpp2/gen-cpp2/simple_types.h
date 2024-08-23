@@ -1209,7 +1209,7 @@ class EmptiableStruct final  {
   bool* get_bool_field() && = delete;
 
   /** Glean { "field": "bool_field" } */
-  [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
@@ -1228,7 +1228,7 @@ class EmptiableStruct final  {
   ::std::int8_t* get_byte_field() && = delete;
 
   /** Glean { "field": "byte_field" } */
-  [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
+  [[deprecated("Use `FOO.byte_field() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
@@ -1247,7 +1247,7 @@ class EmptiableStruct final  {
   ::std::int16_t* get_short_field() && = delete;
 
   /** Glean { "field": "short_field" } */
-  [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
+  [[deprecated("Use `FOO.short_field() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
@@ -1266,7 +1266,7 @@ class EmptiableStruct final  {
   ::std::int32_t* get_int_field() && = delete;
 
   /** Glean { "field": "int_field" } */
-  [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
@@ -1285,7 +1285,7 @@ class EmptiableStruct final  {
   ::std::int64_t* get_long_field() && = delete;
 
   /** Glean { "field": "long_field" } */
-  [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
+  [[deprecated("Use `FOO.long_field() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
@@ -1304,7 +1304,7 @@ class EmptiableStruct final  {
   float* get_float_field() && = delete;
 
   /** Glean { "field": "float_field" } */
-  [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
+  [[deprecated("Use `FOO.float_field() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
@@ -1323,7 +1323,7 @@ class EmptiableStruct final  {
   double* get_double_field() && = delete;
 
   /** Glean { "field": "double_field" } */
-  [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
+  [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
@@ -1343,7 +1343,7 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "string_field" } */
   template <typename T_EmptiableStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_EmptiableStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_EmptiableStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
@@ -1363,7 +1363,7 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "binary_field" } */
   template <typename T_EmptiableStruct_binary_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.binary_field() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_EmptiableStruct_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_EmptiableStruct_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
@@ -1382,7 +1382,7 @@ class EmptiableStruct final  {
   ::apache::thrift::test::MyEnum* get_enum_field() && = delete;
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::apache::thrift::test::MyEnum& set_enum_field(::apache::thrift::test::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
@@ -1396,7 +1396,7 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_EmptiableStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_EmptiableStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_EmptiableStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -1410,7 +1410,7 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "set_field" } */
   template <typename T_EmptiableStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.set_field() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_EmptiableStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_EmptiableStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
@@ -1424,7 +1424,7 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "map_field" } */
   template <typename T_EmptiableStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
-  [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.map_field() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_EmptiableStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_EmptiableStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
@@ -1438,7 +1438,7 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "struct_field" } */
   template <typename T_EmptiableStruct_struct_field_struct_setter = ::apache::thrift::test::MyStruct>
-  [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.struct_field() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::apache::thrift::test::MyStruct& set_struct_field(T_EmptiableStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_EmptiableStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
@@ -2275,7 +2275,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "bool_field" } */
-  [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
@@ -2287,7 +2287,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "byte_field" } */
-  [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
+  [[deprecated("Use `FOO.byte_field() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
@@ -2299,7 +2299,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "short_field" } */
-  [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
+  [[deprecated("Use `FOO.short_field() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
@@ -2311,7 +2311,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "int_field" } */
-  [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
@@ -2323,7 +2323,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "long_field" } */
-  [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
+  [[deprecated("Use `FOO.long_field() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
@@ -2335,7 +2335,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "float_field" } */
-  [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
+  [[deprecated("Use `FOO.float_field() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
@@ -2347,7 +2347,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "double_field" } */
-  [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
+  [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
@@ -2365,7 +2365,7 @@ class EmptiableTerseStruct final  {
 
   /** Glean { "field": "string_field" } */
   template <typename T_EmptiableTerseStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_EmptiableTerseStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_EmptiableTerseStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
@@ -2383,7 +2383,7 @@ class EmptiableTerseStruct final  {
 
   /** Glean { "field": "binary_field" } */
   template <typename T_EmptiableTerseStruct_binary_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.binary_field() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_EmptiableTerseStruct_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_EmptiableTerseStruct_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
@@ -2395,7 +2395,7 @@ class EmptiableTerseStruct final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::apache::thrift::test::MyEnum& set_enum_field(::apache::thrift::test::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
@@ -2407,7 +2407,7 @@ class EmptiableTerseStruct final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_EmptiableTerseStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_EmptiableTerseStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_EmptiableTerseStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -2419,7 +2419,7 @@ class EmptiableTerseStruct final  {
 
   /** Glean { "field": "set_field" } */
   template <typename T_EmptiableTerseStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.set_field() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_EmptiableTerseStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_EmptiableTerseStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
@@ -2431,7 +2431,7 @@ class EmptiableTerseStruct final  {
 
   /** Glean { "field": "map_field" } */
   template <typename T_EmptiableTerseStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
-  [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.map_field() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_EmptiableTerseStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_EmptiableTerseStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
@@ -2443,7 +2443,7 @@ class EmptiableTerseStruct final  {
 
   /** Glean { "field": "struct_field" } */
   template <typename T_EmptiableTerseStruct_struct_field_struct_setter = ::apache::thrift::test::MyStruct>
-  [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.struct_field() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::apache::thrift::test::MyStruct& set_struct_field(T_EmptiableTerseStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_EmptiableTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
@@ -3282,7 +3282,7 @@ class NotEmptiableStruct final  {
   }
 
   /** Glean { "field": "bool_field" } */
-  [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
@@ -3301,7 +3301,7 @@ class NotEmptiableStruct final  {
   ::std::int8_t* get_byte_field() && = delete;
 
   /** Glean { "field": "byte_field" } */
-  [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
+  [[deprecated("Use `FOO.byte_field() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
@@ -3320,7 +3320,7 @@ class NotEmptiableStruct final  {
   ::std::int16_t* get_short_field() && = delete;
 
   /** Glean { "field": "short_field" } */
-  [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
+  [[deprecated("Use `FOO.short_field() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
@@ -3339,7 +3339,7 @@ class NotEmptiableStruct final  {
   ::std::int32_t* get_int_field() && = delete;
 
   /** Glean { "field": "int_field" } */
-  [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
@@ -3358,7 +3358,7 @@ class NotEmptiableStruct final  {
   ::std::int64_t* get_long_field() && = delete;
 
   /** Glean { "field": "long_field" } */
-  [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
+  [[deprecated("Use `FOO.long_field() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
@@ -3377,7 +3377,7 @@ class NotEmptiableStruct final  {
   float* get_float_field() && = delete;
 
   /** Glean { "field": "float_field" } */
-  [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
+  [[deprecated("Use `FOO.float_field() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
@@ -3396,7 +3396,7 @@ class NotEmptiableStruct final  {
   double* get_double_field() && = delete;
 
   /** Glean { "field": "double_field" } */
-  [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
+  [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
@@ -3416,7 +3416,7 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "string_field" } */
   template <typename T_NotEmptiableStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_NotEmptiableStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_NotEmptiableStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
@@ -3436,7 +3436,7 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "binary_field" } */
   template <typename T_NotEmptiableStruct_binary_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.binary_field() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_NotEmptiableStruct_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_NotEmptiableStruct_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
@@ -3455,7 +3455,7 @@ class NotEmptiableStruct final  {
   ::apache::thrift::test::MyEnum* get_enum_field() && = delete;
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::apache::thrift::test::MyEnum& set_enum_field(::apache::thrift::test::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
@@ -3469,7 +3469,7 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_NotEmptiableStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_NotEmptiableStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_NotEmptiableStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -3483,7 +3483,7 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "set_field" } */
   template <typename T_NotEmptiableStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.set_field() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_NotEmptiableStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_NotEmptiableStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
@@ -3497,7 +3497,7 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "map_field" } */
   template <typename T_NotEmptiableStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
-  [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.map_field() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_NotEmptiableStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_NotEmptiableStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
@@ -3511,7 +3511,7 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "struct_field" } */
   template <typename T_NotEmptiableStruct_struct_field_struct_setter = ::apache::thrift::test::MyStruct>
-  [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.struct_field() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::apache::thrift::test::MyStruct& set_struct_field(T_NotEmptiableStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_NotEmptiableStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;

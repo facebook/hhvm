@@ -192,7 +192,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   template <typename T_CustomException_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_CustomException_message_struct_setter&& message_) {
     message_ref() = std::forward<T_CustomException_message_struct_setter>(message_);
     return __fbthrift_field_message;

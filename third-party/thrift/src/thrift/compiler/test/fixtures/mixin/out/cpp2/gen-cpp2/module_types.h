@@ -220,7 +220,7 @@ class Mixin1 final  {
 
   /** Glean { "field": "field1" } */
   template <typename T_Mixin1_field1_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::string& set_field1(T_Mixin1_field1_struct_setter&& field1_) {
     field1_ref() = std::forward<T_Mixin1_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
@@ -443,7 +443,7 @@ class Mixin2 final  {
 
   /** Glean { "field": "m1" } */
   template <typename T_Mixin2_m1_struct_setter = ::cpp2::Mixin1>
-  [[deprecated("Use `FOO.m1_ref() = BAR;` instead of `FOO.set_m1(BAR);`")]]
+  [[deprecated("Use `FOO.m1() = BAR;` instead of `FOO.set_m1(BAR);`")]]
   ::cpp2::Mixin1& set_m1(T_Mixin2_m1_struct_setter&& m1_) {
     m1_ref() = std::forward<T_Mixin2_m1_struct_setter>(m1_);
     return __fbthrift_field_m1;
@@ -463,7 +463,7 @@ class Mixin2 final  {
 
   /** Glean { "field": "field2" } */
   template <typename T_Mixin2_field2_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::string& set_field2(T_Mixin2_field2_struct_setter&& field2_) {
     field2_ref() = std::forward<T_Mixin2_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
@@ -632,7 +632,7 @@ class Mixin3Base final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_Mixin3Base_field3_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::string& set_field3(T_Mixin3Base_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_Mixin3Base_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -937,7 +937,7 @@ class Foo final  {
 
   /** Glean { "field": "field4" } */
   template <typename T_Foo_field4_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field4_ref() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
   ::std::string& set_field4(T_Foo_field4_struct_setter&& field4_) {
     field4_ref() = std::forward<T_Foo_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
@@ -949,7 +949,7 @@ class Foo final  {
 
   /** Glean { "field": "m2" } */
   template <typename T_Foo_m2_struct_setter = ::cpp2::Mixin2>
-  [[deprecated("Use `FOO.m2_ref() = BAR;` instead of `FOO.set_m2(BAR);`")]]
+  [[deprecated("Use `FOO.m2() = BAR;` instead of `FOO.set_m2(BAR);`")]]
   ::cpp2::Mixin2& set_m2(T_Foo_m2_struct_setter&& m2_) {
     m2_ref() = std::forward<T_Foo_m2_struct_setter>(m2_);
     return __fbthrift_field_m2;
@@ -961,7 +961,7 @@ class Foo final  {
 
   /** Glean { "field": "m3" } */
   template <typename T_Foo_m3_struct_setter = ::cpp2::Mixin3>
-  [[deprecated("Use `FOO.m3_ref() = BAR;` instead of `FOO.set_m3(BAR);`")]]
+  [[deprecated("Use `FOO.m3() = BAR;` instead of `FOO.set_m3(BAR);`")]]
   ::cpp2::Mixin3& set_m3(T_Foo_m3_struct_setter&& m3_) {
     m3_ref() = std::forward<T_Foo_m3_struct_setter>(m3_);
     return __fbthrift_field_m3;

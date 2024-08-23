@@ -420,7 +420,7 @@ class Default final  {
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int32_t& set_field1(::std::int32_t field1_) {
     field1_ref() = field1_;
     return __fbthrift_field_field1;
@@ -439,7 +439,7 @@ class Default final  {
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::int32_t& set_field2(::std::int32_t field2_) {
     field2_ref() = field2_;
     return __fbthrift_field_field2;
@@ -459,7 +459,7 @@ class Default final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_Default_field3_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::string& set_field3(T_Default_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_Default_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -478,7 +478,7 @@ class Default final  {
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4_ref() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
   double& set_field4(double field4_) {
     field4_ref() = field4_;
     return __fbthrift_field_field4;
@@ -804,7 +804,7 @@ class NonAtomic final  {
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int32_t& set_field1(::std::int32_t field1_) {
     field1_ref() = field1_;
     return __fbthrift_field_field1;
@@ -823,7 +823,7 @@ class NonAtomic final  {
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::int32_t& set_field2(::std::int32_t field2_) {
     field2_ref() = field2_;
     return __fbthrift_field_field2;
@@ -843,7 +843,7 @@ class NonAtomic final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_NonAtomic_field3_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::string& set_field3(T_NonAtomic_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_NonAtomic_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -862,7 +862,7 @@ class NonAtomic final  {
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4_ref() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
   double& set_field4(double field4_) {
     field4_ref() = field4_;
     return __fbthrift_field_field4;
@@ -1188,7 +1188,7 @@ class Atomic final  {
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int32_t& set_field1(::std::int32_t field1_) {
     field1_ref() = field1_;
     return __fbthrift_field_field1;
@@ -1207,7 +1207,7 @@ class Atomic final  {
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::int32_t& set_field2(::std::int32_t field2_) {
     field2_ref() = field2_;
     return __fbthrift_field_field2;
@@ -1227,7 +1227,7 @@ class Atomic final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_Atomic_field3_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::string& set_field3(T_Atomic_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_Atomic_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -1246,7 +1246,7 @@ class Atomic final  {
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4_ref() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
   double& set_field4(double field4_) {
     field4_ref() = field4_;
     return __fbthrift_field_field4;
@@ -1572,7 +1572,7 @@ class AtomicFoo final  {
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int32_t& set_field1(::std::int32_t field1_) {
     field1_ref() = field1_;
     return __fbthrift_field_field1;
@@ -1591,7 +1591,7 @@ class AtomicFoo final  {
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::int32_t& set_field2(::std::int32_t field2_) {
     field2_ref() = field2_;
     return __fbthrift_field_field2;
@@ -1611,7 +1611,7 @@ class AtomicFoo final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_AtomicFoo_field3_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::string& set_field3(T_AtomicFoo_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_AtomicFoo_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -1630,7 +1630,7 @@ class AtomicFoo final  {
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4_ref() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
   double& set_field4(double field4_) {
     field4_ref() = field4_;
     return __fbthrift_field_field4;

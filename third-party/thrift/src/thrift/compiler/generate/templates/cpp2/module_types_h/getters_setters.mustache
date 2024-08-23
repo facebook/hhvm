@@ -35,7 +35,7 @@
   }
 
 {{/field:optional?}}
-  {{ > common/field_docblock}}  [[deprecated("Use `FOO.{{field:cpp_name}}_ref() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
+  {{ > common/field_docblock}}  [[deprecated("Use `FOO.{{field:cpp_name}}() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
   {{type:cpp_type}}& set_{{field:cpp_name}}({{type:cpp_type}} {{field:cpp_name}}_) {
     {{field:cpp_name}}_ref() = {{field:cpp_name}}_;
     return {{field:cpp_storage_name}};
@@ -63,7 +63,7 @@
 {{/field:optional?}}
 
   {{ > common/field_docblock}}  template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{type:cpp_type}}>
-  [[deprecated("Use `FOO.{{field:cpp_name}}_ref() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
+  [[deprecated("Use `FOO.{{field:cpp_name}}() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
   {{type:cpp_type}}& set_{{field:cpp_name}}(T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter&& {{field:cpp_name}}_) {
     {{field:cpp_name}}_ref() = std::forward<T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter>({{field:cpp_name}}_);
     return {{field:cpp_storage_name}};
@@ -82,7 +82,7 @@
 {{/field:optional?}}
 
   {{ > common/field_docblock}}  template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{type:cpp_type}}>
-  [[deprecated("Use `FOO.{{field:cpp_name}}_ref() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
+  [[deprecated("Use `FOO.{{field:cpp_name}}() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
   {{type:cpp_type}}& set_{{field:cpp_name}}(T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter&& {{field:cpp_name}}_) {
     {{field:cpp_name}}_ref() = std::forward<T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter>({{field:cpp_name}}_);
     return {{field:cpp_storage_name}};

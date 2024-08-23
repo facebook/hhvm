@@ -221,7 +221,7 @@ class InitialResponse final  {
 
   /** Glean { "field": "content" } */
   template <typename T_InitialResponse_content_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.content_ref() = BAR;` instead of `FOO.set_content(BAR);`")]]
+  [[deprecated("Use `FOO.content() = BAR;` instead of `FOO.set_content(BAR);`")]]
   ::std::string& set_content(T_InitialResponse_content_struct_setter&& content_) {
     content_ref() = std::forward<T_InitialResponse_content_struct_setter>(content_);
     return __fbthrift_field_content;
@@ -390,7 +390,7 @@ class FinalResponse final  {
 
   /** Glean { "field": "content" } */
   template <typename T_FinalResponse_content_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.content_ref() = BAR;` instead of `FOO.set_content(BAR);`")]]
+  [[deprecated("Use `FOO.content() = BAR;` instead of `FOO.set_content(BAR);`")]]
   ::std::string& set_content(T_FinalResponse_content_struct_setter&& content_) {
     content_ref() = std::forward<T_FinalResponse_content_struct_setter>(content_);
     return __fbthrift_field_content;
@@ -559,7 +559,7 @@ class SinkPayload final  {
 
   /** Glean { "field": "content" } */
   template <typename T_SinkPayload_content_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.content_ref() = BAR;` instead of `FOO.set_content(BAR);`")]]
+  [[deprecated("Use `FOO.content() = BAR;` instead of `FOO.set_content(BAR);`")]]
   ::std::string& set_content(T_SinkPayload_content_struct_setter&& content_) {
     content_ref() = std::forward<T_SinkPayload_content_struct_setter>(content_);
     return __fbthrift_field_content;
@@ -728,7 +728,7 @@ class CompatibleWithKeywordSink final  {
 
   /** Glean { "field": "sink" } */
   template <typename T_CompatibleWithKeywordSink_sink_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.sink_ref() = BAR;` instead of `FOO.set_sink(BAR);`")]]
+  [[deprecated("Use `FOO.sink() = BAR;` instead of `FOO.set_sink(BAR);`")]]
   ::std::string& set_sink(T_CompatibleWithKeywordSink_sink_struct_setter&& sink_) {
     sink_ref() = std::forward<T_CompatibleWithKeywordSink_sink_struct_setter>(sink_);
     return __fbthrift_field_sink;
@@ -903,7 +903,7 @@ class FOLLY_EXPORT InitialException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "reason" } */
   template <typename T_InitialException_reason_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.reason_ref() = BAR;` instead of `FOO.set_reason(BAR);`")]]
+  [[deprecated("Use `FOO.reason() = BAR;` instead of `FOO.set_reason(BAR);`")]]
   ::std::string& set_reason(T_InitialException_reason_struct_setter&& reason_) {
     reason_ref() = std::forward<T_InitialException_reason_struct_setter>(reason_);
     return __fbthrift_field_reason;
@@ -1082,7 +1082,7 @@ class FOLLY_EXPORT SinkException1 : public virtual apache::thrift::TException {
 
   /** Glean { "field": "reason" } */
   template <typename T_SinkException1_reason_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.reason_ref() = BAR;` instead of `FOO.set_reason(BAR);`")]]
+  [[deprecated("Use `FOO.reason() = BAR;` instead of `FOO.set_reason(BAR);`")]]
   ::std::string& set_reason(T_SinkException1_reason_struct_setter&& reason_) {
     reason_ref() = std::forward<T_SinkException1_reason_struct_setter>(reason_);
     return __fbthrift_field_reason;
@@ -1255,7 +1255,7 @@ class FOLLY_EXPORT SinkException2 : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "reason" } */
-  [[deprecated("Use `FOO.reason_ref() = BAR;` instead of `FOO.set_reason(BAR);`")]]
+  [[deprecated("Use `FOO.reason() = BAR;` instead of `FOO.set_reason(BAR);`")]]
   ::std::int64_t& set_reason(::std::int64_t reason_) {
     reason_ref() = reason_;
     return __fbthrift_field_reason;

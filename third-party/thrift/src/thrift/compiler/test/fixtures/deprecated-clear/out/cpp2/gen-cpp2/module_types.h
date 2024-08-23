@@ -907,7 +907,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "bool_field" } */
-  [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
@@ -919,7 +919,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "byte_field" } */
-  [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
+  [[deprecated("Use `FOO.byte_field() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
@@ -931,7 +931,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "short_field" } */
-  [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
+  [[deprecated("Use `FOO.short_field() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
@@ -943,7 +943,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "int_field" } */
-  [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
@@ -955,7 +955,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "long_field" } */
-  [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
+  [[deprecated("Use `FOO.long_field() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
@@ -967,7 +967,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "float_field" } */
-  [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
+  [[deprecated("Use `FOO.float_field() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
@@ -979,7 +979,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "double_field" } */
-  [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
+  [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
@@ -997,7 +997,7 @@ class StructWithDefaultStruct final  {
 
   /** Glean { "field": "string_field" } */
   template <typename T_StructWithDefaultStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_StructWithDefaultStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_StructWithDefaultStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
@@ -1015,7 +1015,7 @@ class StructWithDefaultStruct final  {
 
   /** Glean { "field": "binary_field" } */
   template <typename T_StructWithDefaultStruct_binary_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.binary_field() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_StructWithDefaultStruct_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_StructWithDefaultStruct_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
@@ -1027,7 +1027,7 @@ class StructWithDefaultStruct final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::apache::thrift::test::MyEnum& set_enum_field(::apache::thrift::test::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
@@ -1039,7 +1039,7 @@ class StructWithDefaultStruct final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_StructWithDefaultStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_StructWithDefaultStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_StructWithDefaultStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -1051,7 +1051,7 @@ class StructWithDefaultStruct final  {
 
   /** Glean { "field": "set_field" } */
   template <typename T_StructWithDefaultStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.set_field() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_StructWithDefaultStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_StructWithDefaultStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
@@ -1063,7 +1063,7 @@ class StructWithDefaultStruct final  {
 
   /** Glean { "field": "map_field" } */
   template <typename T_StructWithDefaultStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
-  [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.map_field() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_StructWithDefaultStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_StructWithDefaultStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;

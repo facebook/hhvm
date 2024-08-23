@@ -246,7 +246,7 @@ class Struct final  {
 
   /** Glean { "field": "first" } */
   template <typename T_Struct_first_struct_setter = ::module0::Struct>
-  [[deprecated("Use `FOO.first_ref() = BAR;` instead of `FOO.set_first(BAR);`")]]
+  [[deprecated("Use `FOO.first() = BAR;` instead of `FOO.set_first(BAR);`")]]
   ::module0::Struct& set_first(T_Struct_first_struct_setter&& first_) {
     first_ref() = std::forward<T_Struct_first_struct_setter>(first_);
     return __fbthrift_field_first;
@@ -258,7 +258,7 @@ class Struct final  {
 
   /** Glean { "field": "second" } */
   template <typename T_Struct_second_struct_setter = ::module1::Struct>
-  [[deprecated("Use `FOO.second_ref() = BAR;` instead of `FOO.set_second(BAR);`")]]
+  [[deprecated("Use `FOO.second() = BAR;` instead of `FOO.set_second(BAR);`")]]
   ::module1::Struct& set_second(T_Struct_second_struct_setter&& second_) {
     second_ref() = std::forward<T_Struct_second_struct_setter>(second_);
     return __fbthrift_field_second;
@@ -471,7 +471,7 @@ class BigStruct final  {
 
   /** Glean { "field": "s" } */
   template <typename T_BigStruct_s_struct_setter = ::module2::Struct>
-  [[deprecated("Use `FOO.s_ref() = BAR;` instead of `FOO.set_s(BAR);`")]]
+  [[deprecated("Use `FOO.s() = BAR;` instead of `FOO.set_s(BAR);`")]]
   ::module2::Struct& set_s(T_BigStruct_s_struct_setter&& s_) {
     s_ref() = std::forward<T_BigStruct_s_struct_setter>(s_);
     return __fbthrift_field_s;
@@ -483,7 +483,7 @@ class BigStruct final  {
   }
 
   /** Glean { "field": "id" } */
-  [[deprecated("Use `FOO.id_ref() = BAR;` instead of `FOO.set_id(BAR);`")]]
+  [[deprecated("Use `FOO.id() = BAR;` instead of `FOO.set_id(BAR);`")]]
   ::std::int32_t& set_id(::std::int32_t id_) {
     id_ref() = id_;
     return __fbthrift_field_id;

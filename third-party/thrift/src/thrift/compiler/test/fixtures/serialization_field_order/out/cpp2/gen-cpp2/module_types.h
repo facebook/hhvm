@@ -310,7 +310,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int32_t& set_field1(::std::int32_t field1_) {
     field1_ref() = field1_;
     return __fbthrift_field_field1;
@@ -322,7 +322,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::int32_t& set_field2(::std::int32_t field2_) {
     field2_ref() = field2_;
     return __fbthrift_field_field2;
@@ -334,7 +334,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field3" } */
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::int32_t& set_field3(::std::int32_t field3_) {
     field3_ref() = field3_;
     return __fbthrift_field_field3;
@@ -602,7 +602,7 @@ class Foo2 final  {
   }
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::int32_t& set_field1(::std::int32_t field1_) {
     field1_ref() = field1_;
     return __fbthrift_field_field1;
@@ -614,7 +614,7 @@ class Foo2 final  {
   }
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::int32_t& set_field2(::std::int32_t field2_) {
     field2_ref() = field2_;
     return __fbthrift_field_field2;
@@ -626,7 +626,7 @@ class Foo2 final  {
   }
 
   /** Glean { "field": "field3" } */
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::int32_t& set_field3(::std::int32_t field3_) {
     field3_ref() = field3_;
     return __fbthrift_field_field3;

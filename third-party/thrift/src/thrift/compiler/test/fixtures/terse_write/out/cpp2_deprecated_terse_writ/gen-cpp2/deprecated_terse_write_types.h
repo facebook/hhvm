@@ -1201,7 +1201,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "bool_field" } */
-  [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
@@ -1213,7 +1213,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "byte_field" } */
-  [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
+  [[deprecated("Use `FOO.byte_field() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
@@ -1225,7 +1225,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "short_field" } */
-  [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
+  [[deprecated("Use `FOO.short_field() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
@@ -1237,7 +1237,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "int_field" } */
-  [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
@@ -1249,7 +1249,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "long_field" } */
-  [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
+  [[deprecated("Use `FOO.long_field() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
@@ -1261,7 +1261,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "float_field" } */
-  [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
+  [[deprecated("Use `FOO.float_field() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
@@ -1273,7 +1273,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "double_field" } */
-  [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
+  [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
@@ -1291,7 +1291,7 @@ class StructLevelTerseStruct final  {
 
   /** Glean { "field": "string_field" } */
   template <typename T_StructLevelTerseStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_StructLevelTerseStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_StructLevelTerseStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
@@ -1309,7 +1309,7 @@ class StructLevelTerseStruct final  {
 
   /** Glean { "field": "binary_field" } */
   template <typename T_StructLevelTerseStruct_binary_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.binary_field() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_StructLevelTerseStruct_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_StructLevelTerseStruct_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
@@ -1321,7 +1321,7 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
@@ -1333,7 +1333,7 @@ class StructLevelTerseStruct final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_StructLevelTerseStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_StructLevelTerseStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_StructLevelTerseStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -1345,7 +1345,7 @@ class StructLevelTerseStruct final  {
 
   /** Glean { "field": "set_field" } */
   template <typename T_StructLevelTerseStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.set_field() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_StructLevelTerseStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_StructLevelTerseStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
@@ -1357,7 +1357,7 @@ class StructLevelTerseStruct final  {
 
   /** Glean { "field": "map_field" } */
   template <typename T_StructLevelTerseStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
-  [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.map_field() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_StructLevelTerseStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_StructLevelTerseStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
@@ -1369,7 +1369,7 @@ class StructLevelTerseStruct final  {
 
   /** Glean { "field": "struct_field" } */
   template <typename T_StructLevelTerseStruct_struct_field_struct_setter = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
-  [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.struct_field() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::deprecated::MyStruct& set_struct_field(T_StructLevelTerseStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_StructLevelTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
@@ -2937,7 +2937,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_bool_field" } */
-  [[deprecated("Use `FOO.terse_bool_field_ref() = BAR;` instead of `FOO.set_terse_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_bool_field() = BAR;` instead of `FOO.set_terse_bool_field(BAR);`")]]
   bool& set_terse_bool_field(bool terse_bool_field_) {
     terse_bool_field_ref() = terse_bool_field_;
     return __fbthrift_field_terse_bool_field;
@@ -2949,7 +2949,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_byte_field" } */
-  [[deprecated("Use `FOO.terse_byte_field_ref() = BAR;` instead of `FOO.set_terse_byte_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_byte_field() = BAR;` instead of `FOO.set_terse_byte_field(BAR);`")]]
   ::std::int8_t& set_terse_byte_field(::std::int8_t terse_byte_field_) {
     terse_byte_field_ref() = terse_byte_field_;
     return __fbthrift_field_terse_byte_field;
@@ -2961,7 +2961,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_short_field" } */
-  [[deprecated("Use `FOO.terse_short_field_ref() = BAR;` instead of `FOO.set_terse_short_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_short_field() = BAR;` instead of `FOO.set_terse_short_field(BAR);`")]]
   ::std::int16_t& set_terse_short_field(::std::int16_t terse_short_field_) {
     terse_short_field_ref() = terse_short_field_;
     return __fbthrift_field_terse_short_field;
@@ -2973,7 +2973,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_int_field" } */
-  [[deprecated("Use `FOO.terse_int_field_ref() = BAR;` instead of `FOO.set_terse_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_int_field() = BAR;` instead of `FOO.set_terse_int_field(BAR);`")]]
   ::std::int32_t& set_terse_int_field(::std::int32_t terse_int_field_) {
     terse_int_field_ref() = terse_int_field_;
     return __fbthrift_field_terse_int_field;
@@ -2985,7 +2985,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_long_field" } */
-  [[deprecated("Use `FOO.terse_long_field_ref() = BAR;` instead of `FOO.set_terse_long_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_long_field() = BAR;` instead of `FOO.set_terse_long_field(BAR);`")]]
   ::std::int64_t& set_terse_long_field(::std::int64_t terse_long_field_) {
     terse_long_field_ref() = terse_long_field_;
     return __fbthrift_field_terse_long_field;
@@ -2997,7 +2997,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_float_field" } */
-  [[deprecated("Use `FOO.terse_float_field_ref() = BAR;` instead of `FOO.set_terse_float_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_float_field() = BAR;` instead of `FOO.set_terse_float_field(BAR);`")]]
   float& set_terse_float_field(float terse_float_field_) {
     terse_float_field_ref() = terse_float_field_;
     return __fbthrift_field_terse_float_field;
@@ -3009,7 +3009,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_double_field" } */
-  [[deprecated("Use `FOO.terse_double_field_ref() = BAR;` instead of `FOO.set_terse_double_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_double_field() = BAR;` instead of `FOO.set_terse_double_field(BAR);`")]]
   double& set_terse_double_field(double terse_double_field_) {
     terse_double_field_ref() = terse_double_field_;
     return __fbthrift_field_terse_double_field;
@@ -3027,7 +3027,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "terse_string_field" } */
   template <typename T_FieldLevelTerseStruct_terse_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.terse_string_field_ref() = BAR;` instead of `FOO.set_terse_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_string_field() = BAR;` instead of `FOO.set_terse_string_field(BAR);`")]]
   ::std::string& set_terse_string_field(T_FieldLevelTerseStruct_terse_string_field_struct_setter&& terse_string_field_) {
     terse_string_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_string_field_struct_setter>(terse_string_field_);
     return __fbthrift_field_terse_string_field;
@@ -3045,7 +3045,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "terse_binary_field" } */
   template <typename T_FieldLevelTerseStruct_terse_binary_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.terse_binary_field_ref() = BAR;` instead of `FOO.set_terse_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_binary_field() = BAR;` instead of `FOO.set_terse_binary_field(BAR);`")]]
   ::std::string& set_terse_binary_field(T_FieldLevelTerseStruct_terse_binary_field_struct_setter&& terse_binary_field_) {
     terse_binary_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_binary_field_struct_setter>(terse_binary_field_);
     return __fbthrift_field_terse_binary_field;
@@ -3057,7 +3057,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_enum_field" } */
-  [[deprecated("Use `FOO.terse_enum_field_ref() = BAR;` instead of `FOO.set_terse_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_enum_field() = BAR;` instead of `FOO.set_terse_enum_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::deprecated::MyEnum& set_terse_enum_field(::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field_) {
     terse_enum_field_ref() = terse_enum_field_;
     return __fbthrift_field_terse_enum_field;
@@ -3069,7 +3069,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "terse_list_field" } */
   template <typename T_FieldLevelTerseStruct_terse_list_field_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.terse_list_field_ref() = BAR;` instead of `FOO.set_terse_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_list_field() = BAR;` instead of `FOO.set_terse_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_terse_list_field(T_FieldLevelTerseStruct_terse_list_field_struct_setter&& terse_list_field_) {
     terse_list_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_list_field_struct_setter>(terse_list_field_);
     return __fbthrift_field_terse_list_field;
@@ -3081,7 +3081,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "terse_set_field" } */
   template <typename T_FieldLevelTerseStruct_terse_set_field_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.terse_set_field_ref() = BAR;` instead of `FOO.set_terse_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_set_field() = BAR;` instead of `FOO.set_terse_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_terse_set_field(T_FieldLevelTerseStruct_terse_set_field_struct_setter&& terse_set_field_) {
     terse_set_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_set_field_struct_setter>(terse_set_field_);
     return __fbthrift_field_terse_set_field;
@@ -3093,7 +3093,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "terse_map_field" } */
   template <typename T_FieldLevelTerseStruct_terse_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
-  [[deprecated("Use `FOO.terse_map_field_ref() = BAR;` instead of `FOO.set_terse_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_map_field() = BAR;` instead of `FOO.set_terse_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_terse_map_field(T_FieldLevelTerseStruct_terse_map_field_struct_setter&& terse_map_field_) {
     terse_map_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_map_field_struct_setter>(terse_map_field_);
     return __fbthrift_field_terse_map_field;
@@ -3105,7 +3105,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "terse_struct_field" } */
   template <typename T_FieldLevelTerseStruct_terse_struct_field_struct_setter = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
-  [[deprecated("Use `FOO.terse_struct_field_ref() = BAR;` instead of `FOO.set_terse_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.terse_struct_field() = BAR;` instead of `FOO.set_terse_struct_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::deprecated::MyStruct& set_terse_struct_field(T_FieldLevelTerseStruct_terse_struct_field_struct_setter&& terse_struct_field_) {
     terse_struct_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_struct_field_struct_setter>(terse_struct_field_);
     return __fbthrift_field_terse_struct_field;
@@ -3117,7 +3117,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "bool_field" } */
-  [[deprecated("Use `FOO.bool_field_ref() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
   bool& set_bool_field(bool bool_field_) {
     bool_field_ref() = bool_field_;
     return __fbthrift_field_bool_field;
@@ -3129,7 +3129,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "byte_field" } */
-  [[deprecated("Use `FOO.byte_field_ref() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
+  [[deprecated("Use `FOO.byte_field() = BAR;` instead of `FOO.set_byte_field(BAR);`")]]
   ::std::int8_t& set_byte_field(::std::int8_t byte_field_) {
     byte_field_ref() = byte_field_;
     return __fbthrift_field_byte_field;
@@ -3141,7 +3141,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "short_field" } */
-  [[deprecated("Use `FOO.short_field_ref() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
+  [[deprecated("Use `FOO.short_field() = BAR;` instead of `FOO.set_short_field(BAR);`")]]
   ::std::int16_t& set_short_field(::std::int16_t short_field_) {
     short_field_ref() = short_field_;
     return __fbthrift_field_short_field;
@@ -3153,7 +3153,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "int_field" } */
-  [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
@@ -3165,7 +3165,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "long_field" } */
-  [[deprecated("Use `FOO.long_field_ref() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
+  [[deprecated("Use `FOO.long_field() = BAR;` instead of `FOO.set_long_field(BAR);`")]]
   ::std::int64_t& set_long_field(::std::int64_t long_field_) {
     long_field_ref() = long_field_;
     return __fbthrift_field_long_field;
@@ -3177,7 +3177,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "float_field" } */
-  [[deprecated("Use `FOO.float_field_ref() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
+  [[deprecated("Use `FOO.float_field() = BAR;` instead of `FOO.set_float_field(BAR);`")]]
   float& set_float_field(float float_field_) {
     float_field_ref() = float_field_;
     return __fbthrift_field_float_field;
@@ -3189,7 +3189,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "double_field" } */
-  [[deprecated("Use `FOO.double_field_ref() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
+  [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
   double& set_double_field(double double_field_) {
     double_field_ref() = double_field_;
     return __fbthrift_field_double_field;
@@ -3207,7 +3207,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "string_field" } */
   template <typename T_FieldLevelTerseStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field_ref() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
   ::std::string& set_string_field(T_FieldLevelTerseStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_FieldLevelTerseStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
@@ -3225,7 +3225,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "binary_field" } */
   template <typename T_FieldLevelTerseStruct_binary_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
+  [[deprecated("Use `FOO.binary_field() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
   ::std::string& set_binary_field(T_FieldLevelTerseStruct_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_FieldLevelTerseStruct_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
@@ -3237,7 +3237,7 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
@@ -3249,7 +3249,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_FieldLevelTerseStruct_list_field_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::std::int16_t>& set_list_field(T_FieldLevelTerseStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_FieldLevelTerseStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -3261,7 +3261,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "set_field" } */
   template <typename T_FieldLevelTerseStruct_set_field_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.set_field() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::std::int16_t>& set_set_field(T_FieldLevelTerseStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_FieldLevelTerseStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
@@ -3273,7 +3273,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "map_field" } */
   template <typename T_FieldLevelTerseStruct_map_field_struct_setter = ::std::map<::std::int16_t, ::std::int16_t>>
-  [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.map_field() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T_FieldLevelTerseStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_FieldLevelTerseStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
@@ -3285,7 +3285,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "struct_field" } */
   template <typename T_FieldLevelTerseStruct_struct_field_struct_setter = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
-  [[deprecated("Use `FOO.struct_field_ref() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.struct_field() = BAR;` instead of `FOO.set_struct_field(BAR);`")]]
   ::facebook::thrift::test::terse_write::deprecated::MyStruct& set_struct_field(T_FieldLevelTerseStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_FieldLevelTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;

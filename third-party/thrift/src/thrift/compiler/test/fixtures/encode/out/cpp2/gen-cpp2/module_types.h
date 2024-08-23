@@ -303,7 +303,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field_ref() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
   ::std::int32_t& set_field(::std::int32_t field_) {
     field_ref() = field_;
     return __fbthrift_field_field;
@@ -469,7 +469,7 @@ class Bar final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_Bar_list_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_field(T_Bar_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_Bar_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -685,7 +685,7 @@ class Baz final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_Baz_list_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_field(T_Baz_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_Baz_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -697,7 +697,7 @@ class Baz final  {
 
   /** Glean { "field": "nested_list_field" } */
   template <typename T_Baz_nested_list_field_struct_setter = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
-  [[deprecated("Use `FOO.nested_list_field_ref() = BAR;` instead of `FOO.set_nested_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.nested_list_field() = BAR;` instead of `FOO.set_nested_list_field(BAR);`")]]
   ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& set_nested_list_field(T_Baz_nested_list_field_struct_setter&& nested_list_field_) {
     nested_list_field_ref() = std::forward<T_Baz_nested_list_field_struct_setter>(nested_list_field_);
     return __fbthrift_field_nested_list_field;
@@ -1431,7 +1431,7 @@ class OpEncodeStruct final  {
   }
 
   /** Glean { "field": "int_field" } */
-  [[deprecated("Use `FOO.int_field_ref() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
   ::std::int32_t& set_int_field(::std::int32_t int_field_) {
     int_field_ref() = int_field_;
     return __fbthrift_field_int_field;
@@ -1443,7 +1443,7 @@ class OpEncodeStruct final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field_ref() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
   ::facebook::thrift::test::Enum& set_enum_field(::facebook::thrift::test::Enum enum_field_) {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
@@ -1455,7 +1455,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "foo_field" } */
   template <typename T_OpEncodeStruct_foo_field_struct_setter = ::facebook::thrift::test::Foo>
-  [[deprecated("Use `FOO.foo_field_ref() = BAR;` instead of `FOO.set_foo_field(BAR);`")]]
+  [[deprecated("Use `FOO.foo_field() = BAR;` instead of `FOO.set_foo_field(BAR);`")]]
   ::facebook::thrift::test::Foo& set_foo_field(T_OpEncodeStruct_foo_field_struct_setter&& foo_field_) {
     foo_field_ref() = std::forward<T_OpEncodeStruct_foo_field_struct_setter>(foo_field_);
     return __fbthrift_field_foo_field;
@@ -1467,7 +1467,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "list_field" } */
   template <typename T_OpEncodeStruct_list_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
-  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_field() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_field(T_OpEncodeStruct_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_OpEncodeStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
@@ -1479,7 +1479,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "list_cpp_type_field" } */
   template <typename T_OpEncodeStruct_list_cpp_type_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
-  [[deprecated("Use `FOO.list_cpp_type_field_ref() = BAR;` instead of `FOO.set_list_cpp_type_field(BAR);`")]]
+  [[deprecated("Use `FOO.list_cpp_type_field() = BAR;` instead of `FOO.set_list_cpp_type_field(BAR);`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_cpp_type_field(T_OpEncodeStruct_list_cpp_type_field_struct_setter&& list_cpp_type_field_) {
     list_cpp_type_field_ref() = std::forward<T_OpEncodeStruct_list_cpp_type_field_struct_setter>(list_cpp_type_field_);
     return __fbthrift_field_list_cpp_type_field;
@@ -1491,7 +1491,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "set_field" } */
   template <typename T_OpEncodeStruct_set_field_struct_setter = ::std::set<::facebook::thrift::test::AdaptedFoo>>
-  [[deprecated("Use `FOO.set_field_ref() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
+  [[deprecated("Use `FOO.set_field() = BAR;` instead of `FOO.set_set_field(BAR);`")]]
   ::std::set<::facebook::thrift::test::AdaptedFoo>& set_set_field(T_OpEncodeStruct_set_field_struct_setter&& set_field_) {
     set_field_ref() = std::forward<T_OpEncodeStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
@@ -1503,7 +1503,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "map_field" } */
   template <typename T_OpEncodeStruct_map_field_struct_setter = ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>>
-  [[deprecated("Use `FOO.map_field_ref() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
+  [[deprecated("Use `FOO.map_field() = BAR;` instead of `FOO.set_map_field(BAR);`")]]
   ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>& set_map_field(T_OpEncodeStruct_map_field_struct_setter&& map_field_) {
     map_field_ref() = std::forward<T_OpEncodeStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
@@ -1515,7 +1515,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "nested_field" } */
   template <typename T_OpEncodeStruct_nested_field_struct_setter = ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
-  [[deprecated("Use `FOO.nested_field_ref() = BAR;` instead of `FOO.set_nested_field(BAR);`")]]
+  [[deprecated("Use `FOO.nested_field() = BAR;` instead of `FOO.set_nested_field(BAR);`")]]
   ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>& set_nested_field(T_OpEncodeStruct_nested_field_struct_setter&& nested_field_) {
     nested_field_ref() = std::forward<T_OpEncodeStruct_nested_field_struct_setter>(nested_field_);
     return __fbthrift_field_nested_field;
@@ -1527,7 +1527,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "bar_field" } */
   template <typename T_OpEncodeStruct_bar_field_struct_setter = ::facebook::thrift::test::Bar>
-  [[deprecated("Use `FOO.bar_field_ref() = BAR;` instead of `FOO.set_bar_field(BAR);`")]]
+  [[deprecated("Use `FOO.bar_field() = BAR;` instead of `FOO.set_bar_field(BAR);`")]]
   ::facebook::thrift::test::Bar& set_bar_field(T_OpEncodeStruct_bar_field_struct_setter&& bar_field_) {
     bar_field_ref() = std::forward<T_OpEncodeStruct_bar_field_struct_setter>(bar_field_);
     return __fbthrift_field_bar_field;

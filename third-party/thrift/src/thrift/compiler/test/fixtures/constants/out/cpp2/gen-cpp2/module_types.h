@@ -630,7 +630,7 @@ class Internship final  {
   }
 
   /** Glean { "field": "weeks" } */
-  [[deprecated("Use `FOO.weeks_ref() = BAR;` instead of `FOO.set_weeks(BAR);`")]]
+  [[deprecated("Use `FOO.weeks() = BAR;` instead of `FOO.set_weeks(BAR);`")]]
   ::std::int32_t& set_weeks(::std::int32_t weeks_) {
     weeks_ref() = weeks_;
     return __fbthrift_field_weeks;
@@ -648,7 +648,7 @@ class Internship final  {
 
   /** Glean { "field": "title" } */
   template <typename T_Internship_title_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.title_ref() = BAR;` instead of `FOO.set_title(BAR);`")]]
+  [[deprecated("Use `FOO.title() = BAR;` instead of `FOO.set_title(BAR);`")]]
   ::std::string& set_title(T_Internship_title_struct_setter&& title_) {
     title_ref() = std::forward<T_Internship_title_struct_setter>(title_);
     return __fbthrift_field_title;
@@ -667,7 +667,7 @@ class Internship final  {
   ::cpp2::Company* get_employer() && = delete;
 
   /** Glean { "field": "employer" } */
-  [[deprecated("Use `FOO.employer_ref() = BAR;` instead of `FOO.set_employer(BAR);`")]]
+  [[deprecated("Use `FOO.employer() = BAR;` instead of `FOO.set_employer(BAR);`")]]
   ::cpp2::Company& set_employer(::cpp2::Company employer_) {
     employer_ref() = employer_;
     return __fbthrift_field_employer;
@@ -686,7 +686,7 @@ class Internship final  {
   double* get_compensation() && = delete;
 
   /** Glean { "field": "compensation" } */
-  [[deprecated("Use `FOO.compensation_ref() = BAR;` instead of `FOO.set_compensation(BAR);`")]]
+  [[deprecated("Use `FOO.compensation() = BAR;` instead of `FOO.set_compensation(BAR);`")]]
   double& set_compensation(double compensation_) {
     compensation_ref() = compensation_;
     return __fbthrift_field_compensation;
@@ -706,7 +706,7 @@ class Internship final  {
 
   /** Glean { "field": "school" } */
   template <typename T_Internship_school_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.school_ref() = BAR;` instead of `FOO.set_school(BAR);`")]]
+  [[deprecated("Use `FOO.school() = BAR;` instead of `FOO.set_school(BAR);`")]]
   ::std::string& set_school(T_Internship_school_struct_setter&& school_) {
     school_ref() = std::forward<T_Internship_school_struct_setter>(school_);
     return __fbthrift_field_school;
@@ -919,7 +919,7 @@ class Range final  {
   }
 
   /** Glean { "field": "min" } */
-  [[deprecated("Use `FOO.min_ref() = BAR;` instead of `FOO.set_min(BAR);`")]]
+  [[deprecated("Use `FOO.min() = BAR;` instead of `FOO.set_min(BAR);`")]]
   ::std::int32_t& set_min(::std::int32_t min_) {
     min_ref() = min_;
     return __fbthrift_field_min;
@@ -931,7 +931,7 @@ class Range final  {
   }
 
   /** Glean { "field": "max" } */
-  [[deprecated("Use `FOO.max_ref() = BAR;` instead of `FOO.set_max(BAR);`")]]
+  [[deprecated("Use `FOO.max() = BAR;` instead of `FOO.set_max(BAR);`")]]
   ::std::int32_t& set_max(::std::int32_t max_) {
     max_ref() = max_;
     return __fbthrift_field_max;
@@ -1146,7 +1146,7 @@ class struct1 final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a_ref() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
   ::std::int32_t& set_a(::std::int32_t a_) {
     a_ref() = a_;
     return __fbthrift_field_a;
@@ -1164,7 +1164,7 @@ class struct1 final  {
 
   /** Glean { "field": "b" } */
   template <typename T_struct1_b_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.b_ref() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
   ::std::string& set_b(T_struct1_b_struct_setter&& b_) {
     b_ref() = std::forward<T_struct1_b_struct_setter>(b_);
     return __fbthrift_field_b;
@@ -1483,7 +1483,7 @@ class struct2 final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a_ref() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
   ::std::int32_t& set_a(::std::int32_t a_) {
     a_ref() = a_;
     return __fbthrift_field_a;
@@ -1501,7 +1501,7 @@ class struct2 final  {
 
   /** Glean { "field": "b" } */
   template <typename T_struct2_b_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.b_ref() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
   ::std::string& set_b(T_struct2_b_struct_setter&& b_) {
     b_ref() = std::forward<T_struct2_b_struct_setter>(b_);
     return __fbthrift_field_b;
@@ -1513,7 +1513,7 @@ class struct2 final  {
 
   /** Glean { "field": "c" } */
   template <typename T_struct2_c_struct_setter = ::cpp2::struct1>
-  [[deprecated("Use `FOO.c_ref() = BAR;` instead of `FOO.set_c(BAR);`")]]
+  [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
   ::cpp2::struct1& set_c(T_struct2_c_struct_setter&& c_) {
     c_ref() = std::forward<T_struct2_c_struct_setter>(c_);
     return __fbthrift_field_c;
@@ -1525,7 +1525,7 @@ class struct2 final  {
 
   /** Glean { "field": "d" } */
   template <typename T_struct2_d_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.d_ref() = BAR;` instead of `FOO.set_d(BAR);`")]]
+  [[deprecated("Use `FOO.d() = BAR;` instead of `FOO.set_d(BAR);`")]]
   ::std::vector<::std::int32_t>& set_d(T_struct2_d_struct_setter&& d_) {
     d_ref() = std::forward<T_struct2_d_struct_setter>(d_);
     return __fbthrift_field_d;
@@ -1798,7 +1798,7 @@ class struct3 final  {
 
   /** Glean { "field": "a" } */
   template <typename T_struct3_a_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.a_ref() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
   ::std::string& set_a(T_struct3_a_struct_setter&& a_) {
     a_ref() = std::forward<T_struct3_a_struct_setter>(a_);
     return __fbthrift_field_a;
@@ -1810,7 +1810,7 @@ class struct3 final  {
   }
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b_ref() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
   ::std::int32_t& set_b(::std::int32_t b_) {
     b_ref() = b_;
     return __fbthrift_field_b;
@@ -1822,7 +1822,7 @@ class struct3 final  {
 
   /** Glean { "field": "c" } */
   template <typename T_struct3_c_struct_setter = ::cpp2::struct2>
-  [[deprecated("Use `FOO.c_ref() = BAR;` instead of `FOO.set_c(BAR);`")]]
+  [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
   ::cpp2::struct2& set_c(T_struct3_c_struct_setter&& c_) {
     c_ref() = std::forward<T_struct3_c_struct_setter>(c_);
     return __fbthrift_field_c;
@@ -2089,7 +2089,7 @@ class struct4 final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a_ref() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
   ::std::int32_t& set_a(::std::int32_t a_) {
     a_ref() = a_;
     return __fbthrift_field_a;
@@ -2108,7 +2108,7 @@ class struct4 final  {
   double* get_b() && = delete;
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b_ref() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
   double& set_b(double b_) {
     b_ref() = b_;
     return __fbthrift_field_b;
@@ -2127,7 +2127,7 @@ class struct4 final  {
   ::std::int8_t* get_c() && = delete;
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c_ref() = BAR;` instead of `FOO.set_c(BAR);`")]]
+  [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
   ::std::int8_t& set_c(::std::int8_t c_) {
     c_ref() = c_;
     return __fbthrift_field_c;

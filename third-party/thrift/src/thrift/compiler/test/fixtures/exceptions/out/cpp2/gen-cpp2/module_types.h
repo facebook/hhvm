@@ -241,7 +241,7 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   template <typename T_Fiery_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_Fiery_message_struct_setter&& message_) {
     message_ref() = std::forward<T_Fiery_message_struct_setter>(message_);
     return __fbthrift_field_message;
@@ -423,7 +423,7 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
 
   /** Glean { "field": "sonnet" } */
   template <typename T_Serious_sonnet_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.sonnet_ref() = BAR;` instead of `FOO.set_sonnet(BAR);`")]]
+  [[deprecated("Use `FOO.sonnet() = BAR;` instead of `FOO.set_sonnet(BAR);`")]]
   ::std::string& set_sonnet(T_Serious_sonnet_struct_setter&& sonnet_) {
     sonnet_ref() = std::forward<T_Serious_sonnet_struct_setter>(sonnet_);
     return __fbthrift_field_sonnet;
@@ -655,7 +655,7 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
 
   /** Glean { "field": "error_message" } */
   template <typename T_ComplexFieldNames_error_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.error_message_ref() = BAR;` instead of `FOO.set_error_message(BAR);`")]]
+  [[deprecated("Use `FOO.error_message() = BAR;` instead of `FOO.set_error_message(BAR);`")]]
   ::std::string& set_error_message(T_ComplexFieldNames_error_message_struct_setter&& error_message_) {
     error_message_ref() = std::forward<T_ComplexFieldNames_error_message_struct_setter>(error_message_);
     return __fbthrift_field_error_message;
@@ -673,7 +673,7 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
 
   /** Glean { "field": "internal_error_message" } */
   template <typename T_ComplexFieldNames_internal_error_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.internal_error_message_ref() = BAR;` instead of `FOO.set_internal_error_message(BAR);`")]]
+  [[deprecated("Use `FOO.internal_error_message() = BAR;` instead of `FOO.set_internal_error_message(BAR);`")]]
   ::std::string& set_internal_error_message(T_ComplexFieldNames_internal_error_message_struct_setter&& internal_error_message_) {
     internal_error_message_ref() = std::forward<T_ComplexFieldNames_internal_error_message_struct_setter>(internal_error_message_);
     return __fbthrift_field_internal_error_message;
@@ -905,7 +905,7 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
 
   /** Glean { "field": "error_message" } */
   template <typename T_CustomFieldNames_error_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.error_message_ref() = BAR;` instead of `FOO.set_error_message(BAR);`")]]
+  [[deprecated("Use `FOO.error_message() = BAR;` instead of `FOO.set_error_message(BAR);`")]]
   ::std::string& set_error_message(T_CustomFieldNames_error_message_struct_setter&& error_message_) {
     error_message_ref() = std::forward<T_CustomFieldNames_error_message_struct_setter>(error_message_);
     return __fbthrift_field_error_message;
@@ -923,7 +923,7 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
 
   /** Glean { "field": "internal_error_message" } */
   template <typename T_CustomFieldNames_internal_error_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.internal_error_message_ref() = BAR;` instead of `FOO.set_internal_error_message(BAR);`")]]
+  [[deprecated("Use `FOO.internal_error_message() = BAR;` instead of `FOO.set_internal_error_message(BAR);`")]]
   ::std::string& set_internal_error_message(T_CustomFieldNames_internal_error_message_struct_setter&& internal_error_message_) {
     internal_error_message_ref() = std::forward<T_CustomFieldNames_internal_error_message_struct_setter>(internal_error_message_);
     return __fbthrift_field_internal_error_message;
@@ -1155,7 +1155,7 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
 
   /** Glean { "field": "message" } */
   template <typename T_ExceptionWithPrimitiveField_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_ExceptionWithPrimitiveField_message_struct_setter&& message_) {
     message_ref() = std::forward<T_ExceptionWithPrimitiveField_message_struct_setter>(message_);
     return __fbthrift_field_message;
@@ -1167,7 +1167,7 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
   }
 
   /** Glean { "field": "error_code" } */
-  [[deprecated("Use `FOO.error_code_ref() = BAR;` instead of `FOO.set_error_code(BAR);`")]]
+  [[deprecated("Use `FOO.error_code() = BAR;` instead of `FOO.set_error_code(BAR);`")]]
   ::std::int32_t& set_error_code(::std::int32_t error_code_) {
     error_code_ref() = error_code_;
     return __fbthrift_field_error_code;
@@ -1399,7 +1399,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
 
   /** Glean { "field": "message_field" } */
   template <typename T_ExceptionWithStructuredAnnotation_message_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_field_ref() = BAR;` instead of `FOO.set_message_field(BAR);`")]]
+  [[deprecated("Use `FOO.message_field() = BAR;` instead of `FOO.set_message_field(BAR);`")]]
   ::std::string& set_message_field(T_ExceptionWithStructuredAnnotation_message_field_struct_setter&& message_field_) {
     message_field_ref() = std::forward<T_ExceptionWithStructuredAnnotation_message_field_struct_setter>(message_field_);
     return __fbthrift_field_message_field;
@@ -1411,7 +1411,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
   }
 
   /** Glean { "field": "error_code" } */
-  [[deprecated("Use `FOO.error_code_ref() = BAR;` instead of `FOO.set_error_code(BAR);`")]]
+  [[deprecated("Use `FOO.error_code() = BAR;` instead of `FOO.set_error_code(BAR);`")]]
   ::std::int32_t& set_error_code(::std::int32_t error_code_) {
     error_code_ref() = error_code_;
     return __fbthrift_field_error_code;

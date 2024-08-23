@@ -185,7 +185,7 @@ class Foo final  {
   ::std::int32_t* get_value() && = delete;
 
   /** Glean { "field": "value" } */
-  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
+  [[deprecated("Use `FOO.value() = BAR;` instead of `FOO.set_value(BAR);`")]]
   ::std::int32_t& set_value(::std::int32_t value_) {
     value_ref() = value_;
     return __fbthrift_field_value;

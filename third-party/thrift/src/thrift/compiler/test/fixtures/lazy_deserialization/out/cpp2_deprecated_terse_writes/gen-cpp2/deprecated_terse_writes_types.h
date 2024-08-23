@@ -413,7 +413,7 @@ class TerseFoo final  {
 
   /** Glean { "field": "field1" } */
   template <typename T_TerseFoo_field1_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::vector<double>& set_field1(T_TerseFoo_field1_struct_setter&& field1_) {
     field1_ref() = std::forward<T_TerseFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
@@ -425,7 +425,7 @@ class TerseFoo final  {
 
   /** Glean { "field": "field2" } */
   template <typename T_TerseFoo_field2_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::vector<::std::int32_t>& set_field2(T_TerseFoo_field2_struct_setter&& field2_) {
     field2_ref() = std::forward<T_TerseFoo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
@@ -437,7 +437,7 @@ class TerseFoo final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_TerseFoo_field3_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::vector<double>& set_field3(T_TerseFoo_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_TerseFoo_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -449,7 +449,7 @@ class TerseFoo final  {
 
   /** Glean { "field": "field4" } */
   template <typename T_TerseFoo_field4_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.field4_ref() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
   ::std::vector<::std::int32_t>& set_field4(T_TerseFoo_field4_struct_setter&& field4_) {
     field4_ref() = std::forward<T_TerseFoo_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
@@ -767,7 +767,7 @@ class TerseLazyFoo final  {
 
   /** Glean { "field": "field1" } */
   template <typename T_TerseLazyFoo_field1_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::vector<double>& set_field1(T_TerseLazyFoo_field1_struct_setter&& field1_) {
     field1_ref() = std::forward<T_TerseLazyFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
@@ -779,7 +779,7 @@ class TerseLazyFoo final  {
 
   /** Glean { "field": "field2" } */
   template <typename T_TerseLazyFoo_field2_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::vector<::std::int32_t>& set_field2(T_TerseLazyFoo_field2_struct_setter&& field2_) {
     field2_ref() = std::forward<T_TerseLazyFoo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
@@ -1123,7 +1123,7 @@ class TerseOptionalFoo final  {
 
   /** Glean { "field": "field1" } */
   template <typename T_TerseOptionalFoo_field1_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::vector<double>& set_field1(T_TerseOptionalFoo_field1_struct_setter&& field1_) {
     field1_ref() = std::forward<T_TerseOptionalFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
@@ -1137,7 +1137,7 @@ class TerseOptionalFoo final  {
 
   /** Glean { "field": "field2" } */
   template <typename T_TerseOptionalFoo_field2_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::vector<::std::int32_t>& set_field2(T_TerseOptionalFoo_field2_struct_setter&& field2_) {
     field2_ref() = std::forward<T_TerseOptionalFoo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
@@ -1151,7 +1151,7 @@ class TerseOptionalFoo final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_TerseOptionalFoo_field3_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::vector<double>& set_field3(T_TerseOptionalFoo_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_TerseOptionalFoo_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -1165,7 +1165,7 @@ class TerseOptionalFoo final  {
 
   /** Glean { "field": "field4" } */
   template <typename T_TerseOptionalFoo_field4_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.field4_ref() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
   ::std::vector<::std::int32_t>& set_field4(T_TerseOptionalFoo_field4_struct_setter&& field4_) {
     field4_ref() = std::forward<T_TerseOptionalFoo_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
@@ -1485,7 +1485,7 @@ class TerseOptionalLazyFoo final  {
 
   /** Glean { "field": "field1" } */
   template <typename T_TerseOptionalLazyFoo_field1_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
   ::std::vector<double>& set_field1(T_TerseOptionalLazyFoo_field1_struct_setter&& field1_) {
     field1_ref() = std::forward<T_TerseOptionalLazyFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
@@ -1499,7 +1499,7 @@ class TerseOptionalLazyFoo final  {
 
   /** Glean { "field": "field2" } */
   template <typename T_TerseOptionalLazyFoo_field2_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
   ::std::vector<::std::int32_t>& set_field2(T_TerseOptionalLazyFoo_field2_struct_setter&& field2_) {
     field2_ref() = std::forward<T_TerseOptionalLazyFoo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;

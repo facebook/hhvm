@@ -904,7 +904,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField_ref() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
@@ -922,7 +922,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyStringField_ref() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
+  [[deprecated("Use `FOO.MyStringField() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
   ::std::string& set_MyStringField(T_MyStruct_MyStringField_struct_setter&& MyStringField_) {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
@@ -934,7 +934,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyDataField" } */
   template <typename T_MyStruct_MyDataField_struct_setter = ::test::fixtures::basic::MyDataItemAlias>
-  [[deprecated("Use `FOO.MyDataField_ref() = BAR;` instead of `FOO.set_MyDataField(BAR);`")]]
+  [[deprecated("Use `FOO.MyDataField() = BAR;` instead of `FOO.set_MyDataField(BAR);`")]]
   ::test::fixtures::basic::MyDataItemAlias& set_MyDataField(T_MyStruct_MyDataField_struct_setter&& MyDataField_) {
     MyDataField_ref() = std::forward<T_MyStruct_MyDataField_struct_setter>(MyDataField_);
     return __fbthrift_field_MyDataField;
@@ -946,7 +946,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myEnum" } */
-  [[deprecated("Use `FOO.myEnum_ref() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
+  [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
   ::test::fixtures::basic::MyEnum& set_myEnum(::test::fixtures::basic::MyEnum myEnum_) {
     myEnum_ref() = myEnum_;
     return __fbthrift_field_myEnum;
@@ -958,7 +958,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "oneway" } */
-  [[deprecated("Use `FOO.oneway_ref() = BAR;` instead of `FOO.set_oneway(BAR);`")]]
+  [[deprecated("Use `FOO.oneway() = BAR;` instead of `FOO.set_oneway(BAR);`")]]
   bool& set_oneway(bool oneway_) {
     oneway_ref() = oneway_;
     return __fbthrift_field_oneway;
@@ -970,7 +970,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "readonly" } */
-  [[deprecated("Use `FOO.readonly_ref() = BAR;` instead of `FOO.set_readonly(BAR);`")]]
+  [[deprecated("Use `FOO.readonly() = BAR;` instead of `FOO.set_readonly(BAR);`")]]
   bool& set_readonly(bool readonly_) {
     readonly_ref() = readonly_;
     return __fbthrift_field_readonly;
@@ -982,7 +982,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "idempotent" } */
-  [[deprecated("Use `FOO.idempotent_ref() = BAR;` instead of `FOO.set_idempotent(BAR);`")]]
+  [[deprecated("Use `FOO.idempotent() = BAR;` instead of `FOO.set_idempotent(BAR);`")]]
   bool& set_idempotent(bool idempotent_) {
     idempotent_ref() = idempotent_;
     return __fbthrift_field_idempotent;
@@ -994,7 +994,7 @@ class MyStruct final  {
 
   /** Glean { "field": "floatSet" } */
   template <typename T_MyStruct_floatSet_struct_setter = ::std::set<float>>
-  [[deprecated("Use `FOO.floatSet_ref() = BAR;` instead of `FOO.set_floatSet(BAR);`")]]
+  [[deprecated("Use `FOO.floatSet() = BAR;` instead of `FOO.set_floatSet(BAR);`")]]
   ::std::set<float>& set_floatSet(T_MyStruct_floatSet_struct_setter&& floatSet_) {
     floatSet_ref() = std::forward<T_MyStruct_floatSet_struct_setter>(floatSet_);
     return __fbthrift_field_floatSet;
@@ -1012,7 +1012,7 @@ class MyStruct final  {
 
   /** Glean { "field": "no_hack_codegen_field" } */
   template <typename T_MyStruct_no_hack_codegen_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.no_hack_codegen_field_ref() = BAR;` instead of `FOO.set_no_hack_codegen_field(BAR);`")]]
+  [[deprecated("Use `FOO.no_hack_codegen_field() = BAR;` instead of `FOO.set_no_hack_codegen_field(BAR);`")]]
   ::std::string& set_no_hack_codegen_field(T_MyStruct_no_hack_codegen_field_struct_setter&& no_hack_codegen_field_) {
     no_hack_codegen_field_ref() = std::forward<T_MyStruct_no_hack_codegen_field_struct_setter>(no_hack_codegen_field_);
     return __fbthrift_field_no_hack_codegen_field;
@@ -1280,7 +1280,7 @@ class Containers final  {
 
   /** Glean { "field": "I32List" } */
   template <typename T_Containers_I32List_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.I32List_ref() = BAR;` instead of `FOO.set_I32List(BAR);`")]]
+  [[deprecated("Use `FOO.I32List() = BAR;` instead of `FOO.set_I32List(BAR);`")]]
   ::std::vector<::std::int32_t>& set_I32List(T_Containers_I32List_struct_setter&& I32List_) {
     I32List_ref() = std::forward<T_Containers_I32List_struct_setter>(I32List_);
     return __fbthrift_field_I32List;
@@ -1292,7 +1292,7 @@ class Containers final  {
 
   /** Glean { "field": "StringSet" } */
   template <typename T_Containers_StringSet_struct_setter = ::std::set<::std::string>>
-  [[deprecated("Use `FOO.StringSet_ref() = BAR;` instead of `FOO.set_StringSet(BAR);`")]]
+  [[deprecated("Use `FOO.StringSet() = BAR;` instead of `FOO.set_StringSet(BAR);`")]]
   ::std::set<::std::string>& set_StringSet(T_Containers_StringSet_struct_setter&& StringSet_) {
     StringSet_ref() = std::forward<T_Containers_StringSet_struct_setter>(StringSet_);
     return __fbthrift_field_StringSet;
@@ -1304,7 +1304,7 @@ class Containers final  {
 
   /** Glean { "field": "StringToI64Map" } */
   template <typename T_Containers_StringToI64Map_struct_setter = ::std::map<::std::string, ::std::int64_t>>
-  [[deprecated("Use `FOO.StringToI64Map_ref() = BAR;` instead of `FOO.set_StringToI64Map(BAR);`")]]
+  [[deprecated("Use `FOO.StringToI64Map() = BAR;` instead of `FOO.set_StringToI64Map(BAR);`")]]
   ::std::map<::std::string, ::std::int64_t>& set_StringToI64Map(T_Containers_StringToI64Map_struct_setter&& StringToI64Map_) {
     StringToI64Map_ref() = std::forward<T_Containers_StringToI64Map_struct_setter>(StringToI64Map_);
     return __fbthrift_field_StringToI64Map;
@@ -2079,7 +2079,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField_ref() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
@@ -2097,7 +2097,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyException_MyStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyStringField_ref() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
+  [[deprecated("Use `FOO.MyStringField() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
   ::std::string& set_MyStringField(T_MyException_MyStringField_struct_setter&& MyStringField_) {
     MyStringField_ref() = std::forward<T_MyException_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
@@ -2109,7 +2109,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "myStruct" } */
   template <typename T_MyException_myStruct_struct_setter = ::test::fixtures::basic::MyStruct>
-  [[deprecated("Use `FOO.myStruct_ref() = BAR;` instead of `FOO.set_myStruct(BAR);`")]]
+  [[deprecated("Use `FOO.myStruct() = BAR;` instead of `FOO.set_myStruct(BAR);`")]]
   ::test::fixtures::basic::MyStruct& set_myStruct(T_MyException_myStruct_struct_setter&& myStruct_) {
     myStruct_ref() = std::forward<T_MyException_myStruct_struct_setter>(myStruct_);
     return __fbthrift_field_myStruct;
@@ -2121,7 +2121,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "myUnion" } */
   template <typename T_MyException_myUnion_struct_setter = ::test::fixtures::basic::MyUnion>
-  [[deprecated("Use `FOO.myUnion_ref() = BAR;` instead of `FOO.set_myUnion(BAR);`")]]
+  [[deprecated("Use `FOO.myUnion() = BAR;` instead of `FOO.set_myUnion(BAR);`")]]
   ::test::fixtures::basic::MyUnion& set_myUnion(T_MyException_myUnion_struct_setter&& myUnion_) {
     myUnion_ref() = std::forward<T_MyException_myUnion_struct_setter>(myUnion_);
     return __fbthrift_field_myUnion;
@@ -2452,7 +2452,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
   }
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField_ref() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
@@ -2470,7 +2470,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyExceptionWithMessage_MyStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyStringField_ref() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
+  [[deprecated("Use `FOO.MyStringField() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
   ::std::string& set_MyStringField(T_MyExceptionWithMessage_MyStringField_struct_setter&& MyStringField_) {
     MyStringField_ref() = std::forward<T_MyExceptionWithMessage_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
@@ -2482,7 +2482,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "myStruct" } */
   template <typename T_MyExceptionWithMessage_myStruct_struct_setter = ::test::fixtures::basic::MyStruct>
-  [[deprecated("Use `FOO.myStruct_ref() = BAR;` instead of `FOO.set_myStruct(BAR);`")]]
+  [[deprecated("Use `FOO.myStruct() = BAR;` instead of `FOO.set_myStruct(BAR);`")]]
   ::test::fixtures::basic::MyStruct& set_myStruct(T_MyExceptionWithMessage_myStruct_struct_setter&& myStruct_) {
     myStruct_ref() = std::forward<T_MyExceptionWithMessage_myStruct_struct_setter>(myStruct_);
     return __fbthrift_field_myStruct;
@@ -2494,7 +2494,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "myUnion" } */
   template <typename T_MyExceptionWithMessage_myUnion_struct_setter = ::test::fixtures::basic::MyUnion>
-  [[deprecated("Use `FOO.myUnion_ref() = BAR;` instead of `FOO.set_myUnion(BAR);`")]]
+  [[deprecated("Use `FOO.myUnion() = BAR;` instead of `FOO.set_myUnion(BAR);`")]]
   ::test::fixtures::basic::MyUnion& set_myUnion(T_MyExceptionWithMessage_myUnion_struct_setter&& myUnion_) {
     myUnion_ref() = std::forward<T_MyExceptionWithMessage_myUnion_struct_setter>(myUnion_);
     return __fbthrift_field_myUnion;
@@ -2661,7 +2661,7 @@ class ReservedKeyword final  {
   }
 
   /** Glean { "field": "reserved_field" } */
-  [[deprecated("Use `FOO.reserved_field_ref() = BAR;` instead of `FOO.set_reserved_field(BAR);`")]]
+  [[deprecated("Use `FOO.reserved_field() = BAR;` instead of `FOO.set_reserved_field(BAR);`")]]
   ::std::int32_t& set_reserved_field(::std::int32_t reserved_field_) {
     reserved_field_ref() = reserved_field_;
     return __fbthrift_field_reserved_field;

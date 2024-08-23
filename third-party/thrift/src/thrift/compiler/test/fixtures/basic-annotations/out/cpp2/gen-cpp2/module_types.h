@@ -845,7 +845,7 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "majorVer" } */
-  [[deprecated("Use `FOO.majorVer_ref() = BAR;` instead of `FOO.set_majorVer(BAR);`")]]
+  [[deprecated("Use `FOO.majorVer() = BAR;` instead of `FOO.set_majorVer(BAR);`")]]
   ::std::int64_t& set_majorVer(::std::int64_t majorVer_) {
     majorVer_ref() = majorVer_;
     return __fbthrift_field_majorVer;
@@ -863,7 +863,7 @@ class YourStruct final  {
 
   /** Glean { "field": "abstract" } */
   template <typename T_YourStruct_abstract_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.abstract_ref() = BAR;` instead of `FOO.set_abstract(BAR);`")]]
+  [[deprecated("Use `FOO.abstract() = BAR;` instead of `FOO.set_abstract(BAR);`")]]
   ::std::string& set_abstract(T_YourStruct_abstract_struct_setter&& abstract_) {
     abstract_ref() = std::forward<T_YourStruct_abstract_struct_setter>(abstract_);
     return __fbthrift_field_abstract;
@@ -881,7 +881,7 @@ class YourStruct final  {
 
   /** Glean { "field": "annotation_with_quote" } */
   template <typename T_YourStruct_annotation_with_quote_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.annotation_with_quote_ref() = BAR;` instead of `FOO.set_annotation_with_quote(BAR);`")]]
+  [[deprecated("Use `FOO.annotation_with_quote() = BAR;` instead of `FOO.set_annotation_with_quote(BAR);`")]]
   ::std::string& set_annotation_with_quote(T_YourStruct_annotation_with_quote_struct_setter&& annotation_with_quote_) {
     annotation_with_quote_ref() = std::forward<T_YourStruct_annotation_with_quote_struct_setter>(annotation_with_quote_);
     return __fbthrift_field_annotation_with_quote;
@@ -899,7 +899,7 @@ class YourStruct final  {
 
   /** Glean { "field": "class_" } */
   template <typename T_YourStruct_class__struct_setter = ::std::string>
-  [[deprecated("Use `FOO.class__ref() = BAR;` instead of `FOO.set_class_(BAR);`")]]
+  [[deprecated("Use `FOO.class_() = BAR;` instead of `FOO.set_class_(BAR);`")]]
   ::std::string& set_class_(T_YourStruct_class__struct_setter&& class__) {
     class__ref() = std::forward<T_YourStruct_class__struct_setter>(class__);
     return __fbthrift_field_class_;
@@ -917,7 +917,7 @@ class YourStruct final  {
 
   /** Glean { "field": "annotation_with_trailing_comma" } */
   template <typename T_YourStruct_annotation_with_trailing_comma_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.annotation_with_trailing_comma_ref() = BAR;` instead of `FOO.set_annotation_with_trailing_comma(BAR);`")]]
+  [[deprecated("Use `FOO.annotation_with_trailing_comma() = BAR;` instead of `FOO.set_annotation_with_trailing_comma(BAR);`")]]
   ::std::string& set_annotation_with_trailing_comma(T_YourStruct_annotation_with_trailing_comma_struct_setter&& annotation_with_trailing_comma_) {
     annotation_with_trailing_comma_ref() = std::forward<T_YourStruct_annotation_with_trailing_comma_struct_setter>(annotation_with_trailing_comma_);
     return __fbthrift_field_annotation_with_trailing_comma;
@@ -935,7 +935,7 @@ class YourStruct final  {
 
   /** Glean { "field": "empty_annotations" } */
   template <typename T_YourStruct_empty_annotations_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.empty_annotations_ref() = BAR;` instead of `FOO.set_empty_annotations(BAR);`")]]
+  [[deprecated("Use `FOO.empty_annotations() = BAR;` instead of `FOO.set_empty_annotations(BAR);`")]]
   ::std::string& set_empty_annotations(T_YourStruct_empty_annotations_struct_setter&& empty_annotations_) {
     empty_annotations_ref() = std::forward<T_YourStruct_empty_annotations_struct_setter>(empty_annotations_);
     return __fbthrift_field_empty_annotations;
@@ -947,7 +947,7 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "my_enum" } */
-  [[deprecated("Use `FOO.my_enum_ref() = BAR;` instead of `FOO.set_my_enum(BAR);`")]]
+  [[deprecated("Use `FOO.my_enum() = BAR;` instead of `FOO.set_my_enum(BAR);`")]]
   ::cpp2::YourEnum& set_my_enum(::cpp2::YourEnum my_enum_) {
     my_enum_ref() = my_enum_;
     return __fbthrift_field_my_enum;
@@ -959,7 +959,7 @@ class YourStruct final  {
 
   /** Glean { "field": "cpp_type_annotation" } */
   template <typename T_YourStruct_cpp_type_annotation_struct_setter = ::cpp2::list_string_6884>
-  [[deprecated("Use `FOO.cpp_type_annotation_ref() = BAR;` instead of `FOO.set_cpp_type_annotation(BAR);`")]]
+  [[deprecated("Use `FOO.cpp_type_annotation() = BAR;` instead of `FOO.set_cpp_type_annotation(BAR);`")]]
   ::cpp2::list_string_6884& set_cpp_type_annotation(T_YourStruct_cpp_type_annotation_struct_setter&& cpp_type_annotation_) {
     cpp_type_annotation_ref() = std::forward<T_YourStruct_cpp_type_annotation_struct_setter>(cpp_type_annotation_);
     return __fbthrift_field_cpp_type_annotation;
@@ -1135,7 +1135,7 @@ class MyStructNestedAnnotation final  {
 
   /** Glean { "field": "name" } */
   template <typename T_MyStructNestedAnnotation_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_MyStructNestedAnnotation_name_struct_setter&& name_) {
     name_ref() = std::forward<T_MyStructNestedAnnotation_name_struct_setter>(name_);
     return __fbthrift_field_name;
@@ -1461,7 +1461,7 @@ class SecretStruct final  {
   }
 
   /** Glean { "field": "id" } */
-  [[deprecated("Use `FOO.id_ref() = BAR;` instead of `FOO.set_id(BAR);`")]]
+  [[deprecated("Use `FOO.id() = BAR;` instead of `FOO.set_id(BAR);`")]]
   ::std::int64_t& set_id(::std::int64_t id_) {
     id_ref() = id_;
     return __fbthrift_field_id;
@@ -1479,7 +1479,7 @@ class SecretStruct final  {
 
   /** Glean { "field": "password" } */
   template <typename T_SecretStruct_password_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.password_ref() = BAR;` instead of `FOO.set_password(BAR);`")]]
+  [[deprecated("Use `FOO.password() = BAR;` instead of `FOO.set_password(BAR);`")]]
   ::std::string& set_password(T_SecretStruct_password_struct_setter&& password_) {
     password_ref() = std::forward<T_SecretStruct_password_struct_setter>(password_);
     return __fbthrift_field_password;

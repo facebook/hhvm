@@ -956,7 +956,7 @@ class MyStructFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "myLongField" } */
-  [[deprecated("Use `FOO.myLongField_ref() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
+  [[deprecated("Use `FOO.myLongField() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
   ::std::int64_t& set_myLongField(::std::int64_t myLongField_) {
     myLongField_ref() = myLongField_;
     return __fbthrift_field_myLongField;
@@ -968,7 +968,7 @@ class MyStructFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "MyByteField" } */
-  [[deprecated("Use `FOO.MyByteField_ref() = BAR;` instead of `FOO.set_MyByteField(BAR);`")]]
+  [[deprecated("Use `FOO.MyByteField() = BAR;` instead of `FOO.set_MyByteField(BAR);`")]]
   ::std::int8_t& set_MyByteField(::std::int8_t MyByteField_) {
     MyByteField_ref() = MyByteField_;
     return __fbthrift_field_MyByteField;
@@ -986,7 +986,7 @@ class MyStructFloatFieldThrowExp final  {
 
   /** Glean { "field": "myStringField" } */
   template <typename T_MyStructFloatFieldThrowExp_myStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.myStringField_ref() = BAR;` instead of `FOO.set_myStringField(BAR);`")]]
+  [[deprecated("Use `FOO.myStringField() = BAR;` instead of `FOO.set_myStringField(BAR);`")]]
   ::std::string& set_myStringField(T_MyStructFloatFieldThrowExp_myStringField_struct_setter&& myStringField_) {
     myStringField_ref() = std::forward<T_MyStructFloatFieldThrowExp_myStringField_struct_setter>(myStringField_);
     return __fbthrift_field_myStringField;
@@ -998,7 +998,7 @@ class MyStructFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "myFloatField" } */
-  [[deprecated("Use `FOO.myFloatField_ref() = BAR;` instead of `FOO.set_myFloatField(BAR);`")]]
+  [[deprecated("Use `FOO.myFloatField() = BAR;` instead of `FOO.set_myFloatField(BAR);`")]]
   float& set_myFloatField(float myFloatField_) {
     myFloatField_ref() = myFloatField_;
     return __fbthrift_field_myFloatField;
@@ -1213,7 +1213,7 @@ class MyStructMapFloatThrowExp final  {
   }
 
   /** Glean { "field": "myLongField" } */
-  [[deprecated("Use `FOO.myLongField_ref() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
+  [[deprecated("Use `FOO.myLongField() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
   ::std::int64_t& set_myLongField(::std::int64_t myLongField_) {
     myLongField_ref() = myLongField_;
     return __fbthrift_field_myLongField;
@@ -1225,7 +1225,7 @@ class MyStructMapFloatThrowExp final  {
 
   /** Glean { "field": "mapListOfFloats" } */
   template <typename T_MyStructMapFloatThrowExp_mapListOfFloats_struct_setter = ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>>
-  [[deprecated("Use `FOO.mapListOfFloats_ref() = BAR;` instead of `FOO.set_mapListOfFloats(BAR);`")]]
+  [[deprecated("Use `FOO.mapListOfFloats() = BAR;` instead of `FOO.set_mapListOfFloats(BAR);`")]]
   ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& set_mapListOfFloats(T_MyStructMapFloatThrowExp_mapListOfFloats_struct_setter&& mapListOfFloats_) {
     mapListOfFloats_ref() = std::forward<T_MyStructMapFloatThrowExp_mapListOfFloats_struct_setter>(mapListOfFloats_);
     return __fbthrift_field_mapListOfFloats;
@@ -2887,7 +2887,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField_ref() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
@@ -2905,7 +2905,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyStringField_ref() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
+  [[deprecated("Use `FOO.MyStringField() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
   ::std::string& set_MyStringField(T_MyStruct_MyStringField_struct_setter&& MyStringField_) {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
@@ -2917,7 +2917,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyDataField" } */
   template <typename T_MyStruct_MyDataField_struct_setter = ::cpp2::MyDataItem>
-  [[deprecated("Use `FOO.MyDataField_ref() = BAR;` instead of `FOO.set_MyDataField(BAR);`")]]
+  [[deprecated("Use `FOO.MyDataField() = BAR;` instead of `FOO.set_MyDataField(BAR);`")]]
   ::cpp2::MyDataItem& set_MyDataField(T_MyStruct_MyDataField_struct_setter&& MyDataField_) {
     MyDataField_ref() = std::forward<T_MyStruct_MyDataField_struct_setter>(MyDataField_);
     return __fbthrift_field_MyDataField;
@@ -2929,7 +2929,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myEnum" } */
-  [[deprecated("Use `FOO.myEnum_ref() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
+  [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_) {
     myEnum_ref() = myEnum_;
     return __fbthrift_field_myEnum;
@@ -2941,7 +2941,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyBoolField" } */
-  [[deprecated("Use `FOO.MyBoolField_ref() = BAR;` instead of `FOO.set_MyBoolField(BAR);`")]]
+  [[deprecated("Use `FOO.MyBoolField() = BAR;` instead of `FOO.set_MyBoolField(BAR);`")]]
   bool& set_MyBoolField(bool MyBoolField_) {
     MyBoolField_ref() = MyBoolField_;
     return __fbthrift_field_MyBoolField;
@@ -2953,7 +2953,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyByteField" } */
-  [[deprecated("Use `FOO.MyByteField_ref() = BAR;` instead of `FOO.set_MyByteField(BAR);`")]]
+  [[deprecated("Use `FOO.MyByteField() = BAR;` instead of `FOO.set_MyByteField(BAR);`")]]
   ::std::int8_t& set_MyByteField(::std::int8_t MyByteField_) {
     MyByteField_ref() = MyByteField_;
     return __fbthrift_field_MyByteField;
@@ -2965,7 +2965,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyShortField" } */
-  [[deprecated("Use `FOO.MyShortField_ref() = BAR;` instead of `FOO.set_MyShortField(BAR);`")]]
+  [[deprecated("Use `FOO.MyShortField() = BAR;` instead of `FOO.set_MyShortField(BAR);`")]]
   ::std::int16_t& set_MyShortField(::std::int16_t MyShortField_) {
     MyShortField_ref() = MyShortField_;
     return __fbthrift_field_MyShortField;
@@ -2977,7 +2977,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyLongField" } */
-  [[deprecated("Use `FOO.MyLongField_ref() = BAR;` instead of `FOO.set_MyLongField(BAR);`")]]
+  [[deprecated("Use `FOO.MyLongField() = BAR;` instead of `FOO.set_MyLongField(BAR);`")]]
   ::std::int64_t& set_MyLongField(::std::int64_t MyLongField_) {
     MyLongField_ref() = MyLongField_;
     return __fbthrift_field_MyLongField;
@@ -2989,7 +2989,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyDoubleField" } */
-  [[deprecated("Use `FOO.MyDoubleField_ref() = BAR;` instead of `FOO.set_MyDoubleField(BAR);`")]]
+  [[deprecated("Use `FOO.MyDoubleField() = BAR;` instead of `FOO.set_MyDoubleField(BAR);`")]]
   double& set_MyDoubleField(double MyDoubleField_) {
     MyDoubleField_ref() = MyDoubleField_;
     return __fbthrift_field_MyDoubleField;
@@ -3001,7 +3001,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lDouble" } */
   template <typename T_MyStruct_lDouble_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.lDouble_ref() = BAR;` instead of `FOO.set_lDouble(BAR);`")]]
+  [[deprecated("Use `FOO.lDouble() = BAR;` instead of `FOO.set_lDouble(BAR);`")]]
   ::std::vector<double>& set_lDouble(T_MyStruct_lDouble_struct_setter&& lDouble_) {
     lDouble_ref() = std::forward<T_MyStruct_lDouble_struct_setter>(lDouble_);
     return __fbthrift_field_lDouble;
@@ -3013,7 +3013,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lShort" } */
   template <typename T_MyStruct_lShort_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.lShort_ref() = BAR;` instead of `FOO.set_lShort(BAR);`")]]
+  [[deprecated("Use `FOO.lShort() = BAR;` instead of `FOO.set_lShort(BAR);`")]]
   ::std::vector<::std::int16_t>& set_lShort(T_MyStruct_lShort_struct_setter&& lShort_) {
     lShort_ref() = std::forward<T_MyStruct_lShort_struct_setter>(lShort_);
     return __fbthrift_field_lShort;
@@ -3025,7 +3025,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lInteger" } */
   template <typename T_MyStruct_lInteger_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.lInteger_ref() = BAR;` instead of `FOO.set_lInteger(BAR);`")]]
+  [[deprecated("Use `FOO.lInteger() = BAR;` instead of `FOO.set_lInteger(BAR);`")]]
   ::std::vector<::std::int32_t>& set_lInteger(T_MyStruct_lInteger_struct_setter&& lInteger_) {
     lInteger_ref() = std::forward<T_MyStruct_lInteger_struct_setter>(lInteger_);
     return __fbthrift_field_lInteger;
@@ -3037,7 +3037,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lLong" } */
   template <typename T_MyStruct_lLong_struct_setter = ::std::vector<::std::int64_t>>
-  [[deprecated("Use `FOO.lLong_ref() = BAR;` instead of `FOO.set_lLong(BAR);`")]]
+  [[deprecated("Use `FOO.lLong() = BAR;` instead of `FOO.set_lLong(BAR);`")]]
   ::std::vector<::std::int64_t>& set_lLong(T_MyStruct_lLong_struct_setter&& lLong_) {
     lLong_ref() = std::forward<T_MyStruct_lLong_struct_setter>(lLong_);
     return __fbthrift_field_lLong;
@@ -3049,7 +3049,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lString" } */
   template <typename T_MyStruct_lString_struct_setter = ::std::vector<::std::string>>
-  [[deprecated("Use `FOO.lString_ref() = BAR;` instead of `FOO.set_lString(BAR);`")]]
+  [[deprecated("Use `FOO.lString() = BAR;` instead of `FOO.set_lString(BAR);`")]]
   ::std::vector<::std::string>& set_lString(T_MyStruct_lString_struct_setter&& lString_) {
     lString_ref() = std::forward<T_MyStruct_lString_struct_setter>(lString_);
     return __fbthrift_field_lString;
@@ -3061,7 +3061,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lBool" } */
   template <typename T_MyStruct_lBool_struct_setter = ::std::vector<bool>>
-  [[deprecated("Use `FOO.lBool_ref() = BAR;` instead of `FOO.set_lBool(BAR);`")]]
+  [[deprecated("Use `FOO.lBool() = BAR;` instead of `FOO.set_lBool(BAR);`")]]
   ::std::vector<bool>& set_lBool(T_MyStruct_lBool_struct_setter&& lBool_) {
     lBool_ref() = std::forward<T_MyStruct_lBool_struct_setter>(lBool_);
     return __fbthrift_field_lBool;
@@ -3073,7 +3073,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lByte" } */
   template <typename T_MyStruct_lByte_struct_setter = ::std::vector<::std::int8_t>>
-  [[deprecated("Use `FOO.lByte_ref() = BAR;` instead of `FOO.set_lByte(BAR);`")]]
+  [[deprecated("Use `FOO.lByte() = BAR;` instead of `FOO.set_lByte(BAR);`")]]
   ::std::vector<::std::int8_t>& set_lByte(T_MyStruct_lByte_struct_setter&& lByte_) {
     lByte_ref() = std::forward<T_MyStruct_lByte_struct_setter>(lByte_);
     return __fbthrift_field_lByte;
@@ -3085,7 +3085,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mShortString" } */
   template <typename T_MyStruct_mShortString_struct_setter = ::std::map<::std::int16_t, ::std::string>>
-  [[deprecated("Use `FOO.mShortString_ref() = BAR;` instead of `FOO.set_mShortString(BAR);`")]]
+  [[deprecated("Use `FOO.mShortString() = BAR;` instead of `FOO.set_mShortString(BAR);`")]]
   ::std::map<::std::int16_t, ::std::string>& set_mShortString(T_MyStruct_mShortString_struct_setter&& mShortString_) {
     mShortString_ref() = std::forward<T_MyStruct_mShortString_struct_setter>(mShortString_);
     return __fbthrift_field_mShortString;
@@ -3097,7 +3097,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mIntegerString" } */
   template <typename T_MyStruct_mIntegerString_struct_setter = ::std::map<::std::int32_t, ::std::string>>
-  [[deprecated("Use `FOO.mIntegerString_ref() = BAR;` instead of `FOO.set_mIntegerString(BAR);`")]]
+  [[deprecated("Use `FOO.mIntegerString() = BAR;` instead of `FOO.set_mIntegerString(BAR);`")]]
   ::std::map<::std::int32_t, ::std::string>& set_mIntegerString(T_MyStruct_mIntegerString_struct_setter&& mIntegerString_) {
     mIntegerString_ref() = std::forward<T_MyStruct_mIntegerString_struct_setter>(mIntegerString_);
     return __fbthrift_field_mIntegerString;
@@ -3109,7 +3109,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mStringMyStruct" } */
   template <typename T_MyStruct_mStringMyStruct_struct_setter = ::std::map<::std::string, ::cpp2::MyStruct>>
-  [[deprecated("Use `FOO.mStringMyStruct_ref() = BAR;` instead of `FOO.set_mStringMyStruct(BAR);`")]]
+  [[deprecated("Use `FOO.mStringMyStruct() = BAR;` instead of `FOO.set_mStringMyStruct(BAR);`")]]
   ::std::map<::std::string, ::cpp2::MyStruct>& set_mStringMyStruct(T_MyStruct_mStringMyStruct_struct_setter&& mStringMyStruct_) {
     mStringMyStruct_ref() = std::forward<T_MyStruct_mStringMyStruct_struct_setter>(mStringMyStruct_);
     return __fbthrift_field_mStringMyStruct;
@@ -3121,7 +3121,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mStringBool" } */
   template <typename T_MyStruct_mStringBool_struct_setter = ::std::map<::std::string, bool>>
-  [[deprecated("Use `FOO.mStringBool_ref() = BAR;` instead of `FOO.set_mStringBool(BAR);`")]]
+  [[deprecated("Use `FOO.mStringBool() = BAR;` instead of `FOO.set_mStringBool(BAR);`")]]
   ::std::map<::std::string, bool>& set_mStringBool(T_MyStruct_mStringBool_struct_setter&& mStringBool_) {
     mStringBool_ref() = std::forward<T_MyStruct_mStringBool_struct_setter>(mStringBool_);
     return __fbthrift_field_mStringBool;
@@ -3133,7 +3133,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mIntegerInteger" } */
   template <typename T_MyStruct_mIntegerInteger_struct_setter = ::std::map<::std::int32_t, ::std::int32_t>>
-  [[deprecated("Use `FOO.mIntegerInteger_ref() = BAR;` instead of `FOO.set_mIntegerInteger(BAR);`")]]
+  [[deprecated("Use `FOO.mIntegerInteger() = BAR;` instead of `FOO.set_mIntegerInteger(BAR);`")]]
   ::std::map<::std::int32_t, ::std::int32_t>& set_mIntegerInteger(T_MyStruct_mIntegerInteger_struct_setter&& mIntegerInteger_) {
     mIntegerInteger_ref() = std::forward<T_MyStruct_mIntegerInteger_struct_setter>(mIntegerInteger_);
     return __fbthrift_field_mIntegerInteger;
@@ -3145,7 +3145,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mIntegerBool" } */
   template <typename T_MyStruct_mIntegerBool_struct_setter = ::std::map<::std::int32_t, bool>>
-  [[deprecated("Use `FOO.mIntegerBool_ref() = BAR;` instead of `FOO.set_mIntegerBool(BAR);`")]]
+  [[deprecated("Use `FOO.mIntegerBool() = BAR;` instead of `FOO.set_mIntegerBool(BAR);`")]]
   ::std::map<::std::int32_t, bool>& set_mIntegerBool(T_MyStruct_mIntegerBool_struct_setter&& mIntegerBool_) {
     mIntegerBool_ref() = std::forward<T_MyStruct_mIntegerBool_struct_setter>(mIntegerBool_);
     return __fbthrift_field_mIntegerBool;
@@ -3157,7 +3157,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sShort" } */
   template <typename T_MyStruct_sShort_struct_setter = ::std::set<::std::int16_t>>
-  [[deprecated("Use `FOO.sShort_ref() = BAR;` instead of `FOO.set_sShort(BAR);`")]]
+  [[deprecated("Use `FOO.sShort() = BAR;` instead of `FOO.set_sShort(BAR);`")]]
   ::std::set<::std::int16_t>& set_sShort(T_MyStruct_sShort_struct_setter&& sShort_) {
     sShort_ref() = std::forward<T_MyStruct_sShort_struct_setter>(sShort_);
     return __fbthrift_field_sShort;
@@ -3169,7 +3169,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sMyStruct" } */
   template <typename T_MyStruct_sMyStruct_struct_setter = ::std::set<::cpp2::MyStruct>>
-  [[deprecated("Use `FOO.sMyStruct_ref() = BAR;` instead of `FOO.set_sMyStruct(BAR);`")]]
+  [[deprecated("Use `FOO.sMyStruct() = BAR;` instead of `FOO.set_sMyStruct(BAR);`")]]
   ::std::set<::cpp2::MyStruct>& set_sMyStruct(T_MyStruct_sMyStruct_struct_setter&& sMyStruct_) {
     sMyStruct_ref() = std::forward<T_MyStruct_sMyStruct_struct_setter>(sMyStruct_);
     return __fbthrift_field_sMyStruct;
@@ -3181,7 +3181,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sLong" } */
   template <typename T_MyStruct_sLong_struct_setter = ::std::set<::std::int64_t>>
-  [[deprecated("Use `FOO.sLong_ref() = BAR;` instead of `FOO.set_sLong(BAR);`")]]
+  [[deprecated("Use `FOO.sLong() = BAR;` instead of `FOO.set_sLong(BAR);`")]]
   ::std::set<::std::int64_t>& set_sLong(T_MyStruct_sLong_struct_setter&& sLong_) {
     sLong_ref() = std::forward<T_MyStruct_sLong_struct_setter>(sLong_);
     return __fbthrift_field_sLong;
@@ -3193,7 +3193,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sString" } */
   template <typename T_MyStruct_sString_struct_setter = ::std::set<::std::string>>
-  [[deprecated("Use `FOO.sString_ref() = BAR;` instead of `FOO.set_sString(BAR);`")]]
+  [[deprecated("Use `FOO.sString() = BAR;` instead of `FOO.set_sString(BAR);`")]]
   ::std::set<::std::string>& set_sString(T_MyStruct_sString_struct_setter&& sString_) {
     sString_ref() = std::forward<T_MyStruct_sString_struct_setter>(sString_);
     return __fbthrift_field_sString;
@@ -3205,7 +3205,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sByte" } */
   template <typename T_MyStruct_sByte_struct_setter = ::std::set<::std::int8_t>>
-  [[deprecated("Use `FOO.sByte_ref() = BAR;` instead of `FOO.set_sByte(BAR);`")]]
+  [[deprecated("Use `FOO.sByte() = BAR;` instead of `FOO.set_sByte(BAR);`")]]
   ::std::set<::std::int8_t>& set_sByte(T_MyStruct_sByte_struct_setter&& sByte_) {
     sByte_ref() = std::forward<T_MyStruct_sByte_struct_setter>(sByte_);
     return __fbthrift_field_sByte;
@@ -3217,7 +3217,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mListList" } */
   template <typename T_MyStruct_mListList_struct_setter = ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>>>
-  [[deprecated("Use `FOO.mListList_ref() = BAR;` instead of `FOO.set_mListList(BAR);`")]]
+  [[deprecated("Use `FOO.mListList() = BAR;` instead of `FOO.set_mListList(BAR);`")]]
   ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>>& set_mListList(T_MyStruct_mListList_struct_setter&& mListList_) {
     mListList_ref() = std::forward<T_MyStruct_mListList_struct_setter>(mListList_);
     return __fbthrift_field_mListList;
@@ -3432,7 +3432,7 @@ class SimpleStruct final  {
   }
 
   /** Glean { "field": "age" } */
-  [[deprecated("Use `FOO.age_ref() = BAR;` instead of `FOO.set_age(BAR);`")]]
+  [[deprecated("Use `FOO.age() = BAR;` instead of `FOO.set_age(BAR);`")]]
   ::std::int64_t& set_age(::std::int64_t age_) {
     age_ref() = age_;
     return __fbthrift_field_age;
@@ -3450,7 +3450,7 @@ class SimpleStruct final  {
 
   /** Glean { "field": "name" } */
   template <typename T_SimpleStruct_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name_ref() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
   ::std::string& set_name(T_SimpleStruct_name_struct_setter&& name_) {
     name_ref() = std::forward<T_SimpleStruct_name_struct_setter>(name_);
     return __fbthrift_field_name;
@@ -4497,7 +4497,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "setOfSetOfInt" } */
   template <typename T_ComplexNestedStruct_setOfSetOfInt_struct_setter = ::std::set<::std::set<::std::int32_t>>>
-  [[deprecated("Use `FOO.setOfSetOfInt_ref() = BAR;` instead of `FOO.set_setOfSetOfInt(BAR);`")]]
+  [[deprecated("Use `FOO.setOfSetOfInt() = BAR;` instead of `FOO.set_setOfSetOfInt(BAR);`")]]
   ::std::set<::std::set<::std::int32_t>>& set_setOfSetOfInt(T_ComplexNestedStruct_setOfSetOfInt_struct_setter&& setOfSetOfInt_) {
     setOfSetOfInt_ref() = std::forward<T_ComplexNestedStruct_setOfSetOfInt_struct_setter>(setOfSetOfInt_);
     return __fbthrift_field_setOfSetOfInt;
@@ -4509,7 +4509,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listofListOfListOfListOfEnum" } */
   template <typename T_ComplexNestedStruct_listofListOfListOfListOfEnum_struct_setter = ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>>
-  [[deprecated("Use `FOO.listofListOfListOfListOfEnum_ref() = BAR;` instead of `FOO.set_listofListOfListOfListOfEnum(BAR);`")]]
+  [[deprecated("Use `FOO.listofListOfListOfListOfEnum() = BAR;` instead of `FOO.set_listofListOfListOfListOfEnum(BAR);`")]]
   ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& set_listofListOfListOfListOfEnum(T_ComplexNestedStruct_listofListOfListOfListOfEnum_struct_setter&& listofListOfListOfListOfEnum_) {
     listofListOfListOfListOfEnum_ref() = std::forward<T_ComplexNestedStruct_listofListOfListOfListOfEnum_struct_setter>(listofListOfListOfListOfEnum_);
     return __fbthrift_field_listofListOfListOfListOfEnum;
@@ -4521,7 +4521,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listOfListOfMyStruct" } */
   template <typename T_ComplexNestedStruct_listOfListOfMyStruct_struct_setter = ::std::vector<::std::vector<::cpp2::MyStruct>>>
-  [[deprecated("Use `FOO.listOfListOfMyStruct_ref() = BAR;` instead of `FOO.set_listOfListOfMyStruct(BAR);`")]]
+  [[deprecated("Use `FOO.listOfListOfMyStruct() = BAR;` instead of `FOO.set_listOfListOfMyStruct(BAR);`")]]
   ::std::vector<::std::vector<::cpp2::MyStruct>>& set_listOfListOfMyStruct(T_ComplexNestedStruct_listOfListOfMyStruct_struct_setter&& listOfListOfMyStruct_) {
     listOfListOfMyStruct_ref() = std::forward<T_ComplexNestedStruct_listOfListOfMyStruct_struct_setter>(listOfListOfMyStruct_);
     return __fbthrift_field_listOfListOfMyStruct;
@@ -4533,7 +4533,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "setOfListOfListOfLong" } */
   template <typename T_ComplexNestedStruct_setOfListOfListOfLong_struct_setter = ::std::set<::std::vector<::std::vector<::std::int64_t>>>>
-  [[deprecated("Use `FOO.setOfListOfListOfLong_ref() = BAR;` instead of `FOO.set_setOfListOfListOfLong(BAR);`")]]
+  [[deprecated("Use `FOO.setOfListOfListOfLong() = BAR;` instead of `FOO.set_setOfListOfListOfLong(BAR);`")]]
   ::std::set<::std::vector<::std::vector<::std::int64_t>>>& set_setOfListOfListOfLong(T_ComplexNestedStruct_setOfListOfListOfLong_struct_setter&& setOfListOfListOfLong_) {
     setOfListOfListOfLong_ref() = std::forward<T_ComplexNestedStruct_setOfListOfListOfLong_struct_setter>(setOfListOfListOfLong_);
     return __fbthrift_field_setOfListOfListOfLong;
@@ -4545,7 +4545,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "setOfSetOfsetOfLong" } */
   template <typename T_ComplexNestedStruct_setOfSetOfsetOfLong_struct_setter = ::std::set<::std::set<::std::set<::std::int64_t>>>>
-  [[deprecated("Use `FOO.setOfSetOfsetOfLong_ref() = BAR;` instead of `FOO.set_setOfSetOfsetOfLong(BAR);`")]]
+  [[deprecated("Use `FOO.setOfSetOfsetOfLong() = BAR;` instead of `FOO.set_setOfSetOfsetOfLong(BAR);`")]]
   ::std::set<::std::set<::std::set<::std::int64_t>>>& set_setOfSetOfsetOfLong(T_ComplexNestedStruct_setOfSetOfsetOfLong_struct_setter&& setOfSetOfsetOfLong_) {
     setOfSetOfsetOfLong_ref() = std::forward<T_ComplexNestedStruct_setOfSetOfsetOfLong_struct_setter>(setOfSetOfsetOfLong_);
     return __fbthrift_field_setOfSetOfsetOfLong;
@@ -4557,7 +4557,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapStructListOfListOfLong" } */
   template <typename T_ComplexNestedStruct_mapStructListOfListOfLong_struct_setter = ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>>
-  [[deprecated("Use `FOO.mapStructListOfListOfLong_ref() = BAR;` instead of `FOO.set_mapStructListOfListOfLong(BAR);`")]]
+  [[deprecated("Use `FOO.mapStructListOfListOfLong() = BAR;` instead of `FOO.set_mapStructListOfListOfLong(BAR);`")]]
   ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& set_mapStructListOfListOfLong(T_ComplexNestedStruct_mapStructListOfListOfLong_struct_setter&& mapStructListOfListOfLong_) {
     mapStructListOfListOfLong_ref() = std::forward<T_ComplexNestedStruct_mapStructListOfListOfLong_struct_setter>(mapStructListOfListOfLong_);
     return __fbthrift_field_mapStructListOfListOfLong;
@@ -4569,7 +4569,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mKeyStructValInt" } */
   template <typename T_ComplexNestedStruct_mKeyStructValInt_struct_setter = ::std::map<::cpp2::MyStruct, ::std::int32_t>>
-  [[deprecated("Use `FOO.mKeyStructValInt_ref() = BAR;` instead of `FOO.set_mKeyStructValInt(BAR);`")]]
+  [[deprecated("Use `FOO.mKeyStructValInt() = BAR;` instead of `FOO.set_mKeyStructValInt(BAR);`")]]
   ::std::map<::cpp2::MyStruct, ::std::int32_t>& set_mKeyStructValInt(T_ComplexNestedStruct_mKeyStructValInt_struct_setter&& mKeyStructValInt_) {
     mKeyStructValInt_ref() = std::forward<T_ComplexNestedStruct_mKeyStructValInt_struct_setter>(mKeyStructValInt_);
     return __fbthrift_field_mKeyStructValInt;
@@ -4581,7 +4581,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listOfMapKeyIntValInt" } */
   template <typename T_ComplexNestedStruct_listOfMapKeyIntValInt_struct_setter = ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>
-  [[deprecated("Use `FOO.listOfMapKeyIntValInt_ref() = BAR;` instead of `FOO.set_listOfMapKeyIntValInt(BAR);`")]]
+  [[deprecated("Use `FOO.listOfMapKeyIntValInt() = BAR;` instead of `FOO.set_listOfMapKeyIntValInt(BAR);`")]]
   ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& set_listOfMapKeyIntValInt(T_ComplexNestedStruct_listOfMapKeyIntValInt_struct_setter&& listOfMapKeyIntValInt_) {
     listOfMapKeyIntValInt_ref() = std::forward<T_ComplexNestedStruct_listOfMapKeyIntValInt_struct_setter>(listOfMapKeyIntValInt_);
     return __fbthrift_field_listOfMapKeyIntValInt;
@@ -4593,7 +4593,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listOfMapKeyStrValList" } */
   template <typename T_ComplexNestedStruct_listOfMapKeyStrValList_struct_setter = ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>>
-  [[deprecated("Use `FOO.listOfMapKeyStrValList_ref() = BAR;` instead of `FOO.set_listOfMapKeyStrValList(BAR);`")]]
+  [[deprecated("Use `FOO.listOfMapKeyStrValList() = BAR;` instead of `FOO.set_listOfMapKeyStrValList(BAR);`")]]
   ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& set_listOfMapKeyStrValList(T_ComplexNestedStruct_listOfMapKeyStrValList_struct_setter&& listOfMapKeyStrValList_) {
     listOfMapKeyStrValList_ref() = std::forward<T_ComplexNestedStruct_listOfMapKeyStrValList_struct_setter>(listOfMapKeyStrValList_);
     return __fbthrift_field_listOfMapKeyStrValList;
@@ -4605,7 +4605,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeySetValLong" } */
   template <typename T_ComplexNestedStruct_mapKeySetValLong_struct_setter = ::std::map<::std::set<::std::int32_t>, ::std::int64_t>>
-  [[deprecated("Use `FOO.mapKeySetValLong_ref() = BAR;` instead of `FOO.set_mapKeySetValLong(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeySetValLong() = BAR;` instead of `FOO.set_mapKeySetValLong(BAR);`")]]
   ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& set_mapKeySetValLong(T_ComplexNestedStruct_mapKeySetValLong_struct_setter&& mapKeySetValLong_) {
     mapKeySetValLong_ref() = std::forward<T_ComplexNestedStruct_mapKeySetValLong_struct_setter>(mapKeySetValLong_);
     return __fbthrift_field_mapKeySetValLong;
@@ -4617,7 +4617,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyListValLong" } */
   template <typename T_ComplexNestedStruct_mapKeyListValLong_struct_setter = ::std::map<::std::vector<::std::string>, ::std::int32_t>>
-  [[deprecated("Use `FOO.mapKeyListValLong_ref() = BAR;` instead of `FOO.set_mapKeyListValLong(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeyListValLong() = BAR;` instead of `FOO.set_mapKeyListValLong(BAR);`")]]
   ::std::map<::std::vector<::std::string>, ::std::int32_t>& set_mapKeyListValLong(T_ComplexNestedStruct_mapKeyListValLong_struct_setter&& mapKeyListValLong_) {
     mapKeyListValLong_ref() = std::forward<T_ComplexNestedStruct_mapKeyListValLong_struct_setter>(mapKeyListValLong_);
     return __fbthrift_field_mapKeyListValLong;
@@ -4629,7 +4629,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyMapValMap" } */
   template <typename T_ComplexNestedStruct_mapKeyMapValMap_struct_setter = ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>>
-  [[deprecated("Use `FOO.mapKeyMapValMap_ref() = BAR;` instead of `FOO.set_mapKeyMapValMap(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeyMapValMap() = BAR;` instead of `FOO.set_mapKeyMapValMap(BAR);`")]]
   ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& set_mapKeyMapValMap(T_ComplexNestedStruct_mapKeyMapValMap_struct_setter&& mapKeyMapValMap_) {
     mapKeyMapValMap_ref() = std::forward<T_ComplexNestedStruct_mapKeyMapValMap_struct_setter>(mapKeyMapValMap_);
     return __fbthrift_field_mapKeyMapValMap;
@@ -4641,7 +4641,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeySetValMap" } */
   template <typename T_ComplexNestedStruct_mapKeySetValMap_struct_setter = ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>
-  [[deprecated("Use `FOO.mapKeySetValMap_ref() = BAR;` instead of `FOO.set_mapKeySetValMap(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeySetValMap() = BAR;` instead of `FOO.set_mapKeySetValMap(BAR);`")]]
   ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& set_mapKeySetValMap(T_ComplexNestedStruct_mapKeySetValMap_struct_setter&& mapKeySetValMap_) {
     mapKeySetValMap_ref() = std::forward<T_ComplexNestedStruct_mapKeySetValMap_struct_setter>(mapKeySetValMap_);
     return __fbthrift_field_mapKeySetValMap;
@@ -4653,7 +4653,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "NestedMaps" } */
   template <typename T_ComplexNestedStruct_NestedMaps_struct_setter = ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>>
-  [[deprecated("Use `FOO.NestedMaps_ref() = BAR;` instead of `FOO.set_NestedMaps(BAR);`")]]
+  [[deprecated("Use `FOO.NestedMaps() = BAR;` instead of `FOO.set_NestedMaps(BAR);`")]]
   ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& set_NestedMaps(T_ComplexNestedStruct_NestedMaps_struct_setter&& NestedMaps_) {
     NestedMaps_ref() = std::forward<T_ComplexNestedStruct_NestedMaps_struct_setter>(NestedMaps_);
     return __fbthrift_field_NestedMaps;
@@ -4665,7 +4665,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyIntValList" } */
   template <typename T_ComplexNestedStruct_mapKeyIntValList_struct_setter = ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>>
-  [[deprecated("Use `FOO.mapKeyIntValList_ref() = BAR;` instead of `FOO.set_mapKeyIntValList(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeyIntValList() = BAR;` instead of `FOO.set_mapKeyIntValList(BAR);`")]]
   ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& set_mapKeyIntValList(T_ComplexNestedStruct_mapKeyIntValList_struct_setter&& mapKeyIntValList_) {
     mapKeyIntValList_ref() = std::forward<T_ComplexNestedStruct_mapKeyIntValList_struct_setter>(mapKeyIntValList_);
     return __fbthrift_field_mapKeyIntValList;
@@ -4677,7 +4677,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyIntValSet" } */
   template <typename T_ComplexNestedStruct_mapKeyIntValSet_struct_setter = ::std::map<::std::int32_t, ::std::set<bool>>>
-  [[deprecated("Use `FOO.mapKeyIntValSet_ref() = BAR;` instead of `FOO.set_mapKeyIntValSet(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeyIntValSet() = BAR;` instead of `FOO.set_mapKeyIntValSet(BAR);`")]]
   ::std::map<::std::int32_t, ::std::set<bool>>& set_mapKeyIntValSet(T_ComplexNestedStruct_mapKeyIntValSet_struct_setter&& mapKeyIntValSet_) {
     mapKeyIntValSet_ref() = std::forward<T_ComplexNestedStruct_mapKeyIntValSet_struct_setter>(mapKeyIntValSet_);
     return __fbthrift_field_mapKeyIntValSet;
@@ -4689,7 +4689,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeySetValInt" } */
   template <typename T_ComplexNestedStruct_mapKeySetValInt_struct_setter = ::std::map<::std::set<bool>, ::cpp2::MyEnum>>
-  [[deprecated("Use `FOO.mapKeySetValInt_ref() = BAR;` instead of `FOO.set_mapKeySetValInt(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeySetValInt() = BAR;` instead of `FOO.set_mapKeySetValInt(BAR);`")]]
   ::std::map<::std::set<bool>, ::cpp2::MyEnum>& set_mapKeySetValInt(T_ComplexNestedStruct_mapKeySetValInt_struct_setter&& mapKeySetValInt_) {
     mapKeySetValInt_ref() = std::forward<T_ComplexNestedStruct_mapKeySetValInt_struct_setter>(mapKeySetValInt_);
     return __fbthrift_field_mapKeySetValInt;
@@ -4701,7 +4701,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyListValSet" } */
   template <typename T_ComplexNestedStruct_mapKeyListValSet_struct_setter = ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>>
-  [[deprecated("Use `FOO.mapKeyListValSet_ref() = BAR;` instead of `FOO.set_mapKeyListValSet(BAR);`")]]
+  [[deprecated("Use `FOO.mapKeyListValSet() = BAR;` instead of `FOO.set_mapKeyListValSet(BAR);`")]]
   ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& set_mapKeyListValSet(T_ComplexNestedStruct_mapKeyListValSet_struct_setter&& mapKeyListValSet_) {
     mapKeyListValSet_ref() = std::forward<T_ComplexNestedStruct_mapKeyListValSet_struct_setter>(mapKeyListValSet_);
     return __fbthrift_field_mapKeyListValSet;
@@ -6536,7 +6536,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "myLongDFset" } */
-  [[deprecated("Use `FOO.myLongDFset_ref() = BAR;` instead of `FOO.set_myLongDFset(BAR);`")]]
+  [[deprecated("Use `FOO.myLongDFset() = BAR;` instead of `FOO.set_myLongDFset(BAR);`")]]
   ::std::int64_t& set_myLongDFset(::std::int64_t myLongDFset_) {
     myLongDFset_ref() = myLongDFset_;
     return __fbthrift_field_myLongDFset;
@@ -6548,7 +6548,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "myLongDF" } */
-  [[deprecated("Use `FOO.myLongDF_ref() = BAR;` instead of `FOO.set_myLongDF(BAR);`")]]
+  [[deprecated("Use `FOO.myLongDF() = BAR;` instead of `FOO.set_myLongDF(BAR);`")]]
   ::std::int64_t& set_myLongDF(::std::int64_t myLongDF_) {
     myLongDF_ref() = myLongDF_;
     return __fbthrift_field_myLongDF;
@@ -6560,7 +6560,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "portDFset" } */
-  [[deprecated("Use `FOO.portDFset_ref() = BAR;` instead of `FOO.set_portDFset(BAR);`")]]
+  [[deprecated("Use `FOO.portDFset() = BAR;` instead of `FOO.set_portDFset(BAR);`")]]
   ::std::int32_t& set_portDFset(::std::int32_t portDFset_) {
     portDFset_ref() = portDFset_;
     return __fbthrift_field_portDFset;
@@ -6572,7 +6572,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "portNum" } */
-  [[deprecated("Use `FOO.portNum_ref() = BAR;` instead of `FOO.set_portNum(BAR);`")]]
+  [[deprecated("Use `FOO.portNum() = BAR;` instead of `FOO.set_portNum(BAR);`")]]
   ::std::int32_t& set_portNum(::std::int32_t portNum_) {
     portNum_ref() = portNum_;
     return __fbthrift_field_portNum;
@@ -6590,7 +6590,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myBinaryDFset" } */
   template <typename T_defaultStruct_myBinaryDFset_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.myBinaryDFset_ref() = BAR;` instead of `FOO.set_myBinaryDFset(BAR);`")]]
+  [[deprecated("Use `FOO.myBinaryDFset() = BAR;` instead of `FOO.set_myBinaryDFset(BAR);`")]]
   ::std::string& set_myBinaryDFset(T_defaultStruct_myBinaryDFset_struct_setter&& myBinaryDFset_) {
     myBinaryDFset_ref() = std::forward<T_defaultStruct_myBinaryDFset_struct_setter>(myBinaryDFset_);
     return __fbthrift_field_myBinaryDFset;
@@ -6608,7 +6608,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myBinary" } */
   template <typename T_defaultStruct_myBinary_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.myBinary_ref() = BAR;` instead of `FOO.set_myBinary(BAR);`")]]
+  [[deprecated("Use `FOO.myBinary() = BAR;` instead of `FOO.set_myBinary(BAR);`")]]
   ::std::string& set_myBinary(T_defaultStruct_myBinary_struct_setter&& myBinary_) {
     myBinary_ref() = std::forward<T_defaultStruct_myBinary_struct_setter>(myBinary_);
     return __fbthrift_field_myBinary;
@@ -6620,7 +6620,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "myByteDFSet" } */
-  [[deprecated("Use `FOO.myByteDFSet_ref() = BAR;` instead of `FOO.set_myByteDFSet(BAR);`")]]
+  [[deprecated("Use `FOO.myByteDFSet() = BAR;` instead of `FOO.set_myByteDFSet(BAR);`")]]
   ::std::int8_t& set_myByteDFSet(::std::int8_t myByteDFSet_) {
     myByteDFSet_ref() = myByteDFSet_;
     return __fbthrift_field_myByteDFSet;
@@ -6632,7 +6632,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "myByte" } */
-  [[deprecated("Use `FOO.myByte_ref() = BAR;` instead of `FOO.set_myByte(BAR);`")]]
+  [[deprecated("Use `FOO.myByte() = BAR;` instead of `FOO.set_myByte(BAR);`")]]
   ::std::int8_t& set_myByte(::std::int8_t myByte_) {
     myByte_ref() = myByte_;
     return __fbthrift_field_myByte;
@@ -6644,7 +6644,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "myDoubleDFset" } */
-  [[deprecated("Use `FOO.myDoubleDFset_ref() = BAR;` instead of `FOO.set_myDoubleDFset(BAR);`")]]
+  [[deprecated("Use `FOO.myDoubleDFset() = BAR;` instead of `FOO.set_myDoubleDFset(BAR);`")]]
   double& set_myDoubleDFset(double myDoubleDFset_) {
     myDoubleDFset_ref() = myDoubleDFset_;
     return __fbthrift_field_myDoubleDFset;
@@ -6656,7 +6656,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "myDoubleDFZero" } */
-  [[deprecated("Use `FOO.myDoubleDFZero_ref() = BAR;` instead of `FOO.set_myDoubleDFZero(BAR);`")]]
+  [[deprecated("Use `FOO.myDoubleDFZero() = BAR;` instead of `FOO.set_myDoubleDFZero(BAR);`")]]
   double& set_myDoubleDFZero(double myDoubleDFZero_) {
     myDoubleDFZero_ref() = myDoubleDFZero_;
     return __fbthrift_field_myDoubleDFZero;
@@ -6668,7 +6668,7 @@ class defaultStruct final  {
   }
 
   /** Glean { "field": "myDouble" } */
-  [[deprecated("Use `FOO.myDouble_ref() = BAR;` instead of `FOO.set_myDouble(BAR);`")]]
+  [[deprecated("Use `FOO.myDouble() = BAR;` instead of `FOO.set_myDouble(BAR);`")]]
   double& set_myDouble(double myDouble_) {
     myDouble_ref() = myDouble_;
     return __fbthrift_field_myDouble;
@@ -6680,7 +6680,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "field3" } */
   template <typename T_defaultStruct_field3_struct_setter = ::std::map<::std::int32_t, ::std::string>>
-  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
   ::std::map<::std::int32_t, ::std::string>& set_field3(T_defaultStruct_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_defaultStruct_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -6692,7 +6692,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myList" } */
   template <typename T_defaultStruct_myList_struct_setter = ::std::vector<::cpp2::MyEnum>>
-  [[deprecated("Use `FOO.myList_ref() = BAR;` instead of `FOO.set_myList(BAR);`")]]
+  [[deprecated("Use `FOO.myList() = BAR;` instead of `FOO.set_myList(BAR);`")]]
   ::std::vector<::cpp2::MyEnum>& set_myList(T_defaultStruct_myList_struct_setter&& myList_) {
     myList_ref() = std::forward<T_defaultStruct_myList_struct_setter>(myList_);
     return __fbthrift_field_myList;
@@ -6704,7 +6704,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "mySet" } */
   template <typename T_defaultStruct_mySet_struct_setter = ::std::set<::std::string>>
-  [[deprecated("Use `FOO.mySet_ref() = BAR;` instead of `FOO.set_mySet(BAR);`")]]
+  [[deprecated("Use `FOO.mySet() = BAR;` instead of `FOO.set_mySet(BAR);`")]]
   ::std::set<::std::string>& set_mySet(T_defaultStruct_mySet_struct_setter&& mySet_) {
     mySet_ref() = std::forward<T_defaultStruct_mySet_struct_setter>(mySet_);
     return __fbthrift_field_mySet;
@@ -6716,7 +6716,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "simpleStruct" } */
   template <typename T_defaultStruct_simpleStruct_struct_setter = ::cpp2::SimpleStruct>
-  [[deprecated("Use `FOO.simpleStruct_ref() = BAR;` instead of `FOO.set_simpleStruct(BAR);`")]]
+  [[deprecated("Use `FOO.simpleStruct() = BAR;` instead of `FOO.set_simpleStruct(BAR);`")]]
   ::cpp2::SimpleStruct& set_simpleStruct(T_defaultStruct_simpleStruct_struct_setter&& simpleStruct_) {
     simpleStruct_ref() = std::forward<T_defaultStruct_simpleStruct_struct_setter>(simpleStruct_);
     return __fbthrift_field_simpleStruct;
@@ -6728,7 +6728,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "listStructDFset" } */
   template <typename T_defaultStruct_listStructDFset_struct_setter = ::std::vector<::cpp2::SimpleStruct>>
-  [[deprecated("Use `FOO.listStructDFset_ref() = BAR;` instead of `FOO.set_listStructDFset(BAR);`")]]
+  [[deprecated("Use `FOO.listStructDFset() = BAR;` instead of `FOO.set_listStructDFset(BAR);`")]]
   ::std::vector<::cpp2::SimpleStruct>& set_listStructDFset(T_defaultStruct_listStructDFset_struct_setter&& listStructDFset_) {
     listStructDFset_ref() = std::forward<T_defaultStruct_listStructDFset_struct_setter>(listStructDFset_);
     return __fbthrift_field_listStructDFset;
@@ -6740,7 +6740,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myUnion" } */
   template <typename T_defaultStruct_myUnion_struct_setter = ::cpp2::MyUnion>
-  [[deprecated("Use `FOO.myUnion_ref() = BAR;` instead of `FOO.set_myUnion(BAR);`")]]
+  [[deprecated("Use `FOO.myUnion() = BAR;` instead of `FOO.set_myUnion(BAR);`")]]
   ::cpp2::MyUnion& set_myUnion(T_defaultStruct_myUnion_struct_setter&& myUnion_) {
     myUnion_ref() = std::forward<T_defaultStruct_myUnion_struct_setter>(myUnion_);
     return __fbthrift_field_myUnion;
@@ -6752,7 +6752,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "listUnionDFset" } */
   template <typename T_defaultStruct_listUnionDFset_struct_setter = ::std::vector<::cpp2::MyUnion>>
-  [[deprecated("Use `FOO.listUnionDFset_ref() = BAR;` instead of `FOO.set_listUnionDFset(BAR);`")]]
+  [[deprecated("Use `FOO.listUnionDFset() = BAR;` instead of `FOO.set_listUnionDFset(BAR);`")]]
   ::std::vector<::cpp2::MyUnion>& set_listUnionDFset(T_defaultStruct_listUnionDFset_struct_setter&& listUnionDFset_) {
     listUnionDFset_ref() = std::forward<T_defaultStruct_listUnionDFset_struct_setter>(listUnionDFset_);
     return __fbthrift_field_listUnionDFset;
@@ -6764,7 +6764,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "mapNestlistStructDfSet" } */
   template <typename T_defaultStruct_mapNestlistStructDfSet_struct_setter = ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>>
-  [[deprecated("Use `FOO.mapNestlistStructDfSet_ref() = BAR;` instead of `FOO.set_mapNestlistStructDfSet(BAR);`")]]
+  [[deprecated("Use `FOO.mapNestlistStructDfSet() = BAR;` instead of `FOO.set_mapNestlistStructDfSet(BAR);`")]]
   ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& set_mapNestlistStructDfSet(T_defaultStruct_mapNestlistStructDfSet_struct_setter&& mapNestlistStructDfSet_) {
     mapNestlistStructDfSet_ref() = std::forward<T_defaultStruct_mapNestlistStructDfSet_struct_setter>(mapNestlistStructDfSet_);
     return __fbthrift_field_mapNestlistStructDfSet;
@@ -6776,7 +6776,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "mapJavaTypeDFset" } */
   template <typename T_defaultStruct_mapJavaTypeDFset_struct_setter = ::cpp2::map_i64_string_5732>
-  [[deprecated("Use `FOO.mapJavaTypeDFset_ref() = BAR;` instead of `FOO.set_mapJavaTypeDFset(BAR);`")]]
+  [[deprecated("Use `FOO.mapJavaTypeDFset() = BAR;` instead of `FOO.set_mapJavaTypeDFset(BAR);`")]]
   ::cpp2::map_i64_string_5732& set_mapJavaTypeDFset(T_defaultStruct_mapJavaTypeDFset_struct_setter&& mapJavaTypeDFset_) {
     mapJavaTypeDFset_ref() = std::forward<T_defaultStruct_mapJavaTypeDFset_struct_setter>(mapJavaTypeDFset_);
     return __fbthrift_field_mapJavaTypeDFset;
@@ -6788,7 +6788,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "emptyMap" } */
   template <typename T_defaultStruct_emptyMap_struct_setter = ::std::map<::std::int64_t, ::std::int32_t>>
-  [[deprecated("Use `FOO.emptyMap_ref() = BAR;` instead of `FOO.set_emptyMap(BAR);`")]]
+  [[deprecated("Use `FOO.emptyMap() = BAR;` instead of `FOO.set_emptyMap(BAR);`")]]
   ::std::map<::std::int64_t, ::std::int32_t>& set_emptyMap(T_defaultStruct_emptyMap_struct_setter&& emptyMap_) {
     emptyMap_ref() = std::forward<T_defaultStruct_emptyMap_struct_setter>(emptyMap_);
     return __fbthrift_field_emptyMap;
@@ -6800,7 +6800,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "enumMapDFset" } */
   template <typename T_defaultStruct_enumMapDFset_struct_setter = ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>>
-  [[deprecated("Use `FOO.enumMapDFset_ref() = BAR;` instead of `FOO.set_enumMapDFset(BAR);`")]]
+  [[deprecated("Use `FOO.enumMapDFset() = BAR;` instead of `FOO.set_enumMapDFset(BAR);`")]]
   ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>& set_enumMapDFset(T_defaultStruct_enumMapDFset_struct_setter&& enumMapDFset_) {
     enumMapDFset_ref() = std::forward<T_defaultStruct_enumMapDFset_struct_setter>(enumMapDFset_);
     return __fbthrift_field_enumMapDFset;
@@ -7379,7 +7379,7 @@ class MyStructTypeDef final  {
   }
 
   /** Glean { "field": "myLongField" } */
-  [[deprecated("Use `FOO.myLongField_ref() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
+  [[deprecated("Use `FOO.myLongField() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
   ::std::int64_t& set_myLongField(::std::int64_t myLongField_) {
     myLongField_ref() = myLongField_;
     return __fbthrift_field_myLongField;
@@ -7391,7 +7391,7 @@ class MyStructTypeDef final  {
   }
 
   /** Glean { "field": "myLongTypeDef" } */
-  [[deprecated("Use `FOO.myLongTypeDef_ref() = BAR;` instead of `FOO.set_myLongTypeDef(BAR);`")]]
+  [[deprecated("Use `FOO.myLongTypeDef() = BAR;` instead of `FOO.set_myLongTypeDef(BAR);`")]]
   ::cpp2::longTypeDef& set_myLongTypeDef(::cpp2::longTypeDef myLongTypeDef_) {
     myLongTypeDef_ref() = myLongTypeDef_;
     return __fbthrift_field_myLongTypeDef;
@@ -7409,7 +7409,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myStringField" } */
   template <typename T_MyStructTypeDef_myStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.myStringField_ref() = BAR;` instead of `FOO.set_myStringField(BAR);`")]]
+  [[deprecated("Use `FOO.myStringField() = BAR;` instead of `FOO.set_myStringField(BAR);`")]]
   ::std::string& set_myStringField(T_MyStructTypeDef_myStringField_struct_setter&& myStringField_) {
     myStringField_ref() = std::forward<T_MyStructTypeDef_myStringField_struct_setter>(myStringField_);
     return __fbthrift_field_myStringField;
@@ -7427,7 +7427,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myStringTypedef" } */
   template <typename T_MyStructTypeDef_myStringTypedef_struct_setter = ::cpp2::stringTypedef>
-  [[deprecated("Use `FOO.myStringTypedef_ref() = BAR;` instead of `FOO.set_myStringTypedef(BAR);`")]]
+  [[deprecated("Use `FOO.myStringTypedef() = BAR;` instead of `FOO.set_myStringTypedef(BAR);`")]]
   ::cpp2::stringTypedef& set_myStringTypedef(T_MyStructTypeDef_myStringTypedef_struct_setter&& myStringTypedef_) {
     myStringTypedef_ref() = std::forward<T_MyStructTypeDef_myStringTypedef_struct_setter>(myStringTypedef_);
     return __fbthrift_field_myStringTypedef;
@@ -7439,7 +7439,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myMapField" } */
   template <typename T_MyStructTypeDef_myMapField_struct_setter = ::std::map<::std::int16_t, ::std::string>>
-  [[deprecated("Use `FOO.myMapField_ref() = BAR;` instead of `FOO.set_myMapField(BAR);`")]]
+  [[deprecated("Use `FOO.myMapField() = BAR;` instead of `FOO.set_myMapField(BAR);`")]]
   ::std::map<::std::int16_t, ::std::string>& set_myMapField(T_MyStructTypeDef_myMapField_struct_setter&& myMapField_) {
     myMapField_ref() = std::forward<T_MyStructTypeDef_myMapField_struct_setter>(myMapField_);
     return __fbthrift_field_myMapField;
@@ -7451,7 +7451,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myMapTypedef" } */
   template <typename T_MyStructTypeDef_myMapTypedef_struct_setter = ::cpp2::mapTypedef>
-  [[deprecated("Use `FOO.myMapTypedef_ref() = BAR;` instead of `FOO.set_myMapTypedef(BAR);`")]]
+  [[deprecated("Use `FOO.myMapTypedef() = BAR;` instead of `FOO.set_myMapTypedef(BAR);`")]]
   ::cpp2::mapTypedef& set_myMapTypedef(T_MyStructTypeDef_myMapTypedef_struct_setter&& myMapTypedef_) {
     myMapTypedef_ref() = std::forward<T_MyStructTypeDef_myMapTypedef_struct_setter>(myMapTypedef_);
     return __fbthrift_field_myMapTypedef;
@@ -7463,7 +7463,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myListField" } */
   template <typename T_MyStructTypeDef_myListField_struct_setter = ::std::vector<double>>
-  [[deprecated("Use `FOO.myListField_ref() = BAR;` instead of `FOO.set_myListField(BAR);`")]]
+  [[deprecated("Use `FOO.myListField() = BAR;` instead of `FOO.set_myListField(BAR);`")]]
   ::std::vector<double>& set_myListField(T_MyStructTypeDef_myListField_struct_setter&& myListField_) {
     myListField_ref() = std::forward<T_MyStructTypeDef_myListField_struct_setter>(myListField_);
     return __fbthrift_field_myListField;
@@ -7475,7 +7475,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myListTypedef" } */
   template <typename T_MyStructTypeDef_myListTypedef_struct_setter = ::cpp2::listTypedef>
-  [[deprecated("Use `FOO.myListTypedef_ref() = BAR;` instead of `FOO.set_myListTypedef(BAR);`")]]
+  [[deprecated("Use `FOO.myListTypedef() = BAR;` instead of `FOO.set_myListTypedef(BAR);`")]]
   ::cpp2::listTypedef& set_myListTypedef(T_MyStructTypeDef_myListTypedef_struct_setter&& myListTypedef_) {
     myListTypedef_ref() = std::forward<T_MyStructTypeDef_myListTypedef_struct_setter>(myListTypedef_);
     return __fbthrift_field_myListTypedef;
@@ -7487,7 +7487,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myMapListOfTypeDef" } */
   template <typename T_MyStructTypeDef_myMapListOfTypeDef_struct_setter = ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>>>
-  [[deprecated("Use `FOO.myMapListOfTypeDef_ref() = BAR;` instead of `FOO.set_myMapListOfTypeDef(BAR);`")]]
+  [[deprecated("Use `FOO.myMapListOfTypeDef() = BAR;` instead of `FOO.set_myMapListOfTypeDef(BAR);`")]]
   ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>>& set_myMapListOfTypeDef(T_MyStructTypeDef_myMapListOfTypeDef_struct_setter&& myMapListOfTypeDef_) {
     myMapListOfTypeDef_ref() = std::forward<T_MyStructTypeDef_myMapListOfTypeDef_struct_setter>(myMapListOfTypeDef_);
     return __fbthrift_field_myMapListOfTypeDef;
@@ -8254,7 +8254,7 @@ class TypeRemapped final  {
 
   /** Glean { "field": "lsMap" } */
   template <typename T_TypeRemapped_lsMap_struct_setter = ::cpp2::map_i64_string_5732>
-  [[deprecated("Use `FOO.lsMap_ref() = BAR;` instead of `FOO.set_lsMap(BAR);`")]]
+  [[deprecated("Use `FOO.lsMap() = BAR;` instead of `FOO.set_lsMap(BAR);`")]]
   ::cpp2::map_i64_string_5732& set_lsMap(T_TypeRemapped_lsMap_struct_setter&& lsMap_) {
     lsMap_ref() = std::forward<T_TypeRemapped_lsMap_struct_setter>(lsMap_);
     return __fbthrift_field_lsMap;
@@ -8266,7 +8266,7 @@ class TypeRemapped final  {
 
   /** Glean { "field": "ioMap" } */
   template <typename T_TypeRemapped_ioMap_struct_setter = ::cpp2::map_i32_FMap_6797>
-  [[deprecated("Use `FOO.ioMap_ref() = BAR;` instead of `FOO.set_ioMap(BAR);`")]]
+  [[deprecated("Use `FOO.ioMap() = BAR;` instead of `FOO.set_ioMap(BAR);`")]]
   ::cpp2::map_i32_FMap_6797& set_ioMap(T_TypeRemapped_ioMap_struct_setter&& ioMap_) {
     ioMap_ref() = std::forward<T_TypeRemapped_ioMap_struct_setter>(ioMap_);
     return __fbthrift_field_ioMap;
@@ -8278,7 +8278,7 @@ class TypeRemapped final  {
   }
 
   /** Glean { "field": "BigInteger" } */
-  [[deprecated("Use `FOO.BigInteger_ref() = BAR;` instead of `FOO.set_BigInteger(BAR);`")]]
+  [[deprecated("Use `FOO.BigInteger() = BAR;` instead of `FOO.set_BigInteger(BAR);`")]]
   ::cpp2::i32_1194& set_BigInteger(::cpp2::i32_1194 BigInteger_) {
     BigInteger_ref() = BigInteger_;
     return __fbthrift_field_BigInteger;
@@ -8296,7 +8296,7 @@ class TypeRemapped final  {
 
   /** Glean { "field": "binaryTestBuffer" } */
   template <typename T_TypeRemapped_binaryTestBuffer_struct_setter = ::cpp2::binary_4918>
-  [[deprecated("Use `FOO.binaryTestBuffer_ref() = BAR;` instead of `FOO.set_binaryTestBuffer(BAR);`")]]
+  [[deprecated("Use `FOO.binaryTestBuffer() = BAR;` instead of `FOO.set_binaryTestBuffer(BAR);`")]]
   ::cpp2::binary_4918& set_binaryTestBuffer(T_TypeRemapped_binaryTestBuffer_struct_setter&& binaryTestBuffer_) {
     binaryTestBuffer_ref() = std::forward<T_TypeRemapped_binaryTestBuffer_struct_setter>(binaryTestBuffer_);
     return __fbthrift_field_binaryTestBuffer;
@@ -8628,7 +8628,7 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   template <typename T_reqXcep_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_reqXcep_message_struct_setter&& message_) {
     message_ref() = std::forward<T_reqXcep_message_struct_setter>(message_);
     return __fbthrift_field_message;
@@ -8640,7 +8640,7 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "errorCode" } */
-  [[deprecated("Use `FOO.errorCode_ref() = BAR;` instead of `FOO.set_errorCode(BAR);`")]]
+  [[deprecated("Use `FOO.errorCode() = BAR;` instead of `FOO.set_errorCode(BAR);`")]]
   ::std::int32_t& set_errorCode(::std::int32_t errorCode_) {
     errorCode_ref() = errorCode_;
     return __fbthrift_field_errorCode;
@@ -8873,7 +8873,7 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   template <typename T_optXcep_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_optXcep_message_struct_setter&& message_) {
     message_ref() = std::forward<T_optXcep_message_struct_setter>(message_);
     return __fbthrift_field_message;
@@ -8892,7 +8892,7 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
   ::std::int32_t* get_errorCode() && = delete;
 
   /** Glean { "field": "errorCode" } */
-  [[deprecated("Use `FOO.errorCode_ref() = BAR;` instead of `FOO.set_errorCode(BAR);`")]]
+  [[deprecated("Use `FOO.errorCode() = BAR;` instead of `FOO.set_errorCode(BAR);`")]]
   ::std::int32_t& set_errorCode(::std::int32_t errorCode_) {
     errorCode_ref() = errorCode_;
     return __fbthrift_field_errorCode;
@@ -9331,7 +9331,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "message" } */
   template <typename T_complexException_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_complexException_message_struct_setter&& message_) {
     message_ref() = std::forward<T_complexException_message_struct_setter>(message_);
     return __fbthrift_field_message;
@@ -9343,7 +9343,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "listStrings" } */
   template <typename T_complexException_listStrings_struct_setter = ::std::vector<::std::string>>
-  [[deprecated("Use `FOO.listStrings_ref() = BAR;` instead of `FOO.set_listStrings(BAR);`")]]
+  [[deprecated("Use `FOO.listStrings() = BAR;` instead of `FOO.set_listStrings(BAR);`")]]
   ::std::vector<::std::string>& set_listStrings(T_complexException_listStrings_struct_setter&& listStrings_) {
     listStrings_ref() = std::forward<T_complexException_listStrings_struct_setter>(listStrings_);
     return __fbthrift_field_listStrings;
@@ -9355,7 +9355,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
   }
 
   /** Glean { "field": "errorEnum" } */
-  [[deprecated("Use `FOO.errorEnum_ref() = BAR;` instead of `FOO.set_errorEnum(BAR);`")]]
+  [[deprecated("Use `FOO.errorEnum() = BAR;` instead of `FOO.set_errorEnum(BAR);`")]]
   ::cpp2::MyEnum& set_errorEnum(::cpp2::MyEnum errorEnum_) {
     errorEnum_ref() = errorEnum_;
     return __fbthrift_field_errorEnum;
@@ -9369,7 +9369,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "unionError" } */
   template <typename T_complexException_unionError_struct_setter = ::cpp2::MyUnion>
-  [[deprecated("Use `FOO.unionError_ref() = BAR;` instead of `FOO.set_unionError(BAR);`")]]
+  [[deprecated("Use `FOO.unionError() = BAR;` instead of `FOO.set_unionError(BAR);`")]]
   ::cpp2::MyUnion& set_unionError(T_complexException_unionError_struct_setter&& unionError_) {
     unionError_ref() = std::forward<T_complexException_unionError_struct_setter>(unionError_);
     return __fbthrift_field_unionError;
@@ -9381,7 +9381,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "structError" } */
   template <typename T_complexException_structError_struct_setter = ::cpp2::MyStruct>
-  [[deprecated("Use `FOO.structError_ref() = BAR;` instead of `FOO.set_structError(BAR);`")]]
+  [[deprecated("Use `FOO.structError() = BAR;` instead of `FOO.set_structError(BAR);`")]]
   ::cpp2::MyStruct& set_structError(T_complexException_structError_struct_setter&& structError_) {
     structError_ref() = std::forward<T_complexException_structError_struct_setter>(structError_);
     return __fbthrift_field_structError;
@@ -9393,7 +9393,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "lsMap" } */
   template <typename T_complexException_lsMap_struct_setter = ::cpp2::map_i64_string_5732>
-  [[deprecated("Use `FOO.lsMap_ref() = BAR;` instead of `FOO.set_lsMap(BAR);`")]]
+  [[deprecated("Use `FOO.lsMap() = BAR;` instead of `FOO.set_lsMap(BAR);`")]]
   ::cpp2::map_i64_string_5732& set_lsMap(T_complexException_lsMap_struct_setter&& lsMap_) {
     lsMap_ref() = std::forward<T_complexException_lsMap_struct_setter>(lsMap_);
     return __fbthrift_field_lsMap;

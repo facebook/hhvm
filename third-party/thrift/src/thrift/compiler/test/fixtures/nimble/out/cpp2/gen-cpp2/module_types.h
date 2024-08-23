@@ -352,7 +352,7 @@ class BasicTypes final  {
   }
 
   /** Glean { "field": "first" } */
-  [[deprecated("Use `FOO.first_ref() = BAR;` instead of `FOO.set_first(BAR);`")]]
+  [[deprecated("Use `FOO.first() = BAR;` instead of `FOO.set_first(BAR);`")]]
   ::std::int32_t& set_first(::std::int32_t first_) {
     first_ref() = first_;
     return __fbthrift_field_first;
@@ -371,7 +371,7 @@ class BasicTypes final  {
   ::std::int32_t* get_second() && = delete;
 
   /** Glean { "field": "second" } */
-  [[deprecated("Use `FOO.second_ref() = BAR;` instead of `FOO.set_second(BAR);`")]]
+  [[deprecated("Use `FOO.second() = BAR;` instead of `FOO.set_second(BAR);`")]]
   ::std::int32_t& set_second(::std::int32_t second_) {
     second_ref() = second_;
     return __fbthrift_field_second;
@@ -390,7 +390,7 @@ class BasicTypes final  {
   ::std::int64_t* get_third() && = delete;
 
   /** Glean { "field": "third" } */
-  [[deprecated("Use `FOO.third_ref() = BAR;` instead of `FOO.set_third(BAR);`")]]
+  [[deprecated("Use `FOO.third() = BAR;` instead of `FOO.set_third(BAR);`")]]
   ::std::int64_t& set_third(::std::int64_t third_) {
     third_ref() = third_;
     return __fbthrift_field_third;
@@ -402,7 +402,7 @@ class BasicTypes final  {
   }
 
   /** Glean { "field": "isTrue" } */
-  [[deprecated("Use `FOO.isTrue_ref() = BAR;` instead of `FOO.set_isTrue(BAR);`")]]
+  [[deprecated("Use `FOO.isTrue() = BAR;` instead of `FOO.set_isTrue(BAR);`")]]
   bool& set_isTrue(bool isTrue_) {
     isTrue_ref() = isTrue_;
     return __fbthrift_field_isTrue;

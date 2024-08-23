@@ -79,6 +79,7 @@ struct CarbonTestRouterInfo {
   static constexpr const char* name = "CarbonTest";
   static constexpr const bool bucketization = false;
   static constexpr const bool useRequestAclChecker = false;
+  static constexpr const bool hasMcRefillRoute = false;
 
   template <class Route>
   using RouteHandle = CarbonTestRouteHandle<Route>;

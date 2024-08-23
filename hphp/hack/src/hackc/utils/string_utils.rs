@@ -196,6 +196,10 @@ pub fn is_static(s: impl AsRef<str>) -> bool {
     s.as_ref().eq_ignore_ascii_case(ns_classes::STATIC)
 }
 
+pub fn class_id_is_dynamic(s: &str) -> bool {
+    is_self(s) || is_parent(s) || is_static(s)
+}
+
 pub fn is_class(s: impl AsRef<str>) -> bool {
     s.as_ref() == members::M_CLASS
 }

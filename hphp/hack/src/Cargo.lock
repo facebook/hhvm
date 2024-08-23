@@ -2913,6 +2913,7 @@ dependencies = [
  "bumpalo",
  "escaper",
  "hash",
+ "hhbc_string_utils",
  "html_entities",
  "itertools 0.11.0",
  "lazy_static",

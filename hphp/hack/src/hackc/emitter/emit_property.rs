@@ -261,8 +261,5 @@ fn shape_field_requires_deep_init((name, expr): &(ast_defs::ShapeFieldName, ast:
 }
 
 fn class_const_requires_deep_init(s: &str, p: &str) -> bool {
-    !string_utils::is_class(p)
-        || string_utils::is_self(s)
-        || string_utils::is_parent(s)
-        || string_utils::is_static(s)
+    !string_utils::is_class(p) || string_utils::class_id_is_dynamic(s)
 }

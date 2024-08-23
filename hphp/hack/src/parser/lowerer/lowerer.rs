@@ -19,6 +19,7 @@ use bumpalo::Bump;
 use escaper::*;
 use hash::HashMap;
 use hash::HashSet;
+use hhbc_string_utils as string_utils;
 use itertools::Either;
 use itertools::Itertools;
 use lint_rust::LintError;
@@ -785,10 +786,20 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
         }
     }
     match &node.children {
-        ScopeResolutionExpression(c) => Ok(SFclassConst(
-            pos_name(&c.qualifier, env)?,
-            p_pstring(&c.name, env)?,
-        )),
+        ScopeResolutionExpression(c) => {
+            let cls_name = pos_name(&c.qualifier, env)?;
+            let const_name = p_pstring(&c.name, env)?;
+            if string_utils::is_class(&const_name.1) && env.is_typechecker() {
+                if string_utils::class_id_is_dynamic(&cls_name.1) {
+                    raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::invalid_lazy_class_shape_field(&cls_name.1),
+                    );
+                };
+            }
+            Ok(SFclassConst(cls_name, const_name))
+        }
         _ => {
             raise_parsing_error(node, env, &syntax_error::invalid_shape_field_name);
             let ast::Id(p, n) = pos_name(node, env)?;
@@ -1185,8 +1196,8 @@ fn fail_if_invalid_class_creation<'a>(node: S<'a>, env: &mut Env<'a>, id: impl A
     let id = id.as_ref();
     let is_in_static_method = *env.in_static_method();
     if is_in_static_method
-        && ((id == special_classes::SELF && env.cls_generics_mut().values().any(|reif| *reif))
-            || (id == special_classes::PARENT && *env.parent_maybe_reified()))
+        && ((string_utils::is_self(id) && env.cls_generics_mut().values().any(|reif| *reif))
+            || (string_utils::is_parent(id) && *env.parent_maybe_reified()))
     {
         raise_parsing_error(node, env, &syntax_error::static_method_reified_obj_creation);
     }

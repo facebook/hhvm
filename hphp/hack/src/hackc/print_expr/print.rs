@@ -14,11 +14,9 @@ use bstr::ByteSlice;
 use core_utils_rust::add_ns;
 use error::ErrorKind;
 use hhbc::ClassName;
+use hhbc_string_utils::class_id_is_dynamic;
 use hhbc_string_utils::integer;
 use hhbc_string_utils::is_class;
-use hhbc_string_utils::is_parent;
-use hhbc_string_utils::is_self;
-use hhbc_string_utils::is_static;
 use hhbc_string_utils::is_xhp;
 use hhbc_string_utils::lstrip;
 use hhbc_string_utils::lstrip_bslice;
@@ -295,12 +293,10 @@ fn print_expr(
             Some((
                 ast::ClassId(_, _, ast::ClassId_::CIexpr(ast::Expr(_, _, ast::Expr_::Id(id)))),
                 (_, s2),
-            )) if is_class(s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
-                Ok(Some({
-                    let s1 = get_class_name_from_id(ctx, env, false, false, &id.1);
-                    print_expr_string(w, s1.as_bytes())?
-                }))
-            }
+            )) if is_class(s2) && !(class_id_is_dynamic(&id.1)) => Ok(Some({
+                let s1 = get_class_name_from_id(ctx, env, false, false, &id.1);
+                print_expr_string(w, s1.as_bytes())?
+            })),
             _ => Ok(None),
         }
     }

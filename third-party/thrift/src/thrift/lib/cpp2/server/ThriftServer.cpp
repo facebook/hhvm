@@ -976,8 +976,7 @@ void ThriftServer::setupThreadManager() {
     }
     // Create an adapter so calls to getThreadManager_deprecated will work
     // when we are using resource pools
-    if (!threadManager_ &&
-        resourcePoolSet().hasResourcePool(ResourcePoolHandle::defaultAsync())) {
+    if (!threadManager_) {
       auto extm =
           std::make_shared<ExecutorToThreadManagerAdaptor>(resourcePoolSet());
       setThreadManagerInternal(extm);

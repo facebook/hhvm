@@ -82,8 +82,8 @@ class BarStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   );
 
   const type TShape = shape(
-    'e' => darray<FooEnum, FooEnum>,
-    's' => darray<FooEnum, bool>,
+    'e' => dict<FooEnum, FooEnum>,
+    's' => dict<FooEnum, bool>,
     ...
   );
   const int STRUCTURAL_ID = 2986314503120154076;

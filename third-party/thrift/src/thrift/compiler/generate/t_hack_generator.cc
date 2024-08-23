@@ -1030,9 +1030,8 @@ class t_hack_generator : public t_concat_generator {
   /**
    * Return the correct function to be used on a Hack Collection, only when
    * generating shape structures.
-   * - If array_migration_ is set, we'll want to use varray / darray
-   * - If we're operating on a list, we'll want to use varray / vec over
-   *   darray / dict
+   * - If array_migration_ is set and its not a list, then use darray.
+   * - If we're on a list, we'll want to use vec over dict
    */
   std::string generate_to_array_method(
       const t_type* t, const std::string& array) {
@@ -6488,27 +6487,21 @@ void t_hack_generator::generate_php_docstring_stream_exceptions(
 
 std::string t_hack_generator::get_container_keyword(
     const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations) {
-  std::string hack_collection, hack_array, php_array;
+  std::string hack_collection, hack_array;
   bool immutable_collections =
       variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] ||
       const_collections_;
   if (ttype->is_map()) {
     hack_array = "dict";
-    php_array = "darray";
     hack_collection = immutable_collections ? "\\ConstMap" : "Map";
   } else if (ttype->is_list()) {
     hack_array = "vec";
-    php_array = "varray";
     hack_collection = immutable_collections ? "\\ConstVector" : "Vector";
   }
 
-  if (arrays_) {
+  if (arrays_ || no_use_hack_collections_ ||
+      variations[TypeToTypehintVariations::IS_SHAPE]) {
     return hack_array;
-  } else if (no_use_hack_collections_) {
-    return variations[TypeToTypehintVariations::IS_ANY_SHAPE] ? php_array
-                                                              : hack_array;
-  } else if (variations[TypeToTypehintVariations::IS_SHAPE]) {
-    return array_migration_ ? php_array : hack_array;
   }
   return hack_collection;
 }
@@ -6619,17 +6612,17 @@ std::string t_hack_generator::type_to_typehint(
   } else if (const auto* tset = dynamic_cast<const t_set*>(ttype)) {
     std::string prefix;
     std::string suffix = ">";
+    // The order of the ifs matters in the code below.
+    // Even though there is a small amount of duplicated code below,
+    // any alternative approaches to achieve the same outcome seem
+    // make it harder to see the order clearly.
     if (arraysets_) {
-      if (variations[TypeToTypehintVariations::IS_ANY_SHAPE]) {
-        prefix = array_migration_ ? "darray" : "dict";
-      } else {
-        prefix = "dict";
-      }
+      prefix = "dict";
       suffix = ", bool>";
     } else if (arrays_) {
       prefix = "keyset";
-    } else if (variations[TypeToTypehintVariations::IS_SHAPE]) {
-      prefix = array_migration_ ? "darray" : "dict";
+    } else if (arraysets_ || variations[TypeToTypehintVariations::IS_SHAPE]) {
+      prefix = "dict";
       suffix = ", bool>";
     } else {
       prefix = variations[TypeToTypehintVariations::IMMUTABLE_COLLECTIONS] ||

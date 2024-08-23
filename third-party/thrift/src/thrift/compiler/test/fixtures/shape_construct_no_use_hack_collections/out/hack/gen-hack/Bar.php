@@ -277,7 +277,7 @@ class Bar_baz_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 
   const type TConstructorShape = shape(
     ?'a' => ?dict<int, bool>,
-    ?'b' => ?varray<darray<int, dict<string, bool>>>,
+    ?'b' => ?vec<dict<int, dict<string, bool>>>,
     ?'c' => ?int,
     ?'d' => ?Foo,
     ?'e' => ?int,
@@ -285,7 +285,7 @@ class Bar_baz_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 
   const type TShape = shape(
     'a' => dict<int, bool>,
-    'b' => varray<darray<int, dict<string, bool>>>,
+    'b' => vec<dict<int, dict<string, bool>>>,
     'c' => int,
     ?'d' => ?Foo::TShape,
     'e' => int,

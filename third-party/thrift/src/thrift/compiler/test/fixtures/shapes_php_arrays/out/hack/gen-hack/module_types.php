@@ -135,21 +135,21 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const type TConstructorShape = shape(
     ?'just_int' => ?int,
     ?'list_of_strings' => ?Vector<string>,
-    ?'set_of_ints' => ?darray<int, bool>,
+    ?'set_of_ints' => ?dict<int, bool>,
     ?'map_of_list_of_strings' => ?Map<string, Vector<string>>,
-    ?'map_of_set_of_strings' => ?Map<string, darray<string, bool>>,
+    ?'map_of_set_of_strings' => ?Map<string, dict<string, bool>>,
     ?'map_of_strings_to_map_of_string_ints' => ?Map<string, Map<string, int>>,
-    ?'optional_map_of_map_of_sets' => ?Map<int, Map<int, darray<string, bool>>>,
+    ?'optional_map_of_map_of_sets' => ?Map<int, Map<int, dict<string, bool>>>,
   );
 
   const type TShape = shape(
     'just_int' => int,
-    'list_of_strings' => varray<string>,
-    'set_of_ints' => darray<int, bool>,
-    'map_of_list_of_strings' => darray<string, varray<string>>,
-    'map_of_set_of_strings' => darray<string, darray<string, bool>>,
-    'map_of_strings_to_map_of_string_ints' => darray<string, darray<string, int>>,
-    ?'optional_map_of_map_of_sets' => ?darray<int, darray<int, darray<string, bool>>>,
+    'list_of_strings' => vec<string>,
+    'set_of_ints' => dict<int, bool>,
+    'map_of_list_of_strings' => dict<string, vec<string>>,
+    'map_of_set_of_strings' => dict<string, dict<string, bool>>,
+    'map_of_strings_to_map_of_string_ints' => dict<string, dict<string, int>>,
+    ?'optional_map_of_map_of_sets' => ?dict<int, dict<int, dict<string, bool>>>,
     ...
   );
   const int STRUCTURAL_ID = 6419322044061300149;

@@ -63,8 +63,8 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'a' => ?varray<string>,
-    ?'b' => ?darray<string, varray<darray<int, bool>>>,
+    ?'a' => ?vec<string>,
+    ?'b' => ?dict<string, vec<dict<int, bool>>>,
     ?'c' => ?int,
     ?'d' => ?bool,
   );
@@ -273,7 +273,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
   const type TConstructorShape = shape(
     ?'message' => ?string,
     ?'some_field' => ?Foo,
-    ?'some_container' => ?darray<string, bool>,
+    ?'some_container' => ?dict<string, bool>,
     ?'code' => ?int,
   );
 

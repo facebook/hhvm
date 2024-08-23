@@ -114,8 +114,8 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     ?'int_value' => ?int,
     ?'str_value' => ?string,
     ?'double_value' => ?float,
-    ?'list_of_strings' => ?varray<string>,
-    ?'map_of_string_to_ints' => ?darray<string, int>,
+    ?'list_of_strings' => ?vec<string>,
+    ?'map_of_string_to_ints' => ?dict<string, int>,
     ?'struct_foo' => ?Foo,
   );
 
@@ -123,8 +123,8 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     ?'int_value' => ?int,
     ?'str_value' => ?string,
     ?'double_value' => ?float,
-    ?'list_of_strings' => ?varray<string>,
-    ?'map_of_string_to_ints' => ?darray<string, int>,
+    ?'list_of_strings' => ?vec<string>,
+    ?'map_of_string_to_ints' => ?dict<string, int>,
     ?'struct_foo' => ?Foo::TShape,
   );
   const int STRUCTURAL_ID = 872350750526219001;
@@ -556,16 +556,16 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   ];
 
   const type TConstructorShape = shape(
-    ?'a' => ?varray<string>,
-    ?'b' => ?darray<string, varray<dict<int, bool>>>,
+    ?'a' => ?vec<string>,
+    ?'b' => ?dict<string, vec<dict<int, bool>>>,
     ?'c' => ?int,
     ?'d' => ?bool,
     ?'str_value' => ?string,
   );
 
   const type TShape = shape(
-    'a' => varray<string>,
-    ?'b' => ?darray<string, varray<dict<int, bool>>>,
+    'a' => vec<string>,
+    ?'b' => ?dict<string, vec<dict<int, bool>>>,
     'c' => int,
     'd' => bool,
     'str_value' => string,
@@ -814,15 +814,15 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   const type TConstructorShape = shape(
     ?'foo_struct' => ?Foo,
     ?'union_value' => ?TestUnion,
-    ?'list_of_struct_foo' => ?varray<Foo>,
-    ?'map_of_string_to_struct_foo' => ?darray<string, Foo>,
+    ?'list_of_struct_foo' => ?vec<Foo>,
+    ?'map_of_string_to_struct_foo' => ?dict<string, Foo>,
   );
 
   const type TShape = shape(
     ?'foo_struct' => ?Foo::TShape,
     ?'union_value' => ?TestUnion::TShape,
-    'list_of_struct_foo' => varray<Foo::TShape>,
-    'map_of_string_to_struct_foo' => darray<string, Foo::TShape>,
+    'list_of_struct_foo' => vec<Foo::TShape>,
+    'map_of_string_to_struct_foo' => dict<string, Foo::TShape>,
   );
   const int STRUCTURAL_ID = 6061345478592222801;
   /**

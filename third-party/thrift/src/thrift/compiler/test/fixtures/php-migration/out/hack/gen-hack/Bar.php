@@ -338,8 +338,8 @@ class Bar_baz_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'a' => ?darray<int, bool>,
-    ?'b' => ?varray<darray<int, darray<string, bool>>>,
+    ?'a' => ?dict<int, bool>,
+    ?'b' => ?vec<dict<int, dict<string, bool>>>,
     ?'c' => ?int,
     ?'d' => ?Foo,
     ?'e' => ?int,

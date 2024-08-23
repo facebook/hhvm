@@ -69,7 +69,8 @@ class ServiceInterceptorTestP : public ::testing::TestWithParam<TransportType> {
                folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
       switch (transportType) {
         case TransportType::HEADER:
-          return HeaderClientChannel::newChannel(std::move(socket));
+          return HeaderClientChannel::newChannel(
+              HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
         case TransportType::ROCKET:
           return RocketClientChannel::newChannel(std::move(socket));
         case TransportType::HTTP2: {

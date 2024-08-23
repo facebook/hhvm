@@ -171,7 +171,8 @@ class HeaderOrRocketTest {
   auto makeClient(ScopedServerInterfaceThread& runner) {
     if (transport == TransportType::Header) {
       return runner.newClient<ClientT>(nullptr, [&](auto socket) mutable {
-        return HeaderClientChannel::newChannel(std::move(socket));
+        return HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
       });
     } else {
       return runner.newClient<ClientT>(nullptr, [&](auto socket) mutable {
@@ -197,8 +198,8 @@ class LoggingEventTest : public testing::Test {
   }
 
   void TearDown() override {
-    for (auto& h : handlers_) {
-      ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(h.second));
+    for (auto& [_, handler] : handlers_) {
+      ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(handler));
     }
   }
 

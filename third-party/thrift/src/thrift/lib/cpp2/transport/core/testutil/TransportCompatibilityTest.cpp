@@ -208,11 +208,9 @@ void TransportCompatibilityTest::connectToServer(
     folly::Function<void(
         std::unique_ptr<TestServiceAsyncClient>,
         std::shared_ptr<ClientConnectionIf>)> callMe) {
-  THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, upgradeToRocket_);
-
   server_->connectToServer(
       FLAGS_transport,
-      upgradeToRocket_,
+      upgradeToRocketExpected_,
       [callMe = std::move(callMe)](
           std::shared_ptr<RequestChannel> channel,
           std::shared_ptr<ClientConnectionIf> connection) mutable {
@@ -320,13 +318,13 @@ void TransportCompatibilityTest::TestConnectionStats() {
     EXPECT_CALL(*handler_.get(), sumTwoNumbers_(1, 2)).Times(1);
     EXPECT_EQ(3, client->future_sumTwoNumbers(1, 2).get());
 
-    if (!upgradeToRocket_) {
-      EXPECT_EQ(1, server_->observer_->connAccepted_);
-      EXPECT_EQ(server_->numIOThreads_, server_->observer_->activeConns_);
-    } else {
+    if (upgradeToRocketExpected_) {
       // for transport upgrade there are both header and rocket connections
       EXPECT_EQ(2, server_->observer_->connAccepted_);
       EXPECT_EQ(2 * server_->numIOThreads_, server_->observer_->activeConns_);
+    } else {
+      EXPECT_EQ(1, server_->observer_->connAccepted_);
+      EXPECT_EQ(server_->numIOThreads_, server_->observer_->activeConns_);
     }
 
     folly::Baton<> connCloseBaton;
@@ -341,10 +339,13 @@ void TransportCompatibilityTest::TestConnectionStats() {
 
     ASSERT_TRUE(connCloseBaton.try_wait_for(std::chrono::seconds(10)));
 
-    if (!upgradeToRocket_) {
-      EXPECT_EQ(1, server_->observer_->connClosed_);
+    if (upgradeToRocketExpected_) {
+      // for transport upgrade there are both header and rocket connections
+      EXPECT_EQ(2, server_->observer_->connAccepted_);
+      EXPECT_EQ(2 * server_->numIOThreads_, server_->observer_->activeConns_);
     } else {
-      EXPECT_EQ(2, server_->observer_->connClosed_);
+      EXPECT_EQ(1, server_->observer_->connAccepted_);
+      EXPECT_EQ(server_->numIOThreads_, server_->observer_->activeConns_);
     }
   });
 }

@@ -360,7 +360,8 @@ class RequestInstrumentationTest : public ::testing::Test {
   auto makeHeaderClient() {
     return server().newClient<InstrumentationTestServiceAsyncClient>(
         nullptr, [&](auto socket) mutable {
-          return HeaderClientChannel::newChannel(std::move(socket));
+          return HeaderClientChannel::newChannel(
+              HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
         });
   }
   auto makeRocketClient() {
@@ -378,8 +379,10 @@ class RequestInstrumentationTest : public ::testing::Test {
         });
   }
 
-  template <typename ClientChannelT>
-  auto makeSingleSocketClient(folly::EventBase* eventBase) {
+  auto makeSingleSocketClient(
+      folly::EventBase* eventBase,
+      std::function<ClientChannel::Ptr(folly::AsyncTransport::UniquePtr)>
+          channelFactory) {
     struct ViaEventBaseDeleter {
       folly::Executor::KeepAlive<folly::EventBase> ka_;
 
@@ -391,7 +394,7 @@ class RequestInstrumentationTest : public ::testing::Test {
     eventBase->runInEventBaseThreadAndWait([&] {
       auto socket =
           folly::AsyncSocket::newSocket(eventBase, server().getAddress());
-      channel = ClientChannelT::newChannel(std::move(socket));
+      channel = channelFactory(std::move(socket));
     });
     return std::
         unique_ptr<InstrumentationTestServiceAsyncClient, ViaEventBaseDeleter>{
@@ -620,10 +623,19 @@ TEST_F(RequestInstrumentationTest, ConnectionSnapshotsTest) {
   {
     folly::ScopedEventBaseThread eventBaseThread;
     auto evb = eventBaseThread.getEventBase();
-    auto client1 = makeSingleSocketClient<RocketClientChannel>(evb);
-    auto client2 = makeSingleSocketClient<RocketClientChannel>(evb);
-    auto client3 = makeSingleSocketClient<RocketClientChannel>(evb);
-    auto headerClient = makeSingleSocketClient<HeaderClientChannel>(evb);
+    std::function<RocketClientChannel::Ptr(folly::AsyncTransport::UniquePtr)>
+        fn = [](folly::AsyncTransport::UniquePtr transport) {
+          return RocketClientChannel::newChannel(std::move(transport));
+        };
+    auto client1 = makeSingleSocketClient(evb, fn);
+    auto client2 = makeSingleSocketClient(evb, fn);
+    auto client3 = makeSingleSocketClient(evb, fn);
+    auto headerClient = makeSingleSocketClient(
+        evb, [](folly::AsyncTransport::UniquePtr transport) {
+          return HeaderClientChannel::newChannel(
+              HeaderClientChannel::WithoutRocketUpgrade{},
+              std::move(transport));
+        });
 
     for (size_t i = 0; i < 10; ++i) {
       client1->semifuture_sendRequest();

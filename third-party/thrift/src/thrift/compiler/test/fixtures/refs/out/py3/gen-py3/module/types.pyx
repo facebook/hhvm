@@ -21,6 +21,9 @@ cimport thrift.py3.types
 cimport thrift.py3.exceptions
 cimport thrift.python.exceptions
 from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
+from thrift.python.types cimport(
+    BadEnum as __BadEnum,
+)
 from thrift.py3.types cimport (
     cSetOp as __cSetOp,
     richcmp as __richcmp,
@@ -44,7 +47,6 @@ from thrift.py3.types cimport (
     EnumFlagsData as __EnumFlagsData,
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
-    BadEnum as __BadEnum,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol

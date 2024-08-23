@@ -27,6 +27,10 @@ from types import MappingProxyType
 
 from thrift.py3.exceptions cimport GeneratedError
 from thrift.py3.serializer import deserialize, serialize
+from thrift.python.types cimport BadEnum as _fbthrift_python_BadEnum
+
+# ensures that BadEnum can be reliably imported from thrift.py3.types
+BadEnum = _fbthrift_python_BadEnum
 
 __all__ = ['Struct', 'BadEnum', 'NOTSET', 'Union', 'Enum', 'Flag']
 
@@ -766,46 +770,6 @@ cdef class Flag(CompiledEnum):
     def __invert__(self):
         return NotImplemented
 
-
-cdef class BadEnum:
-    """
-    This represents a BadEnum value from thrift.
-    So an out of date thrift definition or a default value that is not
-    in the enum
-    """
-
-    def __init__(self, the_enum, value):
-        self._enum = the_enum
-        self.value = value
-        self.name = '#INVALID#'
-
-    def __repr__(self):
-        return f'<{self.enum.__name__}.{self.name}: {self.value}>'
-
-    def __int__(self):
-        return self.value
-
-    def __index__(self):
-        return self.value
-
-    @property
-    def enum(self):
-        return self._enum
-
-    def __reduce__(self):
-        return BadEnum, (self._enum, self.value)
-
-    def __hash__(self):
-        return hash((self._enum, self.value))
-
-    def __eq__(self, other):
-        if not isinstance(other, BadEnum):
-            return False
-        cdef BadEnum cother = <BadEnum>other
-        return (self._enum, self.value) == (cother._enum, cother.value)
-
-    def __ne__(self, other):
-        return not(self == other)
 
 cdef class StructFieldsSetter:
     cdef void set_field(self, const char* name, object val) except *:

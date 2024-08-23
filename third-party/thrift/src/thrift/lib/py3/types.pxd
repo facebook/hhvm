@@ -190,12 +190,6 @@ cdef class CompiledEnum:
 cdef class Flag(CompiledEnum):
     pass
 
-cdef class BadEnum:
-    cdef object _enum
-    cdef readonly int value
-    cdef readonly str name
-
-
 cdef class StructFieldsSetter:
     cdef void set_field(StructFieldsSetter self, const char* name, object value) except *
 

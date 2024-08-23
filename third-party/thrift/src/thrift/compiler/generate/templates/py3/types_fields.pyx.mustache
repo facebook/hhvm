@@ -36,7 +36,8 @@ from thrift.py3.types cimport (
 )
 
 {{#program:structs?}}
-from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
+from thrift.py3.types cimport const_pointer_cast
+from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 {{/program:structs?}}
 {{#program:intercompatible?}}
 from thrift.py3.types import _is_python_enum, _is_python_struct

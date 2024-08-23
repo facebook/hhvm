@@ -828,17 +828,20 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
-  ::cpp2::MyEnum move_myEnum() {
+  template <typename..., typename T = ::cpp2::MyEnum>
+  T move_myEnum() {
     assert(getType() == Type::myEnum);
     return std::move(value_.myEnum);
   }
 
-  ::cpp2::MyStruct move_myStruct() {
+  template <typename..., typename T = ::cpp2::MyStruct>
+  T move_myStruct() {
     assert(getType() == Type::myStruct);
     return std::move(value_.myStruct);
   }
 
-  ::cpp2::MyDataItem move_myDataItem() {
+  template <typename..., typename T = ::cpp2::MyDataItem>
+  T move_myDataItem() {
     assert(getType() == Type::myDataItem);
     return std::move(value_.myDataItem);
   }

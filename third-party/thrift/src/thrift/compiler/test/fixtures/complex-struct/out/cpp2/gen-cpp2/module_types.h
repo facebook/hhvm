@@ -5108,32 +5108,38 @@ class MyUnion final  {
     return value_.intValue;
   }
 
-  ::cpp2::MyEnum move_myEnum() {
+  template <typename..., typename T = ::cpp2::MyEnum>
+  T move_myEnum() {
     assert(getType() == Type::myEnum);
     return std::move(value_.myEnum);
   }
 
-  ::cpp2::MyStruct move_myStruct() {
+  template <typename..., typename T = ::cpp2::MyStruct>
+  T move_myStruct() {
     assert(getType() == Type::myStruct);
     return std::move(value_.myStruct);
   }
 
-  ::cpp2::MyDataItem move_myDataItem() {
+  template <typename..., typename T = ::cpp2::MyDataItem>
+  T move_myDataItem() {
     assert(getType() == Type::myDataItem);
     return std::move(value_.myDataItem);
   }
 
-  ::cpp2::ComplexNestedStruct move_complexNestedStruct() {
+  template <typename..., typename T = ::cpp2::ComplexNestedStruct>
+  T move_complexNestedStruct() {
     assert(getType() == Type::complexNestedStruct);
     return std::move(value_.complexNestedStruct);
   }
 
-  ::std::int64_t move_longValue() {
+  template <typename..., typename T = ::std::int64_t>
+  T move_longValue() {
     assert(getType() == Type::longValue);
     return std::move(value_.longValue);
   }
 
-  ::std::int32_t move_intValue() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_intValue() {
     assert(getType() == Type::intValue);
     return std::move(value_.intValue);
   }
@@ -7814,22 +7820,26 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.complexNestedStruct;
   }
 
-  ::cpp2::MyEnum move_myEnum() {
+  template <typename..., typename T = ::cpp2::MyEnum>
+  T move_myEnum() {
     assert(getType() == Type::myEnum);
     return std::move(value_.myEnum);
   }
 
-  ::std::vector<::std::vector<float>> move_setFloat() {
+  template <typename..., typename T = ::std::vector<::std::vector<float>>>
+  T move_setFloat() {
     assert(getType() == Type::setFloat);
     return std::move(value_.setFloat);
   }
 
-  ::cpp2::MyDataItem move_myDataItem() {
+  template <typename..., typename T = ::cpp2::MyDataItem>
+  T move_myDataItem() {
     assert(getType() == Type::myDataItem);
     return std::move(value_.myDataItem);
   }
 
-  ::cpp2::ComplexNestedStruct move_complexNestedStruct() {
+  template <typename..., typename T = ::cpp2::ComplexNestedStruct>
+  T move_complexNestedStruct() {
     assert(getType() == Type::complexNestedStruct);
     return std::move(value_.complexNestedStruct);
   }

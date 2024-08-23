@@ -1310,72 +1310,86 @@ class MyUnion final  {
     return value_.struct_field;
   }
 
-  bool move_bool_field() {
+  template <typename..., typename T = bool>
+  T move_bool_field() {
     assert(getType() == Type::bool_field);
     return std::move(value_.bool_field);
   }
 
-  ::std::int8_t move_byte_field() {
+  template <typename..., typename T = ::std::int8_t>
+  T move_byte_field() {
     assert(getType() == Type::byte_field);
     return std::move(value_.byte_field);
   }
 
-  ::std::int16_t move_short_field() {
+  template <typename..., typename T = ::std::int16_t>
+  T move_short_field() {
     assert(getType() == Type::short_field);
     return std::move(value_.short_field);
   }
 
-  ::std::int32_t move_int_field() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_int_field() {
     assert(getType() == Type::int_field);
     return std::move(value_.int_field);
   }
 
-  ::std::int64_t move_long_field() {
+  template <typename..., typename T = ::std::int64_t>
+  T move_long_field() {
     assert(getType() == Type::long_field);
     return std::move(value_.long_field);
   }
 
-  float move_float_field() {
+  template <typename..., typename T = float>
+  T move_float_field() {
     assert(getType() == Type::float_field);
     return std::move(value_.float_field);
   }
 
-  double move_double_field() {
+  template <typename..., typename T = double>
+  T move_double_field() {
     assert(getType() == Type::double_field);
     return std::move(value_.double_field);
   }
 
-  ::std::string move_string_field() {
+  template <typename..., typename T = ::std::string>
+  T move_string_field() {
     assert(getType() == Type::string_field);
     return std::move(value_.string_field);
   }
 
-  ::std::string move_binary_field() {
+  template <typename..., typename T = ::std::string>
+  T move_binary_field() {
     assert(getType() == Type::binary_field);
     return std::move(value_.binary_field);
   }
 
-  ::facebook::thrift::test::terse_write::MyEnum move_enum_field() {
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
+  T move_enum_field() {
     assert(getType() == Type::enum_field);
     return std::move(value_.enum_field);
   }
 
-  ::std::vector<::std::int16_t> move_list_field() {
+  template <typename..., typename T = ::std::vector<::std::int16_t>>
+  T move_list_field() {
     assert(getType() == Type::list_field);
     return std::move(value_.list_field);
   }
 
-  ::std::set<::std::int16_t> move_set_field() {
+  template <typename..., typename T = ::std::set<::std::int16_t>>
+  T move_set_field() {
     assert(getType() == Type::set_field);
     return std::move(value_.set_field);
   }
 
-  ::std::map<::std::int16_t, ::std::int16_t> move_map_field() {
+  template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
+  T move_map_field() {
     assert(getType() == Type::map_field);
     return std::move(value_.map_field);
   }
 
-  ::facebook::thrift::test::terse_write::MyStruct move_struct_field() {
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
+  T move_struct_field() {
     assert(getType() == Type::struct_field);
     return std::move(value_.struct_field);
   }

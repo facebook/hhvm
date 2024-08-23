@@ -663,12 +663,14 @@ class MyUnion final  {
     return value_.aString;
   }
 
-  ::std::unique_ptr<::std::int32_t> move_anInteger() {
+  template <typename..., typename T = ::std::unique_ptr<::std::int32_t>>
+  T move_anInteger() {
     assert(getType() == Type::anInteger);
     return std::move(value_.anInteger);
   }
 
-  ::std::unique_ptr<::std::string> move_aString() {
+  template <typename..., typename T = ::std::unique_ptr<::std::string>>
+  T move_aString() {
     assert(getType() == Type::aString);
     return std::move(value_.aString);
   }
@@ -898,7 +900,8 @@ class NonTriviallyDestructibleUnion final  {
     return value_.int_field;
   }
 
-  ::std::shared_ptr<::std::int32_t> move_int_field() {
+  template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
+  T move_int_field() {
     assert(getType() == Type::int_field);
     return std::move(value_.int_field);
   }

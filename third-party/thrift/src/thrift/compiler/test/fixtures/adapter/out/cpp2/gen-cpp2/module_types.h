@@ -1670,27 +1670,32 @@ class Baz final  {
     return value_.longField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz> move_intField() {
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz>>
+  T move_intField() {
     assert(getType() == Type::intField);
     return std::move(value_.intField);
   }
 
-  ::facebook::thrift::test::SetWithAdapter move_setField() {
+  template <typename..., typename T = ::facebook::thrift::test::SetWithAdapter>
+  T move_setField() {
     assert(getType() == Type::setField);
     return std::move(value_.setField);
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz> move_mapField() {
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz>>
+  T move_mapField() {
     assert(getType() == Type::mapField);
     return std::move(value_.mapField);
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz> move_binaryField() {
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz>>
+  T move_binaryField() {
     assert(getType() == Type::binaryField);
     return std::move(value_.binaryField);
   }
 
-  ::facebook::thrift::test::MyI64 move_longField() {
+  template <typename..., typename T = ::facebook::thrift::test::MyI64>
+  T move_longField() {
     assert(getType() == Type::longField);
     return std::move(value_.longField);
   }
@@ -6704,12 +6709,14 @@ class ThriftAdaptTestUnion final  {
     return value_.custom;
   }
 
-  ::facebook::thrift::test::DurationMs move_delay() {
+  template <typename..., typename T = ::facebook::thrift::test::DurationMs>
+  T move_delay() {
     assert(getType() == Type::delay);
     return std::move(value_.delay);
   }
 
-  ::facebook::thrift::test::CustomProtocolType move_custom() {
+  template <typename..., typename T = ::facebook::thrift::test::CustomProtocolType>
+  T move_custom() {
     assert(getType() == Type::custom);
     return std::move(value_.custom);
   }

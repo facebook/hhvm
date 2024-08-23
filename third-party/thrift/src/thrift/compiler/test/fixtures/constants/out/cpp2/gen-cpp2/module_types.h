@@ -2335,12 +2335,14 @@ class union1 final  {
     return value_.d;
   }
 
-  ::std::int32_t move_i() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_i() {
     assert(getType() == Type::i);
     return std::move(value_.i);
   }
 
-  double move_d() {
+  template <typename..., typename T = double>
+  T move_d() {
     assert(getType() == Type::d);
     return std::move(value_.d);
   }
@@ -2707,22 +2709,26 @@ class union2 final  {
     return value_.u;
   }
 
-  ::std::int32_t move_i() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_i() {
     assert(getType() == Type::i);
     return std::move(value_.i);
   }
 
-  double move_d() {
+  template <typename..., typename T = double>
+  T move_d() {
     assert(getType() == Type::d);
     return std::move(value_.d);
   }
 
-  ::cpp2::struct1 move_s() {
+  template <typename..., typename T = ::cpp2::struct1>
+  T move_s() {
     assert(getType() == Type::s);
     return std::move(value_.s);
   }
 
-  ::cpp2::union1 move_u() {
+  template <typename..., typename T = ::cpp2::union1>
+  T move_u() {
     assert(getType() == Type::u);
     return std::move(value_.u);
   }

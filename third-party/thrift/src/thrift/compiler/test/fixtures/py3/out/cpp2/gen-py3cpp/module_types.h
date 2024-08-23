@@ -1061,7 +1061,8 @@ class AdaptedUnion final  {
     return value_.best;
   }
 
-  ::std::int16_t move_best() {
+  template <typename..., typename T = ::std::int16_t>
+  T move_best() {
     assert(getType() == Type::best);
     return std::move(value_.best);
   }
@@ -2782,7 +2783,8 @@ class BinaryUnion final  {
     return value_.iobuf_val;
   }
 
-  ::py3::simple::IOBuf move_iobuf_val() {
+  template <typename..., typename T = ::py3::simple::IOBuf>
+  T move_iobuf_val() {
     assert(getType() == Type::iobuf_val);
     return std::move(value_.iobuf_val);
   }

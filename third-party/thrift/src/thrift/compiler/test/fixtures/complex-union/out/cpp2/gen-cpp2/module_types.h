@@ -562,32 +562,38 @@ class ComplexUnion final  {
     return value_.stringRef;
   }
 
-  ::std::int64_t move_intValue() {
+  template <typename..., typename T = ::std::int64_t>
+  T move_intValue() {
     assert(getType() == Type::intValue);
     return std::move(value_.intValue);
   }
 
-  ::std::string move_stringValue() {
+  template <typename..., typename T = ::std::string>
+  T move_stringValue() {
     assert(getType() == Type::stringValue);
     return std::move(value_.stringValue);
   }
 
-  ::std::vector<::std::int64_t> move_intListValue() {
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  T move_intListValue() {
     assert(getType() == Type::intListValue);
     return std::move(value_.intListValue);
   }
 
-  ::std::vector<::std::string> move_stringListValue() {
+  template <typename..., typename T = ::std::vector<::std::string>>
+  T move_stringListValue() {
     assert(getType() == Type::stringListValue);
     return std::move(value_.stringListValue);
   }
 
-  ::cpp2::containerTypedef move_typedefValue() {
+  template <typename..., typename T = ::cpp2::containerTypedef>
+  T move_typedefValue() {
     assert(getType() == Type::typedefValue);
     return std::move(value_.typedefValue);
   }
 
-  ::std::unique_ptr<::std::string> move_stringRef() {
+  template <typename..., typename T = ::std::unique_ptr<::std::string>>
+  T move_stringRef() {
     assert(getType() == Type::stringRef);
     return std::move(value_.stringRef);
   }
@@ -972,12 +978,14 @@ class ListUnion final  {
     return value_.stringListValue;
   }
 
-  ::std::vector<::std::int64_t> move_intListValue() {
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  T move_intListValue() {
     assert(getType() == Type::intListValue);
     return std::move(value_.intListValue);
   }
 
-  ::std::vector<::std::string> move_stringListValue() {
+  template <typename..., typename T = ::std::vector<::std::string>>
+  T move_stringListValue() {
     assert(getType() == Type::stringListValue);
     return std::move(value_.stringListValue);
   }
@@ -1272,12 +1280,14 @@ class DataUnion final  {
     return value_.stringData;
   }
 
-  ::std::string move_binaryData() {
+  template <typename..., typename T = ::std::string>
+  T move_binaryData() {
     assert(getType() == Type::binaryData);
     return std::move(value_.binaryData);
   }
 
-  ::std::string move_stringData() {
+  template <typename..., typename T = ::std::string>
+  T move_stringData() {
     assert(getType() == Type::stringData);
     return std::move(value_.stringData);
   }
@@ -1867,12 +1877,14 @@ class ValUnion final  {
     return value_.v2;
   }
 
-  ::cpp2::Val move_v1() {
+  template <typename..., typename T = ::cpp2::Val>
+  T move_v1() {
     assert(getType() == Type::v1);
     return std::move(value_.v1);
   }
 
-  ::cpp2::Val move_v2() {
+  template <typename..., typename T = ::cpp2::Val>
+  T move_v2() {
     assert(getType() == Type::v2);
     return std::move(value_.v2);
   }
@@ -2167,12 +2179,14 @@ class VirtualComplexUnion  {
     return value_.thingTwo;
   }
 
-  ::std::string move_thingOne() {
+  template <typename..., typename T = ::std::string>
+  T move_thingOne() {
     assert(getType() == Type::thingOne);
     return std::move(value_.thingOne);
   }
 
-  ::std::string move_thingTwo() {
+  template <typename..., typename T = ::std::string>
+  T move_thingTwo() {
     assert(getType() == Type::thingTwo);
     return std::move(value_.thingTwo);
   }
@@ -2557,7 +2571,8 @@ class NonCopyableUnion final  {
     return value_.s;
   }
 
-  ::cpp2::NonCopyableStruct move_s() {
+  template <typename..., typename T = ::cpp2::NonCopyableStruct>
+  T move_s() {
     assert(getType() == Type::s);
     return std::move(value_.s);
   }

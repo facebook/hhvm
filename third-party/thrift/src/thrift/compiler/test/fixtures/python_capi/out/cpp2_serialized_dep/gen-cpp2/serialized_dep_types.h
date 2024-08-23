@@ -711,12 +711,14 @@ class SerializedUnion final  {
     return value_.i;
   }
 
-  ::std::string move_s() {
+  template <typename..., typename T = ::std::string>
+  T move_s() {
     assert(getType() == Type::s);
     return std::move(value_.s);
   }
 
-  ::std::int32_t move_i() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_i() {
     assert(getType() == Type::i);
     return std::move(value_.i);
   }
@@ -1693,12 +1695,14 @@ class MarshalUnion final  {
     return value_.i;
   }
 
-  ::std::string move_s() {
+  template <typename..., typename T = ::std::string>
+  T move_s() {
     assert(getType() == Type::s);
     return std::move(value_.s);
   }
 
-  ::std::int32_t move_i() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_i() {
     assert(getType() == Type::i);
     return std::move(value_.i);
   }

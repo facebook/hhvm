@@ -1326,22 +1326,26 @@ class union1 final  {
     return value_.ue;
   }
 
-  ::std::int32_t move_ui() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_ui() {
     assert(getType() == Type::ui);
     return std::move(value_.ui);
   }
 
-  double move_ud() {
+  template <typename..., typename T = double>
+  T move_ud() {
     assert(getType() == Type::ud);
     return std::move(value_.ud);
   }
 
-  ::std::string move_us() {
+  template <typename..., typename T = ::std::string>
+  T move_us() {
     assert(getType() == Type::us);
     return std::move(value_.us);
   }
 
-  ::test_cpp2::cpp_reflection::enum1 move_ue() {
+  template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  T move_ue() {
     assert(getType() == Type::ue);
     return std::move(value_.ue);
   }
@@ -1739,22 +1743,26 @@ class union2 final  {
     return value_.ue_2;
   }
 
-  ::std::int32_t move_ui_2() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_ui_2() {
     assert(getType() == Type::ui_2);
     return std::move(value_.ui_2);
   }
 
-  double move_ud_2() {
+  template <typename..., typename T = double>
+  T move_ud_2() {
     assert(getType() == Type::ud_2);
     return std::move(value_.ud_2);
   }
 
-  ::std::string move_us_2() {
+  template <typename..., typename T = ::std::string>
+  T move_us_2() {
     assert(getType() == Type::us_2);
     return std::move(value_.us_2);
   }
 
-  ::test_cpp2::cpp_reflection::enum1 move_ue_2() {
+  template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  T move_ue_2() {
     assert(getType() == Type::ue_2);
     return std::move(value_.ue_2);
   }
@@ -2152,22 +2160,26 @@ class union3 final  {
     return value_.ue_3;
   }
 
-  ::std::int32_t move_ui_3() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_ui_3() {
     assert(getType() == Type::ui_3);
     return std::move(value_.ui_3);
   }
 
-  double move_ud_3() {
+  template <typename..., typename T = double>
+  T move_ud_3() {
     assert(getType() == Type::ud_3);
     return std::move(value_.ud_3);
   }
 
-  ::std::string move_us_3() {
+  template <typename..., typename T = ::std::string>
+  T move_us_3() {
     assert(getType() == Type::us_3);
     return std::move(value_.us_3);
   }
 
-  ::test_cpp2::cpp_reflection::enum1 move_ue_3() {
+  template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  T move_ue_3() {
     assert(getType() == Type::ue_3);
     return std::move(value_.ue_3);
   }
@@ -2851,27 +2863,32 @@ class unionA final  {
     return value_.a;
   }
 
-  ::std::int32_t move_i() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_i() {
     assert(getType() == Type::i);
     return std::move(value_.i);
   }
 
-  double move_d() {
+  template <typename..., typename T = double>
+  T move_d() {
     assert(getType() == Type::d);
     return std::move(value_.d);
   }
 
-  ::std::string move_s() {
+  template <typename..., typename T = ::std::string>
+  T move_s() {
     assert(getType() == Type::s);
     return std::move(value_.s);
   }
 
-  ::test_cpp2::cpp_reflection::enum1 move_e() {
+  template <typename..., typename T = ::test_cpp2::cpp_reflection::enum1>
+  T move_e() {
     assert(getType() == Type::e);
     return std::move(value_.e);
   }
 
-  ::test_cpp2::cpp_reflection::structA move_a() {
+  template <typename..., typename T = ::test_cpp2::cpp_reflection::structA>
+  T move_a() {
     assert(getType() == Type::a);
     return std::move(value_.a);
   }
@@ -10402,142 +10419,170 @@ class union_with_special_names final  {
     return value_.fields;
   }
 
-  ::std::int32_t move_get() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_get() {
     assert(getType() == Type::get);
     return std::move(value_.get);
   }
 
-  ::std::int32_t move_getter() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_getter() {
     assert(getType() == Type::getter);
     return std::move(value_.getter);
   }
 
-  ::std::int32_t move_lists() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_lists() {
     assert(getType() == Type::lists);
     return std::move(value_.lists);
   }
 
-  ::std::int32_t move_maps() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_maps() {
     assert(getType() == Type::maps);
     return std::move(value_.maps);
   }
 
-  ::std::int32_t move_name() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_name() {
     assert(getType() == Type::name);
     return std::move(value_.name);
   }
 
-  ::std::int32_t move_name_to_value() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_name_to_value() {
     assert(getType() == Type::name_to_value);
     return std::move(value_.name_to_value);
   }
 
-  ::std::int32_t move_names() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_names() {
     assert(getType() == Type::names);
     return std::move(value_.names);
   }
 
-  ::std::int32_t move_prefix_tree() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_prefix_tree() {
     assert(getType() == Type::prefix_tree);
     return std::move(value_.prefix_tree);
   }
 
-  ::std::int32_t move_sets() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_sets() {
     assert(getType() == Type::sets);
     return std::move(value_.sets);
   }
 
-  ::std::int32_t move_setter() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_setter() {
     assert(getType() == Type::setter);
     return std::move(value_.setter);
   }
 
-  ::std::int32_t move_str() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_str() {
     assert(getType() == Type::str);
     return std::move(value_.str);
   }
 
-  ::std::int32_t move_strings() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_strings() {
     assert(getType() == Type::strings);
     return std::move(value_.strings);
   }
 
-  ::std::int32_t move_type() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_type() {
     assert(getType() == Type::type);
     return std::move(value_.type);
   }
 
-  ::std::int32_t move_value() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_value() {
     assert(getType() == Type::value);
     return std::move(value_.value);
   }
 
-  ::std::int32_t move_value_to_name() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_value_to_name() {
     assert(getType() == Type::value_to_name);
     return std::move(value_.value_to_name);
   }
 
-  ::std::int32_t move_values() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_values() {
     assert(getType() == Type::values);
     return std::move(value_.values);
   }
 
-  ::std::int32_t move_id() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_id() {
     assert(getType() == Type::id);
     return std::move(value_.id);
   }
 
-  ::std::int32_t move_ids() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_ids() {
     assert(getType() == Type::ids);
     return std::move(value_.ids);
   }
 
-  ::std::int32_t move_descriptor() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_descriptor() {
     assert(getType() == Type::descriptor);
     return std::move(value_.descriptor);
   }
 
-  ::std::int32_t move_descriptors() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_descriptors() {
     assert(getType() == Type::descriptors);
     return std::move(value_.descriptors);
   }
 
-  ::std::int32_t move_key() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_key() {
     assert(getType() == Type::key);
     return std::move(value_.key);
   }
 
-  ::std::int32_t move_keys() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_keys() {
     assert(getType() == Type::keys);
     return std::move(value_.keys);
   }
 
-  ::std::int32_t move_annotation() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_annotation() {
     assert(getType() == Type::annotation);
     return std::move(value_.annotation);
   }
 
-  ::std::int32_t move_annotations() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_annotations() {
     assert(getType() == Type::annotations);
     return std::move(value_.annotations);
   }
 
-  ::std::int32_t move_member() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_member() {
     assert(getType() == Type::member);
     return std::move(value_.member);
   }
 
-  ::std::int32_t move_members() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_members() {
     assert(getType() == Type::members);
     return std::move(value_.members);
   }
 
-  ::std::int32_t move_field() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_field() {
     assert(getType() == Type::field);
     return std::move(value_.field);
   }
 
-  ::std::int32_t move_fields() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_fields() {
     assert(getType() == Type::fields);
     return std::move(value_.fields);
   }
@@ -13851,7 +13896,8 @@ class UnionWithTypedefFieldAdapter final  {
     return value_.field;
   }
 
-  ::test_cpp2::cpp_reflection::I32 move_field() {
+  template <typename..., typename T = ::test_cpp2::cpp_reflection::I32>
+  T move_field() {
     assert(getType() == Type::field);
     return std::move(value_.field);
   }

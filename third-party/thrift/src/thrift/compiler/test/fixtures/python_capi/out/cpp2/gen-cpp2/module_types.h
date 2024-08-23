@@ -6490,37 +6490,44 @@ class Shallot final  {
     return value_.adapted_int;
   }
 
-  ::test::fixtures::python_capi::MyEnum move_myEnum() {
+  template <typename..., typename T = ::test::fixtures::python_capi::MyEnum>
+  T move_myEnum() {
     assert(getType() == Type::myEnum);
     return std::move(value_.myEnum);
   }
 
-  ::test::fixtures::python_capi::PrimitiveStruct move_myStruct() {
+  template <typename..., typename T = ::test::fixtures::python_capi::PrimitiveStruct>
+  T move_myStruct() {
     assert(getType() == Type::myStruct);
     return std::move(value_.myStruct);
   }
 
-  ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>> move_intSet() {
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>>
+  T move_intSet() {
     assert(getType() == Type::intSet);
     return std::move(value_.intSet);
   }
 
-  ::std::string move_myString() {
+  template <typename..., typename T = ::std::string>
+  T move_myString() {
     assert(getType() == Type::myString);
     return std::move(value_.myString);
   }
 
-  ::std::shared_ptr<const ::std::vector<double>> move_doubleList() {
+  template <typename..., typename T = ::std::shared_ptr<const ::std::vector<double>>>
+  T move_doubleList() {
     assert(getType() == Type::doubleList);
     return std::move(value_.doubleList);
   }
 
-  ::std::unique_ptr<::std::map<::std::string, ::std::string>> move_strMap() {
+  template <typename..., typename T = ::std::unique_ptr<::std::map<::std::string, ::std::string>>>
+  T move_strMap() {
     assert(getType() == Type::strMap);
     return std::move(value_.strMap);
   }
 
-  ::apache::thrift::type::ProtocolId move_adapted_int() {
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  T move_adapted_int() {
     assert(getType() == Type::adapted_int);
     return std::move(value_.adapted_int);
   }

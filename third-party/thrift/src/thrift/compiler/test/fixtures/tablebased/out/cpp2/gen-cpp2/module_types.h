@@ -1441,12 +1441,14 @@ class ExampleUnion final  {
     return value_.fieldB;
   }
 
-  ::test::fixtures::tablebased::ContainerStruct move_fieldA() {
+  template <typename..., typename T = ::test::fixtures::tablebased::ContainerStruct>
+  T move_fieldA() {
     assert(getType() == Type::fieldA);
     return std::move(value_.fieldA);
   }
 
-  ::test::fixtures::tablebased::TrivialTypesStruct move_fieldB() {
+  template <typename..., typename T = ::test::fixtures::tablebased::TrivialTypesStruct>
+  T move_fieldB() {
     assert(getType() == Type::fieldB);
     return std::move(value_.fieldB);
   }

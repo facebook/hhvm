@@ -214,7 +214,8 @@ class RefUnion final  {
     return value_.field1;
   }
 
-  ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>> move_field1() {
+  template <typename..., typename T = ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>
+  T move_field1() {
     assert(getType() == Type::field1);
     return std::move(value_.field1);
   }

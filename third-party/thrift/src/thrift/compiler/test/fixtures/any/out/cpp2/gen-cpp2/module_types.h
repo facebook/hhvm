@@ -396,7 +396,8 @@ class MyUnion final  {
     return value_.myString;
   }
 
-  ::std::string move_myString() {
+  template <typename..., typename T = ::std::string>
+  T move_myString() {
     assert(getType() == Type::myString);
     return std::move(value_.myString);
   }

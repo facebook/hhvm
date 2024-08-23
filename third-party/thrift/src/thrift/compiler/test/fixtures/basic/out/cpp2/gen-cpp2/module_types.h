@@ -1638,22 +1638,26 @@ class MyUnion final  {
     return value_.floatSet;
   }
 
-  ::test::fixtures::basic::MyEnumAlias move_myEnum() {
+  template <typename..., typename T = ::test::fixtures::basic::MyEnumAlias>
+  T move_myEnum() {
     assert(getType() == Type::myEnum);
     return std::move(value_.myEnum);
   }
 
-  ::test::fixtures::basic::MyStruct move_myStruct() {
+  template <typename..., typename T = ::test::fixtures::basic::MyStruct>
+  T move_myStruct() {
     assert(getType() == Type::myStruct);
     return std::move(value_.myStruct);
   }
 
-  ::test::fixtures::basic::MyDataItem move_myDataItem() {
+  template <typename..., typename T = ::test::fixtures::basic::MyDataItem>
+  T move_myDataItem() {
     assert(getType() == Type::myDataItem);
     return std::move(value_.myDataItem);
   }
 
-  ::std::set<float> move_floatSet() {
+  template <typename..., typename T = ::std::set<float>>
+  T move_floatSet() {
     assert(getType() == Type::floatSet);
     return std::move(value_.floatSet);
   }
@@ -2829,7 +2833,8 @@ class UnionToBeRenamed final  {
     return value_.reserved_field;
   }
 
-  ::std::int32_t move_reserved_field() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_reserved_field() {
     assert(getType() == Type::reserved_field);
     return std::move(value_.reserved_field);
   }

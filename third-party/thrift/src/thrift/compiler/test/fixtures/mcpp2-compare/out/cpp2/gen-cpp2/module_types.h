@@ -2566,12 +2566,14 @@ class SimpleUnion  {
     return value_.stringValue;
   }
 
-  ::std::int64_t move_intValue() {
+  template <typename..., typename T = ::std::int64_t>
+  T move_intValue() {
     assert(getType() == Type::intValue);
     return std::move(value_.intValue);
   }
 
-  ::std::string move_stringValue() {
+  template <typename..., typename T = ::std::string>
+  T move_stringValue() {
     assert(getType() == Type::stringValue);
     return std::move(value_.stringValue);
   }
@@ -5288,142 +5290,170 @@ class ComplexUnion final  {
     return value_.MyCustomField;
   }
 
-  ::std::int64_t move_intValue() {
+  template <typename..., typename T = ::std::int64_t>
+  T move_intValue() {
     assert(getType() == Type::intValue);
     return std::move(value_.intValue);
   }
 
-  ::std::int64_t move_opt_intValue() {
+  template <typename..., typename T = ::std::int64_t>
+  T move_opt_intValue() {
     assert(getType() == Type::opt_intValue);
     return std::move(value_.opt_intValue);
   }
 
-  ::std::string move_stringValue() {
+  template <typename..., typename T = ::std::string>
+  T move_stringValue() {
     assert(getType() == Type::stringValue);
     return std::move(value_.stringValue);
   }
 
-  ::std::string move_opt_stringValue() {
+  template <typename..., typename T = ::std::string>
+  T move_opt_stringValue() {
     assert(getType() == Type::opt_stringValue);
     return std::move(value_.opt_stringValue);
   }
 
-  ::std::int16_t move_intValue2() {
+  template <typename..., typename T = ::std::int16_t>
+  T move_intValue2() {
     assert(getType() == Type::intValue2);
     return std::move(value_.intValue2);
   }
 
-  ::std::int32_t move_intValue3() {
+  template <typename..., typename T = ::std::int32_t>
+  T move_intValue3() {
     assert(getType() == Type::intValue3);
     return std::move(value_.intValue3);
   }
 
-  double move_doubelValue() {
+  template <typename..., typename T = double>
+  T move_doubelValue() {
     assert(getType() == Type::doubelValue);
     return std::move(value_.doubelValue);
   }
 
-  bool move_boolValue() {
+  template <typename..., typename T = bool>
+  T move_boolValue() {
     assert(getType() == Type::boolValue);
     return std::move(value_.boolValue);
   }
 
-  ::std::vector<::std::int32_t> move_union_list() {
+  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  T move_union_list() {
     assert(getType() == Type::union_list);
     return std::move(value_.union_list);
   }
 
-  ::std::set<::std::int64_t> move_union_set() {
+  template <typename..., typename T = ::std::set<::std::int64_t>>
+  T move_union_set() {
     assert(getType() == Type::union_set);
     return std::move(value_.union_set);
   }
 
-  ::std::map<::std::string, ::std::int32_t> move_union_map() {
+  template <typename..., typename T = ::std::map<::std::string, ::std::int32_t>>
+  T move_union_map() {
     assert(getType() == Type::union_map);
     return std::move(value_.union_map);
   }
 
-  ::std::map<::std::string, ::std::int32_t> move_opt_union_map() {
+  template <typename..., typename T = ::std::map<::std::string, ::std::int32_t>>
+  T move_opt_union_map() {
     assert(getType() == Type::opt_union_map);
     return std::move(value_.opt_union_map);
   }
 
-  ::some::valid::ns::MyEnumA move_enum_field() {
+  template <typename..., typename T = ::some::valid::ns::MyEnumA>
+  T move_enum_field() {
     assert(getType() == Type::enum_field);
     return std::move(value_.enum_field);
   }
 
-  ::std::vector<::some::valid::ns::MyEnumA> move_enum_container() {
+  template <typename..., typename T = ::std::vector<::some::valid::ns::MyEnumA>>
+  T move_enum_container() {
     assert(getType() == Type::enum_container);
     return std::move(value_.enum_container);
   }
 
-  ::some::valid::ns::MyStruct move_a_struct() {
+  template <typename..., typename T = ::some::valid::ns::MyStruct>
+  T move_a_struct() {
     assert(getType() == Type::a_struct);
     return std::move(value_.a_struct);
   }
 
-  ::std::set<::some::valid::ns::MyStruct> move_a_set_struct() {
+  template <typename..., typename T = ::std::set<::some::valid::ns::MyStruct>>
+  T move_a_set_struct() {
     assert(getType() == Type::a_set_struct);
     return std::move(value_.a_set_struct);
   }
 
-  ::some::valid::ns::SimpleUnion move_a_union() {
+  template <typename..., typename T = ::some::valid::ns::SimpleUnion>
+  T move_a_union() {
     assert(getType() == Type::a_union);
     return std::move(value_.a_union);
   }
 
-  ::some::valid::ns::SimpleUnion move_opt_a_union() {
+  template <typename..., typename T = ::some::valid::ns::SimpleUnion>
+  T move_opt_a_union() {
     assert(getType() == Type::opt_a_union);
     return std::move(value_.opt_a_union);
   }
 
-  ::std::vector<::some::valid::ns::SimpleUnion> move_a_union_list() {
+  template <typename..., typename T = ::std::vector<::some::valid::ns::SimpleUnion>>
+  T move_a_union_list() {
     assert(getType() == Type::a_union_list);
     return std::move(value_.a_union_list);
   }
 
-  ::some::valid::ns::unionTypeDef move_a_union_typedef() {
+  template <typename..., typename T = ::some::valid::ns::unionTypeDef>
+  T move_a_union_typedef() {
     assert(getType() == Type::a_union_typedef);
     return std::move(value_.a_union_typedef);
   }
 
-  ::std::vector<::some::valid::ns::unionTypeDef> move_a_union_typedef_list() {
+  template <typename..., typename T = ::std::vector<::some::valid::ns::unionTypeDef>>
+  T move_a_union_typedef_list() {
     assert(getType() == Type::a_union_typedef_list);
     return std::move(value_.a_union_typedef_list);
   }
 
-  ::std::string move_MyBinaryField() {
+  template <typename..., typename T = ::std::string>
+  T move_MyBinaryField() {
     assert(getType() == Type::MyBinaryField);
     return std::move(value_.MyBinaryField);
   }
 
-  ::std::string move_MyBinaryField2() {
+  template <typename..., typename T = ::std::string>
+  T move_MyBinaryField2() {
     assert(getType() == Type::MyBinaryField2);
     return std::move(value_.MyBinaryField2);
   }
 
-  ::std::vector<::std::string> move_MyBinaryListField4() {
+  template <typename..., typename T = ::std::vector<::std::string>>
+  T move_MyBinaryListField4() {
     assert(getType() == Type::MyBinaryListField4);
     return std::move(value_.MyBinaryListField4);
   }
 
-  ::std::unique_ptr<::some::valid::ns::MyStruct> move_ref_field() {
+  template <typename..., typename T = ::std::unique_ptr<::some::valid::ns::MyStruct>>
+  T move_ref_field() {
     assert(getType() == Type::ref_field);
     return std::move(value_.ref_field);
   }
 
-  ::std::shared_ptr<const ::some::valid::ns::MyStruct> move_ref_field2() {
+  template <typename..., typename T = ::std::shared_ptr<const ::some::valid::ns::MyStruct>>
+  T move_ref_field2() {
     assert(getType() == Type::ref_field2);
     return std::move(value_.ref_field2);
   }
 
-  ::some::valid::ns::AnException move_excp_field() {
+  template <typename..., typename T = ::some::valid::ns::AnException>
+  T move_excp_field() {
     assert(getType() == Type::excp_field);
     return std::move(value_.excp_field);
   }
 
-  ::some::valid::ns::CustomProtocolType move_MyCustomField() {
+  template <typename..., typename T = ::some::valid::ns::CustomProtocolType>
+  T move_MyCustomField() {
     assert(getType() == Type::MyCustomField);
     return std::move(value_.MyCustomField);
   }
@@ -10862,12 +10892,14 @@ class FloatUnion final  {
     return value_.doubleSide;
   }
 
-  float move_floatSide() {
+  template <typename..., typename T = float>
+  T move_floatSide() {
     assert(getType() == Type::floatSide);
     return std::move(value_.floatSide);
   }
 
-  double move_doubleSide() {
+  template <typename..., typename T = double>
+  T move_doubleSide() {
     assert(getType() == Type::doubleSide);
     return std::move(value_.doubleSide);
   }

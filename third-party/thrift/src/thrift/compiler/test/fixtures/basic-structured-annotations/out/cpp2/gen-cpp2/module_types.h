@@ -2113,12 +2113,14 @@ class MyUnion final  {
     return value_.second;
   }
 
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string move_first() {
+  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  T move_first() {
     assert(getType() == Type::first);
     return std::move(value_.first);
   }
 
-  ::test::fixtures::basic-structured-annotations::annotated_inline_i64 move_second() {
+  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  T move_second() {
     assert(getType() == Type::second);
     return std::move(value_.second);
   }

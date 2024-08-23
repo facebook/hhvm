@@ -15,7 +15,8 @@
   limitations under the License.
 
 }}{{#struct:legacy_api?}}{{#struct:fields}}
-  {{!deprecated}}{{field:cpp_storage_type}} move_{{field:cpp_name}}() {
+  template <typename..., typename T = {{field:cpp_storage_type}}>
+  {{!deprecated}}T move_{{field:cpp_name}}() {
     assert(getType() == Type::{{field:cpp_name}});
     return std::move(value_.{{field:cpp_name}});
   }

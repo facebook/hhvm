@@ -47,11 +47,6 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
-      INT_LIST_VALUE,
-      STRING_LIST_VALUE,
-    }
-
     public static ListUnion from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -146,17 +141,6 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
-    }
-
-    public Type getThriftType() {
-      switch(this.id) {
-        case 2:
-          return Type.INT_LIST_VALUE;
-        case 3:
-          return Type.STRING_LIST_VALUE;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
     }
 
     public String getThriftName() {

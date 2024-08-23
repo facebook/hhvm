@@ -67,15 +67,6 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
-      INT_VALUE,
-      STRING_VALUE,
-      INT_LIST_VALUE,
-      STRING_LIST_VALUE,
-      TYPEDEF_VALUE,
-      STRING_REF,
-    }
-
     public static ComplexUnion from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -295,25 +286,6 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
-    }
-
-    public Type getThriftType() {
-      switch(this.id) {
-        case 1:
-          return Type.INT_VALUE;
-        case 5:
-          return Type.STRING_VALUE;
-        case 2:
-          return Type.INT_LIST_VALUE;
-        case 3:
-          return Type.STRING_LIST_VALUE;
-        case 9:
-          return Type.TYPEDEF_VALUE;
-        case 14:
-          return Type.STRING_REF;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
     }
 
     public String getThriftName() {

@@ -47,11 +47,6 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
-      BINARY_DATA,
-      STRING_DATA,
-    }
-
     public static DataUnion from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -154,17 +149,6 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
-    }
-
-    public Type getThriftType() {
-      switch(this.id) {
-        case 1:
-          return Type.BINARY_DATA;
-        case 2:
-          return Type.STRING_DATA;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
     }
 
     public String getThriftName() {

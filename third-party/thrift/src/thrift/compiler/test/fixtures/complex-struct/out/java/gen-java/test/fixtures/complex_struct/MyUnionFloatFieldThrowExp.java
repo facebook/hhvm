@@ -57,13 +57,6 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
-      MY_ENUM,
-      SET_FLOAT,
-      MY_DATA_ITEM,
-      COMPLEX_NESTED_STRUCT,
-    }
-
     public static MyUnionFloatFieldThrowExp from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -238,21 +231,6 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
-    }
-
-    public Type getThriftType() {
-      switch(this.id) {
-        case 1:
-          return Type.MY_ENUM;
-        case 2:
-          return Type.SET_FLOAT;
-        case 3:
-          return Type.MY_DATA_ITEM;
-        case 4:
-          return Type.COMPLEX_NESTED_STRUCT;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
     }
 
     public String getThriftName() {

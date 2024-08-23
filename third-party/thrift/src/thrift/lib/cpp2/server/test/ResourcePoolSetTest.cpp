@@ -33,22 +33,18 @@ namespace apache::thrift {
 TEST(ResourcePoolSetTest, testDefaultPoolsOverride_overrideSync_expectCrash) {
   ResourcePoolSet set;
 
-  set.setResourcePool(
-      ResourcePoolHandle::defaultSync(), nullptr, nullptr, nullptr);
+  set.setResourcePool(ResourcePoolHandle::defaultSync());
   EXPECT_THROW(
-      set.setResourcePool(
-          ResourcePoolHandle::defaultSync(), nullptr, nullptr, nullptr),
+      set.setResourcePool(ResourcePoolHandle::defaultSync()),
       std::invalid_argument);
 }
 
 TEST(ResourcePoolSetTest, testDefaultPoolsOverride_overrideAsync_expectCrash) {
   ResourcePoolSet set;
 
-  set.setResourcePool(
-      ResourcePoolHandle::defaultAsync(), nullptr, nullptr, nullptr);
+  set.setResourcePool(ResourcePoolHandle::defaultAsync());
   EXPECT_THROW(
-      set.setResourcePool(
-          ResourcePoolHandle::defaultAsync(), nullptr, nullptr, nullptr),
+      set.setResourcePool(ResourcePoolHandle::defaultAsync()),
       std::invalid_argument);
 }
 

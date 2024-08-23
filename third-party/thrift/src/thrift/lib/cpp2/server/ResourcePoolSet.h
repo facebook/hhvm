@@ -44,6 +44,18 @@ class ResourcePoolSet {
   // already exists. This can only be called before lock() is called. This is
   // primarily used to set the defaultAsync or defaultSync resource pools.
   void setResourcePool(
+      const ResourcePoolHandle& handle, bool joinExecutorOnStop = true);
+
+  // Variant of setResourcePool that also sets the executor for the resource
+  // pool.
+  void setResourcePool(
+      const ResourcePoolHandle& handle,
+      std::shared_ptr<folly::Executor> executor,
+      bool joinExecutorOnStop = true);
+
+  // Variant of setResourcePool that also sets the requestPile, executor, and
+  // concurrencyController for the resource pool.
+  void setResourcePool(
       const ResourcePoolHandle& handle,
       std::unique_ptr<RequestPileInterface>&& requestPile,
       std::shared_ptr<folly::Executor> executor,
@@ -133,6 +145,12 @@ class ResourcePoolSet {
 
  private:
   void calculatePriorityMapping();
+
+  void setResourcePoolInner(
+      const ResourcePoolHandle& handle,
+      std::unique_ptr<ResourcePool>&& resourcePool,
+      std::optional<concurrency::PRIORITY> priorityHint_deprecated =
+          std::nullopt);
 
   std::vector<std::unique_ptr<ResourcePool>> resourcePools_;
   mutable std::mutex mutex_;

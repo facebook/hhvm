@@ -117,6 +117,13 @@ class ResourcePool : public IResourcePoolAcceptor {
 
  private:
   friend class ResourcePoolSet;
+  ResourcePool(std::string_view name, bool joinExecutorOnStop);
+
+  ResourcePool(
+      std::shared_ptr<folly::Executor> executor,
+      std::string_view name,
+      bool joinExecutorOnStop);
+
   ResourcePool(
       std::unique_ptr<RequestPileInterface>&& requestPile,
       std::shared_ptr<folly::Executor> executor,
@@ -124,9 +131,10 @@ class ResourcePool : public IResourcePoolAcceptor {
       std::string_view name,
       bool joinExecutorOnStop);
 
-  std::unique_ptr<RequestPileInterface> requestPile_;
-  std::shared_ptr<folly::Executor> executor_;
-  std::unique_ptr<ConcurrencyControllerInterface> concurrencyController_;
+  std::unique_ptr<RequestPileInterface> requestPile_ = nullptr;
+  std::shared_ptr<folly::Executor> executor_ = nullptr;
+  std::unique_ptr<ConcurrencyControllerInterface> concurrencyController_ =
+      nullptr;
   std::string name_;
   const bool joinExecutorOnStop_;
 };

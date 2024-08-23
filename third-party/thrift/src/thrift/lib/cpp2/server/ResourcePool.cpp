@@ -55,6 +55,19 @@ serverdbginfo::ExecutorDbgInfo getExecutorDbgInfo(folly::Executor* executor) {
 
 // ResourcePool
 
+ResourcePool::ResourcePool(std::string_view name, bool joinExecutorOnStop)
+    : name_(name), joinExecutorOnStop_(joinExecutorOnStop) {}
+
+ResourcePool::ResourcePool(
+    std::shared_ptr<folly::Executor> executor,
+    std::string_view name,
+    bool joinExecutorOnStop)
+    : executor_(executor),
+      name_(name),
+      joinExecutorOnStop_(joinExecutorOnStop) {
+  DCHECK(executor_ != nullptr);
+}
+
 ResourcePool::ResourcePool(
     std::unique_ptr<RequestPileInterface>&& requestPile,
     std::shared_ptr<folly::Executor> executor,
@@ -66,16 +79,13 @@ ResourcePool::ResourcePool(
       concurrencyController_(std::move(concurrencyController)),
       name_(name),
       joinExecutorOnStop_(joinExecutorOnStop) {
-  DCHECK((requestPile_ == nullptr) == (concurrencyController_ == nullptr));
-  /*
-  // Current preconditions - either we have all three of these or none of them
-  if (requestPile_ && concurrencyController_ && executor_) {
-    // This is an async pool - that's allowed.
-  } else {
-    // This is a sync/eb pool.
-    DCHECK(!requestPile_ && !concurrencyController && !executor_);
-  }
-  */
+  // T196069257 added variants of this API that should be preferred when
+  // requestPile, executor, or concurrencyController are nullptr, but we still
+  // allow nullptrs in this variant to preserve the original behavior.
+  DCHECK(
+      (executor_ == nullptr)
+          ? (requestPile_ == nullptr) && (concurrencyController_ == nullptr)
+          : (requestPile_ == nullptr) == (concurrencyController_ == nullptr));
 }
 
 void ResourcePool::stop() {

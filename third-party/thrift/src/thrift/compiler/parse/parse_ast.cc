@@ -629,8 +629,7 @@ class ast_builder : public parser_actions {
       std::unique_ptr<t_throws> throws) override {
     auto return_name = ret.name.str;
     t_type_ref interaction;
-    t_type_ref return_type = t_type_ref::from_ptr(
-        ret.type, {ret.name.loc, ret.name.loc + ret.name.str.size()});
+    t_type_ref return_type = ret.type;
     if (size_t size = return_name.size()) {
       // Handle an interaction or return type name.
       std::string qualified_name;

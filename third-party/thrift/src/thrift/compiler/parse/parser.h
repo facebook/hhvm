@@ -66,7 +66,7 @@ struct type_throws_spec {
 
 struct return_clause {
   identifier name; // An interaction or type name.
-  const t_type* type;
+  t_type_ref type;
   std::unique_ptr<t_node> sink_or_stream;
 };
 

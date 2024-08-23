@@ -1543,49 +1543,41 @@ TEST(CompilerTest, inject_metadata_fields_annotation) {
   check_compile(name_contents_map, "bar.thrift");
 }
 
-TEST(CompilerTest, invalid_set_key_type_for_hack_codegen) {
+TEST(CompilerTest, invalid_field_type_for_hack_codegen) {
   check_compile(
       R"(
-      # expected-error@1: InvalidKeyType: Hack only supports integers and strings as key for map and set - https://fburl.com/wiki/pgzirbu8, field: set<float> set_of_float.
-    struct S {
-      1: i32 field;
-      2: set<float> set_of_float;
-    }
-  )",
+      struct S {
+        1: i32 field;
+
+        2: set<float> set_of_float;
+        # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
+
+        3: map<float, i32> map_of_float_to_int;
+        # expected-error@-1: `float` cannot be used as a map key in Hack because it is not integer, string, binary or enum
+      }
+      )",
       {"--gen", "hack"});
 }
 
-TEST(CompilerTest, invalid_map_key_type_for_hack_codegen) {
+TEST(CompilerTest, invalid_return_type_for_hack_codegen) {
   check_compile(
       R"(
-      # expected-error@1: InvalidKeyType: Hack only supports integers and strings as key for map and set - https://fburl.com/wiki/pgzirbu8, field: map<float, i32> map_of_float_to_int.
-    struct S {
-      1: i32 field;
-      3: map<float, i32> map_of_float_to_int;
-    }
-  )",
+      service Foo {
+        set<float> invalid_rpc_return();
+        # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
+      }
+      )",
       {"--gen", "hack"});
 }
 
-TEST(CompilerTest, invalid_rpc_return_type_for_hack_codegen) {
+TEST(CompilerTest, invalid_param_type_for_hack_codegen) {
   check_compile(
       R"(
-      # expected-error@1: InvalidKeyType: Hack only supports integers and strings as key for map and set - https://fburl.com/wiki/pgzirbu8, function invalid_rpc_return has invalid return type with type: set<float>.
-    service Foo {
-      set<float> invalid_rpc_return();
-    }
-  )",
-      {"--gen", "hack"});
-}
-
-TEST(CompilerTest, invalid_rpc_param_type_for_hack_codegen) {
-  check_compile(
-      R"(
-      # expected-error@1: InvalidKeyType: Hack only supports integers and strings as key for map and set - https://fburl.com/wiki/pgzirbu8, function invalid_rpc_param has invalid param arg1 with type: set<float>.
-    service Foo {
-      void invalid_rpc_param(set<float> arg1);
-    }
-  )",
+      service Foo {
+        void invalid_rpc_param(set<float> arg1);
+        # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
+      }
+      )",
       {"--gen", "hack"});
 }
 

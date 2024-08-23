@@ -56,11 +56,12 @@ void generator_registry::register_generator(
 std::unique_ptr<t_generator> generator_registry::make_generator(
     const std::string& name,
     t_program& p,
-    source_manager& sm,
-    t_program_bundle& pb) {
+    t_program_bundle& pb,
+    diagnostics_engine& diags) {
   generator_map& map = get_generators();
   auto iter = map.find(name);
-  return iter != map.end() ? iter->second->make_generator(p, sm, pb) : nullptr;
+  return iter != map.end() ? iter->second->make_generator(p, pb, diags)
+                           : nullptr;
 }
 
 generator_registry::generator_map& generator_registry::get_generators() {

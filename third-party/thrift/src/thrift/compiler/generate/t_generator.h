@@ -33,8 +33,11 @@ class t_program_bundle;
 
 class t_generator {
  public:
-  t_generator(t_program& p, source_manager& sm, t_program_bundle& pb)
-      : program_(&p), source_mgr_(sm), program_bundle_(pb) {}
+  t_generator(t_program& p, t_program_bundle& pb, diagnostics_engine& diags)
+      : program_(&p),
+        source_mgr_(diags.source_mgr()),
+        diags_(diags),
+        program_bundle_(pb) {}
   virtual ~t_generator() = default;
 
   // Processes generator options.
@@ -91,6 +94,7 @@ class t_generator {
   t_program* program_;
 
   source_manager& source_mgr_;
+  diagnostics_engine& diags_;
 
   t_program_bundle& program_bundle_;
 
@@ -125,7 +129,7 @@ class generator_factory {
 
   // Creates a generator for the specified program.
   virtual std::unique_ptr<t_generator> make_generator(
-      t_program& p, source_manager& sm, t_program_bundle& pb) = 0;
+      t_program& p, t_program_bundle& pb, diagnostics_engine& diags) = 0;
 
   const std::string& name() const { return name_; }
   const std::string& long_name() const { return long_name_; }
@@ -144,8 +148,8 @@ class generator_factory_impl : public generator_factory {
   using generator_factory::generator_factory;
 
   std::unique_ptr<t_generator> make_generator(
-      t_program& p, source_manager& sm, t_program_bundle& pb) override {
-    return std::unique_ptr<t_generator>(new Generator(p, sm, pb));
+      t_program& p, t_program_bundle& pb, diagnostics_engine& diags) override {
+    return std::unique_ptr<t_generator>(new Generator(p, pb, diags));
   }
 };
 } // namespace detail
@@ -157,8 +161,8 @@ void register_generator(const std::string& name, generator_factory* factory);
 std::unique_ptr<t_generator> make_generator(
     const std::string& name,
     t_program& p,
-    source_manager& sm,
-    t_program_bundle& pb);
+    t_program_bundle& pb,
+    diagnostics_engine& diags);
 
 // A map from generator names to factories.
 using generator_map = std::map<std::string, generator_factory*>;

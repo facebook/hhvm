@@ -475,18 +475,18 @@ generator_specs parse_generator_specs(const std::string& target) {
  * @return successfully created generator, or `nullptr` on failure.
  *
  * @throws std::exception if the generator options could not be processed (see
- * `t_generator::process_options()`).
+ * `t_generator::process_options`).
  */
 std::unique_ptr<t_generator> create_generator(
     const std::string& target,
     const gen_params& params,
     t_program& program,
     t_program_bundle& program_bundle,
-    source_manager& source_mgr) {
+    diagnostics_engine& diags) {
   const auto [generator_name, generator_options] =
       parse_generator_specs(target);
   std::unique_ptr<t_generator> generator = generator_registry::make_generator(
-      generator_name, program, source_mgr, program_bundle);
+      generator_name, program, program_bundle, diags);
   if (generator == nullptr) {
     fmt::print(stderr, "Error: Invalid generator name: {}\n", generator_name);
     usage();
@@ -542,8 +542,8 @@ bool generate_code_for_single_program(
     }
 
     for (const std::string& target : params.targets) {
-      std::unique_ptr<t_generator> generator = create_generator(
-          target, params, program, program_bundle, diags.source_mgr());
+      std::unique_ptr<t_generator> generator =
+          create_generator(target, params, program, program_bundle, diags);
       if (generator == nullptr) {
         continue;
       }
@@ -566,7 +566,7 @@ bool generate_code_for_single_program(
         }
       }
     }
-    return all_targets_successful;
+    return all_targets_successful && !diags.has_errors();
   } catch (const std::string& s) {
     printf("Error: %s\n", s.c_str());
     return false;

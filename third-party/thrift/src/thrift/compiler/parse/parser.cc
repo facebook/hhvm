@@ -483,7 +483,8 @@ class parser {
     switch (token_.kind) {
       case tok::kw_void:
         is_void = true;
-        ret.type = &t_primitive_type::t_void();
+        ret.type =
+            actions_.on_type(token_.range, t_primitive_type::t_void(), {});
         consume_token();
         break;
       case tok::kw_sink:
@@ -493,7 +494,7 @@ class parser {
         ret.sink_or_stream = parse_stream();
         return ret;
       default:
-        ret.type = parse_type().get_type();
+        ret.type = parse_type();
         break;
     }
     if (!try_consume_token(',')) {

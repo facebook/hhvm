@@ -95,6 +95,13 @@ class t_result_struct final : public t_structured {
   std::string result_return_type;
 };
 
+// Returns true iff type can be used as a set or map key in Hack.
+bool is_type_arraykey(const t_type& type) {
+  const t_type* true_type = type.get_true_type();
+  return true_type->is_string_or_binary() || true_type->is_any_int() ||
+      true_type->is_byte() || true_type->is_enum();
+}
+
 } // namespace
 
 /**
@@ -448,9 +455,13 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_hack_ref);
   void generate_php_structural_id(
       std::ofstream& out, const t_structured* tstruct, bool asFunction);
-  bool is_valid_hack_type(const t_type* type);
-  bool skip_codegen(const t_field* tfield);
-  bool skip_codegen(const t_function* tfunction);
+  bool skip_codegen(const t_field* field);
+  bool skip_codegen(const t_function* function);
+
+  bool is_valid_hack_type(const t_type* type, const t_type_ref& top_level_type);
+  bool is_valid_hack_type(const t_type_ref& type) {
+    return is_valid_hack_type(&*type, type);
+  }
 
   /**
    * Service-level generation functions
@@ -643,8 +654,6 @@ class t_hack_generator : public t_concat_generator {
       std::map<TypeToTypehintVariations, bool> variations);
   std::string type_to_param_typehint(
       const t_type* ttype, bool nullable = false);
-
-  bool is_type_arraykey(const t_type* type);
 
   std::string union_enum_name(
       const std::string& name, const t_program* program, bool decl = false) {
@@ -1224,6 +1233,8 @@ class t_hack_generator : public t_concat_generator {
    * When to start emitting UNSAFE_CAST in $_TSPEC shape initializers.
    */
   uint32_t min_depth_for_unsafe_cast_ = 4;
+
+  std::unordered_map<const t_type*, bool> type_validity_;
 };
 
 void t_hack_generator::generate_json_enum(
@@ -2821,73 +2832,69 @@ void t_hack_generator::generate_struct(const t_structured* tstruct) {
   }
 }
 
-bool t_hack_generator::is_valid_hack_type(const t_type* type) {
+bool t_hack_generator::is_valid_hack_type(
+    const t_type* type, const t_type_ref& top_level_type) {
   type = type->get_true_type();
   if (!type->is_container()) {
     return true;
   }
-  const t_type* ktype = nullptr;
-  if (type->is_map()) {
-    ktype = static_cast<const t_map*>(type)->get_key_type();
+
+  auto it = type_validity_.find(type);
+  if (it != type_validity_.end()) {
+    return it->second;
+  }
+
+  auto report_invalid_type = [&](const char* what, const t_type& type) {
+    diags_.error(
+        top_level_type,
+        "`{}` cannot be used as a {} in Hack because it is not "
+        "integer, string, binary or enum",
+        type.name(),
+        what);
+  };
+
+  bool valid = false;
+  if (const t_list* list = dynamic_cast<const t_list*>(type)) {
+    valid = is_valid_hack_type(&*list->elem_type(), top_level_type);
+  } else if (const t_set* set = dynamic_cast<const t_set*>(type)) {
+    const t_type& elem_type = *set->elem_type();
+    valid = is_type_arraykey(elem_type);
+    if (!valid) {
+      report_invalid_type("set element", elem_type);
+    }
   } else {
-    ktype = static_cast<const t_set*>(type)->get_elem_type();
+    const t_map* map = dynamic_cast<const t_map*>(type);
+    assert(map);
+    const t_type& key_type = *map->key_type();
+    valid = is_type_arraykey(key_type);
+    if (!valid) {
+      report_invalid_type("map key", key_type);
+    }
+    valid = valid && is_valid_hack_type(&*map->val_type(), top_level_type);
   }
-  if (type->is_set()) {
-    return is_type_arraykey(ktype);
-  } else if (type->is_list()) {
-    return is_valid_hack_type(ktype);
-  } else if (type->is_map()) {
-    return is_type_arraykey(ktype) &&
-        is_valid_hack_type(dynamic_cast<const t_map*>(type)->get_val_type());
-  }
-  throw std::runtime_error("Unreachable, all types should be handled above.");
+  type_validity_[type] = valid;
+  return valid;
 }
 
 bool t_hack_generator::skip_codegen(const t_field* field) {
-  auto skip_codegen_field =
+  auto skip_codegen =
       field->find_structured_annotation_or_null(kHackSkipCodegenUri);
-  if (!skip_codegen_field) {
-    skip_codegen_field = t_typedef::get_first_structured_annotation_or_null(
+  if (!skip_codegen) {
+    skip_codegen = t_typedef::get_first_structured_annotation_or_null(
         field->get_type(), kHackSkipCodegenUri);
   }
-  bool is_valid_type = is_valid_hack_type(field->get_type());
-  if (!is_valid_type && skip_codegen_field == nullptr) {
-    throw std::runtime_error(
-        "InvalidKeyType: Hack only supports integers and strings as key for "
-        "map and set - https://fburl.com/wiki/pgzirbu8, field: " +
-        field->get_type()->get_full_name() + " " + field->get_name() + ".");
-  }
-  return skip_codegen_field != nullptr;
+  return skip_codegen || !is_valid_hack_type(field->type());
 }
 
-bool t_hack_generator::skip_codegen(const t_function* tfunction) {
-  const auto skip_codegen_function =
-      tfunction->find_structured_annotation_or_null(kHackSkipCodegenUri);
-  const t_type* invalid_type = nullptr;
-  std::string field_name;
-  const t_type* type = tfunction->return_type().get_type();
-  if (!is_valid_hack_type(type)) {
-    invalid_type = type;
-    field_name = "return type";
+bool t_hack_generator::skip_codegen(const t_function* function) {
+  if (function->find_structured_annotation_or_null(kHackSkipCodegenUri)) {
+    return true;
   }
-  if (invalid_type == nullptr) {
-    for (const auto& field : tfunction->params().fields()) {
-      type = field.get_type();
-      if (!is_valid_hack_type(type)) {
-        invalid_type = type;
-        field_name = "param " + field.get_name();
-        break;
-      }
-    }
+  bool valid = is_valid_hack_type(function->return_type());
+  for (const auto& field : function->params().fields()) {
+    valid &= is_valid_hack_type(field.type());
   }
-  if (invalid_type != nullptr && skip_codegen_function == nullptr) {
-    throw std::runtime_error(
-        "InvalidKeyType: Hack only supports integers and strings as key for "
-        "map and set - https://fburl.com/wiki/pgzirbu8, function " +
-        tfunction->get_name() + " has invalid " + field_name +
-        " with type: " + invalid_type->get_full_name() + ".");
-  }
-  return skip_codegen_function != nullptr;
+  return !valid;
 }
 
 /**
@@ -6710,21 +6717,15 @@ std::string t_hack_generator::type_to_param_typehint(
     if (strict_types_) {
       return prefix + type_to_typehint(ttype);
     } else {
-      const auto* key_type = tmap->get_key_type();
+      const t_type* key_type = tmap->get_key_type();
       return prefix + "KeyedContainer<" +
-          (!is_type_arraykey(key_type) ? "arraykey"
-                                       : type_to_param_typehint(key_type)) +
+          (!is_type_arraykey(*key_type) ? "arraykey"
+                                        : type_to_param_typehint(key_type)) +
           ", " + type_to_param_typehint(tmap->get_val_type()) + ">";
     }
   } else {
     return prefix + type_to_typehint(ttype);
   }
-}
-
-bool t_hack_generator::is_type_arraykey(const t_type* type) {
-  type = type->get_true_type();
-  return type->is_string_or_binary() || type->is_any_int() || type->is_byte() ||
-      type->is_enum();
 }
 
 /**

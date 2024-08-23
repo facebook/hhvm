@@ -45,7 +45,8 @@ TEST(t_mstch_generator_test, cache_leaks) {
   class leaky_generator : public t_mstch_generator {
    public:
     leaky_generator(t_program& program, int* object_count, t_program_bundle& pb)
-        : t_mstch_generator(program, source_mgr_, pb),
+        : t_mstch_generator(program, pb, diags_),
+          diags_(diagnostics_engine::ignore_all(source_mgr_)),
           object_count_(object_count) {}
 
     std::string template_prefix() const override { return "."; }
@@ -57,6 +58,7 @@ TEST(t_mstch_generator_test, cache_leaks) {
 
    private:
     source_manager source_mgr_;
+    diagnostics_engine diags_;
     int* object_count_;
   };
 

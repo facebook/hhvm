@@ -46,3 +46,5 @@ val make_byte_span : 'a Pos.pos -> Src.ByteSpan.t
 val make_variance : Ast_defs.variance -> Hack.Variance.t
 
 val make_reify_kind : Ast_defs.reify_kind -> Hack.ReifyKind.t
+
+val class_hint_to_qname : Aast_defs.class_hint -> Hack.QName.t option

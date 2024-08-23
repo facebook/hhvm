@@ -33,8 +33,7 @@ let namespace_decl_opt name fa =
   | Some "" -> fa
   | Some name -> namespace_decl name fa |> snd
 
-let container_decl decl_pred name fa =
-  let qname = Util.make_qname name in
+let container_decl_qname decl_pred qname fa =
   let json =
     match decl_pred with
     | Predicate.(Hack ClassDeclaration) ->
@@ -51,9 +50,11 @@ let container_decl decl_pred name fa =
 
 let parent_decls decls pred fa =
   List.fold decls ~init:([], fa) ~f:(fun (decl_refs, fa) decl ->
-      let name = Pretty.(hint_to_string ~is_ctx:false decl |> strip_tparams) in
-      let (decl_id, fa) = container_decl pred name fa in
-      (decl_id :: decl_refs, fa))
+      match Util.class_hint_to_qname decl with
+      | Some qname ->
+        let (decl_id, fa) = container_decl_qname pred qname fa in
+        (decl_id :: decl_refs, fa)
+      | None -> (decl_refs, fa))
 
 let parent_decls_enum decls fa =
   let (fact_ids, fa) = parent_decls decls Predicate.(Hack EnumDeclaration) fa in
@@ -63,6 +64,7 @@ let parent_decls_class decls fa =
   let (fact_ids, fa) =
     parent_decls decls Predicate.(Hack ClassDeclaration) fa
   in
+
   (List.map ~f:(fun x -> ClassDeclaration.Id x) fact_ids, fa)
 
 let parent_decls_trait decls fa =
@@ -169,15 +171,14 @@ let container_defn source_text clss decl_id members fa =
       match clss.c_extends with
       | [] -> (None, fa)
       | [parent] ->
-        let (decl_id, fa) =
-          let parent_clss =
-            Pretty.(hint_to_string ~is_ctx:false parent |> strip_tparams)
+        (match Util.class_hint_to_qname parent with
+        | Some qname ->
+          let (decl_id, fa) =
+            let json = ClassDeclaration.(to_json_key { name = qname }) in
+            Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json fa
           in
-          let qname = Util.make_qname parent_clss in
-          let json = ClassDeclaration.(to_json_key { name = qname }) in
-          Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json fa
-        in
-        (Some (ClassDeclaration.Id decl_id), fa)
+          (Some (ClassDeclaration.Id decl_id), fa)
+        | None -> (None, fa))
       | _ ->
         Hh_logger.log
           "WARNING: skipping extends field for class with multiple parents %s"
@@ -701,3 +702,7 @@ let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ fa =
 let hack_to_thrift hack thrift fa =
   let json = HackToThrift.({ from = hack; to_ = thrift } |> to_json_key) in
   Fact_acc.add_fact Predicate.(Hack HackToThrift) json fa |> snd
+
+let container_decl decl_pred name fa =
+  let qname = Util.make_qname name in
+  container_decl_qname decl_pred qname fa

@@ -142,3 +142,12 @@ let make_reify_kind =
   | Ast_defs.Erased -> Erased
   | Ast_defs.Reified -> Reified
   | Ast_defs.SoftReified -> SoftReified
+
+let class_hint_to_qname (_, chint) =
+  match chint with
+  | Aast_defs.Happly ((_, cname), _) -> Some (make_qname cname)
+  | _ ->
+    Hh_logger.log
+      "Shouldn't happen: expected class hint bug got %s"
+      (Aast_defs.show_hint_ chint);
+    None

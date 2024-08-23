@@ -300,7 +300,7 @@ class field_ref {
     return *this;
   }
 
-  // Workaround for https://bugs.llvm.org/show_bug.cgi?id=49442
+  // Workaround for https://github.com/llvm/llvm-project/issues/48786
   FOLLY_ERASE field_ref& operator=(value_type&& value) noexcept(
       std::is_nothrow_move_assignable<value_type>::value) {
     value_ = static_cast<value_type&&>(value);

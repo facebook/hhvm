@@ -425,6 +425,8 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
     if (c == '\\' && scan.next().peek() == '{') {
       // greedily consume "\{" so that "\{{" is lexed as text
       text += '{';
+      scan = scan.next(2);
+      continue;
     }
     if (c == '{' && scan.next().peek() == '{') {
       auto scan_within = scan.make_fresh().next(2);

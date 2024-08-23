@@ -605,6 +605,19 @@ TEST_F(LexerTest, text_captures_whitespace) {
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
 }
 
+TEST_F(LexerTest, text_escapes_template) {
+  auto lexer = make_lexer("\\{{}} \\{{{foo}}");
+  const std::vector<token_description> expected = {
+      {tok::text, "{{}} {"},
+      {tok::open, {}},
+      {tok::identifier, "foo"},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
 TEST_F(LexerTest, basic_comment_and_text) {
   auto lexer = make_lexer("hello {{! some comment}} and back to text");
   const std::vector<token_description> expected = {

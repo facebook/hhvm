@@ -251,12 +251,14 @@ class parser {
     }
   }
 
-  // body → { text | template | comment }
+  // body → { text | newline | template | comment }
   parse_result<ast::body> parse_body(parser_scan_window scan) {
     assert(scan.empty());
     std::optional<ast::body> body;
     if (parse_result text = parse_text(scan)) {
       body = std::move(text).consume_and_advance(&scan);
+    } else if (parse_result newline = parse_newline(scan)) {
+      body = std::move(newline).consume_and_advance(&scan);
     } else if (parse_result templ = parse_template(scan)) {
       detail::variant_match(
           std::move(templ).consume_and_advance(&scan),
@@ -276,20 +278,22 @@ class parser {
     return {std::move(*body), scan};
   }
 
-  // text → { <raw text until we see a template> }
+  // text → { <raw text until we see a template or newline> }
   parse_result<ast::text> parse_text(parser_scan_window scan) {
     assert(scan.empty());
-    std::string result;
-    while (scan.can_advance()) {
-      const token& t = scan.peek();
-      if (t.kind != tok::text && t.kind != tok::newline) {
-        break;
-      }
-      result += t.string_value();
-      scan.advance();
+    if (const auto& text = scan.advance(); text.kind == tok::text) {
+      return {ast::text{scan.range(), std::string(text.string_value())}, scan};
     }
-    return result.empty() ? std::nullopt
-                          : parse_result{ast::text{scan.range(), result}, scan};
+    return std::nullopt;
+  }
+
+  parse_result<ast::newline> parse_newline(parser_scan_window scan) {
+    assert(scan.empty());
+    if (const auto& text = scan.advance(); text.kind == tok::newline) {
+      return {
+          ast::newline{scan.range(), std::string(text.string_value())}, scan};
+    }
+    return std::nullopt;
   }
 
   // comment → { basic-comment | escaped-comment }
@@ -443,7 +447,7 @@ class parser {
         scan};
   }
 
-  // section-block → { section-block-open ~ template ~ section-block-close }
+  // section-block → { section-block-open ~ body* ~ section-block-close }
   // section-block-open → { "{{" ~ ("#" | "^") ~ variable-lookup ~ "}}" }
   // section-block-close → { "{{" ~ "/" ~ variable-lookup ~ "}}" }
   //

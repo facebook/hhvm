@@ -25,6 +25,7 @@
 namespace whisker::ast {
 
 struct text;
+struct newline;
 struct comment;
 struct section_block;
 struct partial_apply;
@@ -33,8 +34,8 @@ struct variable;
 /**
  * The top-level types of constructs allowed in a Whisker source file.
  */
-using body =
-    std::variant<text, comment, variable, section_block, partial_apply>;
+using body = std::
+    variant<text, newline, comment, variable, section_block, partial_apply>;
 using bodies = std::vector<body>;
 
 /**
@@ -47,8 +48,20 @@ struct root {
 
 /**
  * Raw text content that should be emitted unchanged in the rendered output.
+ * This is guaranteed to be on one line (i.e. not contain a new line).
  */
 struct text {
+  source_range loc;
+  std::string text;
+};
+
+/**
+ * Raw newline that should be emitted unchanged in the rendered output. One of:
+ *   - "\r\n"
+ *   - "\n"
+ *   - "\r"
+ */
+struct newline {
   source_range loc;
   std::string text;
 };

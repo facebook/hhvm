@@ -145,9 +145,11 @@ TEST_F(ParserTest, basic_section) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <line:1:1, line:3:23>\n"
       "| `- variable-lookup <line:1:5, col:21> 'news.has-update?'\n"
-      "| |- text <line:1:23, line:2:12> '\\n  Stuff is '\n"
+      "| |- newline <line:1:23, line:2:1> '\\n'\n"
+      "| |- text <line:2:1, col:12> '  Stuff is '\n"
       "| |- variable <line:2:12, col:19> 'foo'\n"
-      "| |- text <line:2:19, line:3:1> ' happening!\\n'\n");
+      "| |- text <line:2:19, col:30> ' happening!'\n"
+      "| |- newline <line:2:30, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, inverted_section) {
@@ -160,9 +162,11 @@ TEST_F(ParserTest, inverted_section) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <inverted> <line:1:1, line:3:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- text <line:1:22, line:2:12> '\\n  Stuff is '\n"
+      "| |- newline <line:1:22, line:2:1> '\\n'\n"
+      "| |- text <line:2:1, col:12> '  Stuff is '\n"
       "| |- variable <line:2:12, col:19> 'foo'\n"
-      "| |- text <line:2:19, line:3:1> ' happening!\\n'\n");
+      "| |- text <line:2:19, col:30> ' happening!'\n"
+      "| |- newline <line:2:30, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, nested_sections) {
@@ -177,13 +181,17 @@ TEST_F(ParserTest, nested_sections) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <line:1:1, line:5:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- text <line:1:22, line:2:3> '\\n  '\n"
+      "| |- newline <line:1:22, line:2:1> '\\n'\n"
+      "| |- text <line:2:1, col:3> '  '\n"
       "| |- section-block <inverted> <line:2:3, line:4:28>\n"
       "| | `- variable-lookup <line:2:6, col:26> 'update.is-important?'\n"
-      "| | |- text <line:2:28, line:3:24> '\\n    Important stuff is '\n"
+      "| | |- newline <line:2:28, line:3:1> '\\n'\n"
+      "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
       "| | |- variable <line:3:24, col:31> 'foo'\n"
-      "| | |- text <line:3:31, line:4:3> ' happening!\\n  '\n"
-      "| |- text <line:4:28, line:5:1> '\\n'\n");
+      "| | |- text <line:3:31, col:42> ' happening!'\n"
+      "| | |- newline <line:3:42, line:4:1> '\\n'\n"
+      "| | |- text <line:4:1, col:3> '  '\n"
+      "| |- newline <line:4:28, line:5:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, mismatched_section_hierarchy) {
@@ -299,9 +307,10 @@ TEST_F(ParserTest, partial_apply_in_section) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <line:1:1, line:3:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- text <line:1:22, line:2:3> '\\n  '\n"
+      "| |- newline <line:1:22, line:2:1> '\\n'\n"
+      "| |- text <line:2:1, col:3> '  '\n"
       "| |- partial-apply <line:2:3, col:20> 'print/news'\n"
-      "| |- text <line:2:20, line:3:1> '\\n'\n");
+      "| |- newline <line:2:20, line:3:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, partial_apply_no_id) {

@@ -2,8 +2,10 @@
 
 set -e
 
+MODE_FILES=$1
+
 javafoundations/scripts/create-idea-project \
---mode-files "mac" \
+--mode-files "$MODE_FILES" \
 --project-root=thrift/lib/java \
 //thrift/lib/java/benchmarks:benchmarks \
 //thrift/lib/java/common:common \

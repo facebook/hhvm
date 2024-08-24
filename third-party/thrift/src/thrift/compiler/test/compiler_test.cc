@@ -1778,17 +1778,43 @@ TEST(CompilerTest, terse_write_outside_experimental_mode) {
   )");
 }
 
-TEST(CompilerTest, new_test) {
+TEST(CompilerTest, cyclic_dependency) {
   check_compile(R"(
     # expected-error@-1: Cyclic dependency: A -> B -> A
-  struct A {
-    1: B field;
-  }
+    struct A {
+      1: B field;
+    }
 
-  struct B {
-    1: A field;
-  }
+    struct B {
+      1: A field;
+    }
   )");
+}
+
+TEST(CompilerTest, invalid_utf8) {
+  check_compile(
+      "const string s0 = '\x80';\n"
+      "# expected-error@-1: invalid UTF-8 start byte '\\x80'\n"
+      "const string s1 = '\xC2\x42';\n"
+      "# expected-error@-1: invalid UTF-8 continuation byte '\\x42'\n"
+      "const string s2 = '\xE2\x80\x43';\n"
+      "# expected-error@-1: invalid UTF-8 continuation byte '\\x43'\n"
+      "const string s3 = '\xF2\x80\x80\x44';\n"
+      "# expected-error@-1: invalid UTF-8 continuation byte '\\x44'\n"
+      "const string s4 = '\xF4\x90\x80\x80';\n"
+      "# expected-error@-1: invalid UTF-8 continuation byte '\\x90'\n"
+      // Overlong sequences:
+      "const string over0 = '\xC0';\n"
+      "# expected-error@-1: invalid UTF-8 start byte '\\xc0'\n"
+      "const string over1 = '\xC1';\n"
+      "# expected-error@-1: invalid UTF-8 start byte '\\xc1'\n"
+      "const string over2 = '\xE0\x9F\x80';\n"
+      "# expected-error@-1: invalid UTF-8 continuation byte '\\x9f'\n"
+      "const string over3 = '\xF0\x8F\x80\x80';\n"
+      "# expected-error@-1: invalid UTF-8 continuation byte '\\x8f'\n"
+      // Invalid surrogates:
+      "const string sur = '\xED\xA0\x80';\n"
+      "# expected-error@-1: invalid UTF-8 continuation byte '\\xa0'\n");
 }
 
 TEST(CompilerTest, invalid_hex_escape) {

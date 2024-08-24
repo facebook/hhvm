@@ -78,6 +78,9 @@ class lexer {
   comment_lex_result lex_block_comment();
   comment_lex_result lex_whitespace_or_comment();
 
+  bool check_utf8_continue(unsigned char c);
+  void check_utf8_literal(const char* begin, const char* end);
+
   static void ignore_comments(std::string_view, source_range) {}
 
  public:

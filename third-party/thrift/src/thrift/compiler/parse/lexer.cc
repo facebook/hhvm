@@ -323,6 +323,70 @@ lexer::comment_lex_result lexer::lex_whitespace_or_comment() {
   }
 }
 
+// Checks UTF-8 continuation byte 10xxxxxx.
+bool lexer::check_utf8_continue(unsigned char c) {
+  bool valid = (c >> 6) == 0b10;
+  if (!valid) {
+    report_error("invalid UTF-8 continuation byte '\\x{:02x}'", c);
+  }
+  return valid;
+}
+
+// Checks that the string literal in [begin, end) is valid UTF-8.
+void lexer::check_utf8_literal(const char* begin, const char* end) {
+  assert(begin != end && (end[-1] == '\'' || end[-1] == '"'));
+  while (begin != end) {
+    unsigned char c = *begin;
+    // We don't need size checks because of a closing quote and short circuting
+    // of continuation byte checks.
+    if (c < 0x80) {
+      ++begin;
+    } else if ((c >> 5) == 0b110 && c >= 0xC2) {
+      // Two-byte sequence: 110xxxxx 10xxxxxx.
+      if (!check_utf8_continue(begin[1])) {
+        return;
+      }
+      begin += 2;
+    } else if ((c >> 4) == 0b1110) {
+      // Three-byte sequence: 1110xxxx 10xxxxxx 10xxxxxx.
+      if (!check_utf8_continue(begin[1]) || !check_utf8_continue(begin[2])) {
+        return;
+      }
+      unsigned char next = begin[1];
+      if (c == 0xE0 && next < 0xA0) {
+        // Overlong encoding for sequences starting with 0xE0.
+        report_error("invalid UTF-8 continuation byte '\\x{:02x}'", next);
+        return;
+      } else if (c == 0xED && next > 0x9F) {
+        // Invalid surrogate half (0xD800-0xDFFF).
+        report_error("invalid UTF-8 continuation byte '\\x{:02x}'", next);
+        return;
+      }
+      begin += 3;
+    } else if ((c >> 3) == 0b11110) {
+      // Four-byte sequence: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx.
+      if (!check_utf8_continue(begin[1]) || !check_utf8_continue(begin[2]) ||
+          !check_utf8_continue(begin[3])) {
+        return;
+      }
+      unsigned char next = begin[1];
+      if (c == 0xF0 && next < 0x90) {
+        // Overlong encoding for sequences starting with 0xF0.
+        report_error("invalid UTF-8 continuation byte '\\x{:02x}'", next);
+        return;
+      } else if (c == 0xF4 && next > 0x8F) {
+        // Values above U+10FFFF are invalid.
+        report_error("invalid UTF-8 continuation byte '\\x{:02x}'", next);
+        return;
+      }
+      begin += 4;
+    } else {
+      report_error("invalid UTF-8 start byte '\\x{:02x}'", c);
+      return;
+    }
+  }
+}
+
 std::optional<std::string> lexer::lex_string_literal(token literal) {
   auto str = literal.string_value();
   auto size = str.size();
@@ -511,6 +575,7 @@ token lexer::get_next_token() {
       ptr_ = p + 1;
       if ((p - before_backslashes) % 2 != 0) {
         // Even number of backslashes means that the quote is unescaped.
+        check_utf8_literal(token_start_, ptr_);
         return token::make_string_literal(
             token_source_range(),
             {token_start_, static_cast<size_t>(ptr_ - token_start_)});

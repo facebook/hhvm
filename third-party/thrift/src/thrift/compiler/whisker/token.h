@@ -39,6 +39,7 @@ enum class tok : unsigned {
 
   identifier,
   text,
+  newline, // "\r\n", "\n", or "\r"
 
   // clang-format off
   open,      // "{{"
@@ -215,6 +216,7 @@ class token {
   static token make_string_literal(std::string, const source_range&);
   static token make_identifier(std::string_view, const source_range&);
   static token make_text(std::string, const source_range&);
+  static token make_newline(std::string_view, const source_range&);
 
   /**
    * Returns a mapping from keywords (as they appear in source files) to their

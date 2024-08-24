@@ -597,7 +597,8 @@ TEST_F(LexerTest, text_captures_whitespace) {
       {tok::bang, {}},
       {tok::text, "comment"},
       {tok::close, {}},
-      {tok::text, " \n"},
+      {tok::text, " "},
+      {tok::newline, "\n"},
       {tok::open, {}},
       {tok::close, {}},
       {tok::eof, {}},
@@ -705,16 +706,17 @@ TEST_F(LexerTest, unterminated_comment) {
 
 TEST_F(LexerTest, source_ranges) {
   auto lexer = make_lexer(
-      "some text{{! comment }}\n"
+      "some text{{! comment }}\r\n"
       "and {{# variable ^ ! \"string\"\n"
-      "- 12345 if}} More text");
+      "- 12345 if}} More text\n");
   const std::vector<token_description> expected = {
       {tok::text, "some text"},
       {tok::open, {}},
       {tok::bang, {}},
       {tok::text, " comment "},
       {tok::close, {}},
-      {tok::text, "\nand "},
+      {tok::newline, "\r\n"},
+      {tok::text, "and "},
       {tok::open, {}},
       {tok::pound, {}},
       {tok::identifier, "variable"},
@@ -725,28 +727,32 @@ TEST_F(LexerTest, source_ranges) {
       {tok::kw_if, {}},
       {tok::close, {}},
       {tok::text, " More text"},
+      {tok::newline, "\n"},
       {tok::eof, {}},
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
 
-  EXPECT_EQ(token_range_text(actual[0]), "some text");
-  EXPECT_EQ(token_range_text(actual[1]), "{{");
-  EXPECT_EQ(token_range_text(actual[2]), "!");
-  EXPECT_EQ(token_range_text(actual[3]), " comment ");
-  EXPECT_EQ(token_range_text(actual[4]), "}}");
-  EXPECT_EQ(token_range_text(actual[5]), "\nand ");
-  EXPECT_EQ(token_range_text(actual[6]), "{{");
-  EXPECT_EQ(token_range_text(actual[7]), "#");
-  EXPECT_EQ(token_range_text(actual[8]), "variable");
-  EXPECT_EQ(token_range_text(actual[9]), "^");
-  EXPECT_EQ(token_range_text(actual[10]), "!");
-  EXPECT_EQ(token_range_text(actual[11]), "\"string\"");
-  EXPECT_EQ(token_range_text(actual[12]), "- 12345");
-  EXPECT_EQ(token_range_text(actual[13]), "if");
-  EXPECT_EQ(token_range_text(actual[14]), "}}");
-  EXPECT_EQ(token_range_text(actual[15]), " More text");
-  EXPECT_EQ(token_range_text(actual[16]), "");
+  auto needle = actual.cbegin();
+  EXPECT_EQ(token_range_text(*needle++), "some text");
+  EXPECT_EQ(token_range_text(*needle++), "{{");
+  EXPECT_EQ(token_range_text(*needle++), "!");
+  EXPECT_EQ(token_range_text(*needle++), " comment ");
+  EXPECT_EQ(token_range_text(*needle++), "}}");
+  EXPECT_EQ(token_range_text(*needle++), "\r\n");
+  EXPECT_EQ(token_range_text(*needle++), "and ");
+  EXPECT_EQ(token_range_text(*needle++), "{{");
+  EXPECT_EQ(token_range_text(*needle++), "#");
+  EXPECT_EQ(token_range_text(*needle++), "variable");
+  EXPECT_EQ(token_range_text(*needle++), "^");
+  EXPECT_EQ(token_range_text(*needle++), "!");
+  EXPECT_EQ(token_range_text(*needle++), "\"string\"");
+  EXPECT_EQ(token_range_text(*needle++), "- 12345");
+  EXPECT_EQ(token_range_text(*needle++), "if");
+  EXPECT_EQ(token_range_text(*needle++), "}}");
+  EXPECT_EQ(token_range_text(*needle++), " More text");
+  EXPECT_EQ(token_range_text(*needle++), "\n");
+  EXPECT_EQ(token_range_text(*needle++), "");
 }
 
 } // namespace whisker

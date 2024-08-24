@@ -66,6 +66,7 @@ constexpr token_kind_info info[] = {
 
     {tok::i64_literal, "int literal"},
     {tok::string_literal, "string literal"},
+    {tok::newline, "new line"},
 
     {tok::identifier, "identifier"},
     {tok::text, "text"},
@@ -116,12 +117,13 @@ const std::unordered_map<std::string_view, tok> keywords_to_tok = {
 
 void throw_unless_string_like(token_kind kind) {
   if (kind != tok::string_literal && kind != tok::identifier &&
-      kind != tok::text) {
+      kind != tok::text && kind != tok::newline) {
     throw_invalid_kind(fmt::format(
-        "{} or {} or {}",
+        "{} or {} or {} or {}",
         to_string(tok::string_literal),
         to_string(tok::identifier),
-        to_string(tok::text)));
+        to_string(tok::text),
+        to_string(tok::newline)));
   }
 }
 
@@ -155,6 +157,7 @@ token_value_kind token::value_kind() const {
     case tok::string_literal:
     case tok::identifier:
     case tok::text:
+    case tok::newline:
       return token_value_kind::string;
     default:
       return token_value_kind::none;
@@ -214,6 +217,13 @@ std::string_view token::string_value() const {
 /* static */ token token::make_text(std::string value, const source_range& r) {
   auto t = token(tok::text, r);
   t.data = std::move(value);
+  return t;
+}
+
+/* static */ token token::make_newline(
+    std::string_view value, const source_range& r) {
+  auto t = token(tok::newline, r);
+  t.data = value;
   return t;
 }
 

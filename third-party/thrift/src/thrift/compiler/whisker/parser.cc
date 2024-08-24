@@ -279,10 +279,17 @@ class parser {
   // text → { <raw text until we see a template> }
   parse_result<ast::text> parse_text(parser_scan_window scan) {
     assert(scan.empty());
-    if (const auto& text = scan.advance(); text.kind == tok::text) {
-      return {ast::text{scan.range(), std::string(text.string_value())}, scan};
+    std::string result;
+    while (scan.can_advance()) {
+      const token& t = scan.peek();
+      if (t.kind != tok::text && t.kind != tok::newline) {
+        break;
+      }
+      result += t.string_value();
+      scan.advance();
     }
-    return std::nullopt;
+    return result.empty() ? std::nullopt
+                          : parse_result{ast::text{scan.range(), result}, scan};
   }
 
   // comment → { basic-comment | escaped-comment }

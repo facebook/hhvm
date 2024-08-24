@@ -20,6 +20,7 @@
 #include <thrift/compiler/whisker/lexer.h>
 
 #include <cstdlib>
+#include <functional>
 #include <iterator>
 #include <optional>
 #include <unordered_map>
@@ -419,6 +420,20 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
       text += '{';
       scan = scan.next(2);
       continue;
+    }
+    if (detail::is_newline(c)) {
+      std::vector<token> tokens;
+      if (!text.empty()) {
+        tokens.emplace_back(token::make_text(std::move(text), scan.range()));
+      };
+      scan = scan.make_fresh();
+      // "\r", "\n", or "\r\n"
+      char n = scan.advance();
+      if (n == '\r' && scan.peek() == '\n') {
+        scan.advance();
+      }
+      tokens.emplace_back(token::make_newline(scan.text(), scan.range()));
+      return {std::move(tokens)};
     }
     if (c == '{' && scan.next().peek() == '{') {
       auto scan_within = scan.make_fresh().next(2);

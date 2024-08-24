@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/whisker/detail/string.h>
 #include <thrift/compiler/whisker/detail/tree_printer.h>
 
 #include <algorithm>
@@ -21,35 +22,7 @@
 namespace whisker::detail::tree_printer {
 
 std::string escape(std::string_view str) {
-  std::string result;
-  for (const char ch : str) {
-    switch (ch) {
-      case '\\':
-        result += "\\\\";
-        break;
-      case '\n':
-        result += "\\n";
-        break;
-      case '\r':
-        result += "\\r";
-        break;
-      case '\t':
-        result += "\\t";
-        break;
-      case '\v':
-        result += "\\v";
-        break;
-      case '\f':
-        result += "\\f";
-        break;
-      case '\'':
-        result += "\\'";
-        break;
-      default:
-        result += ch;
-    }
-  }
-  return result;
+  return detail::escape(str);
 }
 
 std::ostream& operator<<(

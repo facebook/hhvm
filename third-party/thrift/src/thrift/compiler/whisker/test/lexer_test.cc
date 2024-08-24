@@ -18,6 +18,7 @@
 #include <folly/portability/GTest.h>
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/detail/string.h>
 #include <thrift/compiler/whisker/diagnostic.h>
 #include <thrift/compiler/whisker/lexer.h>
 #include <thrift/compiler/whisker/source_location.h>
@@ -49,7 +50,7 @@ struct token_description {
           return fmt::format(
               "token[kind={}, string=\"{}\"]",
               to_string(desc.kind),
-              token::escape(value));
+              detail::escape(value));
         });
     return out << std::move(str);
   }

@@ -217,12 +217,6 @@ class token {
   static token make_text(std::string, const source_range&);
 
   /**
-   * Escapes special characters in the input string view for displaying.
-   * This includes new lines and other whitespace characters.
-   */
-  static std::string escape(std::string_view);
-
-  /**
    * Returns a mapping from keywords (as they appear in source files) to their
    * corresponding token kind.
    */

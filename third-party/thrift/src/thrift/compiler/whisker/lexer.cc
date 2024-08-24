@@ -15,6 +15,7 @@
  */
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/detail/string.h>
 #include <thrift/compiler/whisker/diagnostic.h>
 #include <thrift/compiler/whisker/lexer.h>
 
@@ -46,29 +47,20 @@ token lexer::diagnoser::unexpected_token(
 
 namespace {
 
-bool is_newline(char c) {
-  return c == '\r' || c == '\n' || c == '\f';
-}
-
-bool is_whitespace(char c) {
-  return c == ' ' || c == '\t' || c == '\v' || is_newline(c);
-}
-
-bool is_letter(char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}
-
-bool is_digit(char c) {
-  return c >= '0' && c <= '9';
-}
-
+/**
+ * Determines if the given character *could* start an identifier in Whisker.
+ */
 bool is_identifier_start(char c) {
-  return is_letter(c) || c == '_' || c == '$';
+  return detail::is_letter(c) || c == '_' || c == '$';
 }
 
+/**
+ * Determines if the given character could be a non-initial character in an
+ * identifier in Whisker.
+ */
 bool is_identifier_continuation(char c) {
   // clang-format off
-  return is_identifier_start(c) || is_digit(c)
+  return is_identifier_start(c) || detail::is_digit(c)
     || c == '-'
     || c == '+'
     || c == ':'
@@ -162,7 +154,7 @@ lex_result lex_i64_literal(
   if (scan.peek() == '-') {
     scan.advance();
     is_negative = true;
-    while (is_whitespace(scan.peek())) {
+    while (detail::is_whitespace(scan.peek())) {
       scan.advance();
     }
   }
@@ -182,7 +174,7 @@ lex_result lex_i64_literal(
         whole};
   };
 
-  while (scan.can_advance() && is_digit(scan.peek())) {
+  while (scan.can_advance() && detail::is_digit(scan.peek())) {
     scan.advance();
   }
   std::string_view text = scan.text();
@@ -254,7 +246,7 @@ lex_result lex_string_literal(
             scan);
       }
     }
-    if (is_newline(c)) {
+    if (detail::is_newline(c)) {
       return lex_result(
           diagnoser.report_error(scan, "unexpected newline in string literal"),
           scan);
@@ -367,7 +359,7 @@ class lexer::state_template : public lexer::state_base {
     auto& scan = lex.scan_window_;
     assert(scan.empty());
 
-    while (is_whitespace(scan.peek())) {
+    while (detail::is_whitespace(scan.peek())) {
       // in template bodies, whitespace is ignored (unlike in raw text)
       scan.advance();
     }

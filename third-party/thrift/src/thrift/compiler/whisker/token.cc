@@ -15,6 +15,7 @@
  */
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/detail/string.h>
 #include <thrift/compiler/whisker/source_location.h>
 #include <thrift/compiler/whisker/token.h>
 
@@ -216,35 +217,6 @@ std::string_view token::string_value() const {
   return t;
 }
 
-/* static */ std::string token::escape(std::string_view str) {
-  std::string result;
-  for (const char ch : str) {
-    switch (ch) {
-      case '\\':
-        result += "\\\\";
-        break;
-      case '\n':
-        result += "\\n";
-        break;
-      case '\r':
-        result += "\\r";
-        break;
-      case '\t':
-        result += "\\t";
-        break;
-      case '\v':
-        result += "\\v";
-        break;
-      case '\f':
-        result += "\\f";
-        break;
-      default:
-        result += ch;
-    }
-  }
-  return result;
-}
-
 /* static */ const std::unordered_map<std::string_view, tok>&
 token::keywords() {
   return keywords_to_tok;
@@ -261,7 +233,7 @@ std::string to_string(const token& token) {
       return fmt::format(
           "token[kind={}, string=\"{}\"]",
           to_string(token.kind),
-          token::escape(token.string_value()));
+          detail::escape(token.string_value()));
     case token_value_kind::none:
       return fmt::format("token[kind={}]", to_string(token.kind));
   }

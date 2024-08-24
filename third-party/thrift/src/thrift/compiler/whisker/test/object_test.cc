@@ -25,8 +25,8 @@ namespace whisker {
 
 namespace {
 class basic_native_object : public native_object {
-  std::optional<object> lookup_property(std::string_view) const override {
-    return std::nullopt;
+  const object* lookup_property(std::string_view) const override {
+    return nullptr;
   }
 };
 } // namespace

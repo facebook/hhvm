@@ -107,8 +107,7 @@ class native_object {
    * Preconditions:
    *   - The provided string is a valid Whisker identifier
    */
-  virtual std::optional<object> lookup_property(
-      std::string_view identifier) const = 0;
+  virtual const object* lookup_property(std::string_view identifier) const = 0;
 };
 
 namespace detail {

@@ -48,7 +48,8 @@ namespace whisker {
  */
 class eval_context {
  public:
-  explicit eval_context(object root_scope);
+  explicit eval_context(const object& root_scope);
+  /* implicit */ eval_context(object&&) = delete;
   ~eval_context() noexcept;
 
   /**
@@ -65,7 +66,7 @@ class eval_context {
    *
    * Calling push_scope() increases the stack depth by 1.
    */
-  void push_scope(object object);
+  void push_scope(const object& object);
 
   /**
    * Pops the top-most lexical scope from the stack. The previous scope becomes
@@ -103,7 +104,7 @@ class eval_context {
    *   - eval_property_lookup_error if any subsequent identifier is not found in
    *     the chain of resolved whisker::objects.
    */
-  object lookup_object(const std::vector<std::string>& path);
+  const object& lookup_object(const std::vector<std::string>& path);
 
  private:
   /**
@@ -131,7 +132,7 @@ class eval_context {
    */
   class lexical_scope {
    public:
-    explicit lexical_scope(object this_ref) : this_ref_(std::move(this_ref)) {}
+    explicit lexical_scope(const object& this_ref) : this_ref_(this_ref) {}
 
     // The {{.}} object is always available in the current scope (or else the
     // scope couldn't exist).
@@ -142,7 +143,7 @@ class eval_context {
      *   1. Locals
      *   2. Backing object (this_ref())
      */
-    std::optional<object> lookup_property(std::string_view identifier);
+    const object* lookup_property(std::string_view identifier);
 
     // Before C++20, std::unordered_map does not support heterogenous lookups
     using locals_map = std::map<std::string, object, std::less<>>;

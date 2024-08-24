@@ -26,38 +26,37 @@
 namespace whisker {
 
 namespace {
-std::optional<object> find_property(
-    const object& o, std::string_view identifier) {
-  using result = std::optional<object>;
+const object* find_property(const object& o, std::string_view identifier) {
+  using result = const object*;
   return o.visit(
-      [](null) -> result { return std::nullopt; },
-      [](i64) -> result { return std::nullopt; },
-      [](f64) -> result { return std::nullopt; },
-      [](const string&) -> result { return std::nullopt; },
-      [](boolean) -> result { return std::nullopt; },
-      [](const array&) -> result { return std::nullopt; },
+      [](null) -> result { return nullptr; },
+      [](i64) -> result { return nullptr; },
+      [](f64) -> result { return nullptr; },
+      [](const string&) -> result { return nullptr; },
+      [](boolean) -> result { return nullptr; },
+      [](const array&) -> result { return nullptr; },
       [identifier](const native_object::ptr& o) -> result {
         return o->lookup_property(identifier);
       },
       [identifier](const map& m) -> result {
         if (auto it = m.find(identifier); it != m.end()) {
-          return it->second;
+          return &it->second;
         }
-        return std::nullopt;
+        return nullptr;
       });
 }
 } // namespace
 
-std::optional<object> eval_context::lexical_scope::lookup_property(
+const object* eval_context::lexical_scope::lookup_property(
     std::string_view identifier) {
   if (auto local = locals_.find(identifier); local != locals_.end()) {
-    return local->second;
+    return &local->second;
   }
   return find_property(this_ref_, identifier);
 }
 
-eval_context::eval_context(object root_scope)
-    : stack_({lexical_scope(std::move(root_scope))}) {}
+eval_context::eval_context(const object& root_scope)
+    : stack_({lexical_scope(root_scope)}) {}
 
 eval_context::~eval_context() noexcept = default;
 
@@ -65,8 +64,8 @@ std::size_t eval_context::stack_depth() const {
   return stack_.size();
 }
 
-void eval_context::push_scope(object object) {
-  stack_.emplace_back(std::move(object));
+void eval_context::push_scope(const object& object) {
+  stack_.emplace_back(object);
 }
 
 void eval_context::pop_scope() {
@@ -84,7 +83,8 @@ void eval_context::bind_local(std::string name, object value) {
   }
 }
 
-object eval_context::lookup_object(const std::vector<std::string>& path) {
+const object& eval_context::lookup_object(
+    const std::vector<std::string>& path) {
   assert(!stack_.empty());
 
   if (path.empty()) {
@@ -92,7 +92,7 @@ object eval_context::lookup_object(const std::vector<std::string>& path) {
     return stack_.back().this_ref();
   }
 
-  auto current = std::invoke([&]() -> std::optional<object> {
+  auto current = std::invoke([&]() -> const object* {
     auto id = path.front();
     // Crawl up through the scope stack since names can be shadowed.
     for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
@@ -100,10 +100,10 @@ object eval_context::lookup_object(const std::vector<std::string>& path) {
         return result;
       }
     }
-    return std::nullopt;
+    return nullptr;
   });
 
-  if (!current.has_value()) {
+  if (current == nullptr) {
     std::vector<object> searched_scopes;
     searched_scopes.reserve(stack_.size());
     // Searching happened in reverse order.
@@ -117,17 +117,17 @@ object eval_context::lookup_object(const std::vector<std::string>& path) {
 
   for (auto component = std::next(path.begin()); component != path.end();
        ++component) {
-    std::optional<object> next = find_property(*current, *component);
-    if (!next.has_value()) {
+    const object* next = find_property(*current, *component);
+    if (next == nullptr) {
       throw eval_property_lookup_error(
           *current, /* missing_from */
           std::vector<std::string>(path.begin(), component), /* success_path */
           *component /* missing_name */);
     }
-    current.emplace(std::move(*next));
+    current = next;
   }
 
-  assert(current.has_value());
+  assert(current != nullptr);
   return *current;
 }
 

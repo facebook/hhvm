@@ -19,6 +19,9 @@
 
 #include <thrift/compiler/whisker/eval_context.h>
 
+#include <cassert>
+#include <map>
+
 #include <fmt/core.h>
 
 namespace w = whisker::make;
@@ -31,8 +34,8 @@ namespace {
  */
 class empty_native_object : public native_object {
  public:
-  std::optional<object> lookup_property(std::string_view) const override {
-    return std::nullopt;
+  const object* lookup_property(std::string_view) const override {
+    return nullptr;
   }
 };
 
@@ -41,9 +44,17 @@ class empty_native_object : public native_object {
  * property name repeated twice.
  */
 class double_property_name : public native_object {
-  std::optional<object> lookup_property(std::string_view id) const override {
-    return w::string(fmt::format("{0}{0}", id));
+  const object* lookup_property(std::string_view id) const override {
+    if (auto cached = cached_.find(id); cached != cached_.end()) {
+      return &cached->second;
+    }
+    auto [result, inserted] =
+        cached_.insert({std::string(id), w::string(fmt::format("{0}{0}", id))});
+    assert(inserted);
+    return &result->second;
   }
+
+  mutable std::map<std::string, object, std::less<>> cached_;
 };
 
 /**
@@ -56,8 +67,8 @@ class delegate_to : public native_object {
       : delegate_(std::move(delegate)) {}
 
  private:
-  std::optional<object> lookup_property(std::string_view) const override {
-    return delegate_;
+  const object* lookup_property(std::string_view) const override {
+    return &delegate_;
   }
 
   whisker::object delegate_;
@@ -176,7 +187,8 @@ TEST(EvalContextTest, self_reference) {
 }
 
 TEST(EvalContextTest, native_object_basic) {
-  eval_context ctx{w::make_native_object<double_property_name>()};
+  auto o = w::make_native_object<double_property_name>();
+  eval_context ctx{o};
   EXPECT_EQ(ctx.lookup_object({"foo"}), string("foofoo"));
   EXPECT_EQ(ctx.lookup_object({"bar"}), string("barbar"));
 }

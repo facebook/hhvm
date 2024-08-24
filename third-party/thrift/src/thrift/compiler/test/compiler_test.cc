@@ -344,30 +344,30 @@ TEST(CompilerTest, integer_overflow_underflow) {
   check_compile(R"(
     # Unsigned Ints
     const i64 overflowUint = 18446744073709551615;  # max uint64
-      # expected-error@-1: integer constant 18446744073709551615 is too large
+    # expected-error@-1: integer constant 18446744073709551615 is too large
   )");
   check_compile(R"(
     const i64 overflowUint2 = 18446744073709551616;  # max uint64 + 1
-      # expected-error@-1: integer constant 18446744073709551616 is too large
+    # expected-error@-1: integer constant 18446744073709551616 is too large
   )");
 }
 
 TEST(CompilerTest, double_overflow_underflow) {
   check_compile(R"(
     const double overflowConst = 1.7976931348623159e+308;
-      # expected-error@-1: floating-point constant 1.7976931348623159e+308 is out of range
+    # expected-error@-1: floating-point constant 1.7976931348623159e+308 is out of range
   )");
   check_compile(R"(
     const double overflowConst = 1.7976931348623159e+309;
-      # expected-error@-1: floating-point constant 1.7976931348623159e+309 is out of range
+    # expected-error@-1: floating-point constant 1.7976931348623159e+309 is out of range
   )");
   check_compile(R"(
     const double overflowConst = 4.9406564584124654e-325;
-      # expected-error@-1: magnitude of floating-point constant 4.9406564584124654e-325 is too small
+    # expected-error@-1: magnitude of floating-point constant 4.9406564584124654e-325 is too small
   )");
   check_compile(R"(
     const double overflowConst = 1e-324;
-      # expected-error@-1: magnitude of floating-point constant 1e-324 is too small
+    # expected-error@-1: magnitude of floating-point constant 1e-324 is too small
   )");
 }
 
@@ -380,86 +380,84 @@ TEST(CompilerTest, void_data) {
   )");
 }
 
-TEST(CompilerTest, const_wrong_type) {
-  check_compile(R"(
-    const i32 wrongInt = "stringVal";
-      # expected-error@-1: cannot convert string to `i32` in initialization of `wrongInt`
-    struct A {}
-    struct B {}
-    const A wrongStruct = B{}; # expected-error: type mismatch: expected test.A, got test.B
-  )");
-}
-
-TEST(CompilerTest, const_byte_value) {
+TEST(CompilerTest, byte_initializer) {
   check_compile(R"(
     const byte c1 = 127;
     const byte c2 = 128;
-    # expected-error@-1: value error: const `c2` has an invalid custom default value.
+    # expected-error@-1: 128 is out of range for `byte` in initialization of `c2`
 
     const byte c3 = -128;
     const byte c4 = -129;
-    # expected-error@-1: value error: const `c4` has an invalid custom default value.
+    # expected-error@-1: -129 is out of range for `byte` in initialization of `c4`
   )");
 }
 
-TEST(CompilerTest, const_i16_value) {
+TEST(CompilerTest, i16_initializer) {
   check_compile(R"(
     const i16 c1 = 32767;
     const i16 c2 = 32768;
-    # expected-error@-1: value error: const `c2` has an invalid custom default value.
+    # expected-error@-1: 32768 is out of range for `i16` in initialization of `c2`
 
     const i16 c3 = -32768;
     const i16 c4 = -32769;
-    # expected-error@-1: value error: const `c4` has an invalid custom default value.
+    # expected-error@-1: -32769 is out of range for `i16` in initialization of `c4`
   )");
 }
 
-TEST(CompilerTest, const_i32_value) {
+TEST(CompilerTest, i32_initializer) {
   check_compile(R"(
-    const i32 c1 = 2147483647;
-    const i32 c2 = 2147483648;
-    # expected-error@-1: value error: const `c2` has an invalid custom default value.
+    const i32 c0 = 42;
 
-    const i32 c3 = -2147483648;
-    const i32 c4 = -2147483649;
-    # expected-error@-1: value error: const `c4` has an invalid custom default value.
+    const i32 c1 = 4.2;
+    # expected-error@-1: cannot convert floating-point number to `i32` in initialization of `c1`
+
+    const i32 c2 = "string typing";
+    # expected-error@-1: cannot convert string to `i32` in initialization of `c2`
+
+    const i32 c3 = 2147483647;
+    const i32 c4 = 2147483648;
+    # expected-error@-1: 2147483648 is out of range for `i32` in initialization of `c4`
+
+    const i32 c5 = -2147483648;
+    const i32 c6 = -2147483649;
+    # expected-error@-1: -2147483649 is out of range for `i32` in initialization of `c6`
   )");
 }
 
-TEST(CompilerTest, const_float_value) {
+TEST(CompilerTest, float_initializer) {
   check_compile(R"(
     const float c0 = 1e8;
 
     const float c1 = 3.4028234663852886e+38;
     const float c2 = 3.402823466385289e+38; // max float + 1 double ulp
-    # expected-error@-1: value error: const `c2` has an invalid custom default value.
+    # expected-error@-1: 3.402823466385289e+38 is out of range for `float` in initialization of `c2`
 
     const float c3 = -3.4028234663852886e+38;
     const float c4 = -3.402823466385289e+38; // min float - 1 double ulp
-    # expected-error@-1: value error: const `c4` has an invalid custom default value.
+    # expected-error@-1: -3.402823466385289e+38 is out of range for `float` in initialization of `c4`
 
     const float c5 = 100000001;
-    # expected-error@-1: value error: const `c5` cannot be represented precisely as `float` or `double`.
+    # expected-error@-1: cannot convert 100000001 to `float` in initialization of `c5`
     const float c6 = -100000001;
-    # expected-error@-1: value error: const `c6` cannot be represented precisely as `float` or `double`.
+    # expected-error@-1: cannot convert -100000001 to `float` in initialization of `c6`
   )");
 }
 
-TEST(CompilerTest, const_double_value) {
+TEST(CompilerTest, double_initializer) {
   check_compile(R"(
     const double c0 = 1e8;
     const double c1 = 1.7976931348623157e+308;
     const double c2 = -1.7976931348623157e+308;
 
-    const float c3 = 10000000000000001;
-    # expected-error@-1: value error: const `c3` cannot be represented precisely as `float` or `double`.
+    const double c3 = 10000000000000001;
+    # expected-error@-1: cannot convert 10000000000000001 to `double` in initialization of `c3`
 
-    const float c4 = -10000000000000001;
-    # expected-error@-1: value error: const `c4` cannot be represented precisely as `float` or `double`.
+    const double c4 = -10000000000000001;
+    # expected-error@-1: cannot convert -10000000000000001 to `double` in initialization of `c4`
   )");
 }
 
-TEST(CompilerTest, const_binary) {
+TEST(CompilerTest, binary_initializer) {
   check_compile(R"(
     const binary b0 = "foo";
 
@@ -487,6 +485,11 @@ TEST(CompilerTest, struct_initializer) {
 
     const S s6 = [];
     # expected-error@-1: cannot convert list to `S` in initialization of `s6`
+
+    struct A {}
+    struct B {}
+    const A a = B{};
+    # expected-error@-1: type mismatch: expected test.A, got test.B
   )");
 }
 
@@ -851,8 +854,7 @@ TEST(CompilerTest, mixins_and_refs) {
       1: optional D a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Mixin field `a` cannot be optional.
     }
-
-)");
+  )");
 }
 
 TEST(CompilerTest, bitpack_with_tablebased_seriliazation) {

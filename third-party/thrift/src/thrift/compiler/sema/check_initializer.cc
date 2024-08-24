@@ -31,35 +31,6 @@
 namespace apache::thrift::compiler {
 namespace {
 
-bool is_valid_int_initializer(
-    const t_primitive_type* type, const t_const_value* value) {
-  int64_t min = 0, max = 0;
-  if (type->is_byte()) {
-    min = std::numeric_limits<int8_t>::min();
-    max = std::numeric_limits<int8_t>::max();
-  } else if (type->is_i16()) {
-    min = std::numeric_limits<int16_t>::min();
-    max = std::numeric_limits<int16_t>::max();
-  } else if (type->is_i32()) {
-    min = std::numeric_limits<int32_t>::min();
-    max = std::numeric_limits<int32_t>::max();
-  } else {
-    assert(false); // Should be unreachable.
-  }
-  return min <= value->get_integer() && value->get_integer() <= max;
-}
-
-bool is_valid_float_initializer(const t_const_value* value) {
-  return std::numeric_limits<float>::lowest() <= value->get_double() &&
-      value->get_double() <= std::numeric_limits<float>::max();
-}
-
-template <typename T>
-bool is_valid_float_initializer_with_integer_value(const t_const_value* value) {
-  return value->get_integer() ==
-      static_cast<int64_t>(static_cast<T>(value->get_integer()));
-}
-
 // Returns the category of an initializer. It is not a real type because the
 // types of initializers are inferred later.
 const char* get_category(const t_const_value* val) {
@@ -92,7 +63,6 @@ class checker {
 
     if (auto primitive_type = dynamic_cast<const t_primitive_type*>(type)) {
       check_primitive_type(primitive_type, value);
-      check_base_value(primitive_type, value);
     } else if (auto enum_type = dynamic_cast<const t_enum*>(type)) {
       check_enum(enum_type, value);
     } else if (auto structured_type = dynamic_cast<const t_structured*>(type)) {
@@ -123,18 +93,6 @@ class checker {
     diags_.warning(node_, msg, std::forward<T>(args)...);
   }
 
-  void report_value_precision() {
-    error(
-        "value error: const `{}` cannot be represented precisely as `float` "
-        "or `double`.",
-        name_);
-  }
-
-  void report_value_mistmatch() {
-    error(
-        "value error: const `{}` has an invalid custom default value.", name_);
-  }
-
   // Report an error when the initializer is incompatible with the type.
   void report_incompatible(
       const t_const_value* initializer, const t_type* type) {
@@ -152,77 +110,89 @@ class checker {
         name_);
   }
 
-  // For CV_INTEGER, an overflow of int64_t is checked in the parser;
-  // therefore, we don't need to check an overflow of i64 or a floating point
-  // stored in integer value. Similarly, for CV_DOUBLE, we do not need
-  // to check double. However, we need to check a floating point stored
-  // with CV_INTEGER that might lead to a precision loss when converting int64_t
-  // to a floating point.
-  void check_base_value(
-      const t_primitive_type* type, const t_const_value* value) {
-    switch (type->primitive_type()) {
-      case t_primitive_type::type::t_void:
-      case t_primitive_type::type::t_string:
-      case t_primitive_type::type::t_binary:
-      case t_primitive_type::type::t_bool:
-      case t_primitive_type::type::t_i64:
-        break;
-      case t_primitive_type::type::t_byte:
-      case t_primitive_type::type::t_i16:
-      case t_primitive_type::type::t_i32:
-        if (value->kind() == t_const_value::CV_INTEGER &&
-            !is_valid_int_initializer(type, value)) {
-          report_value_mistmatch();
-        }
-        break;
-      case t_primitive_type::type::t_float:
-        if (value->kind() == t_const_value::CV_DOUBLE &&
-            !is_valid_float_initializer(value)) {
-          report_value_mistmatch();
-        }
-        if (value->kind() == t_const_value::CV_INTEGER &&
-            !is_valid_float_initializer_with_integer_value<float>(value)) {
-          report_value_precision();
-        }
-        break;
-      case t_primitive_type::type::t_double:
-        if (value->kind() == t_const_value::CV_INTEGER &&
-            !is_valid_float_initializer_with_integer_value<double>(value)) {
-          report_value_precision();
-        }
-        break;
+  template <typename T>
+  void check_int(const t_const_value* value, const t_type* type) {
+    if (value->kind() != t_const_value::CV_INTEGER) {
+      report_incompatible(value, type);
+      return;
+    }
+    // Range check is not needed for int64_t but it makes the code simpler and
+    // will be optimized away.
+    int64_t int_value = value->get_integer();
+    if (int_value < std::numeric_limits<T>::min() ||
+        int_value > std::numeric_limits<T>::max()) {
+      error(
+          "{} is out of range for `{}` in initialization of `{}`",
+          int_value,
+          type->name(),
+          name_);
+    }
+  }
+
+  template <typename T>
+  void check_float(const t_const_value* value, const t_type* type) {
+    if (value->kind() == t_const_value::CV_DOUBLE) {
+      // Range check is not needed for double but it makes the code simpler and
+      // will be optimized away.
+      double double_value = value->get_double();
+      if (double_value < std::numeric_limits<T>::lowest() ||
+          double_value > std::numeric_limits<T>::max()) {
+        error(
+            "{} is out of range for `{}` in initialization of `{}`",
+            double_value,
+            type->name(),
+            name_);
+      }
+    } else if (value->kind() == t_const_value::CV_INTEGER) {
+      int64_t int_value = value->get_integer();
+      if (int_value != static_cast<int64_t>(static_cast<T>(int_value))) {
+        error(
+            "cannot convert {} to `{}` in initialization of `{}`",
+            int_value,
+            type->name(),
+            name_);
+      }
+    } else {
+      report_incompatible(value, type);
     }
   }
 
   void check_primitive_type(
       const t_primitive_type* type, const t_const_value* value) {
-    bool compatible = false;
     const auto kind = value->kind();
     switch (type->primitive_type()) {
       case t_primitive_type::type::t_void:
         return;
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
-        compatible = kind == t_const_value::CV_STRING;
+        if (kind != t_const_value::CV_STRING) {
+          report_incompatible(value, type);
+        }
         break;
       case t_primitive_type::type::t_bool:
-        compatible =
-            kind == t_const_value::CV_BOOL || kind == t_const_value::CV_INTEGER;
+        if (kind != t_const_value::CV_BOOL &&
+            kind != t_const_value::CV_INTEGER) {
+          report_incompatible(value, type);
+        }
         break;
       case t_primitive_type::type::t_byte:
+        check_int<int8_t>(value, type);
+        break;
       case t_primitive_type::type::t_i16:
+        check_int<int16_t>(value, type);
+        break;
       case t_primitive_type::type::t_i32:
+        check_int<int32_t>(value, type);
+        break;
       case t_primitive_type::type::t_i64:
-        compatible = kind == t_const_value::CV_INTEGER;
+        check_int<int64_t>(value, type);
         break;
       case t_primitive_type::type::t_double:
-      case t_primitive_type::type::t_float:
-        compatible = kind == t_const_value::CV_INTEGER ||
-            kind == t_const_value::CV_DOUBLE;
+        check_float<double>(value, type);
         break;
-    }
-    if (!compatible) {
-      report_incompatible(value, type);
+      case t_primitive_type::type::t_float:
+        check_float<float>(value, type);
+        break;
     }
   }
 

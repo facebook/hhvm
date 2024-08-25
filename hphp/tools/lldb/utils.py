@@ -4,6 +4,7 @@ import abc
 import argparse
 import collections
 import collections.abc
+import enum
 import functools
 import re
 import shlex
@@ -13,6 +14,17 @@ import time
 import typing
 
 import lldb
+
+
+# Setting the values strings makes adding them
+# as choices in the LLVMVersion set command subparser work with
+# and unnecessary casting
+class LLVMVersion(enum.Enum):
+    LLVM15 = "15"
+    LLVM17 = "17"
+
+
+_LLVMVersion = None
 
 
 class Command(abc.ABC):
@@ -72,6 +84,85 @@ class Command(abc.ABC):
         exe_ctx: lldb.SBExecutionContext,
         result: lldb.SBCommandReturnObject,
     ): ...
+
+
+def get_llvm_version(target: lldb.SBTarget) -> LLVMVersion:
+    global _LLVMVersion
+    if _LLVMVersion is not None:
+        return _LLVMVersion
+
+    found_version = None
+    try:
+        hhvm_module = get_hhvm_module(target)
+        section = hhvm_module.FindSection(".comment")
+        size = section.GetFileByteSize()
+        data = section.GetSectionData()
+        err = lldb.SBError()
+        i = 0
+        # I'm seeing clang 15 found alongside clang 17
+        # when the hhvm binary was built with clang 17,
+        # so if we see clang 17, assume that it's it.
+        while i < size:
+            s = data.GetString(err, i)
+            if err.Fail():
+                debug_print(
+                    f"Failed to get string from '.comment' section at offset {i}: {err}"
+                )
+                break
+            if re.search("clang version 17", s):
+                found_version = LLVMVersion.LLVM17
+                break
+            i += len(s) + 1
+    except Exception as e:
+        # We tried our best, let's assume we're on predetermined version
+        debug_print(f"Failed in get_llvm_version: {str(e)}")
+
+    if found_version is None:
+        _LLVMVersion = LLVMVersion.LLVM15
+        print(f"Unable to determine LLVM version, assuming it's {_LLVMVersion.value}")
+    else:
+        _LLVMVersion = found_version
+    return _LLVMVersion
+
+
+class LLVMVersionCommand(Command):
+    command = "llvm-version"
+    description = (
+        "Lookup or explicitly set the LLVM version used to build the HHVM binary"
+    )
+
+    @classmethod
+    def create_parser(cls):
+        parser = cls.default_parser()
+        subparsers = parser.add_subparsers(dest="cmd")
+        subparsers.add_parser(
+            "get", help="Look up the LLVM version used to build the HHVM binary"
+        )
+        set_parser = subparsers.add_parser(
+            "set",
+            help="Set the LLVM version (used by the helper scripts for looking up types)",
+        )
+        set_parser.add_argument("version", choices=[v.value for v in LLVMVersion])
+        return parser
+
+    def __init__(self, debugger, internal_dict):
+        super().__init__(debugger, internal_dict)
+
+    def __call__(self, debugger, command, exe_ctx, result):
+        command_args = shlex.split(command)
+        try:
+            options = self.parser.parse_args(command_args)
+        except SystemExit:
+            result.SetError("option parsing failed")
+            return
+
+        if options.cmd == "get":
+            result.write(get_llvm_version(exe_ctx.target).value)
+        elif options.cmd == "set":
+            global _LLVMVersion
+            _LLVMVersion = LLVMVersion(options.version)
+        else:
+            result.SetError(f"Unexpected command {options.cmd}")
 
 
 # -------------------------------------------------------------------------------------
@@ -1238,3 +1329,4 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
         None
     """
     DebugCommand.register_lldb_command(debugger, __name__, top_module)
+    LLVMVersionCommand.register_lldb_command(debugger, __name__, top_module)

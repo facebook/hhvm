@@ -48,7 +48,10 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
         self.assertEqual(raw.name, "void (*)(HPHP::ObjectData *)")
 
     def test_template_type(self):
-        ty = utils.Type("HPHP::VMFixedVector<HPHP::Func::ParamInfo>", self.target)
+        if utils.get_llvm_version(self.target) == utils.LLVMVersion.LLVM15:
+            ty = utils.Type("HPHP::VMFixedVector<HPHP::Func::ParamInfo>", self.target)
+        else:
+            ty = utils.Type("HPHP::VMFixedVector<ParamInfo>", self.target)
         self.assertTrue(ty.IsTypedefType())
         template = utils.template_type(ty)
         self.assertEqual(template, "HPHP::FixedVector")

@@ -23,6 +23,8 @@ namespace apache::thrift {
 class StreamMetricCallback {
  public:
   virtual ~StreamMetricCallback() = default;
+  virtual void onFirstResponse(std::string_view /* methodName */) = 0;
+  virtual void onFirstResponseError(std::string_view /* methodName */) = 0;
   virtual void onStreamNext(std::string_view /* methodName */) = 0;
   virtual void onStreamError(std::string_view /* methodName */) = 0;
   virtual void onStreamComplete(std::string_view /* methodName */) = 0;
@@ -32,6 +34,8 @@ class StreamMetricCallback {
 };
 
 class NoopStreamMetricCallback final : public StreamMetricCallback {
+  void onFirstResponse(std::string_view) override {}
+  void onFirstResponseError(std::string_view) override {}
   void onStreamNext(std::string_view) override {}
   void onStreamError(std::string_view) override {}
   void onStreamComplete(std::string_view) override {}

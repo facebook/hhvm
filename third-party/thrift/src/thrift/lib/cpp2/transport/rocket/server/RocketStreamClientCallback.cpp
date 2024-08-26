@@ -76,6 +76,8 @@ bool RocketStreamClientCallback::onFirstResponse(
     return false;
   }
 
+  streamMetricCallback_.onFirstResponse(rpcMethodName_);
+
   serverCallbackOrCancelled_ = reinterpret_cast<intptr_t>(serverCallback);
   if (UNLIKELY(connection_.areStreamsPaused())) {
     pauseStream();
@@ -104,6 +106,7 @@ bool RocketStreamClientCallback::onFirstResponse(
 
 void RocketStreamClientCallback::onFirstResponseError(
     folly::exception_wrapper ew) {
+  streamMetricCallback_.onFirstResponseError(rpcMethodName_);
   bool isEncodedError = ew.with_exception<RocketException>([&](auto& ex) {
     connection_.sendError(streamId_, std::move(ex));
   }) ||

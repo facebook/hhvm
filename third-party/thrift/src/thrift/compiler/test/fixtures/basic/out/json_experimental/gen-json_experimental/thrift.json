@@ -495,6 +495,39 @@
         "is_union" : false,
         "lineno" : 248
       },
+      "AllowReservedIdentifier" : {
+        "name" : "AllowReservedIdentifier",
+        "structured_annotations": {
+          "scope.Definition" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "In addition to reserved words, Thrift reserves all identifiers\nthat contain the case-insensitive substring fbthrift preceded\nby one or more underscores.\nThe use of such identifiers requires users to explicitly annotate\nthe usage with\n  `@thrift.AllowReservedFilename` for filenames\n  `@thrift.AllowReservedIdentifier` for all other identifiers\nand may result in undefined behavior.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 263
+      },
+      "AllowReservedFilename" : {
+        "name" : "AllowReservedFilename",
+        "structured_annotations": {
+          "scope.Program" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 266
+      },
       "AllowReservedIdentifierName" : {
         "name" : "AllowReservedIdentifierName",
         "structured_annotations": {
@@ -515,10 +548,9 @@
         "value" : {}
       }
         },
-        "docstring" : "In addition to reserved words, Thrift reserves all identifiers\nthat contain the case-insensitive substring fbthrift.\nThe use of such identifiers requires users to explicitly annotate\nthe usage with `@thrift.AllowReservedIdentifierName`,\nand may result in undefined behavior.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 260
+        "lineno" : 270
       }
       },
   "source_path" : "thrift/annotation/thrift",

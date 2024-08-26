@@ -59,9 +59,11 @@ A qualified identifier is a sequence of two or more identifiers separated by per
 maybe_qualified_id ::=  identifier ["." identifier]*
 ```
 
-#### Reserved Identifier Names
+#### Reserved Identifiers
 
-In addition to [reserved words](#keywords), Thrift reserves all words that begin with the case-insensitive string `fbthrift` preceded by zero or more underscores and should not be used as identifiers. The use of such words as identifiers requires explicit annotation of the usage with `@thrift.AllowReservedIdentifierName`, and may result in undefined behavior.
+In addition to [reserved words](#keywords), Thrift reserves all words that begin with the case-insensitive string `fbthrift` preceded by zero or more underscores and should not be used as identifiers. The use of such words as identifiers requires explicit annotation of the usage as specified below, and may result in undefined behavior.
+* To use reserved identifiers for filenames, annotate the [package declaration](#package-declaration) with `@thrift.AllowReservedFilename`.
+* For all other uses of reserved identifiers, annotate the identifier with `@thrift.AllowReservedIdentifier`.
 
 ### Keywords
 

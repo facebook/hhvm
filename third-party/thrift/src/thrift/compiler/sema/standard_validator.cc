@@ -335,15 +335,37 @@ void validate_identifier_is_not_reserved(
     diagnostic_context& ctx, const t_named& node) {
   // Bypass the check any of the cases below.
   //  1. the node was generated.
-  //  2. @thrift.AllowedReservedIdentifierName is present.
+  //  2. @thrift.AllowedReservedIdentifier is present.
   if (node.generated() ||
+      node.find_structured_annotation_or_null(kAllowReservedIdentifierUri) !=
+          nullptr ||
+      // Remove this check once the above changes have successfully propagated.
       node.find_structured_annotation_or_null(
           kAllowReservedIdentifierNameUri) != nullptr) {
     return;
   }
   ctx.check(
       !is_reserved_identifier(node.name()),
-      "`{}` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.",
+      "`{}` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.",
+      node.name());
+}
+
+void validate_filename_is_not_reserved(
+    diagnostic_context& ctx, const t_named& node) {
+  // Bypass the check any of the cases below.
+  //  1. the node was generated.
+  //  2. @thrift.AllowReservedFilename is present.
+  if (node.generated() ||
+      node.find_structured_annotation_or_null(kAllowReservedFilenameUri) !=
+          nullptr ||
+      // Remove this check once the above changes have successfully propagated.
+      node.find_structured_annotation_or_null(
+          kAllowReservedIdentifierNameUri) != nullptr) {
+    return;
+  }
+  ctx.check(
+      !is_reserved_identifier(node.name()),
+      "`{}` is a reserved filename. Choose a different filename that does not contain `fbthrift`.",
       node.name());
 }
 
@@ -1338,7 +1360,8 @@ void forbid_exception_as_const_type(
 
 ast_validator standard_validator() {
   ast_validator validator;
-  validator.add_named_visitor(&validate_identifier_is_not_reserved);
+  validator.add_definition_visitor(&validate_identifier_is_not_reserved);
+  validator.add_program_visitor(&validate_filename_is_not_reserved);
 
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_interface_visitor(&validate_function_priority_annotation);

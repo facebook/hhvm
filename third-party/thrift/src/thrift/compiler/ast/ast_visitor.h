@@ -176,7 +176,6 @@ class basic_ast_visitor {
     add_typedef_visitor(std::forward<V>(visitor));
   }
 
-  // Adds a visitor for all IDL definition node types.
   template <typename V>
   void add_definition_visitor(V&& visitor) {
     add_root_definition_visitor(visitor);

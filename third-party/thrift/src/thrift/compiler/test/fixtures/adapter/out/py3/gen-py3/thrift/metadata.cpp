@@ -29,6 +29,8 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Uri>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Priority>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DeprecatedUnvalidatedAnnotations>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AllowReservedIdentifier>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AllowReservedFilename>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowReservedIdentifierName>::gen(metadata);
   return metadata;
 }

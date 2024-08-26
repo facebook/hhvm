@@ -399,8 +399,8 @@
         }
       }
     },
-    "AllowReservedIdentifierName" : {
-      "lineno" : 260,
+    "AllowReservedIdentifier" : {
+      "lineno" : 263,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -408,11 +408,47 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 260,
+          "line" : 263,
           "column" : 1
         },
         "end" : {
-          "line" : 262,
+          "line" : 264,
+          "column" : 34
+        }
+      }
+    },
+    "AllowReservedFilename" : {
+      "lineno" : 266,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 266,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 267,
+          "column" : 32
+        }
+      }
+    },
+    "AllowReservedIdentifierName" : {
+      "lineno" : 270,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 270,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 272,
           "column" : 38
         }
       }

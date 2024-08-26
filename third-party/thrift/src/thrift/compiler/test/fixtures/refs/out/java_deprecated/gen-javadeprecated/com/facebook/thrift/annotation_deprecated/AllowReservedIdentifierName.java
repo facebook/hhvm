@@ -23,13 +23,6 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
-/**
- * In addition to reserved words, Thrift reserves all identifiers
- * that contain the case-insensitive substring fbthrift.
- * The use of such identifiers requires users to explicitly annotate
- * the usage with `@thrift.AllowReservedIdentifierName`,
- * and may result in undefined behavior.
- */
 @SuppressWarnings({ "unused", "serial" })
 public class AllowReservedIdentifierName implements TBase, java.io.Serializable, Cloneable, Comparable<AllowReservedIdentifierName> {
   private static final TStruct STRUCT_DESC = new TStruct("AllowReservedIdentifierName");

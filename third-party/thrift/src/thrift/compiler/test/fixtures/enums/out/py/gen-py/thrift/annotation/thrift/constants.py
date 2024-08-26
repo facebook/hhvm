@@ -17,5 +17,5 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, RpcPriority, Experimental, ReserveIds, RequiresBackwardCompatibility, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, BitmaskEnum, ExceptionMessage, GenerateRuntimeSchema, InternBox, Serial, Uri, Priority, DeprecatedUnvalidatedAnnotations, AllowReservedIdentifierName
+from .ttypes import UTF8STRINGS, RpcPriority, Experimental, ReserveIds, RequiresBackwardCompatibility, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, BitmaskEnum, ExceptionMessage, GenerateRuntimeSchema, InternBox, Serial, Uri, Priority, DeprecatedUnvalidatedAnnotations, AllowReservedIdentifier, AllowReservedFilename, AllowReservedIdentifierName
 

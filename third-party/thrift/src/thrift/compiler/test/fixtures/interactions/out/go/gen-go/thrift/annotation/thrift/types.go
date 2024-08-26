@@ -1693,6 +1693,152 @@ func (x *DeprecatedUnvalidatedAnnotations) String() string {
     return sb.String()
 }
 
+type AllowReservedIdentifier struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*AllowReservedIdentifier)(nil)
+
+func NewAllowReservedIdentifier() *AllowReservedIdentifier {
+    return (&AllowReservedIdentifier{})
+}
+
+
+
+func (x *AllowReservedIdentifier) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("AllowReservedIdentifier"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *AllowReservedIdentifier) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *AllowReservedIdentifier) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AllowReservedIdentifier({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+type AllowReservedFilename struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*AllowReservedFilename)(nil)
+
+func NewAllowReservedFilename() *AllowReservedFilename {
+    return (&AllowReservedFilename{})
+}
+
+
+
+func (x *AllowReservedFilename) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("AllowReservedFilename"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *AllowReservedFilename) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *AllowReservedFilename) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AllowReservedFilename({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type AllowReservedIdentifierName struct {
 }
 // Compile time interface enforcer
@@ -1785,6 +1931,8 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/Uri", func() any { return NewUri() })
     registry.RegisterType("facebook.com/thrift/annotation/Priority", func() any { return NewPriority() })
     registry.RegisterType("facebook.com/thrift/annotation/DeprecatedUnvalidatedAnnotations", func() any { return NewDeprecatedUnvalidatedAnnotations() })
+    registry.RegisterType("facebook.com/thrift/annotation/AllowReservedIdentifier", func() any { return NewAllowReservedIdentifier() })
+    registry.RegisterType("facebook.com/thrift/annotation/AllowReservedFilename", func() any { return NewAllowReservedFilename() })
     registry.RegisterType("facebook.com/thrift/annotation/AllowReservedIdentifierName", func() any { return NewAllowReservedIdentifierName() })
 
     registry.RegisterType("facebook.com/thrift/annotation/RpcPriority", func() any { return RpcPriority(0) })

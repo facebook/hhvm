@@ -53,6 +53,11 @@ inline constexpr auto kUriUri = "facebook.com/thrift/annotation/Uri";
 inline constexpr auto kPriorityUri = "facebook.com/thrift/annotation/Priority";
 inline constexpr auto kDeprecatedUnvalidatedAnnotationsUri =
     "facebook.com/thrift/annotation/DeprecatedUnvalidatedAnnotations";
+inline constexpr auto kAllowReservedIdentifierUri =
+    "facebook.com/thrift/annotation/AllowReservedIdentifier";
+inline constexpr auto kAllowReservedFilenameUri =
+    "facebook.com/thrift/annotation/AllowReservedFilename";
+// Remove this constant once the above changes have successfully propagated.
 inline constexpr auto kAllowReservedIdentifierNameUri =
     "facebook.com/thrift/annotation/AllowReservedIdentifierName";
 

@@ -458,8 +458,50 @@
         }
       }
     },
+    "AllowReservedIdentifier" : {
+      "lineno" : 263,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 263,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 264,
+          "column" : 34
+        }
+      }
+    },
+    "AllowReservedFilename" : {
+      "lineno" : 266,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 266,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 267,
+          "column" : 32
+        }
+      }
+    },
     "AllowReservedIdentifierName" : {
-      "lineno" : 260,
+      "lineno" : 270,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -471,11 +513,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 260,
+          "line" : 270,
           "column" : 1
         },
         "end" : {
-          "line" : 262,
+          "line" : 272,
           "column" : 38
         }
       }

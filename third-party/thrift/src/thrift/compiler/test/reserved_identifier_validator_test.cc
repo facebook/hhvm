@@ -26,10 +26,10 @@
 
 using apache::thrift::compiler::test::check_compile;
 
-TEST(ReservedIdentifierValidatorTest, ProgramNameIsReservedAndShouldError) {
+TEST(ReservedIdentifierValidatorTest, FilenameIsReservedAndShouldError) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/fbthrift_should_error.thrift"] = R"(
-    # expected-error@1: `fbthrift_should_error` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+    # expected-error@1: `fbthrift_should_error` is a reserved filename. Choose a different filename that does not contain `fbthrift`.
   )";
 
   check_compile(name_contents_map, "path/to/fbthrift_should_error.thrift");
@@ -37,20 +37,38 @@ TEST(ReservedIdentifierValidatorTest, ProgramNameIsReservedAndShouldError) {
 
 TEST(
     ReservedIdentifierValidatorTest,
-    ProgramNameIsReservedAndIsAnnotatedToAllowTheReservedName) {
+    FilenameIsReservedAndIsAnnotatedToAllowTheReservedIdentifier) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/fbthrift_should_not_error_due_to_bypass.thrift"] =
       R"(
 
     include "thrift/annotation/thrift.thrift"
     
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedFilename
     package "test.dev/test"
   )";
 
   check_compile(
       name_contents_map,
       "path/to/fbthrift_should_not_error_due_to_bypass.thrift");
+}
+
+TEST(
+    ReservedIdentifierValidatorTest,
+    CannotUseAllowReservedIdentifierOnFilename) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["path/to/should_error_due_to_incorrect_annotation.thrift"] =
+      R"(
+    include "thrift/annotation/thrift.thrift"
+    
+    @thrift.AllowReservedIdentifier
+    package "test.dev/test"
+    # expected-error@4: `AllowReservedIdentifier` cannot annotate `should_error_due_to_incorrect_annotation`
+  )";
+
+  check_compile(
+      name_contents_map,
+      "path/to/should_error_due_to_incorrect_annotation.thrift");
 }
 
 TEST(ReservedIdentifierValidatorTest, ServiceNameIsReserved) {
@@ -60,10 +78,14 @@ TEST(ReservedIdentifierValidatorTest, ServiceNameIsReserved) {
     service MyService {}
 
     service __fbthriftServiceShouldError {}
-      # expected-error@-1: `__fbthriftServiceShouldError` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+      # expected-error@-1: `__fbthriftServiceShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     service __fbthriftServiceShouldNotErrorDueToBypass {}
+
+    @thrift.AllowReservedFilename
+    service aService {}
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `aService`
   )");
 }
 
@@ -74,10 +96,14 @@ TEST(ReservedIdentifierValidatorTest, InteractionNameIsReserved) {
     interaction MyInteraction {}
 
     interaction __fbthriftInteractionShouldError {}
-        # expected-error@-1: `__fbthriftInteractionShouldError` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+        # expected-error@-1: `__fbthriftInteractionShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     interaction __fbthriftInteractionShouldNotErrorDueToBypass {}
+
+    @thrift.AllowReservedFilename
+    interaction anIteraction {}
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `anIteraction`
   )");
 }
 
@@ -89,17 +115,21 @@ TEST(ReservedIdentifierValidatorTest, StructNameIsReserved) {
       1: i32 myField;
       
       2: i32 __fbthriftFieldShouldError;
-        # expected-error@-1: `__fbthriftFieldShouldError` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+        # expected-error@-1: `__fbthriftFieldShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
       
-      @thrift.AllowReservedIdentifierName    
+      @thrift.AllowReservedIdentifier    
       3: i32 __fbthriftFieldShouldNotErrorDueToBypass;
     }
 
     struct __fbthriftStructShouldError {}
-      # expected-error@-1: `__fbthriftStructShouldError` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+      # expected-error@-1: `__fbthriftStructShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     struct __fbthriftStructShouldNotErrorDueToBypass {}
+
+    @thrift.AllowReservedFilename
+    struct aStruct {}
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `aStruct`
   )");
 }
 
@@ -110,10 +140,14 @@ TEST(ReservedIdentifierValidatorTest, UnionNameIsReserved) {
     union MyUnion {}
 
     union __fbthriftUnionShouldError {}
-      # expected-error@-1: `__fbthriftUnionShouldError` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+      # expected-error@-1: `__fbthriftUnionShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     union __fbthriftUnionShouldNotErrorDueToBypass {}
+
+    @thrift.AllowReservedFilename
+    struct aUnion {}
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `aUnion`
   )");
 }
 
@@ -124,10 +158,14 @@ TEST(ReservedIdentifierValidatorTest, ExceptionNameIsReserved) {
     exception MyException {}
 
     exception __fbthriftExceptionShouldError {}
-      # expected-error@-1: `__fbthriftExceptionShouldError` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+      # expected-error@-1: `__fbthriftExceptionShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     exception __fbthriftExceptionShouldNotErrorDueToBypass {}
+
+    @thrift.AllowReservedFilename
+    struct anException {}
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `anException`
   )");
 }
 
@@ -138,16 +176,23 @@ TEST(ReservedIdentifierValidatorTest, EnumNameIsReserved) {
     enum MyEnum {
       NORMAL                                    = 1,
       FBTHRIFT_SHOULD_ERROR                     = 2, 
-        # expected-error@-1: `FBTHRIFT_SHOULD_ERROR` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
-      @thrift.AllowReservedIdentifierName
+        # expected-error@-1: `FBTHRIFT_SHOULD_ERROR` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
+      @thrift.AllowReservedIdentifier
       FBTHRIFT_SHOULD_NOT_ERROR_DUE_TO_BYPASS   = 3
+      @thrift.AllowReservedFilename
+      AN_ENUM_VALUE                             = 42
+        # expected-error@-2: `AllowReservedFilename` cannot annotate `AN_ENUM_VALUE`
     }
 
     enum __fbthriftEnum {}
-      # expected-error@-1: `__fbthriftEnum` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+      # expected-error@-1: `__fbthriftEnum` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     enum __fbthriftEnumShouldNotErrorDueToBypass {}
+
+    @thrift.AllowReservedFilename
+    struct anEnum {}
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `anEnum`
   )");
 }
 
@@ -158,10 +203,14 @@ TEST(ReservedIdentifierValidatorTest, ConstNameIsReserved) {
     const i32 MY_CONSTANT = 42;
 
     const i32 FBTHRIFT_CONSTANT_SHOULD_ERROR = 42;
-      # expected-error@-1: `FBTHRIFT_CONSTANT_SHOULD_ERROR` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+      # expected-error@-1: `FBTHRIFT_CONSTANT_SHOULD_ERROR` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     const i32 MY_CONSTANT_FBTHRIFT_SHOULD_NOT_ERROR_DUE_TO_BYPASS = 42;
+
+    @thrift.AllowReservedFilename
+    const i32 A_CONSTANT = 42;
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `A_CONSTANT`
   )");
 }
 
@@ -172,11 +221,15 @@ TEST(ReservedIdentifierValidatorTest, TypedefNameIsReserved) {
     typedef i16 MyTypedef;
 
     typedef i16 __fbthriftTypedefShouldError;
-      # expected-error@-1: `__fbthriftTypedefShouldError` is a reserved identifier name. Choose a different name that does not contain `fbthrift`.
+      # expected-error@-1: `__fbthriftTypedefShouldError` is a reserved identifier. Choose a different identifier that does not contain `fbthrift`.
 
-    @thrift.AllowReservedIdentifierName
+    @thrift.AllowReservedIdentifier
     typedef i16 __fbthriftTypedefShouldNotErrorDueToBypass;
-  )");
+ 
+    @thrift.AllowReservedFilename
+    typedef i32 aTypedef;
+      # expected-error@-2: `AllowReservedFilename` cannot annotate `aTypedef`
+ )");
 }
 
 // Tests for generated nodes that will not appear in an IDL file.

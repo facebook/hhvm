@@ -161,6 +161,12 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("thrift.AllowReservedIdentifier").
+    SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("thrift.AllowReservedFilename").
+    SetIsUnion(false),
+    metadata.NewThriftStruct().
     SetName("thrift.AllowReservedIdentifierName").
     SetIsUnion(false),
 }

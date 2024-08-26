@@ -159,6 +159,7 @@ void* Func::allocFuncMem(int numParams) {
 }
 
 void Func::destroy(Func* func) {
+  NamedFunc::removeFunc(func);
   if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
     // Free TC-space associated with func
     jit::tc::reclaimFunction(func);
@@ -814,6 +815,7 @@ void Func::def(Func* func) {
         );
       }
       ne->m_cachedFunc.initWith(func);
+      ne->setFunc(func);
       l.unlock();
 
       DEBUGGER_ATTACHED_ONLY(phpDebuggerDefFuncHook(func));

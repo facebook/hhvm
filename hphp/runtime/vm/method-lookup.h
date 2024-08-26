@@ -141,12 +141,4 @@ LookupResult lookupCtorMethod(const Func*& f,
  */
 const Func* lookupImmutableCtor(const Class* cls,
                                 const MemberLookupContext& callCtx);
-
-/*
- * Find a function which always uniquely maps to the given name in the context
- * of the given unit. A function so returned can be used directly in the TC as
- * it will not change.
- */
-Func* lookupImmutableFunc(const StringData* name);
-
 }

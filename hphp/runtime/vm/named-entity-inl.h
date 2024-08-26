@@ -59,5 +59,9 @@ inline Func* NamedFunc::getCachedFunc() const {
     : nullptr;
 }
 
+inline Func* NamedFunc::func() const {
+  return m_func;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

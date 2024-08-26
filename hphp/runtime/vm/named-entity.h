@@ -248,6 +248,14 @@ struct NamedFunc {
   Func* getCachedFunc() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Get the last func that was loaded.
+  // This safe to do from JIT when cachedFunc handles are not persistent.
+
+  Func* func() const;
+  void setFunc(Func* func);
+  static void removeFunc(Func*);
+
+  /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
 
   /*
@@ -281,6 +289,9 @@ private:
 
 public:
   mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
+
+private:
+  AtomicLowPtr<Func, std::memory_order_acquire, std::memory_order_release> m_func;
 };
 
 using NamedTypePair = std::pair<LowStringPtr,LowPtr<const NamedType>>;

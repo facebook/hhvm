@@ -663,6 +663,14 @@ inline SSATmp* ldCtxCls(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Other common helpers
 
+inline const Func* lookupKnownWithUnit(IRGS& env, const Func* func) {
+  assertx(!func->cls());
+  auto const unit = curUnit(env);
+  if (RO::funcIsRenamable(func->name())) return nullptr;
+  if (func && func->unit() == unit) return func;
+  return func->isPersistent() ? func : nullptr;
+}
+
 inline const Class* lookupKnownWithUnit(IRGS& env, const Class* cls) {
   auto const unit = curUnit(env);
   if (cls && cls->preClass()->unit() == unit) return cls;

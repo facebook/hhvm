@@ -71,6 +71,28 @@ inline low_storage_t to_low(T* px) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template <class S,
+  std::memory_order read_order,
+  std::memory_order write_order,
+  std::memory_order read_modify_write
+>
+struct AtomicStorage {
+  using storage_type = std::atomic<S>;
+  static const std::memory_order R = read_order;
+  static const std::memory_order W = write_order;
+  static const std::memory_order M = read_modify_write;
+
+  static ALWAYS_INLINE low_storage_t get(const storage_type& s) {
+    return s.load(read_order);
+  }
+  static ALWAYS_INLINE void set(storage_type& s, low_storage_t r) {
+    s.store(r, write_order);
+  }
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 /**
  * Low memory pointer template.
@@ -163,25 +185,21 @@ struct LowPtrImpl {
     S::set(r.m_s, tmp);
   }
 
+  template<typename Q = S>
+  typename std::enable_if<
+    std::is_base_of<
+      AtomicStorage<detail::low_storage_t, Q::R, Q::W, Q::M>, Q
+    >::value, bool
+  >::type
+  test_and_set(T* expected, T* desired) {
+    auto e = to_low(expected);
+    auto d = to_low(desired);
+    return m_s.compare_exchange_strong(e, d, Q::M);
+  }
+
 private:
   typename S::storage_type m_s{0};
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-template <class S, std::memory_order read_order, std::memory_order write_order>
-struct AtomicStorage {
-  using storage_type = std::atomic<S>;
-
-  static ALWAYS_INLINE low_storage_t get(const storage_type& s) {
-    return s.load(read_order);
-  }
-  static ALWAYS_INLINE void set(storage_type& s, low_storage_t r) {
-    s.store(r, write_order);
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
 
 }
 
@@ -295,11 +313,13 @@ private:
 
 template<class T,
          std::memory_order read_order = std::memory_order_acquire,
-         std::memory_order write_order = std::memory_order_release>
+         std::memory_order write_order = std::memory_order_release,
+         std::memory_order read_modify_write = std::memory_order_acq_rel>
 using AtomicLowPtr =
   detail::LowPtrImpl<T, detail::AtomicStorage<detail::low_storage_t,
                                               read_order,
-                                              write_order>>;
+                                              write_order,
+                                              read_modify_write>>;
 
 template<class T> struct lowptr_traits : std::false_type {};
 template<class T> struct lowptr_traits<LowPtr<T>> : std::true_type {
@@ -312,7 +332,6 @@ struct lowptr_traits<AtomicLowPtr<T, R, W>> : std::true_type {
   using pointer = T*;
 };
 template<class T> constexpr bool is_lowptr_v = lowptr_traits<T>::value;
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

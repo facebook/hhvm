@@ -101,6 +101,15 @@ void NamedType::pushClass(Class* cls) {
   m_clsList = cls;
 }
 
+void NamedFunc::setFunc(Func* func) {
+  m_func = func;
+}
+
+void NamedFunc::removeFunc(Func* func) {
+  auto const ne = NamedFunc::getNoCreate(func->name());
+  if (ne && ne->m_func) ne->m_func.test_and_set(func, nullptr);
+}
+
 void NamedType::removeClass(Class* goner) {
   auto head = m_clsList;
   if (!head) return;

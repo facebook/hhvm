@@ -63,7 +63,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
   // Verify that recv_echo works
   bool echoDone = false;
   client.echo(
-      [&echoDone](ClientReceiveState&& state) {
+      [&echoDone, &eb](ClientReceiveState&& state) {
         EXPECT_FALSE(state.exception());
         try {
           std::string result;
@@ -72,6 +72,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
           echoDone = true;
         } catch (const std::exception&) {
         }
+        eb.terminateLoopSoon();
       },
       "Hello World");
   eb.loop();
@@ -80,7 +81,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
   // Verify that recv_wrapped_echo works
   echoDone = false;
   client.echo(
-      [&echoDone](ClientReceiveState&& state) {
+      [&echoDone, &eb](ClientReceiveState&& state) {
         EXPECT_FALSE(state.exception());
         std::string result;
         auto ew = ExceptionThrowingServiceAsyncClient::recv_wrapped_echo(
@@ -89,6 +90,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
           EXPECT_EQ(result, "Hello World");
           echoDone = true;
         }
+        eb.terminateLoopSoon();
       },
       "Hello World");
   eb.loop();
@@ -97,7 +99,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
   // recv_throwException
   bool exceptionThrown = false;
   client.throwException(
-      [&exceptionThrown](ClientReceiveState&& state) {
+      [&exceptionThrown, &eb](ClientReceiveState&& state) {
         EXPECT_FALSE(state.exception());
         try {
           ExceptionThrowingServiceAsyncClient::recv_throwException(state);
@@ -105,6 +107,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
           EXPECT_EQ(*e.message(), "Hello World");
           exceptionThrown = true;
         }
+        eb.terminateLoopSoon();
       },
       "Hello World");
   eb.loop();
@@ -113,7 +116,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
   // recv_wrapped_throwException
   exceptionThrown = false;
   client.throwException(
-      [&exceptionThrown](ClientReceiveState&& state) {
+      [&exceptionThrown, &eb](ClientReceiveState&& state) {
         EXPECT_FALSE(state.exception());
         auto ew =
             ExceptionThrowingServiceAsyncClient::recv_wrapped_throwException(
@@ -123,6 +126,7 @@ TEST(ExceptionThrowingTest, Thrift2Client) {
             })) {
           exceptionThrown = true;
         }
+        eb.terminateLoopSoon();
       },
       "Hello World");
   eb.loop();

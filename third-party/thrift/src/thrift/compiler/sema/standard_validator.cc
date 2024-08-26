@@ -44,7 +44,6 @@
 #include <thrift/compiler/lib/reserved_identifier.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
-#include <thrift/compiler/sema/scope_validator.h>
 
 namespace apache {
 namespace thrift {
@@ -1403,7 +1402,7 @@ ast_validator standard_validator() {
   validator.add_enum_value_visitor(&validate_enum_value);
 
   validator.add_named_visitor(&validate_structured_annotation);
-  validator.add_named_visitor(&validate_annotation_scopes);
+  validator.add_named_visitor(&detail::validate_annotation_scopes);
   validator.add_named_visitor(&validate_cpp_adapter_annotation);
   validator.add_named_visitor(&validate_hack_adapter_annotation);
   validator.add_named_visitor(&validate_hack_wrapper_annotation);

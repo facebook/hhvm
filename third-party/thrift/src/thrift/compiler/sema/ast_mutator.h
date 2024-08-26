@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <type_traits>
 #include <vector>
 
 #include <thrift/compiler/ast/ast_visitor.h>
@@ -93,17 +92,17 @@ struct type_ref_resolver {
         });
 
     mutator.add_function_visitor(
-        [&](diagnostic_context& ctx, mutator_context& mCtx, t_function& node) {
+        [&](diagnostic_context& ctx, mutator_context& mctx, t_function& node) {
           resolve_in_place(node.return_type());
           resolve_in_place(node.interaction());
           for (auto& field : node.params().fields()) {
-            mutator(ctx, mCtx, field);
+            mutator(ctx, mctx, field);
           }
         });
     mutator.add_throws_visitor(
-        [&](diagnostic_context& ctx, mutator_context& mCtx, t_throws& node) {
+        [&](diagnostic_context& ctx, mutator_context& mctx, t_throws& node) {
           for (auto& field : node.fields()) {
-            mutator(ctx, mCtx, field);
+            mutator(ctx, mctx, field);
           }
         });
     mutator.add_stream_visitor(
@@ -152,28 +151,21 @@ struct ast_mutators {
     bool unresolvable_typeref = false;
   };
 
+  std::vector<ast_mutator> stages_;
   bool use_legacy_type_ref_resolution_;
 
  public:
   explicit ast_mutators(bool use_legacy_type_ref_resolution)
       : use_legacy_type_ref_resolution_(use_legacy_type_ref_resolution) {}
 
-  std::vector<ast_mutator> stages;
-
-  // Access a specific mutator stage, growing the number of stages if needed.
-  template <typename T>
-  ast_mutator& operator[](T&& stage) {
-    static_assert(std::is_enum<T>::value, "");
-    auto index = static_cast<size_t>(stage);
-    if (stages.size() <= index) {
-      stages.resize(index + 1);
-    }
-    return stages[index];
+  ast_mutator& add_stage() {
+    stages_.push_back({});
+    return stages_.back();
   }
 
   mutation_result operator()(
       diagnostic_context& ctx, t_program_bundle& bundle) {
-    for (auto& stage : stages) {
+    for (auto& stage : stages_) {
       stage.mutate(ctx, bundle);
     }
     // We have no more mutators, so all type references **must** resolve.

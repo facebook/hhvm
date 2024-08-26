@@ -23,7 +23,6 @@
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
-#include <thrift/compiler/sema/standard_mutator_stage.h>
 
 namespace apache {
 namespace thrift {
@@ -435,24 +434,21 @@ void inject_schema_const(
 
 ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
   ast_mutators mutators(use_legacy_type_ref_resolution);
-  {
-    auto& initial = mutators[standard_mutator_stage::initial];
-    initial.add_field_visitor(&lower_type_annotations<t_field>);
-    initial.add_typedef_visitor(&lower_type_annotations<t_typedef>);
-    initial.add_function_visitor(&normalize_return_type);
-    initial.add_named_visitor(&set_generated);
-    initial.add_named_visitor(&lower_deprecated_annotations);
-  }
 
-  {
-    auto& main = mutators[standard_mutator_stage::main];
-    main.add_struct_visitor(&mutate_terse_write_annotation_structured);
-    main.add_exception_visitor(&mutate_terse_write_annotation_structured);
-    main.add_struct_visitor(&mutate_inject_metadata_fields);
-    main.add_const_visitor(&match_const_type_with_value);
-    main.add_field_visitor(&match_field_type_with_default_value);
-    main.add_named_visitor(&match_annotation_types_with_const_values);
-  }
+  auto& initial = mutators.add_stage();
+  initial.add_field_visitor(&lower_type_annotations<t_field>);
+  initial.add_typedef_visitor(&lower_type_annotations<t_typedef>);
+  initial.add_function_visitor(&normalize_return_type);
+  initial.add_named_visitor(&set_generated);
+  initial.add_named_visitor(&lower_deprecated_annotations);
+
+  auto& main = mutators.add_stage();
+  main.add_struct_visitor(&mutate_terse_write_annotation_structured);
+  main.add_exception_visitor(&mutate_terse_write_annotation_structured);
+  main.add_struct_visitor(&mutate_inject_metadata_fields);
+  main.add_const_visitor(&match_const_type_with_value);
+  main.add_field_visitor(&match_field_type_with_default_value);
+  main.add_named_visitor(&match_annotation_types_with_const_values);
 
   return mutators;
 }

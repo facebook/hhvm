@@ -16,22 +16,20 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <vector>
-
-#include <thrift/compiler/ast/t_named.h>
-#include <thrift/compiler/ast/t_type.h>
+#include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/sema/ast_validator.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
 
 namespace apache::thrift::compiler {
 
+class diagnostic_context;
+class t_named;
+class t_type;
+
 /**
- * Transitive includes "work" in thrift C++, but they invite vexing
- * bugs if multiple transitive includes have the same module name. In other
- * langauges without transitive includes, they cause compilation errors (e.g.,
- * Rust). Thrift-python C API doesn't leak field types in headers, so transitive
+ * Transitive includes "work" in Thrift C++, but they invite vexing bugs if
+ * multiple transitive includes have the same module name. In other languages
+ * without transitive includes such as Rust, they cause compilation errors.
+ * Thrift-python C API doesn't leak field types in headers, so transitive
  * includes cause confusing compilation errors re: template specialization not
  * found.
  *

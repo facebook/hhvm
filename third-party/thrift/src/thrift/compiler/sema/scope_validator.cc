@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/sema/scope_validator.h>
+#include <thrift/compiler/sema/standard_validator.h>
 
 #include <memory>
 #include <typeindex>
@@ -72,7 +72,8 @@ struct allowed_scopes {
 
 } // namespace
 
-void validate_annotation_scopes(diagnostic_context& ctx, const t_named& node) {
+void detail::validate_annotation_scopes(
+    diagnostic_context& ctx, const t_named& node) {
   // Ignore a transitive annotation definition because it is a collection of
   // annotations that apply at other scopes. For example:
   //

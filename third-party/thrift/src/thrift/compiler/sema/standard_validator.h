@@ -24,10 +24,12 @@ namespace detail {
 // Checks if an initializer is compatible with a const or a field it
 // initializes.
 void check_initializer(
-    diagnostic_context& ctx,
+    diagnostics_engine& diags,
     const t_named& node,
     const t_type* type,
     const t_const_value* initializer);
+
+void validate_annotation_scopes(diagnostic_context& ctx, const t_named& node);
 
 } // namespace detail
 

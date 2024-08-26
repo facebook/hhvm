@@ -310,11 +310,11 @@ class checker {
 // validation and inference, except the "runtime" is the code generator
 // runtime. Shit. I've been had.
 void detail::check_initializer(
-    diagnostic_context& ctx,
+    diagnostics_engine& diags,
     const t_named& node,
     const t_type* type,
     const t_const_value* initializer) {
-  checker(ctx, node, node.name()).check(type, initializer);
+  checker(diags, node, node.name()).check(type, initializer);
 }
 
 } // namespace apache::thrift::compiler

@@ -196,6 +196,11 @@ int64_t RpcOptions::getInteractionId() const {
   return interactionId_;
 }
 
+RpcOptions& RpcOptions::copyInteractionIdFrom(const RpcOptions& other) {
+  interactionId_ = other.getInteractionId();
+  return *this;
+}
+
 RpcOptions& RpcOptions::setLoggingContext(std::string loggingContext) {
   loggingContext_ = std::move(loggingContext);
   return *this;

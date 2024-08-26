@@ -131,6 +131,7 @@ class RpcOptions {
   // Primarily used by generated code
   RpcOptions& setInteractionId(const InteractionId& id);
   int64_t getInteractionId() const;
+  RpcOptions& copyInteractionIdFrom(const RpcOptions& other);
 
   RpcOptions& setLoggingContext(std::string loggingContext);
   const std::string& getLoggingContext() const;

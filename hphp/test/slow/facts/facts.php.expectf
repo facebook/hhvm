@@ -56,12 +56,12 @@ Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require ext
 Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
 
 Getting paths
-AppleThenBanana has relative path: attribute-classes.inc
-outOfClassFunction has relative path: attribute-classes.inc
-alias AnAlias from type_or_type_alias_to_path_relative has relative path: attribute-classes.inc
-alias AnAlias from type_alias_to_path_relative has relative path: attribute-classes.inc
-SOME_CONSTANT has relative path: constants.inc
-someModule has relative path: attribute-classes.inc
+AppleThenBanana has path: attribute-classes.inc
+outOfClassFunction has path: attribute-classes.inc
+alias AnAlias from type_or_type_alias_to_path has path: attribute-classes.inc
+alias AnAlias from type_alias_to_path has path: attribute-classes.inc
+SOME_CONSTANT has path: constants.inc
+someModule has path: attribute-classes.inc
 
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}
@@ -186,12 +186,12 @@ Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require ext
 Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
 
 Getting paths
-AppleThenBanana has relative path: attribute-classes.inc
-outOfClassFunction has relative path: attribute-classes.inc
-alias AnAlias from type_or_type_alias_to_path_relative has relative path: attribute-classes.inc
-alias AnAlias from type_alias_to_path_relative has relative path: attribute-classes.inc
-SOME_CONSTANT has relative path: constants.inc
-someModule has relative path: attribute-classes.inc
+AppleThenBanana has path: attribute-classes.inc
+outOfClassFunction has path: attribute-classes.inc
+alias AnAlias from type_or_type_alias_to_path has path: attribute-classes.inc
+alias AnAlias from type_alias_to_path has path: attribute-classes.inc
+SOME_CONSTANT has path: constants.inc
+someModule has path: attribute-classes.inc
 
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}

@@ -1090,6 +1090,9 @@ class mstch_java_enum : public mstch_enum {
             {"enum:skipEnumNameMap?",
              &mstch_java_enum::java_skip_enum_name_map},
             {"enum:numValues", &mstch_java_enum::num_values},
+            {"enum:useIntrinsicDefault?",
+             &mstch_java_enum::use_intrinsic_default},
+            {"enum:findValueZero", &mstch_java_enum::find_value_zero},
         });
   }
   mstch::node java_package() {
@@ -1102,6 +1105,25 @@ class mstch_java_enum : public mstch_enum {
     return enum_->has_annotation("java.swift.skip_enum_name_map");
   }
   mstch::node num_values() { return enum_->get_enum_values().size(); }
+  mstch::node use_intrinsic_default() {
+    if (enum_->find_structured_annotation_or_null(
+            kJavaUseIntrinsicDefaultUri) != nullptr) {
+      if (enum_->find_value(0) == nullptr) {
+        throw std::runtime_error(
+            "Enum " + enum_->get_name() +
+            " does not have a value for 0! You have to have value for 0 to use intrinsic default annotation.");
+      }
+      return true;
+    }
+    return false;
+  }
+  mstch::node find_value_zero() {
+    if (enum_->find_structured_annotation_or_null(
+            kJavaUseIntrinsicDefaultUri) != nullptr) {
+      return java::mangle_java_constant_name(enum_->find_value(0)->get_name());
+    }
+    return mstch::node();
+  }
 };
 
 class mstch_java_enum_value : public mstch_enum_value {

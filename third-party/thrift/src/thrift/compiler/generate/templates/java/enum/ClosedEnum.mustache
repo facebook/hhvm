@@ -60,8 +60,14 @@ public {{#enum:skipEnumNameMap?}}class{{/enum:skipEnumNameMap?}}{{^enum:skipEnum
         case {{enum_value:value}}:
             return {{enum_value:javaConstantName}};
         {{/enum:values}}
+        {{#enum:useIntrinsicDefault?}}
+        default:
+            return {{enum:findValueZero}};
+        {{/enum:useIntrinsicDefault?}}
+        {{^enum:useIntrinsicDefault?}}
         default:
             return null;
+        {{/enum:useIntrinsicDefault?}}
         }
         {{/enum:skipEnumNameMap?}}
         {{#enum:skipEnumNameMap?}}

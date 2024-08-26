@@ -37,7 +37,7 @@ public enum MyUseIntrinsicDefaultEnum implements com.facebook.thrift.enums.BaseE
         case 2:
             return TWO;
         default:
-            return null;
+            return ZERO;
         }
     }
 

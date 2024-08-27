@@ -28,6 +28,9 @@ class basic_native_object : public native_object {
   const object* lookup_property(std::string_view) const override {
     return nullptr;
   }
+  void print_to(tree_printer::scope scope) const override {
+    scope.println("<basic_native_object>");
+  }
 };
 } // namespace
 
@@ -320,7 +323,7 @@ TEST(ObjectTest, to_string) {
       "  | `-[1]\n"
       "  |   |-true\n"
       "  | `-[2]\n"
-      "  |   |-<native_object>\n"
+      "  |   |-<basic_native_object>\n"
       "`-'foo'\n"
       "  |-i64(1)\n"
       "`-'fun'\n"

@@ -35,7 +35,7 @@
 // used to track tree depth which informs the indentation of the output.
 // Furthermore, the lines of printed tree can be one of {node, property} (see
 // below).
-namespace whisker::detail::tree_printer {
+namespace whisker::tree_printer {
 
 /**
  * Escapes a string of common special characters, making the output suitable for
@@ -119,4 +119,4 @@ class scope {
       std::ostream& out, const nesting_context& self);
 };
 
-} // namespace whisker::detail::tree_printer
+} // namespace whisker::tree_printer

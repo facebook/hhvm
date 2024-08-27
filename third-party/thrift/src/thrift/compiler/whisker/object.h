@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/tree_printer.h>
 
 namespace whisker {
 
@@ -108,6 +109,16 @@ class native_object {
    *   - The provided string is a valid Whisker identifier
    */
   virtual const object* lookup_property(std::string_view identifier) const = 0;
+
+  /**
+   * Creates a tree-like string representation of this object, primarily for
+   * debugging and diagnostic purposes.
+   *
+   * The provided tree_printer::scope object abstracts away the details of tree
+   * printing as well as encodes the location in an existing print tree where
+   * this object should be inline. See its documentation for more details.
+   */
+  virtual void print_to(tree_printer::scope) const;
 };
 
 namespace detail {
@@ -385,6 +396,14 @@ class object final : private detail::object_base<object> {
 };
 
 std::string to_string(const object&);
+/**
+ * An alternative to to_string() that allows printing a whisker::object within
+ * an ongoing tree printing session. The output is appended to the provided
+ * tree_printer::scope's output stream.
+ *
+ * This is primarily needed for native_object::print_to() implementations.
+ */
+void print_to(const object&, tree_printer::scope);
 
 std::ostream& operator<<(std::ostream&, const object&);
 

@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/whisker/detail/tree_printer.h>
 #include <thrift/compiler/whisker/object.h>
 
 #include <ostream>
 #include <sstream>
 
 namespace whisker {
-
-namespace tree_printer = detail::tree_printer;
 
 namespace {
 
@@ -63,8 +60,8 @@ struct to_string_visitor {
     }
   }
 
-  static void visit(const native_object::ptr&, tree_printer::scope scope) {
-    scope.println("<native_object>");
+  static void visit(const native_object::ptr& o, tree_printer::scope scope) {
+    o->print_to(std::move(scope));
   }
 
   // Prevent implicit conversion to whisker::object. Otherwise, we can silently
@@ -80,10 +77,18 @@ struct to_string_visitor {
 
 } // namespace
 
+void native_object::print_to(tree_printer::scope scope) const {
+  scope.println("<native_object>");
+}
+
 std::string to_string(const object& obj) {
   std::ostringstream out;
-  to_string_visitor::visit(obj, tree_printer::scope::make_root(out));
+  print_to(obj, tree_printer::scope::make_root(out));
   return std::move(out).str();
+}
+
+void print_to(const object& obj, tree_printer::scope scope) {
+  to_string_visitor::visit(obj, std::move(scope));
 }
 
 std::ostream& operator<<(std::ostream& out, const object& o) {

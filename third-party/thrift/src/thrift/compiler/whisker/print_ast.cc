@@ -15,8 +15,8 @@
  */
 
 #include <thrift/compiler/whisker/detail/overload.h>
-#include <thrift/compiler/whisker/detail/tree_printer.h>
 #include <thrift/compiler/whisker/print_ast.h>
+#include <thrift/compiler/whisker/tree_printer.h>
 
 #include <iterator>
 #include <memory>
@@ -28,8 +28,6 @@
 namespace whisker {
 
 namespace {
-
-namespace tree_printer = detail::tree_printer;
 
 std::string to_string(
     const source_range& loc, const source_manager& src_manager) {

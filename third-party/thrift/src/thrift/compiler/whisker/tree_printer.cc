@@ -15,11 +15,11 @@
  */
 
 #include <thrift/compiler/whisker/detail/string.h>
-#include <thrift/compiler/whisker/detail/tree_printer.h>
+#include <thrift/compiler/whisker/tree_printer.h>
 
 #include <algorithm>
 
-namespace whisker::detail::tree_printer {
+namespace whisker::tree_printer {
 
 std::string escape(std::string_view str) {
   return detail::escape(str);
@@ -57,4 +57,4 @@ std::ostream& operator<<(
   return out << buffer;
 }
 
-} // namespace whisker::detail::tree_printer
+} // namespace whisker::tree_printer

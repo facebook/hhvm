@@ -50,6 +50,11 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
     private java.lang.Object value;
     private short id;
 
+    public enum Type {
+      DELAY,
+      CUSTOM,
+    }
+
     public static AdaptTestUnion from(int _id, java.lang.Object _field) {
         return from((short) _id, _field);
     }
@@ -146,6 +151,17 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
     @ThriftUnionId
     public short getThriftId() {
         return this.id;
+    }
+
+    public Type getThriftUnionType() {
+      switch(this.id) {
+        case 1:
+          return Type.DELAY;
+        case 2:
+          return Type.CUSTOM;
+        default:
+          throw new IllegalStateException("unreachable");
+      }
     }
 
     public String getThriftName() {

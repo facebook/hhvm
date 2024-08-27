@@ -782,6 +782,7 @@ class mstch_java_field : public mstch_field {
         {
             {"field:javaName", &mstch_java_field::java_name},
             {"field:javaCapitalName", &mstch_java_field::java_capital_name},
+            {"field:javaConstantName", &mstch_java_field::java_constant_name},
             {"field:javaDefaultValue", &mstch_java_field::java_default_value},
             {"field:javaAllCapsName", &mstch_java_field::java_all_caps_name},
             {"field:recursive?", &mstch_java_field::is_recursive_reference},
@@ -993,6 +994,10 @@ class mstch_java_field : public mstch_field {
   mstch::node java_capital_name() {
     return java::mangle_java_name(
         field_->get_annotation("java.swift.name", &field_->get_name()), true);
+  }
+  mstch::node java_constant_name() {
+    return constant_name(
+        field_->get_annotation("java.swift.name", &field_->get_name()));
   }
   mstch::node java_all_caps_name() {
     auto field_name = field_->get_name();

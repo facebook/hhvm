@@ -1077,33 +1077,6 @@ void optimizeProfiledCallMethod(IRGS& env,
   emitFCall();
 }
 
-namespace {
-/*
- * Find a function which always uniquely maps to the given name in the context
- * of the given unit. A function so returned can be used directly in the TC as
- * it will not change.
- */
-Func* lookupImmutableFunc(IRGS& env, const StringData* name) {
-  auto const ne = NamedFunc::getOrCreate(name);
-  if (auto const f = ne->func()) {
-    if (lookupKnownWithUnit(env, f)) {
-      assertx(!RO::funcIsRenamable(name));
-
-      // In non-repo mode while the function must be available in this unit, it
-      // may be de-duplication on load. This may mean that while the func is
-      // available it is not immutable in the current compilation unit. The order
-      // of the de-duplication can also differ between requests.
-      if (f->isMethCaller() && !RO::RepoAuthoritative) return nullptr;
-
-      // We load persistent symbols once and can persist them across
-      // all requests.
-      return f;
-    }
-  }
-  return nullptr;
-}
-}
-
 void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
                        const StringData* clsHint, SSATmp* methodName,
                        bool dynamicCall, uint32_t numExtraInputs) {
@@ -1413,16 +1386,42 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
-  auto const func = lookupImmutableFunc(env, funcName);
-  if (func) {
-    emitModuleBoundaryCheckKnown(env, func);
-    prepareAndCallKnown(env, func, fca, nullptr, false, false);
+  auto const lookup = lookupKnownFuncMaybe(env, funcName);
+  auto const fast = [&]() {
+    emitModuleBoundaryCheckKnown(env, lookup.func);
+    prepareAndCallKnown(env, lookup.func, fca, nullptr, false, false);
     return;
-  }
+  };
+  auto const slow = [&]() {
+    auto const cachedFunc = gen(env, LdFuncCached, FuncNameData { funcName } );
+    emitModuleBoundaryCheck(env, cachedFunc);
+    prepareAndCallProfiled(env, cachedFunc, fca, nullptr, false, false);
+  };
 
-  auto const cachedFunc = gen(env, LdFuncCached, FuncNameData { funcName } );
-  emitModuleBoundaryCheck(env, cachedFunc);
-  prepareAndCallProfiled(env, cachedFunc, fca, nullptr, false, false);
+  switch (lookup.tag) {
+    case Func::FuncLookupResult::None:
+      return slow();
+    case Func::FuncLookupResult::Exact:
+      return fast();
+    case Func::FuncLookupResult::Maybe:
+      ifThenElse( 
+        env,  
+        [&] (Block* taken) {
+            auto const cachedFunc = gen(env, LdFuncCached, FuncNameData { funcName } );
+            auto const equal = gen(env, EqFunc, cachedFunc, cns(env, lookup.func));
+            gen(env, JmpZero, taken, equal);
+        },
+        [&] {
+          fast();
+          return;
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          slow();
+          return;
+        }
+      );
+  };
 }
 
 void emitFCallFunc(IRGS& env, FCallArgs fca) {
@@ -1437,7 +1436,7 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
-  auto const cachedFunc = lookupImmutableFunc(env, name);
+  auto const cachedFunc = lookupKnownFunc(env, name);
   if (!cachedFunc) {
     auto const func = gen(env, LookupFuncCached, FuncNameData { name } );
     emitModuleBoundaryCheck(env, func);
@@ -1449,7 +1448,7 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
 }
 
 void emitResolveMethCaller(IRGS& env, const StringData* name) {
-  auto const func = lookupImmutableFunc(env, name);
+  auto const func = lookupKnownFunc(env, name);
 
   // We de-duplicate meth_caller across the repo which may lead to the resolved
   // meth caller being in a different unit (and therefore unavailable at this
@@ -1482,7 +1481,7 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
   auto const tsList = popC(env);
 
   auto const funcTmp = [&] () -> SSATmp* {
-    auto const func = lookupImmutableFunc(env, name);
+    auto const func = lookupKnownFunc(env, name);
     if (!func) return gen(env, LookupFuncCached, FuncNameData { name } );
     return cns(env, func);
   }();

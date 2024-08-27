@@ -1734,6 +1734,29 @@ private:
   static constexpr intptr_t kNeedsFullName = 0x1;
 
 public:
+  enum class FuncLookupResult {
+    None,
+    Exact,
+    Maybe,
+  };
+
+  struct FuncLookup {
+    FuncLookupResult tag;
+    const Func* func;
+  };
+  static const FuncLookup lookupKnownMaybe(const StringData* name, const Unit*  unit);
+  static const Func* lookupKnown(const StringData* name, const Unit* unit);
+  static const FuncLookup maybe(const Func* func) {
+    return FuncLookup { FuncLookupResult::Maybe, func };
+  }
+  static const FuncLookup exact(const Func* func) {
+    return FuncLookup { FuncLookupResult::Exact, func };
+  }
+  static const FuncLookup& none() {
+      static FuncLookup lookup { FuncLookupResult::None, nullptr };
+      return lookup;
+  }
+
   // Use by m_inoutBits
   static constexpr uint32_t kInoutFastCheckBits = 31;
 

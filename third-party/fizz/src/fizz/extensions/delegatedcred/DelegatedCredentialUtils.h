@@ -30,6 +30,10 @@ class DelegatedCredentialUtils {
    */
   static bool hasDelegatedExtension(const folly::ssl::X509UniquePtr& cert);
 
+  static std::chrono::system_clock::time_point getCredentialExpiresTime(
+      const folly::ssl::X509UniquePtr& parentCert,
+      const DelegatedCredential& credential);
+
   static void checkCredentialTimeValidity(
       const folly::ssl::X509UniquePtr& parentCert,
       const DelegatedCredential& credential,

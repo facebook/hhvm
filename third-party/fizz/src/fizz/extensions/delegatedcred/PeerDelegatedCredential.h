@@ -19,7 +19,9 @@ namespace extensions {
 // peer cert impl, in case a cast is needed at some higher layer.
 class PeerDelegatedCredential : public PeerCert {
  public:
-  virtual ~PeerDelegatedCredential() = default;
+  virtual ~PeerDelegatedCredential() override = default;
+
+  virtual const DelegatedCredential& getDelegatedCredential() const = 0;
 };
 
 template <openssl::KeyType T>
@@ -44,6 +46,10 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
 
   std::string getIdentity() const override {
     return peerCertImpl_.getIdentity();
+  }
+
+  const DelegatedCredential& getDelegatedCredential() const override {
+    return credential_;
   }
 
   SignatureScheme getExpectedScheme() const;

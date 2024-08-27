@@ -156,6 +156,27 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialWrongKeyUsage) {
       "cert lacks digital signature key usage");
 }
 
+TEST_F(DelegatedCredentialUtilsTest, TestGetCredentialExpiresTime) {
+  auto cert = fizz::test::getCert(kCert);
+  uint32_t secondsSinceEpoch = 1000000;
+  auto notBeforeTime = std::chrono::system_clock::to_time_t(
+      std::chrono::system_clock::time_point(
+          std::chrono::seconds(secondsSinceEpoch)));
+  folly::ssl::ASN1TimeUniquePtr notBeforeTimeASN1(
+      ASN1_TIME_set(nullptr, notBeforeTime));
+  X509_set1_notBefore(cert.get(), notBeforeTimeASN1.get());
+
+  auto credential = getCredential();
+  credential.valid_time = 234567;
+
+  auto credentialExpiresTime =
+      DelegatedCredentialUtils::getCredentialExpiresTime(cert, credential);
+  EXPECT_EQ(
+      credentialExpiresTime,
+      std::chrono::system_clock::time_point(
+          std::chrono::seconds(secondsSinceEpoch + credential.valid_time)));
+}
+
 TEST_F(DelegatedCredentialUtilsTest, TestCertExpiredCredential) {
   auto credential = getCredential();
   // Make it expire immediately after cert is valid

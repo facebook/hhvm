@@ -168,15 +168,21 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
   return cred;
 }
 
+std::chrono::system_clock::time_point
+DelegatedCredentialUtils::getCredentialExpiresTime(
+    const folly::ssl::X509UniquePtr& parentCert,
+    const DelegatedCredential& credential) {
+  auto notBefore = X509_get0_notBefore(parentCert.get());
+  auto notBeforeTime =
+      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notBefore);
+  return notBeforeTime + std::chrono::seconds(credential.valid_time);
+}
+
 void DelegatedCredentialUtils::checkCredentialTimeValidity(
     const folly::ssl::X509UniquePtr& parentCert,
     const DelegatedCredential& credential,
     const std::shared_ptr<Clock>& clock) {
-  auto notBefore = X509_get0_notBefore(parentCert.get());
-  auto notBeforeTime =
-      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notBefore);
-  auto credentialExpiresTime =
-      notBeforeTime + std::chrono::seconds(credential.valid_time);
+  auto credentialExpiresTime = getCredentialExpiresTime(parentCert, credential);
   auto now = clock->getCurrentTime();
   if (now >= credentialExpiresTime) {
     throw FizzException(

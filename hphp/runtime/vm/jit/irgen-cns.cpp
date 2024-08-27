@@ -107,8 +107,8 @@ void exactClsCns(IRGS& env,
     pushIncRef(env, cns);
   };
 
-  auto const data = [&](const ClassId id, bool success) {
-    return LoggingSpeculateClassData {
+  auto const data = [&](uint32_t id, bool success) {
+    return LoggingSpeculateData {
       clsNameStr,
       curClass(env) ? curClass(env)->name() : nullptr,
       cnsNameStr,
@@ -139,8 +139,7 @@ void exactClsCns(IRGS& env,
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
         if (RO::EvalLogClsSpeculation) {
-          ClassId clsId{ClassId::Invalid};
-          gen(env, LogClsSpeculation, data(clsId, false));
+          gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, clsNameStr));
         gen(env, Jmp, makeExit(env));
@@ -181,14 +180,14 @@ void exactClsCns(IRGS& env,
               },
               [&] {
                 if (RO::EvalLogClsSpeculation) {
-                  gen(env, LogClsSpeculation, data(lookup.cls->classId(), true));
+                  gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
                 }
                 push(env, cns(env, *val));
               },
               [&] {
                 hint(env, Block::Hint::Unlikely);
                 if (RO::EvalLogClsSpeculation) {
-                  gen(env, LogClsSpeculation, data(lookup.cls->classId(), false));
+                  gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
                 }
                 getCnsWithType(TInitCell);
                 gen(env, Jmp, makeExit(env, nextSrcKey(env)));

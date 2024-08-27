@@ -2788,31 +2788,32 @@ struct LoggingProfileData : IRExtraData {
   bool isStatic; // Whether the output is guaranteed to be static
 };
 
-struct LoggingSpeculateClassData : IRExtraData {
-  LoggingSpeculateClassData(const StringData* clsName, 
-                            const StringData* ctxName,
-                            const StringData* methName,
-                            Op op,
-                            ClassId expectedClsId,
-                            bool success)
+struct LoggingSpeculateData : IRExtraData {
+  LoggingSpeculateData(const StringData* clsName, 
+                       const StringData* ctxName,
+                       const StringData* methName,
+                       Op op,
+                       uint32_t expectedId,
+                       bool success)
     : clsName(clsName)
     , ctxName(ctxName)
     , methName(methName)
     , opcode(op)
-    , expectedClsId(expectedClsId)
+    , expectedId(expectedId)
     , success(success) {}
 
   std::string show() const {
+    auto const clsStr = clsName ? clsName->data() : "[no cls]";
     auto const ctxStr = ctxName ? ctxName->data() : "[no context]";
     auto const methStr = methName ? methName->data() : "[no meth]";
     return folly::sformat(
-      "Logging {} for speculation {}::{} in {} for op {} with class id {}",
+      "Logging {} for speculation {}::{} in {} for op {} with id {}",
       success ? "true" : "false",
-      clsName,
+      clsStr,
       methStr,
       ctxStr,
       opcodeToName(opcode),
-      expectedClsId.id());
+      expectedId);
   }
 
   size_t stableHash() const {
@@ -2821,17 +2822,17 @@ struct LoggingSpeculateClassData : IRExtraData {
       ctxName->hash(),
       methName->hash(),
       std::hash<Op>()(opcode),
-      std::hash<ClassId::Id>()(expectedClsId.id()),
+      std::hash<uint32_t>()(expectedId),
       std::hash<bool>()(success)
     );
   }
 
-  bool equals(const LoggingSpeculateClassData& o) const {
+  bool equals(const LoggingSpeculateData& o) const {
     return clsName == o.clsName &&
       ctxName == o.ctxName && 
       methName == o.methName && 
       opcode == o.opcode && 
-      expectedClsId == o.expectedClsId &&
+      expectedId == o.expectedId &&
       success == o.success;
   }
 
@@ -2839,7 +2840,7 @@ struct LoggingSpeculateClassData : IRExtraData {
   const StringData* ctxName;
   const StringData* methName;
   Op opcode;
-  ClassId expectedClsId;
+  uint32_t expectedId;
   bool success;
 };
 
@@ -3063,7 +3064,7 @@ X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(IncCallCounter,               FuncData);
 X(LogArrayReach,                SinkProfileData);
-X(LogClsSpeculation,            LoggingSpeculateClassData);
+X(LogClsSpeculation,            LoggingSpeculateData);
 X(NewLoggingArray,              LoggingProfileData);
 X(BespokeGet,                   BespokeGetData);
 X(Call,                         CallData);

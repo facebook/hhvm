@@ -1575,8 +1575,8 @@ void emitNewObjD(IRGS& env, const StringData* className) {
     push(env, gen(env, AllocObj, cachedCls));
   };
   
-  auto const data = [&](const ClassId id, bool success) {
-    return LoggingSpeculateClassData {
+  auto const data = [&](uint32_t id, bool success) {
+    return LoggingSpeculateData {
       className,
       curClass(env) ? curClass(env)->name() : nullptr,
       nullptr,
@@ -1591,8 +1591,7 @@ void emitNewObjD(IRGS& env, const StringData* className) {
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
         if (RO::EvalLogClsSpeculation) {
-          ClassId clsId{ClassId::Invalid};
-          gen(env, LogClsSpeculation, data(clsId, false));
+          gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
         gen(env, Jmp, makeExit(env));
@@ -1612,14 +1611,14 @@ void emitNewObjD(IRGS& env, const StringData* className) {
         },
         [&] {
           if (RO::EvalLogClsSpeculation) {
-            gen(env, LogClsSpeculation, data(lookup.cls->classId(), true));
+            gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
           }
           push(env, allocObjFast(env, cls));
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
           if (RO::EvalLogClsSpeculation) {
-            gen(env, LogClsSpeculation, data(lookup.cls->classId(), false));
+            gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
           }
           slow();
         }
@@ -1804,8 +1803,8 @@ void emitFCallClsMethodD(IRGS& env,
     prepareAndCallProfiled(env, func, fca, ctx, false, false);
   };
 
-  auto const data = [&](const Class* ctx, const ClassId id, bool success) {
-    return LoggingSpeculateClassData {
+  auto const data = [&](const Class* ctx, uint32_t id, bool success) {
+    return LoggingSpeculateData {
       className,
       ctx ? ctx->name() : nullptr,
       methodName,
@@ -1829,8 +1828,7 @@ void emitFCallClsMethodD(IRGS& env,
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
         if (RO::EvalLogClsSpeculation) {
-          ClassId clsId{ClassId::Invalid};
-          gen(env, LogClsSpeculation, data(nullptr, clsId, false));
+          gen(env, LogClsSpeculation, data(nullptr, ClassId::Invalid, false));
         }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
         gen(env, Jmp, makeExit(env));
@@ -1862,7 +1860,7 @@ void emitFCallClsMethodD(IRGS& env,
           emitModuleBoundaryCheckKnown(env, cls);
           if (RO::EvalLogClsSpeculation) {
             gen(env, LogClsSpeculation, data(callCtx.cls(),
-                                             lookup.cls->classId(),
+                                             lookup.cls->classId().id(),
                                              true));
           }
           prepareAndCallKnown(env, func, fca, ctx, false, false);
@@ -1872,7 +1870,7 @@ void emitFCallClsMethodD(IRGS& env,
           updateStackOffset(env);
           if (RO::EvalLogClsSpeculation) {
             gen(env, LogClsSpeculation, data(callCtx.cls(),
-                                             lookup.cls->classId(),
+                                             lookup.cls->classId().id(),
                                              false));
           }
           slow();

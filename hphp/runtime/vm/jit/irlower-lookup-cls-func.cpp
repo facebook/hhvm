@@ -371,7 +371,7 @@ static void logClsSpeculation(
 
 void cgLogClsSpeculation(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const extra = inst->extra<LoggingSpeculateClassData>();
+  auto const extra = inst->extra<LoggingSpeculateData>();
   auto const target = CallSpec::direct(logClsSpeculation);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
                argGroup(env, inst)
@@ -379,7 +379,7 @@ void cgLogClsSpeculation(IRLS& env, const IRInstruction* inst) {
                .immPtr(extra->ctxName)
                .immPtr(extra->methName)
                .immPtr(opcodeToName(extra->opcode))
-               .imm(extra->expectedClsId.id())
+               .imm(extra->expectedId)
                .imm(extra->success)
   );
 }

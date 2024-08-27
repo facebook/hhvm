@@ -182,11 +182,10 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
         dispatchCommand.meta.base.event_count =
             eventCount != samplingRate ? 0 : eventCount;
         dispatchCommand.args = renderedString;
-        dispatchCommand.client_pid = peerPid_;
-        auto processName = peerInfo_.get().name;
-        std::replace(processName.begin(), processName.end(), '\0', ' ');
-        auto cleanName = folly::rtrimWhitespace(processName);
-        dispatchCommand.client_name = cleanName;
+        dispatchCommand.meta.client_pid = peerPid_;
+        dispatchCommand.meta.client_name =
+            facebook::eden::ProcessInfoCache::cleanProcessCommandline(
+                peerInfo_.get().name);
 
         getLogger()->logEvent(dispatchCommand);
       }

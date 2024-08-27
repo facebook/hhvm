@@ -68,6 +68,8 @@ struct MetadataEventData {
   int64_t recrawl = 0;
   bool case_sensitive = false;
   std::string watcher;
+  pid_t client_pid = 0;
+  std::string client_name;
 
   void populate(DynamicEvent& event) const {
     base.populate(event);
@@ -75,6 +77,13 @@ struct MetadataEventData {
     event.addBool("case_sensitive", case_sensitive);
     if (!watcher.empty()) {
       event.addString("watcher", watcher);
+    }
+
+    if (client_pid != 0) {
+      event.addInt("client_pid", client_pid);
+    }
+    if (!client_name.empty()) {
+      event.addString("client", client_name);
     }
   }
 };
@@ -85,20 +94,12 @@ struct DispatchCommand {
   MetadataEventData meta;
   std::string command;
   std::string args;
-  pid_t client_pid = 0;
-  std::string client_name;
 
   void populate(DynamicEvent& event) const {
     meta.populate(event);
     event.addString("command", command);
     if (!args.empty()) {
       event.addString("args", args);
-    }
-    if (client_pid != 0) {
-      event.addInt("client_pid", client_pid);
-    }
-    if (!client_name.empty()) {
-      event.addString("client", client_name);
     }
   }
 };

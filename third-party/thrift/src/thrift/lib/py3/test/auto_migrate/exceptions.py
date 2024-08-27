@@ -18,6 +18,11 @@
 import unittest
 
 from testing.types import Color, HardError, SimpleError, UnfriendlyError, UnusedError
+
+from thrift.lib.py3.test.exception_helper import (
+    simulate_HardError,
+    simulate_UnusedError,
+)
 from thrift.py3.exceptions import (
     ApplicationError,
     ApplicationErrorType,
@@ -29,8 +34,6 @@ from thrift.py3.exceptions import (
     TransportOptions,
 )
 from thrift.py3.serializer import deserialize, serialize_iobuf
-
-from .exception_helper import simulate_HardError, simulate_UnusedError
 
 
 class ExceptionTests(unittest.TestCase):

@@ -229,7 +229,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertIsInstance(simple.empty, BadEnum)
         self.assertEqual(int(simple.empty), 0)
 
-    @brokenInAutoMigrate()
     def test_simple(self) -> None:
         self.assert_simple(self.make_simple_python()._to_py3())
 

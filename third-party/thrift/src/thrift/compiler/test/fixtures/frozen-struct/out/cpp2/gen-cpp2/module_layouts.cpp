@@ -16,12 +16,13 @@ FROZEN_CTOR(::some::ns::ModuleA,
   FROZEN_CTOR_FIELD(inclAField, 5)
   FROZEN_CTOR_FIELD(inclBField, 6))
 FROZEN_MAXIMIZE(::some::ns::ModuleA,
-  FROZEN_MAXIMIZE_FIELD(i32Field)
-  FROZEN_MAXIMIZE_FIELD(strField)
-  FROZEN_MAXIMIZE_FIELD(listField)
-  FROZEN_MAXIMIZE_FIELD(mapField)
-  FROZEN_MAXIMIZE_FIELD(inclAField)
-  FROZEN_MAXIMIZE_FIELD(inclBField))
+  FROZEN_MAXIMIZE_FIELD(i32Field);
+  FROZEN_MAXIMIZE_FIELD(strField);
+  FROZEN_MAXIMIZE_FIELD(listField);
+  FROZEN_MAXIMIZE_FIELD(mapField);
+  FROZEN_MAXIMIZE_FIELD(inclAField);
+  FROZEN_MAXIMIZE_FIELD(inclBField);
+)
 FROZEN_LAYOUT(::some::ns::ModuleA,
   FROZEN_LAYOUT_FIELD(i32Field)
   FROZEN_LAYOUT_FIELD(strField)
@@ -62,8 +63,9 @@ FROZEN_CTOR(::some::ns::ModuleB,
   FROZEN_CTOR_FIELD(i32Field, 1)
   FROZEN_CTOR_FIELD(inclEnumB, 2))
 FROZEN_MAXIMIZE(::some::ns::ModuleB,
-  FROZEN_MAXIMIZE_FIELD(i32Field)
-  FROZEN_MAXIMIZE_FIELD(inclEnumB))
+  FROZEN_MAXIMIZE_FIELD(i32Field);
+  FROZEN_MAXIMIZE_FIELD(inclEnumB);
+)
 FROZEN_LAYOUT(::some::ns::ModuleB,
   FROZEN_LAYOUT_FIELD(i32Field)
   FROZEN_LAYOUT_FIELD(inclEnumB))
@@ -87,11 +89,12 @@ FROZEN_CTOR(::some::ns::CppRef,
   FROZEN_CTOR_FIELD_REF(opt_shared_const_field, 4)
   FROZEN_CTOR_FIELD_REF(boxed_field, 5))
 FROZEN_MAXIMIZE(::some::ns::CppRef,
-  FROZEN_MAXIMIZE_FIELD(shared_field)
-  FROZEN_MAXIMIZE_FIELD(shared_const_field)
-  FROZEN_MAXIMIZE_FIELD(opt_shared_field)
-  FROZEN_MAXIMIZE_FIELD(opt_shared_const_field)
-  FROZEN_MAXIMIZE_FIELD(boxed_field))
+  FROZEN_MAXIMIZE_FIELD(shared_field);
+  FROZEN_MAXIMIZE_FIELD(shared_const_field);
+  FROZEN_MAXIMIZE_FIELD(opt_shared_field);
+  FROZEN_MAXIMIZE_FIELD(opt_shared_const_field);
+  FROZEN_MAXIMIZE_FIELD(boxed_field);
+)
 FROZEN_LAYOUT(::some::ns::CppRef,
   FROZEN_LAYOUT_FIELD_REF(shared_field)
   FROZEN_LAYOUT_FIELD_REF(shared_const_field)

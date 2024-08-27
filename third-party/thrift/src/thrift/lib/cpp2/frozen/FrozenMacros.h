@@ -87,7 +87,7 @@
 #define FROZEN_CTOR(TYPE, ...) \
   Layout<TYPE>::Layout() : LayoutBase(typeid(TYPE)) __VA_ARGS__ {}
 
-#define FROZEN_MAXIMIZE_FIELD(NAME) pos = maximizeField(pos, this->NAME##Field);
+#define FROZEN_MAXIMIZE_FIELD(NAME) pos = maximizeField(pos, this->NAME##Field)
 
 #define FROZEN_MAXIMIZE(TYPE, ...)            \
   FieldPosition Layout<TYPE>::maximize() {    \

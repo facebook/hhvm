@@ -29,8 +29,8 @@ FROZEN_CTOR({{struct:cpp_fullname}},{{!
 }}{{/struct:fields}})
 FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_MAXIMIZE_FIELD({{field:cpp_name}}){{!
-}}{{/struct:fields}})
+  FROZEN_MAXIMIZE_FIELD({{field:cpp_name}});{{/struct:fields}}
+)
 FROZEN_LAYOUT({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
   FROZEN_LAYOUT_FIELD{{ > common/field_suffix}}({{field:cpp_name}}){{!
@@ -63,10 +63,10 @@ FROZEN_CTOR({{struct:cpp_fullname}},{{!
 
 FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 }}
-  FROZEN_MAXIMIZE_FIELD(type_){{!
+  FROZEN_MAXIMIZE_FIELD(type_);{{!
 }}{{#struct:fields}}
-  FROZEN_MAXIMIZE_FIELD({{field:cpp_name}}){{!
-}}{{/struct:fields}})
+  FROZEN_MAXIMIZE_FIELD({{field:cpp_name}});{{/struct:fields}}
+)
 
 
 {{ > module_layouts_cpp/frozen_layout_union}}

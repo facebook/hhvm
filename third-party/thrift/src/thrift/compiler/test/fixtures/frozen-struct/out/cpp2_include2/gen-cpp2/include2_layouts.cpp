@@ -12,8 +12,9 @@ FROZEN_CTOR(::some::ns::IncludedB,
   FROZEN_CTOR_FIELD(i32Field, 1)
   FROZEN_CTOR_FIELD(strField, 2))
 FROZEN_MAXIMIZE(::some::ns::IncludedB,
-  FROZEN_MAXIMIZE_FIELD(i32Field)
-  FROZEN_MAXIMIZE_FIELD(strField))
+  FROZEN_MAXIMIZE_FIELD(i32Field);
+  FROZEN_MAXIMIZE_FIELD(strField);
+)
 FROZEN_LAYOUT(::some::ns::IncludedB,
   FROZEN_LAYOUT_FIELD(i32Field)
   FROZEN_LAYOUT_FIELD(strField))

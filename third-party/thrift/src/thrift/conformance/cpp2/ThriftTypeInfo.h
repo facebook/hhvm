@@ -37,7 +37,6 @@ inline constexpr type::hash_size_t kTypeHashBytesNotSpecified = -1;
 // Which is ~4.3 billion types for the min, and ~18.45 quintillion
 // types for the default.
 inline constexpr type::hash_size_t kMinTypeHashBytes = 8;
-inline constexpr type::hash_size_t kDefaultTypeHashBytes = 16;
 
 // Creates an ThriftTypeInfo struct with the given names and configuration.
 //

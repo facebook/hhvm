@@ -26,8 +26,11 @@
 namespace apache {
 namespace thrift {
 namespace type {
+
 using hash_size_t = int8_t;
+
 inline constexpr hash_size_t kDisableUniversalHash = 0;
+inline constexpr hash_size_t kDefaultTypeHashBytes = 16;
 
 // Validates that uri is a valid universal name uri of the form:
 // {domain}/{path}. For example: facebook.com/thrift/Value.

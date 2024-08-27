@@ -88,7 +88,7 @@ TEST(AnyRegistryTest, LongType) {
 
   // Unset uses default.
   THRIFT_SCOPED_CHECK(
-      checkLongType(kTypeHashBytesNotSpecified, kDefaultTypeHashBytes));
+      checkLongType(kTypeHashBytesNotSpecified, type::kDefaultTypeHashBytes));
 
   // Type can increase bytes used.
   THRIFT_SCOPED_CHECK(checkLongType(24, 24));

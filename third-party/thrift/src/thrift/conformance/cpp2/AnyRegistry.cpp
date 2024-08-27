@@ -46,7 +46,7 @@ namespace {
 
 folly::fbstring maybeGetTypeHash(
     const ThriftTypeInfo& type,
-    hash_size_t defaultTypeHashBytes = kDefaultTypeHashBytes) {
+    hash_size_t defaultTypeHashBytes = type::kDefaultTypeHashBytes) {
   if (type.typeHashBytes().has_value()) {
     // Use the custom size.
     defaultTypeHashBytes = type.typeHashBytes().value_unchecked();

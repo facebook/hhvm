@@ -144,6 +144,11 @@ struct section_block {
 struct partial_apply {
   source_range loc;
   lookup_path path;
+  /**
+   * Standalone partial applications exhibit different indentation behavior:
+   *   https://github.com/mustache/spec/blob/66f078e0d534515d8df23d0d3764dccda74e042b/specs/partials.yml#L13-L15
+   */
+  bool is_standalone;
 };
 
 } // namespace whisker::ast

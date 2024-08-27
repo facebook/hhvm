@@ -80,7 +80,8 @@ struct ast_visitor {
   void visit(const ast::partial_apply& partial_apply, tree_printer::scope scope)
       const {
     scope.println(
-        " partial-apply {} '{}'",
+        " partial-apply{} {} '{}'",
+        partial_apply.is_standalone ? " <standalone>" : "",
         location(partial_apply.loc),
         partial_apply.path.as_string('/'));
   }

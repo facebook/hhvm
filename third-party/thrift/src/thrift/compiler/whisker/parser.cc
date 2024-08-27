@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <iterator>
 #include <optional>
+#include <set>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -230,11 +231,27 @@ bool try_consume_token(parser_scan_window* scan, tok kind) {
  */
 class standalone_lines_scanner {
  public:
-  static void strip_lines(std::vector<token>& tokens) {
+  struct result {
+    /**
+     * If a partial application is standalone, the renderer needs to make sure
+     * to indent each line when inlining it. Since we've already detected such
+     * partials, let's provide this information to the parser to attach to the
+     * AST.
+     *
+     * The cursors here point to the "{{" token of the corresponding partial
+     * application.
+     *
+     * Using std::set here because cursor is an iterator and thus has operator<
+     * but not necessarily std::hash<>.
+     */
+    std::set<parser_scan_window::cursor> standalone_partial_locations;
+  };
+
+  static result strip_lines(std::vector<token>& tokens) {
     assert(!tokens.empty());
     if (tokens.back().kind == tok::error) {
       // No point stripping lines
-      return;
+      return {};
     }
 
     parser_scan_window scan(
@@ -247,36 +264,61 @@ class standalone_lines_scanner {
     // Chunk scanning into lines. We scan each line and mark tokens for removal
     // in a bitmap, then make a pass to erase them. This is because we don't
     // want to modify the vector while iterating over it.
-    std::vector<bool> tokens_to_remove(tokens.size());
-    const auto mark_for_removal = [&](cursor pos) {
-      assert(pos->kind == tok::text || pos->kind == tok::newline);
+    enum class token_marking : char {
+      none,
+      remove,
+      standalone_partial,
+    };
+    std::vector<token_marking> marked_tokens(
+        tokens.size(), token_marking::none);
+
+    const auto mark_token = [&](cursor pos, token_marking mark) {
+      assert(mark != token_marking::none);
+      assert(
+          pos->kind == tok::text || pos->kind == tok::newline ||
+          pos->kind == tok::open);
       std::size_t index = std::distance(tokens.cbegin(), pos);
-      assert(!tokens_to_remove[index]);
-      tokens_to_remove[index] = true;
+      assert(marked_tokens[index] == token_marking::none);
+      marked_tokens[index] = mark;
     };
 
-    const auto remove_marked_tokens = [&] {
+    // The return value is the set of standalone partial locations.
+    const auto remove_marked_tokens = [&]() -> std::set<cursor> {
+      // Because we are removing tokens and invalidating iterators, we need to
+      // grab the actual cursors after vector::erase.
+      std::vector<std::size_t> standalone_partial_indices;
       // Poor man's std::remove_if (which does not provide the iterator to the
       // predicate, which we need to access the bitmap).
       std::size_t compact = 0;
       for (std::size_t run = 0; run < tokens.size(); ++run) {
-        if (!tokens_to_remove[run]) {
+        if (marked_tokens[run] == token_marking::standalone_partial) {
+          standalone_partial_indices.push_back(compact);
+        }
+        if (marked_tokens[run] != token_marking::remove) {
           std::swap(tokens[compact], tokens[run]);
           ++compact;
         }
       }
+
       tokens.erase(tokens.begin() + compact, tokens.end());
+      std::set<cursor> standalone_partial_locations;
+      for (std::size_t index : standalone_partial_indices) {
+        standalone_partial_locations.insert(cursor(tokens.cbegin() + index));
+      }
+      return standalone_partial_locations;
     };
 
     struct line_info {
       cursor start;
+      std::vector<cursor> standalone_partials = {};
       // true iff the line contains a standalone construct described above
       bool is_standalone_eligible = false;
     };
     line_info current_line{scan.head};
 
     const auto begin_next_line = [&]() {
-      current_line = {scan.head};
+      current_line.standalone_partials.clear();
+      current_line = {scan.head, std::move(current_line.standalone_partials)};
       scan = scan.make_fresh();
     };
 
@@ -292,9 +334,12 @@ class standalone_lines_scanner {
 
     const auto strip_current_line = [&]() {
       if (current_line.is_standalone_eligible) {
+        for (cursor c : current_line.standalone_partials) {
+          mark_token(c, token_marking::standalone_partial);
+        }
         for (cursor c = current_line.start; c < scan.head; ++c) {
           if (c->kind == tok::text || c->kind == tok::newline) {
-            mark_for_removal(c);
+            mark_token(c, token_marking::remove);
           }
         }
       }
@@ -313,11 +358,13 @@ class standalone_lines_scanner {
           continue;
         }
       } else if (parse_result standalone = parse_standalone_compatible(scan)) {
+        auto scan_start = scan.start;
         switch (std::move(standalone).consume_and_advance(&scan)) {
           case standalone_compatible_kind::ineligible:
             drain_current_line();
             continue;
           case standalone_compatible_kind::partial_apply:
+            current_line.standalone_partials.push_back(scan_start);
             // Do not strip the left side
             current_line.start = scan.head;
             if (current_line.is_standalone_eligible) {
@@ -342,7 +389,7 @@ class standalone_lines_scanner {
     // Otherwise, the current line is ineligible so nothing happens.
     strip_current_line();
 
-    remove_marked_tokens();
+    return result{remove_marked_tokens()};
   }
 
   // A line containing any of the following constructs...
@@ -450,6 +497,7 @@ class parser {
  private:
   std::vector<token> tokens_;
   diagnostics_engine& diags_;
+  std::set<parser_scan_window::cursor> standalone_partials_;
 
   // Reports an error without failing the parse.
   template <typename... T>
@@ -820,9 +868,14 @@ class parser {
               lookup.as_string('/')));
     }
 
+    bool is_standalone =
+        standalone_partials_.find(scan_start) != standalone_partials_.end();
+
     return {
         ast::partial_apply{
-            scan.with_start(scan_start).range(), std::move(lookup)},
+            scan.with_start(scan_start).range(),
+            std::move(lookup),
+            is_standalone},
         scan};
   }
 
@@ -855,8 +908,14 @@ class parser {
   }
 
  public:
-  parser(std::vector<token> tokens, diagnostics_engine& diags)
-      : tokens_(std::move(tokens)), diags_(diags) {}
+  parser(
+      std::vector<token> tokens,
+      diagnostics_engine& diags,
+      standalone_lines_scanner::result scan_result)
+      : tokens_(std::move(tokens)),
+        diags_(diags),
+        standalone_partials_(
+            std::move(scan_result.standalone_partial_locations)) {}
 
   std::optional<ast::root> parse() {
     return parse_root(parser_scan_window(
@@ -870,8 +929,10 @@ class parser {
 
 std::optional<ast::root> parse(source src, diagnostics_engine& diags) {
   auto tokens = lexer(std::move(src), diags).tokenize_all();
-  standalone_lines_scanner::strip_lines(tokens);
-  return parser(std::move(tokens), diags).parse();
+  auto standalone_scanner_result =
+      standalone_lines_scanner::strip_lines(tokens);
+  return parser(std::move(tokens), diags, std::move(standalone_scanner_result))
+      .parse();
 }
 
 } // namespace whisker

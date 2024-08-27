@@ -162,7 +162,7 @@ let init_via_find
       Lwt.return (Failure (error_from_load_error load_error))
     | Ok (project_metadata, _telemetry) -> begin
       let load_off_disk_result =
-        State_loader_lwt.load_arbitrary_naming_table_from_disk
+        State_loader_lwt.FromDisk.load
           ~project_metadata
           ~threshold:
             local_config.ServerLocalConfig.ide_naming_table_update_threshold

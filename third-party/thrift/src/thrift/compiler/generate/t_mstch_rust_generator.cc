@@ -37,7 +37,7 @@
 #include <thrift/compiler/lib/rust/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 namespace apache {
 namespace thrift {
@@ -2465,7 +2465,7 @@ void t_mstch_rust_generator::set_mstch_factories() {
 namespace {
 
 void validate_struct_annotations(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const t_structured& s,
     const rust_codegen_options& options) {
   if (!validate_rust_serde(s)) {
@@ -2502,7 +2502,7 @@ void validate_struct_annotations(
   }
 }
 
-bool validate_enum_annotations(diagnostic_context& ctx, const t_enum& e) {
+bool validate_enum_annotations(sema_context& ctx, const t_enum& e) {
   if (!validate_rust_serde(e)) {
     ctx.report(
         e,
@@ -2513,8 +2513,7 @@ bool validate_enum_annotations(diagnostic_context& ctx, const t_enum& e) {
   return true;
 }
 
-bool validate_program_annotations(
-    diagnostic_context& ctx, const t_program& program) {
+bool validate_program_annotations(sema_context& ctx, const t_program& program) {
   for (auto t : program.typedefs()) {
     if (node_has_adapter(*t)) {
       if (node_has_custom_rust_type(*t)) {

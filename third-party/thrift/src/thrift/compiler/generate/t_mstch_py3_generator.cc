@@ -1124,7 +1124,7 @@ std::string py3_mstch_program::visit_type_with_typedef(
 // Generator-specific validator that enforces that a reserved key is not used
 // as a namespace component.
 void validate_no_reserved_key_in_namespace(
-    diagnostic_context& ctx, const t_program& prog) {
+    sema_context& ctx, const t_program& prog) {
   auto namespace_tokens = get_py3_namespace(&prog);
   if (namespace_tokens.empty()) {
     return;
@@ -1159,8 +1159,7 @@ void validate_no_reserved_key_in_namespace(
 // Generator-specific validator that enforces "name" and "value" are not used
 // as enum member or union field names (thrift-py3).
 namespace enum_member_union_field_names_validator {
-void validate(
-    const t_named& node, const std::string& name, diagnostic_context& ctx) {
+void validate(const t_named& node, const std::string& name, sema_context& ctx) {
   auto pyname = node.get_annotation("py3.name", &name);
   if (const t_const* annot =
           node.find_structured_annotation_or_null(kPythonNameUri)) {
@@ -1180,14 +1179,14 @@ void validate(
         pyname);
   }
 }
-bool validate_enum(diagnostic_context& ctx, const t_enum& enm) {
+bool validate_enum(sema_context& ctx, const t_enum& enm) {
   for (const t_enum_value& ev : enm.values()) {
     validate(ev, ev.get_name(), ctx);
   }
   return true;
 }
 
-bool validate_union(diagnostic_context& ctx, const t_union& s) {
+bool validate_union(sema_context& ctx, const t_union& s) {
   for (const t_field& f : s.fields()) {
     validate(f, f.name(), ctx);
   }

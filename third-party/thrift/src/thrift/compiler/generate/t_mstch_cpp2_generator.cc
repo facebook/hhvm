@@ -37,7 +37,7 @@
 #include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 namespace apache {
 namespace thrift {
@@ -2677,7 +2677,7 @@ t_mstch_cpp2_generator::get_client_name_to_split_count() const {
 
 // Make sure there is no incompatible annotation.
 void validate_struct_annotations(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const t_structured& s,
     const std::map<std::string, std::string>& options) {
   if (cpp2::packed_isset(s)) {
@@ -2714,7 +2714,7 @@ class validate_splits {
       : split_count_(split_count),
         client_name_to_split_count_(client_name_to_split_count) {}
 
-  void operator()(diagnostic_context& ctx, const t_program& program) {
+  void operator()(sema_context& ctx, const t_program& program) {
     validate_type_cpp_splits(
         program.structured_definitions().size() + program.enums().size(),
         ctx,
@@ -2727,9 +2727,7 @@ class validate_splits {
   std::unordered_map<std::string, int> client_name_to_split_count_;
 
   void validate_type_cpp_splits(
-      const int32_t object_count,
-      diagnostic_context& ctx,
-      const t_program& program) {
+      const int32_t object_count, sema_context& ctx, const t_program& program) {
     if (split_count_ > object_count) {
       ctx.report(
           program,
@@ -2743,7 +2741,7 @@ class validate_splits {
   }
 
   void validate_client_cpp_splits(
-      const std::vector<t_service*>& services, diagnostic_context& ctx) {
+      const std::vector<t_service*>& services, sema_context& ctx) {
     if (client_name_to_split_count_.empty()) {
       return;
     }
@@ -2765,7 +2763,7 @@ class validate_splits {
   }
 };
 
-void validate_lazy_fields(diagnostic_context& ctx, const t_field& field) {
+void validate_lazy_fields(sema_context& ctx, const t_field& field) {
   if (cpp2::is_lazy(&field)) {
     auto t = field.get_type()->get_true_type();
     const char* field_type = nullptr;

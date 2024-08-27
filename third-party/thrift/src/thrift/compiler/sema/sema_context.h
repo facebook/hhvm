@@ -90,13 +90,13 @@ class node_metadata_cache {
   }
 };
 
-// A context aware reporter for diagnostic results.
-class diagnostic_context : public diagnostics_engine,
-                           public const_visitor_context {
+// An AST visitor context for semantic analysis. It combines diagnostics
+// reporting and node metadata cache.
+class sema_context : public diagnostics_engine, public const_visitor_context {
  public:
   using diagnostics_engine::diagnostics_engine;
 
-  explicit diagnostic_context(diagnostics_engine& diags)
+  explicit sema_context(diagnostics_engine& diags)
       : diagnostics_engine(
             diags.source_mgr(),
             [&diags](diagnostic diag) { diags.report(std::move(diag)); },

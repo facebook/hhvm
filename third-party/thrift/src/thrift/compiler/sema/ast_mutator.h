@@ -20,7 +20,7 @@
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 namespace apache {
 namespace thrift {
@@ -34,13 +34,13 @@ struct mutator_context : visitor_context {
 // An AST mutator is a ast_visitor that collects diagnostics and can
 // change the AST.
 class ast_mutator
-    : public basic_ast_visitor<false, diagnostic_context&, mutator_context&> {
-  using base = basic_ast_visitor<false, diagnostic_context&, mutator_context&>;
+    : public basic_ast_visitor<false, sema_context&, mutator_context&> {
+  using base = basic_ast_visitor<false, sema_context&, mutator_context&>;
 
  public:
   using base::base;
 
-  void mutate(diagnostic_context& ctx, t_program_bundle& bundle) {
+  void mutate(sema_context& ctx, t_program_bundle& bundle) {
     mutator_context mctx;
     mctx.bundle = &bundle;
     for (auto itr = bundle.programs().rbegin(); itr != bundle.programs().rend();
@@ -59,7 +59,7 @@ struct type_ref_resolver {
     resolve_in_place(ref);
     return ref;
   }
-  bool operator()(diagnostic_context& ctx, t_program_bundle& bundle) {
+  bool operator()(sema_context& ctx, t_program_bundle& bundle) {
     ast_mutator mutator;
 
     auto resolve_const_value = [&](t_const_value& node, auto& recurse) -> void {
@@ -78,7 +78,7 @@ struct type_ref_resolver {
     };
 
     mutator.add_field_visitor(
-        [&](diagnostic_context&, mutator_context&, t_field& node) {
+        [&](sema_context&, mutator_context&, t_field& node) {
           node.set_type(resolve(node.type()));
 
           if (auto* dflt = node.get_default_value()) {
@@ -87,12 +87,12 @@ struct type_ref_resolver {
         });
 
     mutator.add_typedef_visitor(
-        [&](diagnostic_context&, mutator_context&, t_typedef& node) {
+        [&](sema_context&, mutator_context&, t_typedef& node) {
           node.set_type(resolve(node.type()));
         });
 
     mutator.add_function_visitor(
-        [&](diagnostic_context& ctx, mutator_context& mctx, t_function& node) {
+        [&](sema_context& ctx, mutator_context& mctx, t_function& node) {
           resolve_in_place(node.return_type());
           resolve_in_place(node.interaction());
           for (auto& field : node.params().fields()) {
@@ -100,37 +100,35 @@ struct type_ref_resolver {
           }
         });
     mutator.add_throws_visitor(
-        [&](diagnostic_context& ctx, mutator_context& mctx, t_throws& node) {
+        [&](sema_context& ctx, mutator_context& mctx, t_throws& node) {
           for (auto& field : node.fields()) {
             mutator(ctx, mctx, field);
           }
         });
     mutator.add_stream_visitor(
-        [&](diagnostic_context&, mutator_context&, t_stream& node) {
+        [&](sema_context&, mutator_context&, t_stream& node) {
           resolve_in_place(node.elem_type());
         });
     mutator.add_sink_visitor(
-        [&](diagnostic_context&, mutator_context&, t_sink& node) {
+        [&](sema_context&, mutator_context&, t_sink& node) {
           resolve_in_place(node.elem_type());
           resolve_in_place(node.final_response_type());
         });
 
-    mutator.add_map_visitor(
-        [&](diagnostic_context&, mutator_context&, t_map& node) {
-          resolve_in_place(node.key_type());
-          resolve_in_place(node.val_type());
-        });
-    mutator.add_set_visitor(
-        [&](diagnostic_context&, mutator_context&, t_set& node) {
-          resolve_in_place(node.elem_type());
-        });
+    mutator.add_map_visitor([&](sema_context&, mutator_context&, t_map& node) {
+      resolve_in_place(node.key_type());
+      resolve_in_place(node.val_type());
+    });
+    mutator.add_set_visitor([&](sema_context&, mutator_context&, t_set& node) {
+      resolve_in_place(node.elem_type());
+    });
     mutator.add_list_visitor(
-        [&](diagnostic_context&, mutator_context&, t_list& node) {
+        [&](sema_context&, mutator_context&, t_list& node) {
           resolve_in_place(node.elem_type());
         });
 
     mutator.add_const_visitor(
-        [&](diagnostic_context&, mutator_context&, t_const& node) {
+        [&](sema_context&, mutator_context&, t_const& node) {
           resolve_in_place(node.type_ref());
           resolve_const_value(*node.value(), resolve_const_value);
         });
@@ -163,8 +161,7 @@ struct ast_mutators {
     return stages_.back();
   }
 
-  mutation_result operator()(
-      diagnostic_context& ctx, t_program_bundle& bundle) {
+  mutation_result operator()(sema_context& ctx, t_program_bundle& bundle) {
     for (auto& stage : stages_) {
       stage.mutate(ctx, bundle);
     }
@@ -179,7 +176,7 @@ struct ast_mutators {
   // successful.
   //
   // Any errors are reported via diags.
-  bool resolve_all_types(diagnostic_context& diags, t_program_bundle& bundle) {
+  bool resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
     bool success = true;
     if (!use_legacy_type_ref_resolution_) {
       success = type_ref_resolver{}(diags, bundle);

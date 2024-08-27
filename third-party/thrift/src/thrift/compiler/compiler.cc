@@ -44,7 +44,7 @@
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/sema/ast_validator.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/sema/standard_mutator.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
@@ -508,7 +508,7 @@ std::unique_ptr<t_generator> create_generator(
  */
 bool validate_program(t_generator& generator, diagnostics_engine& diags) {
   bool success = true;
-  diagnostic_context validator_ctx(
+  sema_context validator_ctx(
       diags.source_mgr(),
       [&](diagnostic d) {
         if (d.level() == diagnostic_level::error) {
@@ -626,7 +626,7 @@ bool generate_code_recursively(
 compile_retcode generate_code_for_program_bundle(
     t_program_bundle& program_bundle,
     const gen_params& gparams,
-    diagnostic_context& ctx) {
+    sema_context& ctx) {
   compile_retcode retcode = compile_retcode::failure;
 
   ctx.begin_visit(*program_bundle.root_program());
@@ -699,7 +699,7 @@ std::string get_include_path(
  */
 std::unique_ptr<t_program_bundle> parse_and_mutate(
     source_manager& source_mgr,
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const std::string& input_filename,
     const parsing_params& pparams,
     const gen_params& gparams) {
@@ -721,7 +721,7 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   if (found_or_error.index() == 0) {
     // Found
     if (!program_bundle->find_program(kSchemaPath)) {
-      diagnostic_context stdlib_ctx(
+      sema_context stdlib_ctx(
           source_mgr,
           [&](diagnostic&& d) {
             ctx.report(
@@ -781,7 +781,7 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     // Mutations should be only performed on a valid AST.
     return !return_nullptr_on_failure ? std::move(programs) : nullptr;
   }
-  auto ctx = diagnostic_context(diags);
+  auto ctx = sema_context(diags);
   auto result =
       standard_mutators(use_legacy_type_ref_resolution)(ctx, *programs);
   if (result.unresolvable_typeref && return_nullptr_on_failure) {
@@ -798,7 +798,7 @@ parse_and_mutate_program(
     parsing_params params,
     diagnostic_params dparams) {
   diagnostic_results results;
-  diagnostic_context ctx(sm, results, std::move(dparams));
+  sema_context ctx(sm, results, std::move(dparams));
   return {
       parse_and_mutate_program(sm, ctx, filename, std::move(params)), results};
 }
@@ -809,7 +809,7 @@ std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
     parsing_params pparams,
     diagnostic_params dparams) {
   diagnostic_results results;
-  diagnostic_context ctx(sm, results, std::move(dparams));
+  sema_context ctx(sm, results, std::move(dparams));
   auto program =
       parse_and_mutate_program(sm, ctx, filename, std::move(pparams));
   for (const auto& diag : results.diagnostics()) {
@@ -831,7 +831,7 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
     return {};
   }
 
-  diagnostic_context ctx(
+  sema_context ctx(
       sm,
       [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
       diagnostic_params::only_errors());
@@ -850,7 +850,7 @@ compile_result compile(
   if (input_filename.empty()) {
     return result;
   }
-  diagnostic_context ctx(source_mgr, result.detail, std::move(dparams));
+  sema_context ctx(source_mgr, result.detail, std::move(dparams));
 
   std::unique_ptr<t_program_bundle> program_bundle =
       parse_and_mutate(source_mgr, ctx, input_filename, pparams, gparams);

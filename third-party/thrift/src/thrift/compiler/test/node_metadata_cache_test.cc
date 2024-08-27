@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 #include <memory>
 #include <folly/portability/GTest.h>

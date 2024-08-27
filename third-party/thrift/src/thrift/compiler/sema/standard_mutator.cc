@@ -31,7 +31,7 @@ namespace compiler {
 namespace {
 
 void match_type_with_const_value(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const t_program& program,
     const t_type* long_type,
     t_const_value* value) {
@@ -182,7 +182,7 @@ void match_type_with_const_value(
 }
 
 void maybe_match_type_with_const_value(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     mutator_context& mCtx,
     const t_type* type,
     t_const_value* value) {
@@ -194,19 +194,19 @@ void maybe_match_type_with_const_value(
 }
 
 void match_const_type_with_value(
-    diagnostic_context& ctx, mutator_context& mCtx, t_const& const_node) {
+    sema_context& ctx, mutator_context& mCtx, t_const& const_node) {
   maybe_match_type_with_const_value(
       ctx, mCtx, const_node.type(), const_node.value());
 }
 
 void match_field_type_with_default_value(
-    diagnostic_context& ctx, mutator_context& mCtx, t_field& field_node) {
+    sema_context& ctx, mutator_context& mCtx, t_field& field_node) {
   maybe_match_type_with_const_value(
       ctx, mCtx, field_node.get_type(), field_node.get_default_value());
 }
 
 static void match_annotation_types_with_const_values(
-    diagnostic_context& ctx, mutator_context& mCtx, t_named& node) {
+    sema_context& ctx, mutator_context& mCtx, t_named& node) {
   for (t_const& tconst : node.structured_annotations()) {
     maybe_match_type_with_const_value(ctx, mCtx, tconst.type(), tconst.value());
   }
@@ -214,7 +214,7 @@ static void match_annotation_types_with_const_values(
 
 // Only an unqualified field is eligible for terse write.
 void mutate_terse_write_annotation_structured(
-    diagnostic_context& ctx, mutator_context&, t_structured& node) {
+    sema_context& ctx, mutator_context&, t_structured& node) {
   bool program_has_terse_write =
       ctx.program().inherit_annotation_or_null(node, kTerseWriteUri);
   for (auto& field : node.fields()) {
@@ -233,7 +233,7 @@ void mutate_terse_write_annotation_structured(
 }
 
 void mutate_inject_metadata_fields(
-    diagnostic_context& ctx, mutator_context&, t_structured& node) {
+    sema_context& ctx, mutator_context&, t_structured& node) {
   // TODO(dokwon): Currently field injection doesn't work for structs used as
   // transitive annotations. Skipping as a workaround.
   if (is_transitive_annotation(node)) {
@@ -299,14 +299,14 @@ void mutate_inject_metadata_fields(
   }
 }
 
-void set_generated(diagnostic_context&, mutator_context&, t_named& node) {
+void set_generated(sema_context&, mutator_context&, t_named& node) {
   if (node.find_structured_annotation_or_null(kSetGeneratedUri)) {
     node.set_generated();
   }
 }
 
 void lower_deprecated_annotations(
-    diagnostic_context& ctx, mutator_context&, t_named& node) {
+    sema_context& ctx, mutator_context&, t_named& node) {
   if (auto cnst = node.find_structured_annotation_or_null(
           kDeprecatedUnvalidatedAnnotationsUri)) {
     ctx.check(
@@ -327,7 +327,7 @@ void lower_deprecated_annotations(
 }
 
 void normalize_return_type(
-    diagnostic_context& ctx, mutator_context&, t_function& node) {
+    sema_context& ctx, mutator_context&, t_function& node) {
   if (!node.has_return_type()) {
     return;
   }
@@ -345,8 +345,7 @@ void normalize_return_type(
 }
 
 template <typename Node>
-void lower_type_annotations(
-    diagnostic_context&, mutator_context& mCtx, Node& node) {
+void lower_type_annotations(sema_context&, mutator_context& mCtx, Node& node) {
   std::map<std::string, std::string> unstructured;
 
   if (const t_const* annot =
@@ -400,8 +399,7 @@ void lower_type_annotations(
   }
 }
 
-void inject_schema_const(
-    diagnostic_context& ctx, mutator_context&, t_program& prog) {
+void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
   schematizer::options opts;
   opts.only_root_program_ = true;
   opts.use_hash = true;

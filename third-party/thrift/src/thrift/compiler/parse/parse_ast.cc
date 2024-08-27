@@ -1095,7 +1095,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
   }
 
   // Resolve types in the root program.
-  diagnostic_context ctx(
+  sema_context ctx(
       diags.source_mgr(),
       [&](auto diag) { diags.report(std::move(diag)); },
       diags.params());

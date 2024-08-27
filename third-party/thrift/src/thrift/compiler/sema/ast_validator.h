@@ -17,14 +17,14 @@
 #pragma once
 
 #include <thrift/compiler/ast/ast_visitor.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 namespace apache {
 namespace thrift {
 namespace compiler {
 
 // An AST validator is a const ast_visitor that collects diagnostics.
-using ast_validator = basic_ast_visitor<true, diagnostic_context&>;
+using ast_validator = basic_ast_visitor<true, sema_context&>;
 
 } // namespace compiler
 } // namespace thrift

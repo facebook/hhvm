@@ -21,7 +21,7 @@
 
 namespace apache::thrift::compiler {
 
-class diagnostic_context;
+class sema_context;
 class t_named;
 class t_type;
 
@@ -39,7 +39,7 @@ class t_type;
  */
 
 void validate_explicit_include(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const t_named& src,
     const t_type& type,
     diagnostic_level level);

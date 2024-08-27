@@ -28,7 +28,7 @@ using ::testing::UnorderedElementsAre;
 TEST(AstValidatorTest, Output) {
   ast_validator validator;
   validator.add_program_visitor(
-      [](diagnostic_context& ctx, const t_program& program) {
+      [](sema_context& ctx, const t_program& program) {
         ctx.report(program, diagnostic_level::info, "test");
       });
 
@@ -37,7 +37,7 @@ TEST(AstValidatorTest, Output) {
   auto loc = source_mgr.add_virtual_file(program.path(), "").start;
   program.set_src_range({loc, loc});
   diagnostic_results results;
-  diagnostic_context ctx(source_mgr, results, diagnostic_params::keep_all());
+  sema_context ctx(source_mgr, results, diagnostic_params::keep_all());
   validator(ctx, program);
   EXPECT_THAT(
       results.diagnostics(),

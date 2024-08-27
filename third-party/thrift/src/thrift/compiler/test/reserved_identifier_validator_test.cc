@@ -324,7 +324,7 @@ TEST_P(GeneratedReservedIdentifierValidatorTest, GeneratedNodeMustNotError) {
   auto loc = source_mgr.add_virtual_file(program.path(), "").start;
   program.set_src_range({loc, loc});
   diagnostic_results results;
-  diagnostic_context ctx(source_mgr, results, diagnostic_params::keep_all());
+  sema_context ctx(source_mgr, results, diagnostic_params::keep_all());
 
   // Build the program
   auto definition_factory = GetParam();

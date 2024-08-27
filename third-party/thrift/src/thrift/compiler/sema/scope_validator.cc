@@ -73,7 +73,7 @@ struct allowed_scopes {
 } // namespace
 
 void detail::validate_annotation_scopes(
-    diagnostic_context& ctx, const t_named& node) {
+    sema_context& ctx, const t_named& node) {
   // Ignore a transitive annotation definition because it is a collection of
   // annotations that apply at other scopes. For example:
   //

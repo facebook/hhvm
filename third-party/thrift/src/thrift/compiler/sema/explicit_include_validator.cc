@@ -29,8 +29,7 @@ std::string concatenate_relative_include(
       "{}/{}", this_program->path().substr(0, last_slash), include->path());
 }
 
-bool program_has_include(
-    diagnostic_context& ctx, const t_program* type_program) {
+bool program_has_include(sema_context& ctx, const t_program* type_program) {
   const t_program* this_program = &ctx.program();
   if (this_program == type_program) {
     return true;
@@ -50,7 +49,7 @@ bool program_has_include(
 }
 
 void report_missing(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const t_named& src,
     const t_type& type,
     diagnostic_level level) {
@@ -64,7 +63,7 @@ void report_missing(
 }
 
 void visit_type(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const t_named& src,
     const t_type& type,
     diagnostic_level level) {
@@ -85,7 +84,7 @@ void visit_type(
 } // namespace
 
 void validate_explicit_include(
-    diagnostic_context& ctx,
+    sema_context& ctx,
     const t_named& src,
     const t_type& type,
     diagnostic_level level) {
@@ -103,23 +102,22 @@ void add_explicit_include_validators(
    */
 
   // Structured types: field types
-  validator.add_field_visitor(
-      [level](diagnostic_context& ctx, const t_field& f) {
-        if (f.is_injected()) {
-          return;
-        }
-        visit_type(ctx, f, *f.get_type(), level);
-      });
+  validator.add_field_visitor([level](sema_context& ctx, const t_field& f) {
+    if (f.is_injected()) {
+      return;
+    }
+    visit_type(ctx, f, *f.get_type(), level);
+  });
 
   // Typedefs: underlying type
   validator.add_typedef_visitor(
-      [level](diagnostic_context& ctx, const t_typedef& td) {
+      [level](sema_context& ctx, const t_typedef& td) {
         visit_type(ctx, td, *td.get_type(), level);
       });
 
   // Functions: return types, exceptions, stream/sink types
   validator.add_function_visitor(
-      [level](diagnostic_context& ctx, const t_function& f) {
+      [level](sema_context& ctx, const t_function& f) {
         visit_type(ctx, f, *f.return_type(), level);
         if (const t_type_ref& interaction = f.interaction()) {
           visit_type(ctx, f, *interaction, level);
@@ -129,17 +127,16 @@ void add_explicit_include_validators(
         }
       });
   validator.add_throws_visitor(
-      [level](diagnostic_context& ctx, const t_throws& exns) {
+      [level](sema_context& ctx, const t_throws& exns) {
         for (const t_field& ex : exns.fields()) {
           visit_type(ctx, ex, *ex.get_type(), level);
         }
       });
-  validator.add_stream_visitor([level](
-                                   diagnostic_context& ctx, const t_stream& s) {
+  validator.add_stream_visitor([level](sema_context& ctx, const t_stream& s) {
     visit_type(
         ctx, static_cast<const t_named&>(*ctx.parent()), *s.elem_type(), level);
   });
-  validator.add_sink_visitor([level](diagnostic_context& ctx, const t_sink& s) {
+  validator.add_sink_visitor([level](sema_context& ctx, const t_sink& s) {
     visit_type(
         ctx,
         static_cast<const t_named&>(*ctx.parent()),
@@ -151,32 +148,30 @@ void add_explicit_include_validators(
 
   // Services: base service
   validator.add_service_visitor(
-      [level](diagnostic_context& ctx, const t_service& svc) {
+      [level](sema_context& ctx, const t_service& svc) {
         if (const t_service* extends = svc.extends()) {
           visit_type(ctx, svc, *extends, level);
         }
       });
 
   // Constants: value type
-  validator.add_const_visitor(
-      [level](diagnostic_context& ctx, const t_const& c) {
-        visit_type(ctx, c, *c.type(), level);
-      });
+  validator.add_const_visitor([level](sema_context& ctx, const t_const& c) {
+    visit_type(ctx, c, *c.type(), level);
+  });
 
   // All definitions: annotations
-  validator.add_named_visitor(
-      [level](diagnostic_context& ctx, const t_named& n) {
-        // Temporary workaround for patch generator
-        if (n.generated() ||
-            (ctx.parent() &&
-             static_cast<const t_named&>(*ctx.parent()).generated())) {
-          return;
-        }
+  validator.add_named_visitor([level](sema_context& ctx, const t_named& n) {
+    // Temporary workaround for patch generator
+    if (n.generated() ||
+        (ctx.parent() &&
+         static_cast<const t_named&>(*ctx.parent()).generated())) {
+      return;
+    }
 
-        for (const t_const& anno : n.structured_annotations()) {
-          visit_type(ctx, n, *anno.type(), level);
-        }
-      });
+    for (const t_const& anno : n.structured_annotations()) {
+      visit_type(ctx, n, *anno.type(), level);
+    }
+  });
 }
 
 } // namespace apache::thrift::compiler

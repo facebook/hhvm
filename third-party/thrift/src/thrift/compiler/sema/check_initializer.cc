@@ -26,7 +26,7 @@
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 namespace apache::thrift::compiler {
 namespace {

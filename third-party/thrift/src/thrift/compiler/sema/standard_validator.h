@@ -29,7 +29,7 @@ void check_initializer(
     const t_type* type,
     const t_const_value* initializer);
 
-void validate_annotation_scopes(diagnostic_context& ctx, const t_named& node);
+void validate_annotation_scopes(sema_context& ctx, const t_named& node);
 
 } // namespace detail
 

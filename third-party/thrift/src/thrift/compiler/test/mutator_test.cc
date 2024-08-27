@@ -21,7 +21,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/diagnostic.h>
-#include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/test/gen_testing.h>
 
 namespace apache::thrift::compiler {
@@ -31,7 +31,7 @@ using ::testing::UnorderedElementsAre;
 TEST(AstMutatorTest, Output) {
   ast_mutator mutator;
   mutator.add_program_visitor(
-      [](diagnostic_context& ctx, mutator_context& mctx, t_program& program) {
+      [](sema_context& ctx, mutator_context& mctx, t_program& program) {
         ctx.report(program, diagnostic_level::info, "test");
         EXPECT_EQ(mctx.current(), &program);
         EXPECT_EQ(mctx.parent(), nullptr);
@@ -43,7 +43,7 @@ TEST(AstMutatorTest, Output) {
   t_program program("path/to/program.thrift");
   source_manager source_mgr;
   diagnostic_results results;
-  diagnostic_context ctx(source_mgr, results, diagnostic_params::keep_all());
+  sema_context ctx(source_mgr, results, diagnostic_params::keep_all());
   auto loc = source_mgr.add_virtual_file(program.path(), "").start;
   program.set_src_range({loc, loc});
   mutator_context mctx;
@@ -62,7 +62,7 @@ class StandardMutatorTest : public ::testing::Test {
       diagnostic_params params = diagnostic_params::keep_all()) {
     source_manager source_mgr;
     diagnostic_results results;
-    diagnostic_context ctx(source_mgr, results, std::move(params));
+    sema_context ctx(source_mgr, results, std::move(params));
     standard_mutators(false)(ctx, program_bundle_);
     return std::move(results).diagnostics();
   }

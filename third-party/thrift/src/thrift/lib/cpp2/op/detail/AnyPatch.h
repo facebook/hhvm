@@ -167,32 +167,54 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
 
   void apply(type::AnyStruct& val) const {
-    struct Visitor {
-      type::AnyStruct& v;
-      void assign(const type::AnyStruct& b) { v = b; }
-      void clear() { apache::thrift::clear(v); }
-      void patchIfTypeIs(
-          const type::Type& type, const std::vector<type::AnyStruct>& patches) {
-        if (v.type() != type) {
-          return;
-        }
-        auto val = protocol::detail::parseValueFromAny(v);
-        for (const auto& p : patches) {
+    auto applyTypePatches = [&](const std::vector<type::AnyStruct>* prior,
+                                const std::vector<type::AnyStruct>* after) {
+      if (!prior && !after) {
+        return;
+      }
+
+      auto dynVal = protocol::detail::parseValueFromAny(val);
+      if (prior) {
+        for (const auto& p : *prior) {
           auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-          protocol::applyPatch(dynPatch, val);
+          protocol::applyPatch(dynPatch, dynVal);
         }
-        v = protocol::detail::toAny(val, v.type().value(), v.protocol().value())
+      }
+      if (after) {
+        for (const auto& p : *after) {
+          auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
+          protocol::applyPatch(dynPatch, dynVal);
+        }
+      }
+      val = protocol::detail::toAny(
+                dynVal, val.type().value(), val.protocol().value())
                 .toThrift();
-      }
-      void ensureAny(const type::AnyStruct& any) {
-        if (v.type() == any.type()) {
-          return;
-        }
-        v = any;
-      }
     };
 
-    return customVisit(Visitor{val});
+    if (hasAssign()) {
+      val = data_.assign().value();
+      return;
+    }
+    if (data_.clear().value()) {
+      apache::thrift::clear(val);
+    }
+
+    // If 'ensureAny' type does not match the type of stored value in Thrift
+    // Any, we can ignore 'patchIfTypeIsPrior'.
+    if (data_.ensureAny().has_value() &&
+        data_.ensureAny().value().type() != val.type()) {
+      val = data_.ensureAny().value();
+      const auto* afterTypePatches = folly::get_ptr(
+          data_.patchIfTypeIsAfter().value(), val.type().value());
+      applyTypePatches(nullptr, afterTypePatches);
+      return;
+    }
+
+    const auto* priorTypePatches =
+        folly::get_ptr(data_.patchIfTypeIsPrior().value(), val.type().value());
+    const auto* afterTypePatches =
+        folly::get_ptr(data_.patchIfTypeIsAfter().value(), val.type().value());
+    applyTypePatches(priorTypePatches, afterTypePatches);
   }
 
   void ensureAny(type::AnyStruct ensureAny) {
@@ -234,6 +256,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
  private:
   using Base::assignOr;
   using Base::data_;
+  using Base::hasAssign;
 
   bool ensures(const type::Type& type) {
     return data_.ensureAny().has_value() &&
@@ -245,9 +268,9 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     return ensures(type::Type::create<Tag>());
   }
 
-  // If assign has value and specified 'VPatch' is the corresponding patch type
-  // to the type in 'assign' operation, we ensure the patch is patchable by
-  // making it to 'clear' + 'ensureAny' operation.
+  // If assign has value and specified 'VPatch' is the corresponding patch
+  // type to the type in 'assign' operation, we ensure the patch is patchable
+  // by making it to 'clear' + 'ensureAny' operation.
   template <typename VPatch>
   void tryPatchable() {
     using VType = typename VPatch::value_type;

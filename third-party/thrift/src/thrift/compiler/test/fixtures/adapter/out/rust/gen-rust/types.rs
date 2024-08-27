@@ -2905,6 +2905,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a A")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -2915,9 +2918,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -4874,22 +4875,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Struct, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CircularStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -5106,6 +5107,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a DeclaredAfterStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -5116,9 +5120,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -5476,6 +5478,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a HeapAllocated")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -5486,9 +5491,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -5828,6 +5831,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ApplyAdapter")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -5838,9 +5844,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -5953,6 +5957,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a TransitiveAdapted")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -5963,9 +5970,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -6088,28 +6093,26 @@ where
             ::fbthrift::Field::new("regularInt", ::fbthrift::TType::I64, 1),
             ::fbthrift::Field::new("regularString", ::fbthrift::TType::String, 3),
         ];
-        let mut field_regularInt = ::std::option::Option::None;
-        let mut field_countingInt = ::std::option::Option::None;
-        let mut field_regularString = ::std::option::Option::None;
+        let mut fields = Self {
+            regularInt: ::std::option::Option::None,
+            countingInt: ::std::option::Option::None,
+            regularString: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CountingStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I64, 1) => field_regularInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I64, 2) => field_countingInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 3) => field_regularString = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 1) => fields.regularInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 2) => fields.countingInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 3) => fields.regularString = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            regularInt: field_regularInt,
-            countingInt: field_countingInt,
-            regularString: field_regularString,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 

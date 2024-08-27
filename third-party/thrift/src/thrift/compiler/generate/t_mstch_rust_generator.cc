@@ -1332,6 +1332,7 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:rust_structured_annotations",
              &rust_mstch_struct::rust_structured_annotations},
             {"struct:generated?", &rust_mstch_struct::rust_generated_struct},
+            {"struct:all_optional?", &rust_mstch_struct::rust_all_optional},
         });
   }
   mstch::node rust_name() { return type_rust_name(struct_); }
@@ -1441,6 +1442,14 @@ class rust_mstch_struct : public mstch_struct {
     return structured_annotations_node(*struct_, 1, context_, pos_, options_);
   }
   mstch::node rust_generated_struct() { return (*struct_).generated(); }
+  mstch::node rust_all_optional() {
+    for (const auto& field : struct_->fields()) {
+      if (field.get_req() != t_field::e_req::optional) {
+        return false;
+      }
+    }
+    return true;
+  }
 
  private:
   const rust_codegen_options& options_;

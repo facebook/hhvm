@@ -887,6 +887,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a empty_struct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -897,9 +900,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -2694,6 +2695,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataItem")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -2704,9 +2708,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3065,25 +3067,24 @@ where
             ::fbthrift::Field::new("ForwardUsageByRef", ::fbthrift::TType::Struct, 2),
             ::fbthrift::Field::new("ForwardUsageStruct", ::fbthrift::TType::Struct, 1),
         ];
-        let mut field_ForwardUsageStruct = ::std::option::Option::None;
-        let mut field_ForwardUsageByRef = ::std::option::Option::None;
+        let mut fields = Self {
+            ForwardUsageStruct: ::std::option::Option::None,
+            ForwardUsageByRef: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ForwardUsageRoot")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_ForwardUsageStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 2) => field_ForwardUsageByRef = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => fields.ForwardUsageStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 2) => fields.ForwardUsageByRef = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            ForwardUsageStruct: field_ForwardUsageStruct,
-            ForwardUsageByRef: field_ForwardUsageByRef,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3191,22 +3192,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("foo", ::fbthrift::TType::Struct, 1),
         ];
-        let mut field_foo = ::std::option::Option::None;
+        let mut fields = Self {
+            foo: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ForwardUsageStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            foo: field_foo,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3312,22 +3313,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("foo", ::fbthrift::TType::Struct, 1),
         ];
-        let mut field_foo = ::std::option::Option::None;
+        let mut fields = Self {
+            foo: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ForwardUsageByRef")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 1) => fields.foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            foo: field_foo,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3433,22 +3434,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Map, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteMap")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3536,6 +3537,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteMapDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -3546,9 +3550,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3642,22 +3644,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Map, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteMap")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Map, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3756,6 +3758,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteMapDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -3766,9 +3771,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3862,22 +3865,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -3976,6 +3979,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a IncompleteListDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -3986,9 +3992,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -4082,22 +4086,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -4196,6 +4200,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CompleteListDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -4206,9 +4213,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -4302,22 +4307,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -4540,22 +4545,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a DependentAdaptedList")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::List, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -4651,22 +4656,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::I16, 1),
         ];
-        let mut field_field = ::std::option::Option::None;
+        let mut fields = Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a DependentAdaptedListDep")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I16, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, 1) => fields.field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            field: field_field,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 

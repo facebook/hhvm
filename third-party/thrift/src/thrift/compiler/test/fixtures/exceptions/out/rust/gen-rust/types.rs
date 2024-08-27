@@ -382,22 +382,22 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("sonnet", ::fbthrift::TType::String, 1),
         ];
-        let mut field_sonnet = ::std::option::Option::None;
+        let mut fields = Self {
+            sonnet: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Serious")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::String, 1) => field_sonnet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => fields.sonnet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            sonnet: field_sonnet,
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 
@@ -994,6 +994,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        let mut fields = Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        };
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Banal")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -1004,9 +1007,7 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        ::std::result::Result::Ok(Self {
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-        })
+        ::std::result::Result::Ok(fields)
     }
 }
 

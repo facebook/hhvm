@@ -300,13 +300,12 @@ class field_ref {
     return *this;
   }
 
-  // Workaround for https://github.com/llvm/llvm-project/issues/48786
+  // Workaround for https://bugs.llvm.org/show_bug.cgi?id=49442
   FOLLY_ERASE field_ref& operator=(value_type&& value) noexcept(
       std::is_nothrow_move_assignable<value_type>::value) {
     value_ = static_cast<value_type&&>(value);
     bitref_ = true;
     return *this;
-    value.~value_type(); // Force emit destructor...
   }
 
   /// Assignment from field_ref is intentionally not provided to prevent
@@ -557,7 +556,6 @@ class optional_field_ref {
     value_ = static_cast<value_type&&>(value);
     bitref_ = true;
     return *this;
-    value.~value_type(); // Force emit destructor...
   }
 
   // Copies the data (the set flag and the value if available) from another
@@ -1208,7 +1206,6 @@ class intern_boxed_field_ref {
     value_.mut() = static_cast<value_type&&>(value);
     bitref_ = true;
     return *this;
-    value.~value_type(); // Force emit destructor...
   }
 
   // If the other field owns the value, it will perform deep copy. If the other
@@ -1435,7 +1432,6 @@ class terse_intern_boxed_field_ref {
       std::is_nothrow_move_assignable<value_type>::value) {
     value_.mut() = static_cast<value_type&&>(value);
     return *this;
-    value.~value_type(); // Force emit destructor...
   }
 
   template <typename U>
@@ -1786,7 +1782,6 @@ class required_field_ref {
       std::is_nothrow_move_assignable<value_type>::value) {
     value_ = static_cast<value_type&&>(value);
     return *this;
-    value.~value_type(); // Force emit destructor...
   }
 
   // Assignment from required_field_ref is intentionally not provided to prevent
@@ -2299,7 +2294,6 @@ class terse_field_ref {
       std::is_nothrow_move_assignable<value_type>::value) {
     value_ = static_cast<value_type&&>(value);
     return *this;
-    value.~value_type(); // Force emit destructor...
   }
 
   template <typename U>

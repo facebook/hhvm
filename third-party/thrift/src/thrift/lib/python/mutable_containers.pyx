@@ -167,7 +167,6 @@ cdef class MutableSet:
     the [`MutableSet` abstract base class](https://docs.python.org/3.10/library/collections.abc.html#collections-abstract-base-classes).
     base class
     """
-    # DO_BEFORE(alperyoney,20240603): Implement missing methods from abstract
 
     def __cinit__(MutableSet self, TypeInfoBase value_typeinfo, set set_data):
         """
@@ -195,6 +194,50 @@ cdef class MutableSet:
 
     def __len__(MutableSet self):
         return len(self._set_data)
+
+    def __le__(MutableSet self, other):
+        if self._is_same_type_of_set(other):
+            return self._set_data <= (<MutableSet>other)._set_data
+
+        if not isinstance(other, Set):
+            return NotImplemented
+
+        if len(self) > len(other):
+            return False
+
+        for elem in self:
+            if elem not in other:
+                return False
+
+        return True
+
+    def __lt__(MutableSet self, other):
+        if not isinstance(other, Set):
+            return NotImplemented
+
+        return len(self) < len(other) and self <= other
+
+    def __ge__(MutableSet self, other):
+        if self._is_same_type_of_set(other):
+            return self._set_data >= (<MutableSet>other)._set_data
+
+        if not isinstance(other, Set):
+            return NotImplemented
+
+        if len(self) < len(other):
+            return False
+
+        for elem in other:
+            if elem not in self:
+                return False
+
+        return True
+
+    def __gt__(MutableSet self, other):
+        if not isinstance(other, Set):
+            return NotImplemented
+
+        return len(self) > len(other) and self >= other
 
     def isdisjoint(MutableSet self, other):
         if self._is_same_type_of_set(other):
@@ -226,6 +269,16 @@ cdef class MutableSet:
 
         return MutableSet(self._val_typeinfo, type_checked_set)
 
+    def __iand__(MutableSet self, other):
+        if self._is_same_type_of_set(other):
+            self._set_data &= (<MutableSet>other)._set_data
+            return self
+
+        for value in (self - other):
+            self.discard(value)
+
+        return self
+
     def __or__(MutableSet self, other):
         if self._is_same_type_of_set(other):
             result_set_data = self._set_data | (<MutableSet>other)._set_data
@@ -239,6 +292,16 @@ cdef class MutableSet:
             result_set.add(value)
 
         return result_set
+
+    def __ior__(MutableSet self, other):
+        if self._is_same_type_of_set(other):
+            self._set_data |= (<MutableSet>other)._set_data
+            return self
+
+        for value in other:
+            self.add(value)
+
+        return self
 
     def __sub__(MutableSet self, other):
         if self._is_same_type_of_set(other):
@@ -257,6 +320,16 @@ cdef class MutableSet:
                                          (value for value in self._set_data
                                           if typeinfo.to_python_value(value) not in other))
 
+    def __isub__(MutableSet self, other):
+        if self._is_same_type_of_set(other):
+            self._set_data -= (<MutableSet>other)._set_data
+            return self
+
+        for value in other:
+            self.discard(value)
+
+        return self
+
     def __xor__(MutableSet self, other):
         if self._is_same_type_of_set(other):
             result_set_data = self._set_data ^ (<MutableSet>other)._set_data
@@ -267,6 +340,15 @@ cdef class MutableSet:
 
         other = MutableSet._from_iterable(self._val_typeinfo, set(), other)
         return (self - other) | (other - self)
+
+    def __ixor__(MutableSet self, other):
+        if self._is_same_type_of_set(other):
+            self._set_data ^= (<MutableSet>other)._set_data
+            return self
+
+        other = MutableSet._from_iterable(self._val_typeinfo, set(), other)
+        self._set_data ^= (<MutableSet>other)._set_data
+        return self
 
     def __eq__(MutableSet self, other):
         if self is other:
@@ -339,6 +421,9 @@ cdef class MutableSet:
         Returns `True` if `other` is a `MutableSet` with the same
         `_val_typeinfo` as `self`, `False` otherwise.
         """
+        if self is other:
+            return True
+
         if not isinstance(other, MutableSet):
             return False
 

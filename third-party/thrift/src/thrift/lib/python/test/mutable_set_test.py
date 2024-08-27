@@ -296,3 +296,203 @@ class MutableSetTest(unittest.TestCase):
         mutable_set_unpickled = pickle.loads(pickled)
         self.assertIsInstance(mutable_set_unpickled, MutableSet)
         self.assertEqual(mutable_set, mutable_set_unpickled)
+
+    def test_ior(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 6))
+
+        mutable_set_1 |= mutable_set_2
+
+        self.assertEqual(6, len(mutable_set_1))
+        self.assertEqual({0, 1, 2, 3, 4, 5}, mutable_set_1)
+
+        mutable_set_2 |= [10, 11, 12, 13]
+        self.assertEqual(8, len(mutable_set_2))
+        self.assertEqual({2, 3, 4, 5, 10, 11, 12, 13}, mutable_set_2)
+
+    def test_ior_exception(self) -> None:
+        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(3))
+
+        # basic exception safety
+        with self.assertRaisesRegex(
+            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            mutable_set |= [10, 11, "Not an Integer", 13, 14]
+
+        self.assertEqual(5, len(mutable_set))
+        self.assertEqual({0, 1, 2, 10, 11}, mutable_set)
+
+    def test_iand(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 6))
+
+        mutable_set_1 &= mutable_set_2
+
+        self.assertEqual(2, len(mutable_set_1))
+        self.assertEqual({2, 3}, mutable_set_1)
+
+        mutable_set_1 &= [1, 2]
+        self.assertEqual(1, len(mutable_set_1))
+        self.assertEqual({2}, mutable_set_1)
+
+    def test_iand_exception(self) -> None:
+        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+
+        # No exception is raised, the non-integers are ignored, and only valid
+        # integers are processed
+        mutable_set &= [0, "Not an Integer", 1, 2, 5, 6]
+        self.assertEqual(3, len(mutable_set))
+        self.assertEqual({0, 1, 2}, mutable_set)
+
+    def test_ixor(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+
+        mutable_set_1 ^= mutable_set_2
+        self.assertEqual(5, len(mutable_set_1))
+        self.assertEqual({0, 1, 4, 5, 6}, mutable_set_1)
+
+        mutable_set_1 ^= [4, 5, 6, 7]
+        self.assertEqual(3, len(mutable_set_1))
+        self.assertEqual({0, 1, 7}, mutable_set_1)
+
+    def test_ixor_exception(self) -> None:
+        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+
+        # strong exception safety
+        with self.assertRaisesRegex(
+            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            mutable_set ^= [10, 11, "Not an Integer", 13, 14]
+
+        self.assertEqual(4, len(mutable_set))
+        self.assertEqual({0, 1, 2, 3}, mutable_set)
+
+    def test_isub(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+
+        mutable_set_1 -= mutable_set_2
+        self.assertEqual(2, len(mutable_set_1))
+        self.assertEqual({0, 1}, mutable_set_1)
+
+        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+
+        mutable_set_4 -= mutable_set_3
+        self.assertEqual(3, len(mutable_set_4))
+        self.assertEqual({4, 5, 6}, mutable_set_4)
+
+        mutable_set_5 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set_5 -= [1, 5, 6]
+        self.assertEqual(3, len(mutable_set_5))
+        self.assertEqual({0, 2, 3}, mutable_set_5)
+
+    def test_isub_exception(self) -> None:
+        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+
+        # No exception is raised, the non-integers are ignored, and only valid
+        # integers are processed
+        mutable_set -= [0, "Not an Integer", 1, 5, 6]
+        self.assertEqual(2, len(mutable_set))
+        self.assertEqual({2, 3}, mutable_set)
+
+    def test_le(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
+        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
+        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3])
+
+        self.assertTrue(mutable_set_1 <= mutable_set_2)
+        self.assertTrue(mutable_set_2 <= mutable_set_1)
+
+        self.assertTrue(mutable_set_1 <= mutable_set_3)
+        self.assertFalse(mutable_set_3 <= mutable_set_1)
+
+        self.assertFalse(mutable_set_1 <= mutable_set_4)
+        self.assertFalse(mutable_set_4 <= mutable_set_1)
+
+        self.assertTrue(mutable_set_1 <= {1, 2})
+        self.assertTrue(mutable_set_1 <= {1, 2, 3})
+        self.assertFalse(mutable_set_1 <= {2, 3})
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "'<=' not supported between instances of '.*.MutableSet' and 'list'",
+        ):
+            _ = mutable_set_1 <= [1, 2]
+
+    def test_lt(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
+        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
+        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3])
+
+        self.assertFalse(mutable_set_1 < mutable_set_2)
+        self.assertFalse(mutable_set_2 < mutable_set_1)
+
+        self.assertTrue(mutable_set_1 < mutable_set_3)
+        self.assertFalse(mutable_set_3 < mutable_set_1)
+
+        self.assertFalse(mutable_set_1 < mutable_set_4)
+        self.assertFalse(mutable_set_4 < mutable_set_1)
+
+        self.assertFalse(mutable_set_1 < {1, 2})
+        self.assertTrue(mutable_set_1 < {1, 2, 3})
+        self.assertFalse(mutable_set_1 < {2, 3})
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "'<' not supported between instances of '.*.MutableSet' and 'list'",
+        ):
+            _ = mutable_set_1 < [1, 2]
+
+    def test_ge(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
+        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
+        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3, 4])
+
+        self.assertTrue(mutable_set_1 >= mutable_set_2)
+        self.assertTrue(mutable_set_2 >= mutable_set_1)
+
+        self.assertTrue(mutable_set_1 >= mutable_set_3)
+        self.assertFalse(mutable_set_3 >= mutable_set_1)
+
+        self.assertFalse(mutable_set_1 >= mutable_set_4)
+        self.assertFalse(mutable_set_4 >= mutable_set_1)
+
+        self.assertTrue(mutable_set_1 >= {1, 2, 3})
+        self.assertTrue(mutable_set_1 >= {1, 2})
+        self.assertFalse(mutable_set_1 >= {2, 3, 4})
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "'>=' not supported between instances of '.*.MutableSet' and 'list'",
+        ):
+            _ = mutable_set_1 >= [1, 2]
+
+    def test_gt(self) -> None:
+        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
+        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
+        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
+        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3, 4])
+
+        self.assertFalse(mutable_set_1 > mutable_set_2)
+        self.assertFalse(mutable_set_2 > mutable_set_1)
+
+        self.assertTrue(mutable_set_1 > mutable_set_3)
+        self.assertFalse(mutable_set_3 > mutable_set_1)
+
+        self.assertFalse(mutable_set_1 > mutable_set_4)
+        self.assertFalse(mutable_set_4 > mutable_set_1)
+
+        self.assertFalse(mutable_set_1 > {1, 2, 3})
+        self.assertTrue(mutable_set_1 > {1, 2})
+        self.assertFalse(mutable_set_1 > {2, 3, 4})
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "'>' not supported between instances of '.*.MutableSet' and 'list'",
+        ):
+            _ = mutable_set_1 > [1, 2]

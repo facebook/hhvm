@@ -380,7 +380,6 @@ struct Vgen {
   void emit(const movswl& i) { a->Sxth(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtqw& i) { a->Uxth(W(i.d), W(i.s)); }
-  void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
   void emit(const movzbq& i) { a->Uxtb(X(i.d), W(i.s).X()); }
   void emit(const movzwq& i) { a->Uxth(X(i.d), W(i.s).X()); }
   void emit(const movzlq& i) { a->Uxtw(X(i.d), W(i.s).X()); }
@@ -2033,6 +2032,12 @@ void lower(const VLS& e, movzbl& i, Vlabel b, size_t z) {
 
 void lower(const VLS& e, movzwl& i, Vlabel b, size_t z) {
   lower_movz(e, i, b, z);
+}
+
+void lower(const VLS& e, movtql& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    v << copy{i.s, i.d};
+  });
 }
 
 void lower(const VLS& e, movtdb& i, Vlabel b, size_t z) {

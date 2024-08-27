@@ -81,6 +81,10 @@ void native_object::print_to(tree_printer::scope scope) const {
   scope.println("<native_object>");
 }
 
+bool native_object::operator==(const native_object& other) const {
+  return &other == this;
+}
+
 std::string to_string(const object& obj) {
   std::ostringstream out;
   print_to(obj, tree_printer::scope::make_root(out));

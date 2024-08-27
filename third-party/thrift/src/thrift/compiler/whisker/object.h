@@ -119,6 +119,15 @@ class native_object {
    * this object should be inline. See its documentation for more details.
    */
   virtual void print_to(tree_printer::scope) const;
+
+  /**
+   * Determines if this native_object compares equal to the other object. It is
+   * the implementers's responsibility to ensure that the other object also
+   * compares equal to this one and maintains the commutative property.
+   *
+   * The default implementation compares by object identity.
+   */
+  virtual bool operator==(const native_object& other) const;
 };
 
 namespace detail {
@@ -292,7 +301,8 @@ class object final : private detail::object_base<object> {
 
   friend bool operator==(
       const object& lhs, const native_object::ptr& rhs) noexcept {
-    return lhs.is_native_object() && lhs.as_native_object() == rhs;
+    return lhs.is_native_object() && rhs != nullptr &&
+        *lhs.as_native_object() == *rhs;
   }
   friend bool operator==(
       const native_object::ptr& lhs, const object& rhs) noexcept {

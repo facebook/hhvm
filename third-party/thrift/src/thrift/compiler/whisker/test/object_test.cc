@@ -154,6 +154,41 @@ TEST(ObjectTest, native_object) {
   EXPECT_EQ(o, o);
 }
 
+TEST(ObjectTest, native_object_equality) {
+  struct integer_native_object : basic_native_object {
+    explicit integer_native_object(int value) : value(value) {}
+    int value;
+
+    bool operator==(const native_object& other) const override {
+      if (auto* o = dynamic_cast<const integer_native_object*>(&other)) {
+        return value == o->value;
+      }
+      return false;
+    }
+  };
+  native_object::ptr o1 = std::make_shared<integer_native_object>(5);
+  native_object::ptr o2 = std::make_shared<integer_native_object>(5);
+  native_object::ptr o3 = std::make_shared<integer_native_object>(10);
+
+  object o = w::native_object(o1);
+  EXPECT_TRUE(o.is_native_object());
+  EXPECT_FALSE(o.is_i64());
+
+  EXPECT_EQ(o, o1);
+  EXPECT_EQ(o1, o);
+  EXPECT_EQ(o, o2);
+  EXPECT_EQ(o2, o);
+  EXPECT_NE(o, o3);
+  EXPECT_NE(o3, o);
+  EXPECT_NE(o, w::make_native_object<basic_native_object>());
+  EXPECT_NE(w::make_native_object<basic_native_object>(), o);
+
+  EXPECT_NE(o, native_object::ptr(nullptr));
+  EXPECT_NE(native_object::ptr(nullptr), o);
+  EXPECT_NE(o, i64(1));
+  EXPECT_EQ(o, o);
+}
+
 TEST(ObjectTest, copy) {
   native_object::ptr ptr = std::make_shared<basic_native_object>();
 

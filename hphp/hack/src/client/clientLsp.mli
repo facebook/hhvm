@@ -13,6 +13,7 @@ type args = {
   config: (string * string) list;  (** --config overrides at the command-line *)
   ignore_hh_version: bool;
   naming_table: string option;
+  warnings_saved_state_path: Path.t option;
   notebook_mode: bool;
       (** Notebook mode. The *only* thing this does is filter out error messages that are not relevant for notebooks.
       * Important:

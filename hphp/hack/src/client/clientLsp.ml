@@ -19,6 +19,7 @@ type args = {
   config: (string * string) list;
   ignore_hh_version: bool;
   naming_table: string option;
+  warnings_saved_state_path: Path.t option;
   notebook_mode: bool;
   verbose: bool;
   root_from_cli: Path.t;
@@ -42,6 +43,7 @@ let env =
           config = [];
           ignore_hh_version = false;
           naming_table = None;
+          warnings_saved_state_path = None;
           notebook_mode = false;
           verbose = false;
           root_from_cli = Path.dummy_path;
@@ -1455,6 +1457,7 @@ let run_ide_service
       ide_service
       ~root:!env.root
       ~naming_table_load_info
+      ~warnings_saved_state_path:!env.args.warnings_saved_state_path
       ~config:!env.args.config
       ~ignore_hh_version:!env.args.ignore_hh_version
       ~open_files

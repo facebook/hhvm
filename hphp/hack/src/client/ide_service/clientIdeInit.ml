@@ -10,6 +10,7 @@ open Hh_prelude
 
 type init_result = {
   naming_table: Naming_table.t;
+  warnings_saved_state: Warnings_saved_state.t option;
   sienv: SearchUtils.si_env;
   changed_files: Saved_state_loader.changed_files;
 }
@@ -73,7 +74,7 @@ let init_via_lsp
 (** We might find a saved-state available for download, and download it. *)
 let init_via_fetch
     (ctx : Provider_context.t) ~(root : Path.t) ~(ignore_hh_version : bool) :
-    (Path.t * Saved_state_loader.changed_files) outcome Lwt.t =
+    State_loader_lwt.FromDisk.load_result outcome Lwt.t =
   let ssopt = TypecheckerOptions.saved_state (Provider_context.get_tcopt ctx) in
   let%lwt load_result =
     State_loader_lwt.load
@@ -84,12 +85,26 @@ let init_via_fetch
       ~ignore_hh_version
   in
   match load_result with
-  | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
-    let path =
-      main_artifacts
-        .Saved_state_loader.Naming_and_dep_table_info.naming_sqlite_table_path
-    in
-    Lwt.return (Success (path, changed_files))
+  | Ok
+      {
+        Saved_state_loader.main_artifacts =
+          {
+            Saved_state_loader.Naming_and_dep_table_info
+            .naming_sqlite_table_path;
+            warning_hashes_path;
+            _;
+          };
+        changed_files;
+        _;
+      } ->
+    Lwt.return
+      (Success
+         {
+           State_loader_lwt.FromDisk.naming_table_path =
+             naming_sqlite_table_path;
+           warning_saved_state_path = warning_hashes_path;
+           files_changed = changed_files;
+         })
   | Error load_error -> Lwt.return (Failure (error_from_load_error load_error))
 
 (** Performs a full index of [root], building a naming table on disk,
@@ -146,7 +161,7 @@ let init_via_find
     ~(local_config : ServerLocalConfig.t)
     ~(root : Path.t)
     ~(ignore_hh_version : bool) :
-    (Path.t * Saved_state_loader.changed_files) outcome Lwt.t =
+    State_loader_lwt.FromDisk.load_result outcome Lwt.t =
   if not local_config.ServerLocalConfig.ide_load_naming_table_on_disk then begin
     Lwt.return (Skip "ide_load_naming_table_on_disk=false")
   end else begin
@@ -169,13 +184,18 @@ let init_via_find
           ~root
       in
       match load_off_disk_result with
-      | Ok (path, changed_files) -> Lwt.return (Success (path, changed_files))
+      | Ok result -> Lwt.return (Success result)
       | Error err ->
         let data = Some (Hh_json.JSON_Object [("err", Hh_json.string_ err)]) in
         Lwt.return
           (Failure (ClientIdeUtils.make_rich_error "find_failed" ~data))
     end
   end
+
+type saved_state_paths = {
+  naming_table_path: Path.t;
+  warnings_saved_state_path: Path.t option;
+}
 
 (** This is a helper function used to add logging+telemetry to each
 attempt at initializing the symbol table. Used like this:
@@ -189,10 +209,13 @@ let map_attempt
     (key : string)
     (ctx : Provider_context.t)
     ~(prev : Telemetry.t * ClientIdeMessage.rich_error)
-    ~(f : a -> Path.t * Saved_state_loader.changed_files * SearchUtils.si_env)
+    ~(f :
+       a ->
+       saved_state_paths * Saved_state_loader.changed_files * SearchUtils.si_env)
     (promise : a outcome Lwt.t) :
     ( Telemetry.t
       * Naming_table.t
+      * Warnings_saved_state.t option
       * Saved_state_loader.changed_files
       * SearchUtils.si_env,
       Telemetry.t * ClientIdeMessage.rich_error )
@@ -205,21 +228,30 @@ let map_attempt
     let%lwt result = promise in
     match result with
     | Success a ->
-      let (path, changed_files, sienv) = f a in
+      let ( { naming_table_path; warnings_saved_state_path },
+            changed_files,
+            sienv ) =
+        f a
+      in
       Hh_logger.log
         "Init: %s ok, at %s, %d changed_files"
         key
-        (Path.to_string path)
+        (Path.to_string naming_table_path)
         (List.length changed_files);
       let naming_table =
-        Naming_table.load_from_sqlite ctx (Path.to_string path)
+        Naming_table.load_from_sqlite ctx (Path.to_string naming_table_path)
+      in
+      let warnings_saved_state =
+        Option.map warnings_saved_state_path ~f:(fun path ->
+            Warnings_saved_state.read_from_disk @@ Path.to_string path)
       in
       let telemetry =
         telemetry
         |> Telemetry.string_ ~key ~value:"winner"
         |> Telemetry.duration ~start_time
       in
-      Lwt.return_ok (telemetry, naming_table, changed_files, sienv)
+      Lwt.return_ok
+        (telemetry, naming_table, warnings_saved_state, changed_files, sienv)
     | Skip reason ->
       Hh_logger.log "Init: %s skipped - %s" key reason;
       let telemetry = telemetry |> Telemetry.string_ ~key ~value:reason in
@@ -271,6 +303,7 @@ let init
   let {
     ClientIdeMessage.Initialize_from_saved_state.root;
     naming_table_load_info;
+    warnings_saved_state_path;
     ignore_hh_version;
     config = _;
     open_files = _;
@@ -342,7 +375,21 @@ let init
   (* LSP: Are the paths specified in the LSP initialize message? *)
   let%lwt result =
     init_via_lsp ~naming_table_load_info
-    |> map_attempt "lsp" ctx ~prev ~f:(fun path -> (path, [], sienv))
+    |> map_attempt "lsp" ctx ~prev ~f:(fun naming_table_path ->
+           ({ naming_table_path; warnings_saved_state_path }, [], sienv))
+  in
+  let with_sienv
+      {
+        State_loader_lwt.FromDisk.naming_table_path;
+        warning_saved_state_path;
+        files_changed;
+      } =
+    ( {
+        naming_table_path;
+        warnings_saved_state_path = Some warning_saved_state_path;
+      },
+      files_changed,
+      sienv )
   in
   (* FIND: Find on disk? *)
   let%lwt result =
@@ -350,8 +397,7 @@ let init
     | Ok _ -> Lwt.return result
     | Error prev ->
       init_via_find ctx ~local_config ~root ~ignore_hh_version
-      |> map_attempt "find" ctx ~prev ~f:(fun (path, changed_files) ->
-             (path, changed_files, sienv))
+      |> map_attempt "find" ctx ~prev ~f:with_sienv
   in
   (* FETCH *)
   let%lwt result =
@@ -359,8 +405,7 @@ let init
     | Ok _ -> Lwt.return result
     | Error prev ->
       init_via_fetch ctx ~root ~ignore_hh_version
-      |> map_attempt "fetch" ctx ~prev ~f:(fun (path, changed_files) ->
-             (path, changed_files, sienv))
+      |> map_attempt "fetch" ctx ~prev ~f:with_sienv
   in
   (* BUILD *)
   let%lwt result =
@@ -368,20 +413,24 @@ let init
     | Ok _ -> Lwt.return result
     | Error prev ->
       init_via_build ~config ~root ~hhi_root
-      |> map_attempt "build" ctx ~prev ~f:(fun (path, paths_with_addenda) ->
+      |> map_attempt
+           "build"
+           ctx
+           ~prev
+           ~f:(fun (naming_table_path, paths_with_addenda) ->
              let sienv =
                SymbolIndexCore.update_from_addenda ~sienv ~paths_with_addenda
              in
-             (path, [], sienv))
+             ({ naming_table_path; warnings_saved_state_path = None }, [], sienv))
   in
 
   match result with
-  | Ok (telemetry, naming_table, changed_files, sienv) ->
+  | Ok (telemetry, naming_table, warnings_saved_state, changed_files, sienv) ->
     HackEventLogger.serverless_ide_load_naming_table
       ~start_time
       ~local_file_count:(Some (List.length changed_files))
       telemetry;
-    Lwt.return_ok { naming_table; sienv; changed_files }
+    Lwt.return_ok { naming_table; warnings_saved_state; sienv; changed_files }
   | Error (telemetry, e) ->
     HackEventLogger.serverless_ide_load_naming_table
       ~start_time

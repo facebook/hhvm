@@ -12,6 +12,7 @@
 *)
 val run :
   Provider_context.t ->
+  warnings_saved_state:Warnings_saved_state.t option ->
   Provider_context.entry ->
   Ide_api_types.range ->
   title_prefix:string ->

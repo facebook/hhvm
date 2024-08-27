@@ -12,4 +12,8 @@ end
 
 include Set.S with type elt = ErrorHash.t
 
+type path = string
+
 val pp : Format.formatter -> t -> unit
+
+val read_from_disk : path -> t

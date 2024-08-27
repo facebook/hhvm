@@ -29,6 +29,7 @@ is inappropriate for IDE scenarios. *)
 val compute_tast_and_errors_unquarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
+  warnings_saved_state:Warnings_saved_state.t option ->
   Compute_tast_and_errors.t
 
 (** Same as [compute_tast_and_errors_unquarantined], but skips computing the
@@ -45,6 +46,7 @@ appropriate for IDE scenarios. *)
 val compute_tast_and_errors_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
+  warnings_saved_state:Warnings_saved_state.t option ->
   Compute_tast_and_errors.t
 
 (** Same as [compute_tast_and_errors_quarantined], but skips computing the full

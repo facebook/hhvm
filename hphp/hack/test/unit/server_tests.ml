@@ -146,7 +146,10 @@ let test_compute_tast_counting () =
       ~contents:foo_contents
   in
   let { Tast_provider.Compute_tast_and_errors.telemetry; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+    Tast_provider.compute_tast_and_errors_unquarantined
+      ~ctx
+      ~entry
+      ~warnings_saved_state:None
   in
 
   Asserter.Int_asserter.assert_equals
@@ -184,7 +187,10 @@ let test_compute_tast_counting_local_mem () =
           ~contents:foo_contents
       in
       let { Tast_provider.Compute_tast_and_errors.telemetry; _ } =
-        Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+        Tast_provider.compute_tast_and_errors_unquarantined
+          ~ctx
+          ~entry
+          ~warnings_saved_state:None
       in
       Asserter.Int_asserter.assert_equals
         expected_decling_count

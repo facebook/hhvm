@@ -6,6 +6,8 @@
  *
  *)
 
+open Hh_prelude
+
 type error_hash = int [@@deriving ord, show]
 
 module ErrorHash = struct
@@ -13,9 +15,14 @@ module ErrorHash = struct
 end
 
 module ErrorHashSet = struct
-  include Set.Make (ErrorHash)
+  include Stdlib.Set.Make (ErrorHash)
 
   let pp fmt t = Format.pp_print_list ErrorHash.pp fmt (elements t)
 end
 
 include ErrorHashSet
+
+type path = string
+
+let read_from_disk path =
+  Marshal.from_channel (In_channel.create ~binary:true path)

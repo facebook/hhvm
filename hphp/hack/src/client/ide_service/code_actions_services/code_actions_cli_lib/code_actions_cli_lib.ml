@@ -91,8 +91,11 @@ let patched_text_of_command_or_action ~source_text path code_action :
   | CodeAction.Command _ ->
     Ok None
 
-let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
-  let commands_or_actions = Code_actions_services.go ~ctx ~entry ~range in
+let run_exn
+    ctx ~warnings_saved_state entry range ~title_prefix ~use_snippet_edits =
+  let commands_or_actions =
+    Code_actions_services.go ~ctx ~warnings_saved_state ~entry ~range
+  in
   if List.is_empty commands_or_actions then
     Printf.printf "No commands or actions found\n"
   else begin
@@ -130,6 +133,7 @@ let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
       let resolved =
         Code_actions_services.resolve
           ~ctx
+          ~warnings_saved_state
           ~entry
           ~range
           ~resolve_title:selected_title
@@ -186,7 +190,15 @@ let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
       Printf.printf "\nNo code action titles match prefix: %s\n" title_prefix
   end
 
-let run ctx entry range ~title_prefix ~use_snippet_edits =
-  match run_exn ctx entry range ~title_prefix ~use_snippet_edits with
+let run ctx ~warnings_saved_state entry range ~title_prefix ~use_snippet_edits =
+  match
+    run_exn
+      ctx
+      ~warnings_saved_state
+      entry
+      range
+      ~title_prefix
+      ~use_snippet_edits
+  with
   | exception exn -> print_endline @@ Exn.to_string exn
   | () -> ()

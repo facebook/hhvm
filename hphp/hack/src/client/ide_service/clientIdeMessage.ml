@@ -10,17 +10,18 @@
 open Hh_prelude
 
 module Initialize_from_saved_state = struct
+  type naming_table_load_info = {
+    path: Path.t;
+    test_delay: float;  (** artificial delay in seconds, for test purposes *)
+  }
+
   type t = {
     root: Path.t;
     naming_table_load_info: naming_table_load_info option;
+    warnings_saved_state_path: Path.t option;
     config: (string * string) list;
     ignore_hh_version: bool;
     open_files: Path.t list;
-  }
-
-  and naming_table_load_info = {
-    path: Path.t;
-    test_delay: float;  (** artificial delay in seconds, for test purposes *)
   }
 end
 

@@ -91,13 +91,16 @@ let handle :
         return_expanded_tast;
       } ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let (errors, tasts) = ServerStatusSingle.go file_names ctx in
+    let (errors, tasts) =
+      ServerStatusSingle.go
+        file_names
+        ctx
+        (Option.some_if
+           (not preexisting_warnings)
+           ServerEnv.(env.init_env.mergebase_warning_hashes))
+    in
     let errors =
       errors
-      |> Errors.filter_out_mergebase_warnings
-           (Option.some_if
-              (not preexisting_warnings)
-              ServerEnv.(env.init_env.mergebase_warning_hashes))
       |> Errors.get_sorted_error_list
       |> List.map ~f:User_error.to_absolute
       |> Filter_errors.filter error_filter

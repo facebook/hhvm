@@ -58,6 +58,7 @@ val initialize_from_saved_state :
   root:Path.t ->
   naming_table_load_info:
     ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info option ->
+  warnings_saved_state_path:Path.t option ->
   config:(string * string) list ->
   ignore_hh_version:bool ->
   open_files:Path.t list ->

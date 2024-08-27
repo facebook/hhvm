@@ -32,7 +32,11 @@ type find_refactor =
   entry:Provider_context.entry -> Pos.t -> Provider_context.t -> refactor list
 
 type find_quickfix =
-  entry:Provider_context.entry -> Pos.t -> Provider_context.t -> quickfix list
+  entry:Provider_context.entry ->
+  Pos.t ->
+  Provider_context.t ->
+  warnings_saved_state:Warnings_saved_state.t option ->
+  quickfix list
 
 module Type_string = struct
   type t = string Lazy.t

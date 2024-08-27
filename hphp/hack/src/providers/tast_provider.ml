@@ -25,7 +25,9 @@ end
 
 type _ compute_tast_mode =
   | Compute_tast_only : Compute_tast.t compute_tast_mode
-  | Compute_tast_and_errors : Compute_tast_and_errors.t compute_tast_mode
+  | Compute_tast_and_errors :
+      Warnings_saved_state.t option
+      -> Compute_tast_and_errors.t compute_tast_mode
 
 type seconds_since_epoch = float
 
@@ -108,7 +110,7 @@ let compute_tast_and_errors_unquarantined_internal
   with
   | (Compute_tast_only, Some tast, _) ->
     { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (Compute_tast_and_errors, Some tast, Some errors) ->
+  | (Compute_tast_and_errors _, Some tast, Some errors) ->
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   | (_, _, _) ->
     let start_telemetry = prepare_logging ctx in
@@ -126,7 +128,7 @@ let compute_tast_and_errors_unquarantined_internal
       let do_tast_checks =
         match mode with
         | Compute_tast_only -> false
-        | Compute_tast_and_errors -> true
+        | Compute_tast_and_errors _ -> true
       in
       Errors.do_with_context entry.Provider_context.path (fun () ->
           Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
@@ -143,9 +145,12 @@ let compute_tast_and_errors_unquarantined_internal
     in
 
     (match mode with
-    | Compute_tast_and_errors ->
+    | Compute_tast_and_errors warnings_saved_state ->
       let errors =
-        naming_errors |> Errors.merge typing_errors |> Errors.merge ast_errors
+        naming_errors
+        |> Errors.merge typing_errors
+        |> Errors.merge ast_errors
+        |> Errors.filter_out_mergebase_warnings warnings_saved_state
       in
       entry.Provider_context.tast <- Some tast;
       entry.Provider_context.all_errors <- Some errors;
@@ -155,12 +160,13 @@ let compute_tast_and_errors_unquarantined_internal
       { Compute_tast.tast; telemetry })
 
 let compute_tast_and_errors_unquarantined
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Compute_tast_and_errors.t =
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~warnings_saved_state : Compute_tast_and_errors.t =
   compute_tast_and_errors_unquarantined_internal
     ~ctx
     ~entry
-    ~mode:Compute_tast_and_errors
+    ~mode:(Compute_tast_and_errors warnings_saved_state)
 
 let compute_tast_unquarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
@@ -171,15 +177,18 @@ let compute_tast_unquarantined
     ~mode:Compute_tast_only
 
 let compute_tast_and_errors_quarantined
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Compute_tast_and_errors.t =
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~warnings_saved_state : Compute_tast_and_errors.t =
   (* If results have already been memoized, don't bother quarantining anything *)
   match (entry.Provider_context.tast, entry.Provider_context.all_errors) with
   | (Some tast, Some errors) ->
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
-    let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
+    let f () =
+      compute_tast_and_errors_unquarantined ~ctx ~entry ~warnings_saved_state
+    in
     (match Provider_context.is_quarantined () with
     | false -> Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f
     | true -> f ())

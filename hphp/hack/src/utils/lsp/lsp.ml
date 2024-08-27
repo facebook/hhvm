@@ -288,6 +288,13 @@ module Initialize = struct
     }
   end
 
+  type initializationOptions = {
+    namingTableSavedStatePath: string option;
+    namingTableSavedStateTestDelay: float;
+    delayUntilDoneInit: bool;
+    skipLspServerOnTypeFormatting: bool;
+  }
+
   type params = {
     processId: int option;
     rootPath: string option;
@@ -305,13 +312,6 @@ module Initialize = struct
     | Off
     | Messages
     | Verbose
-
-  and initializationOptions = {
-    namingTableSavedStatePath: string option;
-    namingTableSavedStateTestDelay: float;
-    delayUntilDoneInit: bool;
-    skipLspServerOnTypeFormatting: bool;
-  }
 
   and client_capabilities = {
     workspace: workspaceClientCapabilities;

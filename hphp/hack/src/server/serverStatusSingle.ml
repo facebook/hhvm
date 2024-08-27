@@ -9,7 +9,7 @@
 open Hh_prelude
 open ServerCommandTypes
 
-let go file_inputs ctx :
+let go file_inputs ctx warnings_saved_state :
     Errors.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
   let collect (errors_acc, tasts) file_input =
     match file_input with
@@ -18,7 +18,10 @@ let go file_inputs ctx :
       let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
       let { Tast_provider.Compute_tast_and_errors.errors; tast; telemetry = _ }
           =
-        Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+        Tast_provider.compute_tast_and_errors_unquarantined
+          ~ctx
+          ~entry
+          ~warnings_saved_state
       in
       let errors_acc = Errors.merge errors errors_acc in
       let tasts = Relative_path.Map.add tasts ~key:path ~data:tast in
@@ -35,7 +38,10 @@ let go file_inputs ctx :
         (* Explicitly put the contents of `ctx` in a quarantine, since they
            may overwrite naming table entries. *)
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry)
+            Tast_provider.compute_tast_and_errors_unquarantined
+              ~ctx
+              ~entry
+              ~warnings_saved_state)
       in
       let errors_acc = Errors.merge errors errors_acc in
       let tasts =

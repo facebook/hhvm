@@ -11,6 +11,7 @@ type init_result = {
   naming_table: Naming_table.t;
       (** An open connection to sqlite naming-table file. (Naming_table.t is able to store an in-memory
       delta, but in our case the result of [init] always has an empty delta.) *)
+  warnings_saved_state: Warnings_saved_state.t option;
   sienv: SearchUtils.si_env;
       (** search+autocomplete index, either full (in case we built) or delta
       plus a connection to whatever symbolindex is specified in hh.conf and .hhconfig
@@ -21,25 +22,29 @@ type init_result = {
       some subscription for change-notifications prior to calling [init]. *)
 }
 
-(** "Initialization" for clinetIdeDaemon means setting up naming-table and search-index
-and figuring out what files have changed and need to be indexed.
-We use a strategy of "lsp/find/fetch/build":
+(** "Initialization" for clientIdeDaemon means:
+  - setting up naming-table
+  - setting up the search-index
+  - loading the warnings saved state
+  - figuring out what files have changed and need to be indexed.
 
-1. [LSP] If the LSP initialization request contains the path of a naming-table
+For the naming table part, we use a strategy of LSP/FIND/FETCH/BUILD:
+
+1. LSP: If the LSP initialization request contains the path of a naming-table
 then use it, trust that there are no files changed since that saved-state,
 and initialize sienv empty.
 This is only used for tests at time of writing.
 
-2. [FIND] Otherwise, (if ide_load_naming_table_on_disk) look for any saved-state already on disk
+2. FIND: Otherwise, (if ide_load_naming_table_on_disk) look for any saved-state already on disk
 in the canonical location /tmp/hh_server that's within an age threshold,
 and if found then use it, ask mercurial for files changed since that saved-state,
 and initialize sienv empty
 
-3. [FETCH] Otherwise, try [State_loader_lwt.load] which uses manifold to look for
+3. FETCH: Otherwise, try [State_loader_lwt.load] which uses manifold to look for
 the best saved-state. If one is found then download it, ask mercurial for
 files changed since that saved-state, and initialize sienv empty
 
-4. [BUILD] Otherwise, if .hhconfig allows fall_back_to_full_index (default true) then do a fast
+4. BUILD: Otherwise, if .hhconfig allows fall_back_to_full_index (default true) then do a fast
 multi-core build of the naming-table-sqlite, initialize the naming-table with that,
 deem that there are no files changed since the build, and initialize sienv with all the symbols that
 we parsed while building the full naming table

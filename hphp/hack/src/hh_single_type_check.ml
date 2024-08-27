@@ -1972,7 +1972,13 @@ let handle_mode
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
     let range = find_ide_range_exn src in
-    Code_actions_cli_lib.run ctx entry range ~title_prefix ~use_snippet_edits
+    Code_actions_cli_lib.run
+      ctx
+      ~warnings_saved_state:None
+      entry
+      range
+      ~title_prefix
+      ~use_snippet_edits
   | Ide_diagnostics ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

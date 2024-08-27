@@ -117,6 +117,7 @@ let to_action
 
 let find
     ~(ctx : Provider_context.t)
+    ~warnings_saved_state
     ~(entry : Provider_context.entry)
     ~(range : Lsp.range) : [ `Refactor | `Quickfix ] Code_action_types.t list =
   let pos =
@@ -127,7 +128,9 @@ let find
     let path = entry.Provider_context.path in
     Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
   in
-  let quickfixes = Code_actions_quickfixes.find ~entry pos ctx in
+  let quickfixes =
+    Code_actions_quickfixes.find ~entry pos ctx ~warnings_saved_state
+  in
   let quickfix_titles =
     SSet.of_list @@ List.map quickfixes ~f:(fun q -> q.Code_action_types.title)
   in
@@ -168,10 +171,11 @@ let update_edit ~f =
 
 let go
     ~(ctx : Provider_context.t)
+    ~warnings_saved_state
     ~(entry : Provider_context.entry)
     ~(range : Ide_api_types.range) =
   let strip = update_edit ~f:(fun _ -> Lsp.CodeAction.UnresolvedEdit ()) in
-  find ~ctx ~entry ~range:(lsp_range_of_ide_range range)
+  find ~ctx ~warnings_saved_state ~entry ~range:(lsp_range_of_ide_range range)
   |> List.map ~f:to_action
   |> List.map ~f:strip
 
@@ -191,6 +195,7 @@ the same title, so cannot resolve the code action.
 
 let resolve
     ~(ctx : Provider_context.t)
+    ~warnings_saved_state
     ~(entry : Provider_context.entry)
     ~(range : Ide_api_types.range)
     ~(resolve_title : string)
@@ -206,7 +211,7 @@ let resolve
             else
               remove_snippets edit))
   in
-  find ~ctx ~entry ~range:(lsp_range_of_ide_range range)
+  find ~ctx ~warnings_saved_state ~entry ~range:(lsp_range_of_ide_range range)
   |> List.find ~f:(fun code_action ->
          String.equal code_action.Code_action_types.title resolve_title)
   (* When we can't find a matching code action, ContentModified is the right error

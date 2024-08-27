@@ -287,6 +287,7 @@ let initialize_from_saved_state
     ~(naming_table_load_info :
        ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
        option)
+    ~warnings_saved_state_path
     ~(config : (string * string) list)
     ~(ignore_hh_version : bool)
     ~(open_files : Path.t list) :
@@ -303,6 +304,7 @@ let initialize_from_saved_state
             {
               Initialize_from_saved_state.root;
               naming_table_load_info;
+              warnings_saved_state_path;
               config;
               ignore_hh_version;
               open_files;

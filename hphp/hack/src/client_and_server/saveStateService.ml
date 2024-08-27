@@ -83,7 +83,7 @@ let load_saved_state_exn
         warning_hashes_path;
       Warnings_saved_state.empty
     ) else
-      Marshal.from_channel (In_channel.create ~binary:true warning_hashes_path)
+      Warnings_saved_state.read_from_disk warning_hashes_path
   in
   (old_naming_table, { old_errors; old_warnings })
 

@@ -162,6 +162,7 @@ type istate = {
       have changed since sqlite. When a file is changed on disk, we need this to
       know which shallow decls to invalidate. Note: while the forward-naming-table
       is stored here, the reverse-naming-table is instead stored in ctx. *)
+  warnings_saved_state: Warnings_saved_state.t option; [@opaque]
   sienv: SearchUtils.si_env; [@opaque]
       (** sienv provides autocomplete and find-symbols. It is constructed during
       initialize and updated during process_changed_files. It stores a few
@@ -331,6 +332,7 @@ let initialize1
        config;
        open_files;
        naming_table_load_info = _;
+       warnings_saved_state_path = _;
        ignore_hh_version = _;
      } :
       ClientIdeMessage.Initialize_from_saved_state.t) : dstate =
@@ -418,7 +420,9 @@ let initialize2
   let start_time = log_startup_time "load_naming_table" dstate.start_time in
   log_debug "initialize2";
   match init_result with
-  | Ok { ClientIdeInit.naming_table; sienv; changed_files } ->
+  | Ok
+      { ClientIdeInit.naming_table; warnings_saved_state; sienv; changed_files }
+    ->
     let changed_files_to_process =
       Relative_path.Set.union
         dstate.changed_files_to_process
@@ -437,6 +441,7 @@ let initialize2
     let istate =
       {
         naming_table;
+        warnings_saved_state;
         sienv;
         icommon = dstate.dcommon;
         iopen_files = dstate.dopen_files;
@@ -562,7 +567,9 @@ let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
 
 (** We avoid showing typing errors if there are parsing errors. *)
 let get_user_facing_errors
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) : Errors.t =
+    ~(ctx : Provider_context.t)
+    ~warnings_saved_state
+    ~(entry : Provider_context.entry) : Errors.t =
   let (_, ast_errors) =
     Ast_provider.compute_parser_return_and_ast_errors
       ~popt:(Provider_context.get_popt ctx)
@@ -570,7 +577,10 @@ let get_user_facing_errors
   in
   if Errors.is_empty ast_errors then
     let { Tast_provider.Compute_tast_and_errors.errors = all_errors; _ } =
-      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
+      Tast_provider.compute_tast_and_errors_quarantined
+        ~ctx
+        ~entry
+        ~warnings_saved_state
     in
     all_errors
   else
@@ -619,7 +629,10 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
     (* Here we'll get either cached errors from the cached entry, or will recompute errors
        from the partially cached entry, or will compute errors from the file on disk. *)
     let ctx = make_singleton_ctx istate.icommon entry in
-    get_user_facing_errors ~ctx ~entry
+    get_user_facing_errors
+      ~ctx
+      ~warnings_saved_state:istate.warnings_saved_state
+      ~entry
 
 (** handle_request invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
@@ -703,14 +716,17 @@ let handle_request
       Relative_path.Set.union dstate.changed_files_to_process changes
     in
     (During_init { dstate with changed_files_to_process }, Ok ())
-  | (Initialized istate, Did_change_watched_files changes) ->
+  | ( Initialized
+        ({ icommon; naming_table; sienv; iopen_files; warnings_saved_state = _ }
+        as istate),
+      Did_change_watched_files changes ) ->
     let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches
-        ~ctx:(make_empty_ctx istate.icommon)
-        ~naming_table:istate.naming_table
-        ~sienv:istate.sienv
-        ~local_memory:istate.icommon.local_memory
-        ~open_files:istate.iopen_files
+        ~ctx:(make_empty_ctx icommon)
+        ~naming_table
+        ~sienv
+        ~local_memory:icommon.local_memory
+        ~open_files:iopen_files
         changes
     in
     let istate = { istate with naming_table; sienv } in
@@ -753,7 +769,12 @@ let handle_request
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
     in
-    let errors = get_user_facing_errors ~ctx ~entry in
+    let errors =
+      get_user_facing_errors
+        ~ctx
+        ~warnings_saved_state:istate.warnings_saved_state
+        ~entry
+    in
     published_errors_ref := Some errors;
     let errors = Errors.sort_and_finalize errors in
     let diagnostics = Ide_diagnostics.convert ~ctx ~entry errors in
@@ -1158,7 +1179,11 @@ let handle_request
 
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          Code_actions_services.go ~ctx ~entry ~range)
+          Code_actions_services.go
+            ~ctx
+            ~warnings_saved_state:istate.warnings_saved_state
+            ~entry
+            ~range)
     in
 
     (* We'll take this opportunity to make sure we've returned the latest errors.
@@ -1167,7 +1192,12 @@ let handle_request
        mainly -- it's simpler to perform+handle this logic in just a few places rather than
        everywhere, and also because codeAction is called so frequently (e.g. upon changing
        tabs) that it's the best opportunity we have. *)
-    let errors = get_user_facing_errors ~ctx ~entry in
+    let errors =
+      get_user_facing_errors
+        ~ctx
+        ~warnings_saved_state:istate.warnings_saved_state
+        ~entry
+    in
     let errors_opt =
       match !published_errors_ref with
       | Some published_errors when phys_equal published_errors errors ->
@@ -1203,6 +1233,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           Code_actions_services.resolve
             ~ctx
+            ~warnings_saved_state:istate.warnings_saved_state
             ~entry
             ~range
             ~resolve_title
@@ -1491,6 +1522,7 @@ module Test = struct
     in
     {
       naming_table;
+      warnings_saved_state = None;
       sienv;
       icommon = { hhi_root = Path.make "/"; config; local_config; local_memory };
       iopen_files = Relative_path.Map.empty;

@@ -34,7 +34,10 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~contents:foo_contents
   in
   let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+    Tast_provider.compute_tast_and_errors_unquarantined
+      ~ctx
+      ~entry
+      ~warnings_saved_state:None
   in
   Asserter.Int_asserter.assert_equals
     1
@@ -63,7 +66,10 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~contents:foo_contents1
   in
   let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+    Tast_provider.compute_tast_and_errors_unquarantined
+      ~ctx
+      ~entry
+      ~warnings_saved_state:None
   in
   Asserter.Int_asserter.assert_equals
     0
@@ -90,7 +96,10 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~contents:foo_contents
   in
   let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+    Tast_provider.compute_tast_and_errors_unquarantined
+      ~ctx
+      ~entry
+      ~warnings_saved_state:None
   in
   Asserter.Int_asserter.assert_equals
     1

@@ -145,7 +145,6 @@ TEST_F(ParserTest, basic_section) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <line:1:1, line:3:23>\n"
       "| `- variable-lookup <line:1:5, col:21> 'news.has-update?'\n"
-      "| |- newline <line:1:23, line:2:1> '\\n'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
       "| |- variable <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
@@ -162,7 +161,6 @@ TEST_F(ParserTest, inverted_section) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <inverted> <line:1:1, line:3:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- newline <line:1:22, line:2:1> '\\n'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
       "| |- variable <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
@@ -181,17 +179,12 @@ TEST_F(ParserTest, nested_sections) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <line:1:1, line:5:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- newline <line:1:22, line:2:1> '\\n'\n"
-      "| |- text <line:2:1, col:3> '  '\n"
       "| |- section-block <inverted> <line:2:3, line:4:28>\n"
       "| | `- variable-lookup <line:2:6, col:26> 'update.is-important?'\n"
-      "| | |- newline <line:2:28, line:3:1> '\\n'\n"
       "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
       "| | |- variable <line:3:24, col:31> 'foo'\n"
       "| | |- text <line:3:31, col:42> ' happening!'\n"
-      "| | |- newline <line:3:42, line:4:1> '\\n'\n"
-      "| | |- text <line:4:1, col:3> '  '\n"
-      "| |- newline <line:4:28, line:5:1> '\\n'\n");
+      "| | |- newline <line:3:42, line:4:1> '\\n'\n");
 }
 
 TEST_F(ParserTest, mismatched_section_hierarchy) {
@@ -307,10 +300,8 @@ TEST_F(ParserTest, partial_apply_in_section) {
       "root [path/to/test-1.whisker]\n"
       "|- section-block <line:1:1, line:3:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
-      "| |- newline <line:1:22, line:2:1> '\\n'\n"
       "| |- text <line:2:1, col:3> '  '\n"
-      "| |- partial-apply <line:2:3, col:20> 'print/news'\n"
-      "| |- newline <line:2:20, line:3:1> '\\n'\n");
+      "| |- partial-apply <line:2:3, col:20> 'print/news'\n");
 }
 
 TEST_F(ParserTest, partial_apply_no_id) {
@@ -406,6 +397,201 @@ TEST_F(ParserTest, comment_escaped_empty) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- comment <line:1:1, col:10> ''\n");
+}
+
+TEST_F(ParserTest, strip_standalone_lines) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "{{#boolean}}\n"
+      "|\n"
+      "{{/boolean}}\n"
+      "| A Line\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- section-block <line:2:1, line:4:13>\n"
+      "| `- variable-lookup <line:2:4, col:11> 'boolean'\n"
+      "| |- text <line:3:1, col:2> '|'\n"
+      "| |- newline <line:3:2, line:4:1> '\\n'\n"
+      "|- text <line:5:1, col:9> '| A Line'\n"
+      "|- newline <line:5:9, line:6:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, strip_standalone_lines_indented) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{#boolean}}\n"
+      "|\n"
+      "  {{/boolean}}\n"
+      "| A Line\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- section-block <line:2:3, line:4:15>\n"
+      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "| |- text <line:3:1, col:2> '|'\n"
+      "| |- newline <line:3:2, line:4:1> '\\n'\n"
+      "|- text <line:5:1, col:9> '| A Line'\n"
+      "|- newline <line:5:9, line:6:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, strip_standalone_lines_indented_at_eof) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{#boolean}}\n"
+      "|\n"
+      "  {{/boolean}}  ");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- section-block <line:2:3, line:4:15>\n"
+      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "| |- text <line:3:1, col:2> '|'\n"
+      "| |- newline <line:3:2, line:4:1> '\\n'\n");
+}
+
+TEST_F(
+    ParserTest, strip_standalone_lines_indented_at_eof_ending_with_template) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{#boolean}}\n"
+      "|\n"
+      "  {{/boolean}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- section-block <line:2:3, line:4:15>\n"
+      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "| |- text <line:3:1, col:2> '|'\n"
+      "| |- newline <line:3:2, line:4:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, strip_standalone_lines_multiple) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{#boolean}} {{#boolean}} \n"
+      "|\n"
+      "  {{/boolean}}\n"
+      "  {{/boolean}}\n"
+      "| A Line\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- section-block <line:2:3, line:5:15>\n"
+      "| `- variable-lookup <line:2:6, col:13> 'boolean'\n"
+      "| |- section-block <line:2:16, line:4:15>\n"
+      "| | `- variable-lookup <line:2:19, col:26> 'boolean'\n"
+      "| | |- text <line:3:1, col:2> '|'\n"
+      "| | |- newline <line:3:2, line:4:1> '\\n'\n"
+      "|- text <line:6:1, col:9> '| A Line'\n"
+      "|- newline <line:6:9, line:7:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, strip_standalone_lines_multiline) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{#boolean\n"
+      "       .condition}}  \n"
+      "|\n"
+      "  {{/boolean.condition}}\n"
+      "| A Line\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- section-block <line:2:3, line:5:25>\n"
+      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "| |- text <line:4:1, col:2> '|'\n"
+      "| |- newline <line:4:2, line:5:1> '\\n'\n"
+      "|- text <line:6:1, col:9> '| A Line'\n"
+      "|- newline <line:6:9, line:7:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, strip_standalone_lines_multiline_comment) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{^boolean\n"
+      "       .condition}} {{! unaffected }} \n"
+      "|\n"
+      "  {{/boolean.condition}}\n"
+      "| A Line\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- section-block <inverted> <line:2:3, line:5:25>\n"
+      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "| |- comment <line:3:21, col:38> ''\n"
+      "| |- text <line:4:1, col:2> '|'\n"
+      "| |- newline <line:4:2, line:5:1> '\\n'\n"
+      "|- text <line:6:1, col:9> '| A Line'\n"
+      "|- newline <line:6:9, line:7:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, strip_standalone_lines_multiline_ineligible) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{#boolean\n"
+      "       .condition}} {{ineligible}} \n"
+      "|\n"
+      "  {{/boolean.condition}}\n"
+      "| A Line\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- text <line:2:1, col:3> '  '\n"
+      "|- section-block <line:2:3, line:5:25>\n"
+      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "| |- text <line:3:20, col:21> ' '\n"
+      "| |- variable <line:3:21, col:35> 'ineligible'\n"
+      "| |- text <line:3:35, col:36> ' '\n"
+      "| |- newline <line:3:36, line:4:1> '\\n'\n"
+      "| |- text <line:4:1, col:2> '|'\n"
+      "| |- newline <line:4:2, line:5:1> '\\n'\n"
+      "|- text <line:6:1, col:9> '| A Line'\n"
+      "|- newline <line:6:9, line:7:1> '\\n'\n");
+}
+
+TEST_F(
+    ParserTest,
+    strip_standalone_lines_multiline_ineligible_partial_application) {
+  auto ast = parse_ast(
+      "| This Is\n"
+      "  {{#boolean\n"
+      "       .condition}} {{> ineligible}} \n"
+      "|\n"
+      "  {{/boolean.condition}}\n"
+      "| A Line\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:10> '| This Is'\n"
+      "|- newline <line:1:10, line:2:1> '\\n'\n"
+      "|- text <line:2:1, col:3> '  '\n"
+      "|- section-block <line:2:3, line:5:25>\n"
+      "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
+      "| |- text <line:3:20, col:21> ' '\n"
+      "| |- partial-apply <line:3:21, col:37> 'ineligible'\n"
+      "| |- text <line:3:37, col:38> ' '\n"
+      "| |- newline <line:3:38, line:4:1> '\\n'\n"
+      "| |- text <line:4:1, col:2> '|'\n"
+      "| |- newline <line:4:2, line:5:1> '\\n'\n"
+      "|- text <line:6:1, col:9> '| A Line'\n"
+      "|- newline <line:6:9, line:7:1> '\\n'\n");
 }
 
 } // namespace whisker

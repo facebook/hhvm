@@ -15,6 +15,7 @@
  */
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/detail/string.h>
 #include <thrift/compiler/whisker/lexer.h>
 #include <thrift/compiler/whisker/parser.h>
 
@@ -22,6 +23,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <iterator>
 #include <optional>
 #include <utility>
 #include <variant>
@@ -159,6 +161,262 @@ struct [[nodiscard]] parse_result {
   std::optional<success> result_;
 };
 
+bool try_consume_token(parser_scan_window* scan, tok kind) {
+  assert(scan);
+  if (scan->peek().kind == kind) {
+    scan->advance();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * The Mustache spec contains this concept called "standalone lines".
+ *   https://github.com/mustache/spec/blob/66f078e0d534515d8df23d0d3764dccda74e042b/specs/sections.yml#L279-L305
+ *
+ * If a line opens a section block, and the rest of the line is whitespace only,
+ * then that whitespace is stripped from the output.
+ *
+ * Consider the following template:
+ *
+ *     {{#true_value}}
+ *       hello
+ *     {{/true_value}}
+ *
+ * This will output "  hello\n". Notice that the newline following
+ * "{{#true_value}}" is stripped. However, the newline after "hello" is
+ * retained.
+ *
+ * If we have a {{variable}} then we do not see such behavior:
+ *
+ *     {{#true_value}} {{foo}}
+ *       hello
+ *     {{/true_value}}
+ *
+ * This will output " \n  hello\n".
+ *
+ * Things get even weirder because the definition of a "line" is quite liberal.
+ * Consider the following template:
+ *
+ *     | This Is
+ *       {{#boolean
+ *            .condition}}
+ *     |
+ *       {{/boolean.condition}}
+ *     | A Line
+ *
+ * This will output: "| This Is\n| A Line\n". In other words, the
+ * {{#boolean.condition}} "line" should be stripped of whitespace even though
+ * the whitespace spans multiple lines. This is because "{{ }}" eats whitespace
+ * and newlines can only appear in textual content.
+ *
+ * Partials are also a special case, for three reasons:
+ *   1. They can be contextually standalone even though they are not invisible.
+ *   2. They cannot be combined with other standalone constructs. For example,
+ *      two partial applications on the same line is not standalone.
+ *   3. Standalone partial whitespace stripping applies only to its right side.
+ *
+ * Why does this belong here (in between the lexer and the parser)?
+ *
+ *   The standalone lines rules are particularly weird because it involves
+ *   checking for blocks (a parsed AST concept) but also asserts that whitespace
+ *   be removed (typically in the lexer's domain, not the parser).
+ *
+ *   In other words, the lexer is too "dumb" and the parser is too "refined".
+ *   Therefore, this step can be considered a lexer post-process or a parser
+ *   pre-process step.
+ *
+ * The implementation here is aimed to match mstch.
+ */
+class standalone_lines_scanner {
+ public:
+  static void strip_lines(std::vector<token>& tokens) {
+    assert(!tokens.empty());
+    if (tokens.back().kind == tok::error) {
+      // No point stripping lines
+      return;
+    }
+
+    parser_scan_window scan(
+        tokens.cbegin() /* start */,
+        tokens.cbegin() /* head */,
+        tokens.cend() /* end */);
+
+    using cursor = parser_scan_window::cursor;
+
+    // Chunk scanning into lines. We scan each line and mark tokens for removal
+    // in a bitmap, then make a pass to erase them. This is because we don't
+    // want to modify the vector while iterating over it.
+    std::vector<bool> tokens_to_remove(tokens.size());
+    const auto mark_for_removal = [&](cursor pos) {
+      assert(pos->kind == tok::text || pos->kind == tok::newline);
+      std::size_t index = std::distance(tokens.cbegin(), pos);
+      assert(!tokens_to_remove[index]);
+      tokens_to_remove[index] = true;
+    };
+
+    const auto remove_marked_tokens = [&] {
+      // Poor man's std::remove_if (which does not provide the iterator to the
+      // predicate, which we need to access the bitmap).
+      std::size_t compact = 0;
+      for (std::size_t run = 0; run < tokens.size(); ++run) {
+        if (!tokens_to_remove[run]) {
+          std::swap(tokens[compact], tokens[run]);
+          ++compact;
+        }
+      }
+      tokens.erase(tokens.begin() + compact, tokens.end());
+    };
+
+    struct line_info {
+      cursor start;
+      // true iff the line contains a standalone construct described above
+      bool is_standalone_eligible = false;
+    };
+    line_info current_line{scan.head};
+
+    const auto begin_next_line = [&]() {
+      current_line = {scan.head};
+      scan = scan.make_fresh();
+    };
+
+    const auto drain_current_line = [&]() {
+      do {
+        const auto& t = scan.advance();
+        if (t.kind == tok::newline) {
+          break;
+        }
+      } while (scan.can_advance());
+      begin_next_line();
+    };
+
+    const auto strip_current_line = [&]() {
+      if (current_line.is_standalone_eligible) {
+        for (cursor c = current_line.start; c < scan.head; ++c) {
+          if (c->kind == tok::text || c->kind == tok::newline) {
+            mark_for_removal(c);
+          }
+        }
+      }
+      begin_next_line();
+    };
+
+    while (scan.can_advance()) {
+      if (scan.peek().kind == tok::newline) {
+        scan.advance();
+        strip_current_line();
+      }
+
+      if (parse_result whitespace = parse_whitespace(scan)) {
+        if (!std::move(whitespace).consume_and_advance(&scan)) {
+          drain_current_line();
+          continue;
+        }
+      } else if (parse_result standalone = parse_standalone_compatible(scan)) {
+        switch (std::move(standalone).consume_and_advance(&scan)) {
+          case standalone_compatible_kind::ineligible:
+            drain_current_line();
+            continue;
+          case standalone_compatible_kind::partial_apply:
+            // Do not strip the left side
+            current_line.start = scan.head;
+            if (current_line.is_standalone_eligible) {
+              // Even though we allow multiple standalone constructs on the same
+              // line, for partials it does not apply
+              drain_current_line();
+              continue;
+            }
+            break;
+          default:
+            // These blocks strip both sides
+            break;
+        }
+        current_line.is_standalone_eligible = true;
+      } else {
+        // This line is not eligible for stripping
+        drain_current_line();
+      }
+    }
+
+    // In case, last line is not terminated by a newline.
+    // Otherwise, the current line is ineligible so nothing happens.
+    strip_current_line();
+
+    remove_marked_tokens();
+  }
+
+  // A line containing any of the following constructs...
+  //   - "{{! ... }}"
+  //   - "{{# ... }}"
+  //   - "{{^ ... }}"
+  //   - "{{/ ... }}"
+  //   - "{{> ... }}"
+  // ..and ONLY those constructs are candidates for whitespace stripping. That's
+  // because these kind of templates are invisible in the output — their purpose
+  // is purely to express intent within the templating language.
+  // The only exception is partial applications, where only the right side is
+  // stripped when standalone.
+  enum class standalone_compatible_kind {
+    comment, // "{{!"
+    block, // "{{#", "{{^", or "{{"/"}
+    partial_apply, // "{{>"
+    ineligible // "{{variable}} for example
+  };
+  static parse_result<standalone_compatible_kind> parse_standalone_compatible(
+      parser_scan_window scan) {
+    assert(scan.empty());
+    if (!try_consume_token(&scan, tok::open)) {
+      return std::nullopt;
+    }
+
+    standalone_compatible_kind kind;
+    switch (scan.advance().kind.value) {
+      case tok::bang:
+        kind = standalone_compatible_kind::comment;
+        break;
+      case tok::pound:
+      case tok::caret:
+      case tok::slash:
+        kind = standalone_compatible_kind::block;
+        break;
+      case tok::gt:
+        kind = standalone_compatible_kind::partial_apply;
+        break;
+      default:
+        kind = standalone_compatible_kind::ineligible;
+    }
+
+    // Keep consuming tokens until we reach the end of the "{{ }}"... even if it
+    // means going over to the next line. Templates are supposed to eat
+    // whitespace.
+    while (scan.can_advance()) {
+      if (scan.advance().kind == tok::close) {
+        break;
+      }
+    }
+    return {kind, scan};
+  }
+
+  // Returns:
+  //   - std::nullopt if the current token is not text
+  //   - true if the current token is text and is whitespace only
+  //   - false if the current token is text and contains non-whitespace
+  //     characters
+  static parse_result<bool> parse_whitespace(parser_scan_window scan) {
+    assert(scan.empty());
+    const auto& text = scan.advance();
+    if (text.kind != tok::text) {
+      return std::nullopt;
+    }
+    for (char c : text.string_value()) {
+      if (!detail::is_whitespace(c)) {
+        return {false, scan};
+      }
+    }
+    return {true, scan};
+  }
+};
+
 /**
  * Recursive descent parser for Whisker templates that outputs
  * whisker::ast::root if successful.
@@ -220,15 +478,6 @@ class parser {
         "expected {} but found {}",
         expected,
         to_string(scan.peek().kind));
-  }
-
-  bool try_consume_token(parser_scan_window* scan, tok kind) {
-    assert(scan);
-    if (scan->peek().kind == kind) {
-      scan->advance();
-      return true;
-    }
-    return false;
   }
 
   // root → { body* }
@@ -620,7 +869,9 @@ class parser {
 } // namespace
 
 std::optional<ast::root> parse(source src, diagnostics_engine& diags) {
-  return parser(lexer(std::move(src), diags).tokenize_all(), diags).parse();
+  auto tokens = lexer(std::move(src), diags).tokenize_all();
+  standalone_lines_scanner::strip_lines(tokens);
+  return parser(std::move(tokens), diags).parse();
 }
 
 } // namespace whisker

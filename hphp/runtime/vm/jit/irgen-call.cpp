@@ -1397,9 +1397,23 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
     emitModuleBoundaryCheck(env, cachedFunc);
     prepareAndCallProfiled(env, cachedFunc, fca, nullptr, false, false);
   };
+  auto const data = [&](const Func* func, bool success) {
+    auto id = func ? func->getFuncId().toInt(): FuncId::Invalid.toInt();
+    return LoggingSpeculateData {
+      nullptr,
+      nullptr,
+      funcName,
+      Op::FCallFuncD,
+      id,
+      success,
+    };
+  };
 
   switch (lookup.tag) {
     case Func::FuncLookupResult::None:
+      if (RO::SandboxSpeculate && RO::EvalLogClsSpeculation) {
+        gen(env, LogClsSpeculation, data(nullptr, false));
+      }
       return slow();
     case Func::FuncLookupResult::Exact:
       return fast();
@@ -1412,11 +1426,17 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
             gen(env, JmpZero, taken, equal);
         },
         [&] {
+          if (RO::EvalLogClsSpeculation) {
+            gen(env, LogClsSpeculation, data(lookup.func, true));
+          }
           fast();
           return;
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
+          if (RO::EvalLogClsSpeculation) {
+            gen(env, LogClsSpeculation, data(lookup.func, false));
+          }
           slow();
           return;
         }

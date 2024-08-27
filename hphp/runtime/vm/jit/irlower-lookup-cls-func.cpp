@@ -360,7 +360,7 @@ static void logClsSpeculation(
   ClassId::Id clsId,
   bool success) {
   StructuredLogEntry entry;
-  entry.setStr("cls", clsName->data());
+  entry.setStr("cls", clsName ? clsName->data(): "no cls");
   entry.setStr("method", methName ? methName->data() : "no method");
   entry.setStr("ctx", ctxName ? ctxName->data() : "no context");
   entry.setStr("op", op);

@@ -128,6 +128,55 @@ class native_object {
    * The default implementation compares by object identity.
    */
   virtual bool operator==(const native_object& other) const;
+
+  /**
+   * A class that allows "array-like" random access over an underlying sequence
+   * of objects.
+   */
+  class sequence {
+   public:
+    virtual ~sequence() = default;
+    /**
+     * Returns the number of elements in the sequence.
+     */
+    virtual std::size_t size() const = 0;
+    /**
+     * Returns the object at the specified index within the sequence.
+     *
+     * Preconditions:
+     *   - index < size()
+     */
+    virtual const object& at(std::size_t index) const = 0;
+  };
+  /**
+   * Returns an implementation of sequence if this object supports array-like
+   * iteration. Otherwise, returns nullptr.
+   *
+   * When this function returns a non-null pointer, the returned object can be
+   * used in Whisker template looping constructs, such as section blocks.
+   *
+   * This function returns a shared_ptr so that the returned object can be this
+   * object itself (which is expected to be stored as a native_object::ptr).
+   * Doing so prevents an extra heap allocation in favor of an atomic increment.
+   *
+   *     class my_object : public native_object,
+   *                       public native_object::sequence,
+   *                       public std::enable_shared_from_this<my_object> {
+   *      public:
+   *       std::shared_ptr<const sequence> as_sequence() const override {
+   *         return shared_from_this();
+   *       }
+   *
+   *       // Other functions...
+   *     };
+   *
+   * An array-like object is still allowed to have named properties supported
+   * via lookup_property(). This function opts in to strictly additional
+   * capabilities.
+   */
+  virtual std::shared_ptr<const sequence> as_sequence() const {
+    return nullptr;
+  }
 };
 
 namespace detail {

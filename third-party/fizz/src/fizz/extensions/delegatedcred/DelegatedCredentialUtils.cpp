@@ -189,6 +189,16 @@ void DelegatedCredentialUtils::checkCredentialTimeValidity(
         "credential validity is longer than a week from now",
         AlertDescription::illegal_parameter);
   }
+
+  auto notAfter = X509_get0_notAfter(parentCert.get());
+  auto notAfterTime =
+      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notAfter);
+  // Credential expiry time must be less than certificate's expiry time
+  if (credentialExpiresTime >= notAfterTime) {
+    throw FizzException(
+        "credential validity is longer than parent cert validity",
+        AlertDescription::illegal_parameter);
+  }
 }
 } // namespace extensions
 } // namespace fizz

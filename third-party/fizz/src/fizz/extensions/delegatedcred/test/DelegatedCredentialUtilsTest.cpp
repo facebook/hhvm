@@ -8,6 +8,7 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/ssl/OpenSSLCertUtils.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
 #include <fizz/crypto/Utils.h>
@@ -177,6 +178,32 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialValidForTooLong) {
             fizz::test::getCert(kCert), credential, clock_);
       },
       "credential validity is longer than a week from now");
+}
+
+TEST_F(DelegatedCredentialUtilsTest, TestCertNotAfter) {
+  auto cert = fizz::test::getCert(kCert);
+
+  auto notBefore = X509_get0_notBefore(cert.get());
+  auto notBeforeTime =
+      folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notBefore);
+  auto notAfterTime = clock_->getCurrentTime() + std::chrono::days(1);
+  auto notAfterTimeT = std::chrono::system_clock::to_time_t(notAfterTime);
+  folly::ssl::ASN1TimeUniquePtr notAfterTimeASN1(
+      ASN1_TIME_set(nullptr, notAfterTimeT));
+  X509_set1_notAfter(cert.get(), notAfterTimeASN1.get());
+
+  auto credentialExpiryTime = notAfterTime + std::chrono::seconds(1);
+  auto credentialValidTime = std::chrono::duration_cast<std::chrono::seconds>(
+      credentialExpiryTime - notBeforeTime);
+
+  auto credential = getCredential();
+  credential.valid_time = credentialValidTime.count();
+  expectThrows(
+      [&]() {
+        DelegatedCredentialUtils::checkCredentialTimeValidity(
+            cert, credential, clock_);
+      },
+      "credential validity is longer than parent cert validity");
 }
 } // namespace test
 } // namespace extensions

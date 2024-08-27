@@ -5,8 +5,7 @@ import json
 import os
 from typing import ClassVar, Dict, List, Optional, Type
 
-import test_case
-from common_tests import CommonTestDriver
+import hphp.hack.test.integration.test_case as test_case
 from glean.schema.gencode.types import GenCode
 from glean.schema.hack.types import (
     ClassConstDeclaration,
@@ -53,7 +52,8 @@ from glean.schema.hack.types import (
     TypeInfo,
 )
 from glean.schema.src.types import FileLines
-from hh_paths import hh_server
+from hphp.hack.test.integration.common_tests import CommonTestDriver
+from hphp.hack.test.integration.hh_paths import hh_server
 from thrift.py3 import deserialize, Protocol, Struct
 
 

@@ -10,11 +10,14 @@ import stat
 import time
 from typing import TextIO
 
-import common_tests
-import hierarchy_tests
-from hh_paths import hh_client
-from saved_state_test_driver import SavedStateTestDriver, SaveStateResult
-from test_case import TestCase
+import hphp.hack.test.integration.common_tests as common_tests
+import hphp.hack.test.integration.hierarchy_tests as hierarchy_tests
+from hphp.hack.test.integration.hh_paths import hh_client
+from hphp.hack.test.integration.saved_state_test_driver import (
+    SavedStateTestDriver,
+    SaveStateResult,
+)
+from hphp.hack.test.integration.test_case import TestCase
 
 
 def write_echo_json(f: TextIO, obj: object) -> None:

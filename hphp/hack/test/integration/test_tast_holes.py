@@ -4,8 +4,8 @@ from __future__ import absolute_import, unicode_literals
 import json
 import os
 
-from common_tests import CommonTestDriver
-from test_case import TestCase
+from hphp.hack.test.integration.common_tests import CommonTestDriver
+from hphp.hack.test.integration.test_case import TestCase
 
 
 class TastHolesDriver(CommonTestDriver):

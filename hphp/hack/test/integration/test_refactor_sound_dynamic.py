@@ -1,7 +1,7 @@
 # pyre-unsafe
 import os
 
-import common_tests
+import hphp.hack.test.integration.common_tests as common_tests
 
 
 class TestRenameSoundDynamic(common_tests.CommonTests):

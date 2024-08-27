@@ -1,6 +1,6 @@
 # pyre-unsafe
-import common_tests
-from test_case import TestCase
+import hphp.hack.test.integration.common_tests as common_tests
+from hphp.hack.test.integration.test_case import TestCase
 
 
 class ImplicitPessTests(TestCase[common_tests.CommonTestDriver]):

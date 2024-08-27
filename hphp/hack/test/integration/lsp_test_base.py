@@ -12,12 +12,12 @@ import unittest
 import urllib.parse
 from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
-import common_tests
-from hh_paths import hh_server
-from lspcommand import LspCommandProcessor, Transcript
-from lsptestspec import line, LspTestSpec
-from test_case import TestCase
-from utils import interpolate_variables, Json, JsonObject
+import hphp.hack.test.integration.common_tests as common_tests
+from hphp.hack.test.integration.hh_paths import hh_server
+from hphp.hack.test.integration.lspcommand import LspCommandProcessor, Transcript
+from hphp.hack.test.integration.lsptestspec import line, LspTestSpec
+from hphp.hack.test.integration.test_case import TestCase
+from hphp.hack.test.integration.utils import interpolate_variables, Json, JsonObject
 
 
 class LspTestDriver(common_tests.CommonTestDriver):

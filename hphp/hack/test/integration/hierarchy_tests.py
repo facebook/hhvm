@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # pyre-strict
 
-from common_tests import CommonTestDriver
-from test_case import TestCase
+from hphp.hack.test.integration.common_tests import CommonTestDriver
+from hphp.hack.test.integration.test_case import TestCase
 
 
 class HierarchyTests(TestCase[CommonTestDriver]):

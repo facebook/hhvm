@@ -23,9 +23,12 @@ from typing import (
     TypeVar,
 )
 
-from hh_paths import hh_client
-from jsonrpc_stream import JsonRpcStreamReader, JsonRpcStreamWriter
-from utils import Json
+from hphp.hack.test.integration.hh_paths import hh_client
+from hphp.hack.test.integration.jsonrpc_stream import (
+    JsonRpcStreamReader,
+    JsonRpcStreamWriter,
+)
+from hphp.hack.test.integration.utils import Json
 
 
 # pyre-fixme[4]: Attribute must be annotated.

@@ -21,15 +21,19 @@ from typing import (
 )
 
 import libcst
-from libcst.metadata import CodeRange, MetadataWrapper, PositionProvider
-from lspcommand import LspCommandProcessor, Transcript, TranscriptEntry
-from utils import (
+from hphp.hack.test.integration.lspcommand import (
+    LspCommandProcessor,
+    Transcript,
+    TranscriptEntry,
+)
+from hphp.hack.test.integration.utils import (
     fixup_hhi_json,
     interpolate_variables,
     Json,
     uninterpolate_variables,
     VariableMap,
 )
+from libcst.metadata import CodeRange, MetadataWrapper, PositionProvider
 
 
 _MessageSpec = Union[

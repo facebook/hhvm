@@ -7,8 +7,8 @@ import time
 import unittest
 from typing import List, Optional, Tuple
 
-import common_tests
-from hh_paths import hh_client
+import hphp.hack.test.integration.common_tests as common_tests
+from hphp.hack.test.integration.hh_paths import hh_client
 
 
 class FreshInitTestDriver(common_tests.CommonTestDriver):

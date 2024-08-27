@@ -20,8 +20,8 @@ from typing import (
     Union,
 )
 
-import common_tests
-from hh_paths import hh_client, hh_server
+import hphp.hack.test.integration.common_tests as common_tests
+from hphp.hack.test.integration.hh_paths import hh_client, hh_server
 
 
 T = TypeVar("T")

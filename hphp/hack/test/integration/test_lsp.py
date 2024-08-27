@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 from typing import Union
 
-from lsp_test_base import LspTestBase
-from lsptestspec import line, LspTestSpec, NoResponse
+from hphp.hack.test.integration.lsp_test_base import LspTestBase
+from hphp.hack.test.integration.lsptestspec import line, LspTestSpec, NoResponse
 
 """
 Existence of this file indicates that a Hack notebook is stopped at a breakpoint

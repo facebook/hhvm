@@ -648,6 +648,7 @@ class SerializedUnion final  {
   bool operator==(const SerializedUnion&) const;
   bool operator<(const SerializedUnion&) const;
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
     using T0 = ::std::string;
@@ -658,6 +659,7 @@ class SerializedUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string&& t) {
     using T0 = ::std::string;
@@ -668,6 +670,7 @@ class SerializedUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_s(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
@@ -676,6 +679,7 @@ class SerializedUnion final  {
   }
 
 
+  /** Glean { "field": "i" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -1632,6 +1636,7 @@ class MarshalUnion final  {
   bool operator==(const MarshalUnion&) const;
   bool operator<(const MarshalUnion&) const;
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
     using T0 = ::std::string;
@@ -1642,6 +1647,7 @@ class MarshalUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string&& t) {
     using T0 = ::std::string;
@@ -1652,6 +1658,7 @@ class MarshalUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_s(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
@@ -1660,6 +1667,7 @@ class MarshalUnion final  {
   }
 
 
+  /** Glean { "field": "i" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;

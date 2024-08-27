@@ -1363,6 +1363,7 @@ class ExampleUnion final  {
   bool operator==(const ExampleUnion&) const;
   bool operator<(const ExampleUnion&) const;
 
+  /** Glean { "field": "fieldA" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::ContainerStruct& set_fieldA(::test::fixtures::tablebased::ContainerStruct const &t) {
     using T0 = ::test::fixtures::tablebased::ContainerStruct;
@@ -1373,6 +1374,7 @@ class ExampleUnion final  {
     return value_.fieldA;
   }
 
+  /** Glean { "field": "fieldA" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::ContainerStruct& set_fieldA(::test::fixtures::tablebased::ContainerStruct&& t) {
     using T0 = ::test::fixtures::tablebased::ContainerStruct;
@@ -1383,6 +1385,7 @@ class ExampleUnion final  {
     return value_.fieldA;
   }
 
+  /** Glean { "field": "fieldA" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::tablebased::ContainerStruct, T...>> ::test::fixtures::tablebased::ContainerStruct& set_fieldA(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::fieldA);
@@ -1390,6 +1393,7 @@ class ExampleUnion final  {
     return value_.fieldA;
   }
 
+  /** Glean { "field": "fieldB" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::TrivialTypesStruct& set_fieldB(::test::fixtures::tablebased::TrivialTypesStruct const &t) {
     using T0 = ::test::fixtures::tablebased::TrivialTypesStruct;
@@ -1400,6 +1404,7 @@ class ExampleUnion final  {
     return value_.fieldB;
   }
 
+  /** Glean { "field": "fieldB" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::TrivialTypesStruct& set_fieldB(::test::fixtures::tablebased::TrivialTypesStruct&& t) {
     using T0 = ::test::fixtures::tablebased::TrivialTypesStruct;
@@ -1410,6 +1415,7 @@ class ExampleUnion final  {
     return value_.fieldB;
   }
 
+  /** Glean { "field": "fieldB" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::tablebased::TrivialTypesStruct, T...>> ::test::fixtures::tablebased::TrivialTypesStruct& set_fieldB(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::fieldB);

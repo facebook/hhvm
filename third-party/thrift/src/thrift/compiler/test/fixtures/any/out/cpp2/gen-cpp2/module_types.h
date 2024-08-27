@@ -356,6 +356,7 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  /** Glean { "field": "myString" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_myString(::std::string const &t) {
     using T0 = ::std::string;
@@ -366,6 +367,7 @@ class MyUnion final  {
     return value_.myString;
   }
 
+  /** Glean { "field": "myString" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_myString(::std::string&& t) {
     using T0 = ::std::string;
@@ -376,6 +378,7 @@ class MyUnion final  {
     return value_.myString;
   }
 
+  /** Glean { "field": "myString" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_myString(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myString);

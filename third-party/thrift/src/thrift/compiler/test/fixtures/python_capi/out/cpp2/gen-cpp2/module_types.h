@@ -6294,6 +6294,7 @@ class Shallot final  {
   bool operator==(const Shallot&) const;
   bool operator<(const Shallot&) const;
 
+  /** Glean { "field": "myEnum" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::python_capi::MyEnum& set_myEnum(::test::fixtures::python_capi::MyEnum t = ::test::fixtures::python_capi::MyEnum()) {
     using T0 = ::test::fixtures::python_capi::MyEnum;
@@ -6305,6 +6306,7 @@ class Shallot final  {
   }
 
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::python_capi::PrimitiveStruct& set_myStruct(::test::fixtures::python_capi::PrimitiveStruct const &t) {
     using T0 = ::test::fixtures::python_capi::PrimitiveStruct;
@@ -6315,6 +6317,7 @@ class Shallot final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::python_capi::PrimitiveStruct& set_myStruct(::test::fixtures::python_capi::PrimitiveStruct&& t) {
     using T0 = ::test::fixtures::python_capi::PrimitiveStruct;
@@ -6325,6 +6328,7 @@ class Shallot final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::python_capi::PrimitiveStruct, T...>> ::test::fixtures::python_capi::PrimitiveStruct& set_myStruct(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
@@ -6335,6 +6339,7 @@ class Shallot final  {
   ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& set_intSet(::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>> t);
   ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& set_intSet(::std::set<::std::int64_t> const &t);
   ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& set_intSet(::std::set<::std::int64_t>&& t);
+  /** Glean { "field": "intSet" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::set<::std::int64_t>, T...>> ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>& set_intSet(T&&... t) {
     // defer resolution of ref_ in case ref_::element_type would here be incomplete
     using ref_ = folly::conditional_t<(sizeof...(T) < size_t(-1)), ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::int64_t>>, void>;
@@ -6345,6 +6350,7 @@ class Shallot final  {
   }
  public:
 
+  /** Glean { "field": "myString" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_myString(::std::string const &t) {
     using T0 = ::std::string;
@@ -6355,6 +6361,7 @@ class Shallot final  {
     return value_.myString;
   }
 
+  /** Glean { "field": "myString" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_myString(::std::string&& t) {
     using T0 = ::std::string;
@@ -6365,6 +6372,7 @@ class Shallot final  {
     return value_.myString;
   }
 
+  /** Glean { "field": "myString" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_myString(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myString);
@@ -6375,6 +6383,7 @@ class Shallot final  {
   ::std::shared_ptr<const ::std::vector<double>>& set_doubleList(::std::shared_ptr<const ::std::vector<double>> t);
   ::std::shared_ptr<const ::std::vector<double>>& set_doubleList(::std::vector<double> const &t);
   ::std::shared_ptr<const ::std::vector<double>>& set_doubleList(::std::vector<double>&& t);
+  /** Glean { "field": "doubleList" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<double>, T...>> ::std::shared_ptr<const ::std::vector<double>>& set_doubleList(T&&... t) {
     // defer resolution of ref_ in case ref_::element_type would here be incomplete
     using ref_ = folly::conditional_t<(sizeof...(T) < size_t(-1)), ::std::shared_ptr<const ::std::vector<double>>, void>;
@@ -6386,6 +6395,7 @@ class Shallot final  {
   ::std::unique_ptr<::std::map<::std::string, ::std::string>>& set_strMap(::std::unique_ptr<::std::map<::std::string, ::std::string>> t);
   ::std::unique_ptr<::std::map<::std::string, ::std::string>>& set_strMap(::std::map<::std::string, ::std::string> const &t);
   ::std::unique_ptr<::std::map<::std::string, ::std::string>>& set_strMap(::std::map<::std::string, ::std::string>&& t);
+  /** Glean { "field": "strMap" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::map<::std::string, ::std::string>, T...>> ::std::unique_ptr<::std::map<::std::string, ::std::string>>& set_strMap(T&&... t) {
     // defer resolution of ref_ in case ref_::element_type would here be incomplete
     using ref_ = folly::conditional_t<(sizeof...(T) < size_t(-1)), ::std::unique_ptr<::std::map<::std::string, ::std::string>>, void>;
@@ -6395,6 +6405,7 @@ class Shallot final  {
     return value_.strMap;
   }
 
+  /** Glean { "field": "adapted_int" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::apache::thrift::type::ProtocolId& set_adapted_int(::apache::thrift::type::ProtocolId t = ::apache::thrift::type::ProtocolId()) {
     using T0 = ::apache::thrift::type::ProtocolId;

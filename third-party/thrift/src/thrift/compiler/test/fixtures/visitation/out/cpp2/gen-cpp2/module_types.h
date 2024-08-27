@@ -1203,6 +1203,7 @@ class union1 final  {
   bool operator==(const union1&) const;
   bool operator<(const union1&) const;
 
+  /** Glean { "field": "ui" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ui(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -1214,6 +1215,7 @@ class union1 final  {
   }
 
 
+  /** Glean { "field": "ud" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud(double t = double()) {
     using T0 = double;
@@ -1225,6 +1227,7 @@ class union1 final  {
   }
 
 
+  /** Glean { "field": "us" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us(::std::string const &t) {
     using T0 = ::std::string;
@@ -1235,6 +1238,7 @@ class union1 final  {
     return value_.us;
   }
 
+  /** Glean { "field": "us" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us(::std::string&& t) {
     using T0 = ::std::string;
@@ -1245,6 +1249,7 @@ class union1 final  {
     return value_.us;
   }
 
+  /** Glean { "field": "us" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_us(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us);
@@ -1253,6 +1258,7 @@ class union1 final  {
   }
 
 
+  /** Glean { "field": "ue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -1620,6 +1626,7 @@ class union2 final  {
   bool operator==(const union2&) const;
   bool operator<(const union2&) const;
 
+  /** Glean { "field": "ui_2" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ui_2(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -1631,6 +1638,7 @@ class union2 final  {
   }
 
 
+  /** Glean { "field": "ud_2" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud_2(double t = double()) {
     using T0 = double;
@@ -1642,6 +1650,7 @@ class union2 final  {
   }
 
 
+  /** Glean { "field": "us_2" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_2(::std::string const &t) {
     using T0 = ::std::string;
@@ -1652,6 +1661,7 @@ class union2 final  {
     return value_.us_2;
   }
 
+  /** Glean { "field": "us_2" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_2(::std::string&& t) {
     using T0 = ::std::string;
@@ -1662,6 +1672,7 @@ class union2 final  {
     return value_.us_2;
   }
 
+  /** Glean { "field": "us_2" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_us_2(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us_2);
@@ -1670,6 +1681,7 @@ class union2 final  {
   }
 
 
+  /** Glean { "field": "ue_2" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue_2(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -2037,6 +2049,7 @@ class union3 final  {
   bool operator==(const union3&) const;
   bool operator<(const union3&) const;
 
+  /** Glean { "field": "ui_3" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ui_3(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -2048,6 +2061,7 @@ class union3 final  {
   }
 
 
+  /** Glean { "field": "ud_3" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud_3(double t = double()) {
     using T0 = double;
@@ -2059,6 +2073,7 @@ class union3 final  {
   }
 
 
+  /** Glean { "field": "us_3" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_3(::std::string const &t) {
     using T0 = ::std::string;
@@ -2069,6 +2084,7 @@ class union3 final  {
     return value_.us_3;
   }
 
+  /** Glean { "field": "us_3" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_3(::std::string&& t) {
     using T0 = ::std::string;
@@ -2079,6 +2095,7 @@ class union3 final  {
     return value_.us_3;
   }
 
+  /** Glean { "field": "us_3" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_us_3(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us_3);
@@ -2087,6 +2104,7 @@ class union3 final  {
   }
 
 
+  /** Glean { "field": "ue_3" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue_3(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -2701,6 +2719,7 @@ class unionA final  {
   bool operator==(const unionA&) const;
   bool operator<(const unionA&) const;
 
+  /** Glean { "field": "i" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -2712,6 +2731,7 @@ class unionA final  {
   }
 
 
+  /** Glean { "field": "d" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_d(double t = double()) {
     using T0 = double;
@@ -2723,6 +2743,7 @@ class unionA final  {
   }
 
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
     using T0 = ::std::string;
@@ -2733,6 +2754,7 @@ class unionA final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string&& t) {
     using T0 = ::std::string;
@@ -2743,6 +2765,7 @@ class unionA final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_s(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
@@ -2751,6 +2774,7 @@ class unionA final  {
   }
 
 
+  /** Glean { "field": "e" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_e(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -2762,6 +2786,7 @@ class unionA final  {
   }
 
 
+  /** Glean { "field": "a" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::structA& set_a(::test_cpp2::cpp_reflection::structA const &t) {
     using T0 = ::test_cpp2::cpp_reflection::structA;
@@ -2772,6 +2797,7 @@ class unionA final  {
     return value_.a;
   }
 
+  /** Glean { "field": "a" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::structA& set_a(::test_cpp2::cpp_reflection::structA&& t) {
     using T0 = ::test_cpp2::cpp_reflection::structA;
@@ -2782,6 +2808,7 @@ class unionA final  {
     return value_.a;
   }
 
+  /** Glean { "field": "a" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test_cpp2::cpp_reflection::structA, T...>> ::test_cpp2::cpp_reflection::structA& set_a(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a);
@@ -9761,6 +9788,7 @@ class union_with_special_names final  {
   bool operator==(const union_with_special_names&) const;
   bool operator<(const union_with_special_names&) const;
 
+  /** Glean { "field": "get" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_get(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9772,6 +9800,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "getter" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_getter(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9783,6 +9812,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "lists" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_lists(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9794,6 +9824,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "maps" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_maps(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9805,6 +9836,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "name" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_name(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9816,6 +9848,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "name_to_value" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_name_to_value(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9827,6 +9860,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "names" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_names(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9838,6 +9872,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "prefix_tree" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_prefix_tree(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9849,6 +9884,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "sets" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_sets(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9860,6 +9896,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "setter" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_setter(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9871,6 +9908,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "str" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_str(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9882,6 +9920,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "strings" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_strings(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9893,6 +9932,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "type" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_type(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9904,6 +9944,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "value" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_value(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9915,6 +9956,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "value_to_name" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_value_to_name(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9926,6 +9968,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "values" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_values(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9937,6 +9980,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "id" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_id(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9948,6 +9992,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "ids" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ids(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9959,6 +10004,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "descriptor" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_descriptor(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9970,6 +10016,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "descriptors" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_descriptors(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9981,6 +10028,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "key" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_key(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9992,6 +10040,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "keys" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_keys(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -10003,6 +10052,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "annotation" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_annotation(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -10014,6 +10064,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "annotations" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_annotations(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -10025,6 +10076,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "member" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_member(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -10036,6 +10088,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "members" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_members(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -10047,6 +10100,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "field" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_field(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -10058,6 +10112,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "fields" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_fields(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;

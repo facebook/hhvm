@@ -1038,6 +1038,7 @@ class AdaptedUnion final  {
   bool operator==(const AdaptedUnion&) const;
   bool operator<(const AdaptedUnion&) const;
 
+  /** Glean { "field": "best" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int16_t& set_best(::std::int16_t t = ::std::int16_t()) {
     using T0 = ::std::int16_t;
@@ -2743,6 +2744,7 @@ class BinaryUnion final  {
     ~storage_type() {}
   } ;
 
+  /** Glean { "field": "iobuf_val" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::py3::simple::IOBuf& set_iobuf_val(::py3::simple::IOBuf const &t) {
     using T0 = ::py3::simple::IOBuf;
@@ -2753,6 +2755,7 @@ class BinaryUnion final  {
     return value_.iobuf_val;
   }
 
+  /** Glean { "field": "iobuf_val" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::py3::simple::IOBuf& set_iobuf_val(::py3::simple::IOBuf&& t) {
     using T0 = ::py3::simple::IOBuf;
@@ -2763,6 +2766,7 @@ class BinaryUnion final  {
     return value_.iobuf_val;
   }
 
+  /** Glean { "field": "iobuf_val" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::py3::simple::IOBuf, T...>> ::py3::simple::IOBuf& set_iobuf_val(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::iobuf_val);

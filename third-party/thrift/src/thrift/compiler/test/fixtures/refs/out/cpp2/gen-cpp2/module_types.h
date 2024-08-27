@@ -588,6 +588,7 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  /** Glean { "field": "anInteger" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::int32_t>& set_anInteger(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::unique_ptr<::std::int32_t>;
@@ -598,6 +599,7 @@ class MyUnion final  {
     return value_.anInteger;
   }
 
+  /** Glean { "field": "anInteger" } */
   ::std::unique_ptr<::std::int32_t>& set_anInteger(::std::unique_ptr<::std::int32_t> t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::anInteger);
@@ -605,6 +607,7 @@ class MyUnion final  {
     return value_.anInteger;
   }
 
+  /** Glean { "field": "aString" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::string>& set_aString(::std::string const &t) {
     using T0 = ::std::unique_ptr<::std::string>;
@@ -615,6 +618,7 @@ class MyUnion final  {
     return value_.aString;
   }
 
+  /** Glean { "field": "aString" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::string>& set_aString(::std::string&& t) {
     using T0 = ::std::unique_ptr<::std::string>;
@@ -625,6 +629,7 @@ class MyUnion final  {
     return value_.aString;
   }
 
+  /** Glean { "field": "aString" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::unique_ptr<::std::string>& set_aString(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::aString);
@@ -632,6 +637,7 @@ class MyUnion final  {
     return value_.aString;
   }
 
+  /** Glean { "field": "aString" } */
   ::std::unique_ptr<::std::string>& set_aString(::std::unique_ptr<::std::string> t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::aString);
@@ -871,6 +877,7 @@ class NonTriviallyDestructibleUnion final  {
   bool operator==(const NonTriviallyDestructibleUnion&) const;
   bool operator<(const NonTriviallyDestructibleUnion&) const;
 
+  /** Glean { "field": "int_field" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::shared_ptr<::std::int32_t>& set_int_field(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::shared_ptr<::std::int32_t>;
@@ -881,6 +888,7 @@ class NonTriviallyDestructibleUnion final  {
     return value_.int_field;
   }
 
+  /** Glean { "field": "int_field" } */
   ::std::shared_ptr<::std::int32_t>& set_int_field(::std::shared_ptr<::std::int32_t> t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::int_field);

@@ -336,6 +336,7 @@ class ComplexUnion final  {
   bool operator==(const ComplexUnion&) const;
   bool operator<(const ComplexUnion&) const;
 
+  /** Glean { "field": "intValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int64_t& set_intValue(::std::int64_t t = ::std::int64_t()) {
     using T0 = ::std::int64_t;
@@ -347,6 +348,7 @@ class ComplexUnion final  {
   }
 
 
+  /** Glean { "field": "stringValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string const &t) {
     using T0 = ::std::string;
@@ -357,6 +359,7 @@ class ComplexUnion final  {
     return value_.stringValue;
   }
 
+  /** Glean { "field": "stringValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string&& t) {
     using T0 = ::std::string;
@@ -367,6 +370,7 @@ class ComplexUnion final  {
     return value_.stringValue;
   }
 
+  /** Glean { "field": "stringValue" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_stringValue(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringValue);
@@ -375,6 +379,7 @@ class ComplexUnion final  {
   }
 
 
+  /** Glean { "field": "intListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t> const &t) {
     using T0 = ::std::vector<::std::int64_t>;
@@ -385,6 +390,7 @@ class ComplexUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "intListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t>&& t) {
     using T0 = ::std::vector<::std::int64_t>;
@@ -395,6 +401,7 @@ class ComplexUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "intListValue" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<::std::int64_t>, T...>> ::std::vector<::std::int64_t>& set_intListValue(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::intListValue);
@@ -402,6 +409,7 @@ class ComplexUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string> const &t) {
     using T0 = ::std::vector<::std::string>;
@@ -412,6 +420,7 @@ class ComplexUnion final  {
     return value_.stringListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string>&& t) {
     using T0 = ::std::vector<::std::string>;
@@ -422,6 +431,7 @@ class ComplexUnion final  {
     return value_.stringListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<::std::string>, T...>> ::std::vector<::std::string>& set_stringListValue(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringListValue);
@@ -429,6 +439,7 @@ class ComplexUnion final  {
     return value_.stringListValue;
   }
 
+  /** Glean { "field": "typedefValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::containerTypedef& set_typedefValue(::cpp2::containerTypedef const &t) {
     using T0 = ::cpp2::containerTypedef;
@@ -439,6 +450,7 @@ class ComplexUnion final  {
     return value_.typedefValue;
   }
 
+  /** Glean { "field": "typedefValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::containerTypedef& set_typedefValue(::cpp2::containerTypedef&& t) {
     using T0 = ::cpp2::containerTypedef;
@@ -449,6 +461,7 @@ class ComplexUnion final  {
     return value_.typedefValue;
   }
 
+  /** Glean { "field": "typedefValue" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::containerTypedef, T...>> ::cpp2::containerTypedef& set_typedefValue(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::typedefValue);
@@ -456,6 +469,7 @@ class ComplexUnion final  {
     return value_.typedefValue;
   }
 
+  /** Glean { "field": "stringRef" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::string>& set_stringRef(::std::string const &t) {
     using T0 = ::std::unique_ptr<::std::string>;
@@ -466,6 +480,7 @@ class ComplexUnion final  {
     return value_.stringRef;
   }
 
+  /** Glean { "field": "stringRef" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::string>& set_stringRef(::std::string&& t) {
     using T0 = ::std::unique_ptr<::std::string>;
@@ -476,6 +491,7 @@ class ComplexUnion final  {
     return value_.stringRef;
   }
 
+  /** Glean { "field": "stringRef" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::unique_ptr<::std::string>& set_stringRef(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringRef);
@@ -483,6 +499,7 @@ class ComplexUnion final  {
     return value_.stringRef;
   }
 
+  /** Glean { "field": "stringRef" } */
   ::std::unique_ptr<::std::string>& set_stringRef(::std::unique_ptr<::std::string> t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringRef);
@@ -900,6 +917,7 @@ class ListUnion final  {
   bool operator==(const ListUnion&) const;
   bool operator<(const ListUnion&) const;
 
+  /** Glean { "field": "intListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t> const &t) {
     using T0 = ::std::vector<::std::int64_t>;
@@ -910,6 +928,7 @@ class ListUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "intListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t>&& t) {
     using T0 = ::std::vector<::std::int64_t>;
@@ -920,6 +939,7 @@ class ListUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "intListValue" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<::std::int64_t>, T...>> ::std::vector<::std::int64_t>& set_intListValue(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::intListValue);
@@ -927,6 +947,7 @@ class ListUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string> const &t) {
     using T0 = ::std::vector<::std::string>;
@@ -937,6 +958,7 @@ class ListUnion final  {
     return value_.stringListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string>&& t) {
     using T0 = ::std::vector<::std::string>;
@@ -947,6 +969,7 @@ class ListUnion final  {
     return value_.stringListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<::std::string>, T...>> ::std::vector<::std::string>& set_stringListValue(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringListValue);
@@ -1200,6 +1223,7 @@ class DataUnion final  {
   bool operator==(const DataUnion&) const;
   bool operator<(const DataUnion&) const;
 
+  /** Glean { "field": "binaryData" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_binaryData(::std::string const &t) {
     using T0 = ::std::string;
@@ -1210,6 +1234,7 @@ class DataUnion final  {
     return value_.binaryData;
   }
 
+  /** Glean { "field": "binaryData" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_binaryData(::std::string&& t) {
     using T0 = ::std::string;
@@ -1220,6 +1245,7 @@ class DataUnion final  {
     return value_.binaryData;
   }
 
+  /** Glean { "field": "binaryData" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_binaryData(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::binaryData);
@@ -1228,6 +1254,7 @@ class DataUnion final  {
   }
 
 
+  /** Glean { "field": "stringData" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringData(::std::string const &t) {
     using T0 = ::std::string;
@@ -1238,6 +1265,7 @@ class DataUnion final  {
     return value_.stringData;
   }
 
+  /** Glean { "field": "stringData" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringData(::std::string&& t) {
     using T0 = ::std::string;
@@ -1248,6 +1276,7 @@ class DataUnion final  {
     return value_.stringData;
   }
 
+  /** Glean { "field": "stringData" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_stringData(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringData);
@@ -1799,6 +1828,7 @@ class ValUnion final  {
   bool operator==(const ValUnion&) const;
   bool operator<(const ValUnion&) const;
 
+  /** Glean { "field": "v1" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::Val& set_v1(::cpp2::Val const &t) {
     using T0 = ::cpp2::Val;
@@ -1809,6 +1839,7 @@ class ValUnion final  {
     return value_.v1;
   }
 
+  /** Glean { "field": "v1" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::Val& set_v1(::cpp2::Val&& t) {
     using T0 = ::cpp2::Val;
@@ -1819,6 +1850,7 @@ class ValUnion final  {
     return value_.v1;
   }
 
+  /** Glean { "field": "v1" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::Val, T...>> ::cpp2::Val& set_v1(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::v1);
@@ -1826,6 +1858,7 @@ class ValUnion final  {
     return value_.v1;
   }
 
+  /** Glean { "field": "v2" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::Val& set_v2(::cpp2::Val const &t) {
     using T0 = ::cpp2::Val;
@@ -1836,6 +1869,7 @@ class ValUnion final  {
     return value_.v2;
   }
 
+  /** Glean { "field": "v2" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::Val& set_v2(::cpp2::Val&& t) {
     using T0 = ::cpp2::Val;
@@ -1846,6 +1880,7 @@ class ValUnion final  {
     return value_.v2;
   }
 
+  /** Glean { "field": "v2" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::Val, T...>> ::cpp2::Val& set_v2(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::v2);
@@ -2099,6 +2134,7 @@ class VirtualComplexUnion  {
   bool operator==(const VirtualComplexUnion&) const;
   bool operator<(const VirtualComplexUnion&) const;
 
+  /** Glean { "field": "thingOne" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_thingOne(::std::string const &t) {
     using T0 = ::std::string;
@@ -2109,6 +2145,7 @@ class VirtualComplexUnion  {
     return value_.thingOne;
   }
 
+  /** Glean { "field": "thingOne" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_thingOne(::std::string&& t) {
     using T0 = ::std::string;
@@ -2119,6 +2156,7 @@ class VirtualComplexUnion  {
     return value_.thingOne;
   }
 
+  /** Glean { "field": "thingOne" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_thingOne(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::thingOne);
@@ -2127,6 +2165,7 @@ class VirtualComplexUnion  {
   }
 
 
+  /** Glean { "field": "thingTwo" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_thingTwo(::std::string const &t) {
     using T0 = ::std::string;
@@ -2137,6 +2176,7 @@ class VirtualComplexUnion  {
     return value_.thingTwo;
   }
 
+  /** Glean { "field": "thingTwo" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_thingTwo(::std::string&& t) {
     using T0 = ::std::string;
@@ -2147,6 +2187,7 @@ class VirtualComplexUnion  {
     return value_.thingTwo;
   }
 
+  /** Glean { "field": "thingTwo" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_thingTwo(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::thingTwo);
@@ -2542,6 +2583,7 @@ class NonCopyableUnion final  {
   bool operator<(const NonCopyableUnion&) const;
 
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::NonCopyableStruct& set_s(::cpp2::NonCopyableStruct&& t) {
     using T0 = ::cpp2::NonCopyableStruct;
@@ -2552,6 +2594,7 @@ class NonCopyableUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::NonCopyableStruct, T...>> ::cpp2::NonCopyableStruct& set_s(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);

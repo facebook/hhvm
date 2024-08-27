@@ -934,6 +934,7 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  /** Glean { "field": "myEnum" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum t = ::cpp2::MyEnum()) {
     using T0 = ::cpp2::MyEnum;
@@ -945,6 +946,7 @@ class MyUnion final  {
   }
 
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct const &t) {
     using T0 = ::cpp2::MyStruct;
@@ -955,6 +957,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct&& t) {
     using T0 = ::cpp2::MyStruct;
@@ -965,6 +968,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::MyStruct, T...>> ::cpp2::MyStruct& set_myStruct(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
@@ -972,6 +976,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem const &t) {
     using T0 = ::cpp2::MyDataItem;
@@ -982,6 +987,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem&& t) {
     using T0 = ::cpp2::MyDataItem;
@@ -992,6 +998,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::MyDataItem, T...>> ::cpp2::MyDataItem& set_myDataItem(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);

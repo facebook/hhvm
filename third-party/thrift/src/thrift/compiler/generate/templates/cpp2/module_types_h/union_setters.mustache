@@ -24,7 +24,7 @@
   {{#type:resolves_to_base_or_enum?}}
 
   {{^type:string_or_binary?}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  {{ > common/field_docblock}}  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}} t = {{field:cpp_type}}()) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
@@ -40,7 +40,7 @@
   }
   {{/type:string_or_binary?}}
   {{#type:string_or_binary?}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  {{ > common/field_docblock}}  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}} const &t) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
@@ -55,7 +55,7 @@
     return value_.{{field:cpp_name}};
   }
 
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  {{ > common/field_docblock}}  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}}&& t) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
@@ -71,7 +71,7 @@
   }
 
   {{!deprecated}}
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
+  {{ > common/field_docblock}}  template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::{{field:cpp_name}});
 {{#field:cpp_ref?}}
@@ -85,7 +85,7 @@
   {{/type:string_or_binary?}}
 
 {{#field:cpp_ref?}}
-  {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_storage_type}} t) {
+  {{ > common/field_docblock}}  {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_storage_type}} t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::{{field:cpp_name}});
     ::new (std::addressof(value_.{{field:cpp_name}})) {{field:cpp_storage_type}}(std::move(t));
@@ -97,7 +97,7 @@
   {{^field:cpp_ref?}}
 
   {{^field:cpp_noncopyable?}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  {{ > common/field_docblock}}  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   {{!deprecated}}
   {{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}} const &t) {
     using T0 = {{field:cpp_storage_type}};
@@ -109,7 +109,7 @@
   }
   {{/field:cpp_noncopyable?}}
 
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  {{ > common/field_docblock}}  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}}&& t) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
@@ -120,7 +120,7 @@
   }
 
   {{!deprecated}}
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
+  {{ > common/field_docblock}}  template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::{{field:cpp_name}});
     ::new (std::addressof(value_.{{field:cpp_name}})) {{field:cpp_type}}(std::forward<T>(t)...);
@@ -132,7 +132,7 @@
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}} const &t);
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}}&& t);
   {{!deprecated}}
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
+  {{ > common/field_docblock}}  template<typename... T, typename = ::apache::thrift::safe_overload_t<{{field:cpp_type}}, T...>> {{field:cpp_storage_type}}& set_{{field:cpp_name}}(T&&... t) {
     // defer resolution of ref_ in case ref_::element_type would here be incomplete
     using ref_ = folly::conditional_t<(sizeof...(T) < size_t(-1)), {{field:cpp_storage_type}}, void>;
     __fbthrift_clear();

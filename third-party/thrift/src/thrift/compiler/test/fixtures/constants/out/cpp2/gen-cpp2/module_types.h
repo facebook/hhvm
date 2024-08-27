@@ -2289,6 +2289,7 @@ class union1 final  {
   bool operator==(const union1&) const;
   bool operator<(const union1&) const;
 
+  /** Glean { "field": "i" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -2300,6 +2301,7 @@ class union1 final  {
   }
 
 
+  /** Glean { "field": "d" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_d(double t = double()) {
     using T0 = double;
@@ -2585,6 +2587,7 @@ class union2 final  {
   bool operator==(const union2&) const;
   bool operator<(const union2&) const;
 
+  /** Glean { "field": "i" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -2596,6 +2599,7 @@ class union2 final  {
   }
 
 
+  /** Glean { "field": "d" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_d(double t = double()) {
     using T0 = double;
@@ -2607,6 +2611,7 @@ class union2 final  {
   }
 
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::struct1& set_s(::cpp2::struct1 const &t) {
     using T0 = ::cpp2::struct1;
@@ -2617,6 +2622,7 @@ class union2 final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::struct1& set_s(::cpp2::struct1&& t) {
     using T0 = ::cpp2::struct1;
@@ -2627,6 +2633,7 @@ class union2 final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::struct1, T...>> ::cpp2::struct1& set_s(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
@@ -2634,6 +2641,7 @@ class union2 final  {
     return value_.s;
   }
 
+  /** Glean { "field": "u" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::union1& set_u(::cpp2::union1 const &t) {
     using T0 = ::cpp2::union1;
@@ -2644,6 +2652,7 @@ class union2 final  {
     return value_.u;
   }
 
+  /** Glean { "field": "u" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::union1& set_u(::cpp2::union1&& t) {
     using T0 = ::cpp2::union1;
@@ -2654,6 +2663,7 @@ class union2 final  {
     return value_.u;
   }
 
+  /** Glean { "field": "u" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::union1, T...>> ::cpp2::union1& set_u(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::u);

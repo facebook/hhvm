@@ -407,6 +407,7 @@ class U final  {
   bool operator==(const U&) const;
   bool operator<(const U&) const;
 
+  /** Glean { "field": "i" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -418,6 +419,7 @@ class U final  {
   }
 
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
     using T0 = ::std::string;
@@ -428,6 +430,7 @@ class U final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string&& t) {
     using T0 = ::std::string;
@@ -438,6 +441,7 @@ class U final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_s(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);

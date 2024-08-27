@@ -4922,6 +4922,7 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  /** Glean { "field": "myEnum" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum t = ::cpp2::MyEnum()) {
     using T0 = ::cpp2::MyEnum;
@@ -4933,6 +4934,7 @@ class MyUnion final  {
   }
 
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct const &t) {
     using T0 = ::cpp2::MyStruct;
@@ -4943,6 +4945,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct&& t) {
     using T0 = ::cpp2::MyStruct;
@@ -4953,6 +4956,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::MyStruct, T...>> ::cpp2::MyStruct& set_myStruct(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
@@ -4960,6 +4964,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem const &t) {
     using T0 = ::cpp2::MyDataItem;
@@ -4970,6 +4975,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem&& t) {
     using T0 = ::cpp2::MyDataItem;
@@ -4980,6 +4986,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::MyDataItem, T...>> ::cpp2::MyDataItem& set_myDataItem(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
@@ -4987,6 +4994,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "complexNestedStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct const &t) {
     using T0 = ::cpp2::ComplexNestedStruct;
@@ -4997,6 +5005,7 @@ class MyUnion final  {
     return value_.complexNestedStruct;
   }
 
+  /** Glean { "field": "complexNestedStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct&& t) {
     using T0 = ::cpp2::ComplexNestedStruct;
@@ -5007,6 +5016,7 @@ class MyUnion final  {
     return value_.complexNestedStruct;
   }
 
+  /** Glean { "field": "complexNestedStruct" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::ComplexNestedStruct, T...>> ::cpp2::ComplexNestedStruct& set_complexNestedStruct(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::complexNestedStruct);
@@ -5014,6 +5024,7 @@ class MyUnion final  {
     return value_.complexNestedStruct;
   }
 
+  /** Glean { "field": "longValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int64_t& set_longValue(::std::int64_t t = ::std::int64_t()) {
     using T0 = ::std::int64_t;
@@ -5025,6 +5036,7 @@ class MyUnion final  {
   }
 
 
+  /** Glean { "field": "intValue" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_intValue(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -7680,6 +7692,7 @@ class MyUnionFloatFieldThrowExp final  {
   bool operator==(const MyUnionFloatFieldThrowExp&) const;
   bool operator<(const MyUnionFloatFieldThrowExp&) const;
 
+  /** Glean { "field": "myEnum" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum t = ::cpp2::MyEnum()) {
     using T0 = ::cpp2::MyEnum;
@@ -7691,6 +7704,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
 
+  /** Glean { "field": "setFloat" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::vector<float>>& set_setFloat(::std::vector<::std::vector<float>> const &t) {
     using T0 = ::std::vector<::std::vector<float>>;
@@ -7701,6 +7715,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.setFloat;
   }
 
+  /** Glean { "field": "setFloat" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::vector<float>>& set_setFloat(::std::vector<::std::vector<float>>&& t) {
     using T0 = ::std::vector<::std::vector<float>>;
@@ -7711,6 +7726,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.setFloat;
   }
 
+  /** Glean { "field": "setFloat" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<::std::vector<float>>, T...>> ::std::vector<::std::vector<float>>& set_setFloat(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::setFloat);
@@ -7718,6 +7734,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.setFloat;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem const &t) {
     using T0 = ::cpp2::MyDataItem;
@@ -7728,6 +7745,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem&& t) {
     using T0 = ::cpp2::MyDataItem;
@@ -7738,6 +7756,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::MyDataItem, T...>> ::cpp2::MyDataItem& set_myDataItem(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
@@ -7745,6 +7764,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "complexNestedStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct const &t) {
     using T0 = ::cpp2::ComplexNestedStruct;
@@ -7755,6 +7775,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.complexNestedStruct;
   }
 
+  /** Glean { "field": "complexNestedStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct&& t) {
     using T0 = ::cpp2::ComplexNestedStruct;
@@ -7765,6 +7786,7 @@ class MyUnionFloatFieldThrowExp final  {
     return value_.complexNestedStruct;
   }
 
+  /** Glean { "field": "complexNestedStruct" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::cpp2::ComplexNestedStruct, T...>> ::cpp2::ComplexNestedStruct& set_complexNestedStruct(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::complexNestedStruct);

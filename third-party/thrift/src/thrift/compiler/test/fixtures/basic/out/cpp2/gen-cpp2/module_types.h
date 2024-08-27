@@ -1498,6 +1498,7 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  /** Glean { "field": "myEnum" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyEnumAlias& set_myEnum(::test::fixtures::basic::MyEnumAlias t = ::test::fixtures::basic::MyEnumAlias()) {
     using T0 = ::test::fixtures::basic::MyEnumAlias;
@@ -1509,6 +1510,7 @@ class MyUnion final  {
   }
 
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyStruct& set_myStruct(::test::fixtures::basic::MyStruct const &t) {
     using T0 = ::test::fixtures::basic::MyStruct;
@@ -1519,6 +1521,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyStruct& set_myStruct(::test::fixtures::basic::MyStruct&& t) {
     using T0 = ::test::fixtures::basic::MyStruct;
@@ -1529,6 +1532,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myStruct" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic::MyStruct, T...>> ::test::fixtures::basic::MyStruct& set_myStruct(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
@@ -1536,6 +1540,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyDataItem& set_myDataItem(::test::fixtures::basic::MyDataItem const &t) {
     using T0 = ::test::fixtures::basic::MyDataItem;
@@ -1546,6 +1551,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyDataItem& set_myDataItem(::test::fixtures::basic::MyDataItem&& t) {
     using T0 = ::test::fixtures::basic::MyDataItem;
@@ -1556,6 +1562,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myDataItem" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic::MyDataItem, T...>> ::test::fixtures::basic::MyDataItem& set_myDataItem(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
@@ -1563,6 +1570,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "floatSet" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<float>& set_floatSet(::std::set<float> const &t) {
     using T0 = ::std::set<float>;
@@ -1573,6 +1581,7 @@ class MyUnion final  {
     return value_.floatSet;
   }
 
+  /** Glean { "field": "floatSet" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<float>& set_floatSet(::std::set<float>&& t) {
     using T0 = ::std::set<float>;
@@ -1583,6 +1592,7 @@ class MyUnion final  {
     return value_.floatSet;
   }
 
+  /** Glean { "field": "floatSet" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::set<float>, T...>> ::std::set<float>& set_floatSet(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::floatSet);
@@ -2810,6 +2820,7 @@ class UnionToBeRenamed final  {
   bool operator==(const UnionToBeRenamed&) const;
   bool operator<(const UnionToBeRenamed&) const;
 
+  /** Glean { "field": "reserved_field" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_reserved_field(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;

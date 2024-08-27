@@ -2050,6 +2050,7 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  /** Glean { "field": "first" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(::test::fixtures::basic-structured-annotations::annotated_inline_string const &t) {
     using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
@@ -2060,6 +2061,7 @@ class MyUnion final  {
     return value_.first;
   }
 
+  /** Glean { "field": "first" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(::test::fixtures::basic-structured-annotations::annotated_inline_string&& t) {
     using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
@@ -2070,6 +2072,7 @@ class MyUnion final  {
     return value_.first;
   }
 
+  /** Glean { "field": "first" } */
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic-structured-annotations::annotated_inline_string, T...>> ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::first);
@@ -2078,6 +2081,7 @@ class MyUnion final  {
   }
 
 
+  /** Glean { "field": "second" } */
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic-structured-annotations::annotated_inline_i64& set_second(::test::fixtures::basic-structured-annotations::annotated_inline_i64 t = ::test::fixtures::basic-structured-annotations::annotated_inline_i64()) {
     using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_i64;

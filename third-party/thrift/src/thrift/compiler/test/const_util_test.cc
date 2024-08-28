@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/const_util.h>
+#include <thrift/compiler/generate/const_util.h>
 
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/test/gen-cpp2/const_util_test_types.h>

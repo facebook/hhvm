@@ -25,8 +25,8 @@
 #include <thrift/compiler/ast/t_include.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/detail/pluggable_functions.h>
+#include <thrift/compiler/generate/const_util.h>
 #include <thrift/compiler/generate/t_generator.h>
-#include <thrift/compiler/lib/const_util.h>
 #include <thrift/compiler/lib/schematizer.h>
 
 #include <folly/compression/Compression.h>

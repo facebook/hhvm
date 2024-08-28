@@ -1234,7 +1234,7 @@ struct CompactReader {
       const uint32_t size,
       bool& hasTypeWrapper
     ) {
-      VecInit arr(size);
+      auto arr = initialize_array(size);
       if (spec.val().adapter == nullptr && valueType == T_BYTE) {
         for (uint32_t i = 0; i < size; i++) {
           arr.append(transport.template readBE<int8_t>());
@@ -1247,7 +1247,7 @@ struct CompactReader {
         }
       }
       readCollectionEnd();
-      return arr.toVariant();
+      return arr;
     }
 
     Variant readListCollection(
@@ -1289,7 +1289,7 @@ struct CompactReader {
       } else if (s_collection.equal(spec.format)) {
         return readListCollection(spec, valueType, size, hasTypeWrapper);
       } else {
-        VecInit vai(size);
+        auto vai = initialize_array(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           vai.setLegacyArray(true);
         }
@@ -1297,7 +1297,7 @@ struct CompactReader {
           vai.append(readField(spec.val(), valueType, hasTypeWrapper));
         }
         readCollectionEnd();
-        return vai.toVariant();
+        return vai;
       }
     }
 
@@ -1345,6 +1345,7 @@ struct CompactReader {
       valueType = ctype_to_ttype((CType)(types & 0x0f));
       keyType = ctype_to_ttype((CType)(types >> 4));
 
+      check_container_size(size);
       containerHistory.push(state);
       state = STATE_CONTAINER_READ;
     }
@@ -1359,6 +1360,7 @@ struct CompactReader {
         size = readVarint();
       }
 
+      check_container_size(size);
       containerHistory.push(state);
       state = STATE_CONTAINER_READ;
     }

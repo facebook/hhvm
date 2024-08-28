@@ -121,6 +121,7 @@ let visitor ctx =
           else
             None);
         ]
+    @ Tast_check_pluggin.checks
   in
   let handlers =
     if TypecheckerOptions.skip_tast_checks (Provider_context.get_tcopt ctx) then

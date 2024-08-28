@@ -1,0 +1,6 @@
+(library
+ (name tast_check_handler)
+ (wrapped false)
+ (libraries
+  tast_env
+  error_codes))

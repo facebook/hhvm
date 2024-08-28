@@ -1,0 +1,3 @@
+(library
+ (name tast_check_pluggin_stubs)
+ (wrapped false))

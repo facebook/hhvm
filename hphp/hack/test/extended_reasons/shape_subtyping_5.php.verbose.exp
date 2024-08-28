@@ -82,10 +82,10 @@ File "shape_subtyping_5.php", line 12, character 3 - line 12, character 19:
 
 which is defined here
 
-File "shape_subtyping_5.php", line 4, character 6 - line 4, character 22:
+File "shape_subtyping_5.php", line 4, character 26 - line 4, character 43:
 
  3 | type required_a_at_int = shape('a' => int);
- 4 | type »optional_a_at_int« = shape(?'a' => int);
+ 4 | type optional_a_at_int = »shape(?'a' => int)«;
  5 | 
  6 | function expects_required_a_at_int_alias(
  7 | required_a_at_int $s,
@@ -126,9 +126,9 @@ File "shape_subtyping_5.php", line 7, character 1 - line 7, character 17:
 
 which is defined here
 
-File "shape_subtyping_5.php", line 3, character 6 - line 3, character 22:
+File "shape_subtyping_5.php", line 3, character 26 - line 3, character 42:
 
- 3 | type »required_a_at_int« = shape('a' => int);
+ 3 | type required_a_at_int = »shape('a' => int)«;
  4 | type optional_a_at_int = shape(?'a' => int);
 
 Step 3 of 3 (here is where the error occurred)

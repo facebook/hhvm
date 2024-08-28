@@ -38,11 +38,11 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/saRkKRCJvG/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/qWk3l0GN6F/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
- 20 |
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
+ 20 | 
  21 |   /**
 
 and flows into this expression because it is used in a return position
@@ -199,11 +199,11 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/saRkKRCJvG/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/qWk3l0GN6F/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
- 20 |
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
+ 20 | 
  21 |   /**
 
 and flows into this expression because it is used in a return position
@@ -340,11 +340,11 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/saRkKRCJvG/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/qWk3l0GN6F/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
- 20 |
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
+ 20 | 
  21 |   /**
 
 and flows into this expression because it is used in a return position

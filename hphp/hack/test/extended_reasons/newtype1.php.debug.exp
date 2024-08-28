@@ -47,7 +47,7 @@ Derivation:
               "from":[
                 {
                   "Def":[
-                    {"filename":"newtype1.php--file1.php","line":3,"char_start":9,"char_end":13},
+                    {"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26},
                     [
                       {
                         "Hint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]
@@ -121,7 +121,7 @@ Reason:
                       "from":[
                         {
                           "Def":[
-                            {"filename":"newtype1.php--file1.php","line":3,"char_start":9,"char_end":13},
+                            {"filename":"newtype1.php--file1.php","line":3,"char_start":24,"char_end":26},
                             [
                               {
                                 "Hint":[{"filename":"newtype1.php--file2.php","line":7,"char_start":22,"char_end":26}]

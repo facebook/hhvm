@@ -77,10 +77,10 @@ File "shape_subtyping_7.php", line 12, character 3 - line 12, character 11:
 
 which is defined here
 
-File "shape_subtyping_7.php", line 4, character 6 - line 4, character 14:
+File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
 
  3 | type required_a_at_int = shape('a' => int);
- 4 | type »missing_a« = shape('b' => int);
+ 4 | type missing_a = »shape('b' => int)«;
  5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   required_a_at_int $s,
@@ -121,9 +121,9 @@ File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
 
 which is defined here
 
-File "shape_subtyping_7.php", line 3, character 6 - line 3, character 22:
+File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
 
- 3 | type »required_a_at_int« = shape('a' => int);
+ 3 | type required_a_at_int = »shape('a' => int)«;
  4 | type missing_a = shape('b' => int);
 
 Step 3 of 3 (here is where the error occurred)
@@ -220,10 +220,10 @@ File "shape_subtyping_7.php", line 12, character 3 - line 12, character 11:
 
 which is defined here
 
-File "shape_subtyping_7.php", line 4, character 6 - line 4, character 14:
+File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
 
  3 | type required_a_at_int = shape('a' => int);
- 4 | type »missing_a« = shape('b' => int);
+ 4 | type missing_a = »shape('b' => int)«;
  5 | 
  6 | function expects_required_a_at_int_alias(
  7 |   required_a_at_int $s,
@@ -264,9 +264,9 @@ File "shape_subtyping_7.php", line 7, character 3 - line 7, character 19:
 
 which is defined here
 
-File "shape_subtyping_7.php", line 3, character 6 - line 3, character 22:
+File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
 
- 3 | type »required_a_at_int« = shape('a' => int);
+ 3 | type required_a_at_int = »shape('a' => int)«;
  4 | type missing_a = shape('b' => int);
 
 Step 3 of 3 (here is where the error occurred)

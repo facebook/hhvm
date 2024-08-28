@@ -57,7 +57,7 @@ Derivation:
               "from":[
                 {
                   "Def":[
-                    {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
+                    {"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34},
                     [
                       {
                         "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
@@ -90,7 +90,7 @@ Derivation:
         "super":[
           {
             "Def":[
-              {"filename":"shape_subtyping_7.php","line":3,"char_start":6,"char_end":22},
+              {"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42},
               [
                 {
                   "Hint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
@@ -140,7 +140,7 @@ Reason:
                       "from":[
                         {
                           "Def":[
-                            {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
+                            {"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34},
                             [
                               {
                                 "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
@@ -187,7 +187,7 @@ Reason:
           "super":[
             {
               "Def":[
-                {"filename":"shape_subtyping_7.php","line":3,"char_start":6,"char_end":22},
+                {"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42},
                 [
                   {
                     "Hint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
@@ -260,7 +260,7 @@ Derivation:
               "from":[
                 {
                   "Def":[
-                    {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
+                    {"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34},
                     [
                       {
                         "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
@@ -293,7 +293,7 @@ Derivation:
         "super":[
           {
             "Def":[
-              {"filename":"shape_subtyping_7.php","line":3,"char_start":6,"char_end":22},
+              {"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42},
               [
                 {
                   "Hint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]
@@ -339,7 +339,7 @@ Reason:
                       "from":[
                         {
                           "Def":[
-                            {"filename":"shape_subtyping_7.php","line":4,"char_start":6,"char_end":14},
+                            {"filename":"shape_subtyping_7.php","line":4,"char_start":18,"char_end":34},
                             [
                               {
                                 "Hint":[{"filename":"shape_subtyping_7.php","line":12,"char_start":3,"char_end":11}]
@@ -386,7 +386,7 @@ Reason:
           "super":[
             {
               "Def":[
-                {"filename":"shape_subtyping_7.php","line":3,"char_start":6,"char_end":22},
+                {"filename":"shape_subtyping_7.php","line":3,"char_start":26,"char_end":42},
                 [
                   {
                     "Hint":[{"filename":"shape_subtyping_7.php","line":7,"char_start":3,"char_end":19}]

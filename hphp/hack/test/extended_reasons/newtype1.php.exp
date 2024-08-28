@@ -57,9 +57,9 @@ File "newtype1.php--file2.php", line 7, character 22 - line 7, character 26:
 
 which is defined here
 
-File "newtype1.php--file1.php", line 3, character 9 - line 3, character 13:
+File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
 
- 3 | newtype »myint« as int = int;
+ 3 | newtype myint as int = »int«;
 
 and flows into this expression as the parameter hint
 

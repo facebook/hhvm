@@ -38,10 +38,10 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/MQU76xyFnX/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
  21 |   /**
 
@@ -63,10 +63,10 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/MQU76xyFnX/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
  21 |   /**
 
@@ -216,10 +216,10 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/MQU76xyFnX/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
  21 |   /**
 
@@ -241,10 +241,10 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/MQU76xyFnX/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
  21 |   /**
 
@@ -374,10 +374,10 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/MQU76xyFnX/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
  21 |   /**
 
@@ -399,10 +399,10 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/MQU76xyFnX/classname.hhi", line 19, character 11 - line 19, character 19:
+File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
- 19 |   newtype »classname«<+T> as typename<T> = typename<T>;
+ 19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
  21 |   /**
 

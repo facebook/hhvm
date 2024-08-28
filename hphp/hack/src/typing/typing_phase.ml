@@ -552,7 +552,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         in
         let lty =
           Typing_env.update_reason env lty ~f:(fun r ->
-              Typing_reason.(definition typedef_info.td_pos r))
+              Typing_reason.(definition shp_def_pos r))
         in
         ((env, ty_err_opt, cycles), lty)
       | Decl_entry.DoesNotExist

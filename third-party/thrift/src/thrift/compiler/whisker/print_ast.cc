@@ -78,10 +78,13 @@ struct ast_visitor {
   void visit(const ast::partial_apply& partial_apply, tree_printer::scope scope)
       const {
     scope.println(
-        " partial-apply{} {} '{}'",
-        partial_apply.is_standalone ? " <standalone>" : "",
+        " partial-apply {} '{}'",
         location(partial_apply.loc),
         partial_apply.path.as_string('/'));
+    if (const auto& offset = partial_apply.standalone_offset_within_line;
+        offset.has_value()) {
+      scope.open_property().println(" standalone-offset {}", *offset);
+    }
   }
   void visit(const ast::comment& comment, tree_printer::scope scope) const {
     scope.println(

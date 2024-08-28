@@ -18,6 +18,7 @@
 
 #include <thrift/compiler/whisker/source_location.h>
 
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -147,8 +148,12 @@ struct partial_apply {
   /**
    * Standalone partial applications exhibit different indentation behavior:
    *   https://github.com/mustache/spec/blob/66f078e0d534515d8df23d0d3764dccda74e042b/specs/partials.yml#L13-L15
+   *
+   * If this is a standalone partial application, the value is the amount of
+   * preceeding whitespace necessary before the partial application
+   * interpolation. Otherwise, this is std::nullopt.
    */
-  bool is_standalone;
+  std::optional<unsigned> standalone_offset_within_line;
 };
 
 } // namespace whisker::ast

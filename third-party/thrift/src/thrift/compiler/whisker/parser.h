@@ -31,6 +31,7 @@ namespace whisker {
  * the provided diagnostics_engine is passed the relevant errors that caused
  * parsing to fail.
  */
-std::optional<ast::root> parse(source, diagnostics_engine&);
+std::optional<ast::root> parse(
+    source, const source_manager&, diagnostics_engine&);
 
 } // namespace whisker

@@ -491,6 +491,7 @@ class standalone_lines_scanner {
 class parser {
  private:
   std::vector<token> tokens_;
+  const source_manager& src_manager_;
   diagnostics_engine& diags_;
   std::set<parser_scan_window::cursor> standalone_partials_;
 
@@ -838,6 +839,7 @@ class parser {
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
+    const source_location scan_start_location = scan.start_location();
 
     if (!try_consume_token(&scan, tok::open)) {
       return std::nullopt;
@@ -866,11 +868,17 @@ class parser {
     bool is_standalone =
         standalone_partials_.find(scan_start) != standalone_partials_.end();
 
+    using offset_type = std::optional<unsigned>;
+    // resolved_location::column() is 1-indexed
+    offset_type offset_within_line = is_standalone
+        ? offset_type{resolved_location(scan_start_location, src_manager_).column() - 1}
+        : std::nullopt;
+
     return {
         ast::partial_apply{
             scan.with_start(scan_start).range(),
             std::move(lookup),
-            is_standalone},
+            offset_within_line},
         scan};
   }
 
@@ -905,9 +913,11 @@ class parser {
  public:
   parser(
       std::vector<token> tokens,
+      const source_manager& src_manager,
       diagnostics_engine& diags,
       standalone_lines_scanner::result scan_result)
       : tokens_(std::move(tokens)),
+        src_manager_(src_manager),
         diags_(diags),
         standalone_partials_(
             std::move(scan_result.standalone_partial_locations)) {}
@@ -922,11 +932,16 @@ class parser {
 
 } // namespace
 
-std::optional<ast::root> parse(source src, diagnostics_engine& diags) {
+std::optional<ast::root> parse(
+    source src, const source_manager& src_manager, diagnostics_engine& diags) {
   auto tokens = lexer(std::move(src), diags).tokenize_all();
   auto standalone_scanner_result =
       standalone_lines_scanner::strip_lines(tokens);
-  return parser(std::move(tokens), diags, std::move(standalone_scanner_result))
+  return parser(
+             std::move(tokens),
+             src_manager,
+             diags,
+             std::move(standalone_scanner_result))
       .parse();
 }
 

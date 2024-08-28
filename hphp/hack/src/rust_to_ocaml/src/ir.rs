@@ -149,21 +149,21 @@ pub struct VariantName(pub String);
 
 impl std::fmt::Debug for ModuleName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        std::fmt::Debug::fmt(&self.0, f)
     }
 }
 impl std::fmt::Debug for TypeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        std::fmt::Debug::fmt(&self.0, f)
     }
 }
 impl std::fmt::Debug for FieldName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        std::fmt::Debug::fmt(&self.0, f)
     }
 }
 impl std::fmt::Debug for VariantName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        std::fmt::Debug::fmt(&self.0, f)
     }
 }

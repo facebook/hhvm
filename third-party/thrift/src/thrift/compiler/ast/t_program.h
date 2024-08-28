@@ -170,6 +170,7 @@ class t_program : public t_named {
    * well as the location of the include statement.
    */
   const std::vector<t_include*>& includes() const { return includes_; }
+  std::vector<t_include*>& includes() { return includes_; }
 
   /**
    * Returns a list of programs that are included by this program.

@@ -2099,3 +2099,11 @@ TEST(CompilerTest, exception_invalid_use) {
     const E e = E{}; # expected-error: Exceptions cannot be used as const types
   )");
 }
+
+TEST(CompilerTest, duplicate_include) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/thrift.thrift"
+    include "thrift/annotation/cpp.thrift" # expected-warning: Duplicate include of `thrift/annotation/cpp.thrift`
+  )");
+}

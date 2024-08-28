@@ -16,8 +16,10 @@
 
 #include <thrift/compiler/sema/standard_mutator.h>
 
+#include <algorithm>
 #include <functional>
 #include <type_traits>
+#include <unordered_set>
 
 #include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/lib/cpp2/util.h>
@@ -428,6 +430,25 @@ void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
   prog.add_definition(std::move(cnst));
 }
 
+void deduplicate_thrift_includes(
+    sema_context& ctx, mutator_context&, t_program& prog) {
+  std::unordered_set<const t_program*> seen;
+  auto& includes = prog.includes();
+  auto it = std::remove_if(
+      includes.begin(), includes.end(), [&](const auto* include) {
+        if (!seen.insert(include->get_program()).second) {
+          // TODO (T199931070): make this an error
+          ctx.warning(
+              *include,
+              "Duplicate include of `{}`",
+              include->get_program()->path());
+          return true;
+        }
+        return false;
+      });
+  includes.erase(it, includes.end());
+}
+
 } // namespace
 
 ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
@@ -447,6 +468,7 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
   main.add_const_visitor(&match_const_type_with_value);
   main.add_field_visitor(&match_field_type_with_default_value);
   main.add_named_visitor(&match_annotation_types_with_const_values);
+  main.add_program_visitor(&deduplicate_thrift_includes);
 
   return mutators;
 }

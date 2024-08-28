@@ -268,6 +268,7 @@ File "ctor_generic.php", line 15, character 5 - line 15, character 20:
 [Upper] Step 3 of 4
 
 `\ISender` is a class or interface so next I checked the 2nd type arguments.
+The type parameter is contravariant so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 

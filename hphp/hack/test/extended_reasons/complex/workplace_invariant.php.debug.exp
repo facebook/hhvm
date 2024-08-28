@@ -158,7 +158,7 @@ Derivation:
     },
     {
       "Step":{
-        "rule":{"Using_prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}},
+        "rule":{"Using_prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Contr":[]}]}]}},
         "on_":"Both",
         "sub":[
           {
@@ -214,7 +214,7 @@ Reason:
                     ]
                   }
                 ],
-                "prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]},
+                "prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Contr":[]}]}]},
                 "sub":[
                   {
                     "Axiom":{
@@ -513,7 +513,7 @@ Derivation:
     },
     {
       "Step":{
-        "rule":{"Using_prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]}},
+        "rule":{"Using_prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Contr":[]}]}]}},
         "on_":"Both",
         "sub":[
           {
@@ -548,7 +548,7 @@ Reason:
               ]
             }
           ],
-          "prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Co":[]}]}]},
+          "prj":{"Prj_symm_ctor":["Ctor_class","\\bar",0,{"Inv":[{"Contr":[]}]}]},
           "sub":[
             {
               "Axiom":{

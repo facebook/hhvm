@@ -147,7 +147,7 @@ Step 4 of 4 (here is where the error occurred)
 
 `\MyA` is a class or interface so next I checked the 3rd type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.
-Here I check the covariant case.
+Here I check the contravariant case so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 

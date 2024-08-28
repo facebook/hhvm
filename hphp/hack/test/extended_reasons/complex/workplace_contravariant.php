@@ -14,15 +14,4 @@ final class TestServiceWA extends TestServiceBase<int, string> {
   }
 }
 
-final class SenderWA implements ISender<int, null> {
-  public function __construct(protected int $a, protected null $b) {}
-}
-
 interface ISender<-TA, -TB> {}
-
-final class TestFactory {
-
-  public static function getService(int $a, string $b): TestServiceWA {
-    return new TestServiceWA($a, $b, new SenderWA(1234567890, null));
-  }
-}

@@ -156,6 +156,7 @@ File "class_subtyping_contravariant.php", line 12, character 21 - line 12, chara
 Step 4 of 4 (here is where the error occurred)
 
 `\MyA` is a class or interface so next I checked the 2nd type arguments.
+The type parameter is contravariant so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 

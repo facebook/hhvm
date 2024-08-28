@@ -2488,9 +2488,9 @@ module Constructors = struct
   let prj_ctor_contra ~sub ~super ~super_prj ctor_kind nm idx is_invariant =
     let var =
       if is_invariant then
-        Inv Co
+        Inv Contra
       else
-        Dir Co
+        Dir Contra
     in
     let prj = Prj_symm_ctor (ctor_kind, nm, idx, var) in
     prj_symm_contra ~sub ~super ~super_prj prj

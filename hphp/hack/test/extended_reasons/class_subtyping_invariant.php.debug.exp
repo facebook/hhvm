@@ -207,7 +207,7 @@ Derivation:
     },
     {
       "Step":{
-        "rule":{"Using_prj":{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]}},
+        "rule":{"Using_prj":{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Contr":[]}]}]}},
         "on_":"Both",
         "sub":[
           {
@@ -295,7 +295,7 @@ Reason:
               ]
             }
           ],
-          "prj":{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Co":[]}]}]},
+          "prj":{"Prj_symm_ctor":["Ctor_class","\\MyA",2,{"Inv":[{"Contr":[]}]}]},
           "sub":[
             {
               "Axiom":{

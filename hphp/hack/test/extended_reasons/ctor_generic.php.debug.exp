@@ -167,7 +167,7 @@ Derivation:
         {
           "Step":{
             "rule":{
-              "Using_prj":{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]}
+              "Using_prj":{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Contr":[]}]}]}
             },
             "on_":"Both",
             "sub":[
@@ -383,7 +383,7 @@ Reason:
                                 "Hint":[{"filename":"ctor_generic.php","line":15,"char_start":17,"char_end":19}]
                               }
                             ],
-                            "prj":{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Co":[]}]}]},
+                            "prj":{"Prj_symm_ctor":["Ctor_class","\\ISender",1,{"Dir":[{"Contr":[]}]}]},
                             "sub":[
                               {
                                 "Prj_both":{

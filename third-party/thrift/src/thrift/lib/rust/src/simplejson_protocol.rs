@@ -20,6 +20,11 @@ use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
+use base64::alphabet::STANDARD;
+use base64::engine::general_purpose::GeneralPurpose;
+use base64::engine::general_purpose::NO_PAD;
+use base64::engine::DecodePaddingMode;
+use base64::Engine;
 use bufsize::SizeCounter;
 use bytes::buf::Writer;
 use bytes::Buf;
@@ -47,6 +52,12 @@ use crate::serialize::Serialize;
 use crate::thrift_protocol::MessageType;
 use crate::thrift_protocol::ProtocolID;
 use crate::ttype::TType;
+
+// Bring back the pre 0.20 bevahiour and allow either padded or un-padded base64 strings at decode time.
+const STANDARD_NO_PAD_INDIFFERENT: GeneralPurpose = GeneralPurpose::new(
+    &STANDARD,
+    NO_PAD.with_decode_padding_mode(DecodePaddingMode::Indifferent),
+);
 
 #[phantom]
 #[derive(Copy, Clone)]
@@ -349,10 +360,7 @@ impl<B: BufMutExt> ProtocolWriter for SimpleJsonProtocolSerializer<B> {
             .begin_string(&mut self.buffer)
             .expect("Somehow failed to do \"io\" on a buffer");
         CompactFormatter
-            .write_raw_fragment(
-                &mut self.buffer,
-                &base64::encode_config(value, base64::STANDARD_NO_PAD),
-            )
+            .write_raw_fragment(&mut self.buffer, &STANDARD_NO_PAD_INDIFFERENT.encode(value))
             .expect("Somehow failed to do \"io\" on a buffer");
         CompactFormatter
             .end_string(&mut self.buffer)
@@ -923,7 +931,8 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
                 None => bail!("Expected the string to continue"),
             }
         }
-        let bin = base64::decode_config(&ret, base64::STANDARD_NO_PAD)
+        let bin = STANDARD_NO_PAD_INDIFFERENT
+            .decode(&ret)
             .context("The `binary` data in JSON string does not contain valid base64")?;
         Ok(V::from_vec(bin))
     }

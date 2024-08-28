@@ -107,6 +107,11 @@ mod tests {
     use any::Any;
     use anyhow::anyhow;
     use anyhow::Result;
+    use base64::alphabet::STANDARD;
+    use base64::engine::general_purpose::GeneralPurpose;
+    use base64::engine::general_purpose::GeneralPurposeConfig;
+    use base64::engine::DecodePaddingMode;
+    use base64::Engine;
     use standard::StandardProtocol;
     use standard::TypeName;
     use standard::TypeUri;
@@ -116,17 +121,23 @@ mod tests {
     use super::deserialize;
     use crate::AnyError;
 
+    // Bring back the pre 0.20 bevahiour and allow either padded or un-padded base64 strings at decode time.
+    const STANDARD_INDIFFERENT: GeneralPurpose = GeneralPurpose::new(
+        &STANDARD,
+        GeneralPurposeConfig::new().with_decode_padding_mode(DecodePaddingMode::Indifferent),
+    );
+
     fn make_test_any() -> Result<Any> {
         Ok(Any {
             r#type: Type {
                 name: TypeName::structType(TypeUri::typeHashPrefixSha2_256(
-                    base64::decode("e3AbYkUAP8FICiPtbGYI6w").unwrap(),
+                    STANDARD_INDIFFERENT.decode("e3AbYkUAP8FICiPtbGYI6w").unwrap(),
                 )),
                 params: Vec::new(),
                 ..Default::default()
             },
             protocol: Protocol::standard(StandardProtocol::Compact),
-            data: base64::decode(
+            data: STANDARD_INDIFFERENT.decode(
                 "GAozNjAwNjUwNzQ0GA5jb2d3aGVlbF90ZXN0cxwcHLwoENBU+E6zAHkpmP0Y3JboyaMAABkMABwVBAAYlgMZHBgNY29nd2hlZWxfdGVzdBkcGBIvbG9ncy90aHJpZnRfbW9ja3MYDHRocmlmdF9tb2NrczbAmgwAABwYjAJ7ImFsbF9zaWRlcyI6IFsiYSJdLCAicnBtX21hcCI6IHt9LCAiYnVuZGxlX3BhY2thZ2VfbWFwIjogeyJyY2VzZXJ2aWNlIjogImY4NDZjZjczNGM2YjQ3NDI5OTdiNDBjNTA2MWI1NmJhIiwgInR1cHBlcndhcmUuaW1hZ2Uud2ViZm91bmRhdGlvbi5jOS5yY2VzZXJ2aWNlIjogImZkNDZmN2VmMzQ0ZDYxNTIzMTdhODJlMzE4ZjZkMjk4In0sICJzZmlkIjogInJjZXNlcnZpY2Uvd3d3X2dlbmVyaWMiLCAiYnVuZGxlX2lkIjogODE4OCwgIm1pbm9yX2J1bmRsZV9pZCI6IDF9HBwSEgAcIRISHBIWAAAAHAAcJAIAHBglY29nd2hlZWxfcmNlc2VydmljZV90ZXN0X3Rlc3RfaGFybmVzcwAcAAAcGwAAABgAGwAAABIbABwAAA",
             )?,
             ..Default::default()

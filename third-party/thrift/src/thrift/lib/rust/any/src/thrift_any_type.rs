@@ -109,6 +109,11 @@ mod tests {
     use any::Any;
     use anyhow::anyhow;
     use anyhow::Result;
+    use base64::alphabet::STANDARD;
+    use base64::engine::general_purpose::GeneralPurpose;
+    use base64::engine::general_purpose::GeneralPurposeConfig;
+    use base64::engine::DecodePaddingMode;
+    use base64::Engine;
     use standard::TypeName;
     use standard::TypeUri;
     use type_::Type;
@@ -118,13 +123,21 @@ mod tests {
     use crate::AnyError;
     use crate::AnyTypeExpectationViolated;
 
+    // Bring back the pre 0.20 bevahiour and allow either padded or un-padded base64 strings at decode time.
+    const STANDARD_INDIFFERENT: GeneralPurpose = GeneralPurpose::new(
+        &STANDARD,
+        GeneralPurposeConfig::new().with_decode_padding_mode(DecodePaddingMode::Indifferent),
+    );
+
     #[test]
     fn test_ensure_thrift_any_type_0() -> Result<()> {
         use artifact_builder_override::ExperimentOverrideRequestContext;
         let val = Any {
             r#type: Type {
                 name: TypeName::structType(TypeUri::typeHashPrefixSha2_256(
-                    base64::decode("e3AbYkUAP8FICiPtbGYI6w").unwrap(),
+                    STANDARD_INDIFFERENT
+                        .decode("e3AbYkUAP8FICiPtbGYI6w")
+                        .unwrap(),
                 )),
                 ..Default::default()
             },

@@ -106,10 +106,6 @@ add_library(
   sema/standard_mutator.cc
   sema/standard_validator.cc
 )
-target_compile_definitions(
-  compiler_base
-  PRIVATE -DTHRIFTY_HH="${COMPILER_DIR}/thrifty.hh"
-)
 target_link_libraries(
   compiler_base
   compiler_ast

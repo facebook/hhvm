@@ -86,7 +86,7 @@ File "fn_subtyping_contra_2.php", line 8, character 9 - line 8, character 10:
  8 |   foo_2(»$f«);
  9 | }
 
-The supertype comes from this hint
+The supertype comes from this hint (its definition was given above)
 
 File "fn_subtyping_contra_2.php", line 6, character 16 - line 6, character 54:
 
@@ -121,7 +121,7 @@ Step 4 of 6
 
 These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
 
-The subtype comes from this hint
+The subtype comes from this hint (its definition was given in [Step 2])
 
 File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
 
@@ -130,7 +130,7 @@ File "fn_subtyping_contra_2.php", line 6, character 26 - line 6, character 46:
  8 |   foo_2($f);
  9 | }
 
-The supertype comes from this hint
+The supertype comes from this hint (its definition was given in [Step 2])
 
 File "fn_subtyping_contra_2.php", line 7, character 26 - line 7, character 48:
 
@@ -182,7 +182,7 @@ File "fn_subtyping_contra_2.php", line 3, character 7 - line 3, character 11:
 
  3 | class »Super« {}
  4 | class Sub extends Super {}
- 5 | 
+ 5 |
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
 
 The supertype comes from this hint
@@ -200,7 +200,7 @@ File "fn_subtyping_contra_2.php", line 4, character 7 - line 4, character 9:
 
  3 | class Super {}
  4 | class »Sub« extends Super {}
- 5 | 
+ 5 |
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
 
 1 error found

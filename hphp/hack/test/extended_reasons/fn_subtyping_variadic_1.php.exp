@@ -86,7 +86,7 @@ File "fn_subtyping_variadic_1.php", line 8, character 18 - line 8, character 19:
  8 |   foo_variadic_1(»$x«);
  9 | }
 
-The supertype comes from this hint
+The supertype comes from this hint (its definition was given above)
 
 File "fn_subtyping_variadic_1.php", line 6, character 25 - line 6, character 51:
 
@@ -138,7 +138,7 @@ File "fn_subtyping_variadic_1.php", line 3, character 7 - line 3, character 11:
 
  3 | class »Super« {}
  4 | class Sub extends Super {}
- 5 | 
+ 5 |
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
 
 The supertype comes from this hint
@@ -156,7 +156,7 @@ File "fn_subtyping_variadic_1.php", line 4, character 7 - line 4, character 9:
 
  3 | class Super {}
  4 | class »Sub« extends Super {}
- 5 | 
+ 5 |
  6 | function foo_variadic_1((function(Sub, Super):void) $_): void {}
 
 1 error found

@@ -3388,15 +3388,43 @@ module Derivation = struct
   module Explain = struct
     type should_render = Once
 
+    module Derivation_path = struct
+      type elem =
+        | Main
+        | Upper
+        | Lower
+        | Solution
+        | Step of int
+      [@@deriving eq]
+
+      let elem_to_string = function
+        | Main -> "Main"
+        | Upper -> "Upper"
+        | Lower -> "Lower"
+        | Solution -> "Solution"
+        | Step n -> Format.sprintf "Step %d" (n + 1)
+
+      type t = elem list [@@deriving eq]
+
+      let explain elems =
+        List.fold_left elems ~init:None ~f:(fun acc elem ->
+            let part = elem_to_string elem in
+            Some
+              (Option.value_map
+                 ~default:part
+                 ~f:(Format.sprintf "%s / %s" part)
+                 acc))
+    end
+
     module State = struct
-      type t = { defs_seen: Pos_or_decl.Set.t }
+      type t = { defs_seen: Derivation_path.t Pos_or_decl.Map.t }
 
-      let empty = { defs_seen = Pos_or_decl.Set.empty }
+      let empty = { defs_seen = Pos_or_decl.Map.empty }
 
-      let seen_def { defs_seen } pos = Pos_or_decl.Set.mem pos defs_seen
+      let seen_def { defs_seen } pos = Pos_or_decl.Map.find_opt pos defs_seen
 
-      let def_seen { defs_seen } pos =
-        { defs_seen = Pos_or_decl.Set.add pos defs_seen }
+      let def_seen { defs_seen } pos path =
+        { defs_seen = Pos_or_decl.Map.add pos path defs_seen }
     end
 
     module Config = struct
@@ -3406,21 +3434,9 @@ module Derivation = struct
     end
 
     module Context = struct
-      type path_elem =
-        | Main
-        | Upper
-        | Lower
-        | Solution
-
-      let path_elem_to_string = function
-        | Main -> "Main"
-        | Upper -> "Upper"
-        | Lower -> "Lower"
-        | Solution -> "Solution"
-
       type t = {
         derivation_depth: int;
-        derivation_path: path_elem list;
+        derivation_path: Derivation_path.t;
         in_flow: bool;
       }
 
@@ -3433,31 +3449,27 @@ module Derivation = struct
       let enter ({ derivation_path = d; _ } as t) elem =
         { t with derivation_path = elem :: d; in_flow = false }
 
-      let enter_main t = enter t Main
+      let enter_main t = enter t Derivation_path.Main
 
-      let enter_upper t = enter t Upper
+      let enter_upper t = enter t Derivation_path.Upper
 
-      let enter_lower t = enter t Lower
+      let enter_lower t = enter t Derivation_path.Lower
 
-      let enter_solution t = enter t Solution
+      let enter_solution t = enter t Derivation_path.Solution
+
+      let enter_step t n = enter t @@ Derivation_path.Step n
 
       let set_in_flow t = { t with in_flow = true }
 
       let in_flow { in_flow; _ } = in_flow
 
       let explain_path { derivation_path; _ } =
-        List.fold_left derivation_path ~init:None ~f:(fun acc path_elem ->
-            let part = path_elem_to_string path_elem in
-            Some
-              (Option.value_map
-                 ~default:part
-                 ~f:(Format.sprintf "%s / %s" part)
-                 acc))
+        Derivation_path.explain derivation_path
 
       let is_toplevel { derivation_path; _ } =
         match derivation_path with
         | []
-        | [Main] ->
+        | [Derivation_path.Main] ->
           true
         | _ -> false
     end
@@ -3473,6 +3485,9 @@ module Derivation = struct
       | [] -> [(Pos_or_decl.none, suffix)]
       | (pos, expl) :: rest ->
         (pos, Format.sprintf "%s%s%s" expl sep suffix) :: rest
+
+    let finish_with_suffix ls ~suffix ~sep =
+      List.rev @@ with_suffix ~suffix ~sep @@ List.rev ls
 
     let suppress_derivation ~st:_ ~cfg:_ ~ctxt:_ = false
 
@@ -3590,6 +3605,7 @@ module Derivation = struct
       (List.fold_right acc ~init:[] ~f:(fun xs ys -> List.append ys xs), st)
 
     and explain_step step (idx, n_steps, pfx, toplevel) ~st ~cfg ~ctxt =
+      let ctxt = Context.enter_step ctxt idx in
       let (sub, super, rule_opt, arg_opt) =
         match step with
         | Subtype_step.Begin { sub; super } -> (sub, super, None, None)
@@ -3772,10 +3788,25 @@ module Derivation = struct
 
     and explain_def (pos, reason) ~st ~cfg ~ctxt =
       let (expl_reason, st) = explain_reason reason ~st ~cfg ~ctxt in
-      if suppress_def pos ~st ~cfg ~ctxt then
+      match suppress_def pos ~st ~cfg ~ctxt with
+      | Some seen_at ->
+        let expl_reason =
+          if Derivation_path.equal seen_at ctxt.Context.derivation_path then
+            let suffix = "(its definition was given above)" in
+            finish_with_suffix expl_reason ~suffix ~sep:" "
+          else
+            Option.value_map
+              (Derivation_path.explain seen_at)
+              ~default:expl_reason
+              ~f:(fun path ->
+                let suffix =
+                  Format.sprintf "(its definition was given in [%s])" path
+                in
+                finish_with_suffix expl_reason ~suffix ~sep:" ")
+        in
         (expl_reason, st)
-      else
-        let st = State.def_seen st pos in
+      | None ->
+        let st = State.def_seen st pos ctxt.Context.derivation_path in
         (expl_reason @ [(pos, "which is defined here")], st)
 
     and explain_flow (from, into, kind) ~st ~cfg ~ctxt =

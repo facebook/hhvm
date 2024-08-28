@@ -120,7 +120,7 @@ Step 3 of 4
 
 The subtype extends or implements a class or interface so next I checked that was a subtype of the supertype.
 
-The subtype comes from this hint
+The subtype comes from this hint (its definition was given in [Step 2])
 
 File "class_subtyping_covariant.php", line 5, character 28 - line 5, character 45:
 

@@ -10,7 +10,7 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
-anyhow = "1.0.75"
+anyhow = "1.0.86"
 async-trait = "0.1.71"
 base64 = "0.13"
 bufsize = "1.0.5"

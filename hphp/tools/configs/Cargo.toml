@@ -15,5 +15,5 @@ convert_case = "0.4.0"
 nom = "7.1"
 
 [build-dependencies]
-anyhow = "1.0.75"
+anyhow = "1.0.86"
 cc = "1.0.90"

@@ -185,7 +185,7 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
         dispatchCommand.meta.client_pid = peerPid_;
         dispatchCommand.meta.client_name =
             facebook::eden::ProcessInfoCache::cleanProcessCommandline(
-                peerInfo_.get().name);
+                std::move(peerInfo_.get().name));
 
         getLogger()->logEvent(dispatchCommand);
       }

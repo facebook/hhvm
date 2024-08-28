@@ -108,6 +108,8 @@ module type S = sig
   (** hg update to the base global revision. *)
   val update_to_rev : rev -> string -> unit Future.t
 
+  val hg_root : unit -> string Future.t
+
   module Mocking : sig
     val current_working_copy_hg_rev_returns : (Rev.t * bool) Future.t -> unit
 

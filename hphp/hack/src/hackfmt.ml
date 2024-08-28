@@ -49,7 +49,7 @@ let rec guess_root config start recursion_limit =
   else
     guess_root config (Path.parent start) (recursion_limit - 1)
 
-let get_root_for_diff () =
+let get_www_root_for_diff () =
   eprintf "No root specified, trying to guess one\n";
   let config = ".hhconfig" in
   let start_path = Path.make "." in
@@ -62,7 +62,7 @@ let get_root_for_diff () =
   eprintf "Guessed root: %a\n%!" Path.output root;
   root
 
-let get_root_for_format files =
+let get_www_root_for_format files =
   let cur = Path.make "." in
   let start_path =
     match files with
@@ -122,7 +122,8 @@ module Env = struct
     test: bool;
     mutable mode: string option;
     mutable text_source: text_source;
-    root: string;
+    www_root: string;
+    diff_root: Path.t;
   }
 end
 
@@ -135,9 +136,11 @@ module Raw_options = struct
     inplace: bool;
     diff: bool;
     diff_dry: bool;
+    diff_root: Path.t;
     check: bool;
     config: FEnv.t;
-    root: Path.t;
+    www_root: Path.t;
+    (* www root. By default: directory with .hhconfig *)
     parser_env: Full_fidelity_parser_env.t;
     debug: bool;
     test: bool;
@@ -179,6 +182,7 @@ let parse_options () : Raw_options.t =
   let cli_indent_with_tabs = ref false in
   let cli_line_width = ref None in
   let cli_root = ref None in
+  let diff_root_arg = ref None in
   let cli_format_generated_code = ref false in
   let cli_version = ref None in
   let rec options =
@@ -236,14 +240,18 @@ let parse_options () : Raw_options.t =
           Arg.Int (fun x -> cli_version := Some x),
           " For version-gated formatter features, specify the version to use. "
           ^ "Defaults to latest." );
+        ( "--root",
+          Arg.String (fun x -> cli_root := Some x),
+          "[dir]  Specify a directory " ^ "containing an .hhconfig" );
         ( "--diff",
           Arg.Set diff,
           " Format the changed lines in a diff"
           ^ " (example: hg diff | hackfmt --diff)" );
-        ( "--root",
-          Arg.String (fun x -> cli_root := Some x),
-          "[dir]  Specify a root directory for --diff mode, or a directory "
-          ^ "containing .hhconfig for standard mode" );
+        ( "--diff-root",
+          Arg.String (fun x -> diff_root_arg := Some x),
+          "[dir]  (for use with --diff) Specify a directory paths are relative to in a diffs file."
+          ^ "If not specified, defaults to `hg root`. If no hg root, falls back to WWW root."
+        );
         ( "--diff-dry-run",
           Arg.Set diff_dry,
           " Preview the files that would be overwritten by --diff mode" );
@@ -282,16 +290,35 @@ let parse_options () : Raw_options.t =
         raise (InvalidCliArg "Cannot use --range with --line-range")
       | _ -> None
     in
-    let root =
+    let www_root =
       match !cli_root with
       | Some p -> Path.make p
       | None ->
         if !diff then
-          get_root_for_diff ()
+          get_www_root_for_diff ()
         else
-          get_root_for_format !files
+          get_www_root_for_format !files
     in
-    let hhconfig_path = Path.concat root ".hhconfig" |> Path.to_string in
+    let diff_root =
+      if !diff then
+        match !diff_root_arg with
+        | Some r -> Path.make r
+        | None -> begin
+          match Future.get @@ Hg.hg_root () with
+          | Ok hg_root -> Path.make hg_root
+          | Error e ->
+            let () =
+              eprintf
+                "Could not find hg root:\n%s\nFalling back to WWW root %s\n"
+                (Future.error_to_string e)
+                (Path.to_string www_root)
+            in
+            www_root
+        end
+      else
+        www_root
+    in
+    let hhconfig_path = Path.concat www_root ".hhconfig" |> Path.to_string in
     let (config, parser_env) =
       if file_exists hhconfig_path then
         read_hhconfig hhconfig_path
@@ -324,9 +351,10 @@ let parse_options () : Raw_options.t =
           inplace = !inplace;
           diff = !diff;
           diff_dry = !diff_dry;
+          diff_root;
           check = !check;
           config;
-          root;
+          www_root;
           parser_env;
           debug = !debug;
           test = !test;
@@ -416,7 +444,7 @@ let validate_options
       if not (file_exists path) then fail ("No such file or directory: " ^ path)
   in
   assert_file_exists filename;
-  assert_file_exists (Some env.Env.root);
+  assert_file_exists (Some env.Env.www_root);
   let files =
     if multifile_allowed then
       List.rev_filter files ~f:(fun path ->
@@ -535,7 +563,7 @@ let logging_time_taken env logger thunk =
       ~end_t
       ~mode:env.Env.mode
       ~file:(text_source_to_filename env.Env.text_source)
-      ~root:env.Env.root;
+      ~root:env.Env.www_root;
   res
 
 (* If the range is a byte range, expand it to line boundaries.
@@ -662,7 +690,6 @@ let main
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted
   | Diff { dry; config } ->
-    let root = Path.make env.Env.root in
     read_stdin ()
     |> Parse_diff.go
     |> List.filter ~f:(fun (rel_path, _intervals) -> is_hack rel_path)
@@ -676,7 +703,9 @@ let main
             * Similarly, InvalidDiff exceptions thrown by format_diff_intervals
             * (caused by out-of-bounds line numbers, etc) will cause us to bail
             * before writing to any files. *)
-           let filename = Path.to_string (Path.concat root rel_path) in
+           let filename =
+             Path.to_string (Path.concat env.Env.diff_root rel_path)
+           in
            if not (file_exists filename) then
              raise (InvalidDiff ("No such file or directory: " ^ rel_path));
 
@@ -717,14 +746,17 @@ let () =
   Folly.ensure_folly_init ();
 
   match parse_options () with
-  | Raw_options.(Normal ({ root; parser_env; debug; test; _ } as options)) ->
+  | Raw_options.(
+      Normal ({ www_root; diff_root; parser_env; debug; test; _ } as options))
+    ->
     let env =
       {
         Env.debug;
         test;
         mode = None;
         text_source = Stdin None;
-        root = Path.to_string root;
+        www_root = Path.to_string www_root;
+        diff_root;
       }
     in
     let start_time = Unix.gettimeofday () in
@@ -758,7 +790,7 @@ let () =
         ~exit_code:(Some exit_code)
         ~mode:env.Env.mode
         ~file:(text_source_to_filename env.Env.text_source)
-        ~root:env.Env.root);
+        ~root:env.Env.www_root);
 
     Option.iter err_msg ~f:(eprintf "%s\n");
     exit exit_code

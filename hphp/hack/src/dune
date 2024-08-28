@@ -194,6 +194,7 @@
   default_injector_config
   folly_stubs
   hackfmt
+  hg
   linttool
   hackfmt_debug
   config_file

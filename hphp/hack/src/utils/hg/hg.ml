@@ -203,6 +203,10 @@ module Hg_actual = struct
       in
       FutureProcess.make process Sys_utils.split_lines
 
+  let hg_root () =
+    let process = exec_hg ["root"] in
+    FutureProcess.make process String.trim
+
   (** hg update --rev r<global_rev> --cwd <repo> *)
   let update_to_rev rev repo =
     let process = exec_hg ["update"; "--rev"; rev_string rev; "--cwd"; repo] in
@@ -320,6 +324,8 @@ module Hg_mock = struct
 
   let get_old_version_of_files ~rev:_ ~files:_ ~out:_ ~repo:_ =
     Future.of_value ()
+
+  let hg_root () : string Future.t = Future.of_value ""
 end
 
 include

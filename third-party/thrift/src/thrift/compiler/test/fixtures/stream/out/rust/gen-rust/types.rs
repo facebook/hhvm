@@ -144,6 +144,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -237,6 +238,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -330,6 +332,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };

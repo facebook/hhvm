@@ -152,6 +152,7 @@ where
             {{/struct:fields_by_name}}
         ];
         {{#struct:all_optional?}}
+        #[allow(unused_mut)]
         let mut fields = Self {{>lib/block}}{{!
             }}{{#struct:fields}}
             {{field:rust_name}}: ::std::option::Option::None,{{!

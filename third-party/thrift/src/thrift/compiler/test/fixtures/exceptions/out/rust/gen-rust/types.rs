@@ -382,6 +382,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("sonnet", ::fbthrift::TType::String, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             sonnet: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -994,6 +995,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };

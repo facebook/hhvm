@@ -2905,6 +2905,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -4875,6 +4876,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Struct, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -5107,6 +5109,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -5478,6 +5481,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -5831,6 +5835,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -5957,6 +5962,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -6093,6 +6099,7 @@ where
             ::fbthrift::Field::new("regularInt", ::fbthrift::TType::I64, 1),
             ::fbthrift::Field::new("regularString", ::fbthrift::TType::String, 3),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             regularInt: ::std::option::Option::None,
             countingInt: ::std::option::Option::None,

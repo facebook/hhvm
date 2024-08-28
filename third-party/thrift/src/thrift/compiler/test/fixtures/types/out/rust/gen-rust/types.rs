@@ -887,6 +887,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -2695,6 +2696,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -3067,6 +3069,7 @@ where
             ::fbthrift::Field::new("ForwardUsageByRef", ::fbthrift::TType::Struct, 2),
             ::fbthrift::Field::new("ForwardUsageStruct", ::fbthrift::TType::Struct, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             ForwardUsageStruct: ::std::option::Option::None,
             ForwardUsageByRef: ::std::option::Option::None,
@@ -3192,6 +3195,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("foo", ::fbthrift::TType::Struct, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             foo: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -3313,6 +3317,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("foo", ::fbthrift::TType::Struct, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             foo: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -3434,6 +3439,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Map, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -3537,6 +3543,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -3644,6 +3651,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::Map, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -3758,6 +3766,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -3865,6 +3874,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -3979,6 +3989,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -4086,6 +4097,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -4200,6 +4212,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         };
@@ -4307,6 +4320,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -4545,6 +4559,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::List, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -4656,6 +4671,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field", ::fbthrift::TType::I16, 1),
         ];
+        #[allow(unused_mut)]
         let mut fields = Self {
             field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),

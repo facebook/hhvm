@@ -42,7 +42,7 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
+    public enum TypeEnum {
       INT_FIELD,
     }
 
@@ -108,10 +108,10 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
         return this.id;
     }
 
-    public Type getThriftUnionType() {
+    public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 1:
-          return Type.INT_FIELD;
+          return TypeEnum.INT_FIELD;
         default:
           throw new IllegalStateException("unreachable");
       }

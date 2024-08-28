@@ -47,7 +47,7 @@ public final class UnfortunateUnion implements com.facebook.thrift.payload.Thrif
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
+    public enum TypeEnum {
       AN_SNAKE_STRING,
       A_CAMEL_I32,
     }
@@ -150,12 +150,12 @@ public final class UnfortunateUnion implements com.facebook.thrift.payload.Thrif
         return this.id;
     }
 
-    public Type getThriftUnionType() {
+    public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 1:
-          return Type.AN_SNAKE_STRING;
+          return TypeEnum.AN_SNAKE_STRING;
         case 2:
-          return Type.A_CAMEL_I32;
+          return TypeEnum.A_CAMEL_I32;
         default:
           throw new IllegalStateException("unreachable");
       }

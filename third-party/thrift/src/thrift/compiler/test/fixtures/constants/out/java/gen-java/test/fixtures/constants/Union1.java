@@ -47,7 +47,7 @@ public final class Union1 implements com.facebook.thrift.payload.ThriftSerializa
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
+    public enum TypeEnum {
       I,
       D,
     }
@@ -144,12 +144,12 @@ public final class Union1 implements com.facebook.thrift.payload.ThriftSerializa
         return this.id;
     }
 
-    public Type getThriftUnionType() {
+    public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 1:
-          return Type.I;
+          return TypeEnum.I;
         case 2:
-          return Type.D;
+          return TypeEnum.D;
         default:
           throw new IllegalStateException("unreachable");
       }

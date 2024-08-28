@@ -47,7 +47,7 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
+    public enum TypeEnum {
       THING_ONE,
       THING_TWO,
     }
@@ -148,12 +148,12 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
         return this.id;
     }
 
-    public Type getThriftUnionType() {
+    public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 1:
-          return Type.THING_ONE;
+          return TypeEnum.THING_ONE;
         case 2:
-          return Type.THING_TWO;
+          return TypeEnum.THING_TWO;
         default:
           throw new IllegalStateException("unreachable");
       }

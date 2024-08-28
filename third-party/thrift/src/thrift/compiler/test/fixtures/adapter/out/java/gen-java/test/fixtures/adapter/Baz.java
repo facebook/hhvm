@@ -65,7 +65,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
+    public enum TypeEnum {
       INT_FIELD,
       SET_FIELD,
       MAP_FIELD,
@@ -273,18 +273,18 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         return this.id;
     }
 
-    public Type getThriftUnionType() {
+    public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 1:
-          return Type.INT_FIELD;
+          return TypeEnum.INT_FIELD;
         case 4:
-          return Type.SET_FIELD;
+          return TypeEnum.SET_FIELD;
         case 6:
-          return Type.MAP_FIELD;
+          return TypeEnum.MAP_FIELD;
         case 8:
-          return Type.BINARY_FIELD;
+          return TypeEnum.BINARY_FIELD;
         case 9:
-          return Type.LONG_FIELD;
+          return TypeEnum.LONG_FIELD;
         default:
           throw new IllegalStateException("unreachable");
       }

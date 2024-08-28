@@ -67,7 +67,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
+    public enum TypeEnum {
       MY_ENUM,
       MY_STRUCT,
       MY_DATA_ITEM,
@@ -312,20 +312,20 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         return this.id;
     }
 
-    public Type getThriftUnionType() {
+    public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 1:
-          return Type.MY_ENUM;
+          return TypeEnum.MY_ENUM;
         case 2:
-          return Type.MY_STRUCT;
+          return TypeEnum.MY_STRUCT;
         case 3:
-          return Type.MY_DATA_ITEM;
+          return TypeEnum.MY_DATA_ITEM;
         case 4:
-          return Type.COMPLEX_NESTED_STRUCT;
+          return TypeEnum.COMPLEX_NESTED_STRUCT;
         case 5:
-          return Type.LONG_VALUE;
+          return TypeEnum.LONG_VALUE;
         case 6:
-          return Type.INT_VALUE;
+          return TypeEnum.INT_VALUE;
         default:
           throw new IllegalStateException("unreachable");
       }

@@ -67,7 +67,7 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     private java.lang.Object value;
     private short id;
 
-    public enum Type {
+    public enum TypeEnum {
       INT_VALUE,
       STRING_VALUE,
       INT_LIST_VALUE,
@@ -297,20 +297,20 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         return this.id;
     }
 
-    public Type getThriftUnionType() {
+    public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 1:
-          return Type.INT_VALUE;
+          return TypeEnum.INT_VALUE;
         case 5:
-          return Type.STRING_VALUE;
+          return TypeEnum.STRING_VALUE;
         case 2:
-          return Type.INT_LIST_VALUE;
+          return TypeEnum.INT_LIST_VALUE;
         case 3:
-          return Type.STRING_LIST_VALUE;
+          return TypeEnum.STRING_LIST_VALUE;
         case 9:
-          return Type.TYPEDEF_VALUE;
+          return TypeEnum.TYPEDEF_VALUE;
         case 14:
-          return Type.STRING_REF;
+          return TypeEnum.STRING_REF;
         default:
           throw new IllegalStateException("unreachable");
       }

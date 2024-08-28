@@ -290,8 +290,8 @@ let load_config config options =
         no_parser_readonly_check = po_opt.no_parser_readonly_check;
         unwrap_concurrent = po_opt.unwrap_concurrent;
         parser_errors_only = po_opt.parser_errors_only;
-        use_legacy_experimental_feature_config =
-          po_opt.use_legacy_experimental_feature_config;
+        (* Never use the legacy mode for hh_server *)
+        use_legacy_experimental_feature_config = false;
         (* The remainder are set in the config file *)
         is_systemlib = bool_opt "is_systemlib" config >?? po_opt.is_systemlib;
         disable_lval_as_an_expression =

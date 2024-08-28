@@ -25,6 +25,9 @@ class sema_context;
 class t_named;
 class t_type;
 
+inline constexpr std::string_view implicit_include_rule_name =
+    "implicit-include";
+
 /**
  * Transitive includes "work" in Thrift C++, but they invite vexing bugs if
  * multiple transitive includes have the same module name. In other languages

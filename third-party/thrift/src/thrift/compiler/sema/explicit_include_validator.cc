@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <set>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 
@@ -48,18 +49,33 @@ bool program_has_include(sema_context& ctx, const t_program* type_program) {
   });
 }
 
+const t_node& get_include_insert_node(const t_program& program) {
+  // Add the new include to the top of the includes list, if there are
+  // includes. Otherwise, just add it to the top of the file ¯\_(ツ)_/¯.
+  if (!program.includes().empty()) {
+    return *program.includes().front();
+  }
+  return program;
+}
+
 void report_missing(
-    sema_context& ctx,
-    const t_named& src,
-    const t_type& type,
-    diagnostic_level level) {
+    sema_context& ctx, const t_program* include, diagnostic_level level) {
+  auto implicit_includes_ = ctx.cache().get(ctx.program(), []() {
+    return std::make_unique<
+        std::shared_ptr<std::set<const apache::thrift::compiler::t_program*>>>(
+        std::make_shared<
+            std::set<const apache::thrift::compiler::t_program*>>());
+  });
+  if (implicit_includes_->find(include) != implicit_includes_->end()) {
+    return;
+  }
+  implicit_includes_->insert(include);
   ctx.report(
-      src,
+      get_include_insert_node(ctx.program()),
+      std::string(implicit_include_rule_name),
+      fixit("", fmt::format("include \"{}\"\n", include->path())),
       level,
-      "Type `{}.{}` relies on a transitive include. Add `include \"{}\"` near the top of this file.",
-      type.program()->name(),
-      type.name(),
-      type.program()->path());
+      "Your thrift file depends on a type that it did not include. Please add the following include.");
 }
 
 void visit_type(
@@ -68,7 +84,7 @@ void visit_type(
     const t_type& type,
     diagnostic_level level) {
   if (type.program() != nullptr && !program_has_include(ctx, type.program())) {
-    report_missing(ctx, src, type, level);
+    report_missing(ctx, type.program(), level);
   } else if (type.is_list()) {
     const auto& list = *dynamic_cast<const t_list*>(&type);
     visit_type(ctx, src, *list.get_elem_type(), level);

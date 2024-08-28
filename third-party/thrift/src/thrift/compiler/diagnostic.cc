@@ -49,6 +49,13 @@ fmt::format_context::iterator fmt::formatter<diagnostic>::format(
   if (!d.name().empty()) {
     fmt::format_to(out, " [{}]", d.name());
   }
+  if (d.fixit_hint()) {
+    fmt::format_to(
+        out,
+        " fix: [original: \"{}\"][replacement: \"{}\"]",
+        d.fixit_hint()->original(),
+        d.fixit_hint()->replacement());
+  }
   return out;
 }
 

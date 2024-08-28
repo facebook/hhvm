@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <random>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -84,15 +85,50 @@ std::vector<diagnostic> extract_expected_diagnostics(
     auto line_end = std::find(it, source.end(), '\n');
 
     re2::StringPiece line(&*it, line_end - it);
-    re2::StringPiece type_match, message_match, line_num_match, name_match;
-    re2::RE2 diagnostic_pattern(
-        "#\\s*expected-(?P<type>error|warning)@?(?P<linenum>[+-]?\\d+)?:\\s*(?P<message>.*?)\\s*(?:\\[(?P<name>.*)\\])?$");
+    re2::StringPiece type_match, original_match, replacement_match,
+        message_match, line_num_match, name_match, column_match;
+    // Match the following:
+    // #\\s*expected-(?P<type>error|warning)
+    // match the text #expected- and then either error or warning for error
+    // severity
+    //
+    // @?(?P<linenum>[+-]?\\d+)?
+    // match @ and then a line number, optionaly can be + or - lines to be an
+    // offset to the current line
+    //
+    // \\s*(?:#original\\[(?P<original>.*?)\\])?\\s*(?:#replacement\\[(?P<replacement>.*?)\\])?
+    // match an optional original and replacement text in the form
+    // #original[text here]#replacement[text here]
+    //
+    // @?(?P<column>\\d+)?
+    // match an optional column number, no offset here just the number
+    //
+    // :\\s*(?P<message>.*?)
+    // after a colon, match any characters as the message, until a [ character
+    // is hit for the next match group
+    //
+    // \\s*(?:\\[(?P<name>.*)\\])?$
+    // match a name, in the format [name_here] then end match
+    //
+    // Note that this is just a format to match the comments in
+    // compiler_test.cc, the actual format of the lint messages is different,
+    // for that see diagnostic.cc::format
+    std::string diagnostic_severity_and_line(
+        "#\\s*expected-(?P<type>error|warning)@?(?P<linenum>[+-]?\\d+)?");
+    std::string diagnostic_fixit(
+        "\\s*(?:#original\\[(?P<original>.*?)\\])?\\s*(?:#replacement\\[(?P<replacement>.*?)\\])?@?(?P<column>\\d+)?");
+    std::string diagnostic_message_and_name(
+        ":\\s*(?P<message>.*?)\\s*(?:\\[(?P<name>.*)\\])?$");
 
     if (re2::RE2::PartialMatch(
             line,
-            diagnostic_pattern,
+            diagnostic_severity_and_line + diagnostic_fixit +
+                diagnostic_message_and_name,
             &type_match,
             &line_num_match,
+            &original_match,
+            &replacement_match,
+            &column_match,
             &message_match,
             &name_match)) {
       diagnostic_level level = type_match.as_string() == "error"
@@ -106,8 +142,29 @@ std::vector<diagnostic> extract_expected_diagnostics(
             : std::stoi(ln_no_str);
       }
       auto name = name_match.as_string();
-      result.emplace_back(
-          level, message_match.as_string(), file_name, line_num, name);
+      if ((!original_match.empty() || !replacement_match.empty()) &&
+          !column_match.empty()) {
+        auto col_str = column_match.as_string();
+        int col_num = std::stoi(col_str);
+
+        // Both the original string or the replacement could have newlines,
+        // which need to be unescaped in order for the equality match to work
+        auto replacement = replacement_match.as_string();
+        re2::RE2::GlobalReplace(&replacement, "\\\\n", "\n");
+        auto original = original_match.as_string();
+        re2::RE2::GlobalReplace(&original, "\\\\n", "\n");
+
+        result.emplace_back(
+            level,
+            message_match.as_string(),
+            file_name,
+            line_num,
+            name,
+            fixit(original, replacement, line_num, col_num));
+      } else {
+        result.emplace_back(
+            level, message_match.as_string(), file_name, line_num, name);
+      }
     }
 
     if (line_end == source.end()) {

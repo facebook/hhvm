@@ -53,6 +53,12 @@ class fixit {
         replacement_(std::move(replacement)),
         loc_(std::move(loc)) {}
 
+  fixit(std::string original, std::string replacement, int line, int column)
+      : original_(std::move(original)),
+        replacement_(std::move(replacement)),
+        line_(line),
+        column_(column) {}
+
   const std::string& original() const { return original_; }
   const std::string& replacement() const { return replacement_; }
   int lineno() const { return line_; }

@@ -92,12 +92,7 @@ struct parser_scan_window {
   /**
    * Returns the next token without advancing the head to the next token.
    */
-  [[nodiscard]] const token& peek() const {
-    if (!can_advance()) {
-      return *head;
-    }
-    return *head;
-  }
+  [[nodiscard]] const token& peek() const { return *head; }
 
   /**
    * Returns a new "fresh" parser_scan_window whose start is moved to the

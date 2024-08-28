@@ -50,8 +50,8 @@ class specify_implicit_field_id {
       return;
     }
     fm_.add(
-        {f.src_range().begin.offset(),
-         f.src_range().begin.offset(),
+        {f.type().src_range().begin.offset(),
+         f.type().src_range().begin.offset(),
          fmt::format("{}\n    {}: ", kComment, f.id())});
   }
 

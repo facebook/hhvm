@@ -37,6 +37,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
+                include "thrift/annotation/cpp.thrift"
+
                 struct A {
                     1: string foo;
                 }
@@ -63,6 +65,10 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     1: string bar;
                     string added_after_codemod;
                 }
+                struct G {
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                    string foo;
+                }
                 """
             ),
         )
@@ -74,6 +80,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
             read_file("foo.thrift"),
             textwrap.dedent(
                 """\
+                include "thrift/annotation/cpp.thrift"
+
                 struct A {
                     1: string foo;
                 }
@@ -106,6 +114,11 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     1: string bar;
                     // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
                     -2: string added_after_codemod;
+                }
+                struct G {
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                    // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
+                    -1: string foo;
                 }
                 """
             ),

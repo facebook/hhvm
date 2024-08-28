@@ -73,8 +73,6 @@ class MinimalMap : private folly::F14FastMap<K, M, H, E, A> {
   MinimalMap() = default;
 
   using Super::operator[];
-  using Super::begin;
-  using Super::end;
   using Super::get_allocator;
   using Super::size;
 
@@ -157,13 +155,13 @@ TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCount) {
       TrackedValue::counts(),
       (folly::test::Counts{
           /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
+          /* moveConstruct */ 1,
           /* copyConvert */ 0,
           /* moveConvert */ 0,
           /* copyAssign */ 0,
           /* moveAssign */ 0,
           /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+          /* destroyed */ 1}));
 }
 
 TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVec) {

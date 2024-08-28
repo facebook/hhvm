@@ -24,7 +24,6 @@
 #include <list>
 #include <memory>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 #include <folly/Conv.h>
@@ -124,50 +123,15 @@ typename Container::reference emplace_back_default_map(Container& c, Map& m) {
   }
 }
 
-template <typename Map>
-typename Map::iterator map_emplace_hint_default(
-    Map& map, typename Map::key_type&& key) {
-  constexpr auto pass_alloc =
-      alloc_should_propagate<Map, typename Map::mapped_type>;
-  if constexpr (pass_alloc) {
-    return map.emplace_hint(
-        map.end(),
-        std::move(key),
-        typename Map::mapped_type(map.get_allocator()));
-  }
-  return map.emplace_hint(
-      map.end(),
-      std::piecewise_construct,
-      std::forward_as_tuple(std::move(key)),
-      std::forward_as_tuple());
-}
-
-template <typename Map>
-typename Map::iterator map_emplace_default(
-    Map& map, typename Map::key_type&& key) {
-  constexpr auto pass_alloc =
-      alloc_should_propagate<Map, typename Map::mapped_type>;
-  if constexpr (pass_alloc) {
-    return map
-        .emplace(std::move(key), typename Map::mapped_type(map.get_allocator()))
-        .first;
-  }
-  return map
-      .emplace(
-          std::piecewise_construct,
-          std::forward_as_tuple(std::move(key)),
-          std::forward_as_tuple())
-      .first;
-}
-
 template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
 std::enable_if_t<detail::alloc_should_propagate_map<Map>>
 deserialize_key_val_into_map(
     Map& m, const KeyDeserializer& kr, const MappedDeserializer& mr) {
   typename Map::key_type key = detail::default_map_key(m);
+  typename Map::mapped_type value = detail::default_map_value(m);
   kr(key);
-  auto it = map_emplace_default(m, std::move(key));
-  mr(it->second);
+  mr(value);
+  m.emplace(std::move(key), std::move(value));
 }
 
 template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
@@ -254,9 +218,10 @@ deserialize_known_length_map(
 
   for (auto i = map_size; i--;) {
     typename Map::key_type key = detail::default_map_key(map);
+    typename Map::mapped_type value = detail::default_map_value(map);
     kr(key);
-    auto it = map_emplace_hint_default(map, std::move(key));
-    mr(it->second);
+    mr(value);
+    map.emplace_hint(map.end(), std::move(key), std::move(value));
   }
 }
 

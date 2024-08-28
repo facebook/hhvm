@@ -2839,6 +2839,8 @@ module Derivation = struct
     val to_json : t -> Hh_json.json
 
     val explain : t -> string
+
+    val is_supportdyn : t -> bool
   end = struct
     type t =
       | Using_prj of prj_symm
@@ -2846,6 +2848,10 @@ module Derivation = struct
       | Using_prj_super of prj_asymm
       | Using_axiom_sub of axiom
       | Using_axiom_super of axiom
+
+    let is_supportdyn = function
+      | Using_prj Prj_symm_supportdyn -> true
+      | _ -> false
 
     let using_prj prj = Using_prj prj
 
@@ -3059,6 +3065,8 @@ module Derivation = struct
       Subtype_rule.t -> arg -> sub:locl_phase t_ -> super:locl_phase t_ -> t
 
     val to_json : t -> Hh_json.json
+
+    val uses_supportdyn : t -> bool
   end = struct
     type arg =
       | Subtype
@@ -3083,6 +3091,10 @@ module Derivation = struct
         }
 
     let step rule on_ ~sub ~super = Step { sub; super; rule; on_ }
+
+    let uses_supportdyn = function
+      | Begin _ -> false
+      | Step { rule; _ } -> Subtype_rule.is_supportdyn rule
 
     let begin_ ~sub ~super = Begin { sub; super }
 
@@ -3453,16 +3465,32 @@ module Derivation = struct
         def_config: def_config;
         flow_config: flow_config;
         deriv_config: deriv_config;
+        suppress_supportdyn: bool;
       }
 
       let verbose =
-        { def_config = Always; flow_config = Full; deriv_config = All }
+        {
+          def_config = Always;
+          flow_config = Full;
+          deriv_config = All;
+          suppress_supportdyn = false;
+        }
 
       let chatty =
-        { def_config = Once; flow_config = Full; deriv_config = Depth 2 }
+        {
+          def_config = Once;
+          flow_config = Full;
+          deriv_config = Depth 2;
+          suppress_supportdyn = true;
+        }
 
       let terse =
-        { def_config = Never; flow_config = Ends; deriv_config = Main }
+        {
+          def_config = Never;
+          flow_config = Ends;
+          deriv_config = Main;
+          suppress_supportdyn = true;
+        }
 
       let from_complexity complexity =
         if complexity = 0 then
@@ -3478,9 +3506,15 @@ module Derivation = struct
         | Main -> cur_depth > 0
         | Depth max_depth -> cur_depth > max_depth
 
-      let get_def { def_config; _ } pos seen =
+      let get_def { def_config; suppress_supportdyn; _ } pos seen =
         match def_config with
         | Never -> None
+        | _
+          when suppress_supportdyn
+               && String.equal
+                    (Relative_path.suffix @@ Pos_or_decl.filename pos)
+                    "supportdynamic.hhi" ->
+          None
         | Always -> Some (Either.First pos)
         | Once ->
           (match Pos_or_decl.Map.find_opt pos seen with
@@ -3675,6 +3709,13 @@ module Derivation = struct
         (expl, st)
 
     and explain_steps steps ~st ~cfg ~ctxt =
+      let steps =
+        if cfg.Config.suppress_supportdyn then
+          List.filter steps ~f:(fun step ->
+              not @@ Subtype_step.uses_supportdyn step)
+        else
+          steps
+      in
       let n_steps = List.length steps in
       let path = Context.explain_path ctxt in
       let pfx =
@@ -3902,8 +3943,18 @@ module Derivation = struct
         in
         (expl_reason, st)
       | Some (Either.First pos) ->
-        let st = State.def_seen st pos ctxt.Context.derivation_path in
-        (expl_reason @ [(pos, "which is defined here")], st)
+        (* Suppress the 'definition' of supportdyn  *)
+        if
+          cfg.Config.suppress_supportdyn
+          && Pos_or_decl.is_hhi pos
+          && String.is_substring
+               (Relative_path.suffix (Pos_or_decl.filename pos))
+               ~substring:"supportdynamic"
+        then
+          (expl_reason, st)
+        else
+          let st = State.def_seen st pos ctxt.Context.derivation_path in
+          (expl_reason @ [(pos, "which is defined here")], st)
 
     and explain_flow (from, into, kind) ~st ~cfg ~ctxt =
       let (expl_from, st) = explain_reason from ~st ~cfg ~ctxt in

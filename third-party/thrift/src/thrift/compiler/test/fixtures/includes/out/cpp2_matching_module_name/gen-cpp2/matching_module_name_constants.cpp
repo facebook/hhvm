@@ -9,11 +9,13 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "other/gen-cpp2/matching_module_name_constants.h"
+
 
 namespace matching_module_name {
 namespace matching_module_name_constants {
 
-  ::std::string_view _fbthrift_schema_1cd40e8dd523bf67() { return ""; }
+
 
 } // namespace matching_module_name_constants
 } // namespace matching_module_name

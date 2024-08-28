@@ -10,10 +10,11 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace cpp2 {
 namespace module_no_uri_constants {
 
-  ::std::string_view _fbthrift_schema_1e06ea14371b6d77() { return ""; }
+
 
 } // namespace module_no_uri_constants
 } // namespace cpp2

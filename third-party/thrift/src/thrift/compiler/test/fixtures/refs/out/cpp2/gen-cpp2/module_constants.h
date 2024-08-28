@@ -27,6 +27,7 @@ namespace module_constants {
   ::cpp2::StructWithRefTypeSharedConst const& kStructWithRefTypeSharedConst();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_1a3968d5a44d4338();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1a3968d5a44d4338_includes();
 
 } // namespace module_constants
 } // namespace cpp2

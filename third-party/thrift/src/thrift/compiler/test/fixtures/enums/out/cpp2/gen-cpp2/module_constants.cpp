@@ -10,10 +10,11 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace test::fixtures::enums {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_aee2267ce76e558f() { return ""; }
+
 
 } // namespace module_constants
 } // namespace test::fixtures::enums

@@ -15,6 +15,7 @@ namespace test::fixtures::python_capi {
 namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_1d08748cd3433d4f();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1d08748cd3433d4f_includes();
 
 } // namespace module_constants
 } // namespace test::fixtures::python_capi

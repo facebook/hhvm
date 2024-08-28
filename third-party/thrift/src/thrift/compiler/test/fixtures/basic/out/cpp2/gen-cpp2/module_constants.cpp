@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace test::fixtures::basic {
 namespace module_constants {
 
@@ -45,7 +46,7 @@ namespace module_constants {
   return *instance;
 }
 
-  ::std::string_view _fbthrift_schema_402a672704b1a4e6() { return ""; }
+
 
 } // namespace module_constants
 } // namespace test::fixtures::basic

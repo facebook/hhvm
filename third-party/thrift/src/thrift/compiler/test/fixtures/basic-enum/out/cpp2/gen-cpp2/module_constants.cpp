@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace test::fixtures::enumstrict {
 namespace module_constants {
 
@@ -20,7 +21,7 @@ namespace module_constants {
   return *instance;
 }
 
-  ::std::string_view _fbthrift_schema_e97c3188d96b91fe() { return ""; }
+
 
 } // namespace module_constants
 } // namespace test::fixtures::enumstrict

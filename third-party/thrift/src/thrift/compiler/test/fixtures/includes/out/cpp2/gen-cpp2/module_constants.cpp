@@ -11,10 +11,11 @@
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_constants.h"
 
+
 namespace cpp2 {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_da3e13194d230a3c() { return ""; }
+
 
 } // namespace module_constants
 } // namespace cpp2

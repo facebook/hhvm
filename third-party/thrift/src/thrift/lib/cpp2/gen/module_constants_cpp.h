@@ -16,8 +16,15 @@
 
 #pragma once
 
+#include <array>
+
+#include <folly/CPortability.h>
 #include <folly/Indestructible.h>
 #include <folly/lang/Exception.h>
 
 FOLLY_GNU_DISABLE_WARNING("-Woverlength-strings")
 FOLLY_GNU_DISABLE_WARNING("-Wtrigraphs")
+
+// Schema constant depends on weak symbols to work around legacy include
+// resolution behavior.
+#define FBTHRIFT_HAVE_SCHEMA FOLLY_HAVE_WEAK_SYMBOLS

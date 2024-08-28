@@ -27,6 +27,7 @@ namespace enums_constants {
   ::std::map<::facebook::ns::qwerty::AnEnumC, ::std::map<::std::int16_t, ::std::set<::std::int16_t>>> const& ConstantMap2();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_13f072109540bb8d();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_includes();
 
 } // namespace enums_constants
 } // namespace facebook::ns::qwerty

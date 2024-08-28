@@ -10,11 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace a::different::ns {
 namespace includes_constants {
 
 
-  ::std::string_view _fbthrift_schema_a19367d5994054e6() { return ""; }
+
 
 } // namespace includes_constants
 } // namespace a::different::ns

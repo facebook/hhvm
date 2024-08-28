@@ -9,11 +9,13 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "thrift/compiler/test/fixtures/types/gen-cpp2/included_constants.h"
+
 
 namespace apache::thrift::fixtures::types {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_e891a7857e533163() { return ""; }
+
 
 } // namespace module_constants
 } // namespace apache::thrift::fixtures::types

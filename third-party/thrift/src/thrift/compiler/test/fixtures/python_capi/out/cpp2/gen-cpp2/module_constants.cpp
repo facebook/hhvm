@@ -9,12 +9,16 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/thrift_dep_constants.h"
+#include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/serialized_dep_constants.h"
 #include "thrift/lib/thrift/gen-cpp2/id_constants.h"
+#include "thrift/lib/thrift/gen-cpp2/schema_constants.h"
+
 
 namespace test::fixtures::python_capi {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_1d08748cd3433d4f() { return ""; }
+
 
 } // namespace module_constants
 } // namespace test::fixtures::python_capi

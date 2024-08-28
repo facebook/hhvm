@@ -9,11 +9,14 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_constants.h"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_constants.h"
+
 
 namespace some::ns {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_82239cb6679d7868() { return ""; }
+
 
 } // namespace module_constants
 } // namespace some::ns

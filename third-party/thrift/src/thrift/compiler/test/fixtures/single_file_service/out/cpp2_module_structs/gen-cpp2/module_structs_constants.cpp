@@ -10,10 +10,11 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace cpp2 {
 namespace module_structs_constants {
 
-  ::std::string_view _fbthrift_schema_4fa99c82b375e242() { return ""; }
+
 
 } // namespace module_structs_constants
 } // namespace cpp2

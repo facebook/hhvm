@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <filesystem>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -782,9 +783,12 @@ std::string schematizer::identify_definition(const t_named& node) {
 }
 
 int64_t schematizer::identify_program(const t_program& node) {
+  auto checksum = program_checksum(node);
+  auto path =
+      std::filesystem::path(node.path()).lexically_normal().generic_string();
   // @lint-ignore CLANGTIDY facebook-hte-CArray
   unsigned char hash[SHA256_DIGEST_LENGTH];
-  auto val = fmt::format("{}{}", program_checksum(node), node.path());
+  auto val = fmt::format("{}{}", checksum, path);
   SHA256(reinterpret_cast<const unsigned char*>(val.c_str()), val.size(), hash);
   int64_t ret;
   memcpy(&ret, hash, sizeof(ret));

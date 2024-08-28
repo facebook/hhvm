@@ -9,11 +9,13 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_constants.h"
+
 
 namespace cpp2 {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_6e724513eec8785d() { return ""; }
+
 
 } // namespace module_constants
 } // namespace cpp2

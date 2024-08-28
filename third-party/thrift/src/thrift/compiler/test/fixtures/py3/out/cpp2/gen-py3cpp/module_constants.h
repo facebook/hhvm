@@ -99,6 +99,7 @@ namespace module_constants {
   ::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t> const& ANOTHER_CONST_MAP();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_d88852123f9665d3();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_d88852123f9665d3_includes();
 
 } // namespace module_constants
 } // namespace py3::simple

@@ -9,6 +9,20 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_constants.h"
+
+#if FBTHRIFT_HAVE_SCHEMA
+
+// include.thrift
+namespace cpp2 {namespace include_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_8569dfae849b43aa() { return ""; }
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_8569dfae849b43aa_includes() {
+  static const ::std::array<::std::string_view, 1> empty;
+  return ::folly::range(empty);
+ }
+}} // namespace cpp2
+
+#endif
 
 namespace cpp2 {
 namespace module_constants {
@@ -18,6 +32,14 @@ namespace module_constants {
   return _fbthrift_schema_2926f41c3790ef15_;
 }
 
+
+::folly::Range<const ::std::string_view*> _fbthrift_schema_2926f41c3790ef15_includes() {
+  static const ::std::array<::std::string_view, 2> includes = {
+    _fbthrift_schema_2926f41c3790ef15(),
+    ::cpp2::include_constants::_fbthrift_schema_8569dfae849b43aa(),
+  };
+  return ::folly::range(includes);
+}
 
 } // namespace module_constants
 } // namespace cpp2

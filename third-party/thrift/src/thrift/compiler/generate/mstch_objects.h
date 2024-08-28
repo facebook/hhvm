@@ -29,6 +29,7 @@
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 namespace apache {
 namespace thrift {
@@ -235,6 +236,8 @@ struct mstch_context : mstch_factories {
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> service_cache;
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> program_cache;
 
+  node_metadata_cache metadata_cache;
+
   /**
    * Sets or erases the option with the given `key` depending on the
    * `condition`.
@@ -246,6 +249,8 @@ struct mstch_context : mstch_factories {
    */
   mstch_context& set_or_erase_option(
       bool condition, const std::string& key, const std::string& value);
+
+  node_metadata_cache& cache() { return metadata_cache; }
 };
 
 std::shared_ptr<mstch_base> make_mstch_program_cached(

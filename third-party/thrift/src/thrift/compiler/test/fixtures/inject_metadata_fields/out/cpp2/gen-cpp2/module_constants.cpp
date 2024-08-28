@@ -9,11 +9,13 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_constants.h"
+
 
 namespace cpp2 {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_2eeb0c928daeecf7() { return ""; }
+
 
 } // namespace module_constants
 } // namespace cpp2

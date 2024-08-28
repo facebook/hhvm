@@ -15,6 +15,7 @@ namespace some::ns {
 namespace include2_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_2d56b80040d134fe();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_2d56b80040d134fe_includes();
 
 } // namespace include2_constants
 } // namespace some::ns

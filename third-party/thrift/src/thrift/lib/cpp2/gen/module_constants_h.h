@@ -19,3 +19,4 @@
 #include <cstdint>
 #include <string_view>
 #include <folly/CPortability.h>
+#include <folly/Range.h>

@@ -298,6 +298,15 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 };
 
 class cpp_mstch_program : public mstch_program {
+  // transitive_schema_initializers depends on consistent order.
+  struct program_less {
+    bool operator()(const t_program* a, const t_program* b) const {
+      return a->path() < b->path();
+    }
+  };
+  using transitive_include_map =
+      std::map<const t_program*, std::string, program_less>;
+
  public:
   cpp_mstch_program(
       const t_program* program,
@@ -317,6 +326,10 @@ class cpp_mstch_program : public mstch_program {
          {"program:include_prefix", &cpp_mstch_program::include_prefix},
          {"program:cpp_declare_hash?", &cpp_mstch_program::cpp_declare_hash},
          {"program:thrift_includes", &cpp_mstch_program::thrift_includes},
+         {"program:transitive_schema_initializers",
+          &cpp_mstch_program::transitive_schema_initializers},
+         {"program:num_transitive_thrift_includes",
+          &cpp_mstch_program::num_transitive_thrift_includes},
          {"program:frozen_packed?", &cpp_mstch_program::frozen_packed},
          {"program:legacy_api?", &cpp_mstch_program::legacy_api},
          {"program:fatal_languages", &cpp_mstch_program::fatal_languages},
@@ -465,6 +478,63 @@ class cpp_mstch_program : public mstch_program {
       a.push_back(make_mstch_program_cached(program, context_));
     }
     return a;
+  }
+  /**
+   * To reduce build time, the generated constants code only includes the
+   * headers for direct thrift includes in the .cpp file and not in the .h
+   * file, which means constants from transitive includes are not visible. To
+   * allow constructing a flattened array of schemas for transitive
+   * dependencies without undoing this optimization we indirect through the
+   * flattened array of one of the direct includes to reach the schema of the
+   * transitive include. Constructing this in mustache would be horrible, so
+   * we build up the code here instead.
+   */
+  std::unique_ptr<transitive_include_map> gen_transitive_include_map(
+      const t_program* program) {
+    auto includes = std::make_unique<transitive_include_map>();
+    auto local_includes = program->get_includes_for_codegen();
+    for (const auto* include : local_includes) {
+      includes->emplace(
+          include,
+          fmt::format(
+              "{}::{}_constants::{}()",
+              t_mstch_cpp2_generator::get_cpp2_namespace(include),
+              include->name(),
+              schematizer::name_schema(sm_, *include)));
+      const auto& recursive_includes = context_.cache().get(
+          *include, [&] { return gen_transitive_include_map(include); });
+      size_t i = 0;
+      for (const auto& [recursive_include, _] : recursive_includes) {
+        if (includes->count(recursive_include) == 0) {
+          includes->emplace(
+              recursive_include,
+              fmt::format(
+                  "{}::{}_constants::{}_includes()[{}]",
+                  t_mstch_cpp2_generator::get_cpp2_namespace(include),
+                  include->name(),
+                  schematizer::name_schema(sm_, *include),
+                  i));
+        }
+        ++i;
+      }
+    }
+    return includes;
+  }
+  mstch::node transitive_schema_initializers() {
+    const auto& includes = context_.cache().get(
+        *program_, [&] { return gen_transitive_include_map(program_); });
+    mstch::array initializers = {
+        fmt::format("{}()", schematizer::name_schema(sm_, *program_))};
+    for (const auto& [_, include] : includes) {
+      initializers.push_back(include);
+    }
+    return initializers;
+  }
+  mstch::node num_transitive_thrift_includes() {
+    const auto& includes = context_.cache().get(
+        *program_, [&] { return gen_transitive_include_map(program_); });
+    // Codegen includes the root program but transitive_include_map does not.
+    return includes.size() + 1;
   }
   mstch::node frozen_packed() { return get_option("frozen") == "packed"; }
   mstch::node legacy_api() {

@@ -60,6 +60,7 @@ namespace module_constants {
   ::std::vector<::facebook::thrift::test::AdaptedByte> const& container_of_adapted();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_16db2445290adba9();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_16db2445290adba9_includes();
 
 } // namespace module_constants
 } // namespace facebook::thrift::test

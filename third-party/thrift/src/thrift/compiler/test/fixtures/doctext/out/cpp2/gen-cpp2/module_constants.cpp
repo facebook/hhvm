@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace cpp2 {
 namespace module_constants {
 
@@ -17,7 +18,7 @@ namespace module_constants {
 
 
 
-  ::std::string_view _fbthrift_schema_f7fd5f7069fff5e1() { return ""; }
+
 
 } // namespace module_constants
 } // namespace cpp2

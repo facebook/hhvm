@@ -10,10 +10,11 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace facebook::thrift::compiler::test::fixtures::any {
 namespace module_constants {
 
-  ::std::string_view _fbthrift_schema_b3a9ed2b950fac46() { return ""; }
+
 
 } // namespace module_constants
 } // namespace facebook::thrift::compiler::test::fixtures::any

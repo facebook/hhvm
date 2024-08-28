@@ -10,10 +10,11 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace cpp2 {
 namespace empty_constants {
 
-  ::std::string_view _fbthrift_schema_10b98dc8e0307385() { return ""; }
+
 
 } // namespace empty_constants
 } // namespace cpp2

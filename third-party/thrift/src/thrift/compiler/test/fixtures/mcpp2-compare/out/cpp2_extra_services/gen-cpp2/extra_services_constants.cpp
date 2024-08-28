@@ -11,10 +11,11 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_constants.h"
 
+
 namespace extra::svc {
 namespace extra_services_constants {
 
-  ::std::string_view _fbthrift_schema_6e8480798c558f9d() { return ""; }
+
 
 } // namespace extra_services_constants
 } // namespace extra::svc

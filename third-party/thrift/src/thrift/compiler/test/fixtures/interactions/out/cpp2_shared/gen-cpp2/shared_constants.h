@@ -15,6 +15,7 @@ namespace thrift::shared_interactions {
 namespace shared_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_c56c72d4e711dd06();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_c56c72d4e711dd06_includes();
 
 } // namespace shared_constants
 } // namespace thrift::shared_interactions

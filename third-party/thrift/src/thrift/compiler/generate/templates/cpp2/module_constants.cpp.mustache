@@ -21,10 +21,26 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 {{#program:thrift_includes}}
-  {{#program:constants?}}
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
-  {{/program:constants?}}
 {{/program:thrift_includes}}
+
+{{#program:has_schema?}}
+#if FBTHRIFT_HAVE_SCHEMA
+
+{{#program:thrift_includes}}
+// {{program:autogen_path}}
+{{ > common/namespace_cpp2_begin}}
+namespace {{program:name}}_constants {
+FOLLY_ATTR_WEAK ::std::string_view {{program:schema_name}}() { return ""; }
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
+  static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> empty;
+  return ::folly::range(empty);
+ }
+}{{ > common/namespace_cpp2_end}}
+
+{{/program:thrift_includes}}
+#endif
+{{/program:has_schema?}}
 
 {{ > common/namespace_cpp2_begin}}
 
@@ -55,9 +71,16 @@ namespace {{program:name}}_constants {
 {{/type:binary?}}{{/constant:generated?}}{{/constant:outline_init?}}
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
-{{! Generate empty schema const if none was injected. }}
-{{^program:has_schema?}}
-  ::std::string_view {{program:schema_name}}() { return ""; }
+
+{{#program:has_schema?}}
+::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
+  static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> includes = {
+    {{#program:transitive_schema_initializers}}
+    {{ . }},
+    {{/program:transitive_schema_initializers}}
+  };
+  return ::folly::range(includes);
+}
 {{/program:has_schema?}}
 
 } // namespace {{program:name}}_constants

@@ -66,6 +66,7 @@ namespace module_constants {
   ::std::map<::std::string, ::std::vector<::std::int32_t>> const& AMap();
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_402a672704b1a4e6();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_402a672704b1a4e6_includes();
 
 } // namespace module_constants
 } // namespace test::fixtures::basic

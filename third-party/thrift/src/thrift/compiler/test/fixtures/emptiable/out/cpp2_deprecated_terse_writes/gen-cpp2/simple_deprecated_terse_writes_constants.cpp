@@ -10,10 +10,11 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace apache::thrift::test {
 namespace simple_deprecated_terse_writes_constants {
 
-  ::std::string_view _fbthrift_schema_fdc43d6ffb377768() { return ""; }
+
 
 } // namespace simple_deprecated_terse_writes_constants
 } // namespace apache::thrift::test

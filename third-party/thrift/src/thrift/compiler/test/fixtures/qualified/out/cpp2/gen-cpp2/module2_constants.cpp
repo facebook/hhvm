@@ -12,6 +12,7 @@
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_constants.h"
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_constants.h"
 
+
 namespace module2 {
 namespace module2_constants {
 
@@ -30,7 +31,7 @@ namespace module2_constants {
   return *instance;
 }
 
-  ::std::string_view _fbthrift_schema_9188ad030fa5981a() { return ""; }
+
 
 } // namespace module2_constants
 } // namespace module2

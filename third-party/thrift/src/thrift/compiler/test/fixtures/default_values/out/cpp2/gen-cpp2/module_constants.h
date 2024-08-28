@@ -15,6 +15,7 @@ namespace facebook::thrift::compiler::test::fixtures::default_values {
 namespace module_constants {
 
   FOLLY_EXPORT ::std::string_view _fbthrift_schema_b92a52257f079ee1();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b92a52257f079ee1_includes();
 
 } // namespace module_constants
 } // namespace facebook::thrift::compiler::test::fixtures::default_values

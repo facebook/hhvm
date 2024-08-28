@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+
 namespace facebook::thrift::test {
 namespace module_constants {
 
@@ -122,7 +123,7 @@ namespace module_constants {
   return *instance;
 }
 
-  ::std::string_view _fbthrift_schema_16db2445290adba9() { return ""; }
+
 
 } // namespace module_constants
 } // namespace facebook::thrift::test

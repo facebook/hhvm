@@ -1,32 +1,32 @@
 error: Typing[4110] Invalid argument
 
-File "class_subtyping_contravariant.php", line 14, character 14 - line 14, character 15:
+File "class_subtyping_contravariant.php", line 15, character 14 - line 15, character 15:
 
- 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
- 12 | 
- 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
- 14 |   takes_my_a(»$x«);
- 15 | }
+ 12 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 13 | 
+ 14 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 15 |   takes_my_a(»$x«);
+ 16 | }
 
 Expected `Sub`
 
-File "class_subtyping_contravariant.php", line 13, character 40 - line 13, character 42:
+File "class_subtyping_contravariant.php", line 14, character 40 - line 14, character 42:
 
- 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
- 12 | 
- 13 | function subtype_bad_contravariant(MyB<»Sub«, Super> $x): void {
- 14 |   takes_my_a($x);
- 15 | }
+ 12 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+ 13 | 
+ 14 | function subtype_bad_contravariant(MyB<»Sub«, Super> $x): void {
+ 15 |   takes_my_a($x);
+ 16 | }
 
 But got `Super`
 
-File "class_subtyping_contravariant.php", line 11, character 30 - line 11, character 34:
+File "class_subtyping_contravariant.php", line 12, character 30 - line 12, character 34:
 
- 11 | function takes_my_a(MyA<Sub, »Super«, Super> $_): void {}
- 12 | 
- 13 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
- 14 |   takes_my_a($x);
- 15 | }
+ 12 | function takes_my_a(MyA<Sub, »Super«, Super> $_): void {}
+ 13 | 
+ 14 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 15 |   takes_my_a($x);
+ 16 | }
 
 Derivation:
 {
@@ -38,7 +38,7 @@ Derivation:
             "Support_dynamic_type":[
               {
                 "filename":"class_subtyping_contravariant.php",
-                "line":11,
+                "line":12,
                 "char_start":10,
                 "char_end":19
               }
@@ -50,7 +50,7 @@ Derivation:
             "Witness":[
               {
                 "filename":"class_subtyping_contravariant.php",
-                "line":14,
+                "line":15,
                 "char_start":3,
                 "char_end":16
               }
@@ -80,7 +80,7 @@ Derivation:
                         "Hint":[
                           {
                             "filename":"class_subtyping_contravariant.php",
-                            "line":13,
+                            "line":14,
                             "char_start":36,
                             "char_end":50
                           }
@@ -99,7 +99,7 @@ Derivation:
                         "Witness":[
                           {
                             "filename":"class_subtyping_contravariant.php",
-                            "line":13,
+                            "line":14,
                             "char_start":52,
                             "char_end":53
                           }
@@ -112,7 +112,7 @@ Derivation:
                         "Witness":[
                           {
                             "filename":"class_subtyping_contravariant.php",
-                            "line":14,
+                            "line":15,
                             "char_start":14,
                             "char_end":15
                           }
@@ -139,7 +139,7 @@ Derivation:
                   "Hint":[
                     {
                       "filename":"class_subtyping_contravariant.php",
-                      "line":11,
+                      "line":12,
                       "char_start":21,
                       "char_end":42
                     }
@@ -193,7 +193,7 @@ Derivation:
                   "Hint":[
                     {
                       "filename":"class_subtyping_contravariant.php",
-                      "line":11,
+                      "line":12,
                       "char_start":21,
                       "char_end":42
                     }
@@ -223,7 +223,7 @@ Derivation:
                   "Hint":[
                     {
                       "filename":"class_subtyping_contravariant.php",
-                      "line":11,
+                      "line":12,
                       "char_start":30,
                       "char_end":34
                     }
@@ -238,7 +238,7 @@ Derivation:
             "Def":[
               {
                 "filename":"class_subtyping_contravariant.php",
-                "line":9,
+                "line":10,
                 "char_start":7,
                 "char_end":9
               },
@@ -247,7 +247,7 @@ Derivation:
                   "Hint":[
                     {
                       "filename":"class_subtyping_contravariant.php",
-                      "line":13,
+                      "line":14,
                       "char_start":40,
                       "char_end":42
                     }
@@ -285,7 +285,7 @@ Reason:
                     "Hint":[
                       {
                         "filename":"class_subtyping_contravariant.php",
-                        "line":11,
+                        "line":12,
                         "char_start":30,
                         "char_end":34
                       }
@@ -319,7 +319,7 @@ Reason:
                                       "Hint":[
                                         {
                                           "filename":"class_subtyping_contravariant.php",
-                                          "line":13,
+                                          "line":14,
                                           "char_start":36,
                                           "char_end":50
                                         }
@@ -338,7 +338,7 @@ Reason:
                                       "Witness":[
                                         {
                                           "filename":"class_subtyping_contravariant.php",
-                                          "line":13,
+                                          "line":14,
                                           "char_start":52,
                                           "char_end":53
                                         }
@@ -351,7 +351,7 @@ Reason:
                                       "Witness":[
                                         {
                                           "filename":"class_subtyping_contravariant.php",
-                                          "line":14,
+                                          "line":15,
                                           "char_start":14,
                                           "char_end":15
                                         }
@@ -370,7 +370,7 @@ Reason:
                           "Support_dynamic_type":[
                             {
                               "filename":"class_subtyping_contravariant.php",
-                              "line":11,
+                              "line":12,
                               "char_start":10,
                               "char_end":19
                             }
@@ -382,7 +382,7 @@ Reason:
                           "Witness":[
                             {
                               "filename":"class_subtyping_contravariant.php",
-                              "line":14,
+                              "line":15,
                               "char_start":3,
                               "char_end":16
                             }
@@ -434,7 +434,7 @@ Reason:
                     "Hint":[
                       {
                         "filename":"class_subtyping_contravariant.php",
-                        "line":11,
+                        "line":12,
                         "char_start":21,
                         "char_end":42
                       }
@@ -452,7 +452,7 @@ Reason:
         "Def":[
           {
             "filename":"class_subtyping_contravariant.php",
-            "line":9,
+            "line":10,
             "char_start":7,
             "char_end":9
           },
@@ -461,7 +461,7 @@ Reason:
               "Hint":[
                 {
                   "filename":"class_subtyping_contravariant.php",
-                  "line":13,
+                  "line":14,
                   "char_start":40,
                   "char_end":42
                 }

@@ -21,7 +21,7 @@
    --expect-extension
    .exp
    --flags
-   --config extended_reasons=0
+   --config extended_reasons=1
    )))
 
 

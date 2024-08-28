@@ -3385,8 +3385,6 @@ module Derivation = struct
   (* ~~ Human-readable explanation of full derivation ~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   module Explain = struct
-    type should_render = Once
-
     module Derivation_path = struct
       type elem =
         | Main
@@ -3420,16 +3418,63 @@ module Derivation = struct
 
       let empty = { defs_seen = Pos_or_decl.Map.empty }
 
-      let seen_def { defs_seen } pos = Pos_or_decl.Map.find_opt pos defs_seen
-
       let def_seen { defs_seen } pos path =
         { defs_seen = Pos_or_decl.Map.add pos path defs_seen }
     end
 
     module Config = struct
-      type t = { should_render_defs: should_render }
+      type def_config =
+        | Always  (** Always render a types definition whenever it appears *)
+        | Once
+            (** Render a types definition the first time it appears and provide a reference to it when it appear subsequently *)
+        | Never  (** Don't render definitions *)
 
-      let default = { should_render_defs = Once }
+      type flow_config =
+        | Full  (** Render all steps of a flow *)
+        | Ends  (** Only render the start and endpoints of a flow *)
+
+      type deriv_config =
+        | Main  (** Render only the top-level derivation *)
+        | All  (** Render all transitive derivations *)
+        | Depth of int  (** Render derivations to a fixed depth  *)
+
+      type t = {
+        def_config: def_config;
+        flow_config: flow_config;
+        deriv_config: deriv_config;
+      }
+
+      let verbose =
+        { def_config = Always; flow_config = Full; deriv_config = All }
+
+      let chatty =
+        { def_config = Once; flow_config = Full; deriv_config = Depth 2 }
+
+      let terse =
+        { def_config = Never; flow_config = Ends; deriv_config = Main }
+
+      let from_complexity complexity =
+        if complexity = 0 then
+          verbose
+        else if complexity = 1 then
+          chatty
+        else
+          terse
+
+      let suppress_derivation { deriv_config; _ } cur_depth =
+        match deriv_config with
+        | All -> false
+        | Main -> cur_depth > 0
+        | Depth max_depth -> cur_depth > max_depth
+
+      let get_def { def_config; _ } pos seen =
+        match def_config with
+        | Never -> None
+        | Always -> Some (Either.First pos)
+        | Once ->
+          (match Pos_or_decl.Map.find_opt pos seen with
+          | Some path -> Some (Either.Second path)
+          | None -> Some (Either.First pos))
     end
 
     module Context = struct
@@ -3475,24 +3520,18 @@ module Derivation = struct
 
     let with_prefix ls ~prefix ~sep =
       match ls with
-      | [] -> [(Pos_or_decl.none, prefix)]
+      | [] -> []
       | (pos, expl) :: rest ->
         (pos, Format.sprintf "%s%s%s" prefix sep expl) :: rest
 
     let with_suffix ls ~suffix ~sep =
       match ls with
-      | [] -> [(Pos_or_decl.none, suffix)]
+      | [] -> []
       | (pos, expl) :: rest ->
         (pos, Format.sprintf "%s%s%s" expl sep suffix) :: rest
 
     let finish_with_suffix ls ~suffix ~sep =
       List.rev @@ with_suffix ~suffix ~sep @@ List.rev ls
-
-    let suppress_derivation ~st:_ ~cfg:_ ~ctxt:_ = false
-
-    let suppress_def pos ~st ~cfg ~ctxt:_ =
-      match cfg.Config.should_render_defs with
-      | Once -> State.seen_def st pos
 
     let explain_flow_kind = function
       | Flow_assign -> "via an assignment"
@@ -3506,7 +3545,8 @@ module Derivation = struct
 
     let rec explain t ~st ~cfg ~ctxt =
       match t with
-      | _ when suppress_derivation ~st ~cfg ~ctxt -> ([], st)
+      | _ when Config.suppress_derivation cfg ctxt.Context.derivation_depth ->
+        ([], st)
       | Derivation steps ->
         let (expl, st) = explain_steps steps ~st ~cfg ~ctxt in
         let expl =
@@ -3527,32 +3567,40 @@ module Derivation = struct
           explain upper ~st ~cfg ~ctxt:(Context.enter_upper ctxt)
         in
 
+        let main_path =
+          Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+        in
         let prefix_main =
           let middle =
             match explain_reason on_ ~st ~cfg ~ctxt with
             | ((_, x) :: _, _) -> x
             | _ -> "an inferred type"
           in
-          let main_path =
-            Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
-          and lower_path =
+          Format.sprintf
+            "I checked the subtype constraint in [%s] because it was implied by the other constraints on the %s."
+            main_path
+            middle
+        and prefix_lower =
+          let lower_path =
             Context.(Option.value_exn @@ explain_path @@ enter_lower ctxt)
-          and upper_path =
+          in
+          Format.sprintf
+            "I found the subtype for [%s] when I checked the subtype constraint in [%s]."
+            main_path
+            lower_path
+        and prefix_upper =
+          let upper_path =
             Context.(Option.value_exn @@ explain_path @@ enter_upper ctxt)
           in
           Format.sprintf
-            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraints on the %s.\nThe source of the subtype from [%s] is explained in [%s].\nThe source of the subtype from [%s] is explained in [%s]"
-            main_path
-            middle
-            main_path
-            lower_path
+            "I found the supertype for [%s] when I checked the subtype constraint in [%s]."
             main_path
             upper_path
         in
         let expl =
           with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
-          @ expl_lower
-          @ expl_upper
+          @ with_prefix expl_lower ~prefix:prefix_lower ~sep:"\n\n"
+          @ with_prefix expl_upper ~prefix:prefix_upper ~sep:"\n\n"
         in
         (expl, st)
       | Lower { bound; in_ } ->
@@ -3563,14 +3611,25 @@ module Derivation = struct
         let (expl_lower, st) =
           explain bound ~st ~cfg ~ctxt:(Context.enter_lower ctxt)
         in
+        let main_path =
+          Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+        in
         let prefix_main =
           Format.sprintf
-            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraint in [%s]"
-            Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+            "I checked the subtype constraint in [%s] because it was implied by transitivity."
+            main_path
+        and prefix_lower =
+          let lower_path =
             Context.(Option.value_exn @@ explain_path @@ enter_lower ctxt)
+          in
+          Format.sprintf
+            "I found the subtype for [%s] is when I checked the subtype constraint in [%s]."
+            main_path
+            lower_path
         in
         let expl =
-          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n" @ expl_lower
+          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
+          @ with_prefix expl_lower ~prefix:prefix_lower ~sep:"\n\n"
         in
         (expl, st)
       | Upper { bound; in_ } ->
@@ -3582,14 +3641,25 @@ module Derivation = struct
           explain bound ~st ~cfg ~ctxt:(Context.enter_upper ctxt)
         in
 
+        let main_path =
+          Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+        in
         let prefix_main =
           Format.sprintf
-            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraint in [%s]"
-            Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
+            "I checked the subtype constraint in [%s] because it was implied by transitivity."
+            main_path
+        and prefix_upper =
+          let upper_path =
             Context.(Option.value_exn @@ explain_path @@ enter_upper ctxt)
+          in
+          Format.sprintf
+            "I found the supertype for [%s] is when I checked the subtype constraint in [%s]."
+            main_path
+            upper_path
         in
         let expl =
-          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n" @ expl_upper
+          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
+          @ with_prefix expl_upper ~prefix:prefix_upper ~sep:"\n\n"
         in
         (expl, st)
 
@@ -3696,6 +3766,11 @@ module Derivation = struct
       | From_witness_decl witness -> ([explain_witness_decl witness], st)
       | Def (pos, r) -> explain_def (pos, r) ~st ~cfg ~ctxt
       | Flow { from; into; kind } ->
+        let into =
+          match cfg.Config.flow_config with
+          | Config.Full -> into
+          | Config.Ends -> extract_last into
+        in
         explain_flow (from, into, kind) ~st ~cfg ~ctxt
       | Solved { solution; in_; _ } ->
         explain_solved ~solution ~in_ ~st ~cfg ~ctxt
@@ -3796,8 +3871,9 @@ module Derivation = struct
 
     and explain_def (pos, reason) ~st ~cfg ~ctxt =
       let (expl_reason, st) = explain_reason reason ~st ~cfg ~ctxt in
-      match suppress_def pos ~st ~cfg ~ctxt with
-      | Some seen_at ->
+      match Config.get_def cfg pos st.State.defs_seen with
+      | None -> (expl_reason, st)
+      | Some (Either.Second seen_at) ->
         let expl_reason =
           if Derivation_path.equal seen_at ctxt.Context.derivation_path then
             let suffix = "(its definition was given above)" in
@@ -3813,7 +3889,7 @@ module Derivation = struct
                 finish_with_suffix expl_reason ~suffix ~sep:" ")
         in
         (expl_reason, st)
-      | None ->
+      | Some (Either.First pos) ->
         let st = State.def_seen st pos ctxt.Context.derivation_path in
         (expl_reason @ [(pos, "which is defined here")], st)
 
@@ -3892,17 +3968,17 @@ module Derivation = struct
       explain_reason r ~st ~cfg ~ctxt
   end
 
-  let explain t =
+  let explain t ~complexity =
     let st = Explain.State.empty
-    and cfg = Explain.Config.default
+    and cfg = Explain.Config.from_complexity complexity
     and ctxt = Explain.Context.empty in
     let (expl, _) = Explain.explain t ~st ~cfg ~ctxt in
     let prefix = "Here's why:" in
     Explain.with_prefix expl ~prefix ~sep:"\n\n"
 end
 
-let explain ~sub ~super ~complexity:_ =
-  Derivation.(explain @@ of_reason ~sub ~super)
+let explain ~sub ~super ~complexity =
+  Derivation.(explain (of_reason ~sub ~super) ~complexity)
 
 let debug ~sub ~super =
   let json_repr =

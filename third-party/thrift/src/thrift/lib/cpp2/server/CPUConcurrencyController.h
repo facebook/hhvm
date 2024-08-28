@@ -204,8 +204,8 @@ class CPUConcurrencyController {
   folly::FunctionScheduler scheduler_;
   folly::Synchronized<std::shared_ptr<EventHandler>> eventHandler_{nullptr};
 
-  std::chrono::steady_clock::time_point lastOverloadStart_{
-      std::chrono::steady_clock::now()};
+  folly::relaxed_atomic<std::chrono::steady_clock::time_point>
+      lastOverloadStart_{std::chrono::steady_clock::now()};
 
   std::vector<uint32_t> stableConcurrencySamples_;
   std::atomic<int64_t> stableEstimate_{-1};

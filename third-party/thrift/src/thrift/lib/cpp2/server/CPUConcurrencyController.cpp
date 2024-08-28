@@ -325,7 +325,7 @@ uint32_t CPUConcurrencyController::getLimitUsage(
 
 bool CPUConcurrencyController::isRefractoryPeriodInternal(
     const std::shared_ptr<const Config>& config) const {
-  return (std::chrono::steady_clock::now() - lastOverloadStart_) <=
+  return (std::chrono::steady_clock::now() - lastOverloadStart_.load()) <=
       std::chrono::milliseconds(config->refractoryPeriodMs);
 }
 

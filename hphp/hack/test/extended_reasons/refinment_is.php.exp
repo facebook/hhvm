@@ -36,7 +36,7 @@ Step 1 of 3
 
 I started by checking this subtype relationship.
 
-The subtype comes from this expression
+The subtype comes from this join point
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
@@ -247,7 +247,7 @@ Step 1 of 2
 
 I started by checking this subtype relationship.
 
-The subtype comes from this expression
+The subtype comes from this join point
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
@@ -390,7 +390,7 @@ Step 1 of 3
 
 I started by checking this subtype relationship.
 
-The subtype comes from this expression
+The subtype comes from this join point
 
 File "refinment_is.php", line 8, character 3 - line 12, character 3:
 

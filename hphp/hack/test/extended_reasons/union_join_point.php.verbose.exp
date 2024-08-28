@@ -39,7 +39,7 @@ Step 1 of 2
 
 I started by checking this subtype relationship.
 
-The subtype comes from this expression
+The subtype comes from this join point
 
 File "union_join_point.php", line 6, character 3 - line 10, character 3:
 

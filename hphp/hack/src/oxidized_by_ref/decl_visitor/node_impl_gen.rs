@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3152e1d1d6d6860f783be0be2c3a21cd>>
+// @generated SignedSource<<f0ef53f7d6af8ed4e8eabf573de92b7d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1208,6 +1208,7 @@ impl<'a> Node<'a> for WitnessLocl<'a> {
             WitnessLocl::CapturedLike(ref __binding_0) => __binding_0.accept(v),
             WitnessLocl::UnsafeCast(ref __binding_0) => __binding_0.accept(v),
             WitnessLocl::Pattern(ref __binding_0) => __binding_0.accept(v),
+            WitnessLocl::JoinPoint(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

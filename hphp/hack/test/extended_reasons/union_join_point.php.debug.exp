@@ -31,7 +31,7 @@ Derivation:
             "Flow":{
               "from":[
                 {
-                  "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
+                  "Join_point":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
                 }
               ],
               "kind":"Flow_local",
@@ -201,7 +201,7 @@ Reason:
               "Flow":{
                 "from":[
                   {
-                    "Witness":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
+                    "Join_point":[{"filename":"union_join_point.php","line":6,"char_start":3,"char_end":49}]
                   }
                 ],
                 "kind":"Flow_local",

@@ -348,6 +348,8 @@ val unsafe_cast : Pos.t -> t
 
 val pattern : Pos.t -> t
 
+val join_point : Pos.t -> t
+
 val axiom_extends :
   child:locl_phase t_ -> ancestor:locl_phase t_ -> locl_phase t_
 

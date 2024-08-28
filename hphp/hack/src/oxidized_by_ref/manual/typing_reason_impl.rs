@@ -66,7 +66,8 @@ impl<'a> WitnessLocl<'a> {
             | WitnessLocl::MissingClass(p)
             | WitnessLocl::CapturedLike(p)
             | WitnessLocl::UnsafeCast(p)
-            | WitnessLocl::Pattern(p) => p,
+            | WitnessLocl::Pattern(p)
+            | WitnessLocl::JoinPoint(p) => p,
         }
     }
 }

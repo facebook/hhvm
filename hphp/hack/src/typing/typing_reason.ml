@@ -345,6 +345,7 @@ type witness_locl =
   | Captured_like of Pos.t
   | Unsafe_cast of Pos.t
   | Pattern of Pos.t
+  | Join_point of Pos.t
 [@@deriving hash]
 
 let witness_locl_to_raw_pos = function
@@ -403,7 +404,8 @@ let witness_locl_to_raw_pos = function
   | Missing_class pos
   | Captured_like pos
   | Unsafe_cast pos
-  | Pattern pos ->
+  | Pattern pos
+  | Join_point pos ->
     Pos_or_decl.of_raw_pos pos
 
 let get_pri_witness_locl = function
@@ -470,6 +472,7 @@ let map_pos_witness_locl pos pos_or_decl w =
   | Captured_like p -> Captured_like (pos p)
   | Unsafe_cast p -> Unsafe_cast (pos p)
   | Pattern p -> Pattern (pos p)
+  | Join_point p -> Join_point (pos p)
 
 let constructor_string_of_witness_locl = function
   | Witness _ -> "Rwitness"
@@ -528,6 +531,7 @@ let constructor_string_of_witness_locl = function
   | Captured_like _ -> "Rcaptured_like"
   | Unsafe_cast _ -> "Runsafe_cast"
   | Pattern _ -> "Rpattern"
+  | Join_point _ -> "Rjoin_point"
 
 let pp_witness_locl fmt witness =
   let comma_ fmt () = Format.fprintf fmt ",@ " in
@@ -596,7 +600,8 @@ let pp_witness_locl fmt witness =
     | Missing_class p
     | Witness p
     | Captured_like p
-    | Pattern p ->
+    | Pattern p
+    | Join_point p ->
       Pos.pp fmt p
     | Unset_field (p, s)
     | Shape (p, s)
@@ -770,6 +775,8 @@ let witness_locl_to_json witness =
     Hh_json.(JSON_Object [("Unsafe_cast", JSON_Array [pos_to_json pos])])
   | Pattern pos ->
     Hh_json.(JSON_Object [("Pattern", JSON_Array [pos_to_json pos])])
+  | Join_point pos ->
+    Hh_json.(JSON_Object [("Join_point", JSON_Array [pos_to_json pos])])
 
 let witness_locl_to_string prefix witness =
   match witness with
@@ -965,6 +972,8 @@ let witness_locl_to_string prefix witness =
       ^ ". The type might be a lie!" )
   | Pattern pos ->
     (Pos_or_decl.of_raw_pos pos, prefix ^ " because of this pattern")
+  | Join_point pos ->
+    (Pos_or_decl.of_raw_pos pos, prefix ^ " because of this statement")
 
 (** Witness the reason for a type during decling using the position of a hint *)
 type witness_decl =
@@ -2416,6 +2425,8 @@ module Constructors = struct
 
   let pattern p = from_witness_locl @@ Pattern p
 
+  let join_point p = from_witness_locl @@ Join_point p
+
   let rec flow ~from ~into ~kind =
     match (from, into) with
     | (Flow { from; into = into_l; kind = kind_l }, _) ->
@@ -3839,6 +3850,7 @@ module Derivation = struct
       | No_return pos -> (Pos_or_decl.of_raw_pos pos, "declaration")
       | Shape_literal pos -> (Pos_or_decl.of_raw_pos pos, "shape literal")
       | Destructure pos -> (Pos_or_decl.of_raw_pos pos, "destructure expression")
+      | Join_point pos -> (Pos_or_decl.of_raw_pos pos, "join point")
       | _ ->
         ( witness_locl_to_raw_pos witness,
           Format.sprintf

@@ -47,7 +47,7 @@ let union
   (* TODO(mjt) Use a more specific reason here provided as an argument *)
   let reason =
     if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-      Some (Typing_reason.witness join_pos)
+      Some (Typing_reason.join_point join_pos)
     else
       None
   in

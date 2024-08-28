@@ -64,7 +64,8 @@ impl WitnessLocl {
             | Self::MissingClass(pos)
             | Self::CapturedLike(pos)
             | Self::UnsafeCast(pos)
-            | Self::Pattern(pos) => pos,
+            | Self::Pattern(pos)
+            | Self::JoinPoint(pos) => pos,
         }
     }
 }

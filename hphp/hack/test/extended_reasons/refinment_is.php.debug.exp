@@ -32,7 +32,7 @@ Derivation:
             "Flow":{
               "from":[
                 {
-                  "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                  "Join_point":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
                 }
               ],
               "kind":"Flow_local",
@@ -258,7 +258,7 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                          "Join_point":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
                         }
                       ],
                       "kind":"Flow_local",
@@ -342,7 +342,7 @@ Derivation:
             "Flow":{
               "from":[
                 {
-                  "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                  "Join_point":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
                 }
               ],
               "kind":"Flow_local",
@@ -474,7 +474,7 @@ Reason:
               "Flow":{
                 "from":[
                   {
-                    "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                    "Join_point":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
                   }
                 ],
                 "kind":"Flow_local",
@@ -555,7 +555,7 @@ Derivation:
             "Flow":{
               "from":[
                 {
-                  "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                  "Join_point":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
                 }
               ],
               "kind":"Flow_local",
@@ -733,7 +733,7 @@ Reason:
                     "Flow":{
                       "from":[
                         {
-                          "Witness":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
+                          "Join_point":[{"filename":"refinment_is.php","line":8,"char_start":3,"char_end":56}]
                         }
                       ],
                       "kind":"Flow_local",

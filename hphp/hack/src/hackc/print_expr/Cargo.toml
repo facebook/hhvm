@@ -13,7 +13,7 @@ path = "lib.rs"
 [dependencies]
 anyhow = "1.0.86"
 ast_scope = { version = "0.0.0", path = "../emitter/cargo/ast_scope" }
-bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.6.2", features = ["serde", "std", "unicode"] }
 core_utils_rust = { version = "0.0.0", path = "../../utils/core" }
 emit_type_hint = { version = "0.0.0", path = "../emitter/cargo/emit_type_hint" }
 error = { version = "0.0.0", path = "../error/cargo/error" }

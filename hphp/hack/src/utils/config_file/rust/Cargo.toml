@@ -11,7 +11,7 @@ license = "MIT"
 path = "config_file.rs"
 
 [dependencies]
-bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.6.2", features = ["serde", "std", "unicode"] }
 lazy_static = "1.4"
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 regex = "1.9.2"

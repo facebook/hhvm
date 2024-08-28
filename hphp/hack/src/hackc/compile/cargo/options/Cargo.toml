@@ -12,7 +12,7 @@ path = "../../options.rs"
 
 [dependencies]
 anyhow = "1.0.86"
-bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.6.2", features = ["serde", "std", "unicode"] }
 cxx = "1.0.119"
 hhvm_options = { version = "0.0.0", path = "../../../../utils/hhvm_options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

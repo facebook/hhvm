@@ -25,11 +25,11 @@ File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24
  9 |   return $c;
 10 | }
 
-Step 1 of 1
+Here's why:
+
+Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
-
-This step is the cause of the error.
 
 The subtype comes from this hint
 
@@ -130,6 +130,8 @@ File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19
  9 |   return $c;
 10 | }
 
+Here's why:
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -207,11 +209,9 @@ File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
  6 | 
  7 | function inter_l((A & I) $ai): C {
 
-Step 2 of 2
+Step 2 of 2 (here is where the error occurred)
 
-The subtype is an intersection type so next I checked at least one element of it was a subtype of the supertype.
-
-This step is the cause of the error.
+The subtype is an intersection type so next I checked that at least one element.
 
 The subtype comes from this hint
 
@@ -268,6 +268,8 @@ File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23
  9 |   return $c;
 10 | }
 
+Here's why:
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -345,11 +347,9 @@ File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
  6 | 
  7 | function inter_l((A & I) $ai): C {
 
-Step 2 of 2
+Step 2 of 2 (here is where the error occurred)
 
-The subtype is an intersection type so next I checked at least one element of it was a subtype of the supertype.
-
-This step is the cause of the error.
+The subtype is an intersection type so next I checked that at least one element.
 
 The subtype comes from this hint
 

@@ -31,11 +31,11 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
  7 |   return $c;
  8 | }
 
-Step 1 of 1
+Here's why:
+
+Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
-
-This step is the cause of the error.
 
 The subtype comes from this hint
 
@@ -136,6 +136,8 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
  7 |   return $c;
  8 | }
 
+Here's why:
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -206,11 +208,9 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
  7 |   return $c;
  8 | }
 
-Step 2 of 2
+Step 2 of 2 (here is where the error occurred)
 
-The supertype is a union type so next I checked at least one element of it was a supertype of the subtype.
-
-This step is the cause of the error.
+The supertype is a union type so next I checked at least one element.
 
 The subtype is the same as before.
 
@@ -276,6 +276,8 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
  7 |   return $c;
  8 | }
 
+Here's why:
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -346,11 +348,9 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
  7 |   return $c;
  8 | }
 
-Step 2 of 2
+Step 2 of 2 (here is where the error occurred)
 
-The supertype is a union type so next I checked at least one element of it was a supertype of the subtype.
-
-This step is the cause of the error.
+The supertype is a union type so next I checked at least one element.
 
 The subtype is the same as before.
 

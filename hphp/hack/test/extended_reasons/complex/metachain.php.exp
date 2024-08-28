@@ -31,7 +31,11 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-I checked the subtype constraint in [Main] because it was implied by transitivity from the constraints on the type variable in [Lower] and [Upper]
+Here's why:
+
+I checked the subtype constraint in [Main] because it was implied by transitivity from the constraints on the type variable.
+The source of the subtype from [Main] is explained in [Lower].
+The source of the subtype from [Main] is explained in [Upper]
 
 Main
 
@@ -94,11 +98,9 @@ File "metachain.php", line 22, character 17 - line 22, character 22:
  23 |   );
  24 | }
 
-[Main] Step 2 of 2
+[Main] Step 2 of 2 (here is where the error occurred)
 
-The subtype is a union type so next I checked each element of it was a subtype of the supertype.
-
-This step is the cause of the error.
+The subtype is a union type so next I checked all elements.
 
 The subtype comes from this expression
 
@@ -229,7 +231,7 @@ File "metachain.php", line 11, character 12 - line 11, character 23:
 
 [Lower] Step 2 of 2
 
-The subtype is a union type so next I checked each element of it was a subtype of the supertype.
+The subtype is a union type so next I checked all elements.
 
 The subtype comes from this expression
 
@@ -255,7 +257,9 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-I checked the subtype constraint in [Upper / Main] because it was implied by transitivity from the constraints on the generic parameter `T` of `chain` in [Upper / Lower] and [Upper / Upper]
+I checked the subtype constraint in [Upper / Main] because it was implied by transitivity from the constraints on the generic parameter `T` of `chain`.
+The source of the subtype from [Upper / Main] is explained in [Upper / Lower].
+The source of the subtype from [Upper / Main] is explained in [Upper / Upper]
 
 Upper / Main
 
@@ -285,7 +289,8 @@ File "metachain.php", line 16, character 12 - line 16, character 20:
 
 [Upper / Main] Step 2 of 3
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this shape literal
 
@@ -332,7 +337,7 @@ File "metachain.php", line 21, character 23 - line 23, character 3:
 
 [Upper / Main] Step 3 of 3
 
-These are shape types so next I checked the required `prompt` fields were subtypes.
+These are shape types so next I checked the required `prompt` field.
 
 The subtype comes from this expression
 
@@ -446,7 +451,8 @@ File "metachain.php", line 16, character 12 - line 16, character 20:
 
 [Upper / Lower] Step 2 of 2
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this shape literal
 

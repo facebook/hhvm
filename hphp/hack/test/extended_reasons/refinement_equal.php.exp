@@ -26,11 +26,11 @@ File "refinement_equal.php", line 6, character 22 - line 6, character 23:
  9 |   } else {
 10 |     $z = $c;
 
-Step 1 of 1
+Here's why:
+
+Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
-
-This step is the cause of the error.
 
 The subtype comes from this type variable
 

@@ -2879,7 +2879,7 @@ module Derivation = struct
       match axiom with
       | Extends ->
         Format.sprintf
-          "The %s extends or implements a class or interface so next I checked that was a %s of the %s."
+          "The %s extends a class or implements an interface so next I checked that was a %s of the %s."
           subject
           subject
           other
@@ -2906,90 +2906,89 @@ module Derivation = struct
       | Optional -> "optional"
 
     let explain_prj = function
-      | Prj_symm_neg ->
-        "These are negated types so I checked the inner type were subtypes."
+      | Prj_symm_neg -> "These are negated types so I checked the inner type."
       | Prj_symm_nullable ->
-        "These are nullable types so next I checked the non-null parts were subtypes."
+        "These are nullable types so next I checked the non-null parts."
       | Prj_symm_supportdyn ->
-        "These are `supportdyn` types so next I checked the non-dynamic parts were subtypes."
+        "These are `supportdyn` types so next I checked the non-dynamic parts."
       | Prj_symm_fn_ret ->
-        "These are function types so next I checked function return types were subtypes."
+        "These are function types so next I checked function return types."
       | Prj_symm_tuple idx ->
         Format.sprintf
-          "These are tuple types so next I checked %s elements were subtypes."
+          "These are tuple types so next I checked %s elements."
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_fn_param (idx_sub, idx_sup) when Int.equal idx_sub idx_sup ->
         Format.sprintf
-          "These are function types so next I checked the %s function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed)."
+          "These are function types so next I checked the %s function parameters.\nFunctions are contravariant in their parameters so the direction of the subtype relationship is reversed."
           (int_to_ordinal @@ (idx_sub + 1))
       | Prj_symm_fn_param (idx_sub, idx_sup) ->
         Format.sprintf
-          "These are function types so next I checked the %s function parameter of the supertype and the %s parameter of the subtype were subtypes (functions are contravariant in their parameters the direction of the subtype relationship is reversed)."
+          "These are function types so next I checked the %s function parameter of the subtype and the %s parameter of the supertype.\nFunctions are contravariant in their parameters the direction of the subtype relationship is reversed."
           (int_to_ordinal @@ (idx_sub + 1))
           (int_to_ordinal @@ (idx_sup + 1))
       | Prj_symm_fn_param_inout (idx_sub, idx_sup, Co)
         when Int.equal idx_sub idx_sup ->
         Format.sprintf
-          "These are function types so next I checked the %s function parameters. This is an `inout` parameter so they are invariant so the subtype relation must hold in both directions. Here I checked the covariant direction."
+          "These are function types so next I checked the %s function parameters.\nThis is an `inout` parameter which is invariant. This means the subtype relation must hold in both directions.\nHere I checked the covariant direction."
           (int_to_ordinal @@ (idx_sub + 1))
       | Prj_symm_fn_param_inout (idx_sub, idx_sup, Co) ->
         Format.sprintf
-          "These are function types so next I checked the %s function parameter of the subtype and the %s parameter of the supertype. This is an `inout` paramter so they are invariant so the subtype relation must hold in both directions. Here I checked the covariant direction."
+          "These are function types so next I checked the %s function parameter of the subtype and the %s parameter of the supertype.\nThese are `inout` parameters which are invariant. This means the subtype relation must hold in both directions.\nHere I checked the covariant direction."
           (int_to_ordinal @@ (idx_sub + 1))
           (int_to_ordinal @@ (idx_sup + 1))
       | Prj_symm_fn_param_inout (idx_sub, idx_sup, Contra)
         when Int.equal idx_sub idx_sup ->
         Format.sprintf
-          "These are function types so next I checked the %s function parameters. This is an `inout` parameter so they are invariant so the subtype relation must hold in both directions. Here I checked the contravariant case so the direction of the subtype relationship is reversed."
+          "These are function types so next I checked the %s function parameters.\nThis is an `inout` parameter which is invariant. This means the subtype relation must hold in both directions.\nHere I checked the contravariant case so the direction of the subtype relationship is reversed."
           (int_to_ordinal @@ (idx_sub + 1))
       | Prj_symm_fn_param_inout (idx_sub, idx_sup, Contra) ->
         Format.sprintf
-          "These are function types so next I checked the %s function parameter of the supertype and the %s parameter of the subtype. This is an `inout` parameter so they are invariant so the subtype relation must hold in both directions. Here I checked the contravariant case so the direction of the subtype relationship is reversed."
+          "These are function types so next I checked the %s function parameter of the supertype and the %s parameter of the subtype. These are `inout` parameters which are invariant. This means the relation must hold in both directions.\nHere I checked the contravariant case so the direction of the subtype relationship is reversed."
           (int_to_ordinal @@ (idx_sup + 1))
           (int_to_ordinal @@ (idx_sub + 1))
       | Prj_symm_ctor (ctor_kind, nm, idx, Dir Co) ->
         Format.sprintf
-          "`%s` is a %s so next I checked the %s type arguments are subtypes."
+          "`%s` is a %s so next I checked the %s type arguments."
           nm
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_ctor (ctor_kind, nm, idx, Dir Contra) ->
         Format.sprintf
-          "`%s` is a %s so next I checked the %s type arguments. The type parameter is contravariant so he direction of the subtype relationship is reversed."
+          "`%s` is a %s so next I checked the %s type arguments.\nThe type parameter is contravariant so the direction of the subtype relationship is reversed."
           nm
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_ctor (ctor_kind, nm, idx, Inv Co) ->
         Format.sprintf
-          "`%s` is a %s so next I checked the %s type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the covariant case."
+          "`%s` is a %s so next I checked the %s type arguments are subtypes.\nThe type parameter is invariant so the subtype relationship must hold in both directions.\nHere I check the covariant case."
           nm
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_ctor (ctor_kind, nm, idx, Inv Contra) ->
         Format.sprintf
-          "`%s` is a %s so next I checked the %s type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the contravariant case so the direction of the subtype relationship is reversed."
+          "`%s` is a %s so next I checked the %s type arguments are subtypes.\nThe type parameter is invariant so the subtype relationship must hold in both directions.\nHere I check the contravariant case so the direction of the subtype relationship is reversed."
           nm
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_shape (nm, Absent, fld_kind_sup) ->
         Format.sprintf
-          "These are shape types so next I tried to check the `%s` fields are subtypes. The field is %s in the supertype but missing in the subtype."
+          "These are shape types so next I tried to check the `%s` field.\nThe field is %s in the supertype but missing in the subtype."
           nm
           (explain_field_kind fld_kind_sup)
       | Prj_symm_shape (nm, fld_kind_sub, Absent) ->
         Format.sprintf
-          "These are shape types so next I tried to check the type of `%s` fields are subtypes. The field is %s in the subtype but missing in the supertype."
+          "These are shape types so next I tried to check the `%s` field.\nThe field is %s in the subtype but missing in the supertype."
           nm
           (explain_field_kind fld_kind_sub)
       | Prj_symm_shape (nm, fld_kind_sub, fld_kind_sup)
         when equal_field_kind fld_kind_sub fld_kind_sup ->
         Format.sprintf
-          "These are shape types so next I checked the %s `%s` fields were subtypes."
+          "These are shape types so next I checked the %s `%s` field."
           (explain_field_kind fld_kind_sub)
           nm
       | Prj_symm_shape (nm, fld_kind_sub, fld_kind_sup) ->
         Format.sprintf
-          "These are shape types so next I checked the `%s` fields were subtypes. The field was %s in the subtype and %s in the supertype."
+          "These are shape types so next I checked the `%s` field.\nThe field was %s in the subtype and %s in the supertype."
           nm
           (explain_field_kind fld_kind_sub)
           (explain_field_kind fld_kind_sup)
@@ -2997,24 +2996,24 @@ module Derivation = struct
     let explain_prj_asymm_sub prj =
       match prj with
       | Prj_asymm_union ->
-        "The subtype is a union type so next I checked each element of it was a subtype of the supertype."
+        "The subtype is a union type so next I checked all elements."
       | Prj_asymm_inter ->
-        "The subtype is an intersection type so next I checked at least one element of it was a subtype of the supertype."
+        "The subtype is an intersection type so next I checked that at least one element."
       | Prj_asymm_nullable ->
-        "The subtype is a nullable type so next I checked the non-null part was a subtype of the supertype."
+        "The subtype is a nullable type so next I checked the non-null part."
       | Prj_asymm_neg ->
-        "The subtype is a negated type so next I checked the inner type was a subtype of the supertype."
+        "The subtype is a negated type so next I checked the inner type."
 
     let explain_prj_asymm_super prj =
       match prj with
       | Prj_asymm_union ->
-        "The supertype is a union type so next I checked at least one element of it was a supertype of the subtype."
+        "The supertype is a union type so next I checked at least one element."
       | Prj_asymm_inter ->
-        "The supertype is an intersection type so next I checked each element of it was was a supertype of the subtype."
+        "The supertype is an intersection type so next I checked all elements."
       | Prj_asymm_nullable ->
-        "The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype."
+        "The supertype is a nullable type so next I checked the non-null part."
       | Prj_asymm_neg ->
-        "The supertype is a negated type so I checked the inner type was a supertype of the subtype."
+        "The supertype is a negated type so I checked the inner type."
 
     let explain = function
       | Using_prj prj -> explain_prj prj
@@ -3529,17 +3528,26 @@ module Derivation = struct
         in
 
         let prefix_main =
-          let x =
+          let middle =
             match explain_reason on_ ~st ~cfg ~ctxt with
             | ((_, x) :: _, _) -> x
             | _ -> "an inferred type"
           in
-          Format.sprintf
-            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraints on the %s in [%s] and [%s]"
+          let main_path =
             Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
-            x
+          and lower_path =
             Context.(Option.value_exn @@ explain_path @@ enter_lower ctxt)
+          and upper_path =
             Context.(Option.value_exn @@ explain_path @@ enter_upper ctxt)
+          in
+          Format.sprintf
+            "I checked the subtype constraint in [%s] because it was implied by transitivity from the constraints on the %s.\nThe source of the subtype from [%s] is explained in [%s].\nThe source of the subtype from [%s] is explained in [%s]"
+            main_path
+            middle
+            main_path
+            lower_path
+            main_path
+            upper_path
         in
         let expl =
           with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
@@ -3653,7 +3661,7 @@ module Derivation = struct
         match (rule_opt, toplevel && idx = n_steps - 1) with
         | (Some rule, true) ->
           Format.sprintf
-            "%s %d of %d\n\n%s\n\nThis step is the cause of the error."
+            "%s %d of %d (here is where the error occurred)\n\n%s"
             pfx
             (idx + 1)
             n_steps
@@ -3667,7 +3675,7 @@ module Derivation = struct
             (Subtype_rule.explain rule)
         | (None, true) ->
           Format.sprintf
-            "%s %d of %d\n\nI started by checking this subtype relationship.\n\nThis step is the cause of the error."
+            "%s %d of %d (here is where the error occurred)\n\nI started by checking this subtype relationship."
             pfx
             (idx + 1)
             n_steps
@@ -3889,7 +3897,8 @@ module Derivation = struct
     and cfg = Explain.Config.default
     and ctxt = Explain.Context.empty in
     let (expl, _) = Explain.explain t ~st ~cfg ~ctxt in
-    expl
+    let prefix = "Here's why:" in
+    Explain.with_prefix expl ~prefix ~sep:"\n\n"
 end
 
 let explain ~sub ~super ~complexity:_ =

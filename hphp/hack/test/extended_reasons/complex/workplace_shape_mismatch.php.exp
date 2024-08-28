@@ -28,6 +28,8 @@ File "workplace_shape_mismatch.php", line 15, character 4 - line 15, character 2
  16 |   ?'resource_requirement' => int,
  17 |   ?'execution_push_phase' => string,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -55,7 +57,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -110,7 +113,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -141,11 +144,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `_PIRANHA_SANDBOX_QUEUED_` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `_PIRANHA_SANDBOX_QUEUED_` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -191,6 +193,8 @@ File "workplace_shape_mismatch.php", line 18, character 4 - line 18, character 2
  19 |   ?'devserver' => string,
  20 |   ?'fifo_ordering_key' => string,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -218,7 +222,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -273,7 +278,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -304,11 +309,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `async_bulkapi_factor` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `async_bulkapi_factor` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -354,6 +358,8 @@ File "workplace_shape_mismatch.php", line 19, character 4 - line 19, character 1
  20 |   ?'fifo_ordering_key' => string,
  21 |   ?'fifo_dedup_key' => string,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -381,7 +387,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -436,7 +443,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -467,11 +474,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `devserver` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `devserver` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -517,6 +523,8 @@ File "workplace_shape_mismatch.php", line 14, character 4 - line 14, character 1
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
  16 |   ?'resource_requirement' => int,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -544,7 +552,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -599,7 +608,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -630,11 +639,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `earlyreturn` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `earlyreturn` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -681,6 +689,8 @@ File "workplace_shape_mismatch.php", line 7, character 4 - line 7, character 18:
  8 |   ?'execute_before' => int,
  9 |   ?'expire_after' => int,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -708,7 +718,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -765,7 +776,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -796,11 +807,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `execute_after` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `execute_after` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -849,6 +859,8 @@ File "workplace_shape_mismatch.php", line 8, character 4 - line 8, character 19:
  9 |   ?'expire_after' => int,
 10 |   ?'region' => string,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -876,7 +888,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -934,7 +947,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -965,11 +978,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `execute_before` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `execute_before` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -1017,6 +1029,8 @@ File "workplace_shape_mismatch.php", line 17, character 4 - line 17, character 2
  18 |   ?'async_bulkapi_factor' => float,
  19 |   ?'devserver' => string,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1044,7 +1058,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -1099,7 +1114,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -1130,11 +1145,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `execution_push_phase` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `execution_push_phase` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -1180,6 +1194,8 @@ File "workplace_shape_mismatch.php", line 9, character 4 - line 9, character 17:
 10 |   ?'region' => string,
 11 |   ?'scheduling_uid' => int,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1207,7 +1223,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -1262,7 +1279,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -1293,11 +1310,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `expire_after` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `expire_after` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -1343,6 +1359,8 @@ File "workplace_shape_mismatch.php", line 21, character 4 - line 21, character 1
  22 |   ?'send_schedule_cats' => bool,
  23 | );
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1370,7 +1388,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -1425,7 +1444,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -1456,11 +1475,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `fifo_dedup_key` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `fifo_dedup_key` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -1506,6 +1524,8 @@ File "workplace_shape_mismatch.php", line 20, character 4 - line 20, character 2
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?'send_schedule_cats' => bool,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1533,7 +1553,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -1588,7 +1609,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -1619,11 +1640,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `fifo_ordering_key` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `fifo_ordering_key` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -1669,6 +1689,8 @@ File "workplace_shape_mismatch.php", line 10, character 4 - line 10, character 1
 11 |   ?'scheduling_uid' => int,
 12 |   ?'tag' => string,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1696,7 +1718,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -1751,7 +1774,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -1782,11 +1805,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `region` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `region` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -1832,6 +1854,8 @@ File "workplace_shape_mismatch.php", line 16, character 4 - line 16, character 2
  17 |   ?'execution_push_phase' => string,
  18 |   ?'async_bulkapi_factor' => float,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1859,7 +1883,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -1914,7 +1939,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -1945,11 +1970,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `resource_requirement` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `resource_requirement` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -1995,6 +2019,8 @@ File "workplace_shape_mismatch.php", line 13, character 4 - line 13, character 1
  14 |   ?'earlyreturn' => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2022,7 +2048,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -2077,7 +2104,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -2108,11 +2135,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `retry_attempt` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `retry_attempt` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -2158,6 +2184,8 @@ File "workplace_shape_mismatch.php", line 11, character 4 - line 11, character 1
  12 |   ?'tag' => string,
  13 |   ?'retry_attempt' => int,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2185,7 +2213,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -2240,7 +2269,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -2271,11 +2300,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `scheduling_uid` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `scheduling_uid` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -2320,6 +2348,8 @@ File "workplace_shape_mismatch.php", line 22, character 4 - line 22, character 2
  22 |   ?»'send_schedule_cats'« => bool,
  23 | );
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2347,7 +2377,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -2402,7 +2433,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -2433,11 +2464,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `send_schedule_cats` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `send_schedule_cats` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -2484,6 +2514,8 @@ File "workplace_shape_mismatch.php", line 6, character 4 - line 6, character 25:
  7 |   ?'execute_after' => int,
  8 |   ?'execute_before' => int,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2511,7 +2543,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -2569,7 +2602,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -2600,11 +2633,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `serialization_format` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `serialization_format` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 
@@ -2663,6 +2695,8 @@ File "workplace_shape_mismatch.php", line 12, character 4 - line 12, character 8
  13 |   ?'retry_attempt' => int,
  14 |   ?'earlyreturn' => int,
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2690,7 +2724,8 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -2745,7 +2780,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part was a supertype of the subtype.
+The supertype is a nullable type so next I checked the non-null part.
 
 The subtype is the same as before.
 
@@ -2776,11 +2811,10 @@ File "workplace_shape_mismatch.php", line 74, character 6 - line 74, character 2
  75 |   ?AsyncTierJobOption::EXECUTION_DELAY_SECONDS => int,
  76 |   ?AsyncTierJobOption::TTL_SECONDS => int,
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-These are shape types so next I tried to check the type of `tag` fields are subtypes. The field is optional in the subtype but missing in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I tried to check the `tag` field.
+The field is optional in the subtype but missing in the supertype.
 
 The subtype comes from this hint
 

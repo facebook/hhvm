@@ -37,6 +37,8 @@ File "shape_subtyping_5.php", line 3, character 39 - line 3, character 41:
  3 | type required_a_at_int = shape('a' => »int«);
  4 | type optional_a_at_int = shape(?'a' => int);
 
+Here's why:
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -65,7 +67,8 @@ File "shape_subtyping_5.php", line 14, character 3 - line 14, character 37:
 
 Step 2 of 3
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -128,11 +131,10 @@ File "shape_subtyping_5.php", line 3, character 6 - line 3, character 22:
  3 | type »required_a_at_int« = shape('a' => int);
  4 | type optional_a_at_int = shape(?'a' => int);
 
-Step 3 of 3
+Step 3 of 3 (here is where the error occurred)
 
-These are shape types so next I checked the `a` fields were subtypes. The field was optional in the subtype and required in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I checked the `a` field.
+The field was optional in the subtype and required in the supertype.
 
 The subtype comes from this hint
 

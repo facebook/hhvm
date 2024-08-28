@@ -22,11 +22,11 @@ File "fn_ret.php", line 3, character 17 - line 3, character 19:
  4 |   return 1;
  5 | }
 
-Step 1 of 1
+Here's why:
+
+Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
-
-This step is the cause of the error.
 
 The subtype comes from this hint
 
@@ -68,11 +68,11 @@ File "fn_ret.php", line 3, character 17 - line 3, character 19:
  4 |   return 1;
  5 | }
 
-Step 1 of 1
+Here's why:
+
+Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
-
-This step is the cause of the error.
 
 The subtype comes from this hint
 

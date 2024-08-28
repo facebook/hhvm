@@ -28,6 +28,8 @@ File "class_subtyping_invariant.php", line 11, character 37 - line 11, character
  14 |   takes_my_a($x);
  15 | }
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -54,7 +56,8 @@ File "class_subtyping_invariant.php", line 14, character 3 - line 14, character 
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -118,7 +121,7 @@ File "class_subtyping_invariant.php", line 3, character 7 - line 3, character 9:
 
 Step 3 of 4
 
-The subtype extends or implements a class or interface so next I checked that was a subtype of the supertype.
+The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
 
 The subtype comes from this hint (its definition was given in [Step 2])
 
@@ -140,11 +143,11 @@ File "class_subtyping_invariant.php", line 11, character 21 - line 11, character
  14 |   takes_my_a($x);
  15 | }
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-`\MyA` is a class or interface so next I checked the 3rd type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the covariant case.
-
-This step is the cause of the error.
+`\MyA` is a class or interface so next I checked the 3rd type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the covariant case.
 
 The subtype comes from this hint
 

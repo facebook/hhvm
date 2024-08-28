@@ -36,6 +36,8 @@ File "shape_subtyping_2.php", line 4, character 16 - line 4, character 18:
  5 | ): void {
  6 | }
 
+Here's why:
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -61,7 +63,8 @@ File "shape_subtyping_2.php", line 11, character 3 - line 11, character 31:
 
 Step 2 of 3
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -102,11 +105,10 @@ File "shape_subtyping_2.php", line 4, character 3 - line 4, character 19:
  5 | ): void {
  6 | }
 
-Step 3 of 3
+Step 3 of 3 (here is where the error occurred)
 
-These are shape types so next I checked the `a` fields were subtypes. The field was optional in the subtype and required in the supertype.
-
-This step is the cause of the error.
+These are shape types so next I checked the `a` field.
+The field was optional in the subtype and required in the supertype.
 
 The subtype comes from this hint
 

@@ -28,6 +28,8 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 -
 10 |   rcvr_concrete($x);
 11 | }
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -54,7 +56,8 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 -
 
 Step 2 of 4
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
@@ -137,11 +140,9 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 -
 10 |   rcvr_concrete($x);
 11 | }
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
-
-This step is the cause of the error.
 
 The subtype comes from this hint (its definition was given in [Step 3])
 
@@ -193,6 +194,8 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 -
 10 |   rcvr_concrete($x);
 11 | }
 
+Here's why:
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -217,11 +220,10 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 -
 10 |   »rcvr_concrete($x)«;
 11 | }
 
-Step 2 of 2
+Step 2 of 2 (here is where the error occurred)
 
-These are function types so next I checked the 1st function parameter of the supertype and subtype were subtypes (functions are contravariant in their parameters so the direction of the subtype relationship is reversed).
-
-This step is the cause of the error.
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 

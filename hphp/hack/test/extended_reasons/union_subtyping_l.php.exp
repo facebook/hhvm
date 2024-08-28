@@ -31,6 +31,8 @@ File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
  7 |   return $ab;
  8 | }
 
+Here's why:
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -101,11 +103,9 @@ File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
  7 |   return $ab;
  8 | }
 
-Step 2 of 2
+Step 2 of 2 (here is where the error occurred)
 
-The subtype is a union type so next I checked each element of it was a subtype of the supertype.
-
-This step is the cause of the error.
+The subtype is a union type so next I checked all elements.
 
 The subtype comes from this hint
 
@@ -171,6 +171,8 @@ File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
  7 |   return $ab;
  8 | }
 
+Here's why:
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -241,11 +243,9 @@ File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
  7 |   return $ab;
  8 | }
 
-Step 2 of 2
+Step 2 of 2 (here is where the error occurred)
 
-The subtype is a union type so next I checked each element of it was a subtype of the supertype.
-
-This step is the cause of the error.
+The subtype is a union type so next I checked all elements.
 
 The subtype comes from this hint
 

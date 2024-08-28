@@ -22,6 +22,8 @@ File "workplace_invariant.php", line 15, character 25 - line 15, character 27:
  16 |     return foo::class;
  17 | }
 
+Here's why:
+
 Step 1 of 5
 
 I started by checking this subtype relationship.
@@ -61,7 +63,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 Step 2 of 5
 
-`\HH\classname` is a newtype so next I checked the 1st type arguments are subtypes.
+`\HH\classname` is a newtype so next I checked the 1st type arguments.
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
@@ -97,7 +99,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 5
 
-The subtype extends or implements a class or interface so next I checked that was a subtype of the supertype.
+The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
 
 The subtype comes from this hint (its definition was given in [Step 2])
 
@@ -117,7 +119,9 @@ File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
 Step 4 of 5
 
-`\bar` is a class or interface so next I checked the 1st type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the covariant case.
+`\bar` is a class or interface so next I checked the 1st type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the covariant case.
 
 The subtype comes from this hint
 
@@ -135,11 +139,9 @@ File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
  9 |   public function get(): int {
 10 |     return 1;
 
-Step 5 of 5
+Step 5 of 5 (here is where the error occurred)
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
-
-This step is the cause of the error.
 
 The subtype comes from this hint
 
@@ -181,6 +183,8 @@ File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
  16 |     return foo::class;
  17 | }
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -220,7 +224,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 Step 2 of 4
 
-`\HH\classname` is a newtype so next I checked the 1st type arguments are subtypes.
+`\HH\classname` is a newtype so next I checked the 1st type arguments.
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
@@ -256,7 +260,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
-The subtype extends or implements a class or interface so next I checked that was a subtype of the supertype.
+The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
 
 The subtype comes from this hint (its definition was given in [Step 2])
 
@@ -274,11 +278,11 @@ File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
  16 |     return foo::class;
  17 | }
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-`\bar` is a class or interface so next I checked the 1st type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the covariant case.
-
-This step is the cause of the error.
+`\bar` is a class or interface so next I checked the 1st type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the covariant case.
 
 The subtype comes from this hint
 
@@ -320,6 +324,8 @@ File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
  9 |   public function get(): int {
 10 |     return 1;
 
+Here's why:
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -359,7 +365,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 Step 2 of 4
 
-`\HH\classname` is a newtype so next I checked the 1st type arguments are subtypes.
+`\HH\classname` is a newtype so next I checked the 1st type arguments.
 
 The subtype comes from this implicitly defined constant `::class` of class `\foo`
 
@@ -395,7 +401,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
-The subtype extends or implements a class or interface so next I checked that was a subtype of the supertype.
+The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
 
 The subtype comes from this hint (its definition was given in [Step 2])
 
@@ -413,11 +419,11 @@ File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
  16 |     return foo::class;
  17 | }
 
-Step 4 of 4
+Step 4 of 4 (here is where the error occurred)
 
-`\bar` is a class or interface so next I checked the 1st type arguments are subtypes. The type parameter is invariant so the subtype relationship must hold in both directions. Here I check the covariant case.
-
-This step is the cause of the error.
+`\bar` is a class or interface so next I checked the 1st type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the covariant case.
 
 The subtype comes from this hint
 

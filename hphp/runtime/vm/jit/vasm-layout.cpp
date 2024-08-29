@@ -89,7 +89,9 @@ jit::vector<Vlabel> rpoLayout(Vunit& unit) {
         (isProfiling(kind) && !Cfg::Jit::LayoutProfileSplitHotCold)  ||
         (isLive(kind)      && !Cfg::Jit::LayoutLiveSplitHotCold)) {
       for (auto b : labels) {
-        if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+        if (unit.blocks[b].area_idx == AreaIndex::Cold ||
+            (unit.blocks[b].area_idx == AreaIndex::Frozen &&
+             !Cfg::Jit::LayoutSplitFrozen)) {
           unit.blocks[b].area_idx = AreaIndex::Main;
         }
       }

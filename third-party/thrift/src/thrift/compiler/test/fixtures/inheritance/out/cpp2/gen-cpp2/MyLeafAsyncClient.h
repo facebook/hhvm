@@ -151,6 +151,8 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
   template <typename RpcOptions>
   void fbthrift_send_do_leaf(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_leafCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_do_leaf(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
 

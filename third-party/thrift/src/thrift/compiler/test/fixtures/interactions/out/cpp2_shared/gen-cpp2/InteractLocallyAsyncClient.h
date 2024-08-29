@@ -147,6 +147,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
   template <typename RpcOptions>
   void fbthrift_send_init(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> initCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::int32_t> fbthrift_semifuture_init(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift", "service": "SharedInteraction", "function": "do_something"} */
  void do_something(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -251,6 +253,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
   template <typename RpcOptions>
   void fbthrift_send_do_something(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_somethingCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::thrift::shared_interactions::DoSomethingResult> fbthrift_semifuture_do_something(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift", "service": "SharedInteraction", "function": "tear_down"} */
  void tear_down(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -353,6 +357,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
   template <typename RpcOptions>
   void fbthrift_send_tear_down(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> tear_downCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_tear_down(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift", "service": "InteractLocally", "function": "createSharedInteraction"} */

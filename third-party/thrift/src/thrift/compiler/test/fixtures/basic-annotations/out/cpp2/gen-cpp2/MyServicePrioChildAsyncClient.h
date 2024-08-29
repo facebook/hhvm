@@ -151,6 +151,8 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
   template <typename RpcOptions>
   void fbthrift_send_pang(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pangCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_pang(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
 

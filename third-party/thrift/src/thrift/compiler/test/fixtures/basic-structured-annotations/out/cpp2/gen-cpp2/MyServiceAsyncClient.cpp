@@ -139,6 +139,23 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::test::fixtures::basic-structured-annotations::annotated_inline_string>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = firstCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_first, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_first(rpcOptions, *header, contextStack);
+  fbthrift_send_first(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_first() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_first(rpcOptions);
@@ -150,19 +167,13 @@ folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inli
 }
 
 folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_first(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::test::fixtures::basic-structured-annotations::annotated_inline_string>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>>(std::move(promise), recv_wrapped_first, channel_);
-  first(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
+  using CallbackType = apache::thrift::FutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>;
+  return fbthrift_semifuture_first<CallbackType>(rpcOptions).toUnsafeFuture();
 }
 
 folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_first, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  first(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>;
+  return fbthrift_semifuture_first<CallbackType>(rpcOptions);
 }
 
 
@@ -317,6 +328,23 @@ bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = secondCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_second, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_second(rpcOptions, *header, contextStack, p_count);
+  fbthrift_send_second(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::Future<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_second(::std::int64_t p_count) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_second(rpcOptions, p_count);
@@ -328,19 +356,13 @@ folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structure
 }
 
 folly::Future<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback<bool>>(std::move(promise), recv_wrapped_second, channel_);
-  second(rpcOptions, std::move(callback), p_count);
-  return std::move(future).thenValue(CallbackHelper::extractResult);
+  using CallbackType = apache::thrift::FutureCallback<bool>;
+  return fbthrift_semifuture_second<CallbackType>(rpcOptions, p_count).toUnsafeFuture();
 }
 
 folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_second, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  second(rpcOptions, std::move(callback), p_count);
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<bool>;
+  return fbthrift_semifuture_second<CallbackType>(rpcOptions, p_count);
 }
 
 

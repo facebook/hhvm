@@ -135,6 +135,23 @@ void apache::thrift::Client<::cpp2::Perform>::sync_foo(apache::thrift::RpcOption
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::fbthrift_semifuture_foo(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = fooCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_foo, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_foo(rpcOptions, *header, contextStack);
+  fbthrift_send_foo(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::Future<folly::Unit> apache::thrift::Client<::cpp2::Perform>::future_foo() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_foo(rpcOptions);
@@ -146,19 +163,13 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::semifutu
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::cpp2::Perform>::future_foo(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_foo, channel_);
-  foo(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
+  using CallbackType = apache::thrift::FutureCallback<folly::Unit>;
+  return fbthrift_semifuture_foo<CallbackType>(rpcOptions).toUnsafeFuture();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::semifuture_foo(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_foo, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  foo(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<folly::Unit>;
+  return fbthrift_semifuture_foo<CallbackType>(rpcOptions);
 }
 
 
@@ -386,16 +397,31 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::Perform>::MyInteraction::fbthrift_semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::int32_t>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = frobnicateCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_frobnicate, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_frobnicate(rpcOptions, *header, contextStack);
+  fbthrift_send_frobnicate(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::Perform>::MyInteraction::semifuture_frobnicate() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_frobnicate(rpcOptions);
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::Perform>::MyInteraction::semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_frobnicate, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  frobnicate(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<::std::int32_t>;
+  return fbthrift_semifuture_frobnicate<CallbackType>(rpcOptions);
 }
 
 
@@ -521,16 +547,31 @@ void apache::thrift::Client<::cpp2::Perform>::MyInteraction::sync_ping(apache::t
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyInteraction::fbthrift_semifuture_ping(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = pingCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<true /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_ping(rpcOptions, *header, contextStack);
+  fbthrift_send_ping(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyInteraction::semifuture_ping() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_ping(rpcOptions);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyInteraction::semifuture_ping(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeOneWaySemiFutureCallback(channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  ping(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::OneWaySemiFutureCallback;
+  return fbthrift_semifuture_ping<CallbackType>(rpcOptions);
 }
 
 
@@ -635,16 +676,31 @@ apache::thrift::ClientBufferedStream<bool> apache::thrift::Client<::cpp2::Perfor
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> apache::thrift::Client<::cpp2::Perform>::MyInteraction::fbthrift_semifuture_truthify(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<bool>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = truthifyCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_truthify, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
+  apache::thrift::SerializedRequest request = fbthrift_serialize_truthify(rpcOptions, *header, contextStack);
+  fbthrift_send_truthify(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> apache::thrift::Client<::cpp2::Perform>::MyInteraction::semifuture_truthify() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_truthify(rpcOptions);
 }
 
 folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> apache::thrift::Client<::cpp2::Perform>::MyInteraction::semifuture_truthify(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_truthify, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  truthify(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<apache::thrift::ClientBufferedStream<bool>>;
+  return fbthrift_semifuture_truthify<CallbackType>(rpcOptions);
 }
 
 
@@ -976,16 +1032,31 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::fbthrift_semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::int32_t>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = frobnicateCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_frobnicate, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_frobnicate(rpcOptions, *header, contextStack);
+  fbthrift_send_frobnicate(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::semifuture_frobnicate() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_frobnicate(rpcOptions);
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_frobnicate, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  frobnicate(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<::std::int32_t>;
+  return fbthrift_semifuture_frobnicate<CallbackType>(rpcOptions);
 }
 
 
@@ -1111,16 +1182,31 @@ void apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::sync_ping(apach
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::fbthrift_semifuture_ping(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = pingCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<true /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_ping(rpcOptions, *header, contextStack);
+  fbthrift_send_ping(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::semifuture_ping() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_ping(rpcOptions);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::semifuture_ping(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeOneWaySemiFutureCallback(channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  ping(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::OneWaySemiFutureCallback;
+  return fbthrift_semifuture_ping<CallbackType>(rpcOptions);
 }
 
 
@@ -1225,16 +1311,31 @@ apache::thrift::ClientBufferedStream<bool> apache::thrift::Client<::cpp2::Perfor
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::fbthrift_semifuture_truthify(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<apache::thrift::ClientBufferedStream<bool>>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = truthifyCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_truthify, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
+  apache::thrift::SerializedRequest request = fbthrift_serialize_truthify(rpcOptions, *header, contextStack);
+  fbthrift_send_truthify(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::semifuture_truthify() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_truthify(rpcOptions);
 }
 
 folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> apache::thrift::Client<::cpp2::Perform>::MyInteractionFast::semifuture_truthify(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_truthify, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  truthify(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<apache::thrift::ClientBufferedStream<bool>>;
+  return fbthrift_semifuture_truthify<CallbackType>(rpcOptions);
 }
 
 
@@ -1509,16 +1610,31 @@ void apache::thrift::Client<::cpp2::Perform>::SerialInteraction::sync_frobnicate
 }
 
 
+template <typename CallbackType>
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::SerialInteraction::fbthrift_semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = frobnicateCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_frobnicate, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  apache::thrift::SerializedRequest request = fbthrift_serialize_frobnicate(rpcOptions, *header, contextStack);
+  fbthrift_send_frobnicate(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+}
+
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::SerialInteraction::semifuture_frobnicate() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_frobnicate(rpcOptions);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Perform>::SerialInteraction::semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_frobnicate, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  frobnicate(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
+  using CallbackType = apache::thrift::SemiFutureCallback<folly::Unit>;
+  return fbthrift_semifuture_frobnicate<CallbackType>(rpcOptions);
 }
 
 

@@ -269,14 +269,14 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
     rpcOptions.setWriteHeader(entry.first, entry.second);
   }
 
-  struct SemiFutureCallbackWithExecutor : public SemiFutureCallback {
+  struct SemiFutureCallbackWithExecutor : public LegacySemiFutureCallback {
     folly::Executor::KeepAlive<> executor_;
 
     explicit SemiFutureCallbackWithExecutor(
         folly::Promise<ClientReceiveState>&& promise,
         std::shared_ptr<apache::thrift::RequestChannel> channel,
         folly::Executor::KeepAlive<> executor)
-        : SemiFutureCallback(std::move(promise), std::move(channel)),
+        : LegacySemiFutureCallback(std::move(promise), std::move(channel)),
           executor_(std::move(executor)) {}
 
     folly::Executor::KeepAlive<> getExecutor() const override {

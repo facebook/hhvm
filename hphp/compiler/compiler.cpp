@@ -1318,7 +1318,8 @@ bool process(CompilerOptions &po) {
 
   // Emit a group of files that were parsed remotely
   auto const emitRemoteUnit = [&] (
-      const std::vector<std::filesystem::path>& rpaths
+      const std::vector<std::filesystem::path>& rpaths,
+      bool isOnDemand
   ) -> coro::Task<Package::EmitCallBackResult> {
     Package::ParseMetaVec parseMetas;
     Package::ParseMetaItemsToSkipSet itemsToSkip;
@@ -1327,6 +1328,7 @@ bool process(CompilerOptions &po) {
       if (Cfg::Eval::ActiveDeployment.empty()) return true;
       // If the unit defines any modules, then it is always included
       if (!p.m_definitions.m_modules.empty()) return true;
+      if (Option::ForceEnableSymbolRefs && isOnDemand) return true;
       return p.m_module_use && moduleInDeployment.contains(p.m_module_use);
     };
 

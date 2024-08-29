@@ -290,7 +290,7 @@ struct Package {
   using ParseMetaItemsToSkipSet = hphp_fast_set<size_t>;
   using EmitCallBackResult = std::pair<ParseMetaVec, ParseMetaItemsToSkipSet>;
   using EmitCallback = std::function<
-    folly::coro::Task<EmitCallBackResult>(const std::vector<std::filesystem::path>&)
+    folly::coro::Task<EmitCallBackResult>(const std::vector<std::filesystem::path>&, bool)
   >;
   folly::coro::Task<bool> emit(const UnitIndex&, const EmitCallback&,
                                const LocalCallback&, const std::filesystem::path&);
@@ -348,9 +348,9 @@ private:
   folly::coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&,
                                   const std::filesystem::path&);
   folly::coro::Task<OndemandInfo>
-  emitGroups(Groups, const EmitCallback&, const UnitIndex&);
+  emitGroups(Groups, const EmitCallback&, const UnitIndex&, bool);
   folly::coro::Task<OndemandInfo>
-  emitGroup(Group, const EmitCallback&, const UnitIndex&);
+  emitGroup(Group, const EmitCallback&, const UnitIndex&, bool);
 
   void resolveOnDemand(OndemandInfo&, const StringData* fromFile,
       const SymbolRefs&, const UnitIndex&, bool report = false);

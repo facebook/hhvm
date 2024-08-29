@@ -1470,7 +1470,8 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
   OndemandInfo ondemand;
   {
     Timer timer{Timer::WallTime, "emitting inputs"};
-    ondemand = co_await emitGroups(std::move(input_groups), callback, index);
+    ondemand = co_await emitGroups(
+      std::move(input_groups), callback, index, false /* on demand */);
     if (logEdges) {
       edges.insert(
         edges.end(), ondemand.m_edges.begin(), ondemand.m_edges.end()
@@ -1486,7 +1487,8 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
   do {
     Groups ondemand_groups;
     groupFiles(ondemand_groups, std::move(ondemand.m_files));
-    ondemand = co_await emitGroups(std::move(ondemand_groups), callback, index);
+    ondemand = co_await emitGroups(
+      std::move(ondemand_groups), callback, index, true /* on demand */);
     if (logEdges) {
       edges.insert(
         edges.end(), ondemand.m_edges.begin(), ondemand.m_edges.end()
@@ -1508,7 +1510,8 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
 coro::Task<Package::OndemandInfo> Package::emitGroups(
   Groups groups,
   const EmitCallback& callback,
-  const UnitIndex& index
+  const UnitIndex& index,
+  bool isOnDemand
 ) {
   if (groups.empty()) co_return OndemandInfo{};
 
@@ -1517,7 +1520,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroups(
   std::vector<coro::TaskWithExecutor<OndemandInfo>> tasks;
   for (auto& group : groups) {
     tasks.emplace_back(
-      emitGroup(std::move(group), callback, index)
+      emitGroup(std::move(group), callback, index, isOnDemand)
         .scheduleOn(m_executor.sticky())
     );
   }
@@ -1545,7 +1548,8 @@ coro::Task<Package::OndemandInfo> Package::emitGroups(
 coro::Task<Package::OndemandInfo> Package::emitGroup(
     Group group,
     const EmitCallback& callback,
-    const UnitIndex& index
+    const UnitIndex& index,
+    bool isOnDemand
 ) {
   using namespace folly::gen;
 
@@ -1577,7 +1581,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
     // we also return a fixup list consisting of original indicies of the
     // omitted units. We later use this fixup list to compute the original
     // indicies of each unit.
-    auto parseMetasAndItemsToSkip = co_await callback(group.m_files);
+    auto parseMetasAndItemsToSkip = co_await callback(group.m_files, isOnDemand);
     auto& [parseMetas, itemsToSkip] = parseMetasAndItemsToSkip;
     if (Cfg::Eval::ActiveDeployment.empty()) {
       // If a deployment is not set, then we should have gotten results for

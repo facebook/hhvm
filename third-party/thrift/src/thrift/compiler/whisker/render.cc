@@ -55,7 +55,7 @@ class outputter {
     writeln_to_sink();
   }
 
-  void write(std::string value) {
+  void write(std::string_view value) {
     for (char c : value) {
       current_line().buffer += c;
       if (detail::is_newline(c)) {

@@ -11,9 +11,11 @@ use cxx::CxxString;
 
 #[cxx::bridge(namespace = "HPHP::package")]
 mod ffi {
+    #[derive(Default)]
     struct PackageInfo {
         packages: Vec<PackageMapEntry>,
         deployments: Vec<DeploymentMapEntry>,
+        errors: Vec<String>,
     }
     struct PackageMapEntry {
         name: String,
@@ -80,14 +82,13 @@ pub fn package_info(filename: &CxxString) -> ffi::PackageInfo {
                         .collect()
                 })
                 .unwrap_or_default();
+            let errors = info.errors().iter().map(|e| e.msg()).collect();
             ffi::PackageInfo {
                 packages,
                 deployments,
+                errors,
             }
         }
-        Err(_e) => ffi::PackageInfo {
-            packages: vec![],
-            deployments: vec![],
-        },
+        Err(_e) => ffi::PackageInfo::default(),
     }
 }

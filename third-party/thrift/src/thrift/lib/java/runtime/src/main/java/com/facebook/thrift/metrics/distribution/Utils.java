@@ -18,6 +18,7 @@ package com.facebook.thrift.metrics.distribution;
 
 import com.facebook.thrift.metrics.common.Clock;
 import com.facebook.thrift.metrics.common.NanoClock;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,11 @@ public class Utils {
       }
     }
     return executorService;
+  }
+
+  @VisibleForTesting
+  public static void setExecutorService(ScheduledExecutorService executorService) {
+    Utils.executorService = executorService;
   }
 
   /** Allow clean shutdown for testing purposes */

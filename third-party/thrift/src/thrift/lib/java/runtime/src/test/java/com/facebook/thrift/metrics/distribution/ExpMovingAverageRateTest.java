@@ -34,7 +34,7 @@ public class ExpMovingAverageRateTest {
 
   private void advanceSeconds(long seconds) {
     testClock.incrementSec(seconds);
-    rate.update(0);
+    rate.add(0);
   }
 
   private void advanceMinutes(long minutes) {
@@ -45,7 +45,7 @@ public class ExpMovingAverageRateTest {
   public void testNormalQuantilesOverOneCycle() {
     for (int i = 1; i <= 60; i++) {
       advanceSeconds(1);
-      rate.update(1);
+      rate.add(1);
     }
 
     // One Minute, one per second
@@ -57,7 +57,7 @@ public class ExpMovingAverageRateTest {
   public void testDataDecaysToZeroOver5Minutes() {
     for (int i = 1; i <= 60; i++) {
       advanceSeconds(1);
-      rate.update(1);
+      rate.add(1);
     }
 
     assertThat(rate.oneMinuteRate()).isEqualTo(60);

@@ -146,8 +146,7 @@ class Client<::test::fixtures::basic::FooService> : public apache::thrift::Gener
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FooService", "function": "simple_rpc"} */
   virtual folly::exception_wrapper recv_instance_wrapped_simple_rpc(::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_simple_rpc(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  apache::thrift::SerializedRequest fbthrift_serialize_simple_rpc(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_simple_rpc(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> simple_rpcCtx(apache::thrift::RpcOptions* rpcOptions);

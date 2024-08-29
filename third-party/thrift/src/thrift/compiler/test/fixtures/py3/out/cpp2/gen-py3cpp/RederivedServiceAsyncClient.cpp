@@ -13,22 +13,6 @@ namespace py3::simple {
 typedef apache::thrift::ThriftPresult<false> RederivedService_get_seven_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> RederivedService_get_seven_presult;
 } // namespace py3::simple
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::RederivedService>::fbthrift_serialize_get_seven(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
-  ::py3::simple::RederivedService_get_seven_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_seven",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::RederivedService>::fbthrift_send_get_seven(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -53,15 +37,31 @@ void apache::thrift::Client<::py3::simple::RederivedService>::get_seven(apache::
   fbthrift_serialize_and_send_get_seven(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::py3::simple::RederivedService>::fbthrift_serialize_and_send_get_seven(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_seven(&writer, rpcOptions, *header, contextStack);
-    if (stealRpcOptions) {
-      fbthrift_send_get_seven(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_seven(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::RederivedService>::fbthrift_serialize_get_seven(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::RederivedService_get_seven_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_seven",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::RederivedService>::fbthrift_serialize_and_send_get_seven(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_seven(rpcOptions, *header, contextStack);
+  if (stealRpcOptions) {
+    fbthrift_send_get_seven(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_seven(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::RederivedService>::get_sevenCtx(apache::thrift::RpcOptions* rpcOptions) {

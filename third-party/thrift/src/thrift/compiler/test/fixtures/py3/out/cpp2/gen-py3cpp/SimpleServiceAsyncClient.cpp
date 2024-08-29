@@ -95,22 +95,6 @@ typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apach
 typedef apache::thrift::ThriftPresult<false> SimpleService_get_struct_hidden_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct*>> SimpleService_get_struct_hidden_presult;
 } // namespace py3::simple
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_five(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
-  ::py3::simple::SimpleService_get_five_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_five",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_five(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -120,23 +104,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_fiv
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_add_five(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_num) {
-  ::py3::simple::SimpleService_add_five_pargs args;
-  args.get<0>().value = &p_num;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "add_five",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -150,22 +117,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_add_fiv
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_do_nothing(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
-  ::py3::simple::SimpleService_do_nothing_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "do_nothing",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_do_nothing(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -175,24 +126,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_do_noth
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_concat(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_first, const ::std::string& p_second) {
-  ::py3::simple::SimpleService_concat_pargs args;
-  args.get<0>().value = const_cast<::std::string*>(&p_first);
-  args.get<1>().value = const_cast<::std::string*>(&p_second);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "concat",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -206,23 +139,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_concat(
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_value(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::SimpleStruct& p_simple_struct) {
-  ::py3::simple::SimpleService_get_value_pargs args;
-  args.get<0>().value = const_cast<::py3::simple::SimpleStruct*>(&p_simple_struct);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_value",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_value(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -232,23 +148,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_val
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_negate(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_input) {
-  ::py3::simple::SimpleService_negate_pargs args;
-  args.get<0>().value = &p_input;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "negate",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -262,23 +161,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_negate(
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_tiny(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int8_t p_input) {
-  ::py3::simple::SimpleService_tiny_pargs args;
-  args.get<0>().value = &p_input;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "tiny",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_tiny(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -288,23 +170,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_tiny(ap
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_small(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_input) {
-  ::py3::simple::SimpleService_small_pargs args;
-  args.get<0>().value = &p_input;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "small",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -318,23 +183,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_small(a
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_big(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_input) {
-  ::py3::simple::SimpleService_big_pargs args;
-  args.get<0>().value = &p_input;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "big",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_big(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -344,23 +192,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_big(apa
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_two(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, double p_input) {
-  ::py3::simple::SimpleService_two_pargs args;
-  args.get<0>().value = &p_input;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "two",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -374,22 +205,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_two(apa
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_expected_exception(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
-  ::py3::simple::SimpleService_expected_exception_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "expected_exception",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_expected_exception(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -399,22 +214,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_expecte
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_unexpected_exception(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
-  ::py3::simple::SimpleService_unexpected_exception_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "unexpected_exception",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -428,23 +227,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_unexpec
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_i16_list(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int16_t>& p_numbers) {
-  ::py3::simple::SimpleService_sum_i16_list_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::int16_t>*>(&p_numbers);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "sum_i16_list",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_sum_i16_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -454,23 +236,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_sum_i16
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_i32_list(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int32_t>& p_numbers) {
-  ::py3::simple::SimpleService_sum_i32_list_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::int32_t>*>(&p_numbers);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "sum_i32_list",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -484,23 +249,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_sum_i32
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_i64_list(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int64_t>& p_numbers) {
-  ::py3::simple::SimpleService_sum_i64_list_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::int64_t>*>(&p_numbers);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "sum_i64_list",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_sum_i64_list(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -510,23 +258,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_sum_i64
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_concat_many(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words) {
-  ::py3::simple::SimpleService_concat_many_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_words);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "concat_many",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -540,23 +271,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_concat_
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_count_structs(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
-  ::py3::simple::SimpleService_count_structs_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::py3::simple::SimpleStruct>*>(&p_items);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "count_structs",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_count_structs(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -566,23 +280,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_count_s
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_set(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::std::int32_t>& p_numbers) {
-  ::py3::simple::SimpleService_sum_set_pargs args;
-  args.get<0>().value = const_cast<::std::set<::std::int32_t>*>(&p_numbers);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "sum_set",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -596,24 +293,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_sum_set
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_contains_word(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
-  ::py3::simple::SimpleService_contains_word_pargs args;
-  args.get<0>().value = const_cast<::std::set<::std::string>*>(&p_words);
-  args.get<1>().value = const_cast<::std::string*>(&p_word);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "contains_word",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_contains_word(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -623,24 +302,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_contain
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_map_value(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
-  ::py3::simple::SimpleService_get_map_value_pargs args;
-  args.get<0>().value = const_cast<::std::map<::std::string, ::std::string>*>(&p_words);
-  args.get<1>().value = const_cast<::std::string*>(&p_key);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_map_value",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -654,23 +315,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_map
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_map_length(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
-  ::py3::simple::SimpleService_map_length_pargs args;
-  args.get<0>().value = const_cast<::std::map<::std::string, ::py3::simple::SimpleStruct>*>(&p_items);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "map_length",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_map_length(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -680,23 +324,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_map_len
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_map_values(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int16_t>& p_items) {
-  ::py3::simple::SimpleService_sum_map_values_pargs args;
-  args.get<0>().value = const_cast<::std::map<::std::string, ::std::int16_t>*>(&p_items);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "sum_map_values",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -710,23 +337,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_sum_map
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_complex_sum_i32(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::ComplexStruct& p_counter) {
-  ::py3::simple::SimpleService_complex_sum_i32_pargs args;
-  args.get<0>().value = const_cast<::py3::simple::ComplexStruct*>(&p_counter);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "complex_sum_i32",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_complex_sum_i32(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -736,23 +346,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_complex
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_repeat_name(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::ComplexStruct& p_counter) {
-  ::py3::simple::SimpleService_repeat_name_pargs args;
-  args.get<0>().value = const_cast<::py3::simple::ComplexStruct*>(&p_counter);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "repeat_name",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -766,22 +359,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_repeat_
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_struct(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
-  ::py3::simple::SimpleService_get_struct_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_struct",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_struct(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -791,23 +368,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_str
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_fib(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_n) {
-  ::py3::simple::SimpleService_fib_pargs args;
-  args.get<0>().value = &p_n;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "fib",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -821,23 +381,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_fib(apa
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_unique_words(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words) {
-  ::py3::simple::SimpleService_unique_words_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_words);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "unique_words",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_unique_words(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -847,23 +390,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_unique_
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_words_count(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words) {
-  ::py3::simple::SimpleService_words_count_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_words);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "words_count",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -877,23 +403,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_words_c
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_set_enum(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::py3::simple::AnEnum p_in_enum) {
-  ::py3::simple::SimpleService_set_enum_pargs args;
-  args.get<0>().value = &p_in_enum;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "set_enum",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_set_enum(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -903,24 +412,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_set_enu
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_list_of_lists(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
-  ::py3::simple::SimpleService_list_of_lists_pargs args;
-  args.get<0>().value = &p_num_lists;
-  args.get<1>().value = &p_num_items;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "list_of_lists",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -934,23 +425,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_list_of
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_word_character_frequency(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_sentence) {
-  ::py3::simple::SimpleService_word_character_frequency_pargs args;
-  args.get<0>().value = const_cast<::std::string*>(&p_sentence);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "word_character_frequency",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_word_character_frequency(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -960,23 +434,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_word_ch
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_list_of_sets(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_some_words) {
-  ::py3::simple::SimpleService_list_of_sets_pargs args;
-  args.get<0>().value = const_cast<::std::string*>(&p_some_words);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "list_of_sets",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -990,23 +447,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_list_of
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_nested_map_argument(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
-  ::py3::simple::SimpleService_nested_map_argument_pargs args;
-  args.get<0>().value = const_cast<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>*>(&p_struct_map);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "nested_map_argument",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_nested_map_argument(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -1016,23 +456,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_nested_
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_make_sentence(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
-  ::py3::simple::SimpleService_make_sentence_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::vector<::std::string>>*>(&p_word_chars);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "make_sentence",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -1046,23 +469,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_make_se
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_union(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
-  ::py3::simple::SimpleService_get_union_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::set<::std::int32_t>>*>(&p_sets);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_union",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_union(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -1072,23 +478,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_uni
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_keys(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
-  ::py3::simple::SimpleService_get_keys_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::map<::std::string, ::std::string>>*>(&p_string_map);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_keys",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -1102,23 +491,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_key
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_lookup_double(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_key) {
-  ::py3::simple::SimpleService_lookup_double_pargs args;
-  args.get<0>().value = &p_key;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "lookup_double",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_lookup_double(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -1128,23 +500,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_lookup_
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_retrieve_binary(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_something) {
-  ::py3::simple::SimpleService_retrieve_binary_pargs args;
-  args.get<0>().value = const_cast<::std::string*>(&p_something);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "retrieve_binary",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -1158,23 +513,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_retriev
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_contain_binary(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_binaries) {
-  ::py3::simple::SimpleService_contain_binary_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_binaries);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "contain_binary",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_contain_binary(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -1184,23 +522,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_contain
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_contain_enum(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
-  ::py3::simple::SimpleService_contain_enum_pargs args;
-  args.get<0>().value = const_cast<::std::vector<::py3::simple::AnEnum>*>(&p_the_enum);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "contain_enum",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -1214,23 +535,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_contain
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_binary_union_struct(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::BinaryUnion& p_u) {
-  ::py3::simple::SimpleService_get_binary_union_struct_pargs args;
-  args.get<0>().value = const_cast<::py3::simple::BinaryUnion*>(&p_u);
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_binary_union_struct",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
-}
-
 template <typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_binary_union_struct(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
 
@@ -1240,22 +544,6 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_send_get_bin
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
-}
-
-template <typename Protocol_>
-apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_struct_hidden(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
-  ::py3::simple::SimpleService_get_struct_hidden_pargs args;
-  const auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
-  const auto writer = [&](Protocol_* p) { args.write(p); };
-  return apache::thrift::preprocessSendT<Protocol_>(
-      prot,
-      rpcOptions,
-      contextStack,
-      header,
-      "get_struct_hidden",
-      writer,
-      sizer,
-      channel_->getChecksumSamplingRate());
 }
 
 template <typename RpcOptions>
@@ -1282,15 +570,31 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_five(apache::thri
   fbthrift_serialize_and_send_get_five(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_five(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_five(&writer, rpcOptions, *header, contextStack);
-    if (stealRpcOptions) {
-      fbthrift_send_get_five(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_five(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_five(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_five_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_five",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_five(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_five(rpcOptions, *header, contextStack);
+  if (stealRpcOptions) {
+    fbthrift_send_get_five(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_five(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_fiveCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -1445,15 +749,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::add_five(apache::thri
   fbthrift_serialize_and_send_add_five(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_num);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_add_five(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_num, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_add_five(&writer, rpcOptions, *header, contextStack, p_num);
-    if (stealRpcOptions) {
-      fbthrift_send_add_five(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_add_five(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_add_five(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_num) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_add_five_pargs args;
+    args.get<0>().value = &p_num;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "add_five",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_add_five(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_num, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_add_five(rpcOptions, *header, contextStack, p_num);
+  if (stealRpcOptions) {
+    fbthrift_send_add_five(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_add_five(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::add_fiveCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -1608,15 +929,31 @@ void apache::thrift::Client<::py3::simple::SimpleService>::do_nothing(apache::th
   fbthrift_serialize_and_send_do_nothing(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_do_nothing(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_do_nothing(&writer, rpcOptions, *header, contextStack);
-    if (stealRpcOptions) {
-      fbthrift_send_do_nothing(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_do_nothing(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_do_nothing(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_do_nothing_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "do_nothing",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_do_nothing(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_do_nothing(rpcOptions, *header, contextStack);
+  if (stealRpcOptions) {
+    fbthrift_send_do_nothing(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_do_nothing(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::do_nothingCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -1769,15 +1106,33 @@ void apache::thrift::Client<::py3::simple::SimpleService>::concat(apache::thrift
   fbthrift_serialize_and_send_concat(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_first, p_second);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_concat(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_first, const ::std::string& p_second, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_concat(&writer, rpcOptions, *header, contextStack, p_first, p_second);
-    if (stealRpcOptions) {
-      fbthrift_send_concat(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_concat(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_concat(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_first, const ::std::string& p_second) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_concat_pargs args;
+    args.get<0>().value = const_cast<::std::string*>(&p_first);
+    args.get<1>().value = const_cast<::std::string*>(&p_second);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "concat",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_concat(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_first, const ::std::string& p_second, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_concat(rpcOptions, *header, contextStack, p_first, p_second);
+  if (stealRpcOptions) {
+    fbthrift_send_concat(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_concat(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::concatCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -1930,15 +1285,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_value(apache::thr
   fbthrift_serialize_and_send_get_value(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_simple_struct);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_value(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::SimpleStruct& p_simple_struct, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_value(&writer, rpcOptions, *header, contextStack, p_simple_struct);
-    if (stealRpcOptions) {
-      fbthrift_send_get_value(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_value(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_value(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::SimpleStruct& p_simple_struct) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_value_pargs args;
+    args.get<0>().value = const_cast<::py3::simple::SimpleStruct*>(&p_simple_struct);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_value",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_value(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::SimpleStruct& p_simple_struct, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_value(rpcOptions, *header, contextStack, p_simple_struct);
+  if (stealRpcOptions) {
+    fbthrift_send_get_value(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_value(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_valueCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -2093,15 +1465,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::negate(apache::thrift
   fbthrift_serialize_and_send_negate(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_negate(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_input, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_negate(&writer, rpcOptions, *header, contextStack, p_input);
-    if (stealRpcOptions) {
-      fbthrift_send_negate(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_negate(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_negate(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, bool p_input) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_negate_pargs args;
+    args.get<0>().value = &p_input;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "negate",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_negate(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_input, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_negate(rpcOptions, *header, contextStack, p_input);
+  if (stealRpcOptions) {
+    fbthrift_send_negate(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_negate(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::negateCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -2256,15 +1645,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::tiny(apache::thrift::
   fbthrift_serialize_and_send_tiny(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_tiny(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_input, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_tiny(&writer, rpcOptions, *header, contextStack, p_input);
-    if (stealRpcOptions) {
-      fbthrift_send_tiny(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_tiny(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_tiny(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int8_t p_input) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_tiny_pargs args;
+    args.get<0>().value = &p_input;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "tiny",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_tiny(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_input, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_tiny(rpcOptions, *header, contextStack, p_input);
+  if (stealRpcOptions) {
+    fbthrift_send_tiny(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_tiny(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::tinyCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -2419,15 +1825,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::small(apache::thrift:
   fbthrift_serialize_and_send_small(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_small(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_input, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_small(&writer, rpcOptions, *header, contextStack, p_input);
-    if (stealRpcOptions) {
-      fbthrift_send_small(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_small(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_small(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_input) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_small_pargs args;
+    args.get<0>().value = &p_input;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "small",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_small(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_input, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_small(rpcOptions, *header, contextStack, p_input);
+  if (stealRpcOptions) {
+    fbthrift_send_small(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_small(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::smallCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -2582,15 +2005,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::big(apache::thrift::R
   fbthrift_serialize_and_send_big(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_big(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_input, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_big(&writer, rpcOptions, *header, contextStack, p_input);
-    if (stealRpcOptions) {
-      fbthrift_send_big(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_big(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_big(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_input) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_big_pargs args;
+    args.get<0>().value = &p_input;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "big",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_big(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_input, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_big(rpcOptions, *header, contextStack, p_input);
+  if (stealRpcOptions) {
+    fbthrift_send_big(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_big(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::bigCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -2745,15 +2185,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::two(apache::thrift::R
   fbthrift_serialize_and_send_two(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_input);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_two(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_input, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_two(&writer, rpcOptions, *header, contextStack, p_input);
-    if (stealRpcOptions) {
-      fbthrift_send_two(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_two(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_two(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, double p_input) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_two_pargs args;
+    args.get<0>().value = &p_input;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "two",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_two(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_input, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_two(rpcOptions, *header, contextStack, p_input);
+  if (stealRpcOptions) {
+    fbthrift_send_two(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_two(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::twoCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -2908,15 +2365,31 @@ void apache::thrift::Client<::py3::simple::SimpleService>::expected_exception(ap
   fbthrift_serialize_and_send_expected_exception(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_expected_exception(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_expected_exception(&writer, rpcOptions, *header, contextStack);
-    if (stealRpcOptions) {
-      fbthrift_send_expected_exception(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_expected_exception(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_expected_exception(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_expected_exception_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "expected_exception",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_expected_exception(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_expected_exception(rpcOptions, *header, contextStack);
+  if (stealRpcOptions) {
+    fbthrift_send_expected_exception(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_expected_exception(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::expected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -3069,15 +2542,31 @@ void apache::thrift::Client<::py3::simple::SimpleService>::unexpected_exception(
   fbthrift_serialize_and_send_unexpected_exception(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_unexpected_exception(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_unexpected_exception(&writer, rpcOptions, *header, contextStack);
-    if (stealRpcOptions) {
-      fbthrift_send_unexpected_exception(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_unexpected_exception(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_unexpected_exception(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_unexpected_exception_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "unexpected_exception",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_unexpected_exception(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_unexpected_exception(rpcOptions, *header, contextStack);
+  if (stealRpcOptions) {
+    fbthrift_send_unexpected_exception(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_unexpected_exception(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::unexpected_exceptionCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -3232,15 +2721,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_i16_list(apache::
   fbthrift_serialize_and_send_sum_i16_list(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int16_t>& p_numbers, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_sum_i16_list(&writer, rpcOptions, *header, contextStack, p_numbers);
-    if (stealRpcOptions) {
-      fbthrift_send_sum_i16_list(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_sum_i16_list(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_i16_list(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int16_t>& p_numbers) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_sum_i16_list_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::int16_t>*>(&p_numbers);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "sum_i16_list",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_i16_list(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int16_t>& p_numbers, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_sum_i16_list(rpcOptions, *header, contextStack, p_numbers);
+  if (stealRpcOptions) {
+    fbthrift_send_sum_i16_list(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_sum_i16_list(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::sum_i16_listCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -3395,15 +2901,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_i32_list(apache::
   fbthrift_serialize_and_send_sum_i32_list(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int32_t>& p_numbers, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_sum_i32_list(&writer, rpcOptions, *header, contextStack, p_numbers);
-    if (stealRpcOptions) {
-      fbthrift_send_sum_i32_list(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_sum_i32_list(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_i32_list(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int32_t>& p_numbers) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_sum_i32_list_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::int32_t>*>(&p_numbers);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "sum_i32_list",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_i32_list(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int32_t>& p_numbers, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_sum_i32_list(rpcOptions, *header, contextStack, p_numbers);
+  if (stealRpcOptions) {
+    fbthrift_send_sum_i32_list(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_sum_i32_list(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::sum_i32_listCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -3558,15 +3081,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_i64_list(apache::
   fbthrift_serialize_and_send_sum_i64_list(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_numbers, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_sum_i64_list(&writer, rpcOptions, *header, contextStack, p_numbers);
-    if (stealRpcOptions) {
-      fbthrift_send_sum_i64_list(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_sum_i64_list(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_i64_list(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::int64_t>& p_numbers) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_sum_i64_list_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::int64_t>*>(&p_numbers);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "sum_i64_list",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_i64_list(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_numbers, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_sum_i64_list(rpcOptions, *header, contextStack, p_numbers);
+  if (stealRpcOptions) {
+    fbthrift_send_sum_i64_list(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_sum_i64_list(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::sum_i64_listCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -3721,15 +3261,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::concat_many(apache::t
   fbthrift_serialize_and_send_concat_many(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_concat_many(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_concat_many(&writer, rpcOptions, *header, contextStack, p_words);
-    if (stealRpcOptions) {
-      fbthrift_send_concat_many(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_concat_many(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_concat_many(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_concat_many_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_words);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "concat_many",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_concat_many(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_concat_many(rpcOptions, *header, contextStack, p_words);
+  if (stealRpcOptions) {
+    fbthrift_send_concat_many(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_concat_many(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::concat_manyCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -3882,15 +3439,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::count_structs(apache:
   fbthrift_serialize_and_send_count_structs(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_items);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_count_structs(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_count_structs(&writer, rpcOptions, *header, contextStack, p_items);
-    if (stealRpcOptions) {
-      fbthrift_send_count_structs(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_count_structs(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_count_structs(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::py3::simple::SimpleStruct>& p_items) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_count_structs_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::py3::simple::SimpleStruct>*>(&p_items);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "count_structs",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_count_structs(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::SimpleStruct>& p_items, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_count_structs(rpcOptions, *header, contextStack, p_items);
+  if (stealRpcOptions) {
+    fbthrift_send_count_structs(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_count_structs(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::count_structsCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -4045,15 +3619,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_set(apache::thrif
   fbthrift_serialize_and_send_sum_set(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_numbers);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_set(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::int32_t>& p_numbers, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_sum_set(&writer, rpcOptions, *header, contextStack, p_numbers);
-    if (stealRpcOptions) {
-      fbthrift_send_sum_set(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_sum_set(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_set(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::std::int32_t>& p_numbers) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_sum_set_pargs args;
+    args.get<0>().value = const_cast<::std::set<::std::int32_t>*>(&p_numbers);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "sum_set",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_set(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::int32_t>& p_numbers, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_sum_set(rpcOptions, *header, contextStack, p_numbers);
+  if (stealRpcOptions) {
+    fbthrift_send_sum_set(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_sum_set(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::sum_setCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -4208,15 +3799,33 @@ void apache::thrift::Client<::py3::simple::SimpleService>::contains_word(apache:
   fbthrift_serialize_and_send_contains_word(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words, p_word);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_contains_word(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_contains_word(&writer, rpcOptions, *header, contextStack, p_words, p_word);
-    if (stealRpcOptions) {
-      fbthrift_send_contains_word(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_contains_word(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_contains_word(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::set<::std::string>& p_words, const ::std::string& p_word) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_contains_word_pargs args;
+    args.get<0>().value = const_cast<::std::set<::std::string>*>(&p_words);
+    args.get<1>().value = const_cast<::std::string*>(&p_word);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "contains_word",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_contains_word(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_words, const ::std::string& p_word, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_contains_word(rpcOptions, *header, contextStack, p_words, p_word);
+  if (stealRpcOptions) {
+    fbthrift_send_contains_word(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_contains_word(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::contains_wordCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -4371,15 +3980,33 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_map_value(apache:
   fbthrift_serialize_and_send_get_map_value(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words, p_key);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_map_value(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_map_value(&writer, rpcOptions, *header, contextStack, p_words, p_key);
-    if (stealRpcOptions) {
-      fbthrift_send_get_map_value(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_map_value(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_map_value(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_map_value_pargs args;
+    args.get<0>().value = const_cast<::std::map<::std::string, ::std::string>*>(&p_words);
+    args.get<1>().value = const_cast<::std::string*>(&p_key);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_map_value",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_map_value(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::string>& p_words, const ::std::string& p_key, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_map_value(rpcOptions, *header, contextStack, p_words, p_key);
+  if (stealRpcOptions) {
+    fbthrift_send_get_map_value(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_map_value(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_map_valueCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -4532,15 +4159,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::map_length(apache::th
   fbthrift_serialize_and_send_map_length(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_items);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_map_length(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_map_length(&writer, rpcOptions, *header, contextStack, p_items);
-    if (stealRpcOptions) {
-      fbthrift_send_map_length(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_map_length(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_map_length(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_map_length_pargs args;
+    args.get<0>().value = const_cast<::std::map<::std::string, ::py3::simple::SimpleStruct>*>(&p_items);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "map_length",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_map_length(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& p_items, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_map_length(rpcOptions, *header, contextStack, p_items);
+  if (stealRpcOptions) {
+    fbthrift_send_map_length(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_map_length(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::map_lengthCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -4695,15 +4339,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::sum_map_values(apache
   fbthrift_serialize_and_send_sum_map_values(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_items);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_map_values(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int16_t>& p_items, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_sum_map_values(&writer, rpcOptions, *header, contextStack, p_items);
-    if (stealRpcOptions) {
-      fbthrift_send_sum_map_values(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_sum_map_values(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_sum_map_values(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::int16_t>& p_items) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_sum_map_values_pargs args;
+    args.get<0>().value = const_cast<::std::map<::std::string, ::std::int16_t>*>(&p_items);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "sum_map_values",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_sum_map_values(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int16_t>& p_items, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_sum_map_values(rpcOptions, *header, contextStack, p_items);
+  if (stealRpcOptions) {
+    fbthrift_send_sum_map_values(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_sum_map_values(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::sum_map_valuesCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -4858,15 +4519,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::complex_sum_i32(apach
   fbthrift_serialize_and_send_complex_sum_i32(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_counter);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_complex_sum_i32(&writer, rpcOptions, *header, contextStack, p_counter);
-    if (stealRpcOptions) {
-      fbthrift_send_complex_sum_i32(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_complex_sum_i32(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_complex_sum_i32(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::ComplexStruct& p_counter) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_complex_sum_i32_pargs args;
+    args.get<0>().value = const_cast<::py3::simple::ComplexStruct*>(&p_counter);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "complex_sum_i32",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_complex_sum_i32(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_complex_sum_i32(rpcOptions, *header, contextStack, p_counter);
+  if (stealRpcOptions) {
+    fbthrift_send_complex_sum_i32(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_complex_sum_i32(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::complex_sum_i32Ctx(apache::thrift::RpcOptions* rpcOptions) {
@@ -5021,15 +4699,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::repeat_name(apache::t
   fbthrift_serialize_and_send_repeat_name(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_counter);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_repeat_name(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_repeat_name(&writer, rpcOptions, *header, contextStack, p_counter);
-    if (stealRpcOptions) {
-      fbthrift_send_repeat_name(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_repeat_name(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_repeat_name(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::ComplexStruct& p_counter) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_repeat_name_pargs args;
+    args.get<0>().value = const_cast<::py3::simple::ComplexStruct*>(&p_counter);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "repeat_name",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_repeat_name(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::ComplexStruct& p_counter, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_repeat_name(rpcOptions, *header, contextStack, p_counter);
+  if (stealRpcOptions) {
+    fbthrift_send_repeat_name(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_repeat_name(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::repeat_nameCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -5182,15 +4877,31 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_struct(apache::th
   fbthrift_serialize_and_send_get_struct(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_struct(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_struct(&writer, rpcOptions, *header, contextStack);
-    if (stealRpcOptions) {
-      fbthrift_send_get_struct(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_struct(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_struct(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_struct_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_struct",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_struct(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_struct(rpcOptions, *header, contextStack);
+  if (stealRpcOptions) {
+    fbthrift_send_get_struct(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_struct(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_structCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -5343,15 +5054,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::fib(apache::thrift::R
   fbthrift_serialize_and_send_fib(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_n);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_fib(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_n, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_fib(&writer, rpcOptions, *header, contextStack, p_n);
-    if (stealRpcOptions) {
-      fbthrift_send_fib(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_fib(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_fib(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_n) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_fib_pargs args;
+    args.get<0>().value = &p_n;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "fib",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_fib(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_n, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_fib(rpcOptions, *header, contextStack, p_n);
+  if (stealRpcOptions) {
+    fbthrift_send_fib(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_fib(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::fibCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -5504,15 +5232,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::unique_words(apache::
   fbthrift_serialize_and_send_unique_words(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_unique_words(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_unique_words(&writer, rpcOptions, *header, contextStack, p_words);
-    if (stealRpcOptions) {
-      fbthrift_send_unique_words(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_unique_words(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_unique_words(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_unique_words_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_words);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "unique_words",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_unique_words(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_unique_words(rpcOptions, *header, contextStack, p_words);
+  if (stealRpcOptions) {
+    fbthrift_send_unique_words(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_unique_words(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::unique_wordsCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -5665,15 +5410,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::words_count(apache::t
   fbthrift_serialize_and_send_words_count(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_words);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_words_count(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_words_count(&writer, rpcOptions, *header, contextStack, p_words);
-    if (stealRpcOptions) {
-      fbthrift_send_words_count(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_words_count(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_words_count(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_words) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_words_count_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_words);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "words_count",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_words_count(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_words, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_words_count(rpcOptions, *header, contextStack, p_words);
+  if (stealRpcOptions) {
+    fbthrift_send_words_count(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_words_count(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::words_countCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -5826,15 +5588,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::set_enum(apache::thri
   fbthrift_serialize_and_send_set_enum(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_in_enum);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_set_enum(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::py3::simple::AnEnum p_in_enum, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_set_enum(&writer, rpcOptions, *header, contextStack, p_in_enum);
-    if (stealRpcOptions) {
-      fbthrift_send_set_enum(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_set_enum(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_set_enum(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::py3::simple::AnEnum p_in_enum) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_set_enum_pargs args;
+    args.get<0>().value = &p_in_enum;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "set_enum",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_set_enum(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::py3::simple::AnEnum p_in_enum, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_set_enum(rpcOptions, *header, contextStack, p_in_enum);
+  if (stealRpcOptions) {
+    fbthrift_send_set_enum(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_set_enum(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::set_enumCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -5989,15 +5768,33 @@ void apache::thrift::Client<::py3::simple::SimpleService>::list_of_lists(apache:
   fbthrift_serialize_and_send_list_of_lists(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_num_lists, p_num_items);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_list_of_lists(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_list_of_lists(&writer, rpcOptions, *header, contextStack, p_num_lists, p_num_items);
-    if (stealRpcOptions) {
-      fbthrift_send_list_of_lists(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_list_of_lists(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_list_of_lists(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_list_of_lists_pargs args;
+    args.get<0>().value = &p_num_lists;
+    args.get<1>().value = &p_num_items;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "list_of_lists",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_list_of_lists(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_list_of_lists(rpcOptions, *header, contextStack, p_num_lists, p_num_items);
+  if (stealRpcOptions) {
+    fbthrift_send_list_of_lists(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_list_of_lists(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::list_of_listsCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -6150,15 +5947,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::word_character_freque
   fbthrift_serialize_and_send_word_character_frequency(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_sentence);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_sentence, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_word_character_frequency(&writer, rpcOptions, *header, contextStack, p_sentence);
-    if (stealRpcOptions) {
-      fbthrift_send_word_character_frequency(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_word_character_frequency(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_word_character_frequency(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_sentence) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_word_character_frequency_pargs args;
+    args.get<0>().value = const_cast<::std::string*>(&p_sentence);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "word_character_frequency",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_word_character_frequency(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_sentence, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_word_character_frequency(rpcOptions, *header, contextStack, p_sentence);
+  if (stealRpcOptions) {
+    fbthrift_send_word_character_frequency(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_word_character_frequency(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::word_character_frequencyCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -6311,15 +6125,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::list_of_sets(apache::
   fbthrift_serialize_and_send_list_of_sets(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_some_words);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_list_of_sets(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_some_words, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_list_of_sets(&writer, rpcOptions, *header, contextStack, p_some_words);
-    if (stealRpcOptions) {
-      fbthrift_send_list_of_sets(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_list_of_sets(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_list_of_sets(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_some_words) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_list_of_sets_pargs args;
+    args.get<0>().value = const_cast<::std::string*>(&p_some_words);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "list_of_sets",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_list_of_sets(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_some_words, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_list_of_sets(rpcOptions, *header, contextStack, p_some_words);
+  if (stealRpcOptions) {
+    fbthrift_send_list_of_sets(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_list_of_sets(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::list_of_setsCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -6472,15 +6303,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::nested_map_argument(a
   fbthrift_serialize_and_send_nested_map_argument(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_struct_map);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_nested_map_argument(&writer, rpcOptions, *header, contextStack, p_struct_map);
-    if (stealRpcOptions) {
-      fbthrift_send_nested_map_argument(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_nested_map_argument(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_nested_map_argument(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_nested_map_argument_pargs args;
+    args.get<0>().value = const_cast<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>*>(&p_struct_map);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "nested_map_argument",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_nested_map_argument(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& p_struct_map, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_nested_map_argument(rpcOptions, *header, contextStack, p_struct_map);
+  if (stealRpcOptions) {
+    fbthrift_send_nested_map_argument(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_nested_map_argument(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::nested_map_argumentCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -6635,15 +6483,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::make_sentence(apache:
   fbthrift_serialize_and_send_make_sentence(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_word_chars);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_make_sentence(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_make_sentence(&writer, rpcOptions, *header, contextStack, p_word_chars);
-    if (stealRpcOptions) {
-      fbthrift_send_make_sentence(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_make_sentence(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_make_sentence(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::vector<::std::string>>& p_word_chars) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_make_sentence_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::vector<::std::string>>*>(&p_word_chars);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "make_sentence",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_make_sentence(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::string>>& p_word_chars, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_make_sentence(rpcOptions, *header, contextStack, p_word_chars);
+  if (stealRpcOptions) {
+    fbthrift_send_make_sentence(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_make_sentence(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::make_sentenceCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -6796,15 +6661,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_union(apache::thr
   fbthrift_serialize_and_send_get_union(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_sets);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_union(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_union(&writer, rpcOptions, *header, contextStack, p_sets);
-    if (stealRpcOptions) {
-      fbthrift_send_get_union(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_union(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_union(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::set<::std::int32_t>>& p_sets) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_union_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::set<::std::int32_t>>*>(&p_sets);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_union",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_union(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::set<::std::int32_t>>& p_sets, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_union(rpcOptions, *header, contextStack, p_sets);
+  if (stealRpcOptions) {
+    fbthrift_send_get_union(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_union(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_unionCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -6957,15 +6839,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_keys(apache::thri
   fbthrift_serialize_and_send_get_keys(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_string_map);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_keys(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_keys(&writer, rpcOptions, *header, contextStack, p_string_map);
-    if (stealRpcOptions) {
-      fbthrift_send_get_keys(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_keys(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_keys(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_keys_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::map<::std::string, ::std::string>>*>(&p_string_map);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_keys",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_keys(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::map<::std::string, ::std::string>>& p_string_map, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_keys(rpcOptions, *header, contextStack, p_string_map);
+  if (stealRpcOptions) {
+    fbthrift_send_get_keys(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_keys(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_keysCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -7118,15 +7017,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::lookup_double(apache:
   fbthrift_serialize_and_send_lookup_double(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_key);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_lookup_double(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_key, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_lookup_double(&writer, rpcOptions, *header, contextStack, p_key);
-    if (stealRpcOptions) {
-      fbthrift_send_lookup_double(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_lookup_double(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_lookup_double(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int32_t p_key) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_lookup_double_pargs args;
+    args.get<0>().value = &p_key;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "lookup_double",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_lookup_double(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_key, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_lookup_double(rpcOptions, *header, contextStack, p_key);
+  if (stealRpcOptions) {
+    fbthrift_send_lookup_double(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_lookup_double(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::lookup_doubleCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -7281,15 +7197,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::retrieve_binary(apach
   fbthrift_serialize_and_send_retrieve_binary(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_something);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_something, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_retrieve_binary(&writer, rpcOptions, *header, contextStack, p_something);
-    if (stealRpcOptions) {
-      fbthrift_send_retrieve_binary(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_retrieve_binary(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_retrieve_binary(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_something) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_retrieve_binary_pargs args;
+    args.get<0>().value = const_cast<::std::string*>(&p_something);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "retrieve_binary",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_retrieve_binary(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_something, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_retrieve_binary(rpcOptions, *header, contextStack, p_something);
+  if (stealRpcOptions) {
+    fbthrift_send_retrieve_binary(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_retrieve_binary(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::retrieve_binaryCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -7442,15 +7375,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::contain_binary(apache
   fbthrift_serialize_and_send_contain_binary(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_binaries);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_contain_binary(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_binaries, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_contain_binary(&writer, rpcOptions, *header, contextStack, p_binaries);
-    if (stealRpcOptions) {
-      fbthrift_send_contain_binary(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_contain_binary(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_contain_binary(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::std::string>& p_binaries) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_contain_binary_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::std::string>*>(&p_binaries);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "contain_binary",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_contain_binary(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::string>& p_binaries, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_contain_binary(rpcOptions, *header, contextStack, p_binaries);
+  if (stealRpcOptions) {
+    fbthrift_send_contain_binary(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_contain_binary(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::contain_binaryCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -7603,15 +7553,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::contain_enum(apache::
   fbthrift_serialize_and_send_contain_enum(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_the_enum);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_contain_enum(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_contain_enum(&writer, rpcOptions, *header, contextStack, p_the_enum);
-    if (stealRpcOptions) {
-      fbthrift_send_contain_enum(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_contain_enum(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_contain_enum(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::vector<::py3::simple::AnEnum>& p_the_enum) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_contain_enum_pargs args;
+    args.get<0>().value = const_cast<::std::vector<::py3::simple::AnEnum>*>(&p_the_enum);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "contain_enum",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_contain_enum(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::py3::simple::AnEnum>& p_the_enum, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_contain_enum(rpcOptions, *header, contextStack, p_the_enum);
+  if (stealRpcOptions) {
+    fbthrift_send_contain_enum(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_contain_enum(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::contain_enumCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -7764,15 +7731,32 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_binary_union_stru
   fbthrift_serialize_and_send_get_binary_union_struct(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_u);
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::BinaryUnion& p_u, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_binary_union_struct(&writer, rpcOptions, *header, contextStack, p_u);
-    if (stealRpcOptions) {
-      fbthrift_send_get_binary_union_struct(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_binary_union_struct(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_binary_union_struct(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::py3::simple::BinaryUnion& p_u) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_binary_union_struct_pargs args;
+    args.get<0>().value = const_cast<::py3::simple::BinaryUnion*>(&p_u);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_binary_union_struct",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_binary_union_struct(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::BinaryUnion& p_u, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_binary_union_struct(rpcOptions, *header, contextStack, p_u);
+  if (stealRpcOptions) {
+    fbthrift_send_get_binary_union_struct(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_binary_union_struct(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_binary_union_structCtx(apache::thrift::RpcOptions* rpcOptions) {
@@ -7925,15 +7909,31 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hidden(apa
   fbthrift_serialize_and_send_get_struct_hidden(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
-  apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& writer) {
-    apache::thrift::SerializedRequest request = fbthrift_serialize_get_struct_hidden(&writer, rpcOptions, *header, contextStack);
-    if (stealRpcOptions) {
-      fbthrift_send_get_struct_hidden(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
-    } else {
-      fbthrift_send_get_struct_hidden(std::move(request), rpcOptions, std::move(header), std::move(callback));
-    }
+apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_get_struct_hidden(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::py3::simple::SimpleService_get_struct_hidden_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "get_struct_hidden",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
   });
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::fbthrift_serialize_and_send_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_get_struct_hidden(rpcOptions, *header, contextStack);
+  if (stealRpcOptions) {
+    fbthrift_send_get_struct_hidden(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+  } else {
+    fbthrift_send_get_struct_hidden(std::move(request), rpcOptions, std::move(header), std::move(callback));
+  }
 }
 
 std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hiddenCtx(apache::thrift::RpcOptions* rpcOptions) {

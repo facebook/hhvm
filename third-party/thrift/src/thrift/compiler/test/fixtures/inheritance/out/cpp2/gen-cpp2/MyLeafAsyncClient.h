@@ -147,8 +147,7 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
   /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   virtual folly::exception_wrapper recv_instance_wrapped_do_leaf(::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_do_leaf(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  apache::thrift::SerializedRequest fbthrift_serialize_do_leaf(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_do_leaf(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_leafCtx(apache::thrift::RpcOptions* rpcOptions);

@@ -149,8 +149,7 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
   virtual folly::exception_wrapper recv_instance_wrapped_get_seven(::std::int32_t& _return, ::apache::thrift::ClientReceiveState& state);
  private:
-  template <typename Protocol_>
-  apache::thrift::SerializedRequest fbthrift_serialize_get_seven(Protocol_* prot, const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  apache::thrift::SerializedRequest fbthrift_serialize_get_seven(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_get_seven(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_sevenCtx(apache::thrift::RpcOptions* rpcOptions);

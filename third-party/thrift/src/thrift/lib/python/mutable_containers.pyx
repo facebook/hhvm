@@ -527,6 +527,14 @@ cdef class MutableMap:
         internal_value = self._val_typeinfo.to_internal_data(value)
         self._map_data[internal_key] = internal_value
 
+    def __delitem__(self, key):
+        try:
+            internal_key = self._key_typeinfo.to_internal_data(key)
+        except TypeError:
+            raise KeyError(f"{key}")
+
+        del self._map_data[internal_key]
+
     def __deepcopy__(self, memo):
         return MutableMap(self._key_typeinfo, self._val_typeinfo, copy.deepcopy(self._map_data, memo))
 

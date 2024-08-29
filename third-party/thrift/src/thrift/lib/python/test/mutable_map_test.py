@@ -107,6 +107,25 @@ class MutableMapTest(unittest.TestCase):
         with self.assertRaises(OverflowError):
             mutable_map["max"] = 2**31
 
+    def test_delitem(self) -> None:
+        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map["A"] = 65
+        mutable_map["a"] = 97
+        self.assertEqual({"A": 65, "a": 97}, mutable_map)
+
+        with self.assertRaisesRegex(KeyError, "c"):
+            del mutable_map["c"]
+
+        # Key is not expected type but MutableMap raises key error
+        with self.assertRaisesRegex(KeyError, "1"):
+            del mutable_map[1]
+
+        self.assertEqual({"A": 65, "a": 97}, mutable_map)
+        del mutable_map["a"]
+        self.assertEqual({"A": 65}, mutable_map)
+        del mutable_map["A"]
+        self.assertEqual({}, mutable_map)
+
     def test_getitem(self) -> None:
         mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
         mutable_map["A"] = 65

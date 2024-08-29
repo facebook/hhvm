@@ -9,7 +9,7 @@
 
 #include <cstddef>
 
-#include "mcrouter/McSpoolUtils.h"
+#include "mcrouter/McDistributionUtils.h"
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/ProxyBase.h"
 #include "mcrouter/ProxyRequestContextTyped.h"
@@ -27,8 +27,6 @@ struct DistributionRouteSettings {
 };
 
 constexpr std::string_view kAsynclogDistributionEndpoint = "0.0.0.0";
-constexpr std::string_view kBroadcastRolloutMessage = "DistributionRoute";
-constexpr std::string_view kDistributionTargetMarkerForLog = "dl_distribution";
 
 /**
  * The route handle is used to route cross-region requests via DL
@@ -105,14 +103,14 @@ class DistributionRoute {
     DestinationRequestCtx dctx(nowUs());
     onBeforeDistribution(finalReq, ctx, *finalReq.bucketId_ref(), dctx);
 
-    auto axonLogRes = spoolAxonProxy(
+    auto axonLogRes = distributeDeleteRequest(
         finalReq,
         axonCtx,
         *bucketId,
+        invalidation::DistributionType::Distribution,
         std::move(
-            distributionRegion.value().empty()
-                ? std::string(kBroadcastRolloutMessage)
-                : *distributionRegion));
+            distributionRegion.value().empty() ? std::string(kBroadcast)
+                                               : *distributionRegion));
 
     auto reply = axonLogRes ? createReply(DefaultReply, finalReq)
                             : McDeleteReply(carbon::Result::LOCAL_ERROR);

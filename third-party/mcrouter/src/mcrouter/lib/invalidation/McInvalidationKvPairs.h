@@ -7,8 +7,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
@@ -22,14 +24,20 @@ constexpr uint32_t getMcInvalidationVersion() {
   // invalidation format, i.e. add/modify/remove key-values.
   // When the version is bumped it is essential to make sure that
   // the write/read logic supports both previous and current versions.
-  return 1;
+  return 2;
 }
+
+enum class DistributionOperation : uint8_t { Delete, Write };
+enum class DistributionType : uint8_t { Async, Distribution };
 
 constexpr std::string_view kSerialized("serialized");
 constexpr std::string_view kRegion("region");
 constexpr std::string_view kVersion("version");
 constexpr std::string_view kPool("pool");
 constexpr std::string_view kMessage("message");
+constexpr std::string_view kType("type");
+constexpr std::string_view kOperation("op");
+constexpr std::string_view kSourceRegion("src_region");
 
 /**
  * Functions to generate/validate key-value pairs for a DL record.
@@ -41,32 +49,37 @@ class McInvalidationKvPairs {
   /**
    * Api for invalidations writer.
    *
-   * Create a set of key-value pairs
+   * Create a set of key-value pairs from the input data,
    * in order to write them to DL.
    *
-   * Provided data must contain:
-   * 1. Serialized delete request (string)
-   * 2. Optional destination region
-   * 3. Optional destination Memcache pool
-   * 4. Optional free-format message string
+   * @param serialized Serialized request (string)
+   * @param region Destination region
+   * @param pool Destination pool (e.g. main|tfh)
+   * @param message Free-format message string
+   * @param type Type of the distribution (async/distribution)
+   * @param operation Operation of the serialized entity (delete/write)
+   * @param srcRegion Source (current) region
+   *
    */
   static KeyValuePairs createAxonKvPairs(
-      const std::string& serialized,
-      std::optional<std::string> regionOpt = std::nullopt,
-      std::optional<std::string> poolOpt = std::nullopt,
-      std::optional<std::string> messageOpt = std::nullopt);
+      std::string serialized,
+      std::optional<std::string> region = std::nullopt,
+      std::optional<std::string> pool = std::nullopt,
+      std::optional<std::string> message = std::nullopt,
+      DistributionType type = DistributionType::Async,
+      DistributionOperation operation = DistributionOperation::Delete,
+      std::optional<std::string> srcRegion = std::nullopt);
 
   /**
    * Api for invalidations reader.
    *
    * Validate key-value pairs set coming from the DL.
    *
-   * Key-values must contain:
-   * 1. "serialized" -> serialized delete request
-   * 2. "version" -> Invalidation format version
-   * 3. Optional free-format message string
+   * Key-values at minimum must contain:
+   * @param serialized Serialized delete request
+   * @param version Invalidation format version
    *
-   * Returns false if the input is insufficient/incorrect
+   * @return True if the input is valid, False otherwise.
    */
   static bool validateAxonKvPairs(const KeyValuePairs& keyValues);
 

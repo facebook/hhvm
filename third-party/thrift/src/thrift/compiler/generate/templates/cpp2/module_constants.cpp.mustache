@@ -73,6 +73,7 @@ namespace {{program:name}}_constants {
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
 
 {{#program:has_schema?}}
+#if FBTHRIFT_HAVE_SCHEMA
 ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
   static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> includes = {
     {{#program:transitive_schema_initializers}}
@@ -81,6 +82,7 @@ namespace {{program:name}}_constants {
   };
   return ::folly::range(includes);
 }
+#endif
 {{/program:has_schema?}}
 
 } // namespace {{program:name}}_constants

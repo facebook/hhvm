@@ -33,6 +33,7 @@ namespace module_constants {
 }
 
 
+#if FBTHRIFT_HAVE_SCHEMA
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_2926f41c3790ef15_includes() {
   static const ::std::array<::std::string_view, 2> includes = {
     _fbthrift_schema_2926f41c3790ef15(),
@@ -40,6 +41,7 @@ namespace module_constants {
   };
   return ::folly::range(includes);
 }
+#endif
 
 } // namespace module_constants
 } // namespace cpp2

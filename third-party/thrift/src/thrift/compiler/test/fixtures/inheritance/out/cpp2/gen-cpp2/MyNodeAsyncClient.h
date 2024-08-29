@@ -153,6 +153,7 @@ class Client<::cpp2::MyNode> : public ::cpp2::MyRootAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_midCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_do_mid(apache::thrift::RpcOptions& rpcOptions);
+  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_do_mid(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
 };
 

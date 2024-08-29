@@ -148,6 +148,7 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> doBlandCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_doBland(apache::thrift::RpcOptions& rpcOptions);
+  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_doBland(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
   virtual void doRaise(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -266,6 +267,7 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> doRaiseCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_doRaise(apache::thrift::RpcOptions& rpcOptions);
+  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_doRaise(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
   virtual void get200(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -386,6 +388,7 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get200Ctx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::string> fbthrift_semifuture_get200(apache::thrift::RpcOptions& rpcOptions);
+  FOLLY_NOINLINE folly::SemiFuture<::std::string> fbthrift_semifuture_get200(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::std::string>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
   virtual void get500(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -506,6 +509,7 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get500Ctx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::string> fbthrift_semifuture_get500(apache::thrift::RpcOptions& rpcOptions);
+  FOLLY_NOINLINE folly::SemiFuture<::std::string> fbthrift_semifuture_get500(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::std::string>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
 };
 

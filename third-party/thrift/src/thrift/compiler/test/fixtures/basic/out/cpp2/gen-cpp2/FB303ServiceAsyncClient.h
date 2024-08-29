@@ -154,6 +154,7 @@ class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::Gen
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> simple_rpcCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> fbthrift_semifuture_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter);
+  FOLLY_NOINLINE folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> fbthrift_semifuture_simple_rpc(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::test::fixtures::basic::ReservedKeyword>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int32_t p_int_parameter);
  public:
 };
 

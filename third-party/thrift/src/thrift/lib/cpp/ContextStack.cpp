@@ -372,6 +372,15 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
         std::move(exceptions)));
   }
 }
+
+folly::SemiFuture<folly::Unit>
+ContextStack::semifuture_processClientInterceptorsOnRequest() {
+  return processClientInterceptorsOnRequest().semi();
+}
+folly::SemiFuture<folly::Unit>
+ContextStack::semifuture_processClientInterceptorsOnResponse() {
+  return processClientInterceptorsOnResponse().semi();
+}
 #endif // FOLLY_HAS_COROUTINES
 
 void*& ContextStack::contextAt(size_t i) {

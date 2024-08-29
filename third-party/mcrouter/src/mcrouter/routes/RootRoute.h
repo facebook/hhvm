@@ -97,15 +97,32 @@ class RootRoute {
     return reply;
   }
 
+  McSetReply route(const McSetRequest& req) const {
+    return routeAndDistribute(
+        req, enableSetDistribution_, enableCrossRegionSetRpc_);
+  }
+
   McDeleteReply route(const McDeleteRequest& req) const {
-    // If distribution is enabled, route deletes to the default route where
+    return routeAndDistribute(
+        req, enableDeleteDistribution_, enableCrossRegionDeleteRpc_);
+  }
+
+  template <class Request>
+  typename std::enable_if<
+      folly::IsOneOf<Request, McDeleteRequest, McSetRequest>::value,
+      ReplyT<Request>>::type
+  routeAndDistribute(
+      const Request& req,
+      bool enableDistribution,
+      bool enableRpc) const {
+    // If distribution is enabled, route deletes/sets to the default route where
     // DistributionRoute will route cross region.
     //
-    // NOTE: if enableCrossRegionDeleteRpc flag is not set it defaults to true,
-    // the distribution step will be followed by a duplicating RPC step, and the
-    // return value will be the reply returned by the RPC step.
-    McDeleteReply reply;
-    if (enableDeleteDistribution_ && !req.key_ref()->routingPrefix().empty()) {
+    // NOTE: if enableCrossRegionRpc flag is not set it defaults to
+    // true, the distribution step will be followed by a duplicating RPC step,
+    // and the return value will be the reply returned by the RPC step.
+    ReplyT<Request> reply;
+    if (enableDistribution && !req.key_ref()->routingPrefix().empty()) {
       auto routingPrefix = RoutingPrefix(req.key_ref()->routingPrefix());
       if (routingPrefix.getRegion() != defaultRoute_.getRegion() &&
           req.key_ref()->routingPrefix() != kBroadcastPrefix) {
@@ -116,14 +133,14 @@ class RootRoute {
               return getTargetsAndRoute(defaultRoute_, req);
             });
 
-        if (!enableCrossRegionDeleteRpc_) {
+        if (!enableRpc) {
           return reply;
         }
       }
     }
     reply = getTargetsAndRoute(req.key_ref()->routingPrefix(), req);
     if (isErrorResult(*reply.result_ref()) && opts_.group_remote_errors) {
-      reply = McDeleteReply(carbon::Result::REMOTE_ERROR);
+      reply = ReplyT<Request>(carbon::Result::REMOTE_ERROR);
     }
     return reply;
   }
@@ -211,9 +228,9 @@ class RootRoute {
       const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
           rh,
       const Request& req) const {
-    // for deletes, we cannot assume that there's only one target
-    // even if it's a broadcast delete
-    if (!folly::IsOneOf<Request, McDeleteRequest>::value) {
+    // for deletes/sets, we cannot assume that there's only one target
+    // even when it's a broadcast
+    if (!folly::IsOneOf<Request, McDeleteRequest, McSetRequest>::value) {
       if (FOLLY_LIKELY(rh.size() == 1)) {
         return rh[0]->route(req);
       }
@@ -241,22 +258,49 @@ class RootRoute {
       const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
           rh,
       const McDeleteRequest& req) const {
-    if (enableCrossRegionDeleteRpc_ && rh.size() > 1) {
-      auto reqCopy = std::make_shared<const McDeleteRequest>(req);
+    return routeToAllImpl(
+        rh,
+        req,
+        enableCrossRegionDeleteRpc_,
+        enableDeleteDistribution_,
+        enableAsyncDlBroadcast_);
+  }
+
+  McSetReply routeToAll(
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
+      const McSetRequest& req) const {
+    return routeToAllImpl(
+        rh, req, enableCrossRegionSetRpc_, enableSetDistribution_, false);
+  }
+
+  template <class Request>
+  typename std::enable_if<
+      folly::IsOneOf<Request, McDeleteRequest, McSetRequest>::value,
+      ReplyT<Request>>::type
+  routeToAllImpl(
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
+      const Request& req,
+      bool enableRpc,
+      bool enableDistribution,
+      bool enableAsyncBroadcast) const {
+    if (enableRpc && rh.size() > 1) {
+      auto reqCopy = std::make_shared<const Request>(req);
       for (size_t i = 1, e = rh.size(); i < e; ++i) {
         auto r = rh[i];
         folly::fibers::addTask([r, reqCopy]() { r->route(*reqCopy); });
       }
     }
-    if (enableDeleteDistribution_ &&
+    if (enableDistribution &&
         req.key_ref()->routingPrefix() == kBroadcastPrefix) {
-      if (enableAsyncDlBroadcast_) {
-        auto reqCopy = std::make_shared<const McDeleteRequest>(req);
+      if (enableAsyncBroadcast) {
         auto r = rh[0];
-        folly::fibers::addTask([r, reqCopy]() {
-          fiber_local<RouterInfo>::setDistributionTargetRegion("");
-          r->route(*reqCopy);
-        });
+        folly::fibers::addTask(
+            [r, reqCopy = std::make_shared<const Request>(req)]() {
+              fiber_local<RouterInfo>::setDistributionTargetRegion("");
+              r->route(*reqCopy);
+            });
         // for async return carbon::Result::NOTFOUND:
         return createReply(DefaultReply, req);
       } else {

@@ -396,4 +396,136 @@ TEST_F(
   EXPECT_TRUE(getTestHandle(2)->distributionRegionInFiber.empty());
 }
 
+TEST_F(RootRouteTest, SetNoRoutingPrefixDistributionOnRpcOn) {
+  mockFiberContext();
+  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
+  RootRoute<MemcacheRouterInfo> rr{
+      *proxy,
+      getRouteSelectors(),
+      RootRouteRolloutOpts{
+          .enableSetDistribution = true,
+          .enableCrossRegionSetRpc = true,
+      }};
+  auto reply = rr.route(McSetRequest("setReq"));
+  EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
+  EXPECT_TRUE(getTestHandle(1)->saw_keys.empty());
+  EXPECT_TRUE(getTestHandle(2)->saw_keys.empty());
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys.size(), 1);
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys[0], "setReq");
+
+  EXPECT_TRUE(getTestHandle(0)->distributionRegionInFiber.empty());
+  EXPECT_TRUE(getTestHandle(1)->distributionRegionInFiber.empty());
+  EXPECT_TRUE(getTestHandle(2)->distributionRegionInFiber.empty());
+}
+
+TEST_F(RootRouteTest, SetBroadcastRoutingPrefixDistributionOnRpcOn) {
+  mockFiberContext();
+  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
+  RootRoute<MemcacheRouterInfo> rr{
+      *proxy,
+      getRouteSelectors(),
+      RootRouteRolloutOpts{
+          .enableSetDistribution = true,
+          .enableCrossRegionSetRpc = true,
+      }};
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() { rr.route(McSetRequest("/*/*/setReq")); }});
+  EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
+  EXPECT_FALSE(getTestHandle(1)->saw_keys.empty());
+  EXPECT_FALSE(getTestHandle(2)->saw_keys.empty());
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys.size(), 1);
+  EXPECT_EQ(getTestHandle(1)->saw_keys.size(), 1);
+  EXPECT_EQ(getTestHandle(2)->saw_keys.size(), 1);
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys[0], "/*/*/setReq");
+  EXPECT_EQ(getTestHandle(1)->saw_keys[0], "/*/*/setReq");
+  EXPECT_EQ(getTestHandle(2)->saw_keys[0], "/*/*/setReq");
+
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber.size(), 1);
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber[0], "");
+  EXPECT_TRUE(getTestHandle(1)->distributionRegionInFiber.empty());
+  EXPECT_TRUE(getTestHandle(2)->distributionRegionInFiber.empty());
+}
+
+TEST_F(RootRouteTest, SetDirectedRoutingPrefixDistributionOnRpcOn) {
+  mockFiberContext();
+  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
+  RootRoute<MemcacheRouterInfo> rr{
+      *proxy,
+      getRouteSelectors(),
+      RootRouteRolloutOpts{
+          .enableSetDistribution = true,
+          .enableCrossRegionSetRpc = true,
+      }};
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() { rr.route(McSetRequest("/virginia/c/setReq")); }});
+  EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
+  EXPECT_FALSE(getTestHandle(1)->saw_keys.empty());
+  EXPECT_TRUE(getTestHandle(2)->saw_keys.empty());
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys.size(), 1);
+  EXPECT_EQ(getTestHandle(1)->saw_keys.size(), 1);
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys[0], "/virginia/c/setReq");
+  EXPECT_EQ(getTestHandle(1)->saw_keys[0], "/virginia/c/setReq");
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber.size(), 1);
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber[0], "virginia");
+  EXPECT_TRUE(getTestHandle(1)->distributionRegionInFiber.empty());
+  EXPECT_TRUE(getTestHandle(2)->distributionRegionInFiber.empty());
+}
+
+TEST_F(RootRouteTest, SetBroadcastRoutingPrefixDistributionOnRpcOff) {
+  mockFiberContext();
+  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
+  RootRoute<MemcacheRouterInfo> rr{
+      *proxy,
+      getRouteSelectors(),
+      RootRouteRolloutOpts{
+          .enableSetDistribution = true,
+          .enableCrossRegionSetRpc = false,
+      }};
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() { rr.route(McSetRequest("/*/*/setReq")); }});
+  EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
+  EXPECT_TRUE(getTestHandle(1)->saw_keys.empty());
+  EXPECT_TRUE(getTestHandle(2)->saw_keys.empty());
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys.size(), 1);
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys[0], "/*/*/setReq");
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber.size(), 1);
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber[0], "");
+  EXPECT_TRUE(getTestHandle(1)->distributionRegionInFiber.empty());
+  EXPECT_TRUE(getTestHandle(2)->distributionRegionInFiber.empty());
+}
+
+TEST_F(RootRouteTest, SetDirectedRoutingPrefixDistributionOnRpcOff) {
+  mockFiberContext();
+  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
+  RootRoute<MemcacheRouterInfo> rr{
+      *proxy,
+      getRouteSelectors(),
+      RootRouteRolloutOpts{
+          .enableSetDistribution = true,
+          .enableCrossRegionSetRpc = false,
+      }};
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() { rr.route(McSetRequest("/virginia/c/setReq")); }});
+  EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
+  EXPECT_TRUE(getTestHandle(1)->saw_keys.empty());
+  EXPECT_TRUE(getTestHandle(2)->saw_keys.empty());
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys.size(), 1);
+
+  EXPECT_EQ(getTestHandle(0)->saw_keys[0], "/virginia/c/setReq");
+
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber.size(), 1);
+  EXPECT_EQ(getTestHandle(0)->distributionRegionInFiber[0], "virginia");
+  EXPECT_TRUE(getTestHandle(1)->distributionRegionInFiber.empty());
+  EXPECT_TRUE(getTestHandle(2)->distributionRegionInFiber.empty());
+}
+
 } // namespace facebook::memcache::mcrouter

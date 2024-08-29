@@ -21,11 +21,13 @@
 #include <thrift/lib/cpp2/server/ResourcePoolSet.h>
 
 namespace apache::thrift {
-
-void ResourcePoolSet::setResourcePoolInner(
+void ResourcePoolSet::setResourcePool(
     const ResourcePoolHandle& handle,
-    std::unique_ptr<ResourcePool>&& resourcePool,
-    std::optional<concurrency::PRIORITY> priorityHint_deprecated) {
+    std::unique_ptr<RequestPileInterface>&& requestPile,
+    std::shared_ptr<folly::Executor> executor,
+    std::unique_ptr<ConcurrencyControllerInterface>&& concurrencyController,
+    std::optional<concurrency::PRIORITY> priorityHint_deprecated,
+    bool joinExecutorOnStop) {
   std::lock_guard<std::mutex> lock(mutex_);
   if (locked_) {
     throw std::logic_error("Cannot setResourcePool() after lock()");
@@ -36,57 +38,16 @@ void ResourcePoolSet::setResourcePoolInner(
     LOG(ERROR) << "Cannot overwrite resourcePool:" << handle.name();
     throw std::invalid_argument("Cannot overwrite resourcePool");
   }
-  resourcePools_.at(handle.index()) = std::move(resourcePool);
+  std::unique_ptr<ResourcePool> pool{new ResourcePool{
+      std::move(requestPile),
+      executor,
+      std::move(concurrencyController),
+      handle.name(),
+      joinExecutorOnStop}};
+  resourcePools_.at(handle.index()) = std::move(pool);
 
   priorities_.resize(std::max(priorities_.size(), handle.index() + 1));
   priorities_.at(handle.index()) = priorityHint_deprecated;
-}
-
-void ResourcePoolSet::setResourcePool(
-    const ResourcePoolHandle& handle, bool joinExecutorOnStop) {
-  return setResourcePoolInner(
-      handle,
-      std::unique_ptr<ResourcePool>(
-          new ResourcePool(handle.name(), joinExecutorOnStop)),
-      std::nullopt);
-}
-
-void ResourcePoolSet::setResourcePool(
-    const ResourcePoolHandle& handle,
-    std::shared_ptr<folly::Executor> executor,
-    bool joinExecutorOnStop) {
-  if (executor == nullptr) {
-    LOG(ERROR) << "executor must not be nullptr in this API variant."
-               << std::endl;
-    throw std::invalid_argument(
-        "executor must not be nullptr in this API variant.");
-  }
-  return setResourcePoolInner(
-      handle,
-      std::unique_ptr<ResourcePool>(
-          new ResourcePool(executor, handle.name(), joinExecutorOnStop)),
-      std::nullopt);
-}
-
-void ResourcePoolSet::setResourcePool(
-    const ResourcePoolHandle& handle,
-    std::unique_ptr<RequestPileInterface>&& requestPile,
-    std::shared_ptr<folly::Executor> executor,
-    std::unique_ptr<ConcurrencyControllerInterface>&& concurrencyController,
-    std::optional<concurrency::PRIORITY> priorityHint_deprecated,
-    bool joinExecutorOnStop) {
-  // T196069257 added variants of this API that should be preferred when
-  // requestPile, executor, or concurrencyController are nullptr, but we still
-  // allow nullptrs in this variant to preserve the original behavior.
-  return setResourcePoolInner(
-      handle,
-      std::unique_ptr<ResourcePool>(new ResourcePool(
-          std::move(requestPile),
-          std::move(executor),
-          std::move(concurrencyController),
-          handle.name(),
-          joinExecutorOnStop)),
-      priorityHint_deprecated);
 }
 
 ResourcePoolHandle ResourcePoolSet::addResourcePool(

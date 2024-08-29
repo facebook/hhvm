@@ -1193,7 +1193,11 @@ void ThriftServer::ensureResourcePools() {
 
   if (!resourcePoolSet().hasResourcePool(ResourcePoolHandle::defaultSync())) {
     // Ensure there is a sync resource pool.
-    resourcePoolSet().setResourcePool(ResourcePoolHandle::defaultSync());
+    resourcePoolSet().setResourcePool(
+        ResourcePoolHandle::defaultSync(),
+        /*requestPile=*/nullptr,
+        /*executor=*/nullptr,
+        /*concurrencyController=*/nullptr);
   }
 
   // The user provided the resource pool. Use it as is.

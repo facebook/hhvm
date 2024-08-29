@@ -133,8 +133,10 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (FLAGS_no_resource_pile_or_cc) {
     server->resourcePoolSet().setResourcePool(
         apache::thrift::ResourcePoolHandle::defaultAsync(),
+        nullptr,
         std::make_shared<folly::CPUThreadPoolExecutor>(
-            sanitizeNumThreads(FLAGS_cpu_threads)));
+            sanitizeNumThreads(FLAGS_cpu_threads)),
+        nullptr);
 
     server->ensureResourcePools();
     server->requireResourcePools();

@@ -150,8 +150,6 @@ let run_saved_state_future
         } ->
       let () = HackEventLogger.state_loader_dirty_files t in
       let dirty_naming_files = Relative_path.Set.of_list changed_files in
-      let dirty_master_files = dirty_master_files in
-      let dirty_local_files = dirty_local_files in
       let naming_table_manifold_path = Some manifold_path in
       Ok
         {
@@ -488,9 +486,7 @@ let log_fanout_information to_recheck_deps files_to_recheck =
                   bool_ (Relative_path.Set.cardinal files_to_recheck > max) );
               ])
 
-(** Compare declarations loaded from the saved state to declarations based on
-  the current versions of dirty files. This lets us check a smaller set of
-  files than the set we'd check if old declarations were not available. *)
+(** Compute fanout for saved state init *)
 let get_files_to_recheck
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -648,8 +644,11 @@ let calculate_fanout_and_defer_or_do_type_check
       files_to_redeclare
   in
   let (env, to_recheck) =
-    if use_prechecked_files genv then
+    if use_prechecked_files genv then (
       (* Start with dirty files and fan-out of local changes only *)
+      Hh_logger.log
+        "Using prechecked algorithm. Computing fanout from %d files with changed decls since the mergebase."
+        (Relative_path.Set.cardinal dirty_local_files_changed_decls);
       let to_recheck =
         if genv.local_config.SLC.fetch_remote_old_decls then
           get_files_to_recheck dirty_local_files_changed_decls
@@ -666,7 +665,7 @@ let calculate_fanout_and_defer_or_do_type_check
           ~dirty_master_deps:master_deps
       in
       (env, to_recheck)
-    else
+    ) else
       (* Start with full fan-out immediately *)
       let to_recheck =
         if genv.local_config.SLC.fetch_remote_old_decls then
@@ -1091,6 +1090,29 @@ let update_naming_table
     in
     (env, t, Some new_naming_table)
 
+let log_changed_files_counts
+    ~dirty_local_files_unchanged_decls
+    ~dirty_local_files_changed_decls
+    ~dirty_master_files_unchanged_decls
+    ~dirty_master_files_changed_decls
+    ~dirty_master_files
+    ~dirty_local_files =
+  Hh_logger.log
+    "Number of files changed between saved state revision and mergebase: %d"
+    (Relative_path.Set.cardinal dirty_master_files);
+  Hh_logger.log
+    "Out of which %d have changed decls, and the rest (%d) have unchanged decls"
+    (Relative_path.Set.cardinal dirty_master_files_changed_decls)
+    (Relative_path.Set.cardinal dirty_master_files_unchanged_decls);
+  Hh_logger.log
+    "Number of files changed since mergebase: %d"
+    (Relative_path.Set.cardinal dirty_local_files);
+  Hh_logger.log
+    "Out of which %d have changed decls, and the rest (%d) have unchanged decls"
+    (Relative_path.Set.cardinal dirty_local_files_changed_decls)
+    (Relative_path.Set.cardinal dirty_local_files_unchanged_decls);
+  ()
+
 (** What files should be checked?
 
   We've already said that files-with-errors from the dirty saved state must be
@@ -1143,6 +1165,13 @@ let compute_fanout
   let (dirty_local_files_unchanged_decls, dirty_local_files_changed_decls) =
     partition_unchanged_hash dirty_local_files
   in
+  log_changed_files_counts
+    ~dirty_local_files_unchanged_decls
+    ~dirty_local_files_changed_decls
+    ~dirty_master_files_unchanged_decls
+    ~dirty_master_files_changed_decls
+    ~dirty_master_files
+    ~dirty_local_files;
 
   let (env, t) =
     calculate_fanout_and_defer_or_do_type_check

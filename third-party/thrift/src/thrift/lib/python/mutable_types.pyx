@@ -43,6 +43,8 @@ from thrift.python.types cimport (
 
 from cython.operator cimport dereference as deref
 
+import cython
+
 cdef extern from "<Python.h>":
     cdef const char * PyUnicode_AsUTF8(object unicode)
 
@@ -74,6 +76,22 @@ def fill_specs(*structured_thrift_classes):
     for cls in structured_thrift_classes:
         if not isinstance(cls, MutableUnionMeta):
             cls._fbthrift_store_field_values()
+
+
+MutableStructOrError = cython.fused_type(MutableStruct, MutableGeneratedError)
+
+def _isset(MutableStructOrError struct):
+    """
+    This is an internal function that returns the 'isset byte' of the
+    corresponding field. Immutable types expose this function publicly, but for
+    mutable types, it remains internal and should not be accessed by user code.
+    """
+    cdef MutableStructInfo info = struct._fbthrift_mutable_struct_info
+    isset_bytes = struct._fbthrift_data[0]
+    return {
+        name: bool(isset_bytes[index])
+        for name, index in info.name_to_index.items()
+    }
 
 
 class _MutableStructField:
@@ -208,7 +226,7 @@ cdef class MutableStruct(MutableStructOrUnion):
 
         for field_name, value in kwargs.items():
             if value is None:
-                self_copy._do_not_use_resetFieldToStandardDefault(field_name)
+                self_copy._fbthrift_internal_resetFieldToStandardDefault(field_name)
             else:
                 setattr(self_copy, field_name, value)
 
@@ -358,11 +376,10 @@ cdef class MutableStruct(MutableStructOrUnion):
         )
         return length
 
-    def _do_not_use_resetFieldToStandardDefault(self, field_name: str):
+    def _fbthrift_internal_resetFieldToStandardDefault(self, field_name: str):
         """
-        This method is currently intended for internal testing purposes only.
-        Please avoid using it as it will be replaced with a more appropriate
-        mechanism in the future
+        This method is the mechanism to reset the field to its standard default
+        value. For optional fields, this method sets the field to `None`.
         """
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
         field_index = mutable_struct_info.name_to_index.get(field_name)

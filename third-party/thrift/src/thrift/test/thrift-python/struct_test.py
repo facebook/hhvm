@@ -30,11 +30,13 @@ from thrift.python.mutable_containers import MutableList, MutableMap, MutableSet
 
 from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import (
+    _isset as mutable_isset,
     MutableStruct,
     MutableStructMeta,
     MutableStructOrUnion,
 )
 from thrift.python.types import (
+    isset as immutable_isset,
     Struct as ImmutableStruct,
     StructMeta as ImmutableStructMeta,
     StructOrUnion as ImmutableStructOrUnion,
@@ -312,6 +314,12 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertEqual(typing.get_type_hints(TestStructImmutable), {})
 
     def test_serialization_round_trip(self) -> None:
+        s = TestStructAllThriftPrimitiveTypesImmutable()
+
+        # Default initialized fields set their isset flags to `False`
+        for field, _ in TestStructAllThriftPrimitiveTypesImmutable:
+            self.assertFalse(immutable_isset(s)[field])
+
         s = TestStructAllThriftPrimitiveTypesImmutable(
             unqualified_string="Hello world!",
             optional_string="Hello optional!",
@@ -321,7 +329,21 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             optional_double=1.3,
             unqualified_bool=True,
             optional_bool=False,
+            unqualified_byte=1,
+            optional_byte=1,
+            unqualified_i16=211,
+            optional_i16=234,
+            unqualified_i64=211,
+            optional_i64=234,
+            unqualified_float=2.0,
+            optional_float=1.0,
         )
+
+        # All the fields are initialized above, so all isset flags should be
+        # set to `True`.
+        for field, _ in TestStructAllThriftPrimitiveTypesImmutable:
+            self.assertTrue(immutable_isset(s)[field])
+
         _thrift_serialization_round_trip(self, immutable_serializer, s)
         _pickle_round_trip(self, s)
 
@@ -583,20 +605,24 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         if expected_default_value is not None:
             self.assertIsNotNone(getattr(struct, field_name))
             self.assertEqual(expected_default_value, getattr(struct, field_name))
+            self.assertFalse(mutable_isset(struct)[field_name])
         else:  # OPTIONAL
             self.assertIsNone(getattr(struct, field_name))
+            self.assertFalse(mutable_isset(struct)[field_name])
 
         # Set the `value`, read it back
         setattr(struct, field_name, value)
         self.assertEqual(value, getattr(struct, field_name))
+        self.assertTrue(mutable_isset(struct)[field_name])
 
-        # TODO: How to reset field to standard default value?
-        struct._do_not_use_resetFieldToStandardDefault(field_name)
+        struct._fbthrift_internal_resetFieldToStandardDefault(field_name)
         if expected_default_value is not None:
             self.assertIsNotNone(getattr(struct, field_name))
             self.assertEqual(expected_default_value, getattr(struct, field_name))
+            self.assertTrue(mutable_isset(struct)[field_name])
         else:  # OPTIONAL
             self.assertIsNone(getattr(struct, field_name))
+            self.assertFalse(mutable_isset(struct)[field_name])
 
         # `del struct.field_name` raises a `AttributeError`
         with self.assertRaises(AttributeError):

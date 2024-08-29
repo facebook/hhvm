@@ -1172,6 +1172,7 @@ void resetFieldToStandardDefault(
   if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
     PyList_SET_ITEM(structList, index + 1, Py_None);
     Py_INCREF(Py_None);
+    setMutableStructIsset(structList, index, false);
   } else {
     // getDefaultValueForField calls `Py_INCREF`
     PyList_SET_ITEM(
@@ -1185,9 +1186,6 @@ void resetFieldToStandardDefault(
             .release());
   }
   Py_DECREF(oldValue);
-  // DO_BEFORE(alperyoney,20240515): Figure out whether isset flag should be
-  // cleared for non-optional fields.
-  setMutableStructIsset(structList, index, false);
 }
 
 detail::OptionalThriftValue getStruct(

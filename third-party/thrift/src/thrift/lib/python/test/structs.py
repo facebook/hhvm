@@ -59,33 +59,62 @@ from testing.thrift_types import (
     StructuredAnnotation,
     UnusedError,
 )
+from thrift.python.mutable_types import _isset as mutable_isset
 from thrift.python.serializer import deserialize, serialize_iobuf
 from thrift.python.types import isset, update_nested_field
 
 
-class StructTests(unittest.TestCase):
+@parameterized_class(
+    ("test_types", "serializer_module"),
+    [
+        (immutable_test_types, immutable_serializer),
+        (mutable_test_types, mutable_serializer),
+    ],
+)
+class StructTestsParameterized(unittest.TestCase):
+    def setUp(self) -> None:
+        """
+        The `setUp` method performs these assignments with type hints to enable
+        pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
+        behind `test_types`.
+        """
+        # pyre-ignore[16]: has no attribute `test_types`
+        self.OptionalFile: Type[OptionalFile] = self.test_types.OptionalFile
+        self.File: Type[File] = self.test_types.File
+        self.Kind: Type[Kind] = self.test_types.Kind
+        self.UnusedError: Type[UnusedError] = self.test_types.UnusedError
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+        # pyre-ignore[16]: has no attribute `serializer_module`
+        self.serializer: types.ModuleType = self.serializer_module
+        self.isset = mutable_isset if self.is_mutable_run else isset
+
     def test_isset_Struct(self) -> None:
-        to_serialize = OptionalFile(name="/dev/null", type=8)
-        serialized = serialize_iobuf(to_serialize)
-        file = deserialize(File, serialized)
-        self.assertTrue(isset(file)["type"])
-        self.assertFalse(isset(file)["permissions"])
+        to_serialize = self.OptionalFile(name="/dev/null", type=8)
+        serialized = self.serializer.serialize_iobuf(to_serialize)
+        file = self.serializer.deserialize(self.File, serialized)
+        self.assertTrue(self.isset(file)["type"])
+        self.assertFalse(self.isset(file)["permissions"])
 
-        to_serialize = OptionalFile(name="/dev/null")
-        serialized = serialize_iobuf(to_serialize)
-        file = deserialize(File, serialized)
-        self.assertEqual(file.type, Kind.REGULAR)
-        self.assertFalse(isset(file)["type"])
+        to_serialize = self.OptionalFile(name="/dev/null")
+        serialized = self.serializer.serialize_iobuf(to_serialize)
+        file = self.serializer.deserialize(self.File, serialized)
+        self.assertEqual(file.type, self.Kind.REGULAR)
+        self.assertFalse(self.isset(file)["type"])
 
+    def test_isset_Error(self) -> None:
+        e = self.UnusedError(message="ACK")
+        # pyre-ignore[6]: `mutable_isset` expected ...
+        self.assertTrue(self.isset(e)["message"])
+
+
+class StructTests(unittest.TestCase):
     def test_isset_Union(self) -> None:
         i = Integers(large=2)
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: for test
             isset(i)["large"]
-
-    def test_isset_Error(self) -> None:
-        e = UnusedError(message="ACK")
-        self.assertTrue(isset(e)["message"])
 
     def test_copy(self) -> None:
         x = easy(val=1, an_int=Integers(small=300), name="foo", val_list=[1, 2, 3, 4])

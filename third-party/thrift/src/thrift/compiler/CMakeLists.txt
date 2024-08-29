@@ -81,7 +81,7 @@ target_link_libraries(
   fmt::fmt
 )
 
-# The base library.
+# The base compiler infrastructure library
 add_library(
   compiler_base
   STATIC
@@ -90,6 +90,18 @@ add_library(
   detail/pluggable_functions.cc
   diagnostic.cc
   source_location.cc
+)
+target_link_libraries(
+  compiler_base
+  fmt::fmt
+  Boost::boost
+  ${FBTHRIFT_COMPILER_LINK_CXXFS}
+)
+
+# The base Thrift compiler library.
+add_library(
+  compiler_lib
+  STATIC
 
   lib/schematizer.cc
   parse/lexer.cc
@@ -107,10 +119,10 @@ add_library(
   sema/standard_validator.cc
 )
 target_link_libraries(
+  compiler_lib
   compiler_base
   compiler_ast
   fmt::fmt
-  ${FBTHRIFT_COMPILER_LINK_CXXFS}
 )
 
 # The Thrift compiler library.
@@ -173,7 +185,7 @@ add_executable(
 target_link_libraries(
   thrift1
   compiler_ast
-  compiler_base
+  compiler_lib
   ${FBTHRIFT_COMPILER_LINK_CXXFS}
   ${GENERATE_LINKED}
 )
@@ -188,13 +200,18 @@ endif ()
 if (BUILD_SHARED_LIBS)
   # All but thrift1 since it's a binary.
   set_target_properties(
-    compiler_ast compiler_base compiler mustache compiler_generators
+    compiler_ast
+    compiler_base
+    compiler_lib
+    compiler
+    mustache
+    compiler_generators
     PROPERTIES VERSION ${PACKAGE_VERSION}
   )
 endif ()
 
 install(
-  TARGETS thrift1 compiler_ast compiler_base compiler mustache
+  TARGETS thrift1 compiler_ast compiler_base compiler_lib compiler mustache
   EXPORT fbthrift-exports
   RUNTIME DESTINATION ${BIN_INSTALL_DIR}
   LIBRARY DESTINATION ${LIB_INSTALL_DIR}

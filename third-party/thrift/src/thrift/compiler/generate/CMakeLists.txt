@@ -49,6 +49,7 @@ target_link_libraries(
   compiler_generators
   compiler_ast
   compiler_base
+  compiler_lib
   compiler
   mustache
   ${OPENSSL_LIBRARIES}

@@ -49,10 +49,11 @@ public class RSocketServerTransportFactory
   }
 
   private SocketAddress parsePort(SocketAddress socketAddress) {
-    if (socketAddress instanceof InetSocketAddress) {
+    if (socketAddress instanceof InetSocketAddress
+        && ((InetSocketAddress) socketAddress).getPort() == 0) {
       InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
       return new InetSocketAddress(
-          inetSocketAddress.getHostName(), parsePort(inetSocketAddress.getPort()));
+          inetSocketAddress.getHostString(), parsePort(inetSocketAddress.getPort()));
     }
     return socketAddress;
   }

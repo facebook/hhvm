@@ -16,15 +16,13 @@
 
 package com.facebook.swift.service;
 
-import static java.util.Arrays.asList;
-
-import com.facebook.thrift.metrics.distribution.MultiWindowDistribution;
-import com.facebook.thrift.metrics.distribution.Quantile;
-import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
+import io.airlift.stats.DecayCounter;
+import io.airlift.stats.Distribution;
+import io.airlift.stats.ExponentialDecay;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ThriftClientStats {
 
@@ -48,12 +46,11 @@ public class ThriftClientStats {
   private static final String CREATED = ".created";
 
   private static final String DISPOSED = ".diposed";
-
-  private final ConcurrentHashMap<String, SlidingTimeWindowMovingCounter> counters =
-      new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, MultiWindowDistribution> distributions =
-      new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, LongAdder> allTimeCounters = new ConcurrentHashMap<>();
+  private final Map<String, AtomicLong> counters = new ConcurrentHashMap<>();
+  private final Map<String, DecayCounter> decayCounters = new ConcurrentHashMap<>();
+  private final Map<String, Distribution> distributions = new ConcurrentHashMap<>();
+  private final Map<String, Distribution> oneMinuteDistributions = new ConcurrentHashMap<>();
+  private final Map<String, Distribution> oneHourDistributions = new ConcurrentHashMap<>();
 
   public ThriftClientStats() {}
 
@@ -95,45 +92,80 @@ public class ThriftClientStats {
     Map<String, Long> resultCounters = new HashMap<>();
     counters.forEach(
         (key, value) -> {
-          resultCounters.put(THRIFT_CLIENT + key + ONE_MINUTE, value.oneMinuteRate());
-          resultCounters.put(THRIFT_CLIENT + key + ONE_HOUR, value.oneHourRate());
+          resultCounters.put(THRIFT_CLIENT + key, value.get());
         });
 
-    allTimeCounters.forEach(
-        (key, counter) -> resultCounters.put(THRIFT_CLIENT + key, counter.sum()));
-
-    distributions.forEach(
-        (key, dist) -> {
-          addQuantilesToCounters(
-              THRIFT_CLIENT + key, ONE_MINUTE, resultCounters, dist.getOneMinuteQuantiles());
-          addQuantilesToCounters(
-              THRIFT_CLIENT + key, ONE_HOUR, resultCounters, dist.getOneHourQuantiles());
-          addQuantilesToCounters(
-              THRIFT_CLIENT + key, "", resultCounters, dist.getAllTimeQuantiles());
+    decayCounters.forEach(
+        (key, value) -> {
+          resultCounters.put(THRIFT_CLIENT + key, Math.round(value.getCount()));
         });
+
+    distributions.forEach((key, value) -> addCountersToResults("", key, value, resultCounters));
+
+    oneMinuteDistributions.forEach(
+        (key, value) -> addCountersToResults(".60", key, value, resultCounters));
+
+    oneHourDistributions.forEach(
+        (key, value) -> addCountersToResults(".3600", key, value, resultCounters));
     return resultCounters;
   }
 
-  private void addQuantilesToCounters(
-      String baseKey, String windowKey, Map<String, Long> counters, Map<Quantile, Long> quantiles) {
-    for (Map.Entry<Quantile, Long> entry : quantiles.entrySet()) {
-      counters.put(baseKey + "." + entry.getKey().getKey() + windowKey, entry.getValue());
-    }
+  private static void addCountersToResults(
+      String postFix, String key, Distribution value, Map<String, Long> resultCounters) {
+    double result = value.getAvg();
+    double sum = value.getCount();
+
+    resultCounters.put(
+        THRIFT_CLIENT + key + ".sum" + postFix, Double.isInfinite(sum) ? 0L : Math.round(sum));
+
+    resultCounters.put(
+        THRIFT_CLIENT + key + ".avg" + postFix,
+        Double.isInfinite(result) ? 0L : Math.round(result));
+
+    result = value.getP90();
+    resultCounters.put(
+        THRIFT_CLIENT + key + ".p90" + postFix,
+        Double.isInfinite(result) ? 0L : Math.round(result));
+
+    result = value.getP99();
+    resultCounters.put(
+        THRIFT_CLIENT + key + ".p99" + postFix,
+        Double.isInfinite(result) ? 0L : Math.round(result));
   }
 
   private void incrementCounterValues(String key) {
-    allTimeCounters.computeIfAbsent(key, k -> new LongAdder()).increment();
+    AtomicLong counter = counters.computeIfAbsent(key, k -> new AtomicLong(0));
+    DecayCounter counterOneMin =
+        decayCounters.computeIfAbsent(
+            key + ONE_MINUTE, k -> new DecayCounter(ExponentialDecay.oneMinute()));
+    DecayCounter counterOneHour =
+        decayCounters.computeIfAbsent(
+            key + ONE_HOUR, k -> new DecayCounter(ExponentialDecay.seconds(3600)));
 
-    counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter()).add(1);
+    counter.incrementAndGet();
+    counterOneMin.add(1);
+    counterOneHour.add(1);
   }
 
   private void addHistogramValue(String key, long value) {
-    distributions
-        .computeIfAbsent(
-            key,
-            k ->
-                new MultiWindowDistribution(
-                    asList(Quantile.P99, Quantile.P90, Quantile.AVG, Quantile.SUM)))
-        .add(value);
+    Distribution distribution = distributions.computeIfAbsent(key, k -> new Distribution());
+
+    Distribution distributionOneMin =
+        oneMinuteDistributions.computeIfAbsent(
+            key, k -> new Distribution(ExponentialDecay.oneMinute()));
+
+    Distribution distributionOneHour =
+        oneHourDistributions.computeIfAbsent(
+            key, k -> new Distribution(ExponentialDecay.seconds(3600)));
+
+    // Catching exception from airlift:stats:0.196. A stable fix is yet to be relased
+    // https://github.com/prestosql/presto/issues/3965
+    try {
+      distribution.add(value);
+      distributionOneMin.add(value);
+      distributionOneHour.add(value);
+    } catch (Throwable t) {
+      // Suppress exception/error while adding value to distribution
+    }
   }
 }

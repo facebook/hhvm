@@ -33,7 +33,9 @@ class TypeToPatchInternalDoNotUse;
 
 namespace detail {
 
-[[noreturn]] void throwIfDuplicatedType(const type::Type& type);
+[[noreturn]] void throwDuplicatedType(const type::Type& type);
+[[noreturn]] void throwTypeNotValid(const type::Type& type);
+[[noreturn]] void throwAnyNotValid(const type::AnyStruct& any);
 
 struct TypeToPatchMapAdapter {
   using StandardType = std::vector<TypeToPatchInternalDoNotUse>;
@@ -48,7 +50,7 @@ struct TypeToPatchMapAdapter {
                   typeToPatchStruct.type().value(),
                   std::move(typeToPatchStruct.patches().value()))
                .second) {
-        throwIfDuplicatedType(typeToPatchStruct.type().value());
+        throwDuplicatedType(typeToPatchStruct.type().value());
       }
     }
     return map;
@@ -104,7 +106,7 @@ struct TypeToPatchMapAdapter {
                     typeToPatchStruct.type().value(),
                     std::move(typeToPatchStruct.patches().value()))
                  .second) {
-          throwIfDuplicatedType(typeToPatchStruct.type().value());
+          throwDuplicatedType(typeToPatchStruct.type().value());
         }
       }
     }
@@ -219,6 +221,9 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
 
   void ensureAny(type::AnyStruct ensureAny) {
+    if (!type::AnyData::isValid(ensureAny)) {
+      throwAnyNotValid(ensureAny);
+    }
     if (data_.assign().has_value()) {
       data_.clear() = true;
       data_.ensureAny() = std::move(data_.assign().value());

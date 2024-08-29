@@ -21,9 +21,19 @@
 
 namespace apache::thrift::op::detail {
 
-void throwIfDuplicatedType(const type::Type& type) {
+void throwDuplicatedType(const type::Type& type) {
   folly::throw_exception<std::runtime_error>(fmt::format(
       "duplicated key in AnyPatch: {}", debugStringViaEncode(type)));
+}
+
+void throwTypeNotValid(const type::Type& type) {
+  folly::throw_exception<std::runtime_error>(
+      fmt::format("Invalid type: {}", debugStringViaEncode(type)));
+}
+
+void throwAnyNotValid(const type::AnyStruct& any) {
+  folly::throw_exception<std::runtime_error>(
+      fmt::format("Invalid any: {}", debugStringViaEncode(any)));
 }
 
 } // namespace apache::thrift::op::detail

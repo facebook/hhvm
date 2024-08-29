@@ -140,7 +140,7 @@ folly::dynamic toDynamic(const Value& value) {
       }
       return ret;
     case Value::Type::__EMPTY__:
-      return true;
+      return nullptr;
     default:
       folly::throw_exception<std::runtime_error>("Not Implemented.");
   }

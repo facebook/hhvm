@@ -1233,29 +1233,43 @@ TEST(ObjectTest, ToDynamic) {
   Value v;
   v.ensure_bool() = true;
   EXPECT_EQ(toDynamic(v), true);
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::BOOL);
   v.ensure_byte() = 10;
   EXPECT_EQ(toDynamic(v), 10);
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::INT64);
   v.ensure_i16() = 20;
   EXPECT_EQ(toDynamic(v), 20);
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::INT64);
   v.ensure_i32() = 30;
   EXPECT_EQ(toDynamic(v), 30);
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::INT64);
   v.ensure_i64() = 40;
   EXPECT_EQ(toDynamic(v), 40);
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::INT64);
   v.ensure_float() = 50;
   EXPECT_EQ(toDynamic(v), float(50));
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::DOUBLE);
   v.ensure_double() = 60;
   EXPECT_EQ(toDynamic(v), double(60));
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::DOUBLE);
   v.ensure_string() = "70";
   EXPECT_EQ(toDynamic(v), "70");
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::STRING);
   v = asValueStruct<type::binary_t>("80");
   EXPECT_EQ(toDynamic(v), "80");
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::STRING);
+  v = Value();
+  EXPECT_EQ(toDynamic(v), nullptr);
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::NULLT);
 
   v.ensure_float() = NAN;
   EXPECT_TRUE(std::isnan(toDynamic(v).asDouble()));
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::DOUBLE);
 
   std::vector<int> vec = {1, 4, 2};
   v = asValueStruct<type::list<type::i16_t>>(vec);
   EXPECT_EQ(toDynamic(v), folly::dynamic::array(1, 4, 2));
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::ARRAY);
 
   v = asValueStruct<type::set<type::i16_t>>({1, 4, 2});
 
@@ -1264,6 +1278,7 @@ TEST(ObjectTest, ToDynamic) {
   EXPECT_EQ(
       toDynamic(v),
       folly::dynamic(folly::dynamic::object("4", "40")("1", "10")("2", "20")));
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::OBJECT);
 
   v.ensure_object();
   v.as_object()[FieldId{10}].ensure_string() = "100";
@@ -1273,6 +1288,7 @@ TEST(ObjectTest, ToDynamic) {
       toDynamic(v),
       folly::dynamic(
           folly::dynamic::object("40", "400")("10", "100")("20", "200")));
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::OBJECT);
 
   Value v2;
   v2.ensure_object()[FieldId{30}].ensure_string() = "300";
@@ -1280,6 +1296,7 @@ TEST(ObjectTest, ToDynamic) {
   EXPECT_EQ(
       toDynamic(v2),
       folly::dynamic(folly::dynamic::object("30", "300")("50", toDynamic(v))));
+  EXPECT_EQ(toDynamic(v).type(), folly::dynamic::Type::OBJECT);
 
   v = asValueStruct<type::list<type::i16_t>>(vec);
   v2.ensure_map()[v] = asValueStruct<type::i32_t>(10);

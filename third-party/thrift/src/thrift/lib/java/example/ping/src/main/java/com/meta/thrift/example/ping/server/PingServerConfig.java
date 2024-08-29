@@ -36,7 +36,7 @@ public class PingServerConfig {
     return transport;
   }
 
-  public static class Builder {
+  public static final class Builder {
     private int port = DEFAULT_PORT;
     private String transport = DEFAULT_TRANSPORT;
 

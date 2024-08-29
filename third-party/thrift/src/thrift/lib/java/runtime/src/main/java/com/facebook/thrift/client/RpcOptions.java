@@ -65,7 +65,7 @@ public class RpcOptions {
     this.interactionId = interactionId;
   }
 
-  public static class Builder {
+  public static final class Builder {
     private ProtocolId protocolId;
     private Integer seqId;
     private Integer clientTimeoutMs;

@@ -38,7 +38,7 @@ public interface RpcClientFactory {
    * Builder to create an RpcClientFactory. By default it creates an RpcClientFactory with RSocket
    * disabled, stats enabled, reconnecting client enabled, and simple load balancing enabled.
    */
-  class Builder {
+  final class Builder {
     private boolean disableRSocket = true;
     private boolean disableStats = false;
     private boolean disableReconnectingClient = false;

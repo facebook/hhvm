@@ -100,7 +100,7 @@ public abstract class LazyAny<T> {
     return any.equals(other.getAny());
   }
 
-  public static class Builder<T> {
+  public static final class Builder<T> {
     private T value;
 
     private String customProtocol;

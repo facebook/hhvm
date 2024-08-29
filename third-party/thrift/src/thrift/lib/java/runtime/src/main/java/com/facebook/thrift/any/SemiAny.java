@@ -97,7 +97,7 @@ public abstract class SemiAny<T> extends AbstractAny<T, SemiAnyStruct> {
    *
    * @param <T>
    */
-  public static class Builder<T> extends AnyBuilder<T, SemiAny<T>> {
+  public static final class Builder<T> extends AnyBuilder<T, SemiAny<T>> {
 
     public <T> Builder() {}
 

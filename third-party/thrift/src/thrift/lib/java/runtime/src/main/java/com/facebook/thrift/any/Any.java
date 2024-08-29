@@ -60,7 +60,7 @@ public abstract class Any<T> extends AbstractAny<T, AnyStruct> {
    *
    * @param <T>
    */
-  public static class Builder<T> extends AnyBuilder<T, UnserializedAny<T>> {
+  public static final class Builder<T> extends AnyBuilder<T, UnserializedAny<T>> {
 
     public Builder(T value, Class... clazz) {
       super(value, clazz);

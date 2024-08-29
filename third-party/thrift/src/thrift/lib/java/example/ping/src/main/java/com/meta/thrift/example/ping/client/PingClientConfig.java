@@ -50,7 +50,7 @@ public class PingClientConfig {
     return method;
   }
 
-  public static class Builder {
+  public static final class Builder {
     private String host = DEFAULT_HOST;
     private int port = DEFAULT_PORT;
     private String transport = DEFAULT_TRANSPORT;

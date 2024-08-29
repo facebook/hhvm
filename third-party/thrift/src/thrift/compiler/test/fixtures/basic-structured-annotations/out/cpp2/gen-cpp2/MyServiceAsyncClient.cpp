@@ -182,21 +182,6 @@ folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inli
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_future_first(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>>(std::move(promise), recv_wrapped_first, channel_);
-  first(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::SemiFuture<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_first, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  first(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
-}
 
 void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::first(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   first(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -358,21 +343,6 @@ folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structure
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<bool>>(std::move(promise), recv_wrapped_second, channel_);
-  second(rpcOptions, std::move(callback), p_count);
-  return std::move(future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
-  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_second, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  second(rpcOptions, std::move(callback), p_count);
-  return std::move(callbackAndFuture.second);
-}
 
 void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::second(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_count) {
   second(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_count);

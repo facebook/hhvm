@@ -708,10 +708,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   virtual folly::Future<::thrift::shared_interactions::DoSomethingResult> future_do_some_similar_things(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "InteractWithShared", "function": "do_some_similar_things"} */
   virtual folly::SemiFuture<::thrift::shared_interactions::DoSomethingResult> semifuture_do_some_similar_things(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "InteractWithShared", "function": "do_some_similar_things"} */
-  virtual folly::Future<std::pair<::thrift::shared_interactions::DoSomethingResult, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_do_some_similar_things(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "InteractWithShared", "function": "do_some_similar_things"} */
-  virtual folly::SemiFuture<std::pair<::thrift::shared_interactions::DoSomethingResult, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_do_some_similar_things(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

@@ -31,6 +31,7 @@ exception Xception {
 service FutureService {
   string sendResponse(1: i64 size);
   oneway void noResponse(1: i64 size);
+  @cpp.GenerateDeprecatedHeaderClientMethods
   string echoRequest(1: string req);
   string echoRequestSlow(1: string req, 2: i64 sleepMs);
   i32 throwing() throws (1: Xception err1);

@@ -55,10 +55,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   virtual folly::Future<folly::Unit> future_method1(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method1"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_method1(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method1"} */
-  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method1(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method1"} */
-  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method1(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -176,10 +172,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   virtual folly::Future<folly::Unit> future_method2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method2"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_method2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method2"} */
-  virtual folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method2"} */
-  virtual folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -297,10 +289,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   virtual folly::Future<::std::int32_t> future_method3(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method3"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_method3(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method3"} */
-  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method3(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method3"} */
-  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method3(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -420,10 +408,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   virtual folly::Future<::std::int32_t> future_method4(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method4"} */
   virtual folly::SemiFuture<::std::int32_t> semifuture_method4(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method4"} */
-  virtual folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method4(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method4"} */
-  virtual folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method4(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -543,10 +527,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   virtual folly::Future<::test_cpp2::cpp_reflection::struct2> future_method5(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method5"} */
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> semifuture_method5(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method5"} */
-  virtual folly::Future<std::pair<::test_cpp2::cpp_reflection::struct2, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method5(apache::thrift::RpcOptions& rpcOptions);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method5"} */
-  virtual folly::SemiFuture<std::pair<::test_cpp2::cpp_reflection::struct2, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method5(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__
@@ -666,10 +646,6 @@ class Client<::test_cpp2::cpp_reflection::service1> : public apache::thrift::Gen
   virtual folly::Future<::test_cpp2::cpp_reflection::struct2> future_method6(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method6"} */
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> semifuture_method6(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method6"} */
-  virtual folly::Future<std::pair<::test_cpp2::cpp_reflection::struct2, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_method6(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service1", "function": "method6"} */
-  virtual folly::SemiFuture<std::pair<::test_cpp2::cpp_reflection::struct2, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_method6(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
 
 #if FOLLY_HAS_COROUTINES
 #if __clang__

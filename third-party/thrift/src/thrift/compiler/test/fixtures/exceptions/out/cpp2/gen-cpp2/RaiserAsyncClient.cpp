@@ -239,21 +239,6 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Raiser>::semifutur
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_future_doBland(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_doBland, channel_);
-  doBland(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_semifuture_doBland(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_doBland, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  doBland(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
-}
 
 void apache::thrift::Client<::cpp2::Raiser>::doBland(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   doBland(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -415,21 +400,6 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::Raiser>::semifutur
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_future_doRaise(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_doRaise, channel_);
-  doRaise(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_semifuture_doRaise(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_doRaise, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  doRaise(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
-}
 
 void apache::thrift::Client<::cpp2::Raiser>::doRaise(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   doRaise(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -591,21 +561,6 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::Raiser>::semifut
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_future_get200(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_get200, channel_);
-  get200(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_semifuture_get200(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get200, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  get200(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
-}
 
 void apache::thrift::Client<::cpp2::Raiser>::get200(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   get200(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
@@ -767,21 +722,6 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::Raiser>::semifut
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_future_get500(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_get500, channel_);
-  get500(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::Raiser>::header_semifuture_get500(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get500, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  get500(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
-}
 
 void apache::thrift::Client<::cpp2::Raiser>::get500(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   get500(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));

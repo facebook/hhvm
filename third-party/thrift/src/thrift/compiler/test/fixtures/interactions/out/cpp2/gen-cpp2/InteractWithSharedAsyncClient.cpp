@@ -152,21 +152,6 @@ folly::SemiFuture<::thrift::shared_interactions::DoSomethingResult> apache::thri
   return std::move(callbackAndFuture.second);
 }
 
-folly::Future<std::pair<::thrift::shared_interactions::DoSomethingResult, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::InteractWithShared>::header_future_do_some_similar_things(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<std::pair<::thrift::shared_interactions::DoSomethingResult, std::unique_ptr<apache::thrift::transport::THeader>>>;
-  folly::Promise<CallbackHelper::PromiseResult> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::thrift::shared_interactions::DoSomethingResult>>(std::move(promise), recv_wrapped_do_some_similar_things, channel_);
-  do_some_similar_things(rpcOptions, std::move(callback));
-  return std::move(future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::SemiFuture<std::pair<::thrift::shared_interactions::DoSomethingResult, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::InteractWithShared>::header_semifuture_do_some_similar_things(apache::thrift::RpcOptions& rpcOptions) {
-  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_do_some_similar_things, channel_);
-  auto callback = std::move(callbackAndFuture.first);
-  do_some_similar_things(rpcOptions, std::move(callback));
-  return std::move(callbackAndFuture.second);
-}
 
 void apache::thrift::Client<::cpp2::InteractWithShared>::do_some_similar_things(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   do_some_similar_things(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));

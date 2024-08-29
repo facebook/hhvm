@@ -80,7 +80,7 @@ struct ast_visitor {
     scope.println(
         " partial-apply {} '{}'",
         location(partial_apply.loc),
-        partial_apply.path.as_string('/'));
+        partial_apply.path_string());
     if (const auto& offset = partial_apply.standalone_offset_within_line;
         offset.has_value()) {
       scope.open_property().println(" standalone-offset {}", *offset);
@@ -97,11 +97,11 @@ struct ast_visitor {
     scope.println(
         " variable-lookup {} '{}'",
         location(variable.loc),
-        variable.path_string());
+        variable.chain_string());
   }
   void visit(const ast::variable& variable, tree_printer::scope scope) const {
     scope.println(
-        " variable {} '{}'", location(variable.loc), variable.path_string());
+        " variable {} '{}'", location(variable.loc), variable.chain_string());
   }
   void visit(const ast::body& body, tree_printer::scope scope) const {
     // This node is transparent so it does not directly appear in the tree

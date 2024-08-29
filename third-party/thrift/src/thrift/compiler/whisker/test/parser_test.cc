@@ -338,18 +338,18 @@ TEST_F(ParserTest, partial_apply_dotted_path) {
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-apply <line:1:1, col:20> 'path/to/file'\n"
+      "|- partial-apply <line:1:1, col:20> 'path/to.file'\n"
       "| `- standalone-offset 0\n");
 }
 
 TEST_F(ParserTest, partial_apply_empty_path_part) {
-  auto ast = parse_ast("{{> path/.to.file }}");
+  auto ast = parse_ast("{{> path//to.file }}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected identifier in partial-lookup but found `.`",
+          "expected path-component in partial-lookup but found `/`",
           path_to_file(1),
           1)));
 }

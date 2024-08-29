@@ -19,26 +19,47 @@
 
 #include <cassert>
 #include <iterator>
+#include <utility>
 
 namespace whisker::ast {
 
-std::string lookup_path::as_string(char separator) const {
+namespace {
+
+template <typename T, typename ToStringFunc>
+std::string to_joined_string(
+    const std::vector<T>& parts, char separator, ToStringFunc&& to_string) {
   assert(!parts.empty());
-  std::string result = parts[0].name;
+  std::string result = to_string(parts.front());
   for (auto part = std::next(parts.begin()); part != parts.end(); ++part) {
     result += separator;
-    result += part->name;
+    result += to_string(*part);
   }
   return result;
 }
 
-std::string variable_lookup::path_string() const {
+} // namespace
+
+std::string variable_lookup::chain_string() const {
   return detail::variant_match(
-      path,
+      chain,
       [](this_ref) -> std::string { return "."; },
-      [](const lookup_path& path) -> std::string {
-        return path.as_string('.');
+      [](const std::vector<identifier>& chain) -> std::string {
+        return to_joined_string(
+            chain, '.', [](const identifier& id) -> const std::string& {
+              return id.name;
+            });
       });
+}
+
+std::string partial_lookup::as_string() const {
+  return to_joined_string(
+      parts, '/', [](const path_component& component) -> const std::string& {
+        return component.value;
+      });
+}
+
+std::string partial_apply::path_string() const {
+  return path.as_string();
 }
 
 } // namespace whisker::ast

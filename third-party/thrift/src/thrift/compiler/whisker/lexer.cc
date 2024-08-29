@@ -70,6 +70,39 @@ bool is_identifier_continuation(char c) {
 }
 
 /**
+ * A path in Whisker must satisfy POSIX's portable file name character set:
+ *   https://www.ibm.com/docs/en/zvm/7.3?topic=files-naming
+ *
+ * A valid path, therefore, will pass the GNU coreutils `pathchk` command (minus
+ * length restrictions):
+ *   https://man7.org/linux/man-pages/man1/pathchk.1.html
+ *   https://github.com/coreutils/coreutils/blob/v9.5/src/pathchk.c#L157-L202
+ */
+bool is_path_component_continuation(char c) {
+  // clang-format off
+  return detail::is_letter(c) || detail::is_digit(c)
+    || c == '_'
+    || c == '.'
+    || c == '-';
+  // clang-format on
+}
+/**
+ * A leading hyphen is not allowed for POSIX's portable file names.
+ */
+bool is_path_component_start(char c) {
+  return c != '-' && is_path_component_continuation(c);
+}
+
+/**
+ * Advances the scan window past zero or more whitespace characters.
+ */
+void skip_whitespace(detail::lexer_scan_window* scan) {
+  while (detail::is_whitespace(scan->peek())) {
+    scan->advance();
+  }
+}
+
+/**
  * Result of a scan which resulted in a token or failed.
  * The (now advanced) scan_window is packaged with the token so the lexer can
  * move up its cursor.
@@ -146,6 +179,24 @@ lex_result lex_identifier_or_keyword(detail::lexer_scan_window scan) {
   }
 }
 
+lex_result lex_path_component(detail::lexer_scan_window scan) {
+  char c = scan.advance();
+  if (!is_path_component_start(c)) {
+    return std::nullopt;
+  }
+  while (scan.can_advance() && is_path_component_continuation(scan.peek())) {
+    scan.advance();
+  }
+  return lex_result(
+      token::make_path_component(scan.text(), scan.range()), scan);
+}
+
+lex_result lex_path_separator(detail::lexer_scan_window scan) {
+  return scan.advance() == '/'
+      ? lex_result(token(tok::slash, scan.range()), scan)
+      : std::nullopt;
+}
+
 lex_result lex_i64_literal(
     detail::lexer_scan_window scan, lexer::diagnoser diagnoser) {
   assert(scan.empty());
@@ -155,9 +206,7 @@ lex_result lex_i64_literal(
   if (scan.peek() == '-') {
     scan.advance();
     is_negative = true;
-    while (detail::is_whitespace(scan.peek())) {
-      scan.advance();
-    }
+    skip_whitespace(&scan);
   }
   scan = scan.make_fresh();
 
@@ -297,6 +346,24 @@ lex_result lex_close(detail::lexer_scan_window scan) {
   return lex_result(token(tok::close, scan.range()), scan);
 }
 
+// Lexes common template parts (to be shared between different lexer states)
+lex_result lex_template_part(
+    detail::lexer_scan_window scan, lexer::diagnoser diagnoser) {
+  if (lex_result punct = lex_punctuation(scan)) {
+    return punct;
+  }
+  if (lex_result identifier = lex_identifier_or_keyword(scan)) {
+    return identifier;
+  }
+  if (lex_result i64_literal = lex_i64_literal(scan, diagnoser)) {
+    return i64_literal;
+  }
+  if (lex_result string_literal = lex_string_literal(scan, diagnoser)) {
+    return string_literal;
+  }
+  return std::nullopt;
+}
+
 } // namespace
 
 /**
@@ -310,6 +377,8 @@ class lexer::state_text : public lexer::state_base {
 /**
  * Reads all text in a comment "{{!" or "{{!--" until lexing encounters "}}" or
  * "--}}" respectively.
+ *
+ * This implementation assumes that we transition after "{{" but before "!".
  */
 class lexer::state_comment : public lexer::state_base {
   result next(lexer& lex) override {
@@ -353,17 +422,16 @@ class lexer::state_comment : public lexer::state_base {
 };
 
 /**
- * Reads the templating language constructs in between "{{" and "}}".
+ * Reads the templating language constructs in between "{{" and "}}" (except
+ * partial application and comments).
  */
 class lexer::state_template : public lexer::state_base {
   result next(lexer& lex) override {
     auto& scan = lex.scan_window_;
     assert(scan.empty());
 
-    while (detail::is_whitespace(scan.peek())) {
-      // in template bodies, whitespace is ignored (unlike in raw text)
-      scan.advance();
-    }
+    // in template bodies, whitespace is ignored (unlike in raw text)
+    skip_whitespace(&scan);
     scan = scan.make_fresh();
 
     if (!scan.can_advance()) {
@@ -375,23 +443,68 @@ class lexer::state_template : public lexer::state_base {
           std::move(close).advance_to_token(&scan),
           std::make_unique<lexer::state_text>()};
     }
-    if (lex_result punct = lex_punctuation(scan)) {
-      return std::move(punct).advance_to_token(&scan);
+    if (lex_result any = lex_template_part(scan, lex.diagnose())) {
+      return std::move(any).advance_to_token(&scan);
     }
-    if (lex_result identifier = lex_identifier_or_keyword(scan)) {
-      return std::move(identifier).advance_to_token(&scan);
+    // We don't know what the next token is
+    scan.advance();
+    return lex.diagnose().unexpected_token();
+  }
+};
+
+/**
+ * Reads the templating language constructs in between "{{>" and "}}" (partial
+ * application).
+ *
+ * Partial application gets its own state primarily because identifers can be
+ * ambiguous with path components. So instead we opt to emit tok::path_component
+ * exclusively in partial application contexts.
+ *
+ * This implementation assumes we transition after "{{" but before ">".
+ */
+class lexer::state_partial_application : public lexer::state_base {
+  result next(lexer& lex) override {
+    auto& scan = lex.scan_window_;
+    assert(scan.empty());
+
+    // in template bodies, whitespace is ignored (unlike in raw text)
+    skip_whitespace(&scan);
+    if (!init_) {
+      init_ = true;
+      [[maybe_unused]] char c = scan.advance();
+      assert(c == '>');
+      return token(tok::gt, scan.range());
     }
-    if (lex_result i64_literal = lex_i64_literal(scan, lex.diagnose())) {
-      return std::move(i64_literal).advance_to_token(&scan);
+
+    scan = scan.make_fresh();
+
+    if (!scan.can_advance()) {
+      return token(tok::eof, scan.range());
     }
-    if (lex_result string_literal = lex_string_literal(scan, lex.diagnose())) {
-      return std::move(string_literal).advance_to_token(&scan);
+
+    if (lex_result close = lex_close(scan)) {
+      return {
+          std::move(close).advance_to_token(&scan),
+          std::make_unique<lexer::state_text>()};
+    }
+    if (lex_result path_separator = lex_path_separator(scan)) {
+      return std::move(path_separator).advance_to_token(&scan);
+    }
+    if (lex_result path_component = lex_path_component(scan)) {
+      return std::move(path_component).advance_to_token(&scan);
+    }
+    // Fall back to common template tokenization. Most likely, this will fail
+    // in the parser but that will result in a better error message.
+    if (lex_result any = lex_template_part(scan, lex.diagnose())) {
+      return std::move(any).advance_to_token(&scan);
     }
 
     // We don't know what the next token is
     scan.advance();
     return lex.diagnose().unexpected_token();
   }
+
+  bool init_ = false;
 };
 
 /**
@@ -439,9 +552,18 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
       auto scan_within = scan.make_fresh().next(2);
       auto open_token = token(tok::open, scan_within.range());
       using ptr = std::unique_ptr<lexer::state_base>;
-      auto transition = scan_within.peek() == '!'
-          ? ptr(std::make_unique<lexer::state_comment>())
-          : ptr(std::make_unique<lexer::state_template>());
+      auto transition = std::invoke([&] {
+        if (scan_within.peek() == '!') {
+          return ptr(std::make_unique<lexer::state_comment>());
+        }
+        // While Mustache does not technically support spaces between "{{" and
+        // ">" for partial applications, mstch does so we skip whitespace *only*
+        // in this case for backward compatibility.
+        skip_whitespace(&scan_within);
+        return scan_within.peek() == '>'
+            ? ptr(std::make_unique<lexer::state_partial_application>())
+            : ptr(std::make_unique<lexer::state_template>());
+      });
       std::vector<token> tokens;
       if (!text.empty()) {
         tokens.emplace_back(token::make_text(std::move(text), scan.range()));

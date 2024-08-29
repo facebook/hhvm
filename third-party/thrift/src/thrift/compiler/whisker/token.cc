@@ -66,10 +66,13 @@ constexpr token_kind_info info[] = {
 
     {tok::i64_literal, "int literal"},
     {tok::string_literal, "string literal"},
-    {tok::newline, "new line"},
 
     {tok::identifier, "identifier"},
+    {tok::path_component, "path component"},
+
     {tok::text, "text"},
+    {tok::newline, "new line"},
+
     {tok::open, "`{{`"},
     {tok::close, "`}}`"},
 
@@ -115,18 +118,6 @@ const std::unordered_map<std::string_view, tok> keywords_to_tok = {
   throw std::runtime_error(fmt::format("token kind is not {}", expected));
 }
 
-void throw_unless_string_like(token_kind kind) {
-  if (kind != tok::string_literal && kind != tok::identifier &&
-      kind != tok::text && kind != tok::newline) {
-    throw_invalid_kind(fmt::format(
-        "{} or {} or {} or {}",
-        to_string(tok::string_literal),
-        to_string(tok::identifier),
-        to_string(tok::text),
-        to_string(tok::newline)));
-  }
-}
-
 } // namespace
 
 std::string_view to_string(tok kind) {
@@ -156,6 +147,7 @@ token_value_kind token::value_kind() const {
       return token_value_kind::i64;
     case tok::string_literal:
     case tok::identifier:
+    case tok::path_component:
     case tok::text:
     case tok::newline:
       return token_value_kind::string;
@@ -183,7 +175,15 @@ std::int64_t token::i64_value() const {
 }
 
 std::string_view token::string_value() const {
-  throw_unless_string_like(kind);
+  if (value_kind() != token_value_kind::string) {
+    throw_invalid_kind(fmt::format(
+        "{}, {}, {}, {}, or {}",
+        to_string(tok::string_literal),
+        to_string(tok::identifier),
+        to_string(tok::path_component),
+        to_string(tok::text),
+        to_string(tok::newline)));
+  }
   return detail::variant_match(
       data,
       [](const std::string_view& str) -> std::string_view { return str; },
@@ -210,6 +210,13 @@ std::string_view token::string_value() const {
 /* static */ token token::make_identifier(
     std::string_view value, const source_range& r) {
   auto t = token(tok::identifier, r);
+  t.data = value;
+  return t;
+}
+
+/* static */ token token::make_path_component(
+    std::string_view value, const source_range& r) {
+  auto t = token(tok::path_component, r);
   t.data = value;
   return t;
 }

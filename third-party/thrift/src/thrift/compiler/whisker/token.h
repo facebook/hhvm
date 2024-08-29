@@ -38,6 +38,8 @@ enum class tok : unsigned {
   string_literal,
 
   identifier,
+  path_component,
+
   text,
   newline, // "\r\n", "\n", or "\r"
 
@@ -215,6 +217,7 @@ class token {
   static token make_i64_literal(std::int64_t, const source_range&);
   static token make_string_literal(std::string, const source_range&);
   static token make_identifier(std::string_view, const source_range&);
+  static token make_path_component(std::string_view, const source_range&);
   static token make_text(std::string, const source_range&);
   static token make_newline(std::string_view, const source_range&);
 

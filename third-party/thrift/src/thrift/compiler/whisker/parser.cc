@@ -735,9 +735,7 @@ class parser {
     }
 
     auto range = scan.with_start(scan_start).range();
-    return {
-        ast::variable_lookup{range, ast::lookup_path{range, std::move(path)}},
-        scan};
+    return {ast::variable_lookup{range, std::move(path)}, scan};
   }
 
   // section-block → { section-block-open ~ body* ~ section-block-close }
@@ -781,7 +779,9 @@ class parser {
       report_expected(
           scan,
           fmt::format(
-              "{} to close section-block '{}'", tok::open, open.path_string()));
+              "{} to close section-block '{}'",
+              tok::open,
+              open.chain_string()));
     }
     if (!try_consume_token(&scan, tok::slash)) {
       report_expected(
@@ -789,7 +789,7 @@ class parser {
           fmt::format(
               "{} to close section-block '{}'",
               tok::slash,
-              open.path_string()));
+              open.chain_string()));
     }
 
     parse_result lookup_at_close = parse_variable_lookup(scan.make_fresh());
@@ -798,19 +798,19 @@ class parser {
           scan,
           fmt::format(
               "variable-lookup to close section-block '{}'",
-              open.path_string()));
+              open.chain_string()));
     }
     ast::variable_lookup close =
         std::move(lookup_at_close).consume_and_advance(&scan);
 
     bool should_fail = false;
-    if (open.path_string() != close.path_string()) {
+    if (open.chain_string() != close.chain_string()) {
       should_fail = true;
       report_error(
           scan,
           "section-block opening '{}' does not match closing '{}'",
-          open.path_string(),
-          close.path_string());
+          open.chain_string(),
+          close.chain_string());
     }
     if (!try_consume_token(&scan, tok::close)) {
       should_fail = true;
@@ -818,7 +818,7 @@ class parser {
           scan,
           "expected {} to close section-block '{}'",
           tok::close,
-          open.path_string());
+          open.chain_string());
     }
     if (should_fail) {
       throw parse_error();
@@ -853,7 +853,7 @@ class parser {
     if (!partial_lookup.has_value()) {
       report_expected(scan, "partial-lookup in partial-apply");
     }
-    ast::lookup_path lookup =
+    ast::partial_lookup lookup =
         std::move(partial_lookup).consume_and_advance(&scan);
 
     if (!try_consume_token(&scan, tok::close)) {
@@ -862,7 +862,7 @@ class parser {
           fmt::format(
               "{} to close partial-apply '{}'",
               tok::close,
-              lookup.as_string('/')));
+              lookup.as_string()));
     }
 
     bool is_standalone =
@@ -882,31 +882,33 @@ class parser {
         scan};
   }
 
-  // partial-lookup → { identifier ~ (("/" | ".") ~ identifier)* }
-  parse_result<ast::lookup_path> parse_partial_lookup(parser_scan_window scan) {
+  // partial-lookup → { path-component ~ ("/" ~ path-component)* }
+  parse_result<ast::partial_lookup> parse_partial_lookup(
+      parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
     const token& first_id = scan.advance();
-    if (first_id.kind != tok::identifier) {
+    if (first_id.kind != tok::path_component) {
       return std::nullopt;
     }
-    std::vector<ast::identifier> path;
-    path.emplace_back(
-        ast::identifier{first_id.range, std::string(first_id.string_value())});
+    std::vector<ast::path_component> path;
+    path.emplace_back(ast::path_component{
+        first_id.range, std::string(first_id.string_value())});
 
     while (try_consume_token(&scan, tok::slash) ||
            try_consume_token(&scan, tok::dot)) {
       const token& id_part = scan.peek();
-      if (id_part.kind != tok::identifier) {
-        report_expected(scan, "identifier in partial-lookup");
+      if (id_part.kind != tok::path_component) {
+        report_expected(scan, "path-component in partial-lookup");
       }
       scan.advance();
-      path.emplace_back(
-          ast::identifier{id_part.range, std::string(id_part.string_value())});
+      path.emplace_back(ast::path_component{
+          id_part.range, std::string(id_part.string_value())});
     }
     return {
-        ast::lookup_path{scan.with_start(scan_start).range(), std::move(path)},
+        ast::partial_lookup{
+            scan.with_start(scan_start).range(), std::move(path)},
         scan};
   }
 

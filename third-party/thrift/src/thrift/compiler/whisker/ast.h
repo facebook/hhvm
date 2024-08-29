@@ -87,19 +87,8 @@ struct identifier {
 };
 
 /**
- * A "path" of identifiers that represent a lookup of a variable or partial.
- * Unlike variable_lookup, the self-referencing dot is not a valid lookup_path.
- */
-struct lookup_path {
-  source_range loc;
-  std::vector<identifier> parts;
-
-  std::string as_string(char separator) const;
-};
-
-/**
  * A "path" of identifiers that represent a lookup of a variable where each
- * path component is separated by a dot. This is a subset of Mustache's
+ * chain component is separated by a dot. This is a subset of Mustache's
  * variables:
  *   https://mustache.github.io/mustache.5.html#Variables
  */
@@ -107,9 +96,9 @@ struct variable_lookup {
   source_range loc;
   // this_ref is a special case: {{.}} referring to the current object.
   struct this_ref {};
-  std::variant<this_ref, lookup_path> path;
+  std::variant<this_ref, std::vector<identifier>> chain;
 
-  std::string path_string() const;
+  std::string chain_string() const;
 };
 
 /**
@@ -120,7 +109,7 @@ struct variable {
   source_range loc;
   variable_lookup lookup;
 
-  std::string path_string() const { return lookup.path_string(); }
+  std::string chain_string() const { return lookup.chain_string(); }
 };
 
 /**
@@ -138,13 +127,33 @@ struct section_block {
   bodies bodies;
 };
 
+/*
+ * A valid Whisker path component for partial application. See whisker::lexer
+ * for its definition.
+ */
+struct path_component {
+  source_range loc;
+  std::string value;
+};
+
+/**
+ * A '/' delimited series of path components representing a POSIX portable file
+ * path. This is used for partial applications.
+ */
+struct partial_lookup {
+  source_range loc;
+  std::vector<path_component> parts;
+
+  std::string as_string() const;
+};
+
 /**
  * A Whisker construct for partially applied templates. This matches Mustache:
  *   https://mustache.github.io/mustache.5.html#Partials
  */
 struct partial_apply {
   source_range loc;
-  lookup_path path;
+  partial_lookup path;
   /**
    * Standalone partial applications exhibit different indentation behavior:
    *   https://github.com/mustache/spec/blob/66f078e0d534515d8df23d0d3764dccda74e042b/specs/partials.yml#L13-L15
@@ -154,6 +163,8 @@ struct partial_apply {
    * interpolation. Otherwise, this is std::nullopt.
    */
   std::optional<unsigned> standalone_offset_within_line;
+
+  std::string path_string() const;
 };
 
 } // namespace whisker::ast

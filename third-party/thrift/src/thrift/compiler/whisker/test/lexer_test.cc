@@ -250,6 +250,79 @@ TEST_F(LexerTest, unrecognized_token_against_identifier) {
           1)));
 }
 
+TEST_F(LexerTest, partial_apply) {
+  auto lexer = make_lexer("{{> foo/bar }}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::gt, {}},
+      {tok::path_component, "foo"},
+      {tok::slash, {}},
+      {tok::path_component, "bar"},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, partial_apply_single_component) {
+  auto lexer = make_lexer("{{ > foo }}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::gt, {}},
+      {tok::path_component, "foo"},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, partial_apply_no_path) {
+  auto lexer = make_lexer("{{> }}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::gt, {}},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, partial_apply_keyword_and_dots) {
+  auto lexer = make_lexer("{{ > foo-bar / true /source.cpp }}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::gt, {}},
+      {tok::path_component, "foo-bar"},
+      {tok::slash, {}},
+      {tok::path_component, "true"}, // keyword
+      {tok::slash, {}},
+      {tok::path_component, "source.cpp"},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, partial_apply_bad_token) {
+  // Should not error in the lexer, leave that to the parser
+  auto lexer = make_lexer("{{> foo / \"bar\" }}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::gt, {}},
+      {tok::path_component, "foo"},
+      {tok::slash, {}},
+      {tok::string_literal, "bar"},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
 TEST_F(LexerTest, keywords) {
   constexpr std::string_view keywords =
       "if unless else each as partial let and or not with this define for do import export from";

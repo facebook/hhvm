@@ -112,6 +112,33 @@ public class RSocketThriftClientTest {
   }
 
   @Test
+  public void testZeroPort() {
+    RpcServerHandler serverHandler =
+        new PingServiceRpcServerHandler(new BlockingPingService(), Collections.emptyList());
+
+    RSocketServerTransportFactory transportFactory =
+        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+    RSocketServerTransport transport =
+        transportFactory.createServerTransport(new InetSocketAddress(0), serverHandler).block();
+    InetSocketAddress address = (InetSocketAddress) transport.getAddress();
+
+    RpcClientFactory factory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setDisableRSocket(false)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .build();
+
+    PingService client =
+        PingService.clientBuilder().setProtocolId(ProtocolId.BINARY).build(factory, address);
+
+    client.pingVoid(new PingRequest.Builder().setRequest("ping").build());
+  }
+
+  @Test
   public void testPingVoidAsync() throws Exception {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =

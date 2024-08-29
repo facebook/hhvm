@@ -35,7 +35,7 @@ public class RSocketServerTransportFactory
   @Override
   public Mono<? extends RSocketServerTransport> createServerTransport(
       SocketAddress bindAddress, RpcServerHandler rpcServerHandler) {
-    return RSocketServerTransport.createInstance(bindAddress, rpcServerHandler, config);
+    return RSocketServerTransport.createInstance(parsePort(bindAddress), rpcServerHandler, config);
   }
 
   public Mono<? extends RSocketServerTransport> createServerTransport(
@@ -46,5 +46,14 @@ public class RSocketServerTransportFactory
 
   private int parsePort(int port) {
     return port == 0 ? RpcServerUtils.findFreePort() : port;
+  }
+
+  private SocketAddress parsePort(SocketAddress socketAddress) {
+    if (socketAddress instanceof InetSocketAddress) {
+      InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+      return new InetSocketAddress(
+          inetSocketAddress.getHostName(), parsePort(inetSocketAddress.getPort()));
+    }
+    return socketAddress;
   }
 }

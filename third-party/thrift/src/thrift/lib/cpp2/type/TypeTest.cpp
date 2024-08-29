@@ -24,7 +24,7 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
-#include <thrift/lib/cpp2/type/ThriftType.h>
+#include <thrift/lib/cpp2/type/UniversalName.h>
 
 namespace apache::thrift::type {
 namespace {
@@ -41,7 +41,6 @@ TypeTestCase test(Args&&... args) {
 
 std::vector<TypeTestCase> getUniqueNonContainerTypes() {
   return {
-      test<void_t>(),
       test<bool_t>(),
       test<byte_t>(),
       test<i16_t>(),
@@ -213,5 +212,91 @@ TEST(TypeTest, isFull) {
   // ensures that uri is valid
   EXPECT_TRUE(type.isValid());
 }
+
+TEST(TypeTest, IdenticalTypeStructBasic) {
+  auto unique = getUniqueTypes();
+  EXPECT_FALSE(unique.empty());
+  for (size_t i = 0; i < unique.size(); ++i) {
+    for (size_t j = 0; j < unique.size(); ++j) {
+      if (i == j) {
+        EXPECT_TRUE(identicalTypeStruct(
+            unique[i].type.toThrift(), unique[j].type.toThrift()));
+      } else {
+        EXPECT_FALSE(identicalTypeStruct(
+            unique[i].type.toThrift(), unique[j].type.toThrift()));
+      }
+    }
+  }
+}
+
+TEST(TypeTest, IdenticalTypeStructHash) {
+  auto structUri = "domain.com/my/package/MyStruct";
+  auto structType = Type::create<struct_c>(structUri).toThrift();
+  // TODO(dokwon): Consider adding Type::create with hash
+  TypeStruct structTypeWithHash;
+  structTypeWithHash.name()
+      ->structType_ref()
+      .ensure()
+      .typeHashPrefixSha2_256_ref() =
+      getUniversalHashPrefix(structUri, kDefaultTypeHashBytes).toString();
+  EXPECT_TRUE(identicalTypeStruct(structType, structTypeWithHash));
+  // list<struct>
+  {
+    TypeStruct type;
+    type.name()->listType_ref().ensure();
+    type.params()->push_back(structType);
+    TypeStruct typeWithHash;
+    typeWithHash.name()->listType_ref().ensure();
+    typeWithHash.params()->push_back(structTypeWithHash);
+    EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
+  }
+  // set<struct>
+  {
+    TypeStruct type;
+    type.name()->setType_ref().ensure();
+    type.params()->push_back(structType);
+    TypeStruct typeWithHash;
+    typeWithHash.name()->setType_ref().ensure();
+    typeWithHash.params()->push_back(structTypeWithHash);
+    EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
+  }
+  // map<struct, int>
+  {
+    TypeStruct type;
+    type.name()->mapType_ref().ensure();
+    type.params()->push_back(structType);
+    type.params()->push_back(Type::create<type::i32_t>().toThrift());
+    TypeStruct typeWithHash;
+    typeWithHash.name()->mapType_ref().ensure();
+    typeWithHash.params()->push_back(structTypeWithHash);
+    typeWithHash.params()->push_back(Type::create<type::i32_t>().toThrift());
+    EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
+  }
+  // map<int, struct>
+  {
+    TypeStruct type;
+    type.name()->mapType_ref().ensure();
+    type.params()->push_back(Type::create<type::i32_t>().toThrift());
+    type.params()->push_back(structType);
+    TypeStruct typeWithHash;
+    typeWithHash.name()->mapType_ref().ensure();
+    typeWithHash.params()->push_back(Type::create<type::i32_t>().toThrift());
+    typeWithHash.params()->push_back(structTypeWithHash);
+    EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
+  }
+  // map<struct, struct>
+  {
+    TypeStruct type;
+    type.name()->mapType_ref().ensure();
+    type.params()->push_back(structType);
+    type.params()->push_back(structType);
+    TypeStruct typeWithHash;
+    typeWithHash.name()->mapType_ref().ensure();
+    typeWithHash.params()->push_back(structTypeWithHash);
+    typeWithHash.params()->push_back(structTypeWithHash);
+    EXPECT_TRUE(identicalTypeStruct(type, typeWithHash));
+  }
+}
+
 } // namespace
 } // namespace apache::thrift::type

@@ -209,6 +209,9 @@ class Type : public detail::Wrap<TypeStruct> {
   struct Helper<cpp_type<T, Tag>> : Helper<Tag> {};
 };
 
+// TODO(dokwon): Consider moving this to either op::equal or op::identical
+bool identicalTypeStruct(const TypeStruct& lhs, const TypeStruct& rhs);
+
 } // namespace type
 } // namespace thrift
 } // namespace apache

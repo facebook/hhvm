@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/type/Type.h>
 
+#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
 namespace apache {
@@ -83,6 +84,88 @@ bool Type::isFull(
 
 void Type::checkName(const std::string& name) {
   validateUniversalName(name);
+}
+
+bool identicalTypeUri(const TypeUri& lhs, const TypeUri& rhs) {
+  // We don't consider 'scopedName' here since it is there for backward
+  // compatible reason and couldn't be generated with any of our standard
+  // offerings.
+  if (lhs.getType() != rhs.getType()) {
+    if (lhs.uri_ref().has_value() &&
+        rhs.typeHashPrefixSha2_256_ref().has_value()) {
+      return getUniversalHashPrefix(
+                 lhs.uri_ref().value(), kDefaultTypeHashBytes) ==
+          rhs.typeHashPrefixSha2_256_ref().value();
+    } else if (
+        lhs.typeHashPrefixSha2_256_ref().has_value() &&
+        rhs.uri_ref().has_value()) {
+      return lhs.typeHashPrefixSha2_256_ref().value() ==
+          getUniversalHashPrefix(rhs.uri_ref().value(), kDefaultTypeHashBytes);
+    }
+    return false;
+  }
+  return lhs == rhs;
+}
+
+bool identicalTypeStruct(const TypeStruct& lhs, const TypeStruct& rhs) {
+  if (lhs.name()->getType() != rhs.name()->getType()) {
+    return false;
+  }
+
+  switch (lhs.name()->getType()) {
+    case TypeName::__EMPTY__:
+      return false;
+    // primitives
+    case TypeName::boolType:
+    case TypeName::byteType:
+    case TypeName::i16Type:
+    case TypeName::i32Type:
+    case TypeName::i64Type:
+    case TypeName::floatType:
+    case TypeName::doubleType:
+    case TypeName::stringType:
+    case TypeName::binaryType:
+      return true;
+    // definitions
+    case TypeName::enumType:
+      return identicalTypeUri(
+          lhs.name()->enumType_ref().value(),
+          rhs.name()->enumType_ref().value());
+    case TypeName::typedefType:
+      return identicalTypeUri(
+          lhs.name()->typedefType_ref().value(),
+          rhs.name()->typedefType_ref().value());
+    case TypeName::structType:
+      return identicalTypeUri(
+          lhs.name()->structType_ref().value(),
+          rhs.name()->structType_ref().value());
+    case TypeName::unionType:
+      return identicalTypeUri(
+          lhs.name()->unionType_ref().value(),
+          rhs.name()->unionType_ref().value());
+    case TypeName::exceptionType:
+      return identicalTypeUri(
+          lhs.name()->exceptionType_ref().value(),
+          rhs.name()->exceptionType_ref().value());
+    // containers
+    case TypeName::listType:
+    case TypeName::setType:
+      if (lhs.params()->size() != 1 || rhs.params()->size() != 1) {
+        folly::throw_exception<std::runtime_error>("Invalid params");
+      }
+      return identicalTypeStruct(
+          lhs.params().value()[0], rhs.params().value()[0]);
+    case TypeName::mapType:
+      if (lhs.params()->size() != 2 || rhs.params()->size() != 2) {
+        folly::throw_exception<std::runtime_error>("Invalid params");
+      }
+      return identicalTypeStruct(
+                 lhs.params().value()[0], rhs.params().value()[0]) &&
+          identicalTypeStruct(lhs.params().value()[1], rhs.params().value()[1]);
+    default:
+      // unreachable
+      folly::terminate_with<std::runtime_error>("Invalid type.");
+  }
 }
 
 } // namespace type

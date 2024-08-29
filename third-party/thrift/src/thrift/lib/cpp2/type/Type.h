@@ -212,6 +212,10 @@ class Type : public detail::Wrap<TypeStruct> {
 // TODO(dokwon): Consider moving this to either op::equal or op::identical
 bool identicalTypeStruct(const TypeStruct& lhs, const TypeStruct& rhs);
 
+inline bool identicalType(const Type& lhs, const Type& rhs) {
+  return identicalTypeStruct(lhs.toThrift(), rhs.toThrift());
+}
+
 } // namespace type
 } // namespace thrift
 } // namespace apache

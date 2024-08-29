@@ -202,7 +202,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     // If 'ensureAny' type does not match the type of stored value in Thrift
     // Any, we can ignore 'patchIfTypeIsPrior'.
     if (data_.ensureAny().has_value() &&
-        data_.ensureAny().value().type() != val.type()) {
+        !type::identicalType(
+            data_.ensureAny()->type().value(), val.type().value())) {
       val = data_.ensureAny().value();
       const auto* afterTypePatches = folly::get_ptr(
           data_.patchIfTypeIsAfter().value(), val.type().value());
@@ -260,7 +261,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   bool ensures(const type::Type& type) {
     return data_.ensureAny().has_value() &&
-        data_.ensureAny().value().type() == type;
+        type::identicalType(data_.ensureAny()->type().value(), type);
   }
 
   template <typename Tag>
@@ -279,7 +280,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
   void tryPatchable(const type::Type& type) {
     if (data_.assign().has_value()) {
-      if (data_.assign().value().type() != type) {
+      if (!type::identicalType(data_.assign()->type().value(), type)) {
         return;
       }
       data_.clear() = true;

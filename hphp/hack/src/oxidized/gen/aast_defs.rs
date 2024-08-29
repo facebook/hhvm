@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9876e0dd7ee18a9ccb3c59580d04a438>>
+// @generated SignedSource<<7a702dff22bbee1442e41e2e67a26de1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2317,6 +2317,8 @@ pub enum Def<Ex, En> {
     Namespace(Box<(Sid, Vec<Def<Ex, En>>)>),
     NamespaceUse(Vec<(NsKind, Sid, Sid)>),
     SetNamespaceEnv(Box<Nsenv>),
+    /// NB: these are only there at the AAST level.
+    /// From NAST onwards, they've been copied to each top-level def and discarded.
     FileAttributes(Box<FileAttribute<Ex, En>>),
     Module(Box<ModuleDef<Ex, En>>),
     SetModule(Box<Sid>),

@@ -385,6 +385,8 @@ module UserAttributes = struct
 
   let uaPackageOverride = "__PackageOverride"
 
+  let bkscStrict = "\\BKSCStrict"
+
   type attr_info = {
     contexts: string list;
     doc: string;

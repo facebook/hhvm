@@ -1153,6 +1153,8 @@ and ('ex, 'en) def =
   | NamespaceUse of (ns_kind * sid * sid) list
   | SetNamespaceEnv of nsenv
   | FileAttributes of ('ex, 'en) file_attribute
+      (** NB: these are only there at the AAST level.
+        From NAST onwards, they've been copied to each top-level def and discarded. *)
   | Module of ('ex, 'en) module_def
   | SetModule of sid
 

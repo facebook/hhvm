@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8c51029fccc487517e6f2b72a14e980e>>
+// @generated SignedSource<<f7c5b88a53dfd1537d63f7fa47d9b296>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2914,6 +2914,8 @@ pub enum Def<'a, Ex, En> {
     NamespaceUse(&'a [(&'a oxidized::aast_defs::NsKind, Sid<'a>, Sid<'a>)]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     SetNamespaceEnv(&'a Nsenv<'a>),
+    /// NB: these are only there at the AAST level.
+    /// From NAST onwards, they've been copied to each top-level def and discarded.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     FileAttributes(&'a FileAttribute<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

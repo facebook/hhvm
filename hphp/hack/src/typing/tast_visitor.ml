@@ -392,6 +392,8 @@ class type handler =
 
     method at_fun_def : Env.t -> Tast.fun_def -> unit
 
+    method at_module_def : Env.t -> Tast.module_def -> unit
+
     method at_method_ : Env.t -> Tast.method_ -> unit
 
     method at_expr : Env.t -> Tast.expr -> unit
@@ -424,6 +426,8 @@ class virtual handler_base : handler =
     method at_gconst _ _ = ()
 
     method at_fun_def _ _ = ()
+
+    method at_module_def _ _ = ()
 
     method at_method_ _ _ = ()
 
@@ -467,6 +471,10 @@ let iter_with (handlers : handler list) : iter =
     method! on_fun_def env x =
       List.iter handlers ~f:(fun v -> v#at_fun_def env x);
       super#on_fun_def env x
+
+    method! on_module_def env x =
+      List.iter handlers ~f:(fun v -> v#at_module_def env x);
+      super#on_module_def env x
 
     method! on_method_ env x =
       List.iter handlers ~f:(fun v -> v#at_method_ env x);

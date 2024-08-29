@@ -26,44 +26,53 @@ namespace apache::thrift {
 const type::Schema& SchemaRegistry::getMergedSchema() {
   static const folly::Indestructible<type::Schema> merged = [&] {
     BaseSchemaRegistry::accessed() = true;
-    type::Schema mergedSchema;
-    std::unordered_set<type::ProgramId> includedPrograms;
-
+    std::vector<std::string_view> schemas;
+    schemas.reserve(BaseSchemaRegistry::getRawSchemas().size());
     for (auto& [name, data] : BaseSchemaRegistry::getRawSchemas()) {
-      auto decompressed =
-          folly::io::getCodec(folly::compression::CodecType::ZSTD)
-              ->uncompress(data.data);
-      auto schema = CompactSerializer::deserialize<type::Schema>(decompressed);
-
-      for (auto& program : *schema.programs()) {
-        auto id = *program.id();
-        if (!includedPrograms.insert(id).second) {
-          // We checked during registration that the program ids are unique,
-          // so this file was already included by another program bundle.
-          continue;
-        }
-        mergedSchema.programs()->push_back(std::move(program));
-      }
-
-      mergedSchema.valuesMap()->insert(
-          std::make_move_iterator(schema.valuesMap()->begin()),
-          std::make_move_iterator(schema.valuesMap()->end()));
-      // This deduplicates common values.
-
-      auto ndefs = mergedSchema.definitionsMap()->size();
-      mergedSchema.definitionsMap()->insert(
-          std::make_move_iterator(schema.definitionsMap()->begin()),
-          std::make_move_iterator(schema.definitionsMap()->end()));
-      if (mergedSchema.definitionsMap()->size() !=
-          ndefs + schema.definitionsMap()->size()) {
-        throw std::runtime_error("DefinitionKey collision");
-      }
+      schemas.push_back(data.data);
     }
-
-    return mergedSchema;
+    return mergeSchemas(folly::range(schemas));
   }();
 
   return *merged;
+}
+
+type::Schema SchemaRegistry::mergeSchemas(
+    folly::Range<const std::string_view*> schemas) {
+  type::Schema mergedSchema;
+  std::unordered_set<type::ProgramId> includedPrograms;
+
+  for (const auto& data : schemas) {
+    auto decompressed = folly::io::getCodec(folly::compression::CodecType::ZSTD)
+                            ->uncompress(data);
+    auto schema = CompactSerializer::deserialize<type::Schema>(decompressed);
+
+    for (auto& program : *schema.programs()) {
+      auto id = *program.id();
+      if (!includedPrograms.insert(id).second) {
+        // We checked during registration that the program ids are unique,
+        // so this file was already included by another program bundle.
+        continue;
+      }
+      mergedSchema.programs()->push_back(std::move(program));
+    }
+
+    mergedSchema.valuesMap()->insert(
+        std::make_move_iterator(schema.valuesMap()->begin()),
+        std::make_move_iterator(schema.valuesMap()->end()));
+    // This deduplicates common values.
+
+    auto ndefs = mergedSchema.definitionsMap()->size();
+    mergedSchema.definitionsMap()->insert(
+        std::make_move_iterator(schema.definitionsMap()->begin()),
+        std::make_move_iterator(schema.definitionsMap()->end()));
+    if (mergedSchema.definitionsMap()->size() !=
+        ndefs + schema.definitionsMap()->size()) {
+      throw std::runtime_error("DefinitionKey collision");
+    }
+  }
+
+  return mergedSchema;
 }
 
 } // namespace apache::thrift

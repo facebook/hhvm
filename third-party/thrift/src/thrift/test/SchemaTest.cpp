@@ -25,6 +25,8 @@
 #include <thrift/test/gen-cpp2/TopologicallySortObjectsTest_types.h>
 #include <thrift/test/gen-cpp2/schema_types.h>
 
+#include <thrift/test/gen-cpp2/schema_constants.h>
+
 using namespace apache::thrift;
 
 TEST(SchemaTest, not_linked) {
@@ -82,4 +84,28 @@ TEST(SchemaTest, linked) {
 
   // Use the types target
   (void)facebook::thrift::test::schema::Empty{};
+}
+
+TEST(SchemaTest, static_schema) {
+  auto static_schema = SchemaRegistry::mergeSchemas(
+      facebook::thrift::test::schema::schema_constants::
+          _fbthrift_schema_b5658a7a6a556e3f_includes());
+  const type::Program* static_program = nullptr;
+  for (const auto& program : *static_schema.programs()) {
+    if (program.path() == "thrift/test/schema.thrift") {
+      static_program = &program;
+    }
+  }
+  ASSERT_TRUE(static_program);
+
+  const auto& dynamic_schema = SchemaRegistry::getMergedSchema();
+  const type::Program* dynamic_program = nullptr;
+  for (const auto& program : *dynamic_schema.programs()) {
+    if (program.path() == "thrift/test/schema.thrift") {
+      dynamic_program = &program;
+    }
+  }
+  ASSERT_TRUE(dynamic_program);
+
+  EXPECT_EQ(*static_program, *dynamic_program);
 }

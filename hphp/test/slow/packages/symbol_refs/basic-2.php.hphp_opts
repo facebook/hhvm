@@ -1,4 +1,4 @@
 --dir=__DIR__
 --exclude-dir=__DIR__/inc
--vRuntime.Eval.ActiveDeployment="deployment_with_a"
+-vRuntime.Eval.ActiveDeployment="deployment_with_bar"
 -vForceEnableSymbolRefs=true

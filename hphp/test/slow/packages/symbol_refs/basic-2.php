@@ -1,9 +1,9 @@
 <?hh
 
-module a;
+module bar;
 
 <<__EntryPoint>>
 function main_basic_2() :mixed{
-  foo(); // in module a which is in same package as a
+  foo(); // in module foo which is not in same package as bar
   echo "Done\n";
 }

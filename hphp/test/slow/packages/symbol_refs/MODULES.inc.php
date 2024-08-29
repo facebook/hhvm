@@ -1,4 +1,4 @@
 <?hh
 
-new module a {}
-new module b {}
+new module foo {}
+new module bar {}

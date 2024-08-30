@@ -187,6 +187,11 @@ struct SymbolMap {
       const StringData& baseType,
       DeriveKind kind);
 
+  std::vector<Symbol<SymKind::Type>> getTransitiveDerivedTypes(
+      Symbol<SymKind::Type> baseType);
+  std::vector<Symbol<SymKind::Type>> getTransitiveDerivedTypes(
+      const StringData& baseType);
+
   /**
    * Return the attributes of a type
    */

@@ -76,6 +76,20 @@ function print_subtypes(
   }
 }
 
+function print_transitive_subtypes(
+  classname<mixed> $type,
+  ?HH\Facts\DeriveFilters $filters = null,
+): void {
+  if ($filters is nonnull) {
+    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes($type, $filters));
+    $filters_json = jsonify_filters($filters);
+    print "Transitive subtypes of $type with filters $filters_json: $subtypes_json\n";
+  } else {
+    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes($type));
+    print "Transitive subtypes of $type: $subtypes_json\n";
+  }
+}
+
 function print_supertypes(
   classname<mixed> $type,
   ?HH\Facts\DeriveFilters $filters = null,
@@ -352,6 +366,11 @@ function facts(): void {
         HH\Facts\TypeKind::K_TRAIT,
       ],
     ),
+  );
+
+  print_transitive_subtypes(
+    BaseClass::class,
+    shape('kind' => keyset[HH\Facts\TypeKind::K_CLASS]),
   );
 
   print_supertypes(DerivedClass::class);

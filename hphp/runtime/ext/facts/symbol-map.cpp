@@ -420,6 +420,44 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
   return getDerivedTypes(Symbol<SymKind::Type>{baseType}, kind);
 }
 
+// Implements a BFS to capture the transitive closure of the subtypes
+// of baseType
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTransitiveDerivedTypes(
+    Symbol<SymKind::Type> baseType) {
+  // return empty vec if you passed in a trait and wanted
+  // to filter them out.
+  std::vector<Symbol<SymKind::Type>> subtypes{baseType};
+  std::set<std::string_view> seen;
+  DeriveKind deriveKinds[2] = {DeriveKind::Extends, DeriveKind::RequireExtends};
+  for (auto idx = 0; idx < subtypes.size(); idx++) {
+    auto type_ = subtypes.at(idx);
+    for (auto const kind : deriveKinds) {
+      auto derivedTypes = getDerivedTypes(type_, kind);
+      for (auto const child : derivedTypes) {
+        if (seen.find(child.slice()) != seen.end())
+          continue;
+        // if the child is a trait and the deriveKind is
+        // requireExtends, we throw it away here.
+        auto childKind = getKind(child);
+        if (childKind == TypeKind::Trait && kind == DeriveKind::RequireExtends)
+          continue;
+        seen.insert(child.slice());
+        subtypes.push_back(child);
+      }
+    }
+  }
+
+  // make sure to remove first element, since we only want
+  // derivations of baseType
+  subtypes.erase(subtypes.begin());
+  return subtypes;
+}
+
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTransitiveDerivedTypes(
+    const StringData& baseType) {
+  return getTransitiveDerivedTypes(Symbol<SymKind::Type>{baseType});
+}
+
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfType(
     Symbol<SymKind::Type> type) {
   auto path = getSymbolPath(type);

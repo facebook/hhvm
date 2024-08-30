@@ -204,6 +204,17 @@ function subtypes(
 )[]: vec<string>;
 
 /**
+ * Get the transitive types which extend, implement, or use the given base type.
+ *
+ * Throws InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function transitive_subtypes(
+  /* classname<T> */ string $base_type,
+  /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
+)[]: vec<string>;
+
+/**
  * Get all types which the given type extends, implements, or uses.
  *
  * Throws InvalidOperationException if Facts is not enabled.

@@ -352,6 +352,13 @@ struct Recorder::FactsStore final : public HPHP::FactsStore {
     return wrapper(baseType, filters);
   }
 
+  Array getTransitiveDerivedTypes(const String& baseType, const Variant& filters)
+      override {
+    static constexpr auto m{&HPHP::FactsStore::getTransitiveDerivedTypes};
+    static const auto wrapper{wrap(m, "getTransitiveDerivedTypes")};
+    return wrapper(baseType, filters);
+  }
+
   Array getFileAttrArgs(const String& file, const String& attr) override {
     static constexpr auto m{&HPHP::FactsStore::getFileAttrArgs};
     static const auto wrapper{wrap(m, "getFileAttrArgs")};

@@ -175,6 +175,16 @@ namespace HH\Facts {
     ?DeriveFilters $filters = null,
   )[]: vec<classname<T>>;
 
+ /**
+  * Get the transitive types which extend, implement, or use the given base type.
+  *
+  * Throws InvalidOperationException if Facts is not enabled.
+  */
+  function transitive_subtypes<T>(
+    classname<T> $base_type,
+    ?DeriveFilters $filters = null,
+  )[]: vec<string>;
+
   /**
    * Get all types which the given type extends, implements, or uses.
    *

@@ -66,3 +66,13 @@ trait TRequireClassFinalClassB {
 final class FinalClassUsesTRequireClassB extends SuperClassOfFinalClassB {
   use TRequireClassFinalCLass;
 }
+
+// testing for transitive subclasses
+
+class DerivedOnceClass extends BaseClass {}
+
+class DerivedTwiceClass extends DerivedOnceClass {}
+
+class DerivedAgainClass extends DerivedOnceClass {}
+
+class DerivedFromDerivedTwiceClass extends DerivedTwiceClass {}

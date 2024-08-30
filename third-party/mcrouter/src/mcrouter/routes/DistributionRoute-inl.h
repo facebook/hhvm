@@ -25,6 +25,13 @@ inline DistributionRouteSettings parseDistributionRouteSettings(
     settings.distributedDeleteRpcEnabled = parseBool(
         *jDistributedDeleteRpcEnabled, "distributed_delete_rpc_enabled");
   }
+  if (auto* jDistributionSourceRegion =
+          json.get_ptr("distribution_source_region")) {
+    checkLogic(
+        jDistributionSourceRegion->isString(),
+        "DistributionRoute: distribution_source_region must be a string");
+    settings.srcRegion = jDistributionSourceRegion->getString();
+  }
   return settings;
 }
 

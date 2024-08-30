@@ -54,6 +54,14 @@ class object_t {
     return (methods_.find(name) != methods_.end());
   }
 
+  std::vector<std::string> property_names() const {
+    std::vector<std::string> result;
+    for (auto& entry : methods_) {
+      result.push_back(entry.first);
+    }
+    return result;
+  }
+
  protected:
   // Volatile (uncached) methods are re-invoked every time their value is needed
   // during a template evaluation.

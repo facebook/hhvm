@@ -390,10 +390,13 @@ class DestinationRoute {
       const std::shared_ptr<AxonContext>& axonCtx,
       const std::optional<uint64_t>& bucketId) const {
     // return true if axonlog is enabled and appending to axon client succeed.
-    auto axonLogRes =
-        bucketId && axonCtx &&
+    auto axonLogRes = bucketId && axonCtx &&
         distributeDeleteRequest(
-            req, axonCtx, *bucketId, invalidation::DistributionType::Async);
+                          req,
+                          axonCtx,
+                          *bucketId,
+                          invalidation::DistributionType::Async,
+                          axonCtx->defaultRegionFilter);
     // Try spool asynclog for mcreplay when:
     // 1. Axon is not enabled
     // 2. Axon is enabled, but isn't configured with fallback to Asynclog.

@@ -18,6 +18,7 @@
 
 #include <stdexcept>
 
+#include <folly/Exception.h>
 #include <folly/File.h>
 #include <folly/portability/GFlags.h>
 #include <folly/system/MemoryMapping.h>

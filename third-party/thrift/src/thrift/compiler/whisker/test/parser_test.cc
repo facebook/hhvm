@@ -539,7 +539,7 @@ TEST_F(ParserTest, strip_standalone_lines_multiline_comment) {
       "|- newline <line:1:10, line:2:1> '\\n'\n"
       "|- section-block <inverted> <line:2:3, line:5:25>\n"
       "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
-      "| |- comment <line:3:21, col:38> ''\n"
+      "| |- comment <line:3:21, col:38> ' unaffected '\n"
       "| |- text <line:4:1, col:2> '|'\n"
       "| |- newline <line:4:2, line:5:1> '\\n'\n"
       "|- text <line:6:1, col:9> '| A Line'\n"

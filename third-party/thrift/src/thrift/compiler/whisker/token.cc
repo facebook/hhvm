@@ -25,7 +25,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 // "X macro" pattern to de-dupe code:
 //   https://en.wikipedia.org/wiki/X_macro
@@ -71,6 +71,7 @@ constexpr token_kind_info info[] = {
     {tok::path_component, "path component"},
 
     {tok::text, "text"},
+    {tok::whitespace, "whitespace"},
     {tok::newline, "new line"},
 
     {tok::open, "`{{`"},
@@ -149,6 +150,7 @@ token_value_kind token::value_kind() const {
     case tok::identifier:
     case tok::path_component:
     case tok::text:
+    case tok::whitespace:
     case tok::newline:
       return token_value_kind::string;
     default:
@@ -177,12 +179,16 @@ std::int64_t token::i64_value() const {
 std::string_view token::string_value() const {
   if (value_kind() != token_value_kind::string) {
     throw_invalid_kind(fmt::format(
-        "{}, {}, {}, {}, or {}",
-        to_string(tok::string_literal),
-        to_string(tok::identifier),
-        to_string(tok::path_component),
-        to_string(tok::text),
-        to_string(tok::newline)));
+        "one of {}",
+        fmt::join(
+            std::initializer_list<std::string_view>{
+                to_string(tok::string_literal),
+                to_string(tok::identifier),
+                to_string(tok::path_component),
+                to_string(tok::text),
+                to_string(tok::whitespace),
+                to_string(tok::newline)},
+            ", ")));
   }
   return detail::variant_match(
       data,
@@ -223,6 +229,13 @@ std::string_view token::string_value() const {
 
 /* static */ token token::make_text(std::string value, const source_range& r) {
   auto t = token(tok::text, r);
+  t.data = std::move(value);
+  return t;
+}
+
+/* static */ token token::make_whitespace(
+    std::string value, const source_range& r) {
+  auto t = token(tok::whitespace, r);
   t.data = std::move(value);
   return t;
 }

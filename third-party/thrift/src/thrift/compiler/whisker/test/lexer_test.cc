@@ -164,12 +164,18 @@ TEST_F(LexerTest, basic_identifier) {
 TEST_F(LexerTest, multiple_identifiers) {
   auto lexer = make_lexer("some text {{ bas ic }} some text");
   const std::vector<token_description> expected = {
-      {tok::text, "some text "},
+      {tok::text, "some"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
+      {tok::whitespace, " "},
       {tok::open, {}},
       {tok::identifier, "bas"},
       {tok::identifier, "ic"},
       {tok::close, {}},
-      {tok::text, " some text"},
+      {tok::whitespace, " "},
+      {tok::text, "some"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
       {tok::eof, {}},
   };
   auto actual = lexer.tokenize_all();
@@ -203,7 +209,9 @@ TEST_F(LexerTest, ids_and_punctuations) {
 TEST_F(LexerTest, unterminated_open) {
   auto lexer = make_lexer("some text{{foo bar");
   const std::vector<token_description> expected = {
-      {tok::text, "some text"},
+      {tok::text, "some"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
       {tok::open, {}},
       {tok::identifier, "foo"},
       {tok::identifier, "bar"},
@@ -325,30 +333,42 @@ TEST_F(LexerTest, partial_apply_bad_token) {
 
 TEST_F(LexerTest, keywords) {
   constexpr std::string_view keywords =
-      "if unless else each as partial let and or not with this define for do import export from";
+      "true false null if unless else each as partial let and or not with this define for do import export from";
   auto lexer = make_lexer(fmt::format("{0}{{{{{0}}}}}", keywords));
+  const token_description ws = {tok::whitespace, " "};
   const std::vector<token_description> expected = {
-      {tok::text, std::string(keywords)},
-      {tok::open, {}},
-      {tok::kw_if, {}},
-      {tok::kw_unless, {}},
-      {tok::kw_else, {}},
-      {tok::kw_each, {}},
-      {tok::kw_as, {}},
-      {tok::kw_partial, {}},
-      {tok::kw_let, {}},
-      {tok::kw_and, {}},
-      {tok::kw_or, {}},
-      {tok::kw_not, {}},
-      {tok::kw_with, {}},
-      {tok::kw_this, {}},
-      {tok::kw_define, {}},
-      {tok::kw_for, {}},
-      {tok::kw_do, {}},
-      {tok::kw_import, {}},
-      {tok::kw_export, {}},
-      {tok::kw_from, {}},
-      {tok::close, {}},
+      {tok::text, "true"},    ws,
+      {tok::text, "false"},   ws,
+      {tok::text, "null"},    ws,
+      {tok::text, "if"},      ws,
+      {tok::text, "unless"},  ws,
+      {tok::text, "else"},    ws,
+      {tok::text, "each"},    ws,
+      {tok::text, "as"},      ws,
+      {tok::text, "partial"}, ws,
+      {tok::text, "let"},     ws,
+      {tok::text, "and"},     ws,
+      {tok::text, "or"},      ws,
+      {tok::text, "not"},     ws,
+      {tok::text, "with"},    ws,
+      {tok::text, "this"},    ws,
+      {tok::text, "define"},  ws,
+      {tok::text, "for"},     ws,
+      {tok::text, "do"},      ws,
+      {tok::text, "import"},  ws,
+      {tok::text, "export"},  ws,
+      {tok::text, "from"},    {tok::open, {}},
+      {tok::kw_true, {true}}, {tok::kw_false, {false}},
+      {tok::kw_null, {}},     {tok::kw_if, {}},
+      {tok::kw_unless, {}},   {tok::kw_else, {}},
+      {tok::kw_each, {}},     {tok::kw_as, {}},
+      {tok::kw_partial, {}},  {tok::kw_let, {}},
+      {tok::kw_and, {}},      {tok::kw_or, {}},
+      {tok::kw_not, {}},      {tok::kw_with, {}},
+      {tok::kw_this, {}},     {tok::kw_define, {}},
+      {tok::kw_for, {}},      {tok::kw_do, {}},
+      {tok::kw_import, {}},   {tok::kw_export, {}},
+      {tok::kw_from, {}},     {tok::close, {}},
       {tok::eof, {}},
   };
   auto actual = lexer.tokenize_all();
@@ -670,7 +690,7 @@ TEST_F(LexerTest, text_captures_whitespace) {
       {tok::bang, {}},
       {tok::text, "comment"},
       {tok::close, {}},
-      {tok::text, " "},
+      {tok::whitespace, " "},
       {tok::newline, "\n"},
       {tok::open, {}},
       {tok::close, {}},
@@ -683,7 +703,9 @@ TEST_F(LexerTest, text_captures_whitespace) {
 TEST_F(LexerTest, text_escapes_template) {
   auto lexer = make_lexer("\\{{}} \\{{{foo}}");
   const std::vector<token_description> expected = {
-      {tok::text, "{{}} {"},
+      {tok::text, "{{}}"},
+      {tok::whitespace, " "},
+      {tok::text, "{"},
       {tok::open, {}},
       {tok::identifier, "foo"},
       {tok::close, {}},
@@ -696,12 +718,20 @@ TEST_F(LexerTest, text_escapes_template) {
 TEST_F(LexerTest, basic_comment_and_text) {
   auto lexer = make_lexer("hello {{! some comment}} and back to text");
   const std::vector<token_description> expected = {
-      {tok::text, "hello "},
+      {tok::text, "hello"},
+      {tok::whitespace, " "},
       {tok::open, {}},
       {tok::bang, {}},
       {tok::text, " some comment"},
       {tok::close, {}},
-      {tok::text, " and back to text"},
+      {tok::whitespace, " "},
+      {tok::text, "and"},
+      {tok::whitespace, " "},
+      {tok::text, "back"},
+      {tok::whitespace, " "},
+      {tok::text, "to"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
       {tok::eof, {}},
   };
   auto actual = lexer.tokenize_all();
@@ -724,12 +754,20 @@ TEST_F(LexerTest, empty_comment) {
 TEST_F(LexerTest, escaped_comment) {
   auto lexer = make_lexer("hello {{!-- some comment}} --}} and back to text");
   const std::vector<token_description> expected = {
-      {tok::text, "hello "},
+      {tok::text, "hello"},
+      {tok::whitespace, " "},
       {tok::open, {}},
       {tok::bang, {}},
       {tok::text, " some comment}} "},
       {tok::close, {}},
-      {tok::text, " and back to text"},
+      {tok::whitespace, " "},
+      {tok::text, "and"},
+      {tok::whitespace, " "},
+      {tok::text, "back"},
+      {tok::whitespace, " "},
+      {tok::text, "to"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
       {tok::eof, {}},
   };
   auto actual = lexer.tokenize_all();
@@ -752,12 +790,20 @@ TEST_F(LexerTest, empty_escaped_comment) {
 TEST_F(LexerTest, almost_escaped_comment) {
   auto lexer = make_lexer("hello {{!- not escaped comment }} and back to text");
   const std::vector<token_description> expected = {
-      {tok::text, "hello "},
+      {tok::text, "hello"},
+      {tok::whitespace, " "},
       {tok::open, {}},
       {tok::bang, {}},
       {tok::text, "- not escaped comment "},
       {tok::close, {}},
-      {tok::text, " and back to text"},
+      {tok::whitespace, " "},
+      {tok::text, "and"},
+      {tok::whitespace, " "},
+      {tok::text, "back"},
+      {tok::whitespace, " "},
+      {tok::text, "to"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
       {tok::eof, {}},
   };
   auto actual = lexer.tokenize_all();
@@ -767,7 +813,8 @@ TEST_F(LexerTest, almost_escaped_comment) {
 TEST_F(LexerTest, unterminated_comment) {
   auto lexer = make_lexer("hello {{! this is not closed");
   const std::vector<token_description> expected = {
-      {tok::text, "hello "},
+      {tok::text, "hello"},
+      {tok::whitespace, " "},
       {tok::open, {}},
       {tok::bang, {}},
       {tok::text, " this is not closed"},
@@ -780,16 +827,19 @@ TEST_F(LexerTest, unterminated_comment) {
 TEST_F(LexerTest, source_ranges) {
   auto lexer = make_lexer(
       "some text{{! comment }}\r\n"
-      "and {{# variable ^ ! \"string\"\n"
-      "- 12345 if}} More text\n");
+      "and\t{{# variable ^ ! \"string\"\n"
+      "- 12345 if}}\t More text\n");
   const std::vector<token_description> expected = {
-      {tok::text, "some text"},
+      {tok::text, "some"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
       {tok::open, {}},
       {tok::bang, {}},
       {tok::text, " comment "},
       {tok::close, {}},
       {tok::newline, "\r\n"},
-      {tok::text, "and "},
+      {tok::text, "and"},
+      {tok::whitespace, "\t"},
       {tok::open, {}},
       {tok::pound, {}},
       {tok::identifier, "variable"},
@@ -799,7 +849,10 @@ TEST_F(LexerTest, source_ranges) {
       {tok::i64_literal, -12345},
       {tok::kw_if, {}},
       {tok::close, {}},
-      {tok::text, " More text"},
+      {tok::whitespace, "\t "},
+      {tok::text, "More"},
+      {tok::whitespace, " "},
+      {tok::text, "text"},
       {tok::newline, "\n"},
       {tok::eof, {}},
   };
@@ -807,13 +860,16 @@ TEST_F(LexerTest, source_ranges) {
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
 
   auto needle = actual.cbegin();
-  EXPECT_EQ(token_range_text(*needle++), "some text");
+  EXPECT_EQ(token_range_text(*needle++), "some");
+  EXPECT_EQ(token_range_text(*needle++), " ");
+  EXPECT_EQ(token_range_text(*needle++), "text");
   EXPECT_EQ(token_range_text(*needle++), "{{");
   EXPECT_EQ(token_range_text(*needle++), "!");
   EXPECT_EQ(token_range_text(*needle++), " comment ");
   EXPECT_EQ(token_range_text(*needle++), "}}");
   EXPECT_EQ(token_range_text(*needle++), "\r\n");
-  EXPECT_EQ(token_range_text(*needle++), "and ");
+  EXPECT_EQ(token_range_text(*needle++), "and");
+  EXPECT_EQ(token_range_text(*needle++), "\t");
   EXPECT_EQ(token_range_text(*needle++), "{{");
   EXPECT_EQ(token_range_text(*needle++), "#");
   EXPECT_EQ(token_range_text(*needle++), "variable");
@@ -823,7 +879,10 @@ TEST_F(LexerTest, source_ranges) {
   EXPECT_EQ(token_range_text(*needle++), "- 12345");
   EXPECT_EQ(token_range_text(*needle++), "if");
   EXPECT_EQ(token_range_text(*needle++), "}}");
-  EXPECT_EQ(token_range_text(*needle++), " More text");
+  EXPECT_EQ(token_range_text(*needle++), "\t ");
+  EXPECT_EQ(token_range_text(*needle++), "More");
+  EXPECT_EQ(token_range_text(*needle++), " ");
+  EXPECT_EQ(token_range_text(*needle++), "text");
   EXPECT_EQ(token_range_text(*needle++), "\n");
   EXPECT_EQ(token_range_text(*needle++), "");
 }

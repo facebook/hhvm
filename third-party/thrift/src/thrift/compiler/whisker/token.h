@@ -40,8 +40,12 @@ enum class tok : unsigned {
   identifier,
   path_component,
 
+  // non-whitespace (except in comments) raw text
   text,
-  newline, // "\r\n", "\n", or "\r"
+  // one or more repititions of " ", "\t", or "\v"
+  whitespace,
+  // "\r\n", "\n", or "\r"
+  newline,
 
   // clang-format off
   open,      // "{{"
@@ -219,6 +223,7 @@ class token {
   static token make_identifier(std::string_view, const source_range&);
   static token make_path_component(std::string_view, const source_range&);
   static token make_text(std::string, const source_range&);
+  static token make_whitespace(std::string, const source_range&);
   static token make_newline(std::string_view, const source_range&);
 
   /**

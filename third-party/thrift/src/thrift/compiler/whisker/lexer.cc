@@ -525,20 +525,75 @@ class lexer::state_terminal : public lexer::state_base {
 
 lexer::state_text::result lexer::state_text::next(lexer& lex) {
   auto& scan = lex.scan_window_;
-  std::string text;
+
+  // The text buffer alternates between creating tok::text and tok::whitespace
+  // based on runs of whitespace and non-whitespace text.
+  struct text_buffer {
+    text_buffer() = default;
+
+    void consume_one(detail::lexer_scan_window* scan) {
+      assert(!detail::is_newline(scan->peek()));
+      bool is_whitespace = detail::is_whitespace(scan->peek());
+
+      if (!current_run_.has_value()) {
+        // Let's decide what the next token is going to be
+        current_run_.emplace(
+            run{is_whitespace, std::string(1, scan->advance())});
+        return;
+      }
+      assert(!current_run_->content.empty());
+      if (current_run_->is_whitespace == is_whitespace) {
+        // Continue the text or whitespace run
+        current_run_->content += scan->advance();
+        return;
+      }
+      // The current run has ended
+      tokens_.emplace_back(std::move(*current_run_).to_token(*scan));
+      *scan = scan->make_fresh();
+      current_run_.emplace(run{is_whitespace, std::string(1, scan->advance())});
+    }
+
+    [[nodiscard]] bool empty() const {
+      return tokens_.empty() && !current_run_.has_value();
+    }
+
+    std::vector<token> to_tokens(const detail::lexer_scan_window& scan) && {
+      if (current_run_.has_value()) {
+        assert(!current_run_->content.empty());
+        // Forcefully end the current run
+        tokens_.emplace_back(std::move(*current_run_).to_token(scan));
+        current_run_.reset();
+      }
+      return std::move(tokens_);
+    }
+
+   private:
+    std::vector<token> tokens_;
+
+    struct run {
+      const bool is_whitespace = true;
+      std::string content;
+
+      token to_token(const detail::lexer_scan_window& scan) && {
+        auto* token_factory =
+            is_whitespace ? &token::make_whitespace : &token::make_text;
+        return token_factory(std::move(content), scan.range());
+      }
+    };
+    std::optional<run> current_run_;
+  };
+
+  text_buffer buffer;
   while (scan.can_advance()) {
     char c = scan.peek();
     if (c == '\\' && scan.next().peek() == '{') {
       // greedily consume "\{" so that "\{{" is lexed as text
-      text += '{';
-      scan = scan.next(2);
+      scan.advance();
+      buffer.consume_one(&scan);
       continue;
     }
     if (detail::is_newline(c)) {
-      std::vector<token> tokens;
-      if (!text.empty()) {
-        tokens.emplace_back(token::make_text(std::move(text), scan.range()));
-      };
+      std::vector<token> tokens = std::move(buffer).to_tokens(scan);
       scan = scan.make_fresh();
       // "\r", "\n", or "\r\n"
       char n = scan.advance();
@@ -564,19 +619,19 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
             ? ptr(std::make_unique<lexer::state_partial_application>())
             : ptr(std::make_unique<lexer::state_template>());
       });
-      std::vector<token> tokens;
-      if (!text.empty()) {
-        tokens.emplace_back(token::make_text(std::move(text), scan.range()));
-      }
+      std::vector<token> tokens = std::move(buffer).to_tokens(scan);
       tokens.emplace_back(std::move(open_token));
       // Move up the scan_window to the '!'
       scan = std::move(scan_within);
       return {std::move(tokens), std::move(transition)};
     }
-    text += scan.advance();
+    buffer.consume_one(&scan);
   }
-  return text.empty() ? token(tok::eof, scan.range())
-                      : token::make_text(std::move(text), scan.range());
+
+  if (buffer.empty()) {
+    return token(tok::eof, scan.range());
+  }
+  return std::move(buffer).to_tokens(scan);
 }
 
 lexer::lexer(source source, diagnostics_engine& diags)

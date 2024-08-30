@@ -270,7 +270,7 @@ class standalone_lines_scanner {
     const auto mark_token = [&](cursor pos, token_marking mark) {
       assert(mark != token_marking::none);
       assert(
-          pos->kind == tok::text || pos->kind == tok::newline ||
+          pos->kind == tok::whitespace || pos->kind == tok::newline ||
           pos->kind == tok::open);
       std::size_t index = std::distance(tokens.cbegin(), pos);
       assert(marked_tokens[index] == token_marking::none);
@@ -333,7 +333,7 @@ class standalone_lines_scanner {
           mark_token(c, token_marking::standalone_partial);
         }
         for (cursor c = current_line.start; c < scan.head; ++c) {
-          if (c->kind == tok::text || c->kind == tok::newline) {
+          if (c->kind == tok::whitespace || c->kind == tok::newline) {
             mark_token(c, token_marking::remove);
           }
         }
@@ -347,12 +347,15 @@ class standalone_lines_scanner {
         strip_current_line();
       }
 
-      if (parse_result whitespace = parse_whitespace(scan)) {
-        if (!std::move(whitespace).consume_and_advance(&scan)) {
-          drain_current_line();
-          continue;
-        }
-      } else if (parse_result standalone = parse_standalone_compatible(scan)) {
+      if (try_consume_token(&scan, tok::whitespace)) {
+        scan = scan.make_fresh();
+        continue;
+      }
+      if (try_consume_token(&scan, tok::text)) {
+        drain_current_line();
+        continue;
+      }
+      if (parse_result standalone = parse_standalone_compatible(scan)) {
         auto scan_start = scan.start;
         switch (std::move(standalone).consume_and_advance(&scan)) {
           case standalone_compatible_kind::ineligible:
@@ -437,25 +440,6 @@ class standalone_lines_scanner {
       }
     }
     return {kind, scan};
-  }
-
-  // Returns:
-  //   - std::nullopt if the current token is not text
-  //   - true if the current token is text and is whitespace only
-  //   - false if the current token is text and contains non-whitespace
-  //     characters
-  static parse_result<bool> parse_whitespace(parser_scan_window scan) {
-    assert(scan.empty());
-    const auto& text = scan.advance();
-    if (text.kind != tok::text) {
-      return std::nullopt;
-    }
-    for (char c : text.string_value()) {
-      if (!detail::is_whitespace(c)) {
-        return {false, scan};
-      }
-    }
-    return {true, scan};
   }
 };
 
@@ -571,13 +555,20 @@ class parser {
     return {std::move(*body), scan};
   }
 
-  // text → { <raw text until we see a template or newline> }
+  // text → { (tok::text | whitespace)+ }
   parse_result<ast::text> parse_text(parser_scan_window scan) {
     assert(scan.empty());
-    if (const auto& text = scan.advance(); text.kind == tok::text) {
-      return {ast::text{scan.range(), std::string(text.string_value())}, scan};
+    std::string result;
+    while (scan.can_advance()) {
+      const token& t = scan.peek();
+      if (t.kind != tok::text && t.kind != tok::whitespace) {
+        break;
+      }
+      result += t.string_value();
+      scan.advance();
     }
-    return std::nullopt;
+    return result.empty() ? std::nullopt
+                          : parse_result{ast::text{scan.range(), result}, scan};
   }
 
   parse_result<ast::newline> parse_newline(parser_scan_window scan) {

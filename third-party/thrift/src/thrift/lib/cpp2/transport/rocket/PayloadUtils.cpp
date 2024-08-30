@@ -77,8 +77,9 @@ rocket::Payload finalizePayload(
     std::unique_ptr<folly::IOBuf>&& payload,
     Metadata* metadata,
     folly::SocketFds fds) {
-  auto ret = apache::thrift::rocket::detail::makePayload(
-      *metadata, std::move(payload));
+  auto ret = apache::thrift::rocket::detail::
+      makePayload<Metadata, CompactProtocolWriter>(
+          *metadata, std::move(payload));
   if (fds.size()) {
     ret.fds = std::move(fds.dcheckToSendOrEmpty());
   }
@@ -114,10 +115,10 @@ template rocket::Payload packWithFds<StreamPayloadMetadata>(
 
 namespace detail {
 
-template <class Metadata>
+template <class Metadata, class ProtocolWriter>
 Payload makePayload(
     const Metadata& metadata, std::unique_ptr<folly::IOBuf> data) {
-  CompactProtocolWriter writer;
+  ProtocolWriter writer;
   // Default is to leave some headroom for rsocket headers
   size_t serSize = metadata.serializedSizeZC(&writer);
   constexpr size_t kHeadroomBytes = 16;
@@ -158,11 +159,18 @@ Payload makePayload(
   }
 }
 
-template Payload makePayload<>(
+template Payload makePayload<RequestRpcMetadata, BinaryProtocolWriter>(
     const RequestRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
-template Payload makePayload<>(
+template Payload makePayload<ResponseRpcMetadata, BinaryProtocolWriter>(
     const ResponseRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
-template Payload makePayload<>(
+template Payload makePayload<StreamPayloadMetadata, BinaryProtocolWriter>(
+    const StreamPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
+
+template Payload makePayload<RequestRpcMetadata, CompactProtocolWriter>(
+    const RequestRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
+template Payload makePayload<ResponseRpcMetadata, CompactProtocolWriter>(
+    const ResponseRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
+template Payload makePayload<StreamPayloadMetadata, CompactProtocolWriter>(
     const StreamPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
 } // namespace detail
 } // namespace apache::thrift::rocket

@@ -19,6 +19,7 @@
 #include <fmt/core.h>
 #include <folly/Try.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
@@ -38,7 +39,7 @@ struct RequestPayload {
 
 namespace rocket {
 namespace detail {
-template <class Metadata>
+template <class Metadata, class ProtocolWriter>
 Payload makePayload(
     const Metadata& metadata, std::unique_ptr<folly::IOBuf> data);
 } // namespace detail

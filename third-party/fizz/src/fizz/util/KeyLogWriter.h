@@ -18,7 +18,7 @@ namespace fizz {
 /**
  * Dump NSS Key Log File.
  * More details can be found here:
- * https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format.
+ * https://datatracker.ietf.org/doc/draft-ietf-tls-keylogfile/
  * The syntax: <Label> <space> <ClientRandom> <space> <Secret>.
  *
  * The values here map with values in a tracepoint script (fizztrace.py).

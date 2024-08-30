@@ -168,7 +168,7 @@ bool try_consume_token(parser_scan_window* scan, tok kind) {
 
 /**
  * The Mustache spec contains this concept called "standalone lines".
- *   https://github.com/mustache/spec/blob/66f078e0d534515d8df23d0d3764dccda74e042b/specs/sections.yml#L279-L305
+ *   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L279-L305
  *
  * If a line opens a section block, and the rest of the line is whitespace only,
  * then that whitespace is stripped from the output.

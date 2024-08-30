@@ -156,7 +156,7 @@ struct partial_apply {
   partial_lookup path;
   /**
    * Standalone partial applications exhibit different indentation behavior:
-   *   https://github.com/mustache/spec/blob/66f078e0d534515d8df23d0d3764dccda74e042b/specs/partials.yml#L13-L15
+   *   https://github.com/mustache/spec/blob/v1.4.2/specs/partials.yml#L13-L15
    *
    * If this is a standalone partial application, the value is the amount of
    * preceeding whitespace necessary before the partial application

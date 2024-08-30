@@ -51,6 +51,7 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
     private short id;
 
     public enum TypeEnum {
+      __EMPTY__,
       DELAY,
       CUSTOM,
     }
@@ -155,6 +156,8 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
 
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
+        case 0:
+          return TypeEnum.__EMPTY__;
         case 1:
           return TypeEnum.DELAY;
         case 2:

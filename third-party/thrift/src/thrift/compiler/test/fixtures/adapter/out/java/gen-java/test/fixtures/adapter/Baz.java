@@ -66,6 +66,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     private short id;
 
     public enum TypeEnum {
+      __EMPTY__,
       INT_FIELD,
       SET_FIELD,
       MAP_FIELD,
@@ -275,6 +276,8 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
 
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
+        case 0:
+          return TypeEnum.__EMPTY__;
         case 1:
           return TypeEnum.INT_FIELD;
         case 4:

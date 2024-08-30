@@ -19,6 +19,7 @@ package com.facebook.thrift.serialization;
 import com.facebook.thrift.test.JustABinary;
 import com.facebook.thrift.test.TestUnion;
 import java.util.ArrayList;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class UnionTest {
@@ -35,5 +36,17 @@ public class UnionTest {
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidObject() {
     TestUnion.from(TestUnion._ABINARY, new ArrayList<>());
+  }
+
+  @Test
+  public void testUnionType() {
+    TestUnion anUnion = TestUnion.from(TestUnion._ABINARY, JustABinary.defaultInstance());
+    Assert.assertEquals(anUnion.getThriftUnionType(), TestUnion.TypeEnum.A_BINARY);
+  }
+
+  @Test
+  public void testEmptyUnion() {
+    TestUnion anUnion = new TestUnion();
+    Assert.assertEquals(anUnion.getThriftUnionType(), TestUnion.TypeEnum.__EMPTY__);
   }
 }

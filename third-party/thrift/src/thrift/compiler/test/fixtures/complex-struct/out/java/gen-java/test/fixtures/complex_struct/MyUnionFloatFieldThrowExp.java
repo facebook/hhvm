@@ -58,6 +58,7 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     private short id;
 
     public enum TypeEnum {
+      __EMPTY__,
       MY_ENUM,
       SET_FLOAT,
       MY_DATA_ITEM,
@@ -242,6 +243,8 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
 
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
+        case 0:
+          return TypeEnum.__EMPTY__;
         case 1:
           return TypeEnum.MY_ENUM;
         case 2:

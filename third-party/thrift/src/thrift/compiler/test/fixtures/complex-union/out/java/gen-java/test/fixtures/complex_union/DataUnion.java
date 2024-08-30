@@ -48,6 +48,7 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     private short id;
 
     public enum TypeEnum {
+      __EMPTY__,
       BINARY_DATA,
       STRING_DATA,
     }
@@ -158,6 +159,8 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
 
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
+        case 0:
+          return TypeEnum.__EMPTY__;
         case 1:
           return TypeEnum.BINARY_DATA;
         case 2:

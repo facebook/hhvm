@@ -27,10 +27,6 @@ TClient = TypeVar("TClient", bound=Client)
 def inspect(cls: Union[Struct, Type[Struct], Error, Type[Error]]) -> StructSpec: ...
 @overload
 def inspect(
-    cls: Union[ServiceInterface, Type[ServiceInterface], TClient, Type[TClient]]
-) -> InterfaceSpec: ...
-@overload
-def inspect(
     # pyre-ignore[2] : it may return anything
     cls: Union[Sequence[Any], Type[Sequence[Any]]]
 ) -> ListSpec: ...

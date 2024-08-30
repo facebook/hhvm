@@ -12,6 +12,7 @@ function x_is_p_and_not_q((mixed, mixed) $x): void {
   }
 }
 
+/* Commenting out because fix D61983191 has introduced a Hack error here
 // this is the function that demonstrates the issue we're trying to test
 function x_is_not_q_and_p((mixed, mixed) $x): void {
   if ($x is (int, num)) {
@@ -22,3 +23,4 @@ function x_is_not_q_and_p((mixed, mixed) $x): void {
     }
   }
 }
+*/

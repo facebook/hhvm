@@ -866,9 +866,10 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     end
     | (Tfun fty, Tfun fty2) -> tfun_compare fty fty2
     | (Tunion tyl1, Tunion tyl2)
-    | (Tintersection tyl1, Tintersection tyl2)
-    | (Ttuple tyl1, Ttuple tyl2) ->
+    | (Tintersection tyl1, Tintersection tyl2) ->
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
+    | (Ttuple tyl1, Ttuple tyl2) ->
+      tyl_compare ~sort:false ~normalize_lists tyl1 tyl2
     | (Tgeneric (n1, args1), Tgeneric (n2, args2)) -> begin
       match String.compare n1 n2 with
       | 0 -> tyl_compare ~sort:false ~normalize_lists args1 args2

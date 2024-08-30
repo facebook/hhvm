@@ -55,13 +55,6 @@ const StaticString
   s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
 const StaticString s_attr_Deprecated("__Deprecated");
 
-// If we manipulate the stack before generating a may-throw IR op, we have to
-// record the updated stack offset in the marker, so that the catch block of
-// the IR op will have the correct memory effects.
-void updateStackOffset(IRGS& env) {
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-}
 
 const Class* callContext(IRGS& env, const FCallArgs& fca, const Class* cls) {
   if (!fca.context) return curClass(env);
@@ -2152,6 +2145,8 @@ void fcallClsMethodCommon(IRGS& env,
 
   auto const methodName = methVal->strVal();
   auto const knownClass = [&] () -> std::pair<const Class*, bool> {
+    // clsHint is added by HHBBC. Will be empty if not in repo mode.
+    assertx(IMPLIES(!clsHint->empty(), RO::RepoAuthoritative));
     if (!clsHint->empty()) {
       auto const cls = lookupKnown(env, clsHint);
       if (cls && isNormalClass(cls)) return std::make_pair(cls, true);

@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -711,6 +712,14 @@ inline Class::ClassLookup lookupKnownMaybe(IRGS& env, const StringData* name) {
   return lookupKnownMaybe(env, cls);
 }
 
+// If we manipulate the stack before generating a may-throw IR op, we have to
+// record the updated stack offset in the marker, so that the catch block of
+// the IR op will have the correct memory effects.
+inline void updateStackOffset(IRGS& env) {
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+}
+
 inline SSATmp* ldCls(IRGS& env,
                      SSATmp* lazyClassOrName,
                      LdClsFallback fallback = LdClsFallback::Fatal) {
@@ -719,12 +728,52 @@ inline SSATmp* ldCls(IRGS& env,
   if (lazyClassOrName->hasConstVal()) {
     auto const cnameStr = isLazy ? lazyClassOrName->lclsVal().name() :
                                    lazyClassOrName->strVal();
-    auto const cls = lookupKnown(env, cnameStr);
-    if (cls) {
-      return cns(env, cls);
-    } else {
-      auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
-      return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
+    auto const data = [&](uint32_t id, bool success) {
+      return LoggingSpeculateData {
+        cnameStr,
+        curClass(env) ? curClass(env)->name() : nullptr,
+        nullptr,
+        Op::ResolveClass,
+        id,
+        success,
+      };
+    };
+    auto const lookup = lookupKnownMaybe(env, cnameStr);
+    auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
+    switch (lookup.tag) {
+      case Class::ClassLookupResult::Exact:
+        return cns(env, lookup.cls);
+      case Class::ClassLookupResult::None:
+        if (RO::SandboxSpeculate && RO::EvalLogClsSpeculation) {
+          gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
+        }
+        return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
+      case Class::ClassLookupResult::Maybe:
+        gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
+        auto const isEqual = gen(env, EqClassId, ClassIdData(lookup.cls));
+        return cond(
+          env,
+          [&] (Block* taken) {
+            gen(env, JmpZero, taken, isEqual);
+          },
+          [&] {
+            updateStackOffset(env);
+            if (RO::EvalLogClsSpeculation) {
+              gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
+            }
+            return cns(env, lookup.cls);
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+            updateStackOffset(env);
+            if (RO::EvalLogClsSpeculation) {
+              gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
+            }
+            // Side-exit to not pessimize exact class returned
+            gen(env, Jmp, makeExitSlow(env));
+            return cns(env, TBottom);
+          }
+        );
     }
   }
   auto const ctxClass = curClass(env);

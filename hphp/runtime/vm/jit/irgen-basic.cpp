@@ -53,9 +53,9 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
     interpOne(env);
     return;
   }
-  popC(env);
 
   if (name->isA(TCls)) {
+    popC(env);
     push(env, name);
     return;
   }
@@ -98,6 +98,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
     }
   }();
 
+  popC(env);
   decRef(env, name);
   if (name->isA(TStr)) emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);

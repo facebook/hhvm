@@ -602,6 +602,10 @@ To string conversions:
 
   Checks if two Func values are equal.
 
+| EqFuncId<funcId>, D(Bool), S(Func), B
+
+  Tests if the FuncId of S0 matches jit-time funcId.
+
 | EqStrPtr,                    D(Bool), S(Str) S(Str),                    NF
 
   Checks if two string values represent the same underlying string. That is,

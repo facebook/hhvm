@@ -1418,14 +1418,14 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
     case Func::FuncLookupResult::Exact:
       return fast();
     case Func::FuncLookupResult::Maybe:
+      auto const loadedFunc = gen(env, LdFuncCached, FuncNameData { funcName } );
       ifThenElse( 
         env,  
         [&] (Block* taken) {
-            auto const cachedFunc = gen(env, LdFuncCached, FuncNameData { funcName } );
-            auto const equal = gen(env, EqFunc, cachedFunc, cns(env, lookup.func));
-            gen(env, JmpZero, taken, equal);
+          gen(env, EqFuncId, FuncData(lookup.func), taken, loadedFunc);
         },
         [&] {
+          updateStackOffset(env);
           if (RO::EvalLogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.func, true));
           }
@@ -1434,6 +1434,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
+          updateStackOffset(env);
           if (RO::EvalLogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.func, false));
           }

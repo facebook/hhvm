@@ -443,7 +443,7 @@ struct FuncData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::format("{}", func->fullName()).str();
+    return folly::format("{} ({})", func->fullName(), func->getFuncId()).str();
   }
 
   bool equals(const FuncData& f) const {
@@ -3245,6 +3245,7 @@ X(RecordFuncCall,               FuncData);
 X(LdClsPropAddrOrNull,          ReadonlyData);
 X(LdClsPropAddrOrRaise,         ReadonlyData);
 X(EqClassId,                    ClassIdData);
+X(EqFuncId,                     FuncData);
 X(LdMBase,                      AliasClassData);
 X(ThrowMustBeEnclosedInReadonly,ClassData);
 X(ThrowMustBeMutableException,  ClassData);

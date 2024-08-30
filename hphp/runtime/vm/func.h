@@ -253,6 +253,12 @@ struct Func final {
    */
   FuncId getFuncId() const;
 
+#ifndef USE_LOWPTR
+  static constexpr size_t funcIdOffset() {
+    return offsetof(Func, m_funcId);
+  }
+#endif
+
 private:
   /*
    * Reserve the next available FuncId for `this', and add `this' to the

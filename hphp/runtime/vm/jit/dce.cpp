@@ -373,6 +373,7 @@ bool canDCE(const IRInstruction& inst) {
   case NeqObj:
   case CmpObj:
   case CmpRes:
+  case EqFuncId:
   case GtRes:
   case GteRes:
   case LtRes:

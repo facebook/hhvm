@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -307,6 +306,25 @@ void cgEqFunc(IRLS& env, const IRInstruction* inst) {
 
   emitCmpLowPtr<Func>(v, sf, s1, s0);
   v << setcc{CC_E, sf, d};
+}
+
+void cgEqFuncId(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<EqFuncId>();
+  auto const funcPtr = extra->func;
+  auto const func = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  #ifdef USE_LOWPTR
+    assertx(RO::RepoAuthoritative);
+    emitCmpLowPtr(v, sf, funcPtr, func);
+  #else
+    auto const funcId = funcPtr->getFuncId();
+    auto const off = Func::funcIdOffset();
+    assertx(!funcId.isInvalid() && !funcId.isDummy());
+    v << cmplim{(int32_t)funcId.toInt(), func[off], sf};
+  #endif
+  ifThen(v, CC_NE, sf, label(env, inst->taken()));
 }
 
 void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {

@@ -1546,6 +1546,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqCls:
   case EqLazyCls:
   case EqFunc:
+  case EqFuncId:
   case EqStrPtr:
   case EqArrayDataPtr:
   case EqDbl:

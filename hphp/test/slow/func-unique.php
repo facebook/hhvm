@@ -15,5 +15,7 @@ function main() {
   require_once(__DIR__."/func-unique-$id.inc");
 
   var_dump(bar());
-  var_dump(outside_bar());
+  for ($i = 0; $i < 10; $i++) {
+    var_dump(outside_bar());
+  }
 }

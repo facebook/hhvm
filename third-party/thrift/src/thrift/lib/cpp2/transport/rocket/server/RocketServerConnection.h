@@ -208,6 +208,13 @@ class RocketServerConnection final
     onWriteQuiescence_ = std::move(cb);
   }
 
+  bool isDecodingMetadataUsingBinaryProtocol() {
+    // NOTE: state check in RocketServerConnection::handleFrame should
+    // guarantee decodeMetadataUsingBinary_ has value when this method is
+    // invoked.
+    return decodeMetadataUsingBinary_.value();
+  }
+
   bool incMemoryUsage(uint32_t memSize);
 
   void decMemoryUsage(uint32_t memSize) {
@@ -324,6 +331,8 @@ class RocketServerConnection final
   Parser<RocketServerConnection> parser_;
   std::unique_ptr<RocketServerHandler> frameHandler_;
   bool setupFrameReceived_{false};
+  std::optional<bool> decodeMetadataUsingBinary_;
+
   folly::F14NodeMap<
       StreamId,
       std::variant<

@@ -391,18 +391,22 @@ void RocketServerConnection::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
       return close(folly::make_exception_wrapper<RocketException>(
           ErrorCode::INVALID_SETUP, "First frame must be SETUP frame"));
     }
+    DCHECK(!decodeMetadataUsingBinary_.has_value());
     setupFrameReceived_ = true;
   } else {
     if (UNLIKELY(frameType == FrameType::SETUP)) {
       return close(folly::make_exception_wrapper<RocketException>(
           ErrorCode::INVALID_SETUP, "More than one SETUP frame received"));
     }
+    DCHECK(decodeMetadataUsingBinary_.has_value());
   }
 
   switch (frameType) {
     case FrameType::SETUP: {
-      return frameHandler_->handleSetupFrame(
-          SetupFrame(std::move(frame)), *this);
+      auto setupFrame = SetupFrame(std::move(frame));
+      decodeMetadataUsingBinary_.emplace(
+          setupFrame.encodeMetadataUsingBinary());
+      return frameHandler_->handleSetupFrame(std::move(setupFrame), *this);
     }
 
     case FrameType::REQUEST_RESPONSE: {

@@ -173,6 +173,7 @@ class BaseRandomizer(object):
         constraint to determine the chance of returning the result of fuzz(seed)
         Otherwise, return the seed.
         """
+
         if seed is None:
             seeds = self.constraints["seeds"]
         else:
@@ -302,6 +303,7 @@ class EnumRandomizer(ScalarTypeRandomizer):
         cls = self.__class__
 
         val = super(EnumRandomizer, self)._randomize()
+
         if val is not None:
             if isinstance(val, six.string_types):
                 return self.type_spec.names_to_values()[val]

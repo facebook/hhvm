@@ -36,4 +36,10 @@ void throwAnyNotValid(const type::AnyStruct& any) {
       fmt::format("Invalid any: {}", debugStringViaEncode(any)));
 }
 
+void throwUnsupportedAnyProtocol(const type::AnyStruct& any) {
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Unsupported serialization protocol for AnyPatch: {}",
+      debugStringViaEncode(any.protocol().value())));
+}
+
 } // namespace apache::thrift::op::detail

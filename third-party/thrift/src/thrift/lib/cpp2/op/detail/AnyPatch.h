@@ -36,6 +36,18 @@ namespace detail {
 [[noreturn]] void throwDuplicatedType(const type::Type& type);
 [[noreturn]] void throwTypeNotValid(const type::Type& type);
 [[noreturn]] void throwAnyNotValid(const type::AnyStruct& any);
+[[noreturn]] void throwUnsupportedAnyProtocol(const type::AnyStruct& any);
+
+inline void throwIfInvalidOrUnsupportedAny(const type::AnyStruct& any) {
+  if (!type::AnyData::isValid(any)) {
+    throwAnyNotValid(any);
+  }
+  if (any.protocol() != type::Protocol::get<type::StandardProtocol::Binary>() &&
+      any.protocol() !=
+          type::Protocol::get<type::StandardProtocol::Compact>()) {
+    throwUnsupportedAnyProtocol(any);
+  }
+}
 
 struct TypeToPatchMapAdapter {
   using StandardType = std::vector<TypeToPatchInternalDoNotUse>;
@@ -46,11 +58,14 @@ struct TypeToPatchMapAdapter {
     TypeToPatchMapAdapter::AdaptedType map;
     map.reserve(vec.size());
     for (auto& typeToPatchStruct : vec) {
-      if (!map.emplace(
-                  typeToPatchStruct.type().value(),
-                  std::move(typeToPatchStruct.patches().value()))
-               .second) {
+      auto it = map.emplace(
+          typeToPatchStruct.type().value(),
+          std::move(typeToPatchStruct.patches().value()));
+      if (!it.second) {
         throwDuplicatedType(typeToPatchStruct.type().value());
+      }
+      for (const auto& any : it.first->second) {
+        throwIfInvalidOrUnsupportedAny(any);
       }
     }
     return map;
@@ -221,9 +236,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
 
   void ensureAny(type::AnyStruct ensureAny) {
-    if (!type::AnyData::isValid(ensureAny)) {
-      throwAnyNotValid(ensureAny);
-    }
+    throwIfInvalidOrUnsupportedAny(ensureAny);
     if (data_.assign().has_value()) {
       data_.clear() = true;
       data_.ensureAny() = std::move(data_.assign().value());
@@ -265,9 +278,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     if (!type.isValid()) {
       throwTypeNotValid(type);
     }
-    if (!type::AnyData::isValid(patch)) {
-      throwAnyNotValid(patch);
-    }
+    throwIfInvalidOrUnsupportedAny(patch);
     tryPatchable(type);
     bool ensure = ensures(type);
     patchIfTypeIsImpl(std::move(type), std::move(patch), ensure);
@@ -276,12 +287,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   void ensureAndPatch(type::AnyStruct ensure, type::AnyStruct patch) {
     // TODO(dokwon): Add validation that the type in provided ensureAny matches
     // with the value type of patch stored in provided patch as Thrift Any.
-    if (!type::AnyData::isValid(ensure)) {
-      throwAnyNotValid(ensure);
-    }
-    if (!type::AnyData::isValid(patch)) {
-      throwAnyNotValid(patch);
-    }
+    throwIfInvalidOrUnsupportedAny(ensure);
+    throwIfInvalidOrUnsupportedAny(patch);
     type::Type type = ensure.type().value();
     ensureAny(std::move(ensure));
     patchIfTypeIsImpl(std::move(type), std::move(patch), true);

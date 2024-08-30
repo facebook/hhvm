@@ -63,11 +63,12 @@ folly::SemiFuture<{{ > types/return_type_client_lift_unit}}> {{ > service_common
   fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}});
   return std::move(semifuture)
       .deferValue(
-          [interactionHandle = std::move(interactionHandle)](CallbackHelper::PromiseResult&&{{^type:void?}} result{{/type:void?}}) mutable {
+          [interactionHandle = std::move(interactionHandle)](CallbackHelper::PromiseResult&& result) mutable {
           {{^type:void?}}
             return std::pair{std::move(interactionHandle), CallbackHelper::extractResult(std::move(result))};
           {{/type:void?}}
           {{#type:void?}}
+            std::ignore = CallbackHelper::extractResult(std::move(result));
             return std::move(interactionHandle);
           {{/type:void?}}
           });

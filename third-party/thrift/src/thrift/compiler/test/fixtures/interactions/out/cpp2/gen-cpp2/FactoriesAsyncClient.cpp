@@ -400,7 +400,8 @@ folly::SemiFuture<apache::thrift::Client<::cpp2::Factories>::MyInteraction> apac
   fbthrift_send_interact(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), interactionHandle);
   return std::move(semifuture)
       .deferValue(
-          [interactionHandle = std::move(interactionHandle)](CallbackHelper::PromiseResult&&) mutable {
+          [interactionHandle = std::move(interactionHandle)](CallbackHelper::PromiseResult&& result) mutable {
+            std::ignore = CallbackHelper::extractResult(std::move(result));
             return std::move(interactionHandle);
           });
 }

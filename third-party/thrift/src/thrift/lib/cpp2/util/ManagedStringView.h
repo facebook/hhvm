@@ -118,13 +118,18 @@ class ManagedStringViewWithConversions : public ManagedStringView {
     check_owned("view: cannot reserve");
     string_.reserve(n);
   }
+
   void append(const char* data, size_t n) {
     check_owned("view: cannot append");
     string_.append(data, n);
   }
-  ManagedStringView& operator+=(std::string_view in) {
+  void append(std::string_view in) {
     check_owned("view: cannot append");
     string_.append(in.data(), in.size());
+  }
+
+  ManagedStringView& operator+=(std::string_view in) {
+    append(in);
     return *this;
   }
   ManagedStringView& operator+=(unsigned char in) {

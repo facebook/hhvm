@@ -13,68 +13,79 @@ module Set_relation = struct
     | Superset
     | Disjoint
     | Unknown
+
+  let flip = function
+    | Subset -> Superset
+    | Superset -> Subset
+    | r -> r
 end
 
 module type DomainType = sig
-  type 'a t
+  type t
 
   type ctx
 
-  val relation : 'a t -> ctx:ctx -> 'a t -> Set_relation.t
+  val relation : t -> ctx:ctx -> t -> Set_relation.t
 end
 
 module type S = sig
   module Domain : DomainType
 
-  type 'a t
+  type t
 
-  val empty : 'a t
+  val empty : t
 
-  val singleton : 'a Domain.t -> 'a t
+  val singleton : Domain.t -> t
 
-  val union : 'a t -> 'a t -> 'a t
+  val union : t -> t -> t
 
-  val inter : 'a t -> 'a t -> 'a t
+  val inter : t -> t -> t
 
-  val diff : 'a t -> 'a t -> 'a t
+  val diff : t -> t -> t
 
-  val of_list : 'a Domain.t list -> 'a t
+  val of_list : Domain.t list -> t
 
-  type 'a disjoint =
+  type disjoint =
     | Sat
     | Unsat of {
-        left: 'a Domain.t;
+        left: Domain.t;
         relation: Set_relation.t;
-        right: 'a Domain.t;
+        right: Domain.t;
       }
 
-  val disjoint : Domain.ctx -> 'a t -> 'a t -> 'a disjoint
+  val disjoint : Domain.ctx -> t -> t -> disjoint
 
-  val are_disjoint : Domain.ctx -> 'a t -> 'a t -> bool
+  val are_disjoint : Domain.ctx -> t -> t -> bool
 end
 
 module Make (Domain : DomainType) : S with module Domain := Domain = struct
-  type 'a disjoint =
+  type disjoint =
     | Sat
     | Unsat of {
-        left: 'a Domain.t;
+        left: Domain.t;
         relation: Set_relation.t;
-        right: 'a Domain.t;
+        right: Domain.t;
       }
 
   (* Sets over [Domain.t]; representation is in NNF by construction *)
   module Impl = struct
-    type 'a atom = {
+    type atom = {
       comp: bool;
-      elt: 'a Domain.t;
+      elt: Domain.t;
     }
 
-    type 'a t =
-      | Set of 'a atom
-      | Union of 'a t * 'a t
-      | Inter of 'a t * 'a t
+    type t =
+      | Set of atom
+      | Union of t * t
+      | Inter of t * t
 
     let singleton elt = Set { comp = false; elt }
+
+    let flip_unsat = function
+      | Sat -> Sat
+      | Unsat { left; relation; right } ->
+        Unsat
+          { left = right; relation = Set_relation.flip relation; right = left }
 
     let rec disjoint_atom atom1 atom2 ~ctx =
       match (atom1, atom2) with
@@ -103,7 +114,7 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
            so we are forced to approximate the result. The safest approximation
            is to assume the sets are not disjoint *)
         Unsat { left = elt1; relation = Set_relation.Unknown; right = elt2 }
-      | _ -> disjoint_atom atom2 atom1 ~ctx
+      | _ -> disjoint_atom atom2 atom1 ~ctx |> flip_unsat
 
     let rec disjoint ctx set1 set2 =
       match (set1, set2) with
@@ -120,7 +131,7 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
         | Unsat _ -> disjoint ctx r set
       end
       | (Set atom1, Set atom2) -> disjoint_atom atom1 atom2 ~ctx
-      | (Set _, (Union _ | Inter _)) -> disjoint ctx set2 set1
+      | (Set _, (Union _ | Inter _)) -> disjoint ctx set2 set1 |> flip_unsat
 
     let union l r = Union (l, r)
 
@@ -142,7 +153,7 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
   open Impl
 
   (* We encode an empty set using [Option.None] *)
-  type nonrec 'a t = 'a t option
+  type nonrec t = t option
 
   let empty = None
 

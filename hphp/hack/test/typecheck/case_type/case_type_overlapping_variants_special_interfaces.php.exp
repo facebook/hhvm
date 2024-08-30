@@ -2,6 +2,12 @@ ERROR: File "case_type_overlapping_variants_special_interfaces.php", line 4, cha
 Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
   This is the type `AnyArray<nothing, nothing>`, which includes **dicts**
+  File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
+  It overlaps with `vec_or_dict<arraykey, nothing>`, which also includes **dicts**
+ERROR: File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
+  This is the type `AnyArray<nothing, nothing>`, which includes **dicts**
   File "case_type_overlapping_variants_special_interfaces.php", line 7, characters 5-26:
   It overlaps with `dict<nothing, nothing>`, which also includes **dicts**
 ERROR: File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
@@ -16,12 +22,6 @@ Invalid case type declaration. More than one variant of `ArrayData` could contai
   This is the type `AnyArray<nothing, nothing>`, which includes **vecs**
   File "case_type_overlapping_variants_special_interfaces.php", line 9, characters 5-16:
   It overlaps with `vec<nothing>`, which also includes **vecs**
-ERROR: File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
-  This is the type `vec_or_dict<arraykey, nothing>`, which includes **dicts**
-  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  It overlaps with `AnyArray<nothing, nothing>`, which also includes **dicts**
 ERROR: File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
 Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:

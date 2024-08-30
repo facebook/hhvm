@@ -10,7 +10,7 @@ open Hh_prelude
 open OUnit2
 
 module ASet = ApproxSet.Make (struct
-  type 'a t = Char.Set.t
+  type t = Char.Set.t
 
   type ctx = unit
 
@@ -28,7 +28,7 @@ module ASet = ApproxSet.Make (struct
       Unknown
 end)
 
-let mk lst : unit ASet.t = ASet.singleton @@ Char.Set.of_list lst
+let mk lst : ASet.t = ASet.singleton @@ Char.Set.of_list lst
 
 let a = mk ['a']
 
@@ -120,16 +120,12 @@ let test_complex _ =
 let test_origin_reporting _ =
   let lhs = a and rhs = def ||| abc in
   let res1 = ASet.disjoint () lhs rhs and res2 = ASet.disjoint () rhs lhs in
-  assert_equal
-    ~msg:"Expect same result whichever way round we provide arguments"
-    res1
-    res2
-    ~cmp:(fun t1 t2 ->
+  assert_equal ~msg:"Expect results to be flipped" res1 res2 ~cmp:(fun t1 t2 ->
       match (t1, t2) with
       | (ASet.Sat, ASet.Sat) -> true
       | ( ASet.Unsat { left = l1; right = l2; _ },
           ASet.Unsat { left = r1; right = r2; _ } ) ->
-        Char.Set.equal l1 r1 && Char.Set.equal l2 r2
+        Char.Set.equal l1 r2 && Char.Set.equal l2 r1
       | _ -> false)
 
 let test_unknown _ =

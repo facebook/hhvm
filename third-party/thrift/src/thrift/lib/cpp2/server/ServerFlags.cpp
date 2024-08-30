@@ -37,7 +37,6 @@ THRIFT_FLAG_DEFINE_bool(enable_resource_pools_for_interaction, false);
 THRIFT_FLAG_DEFINE_bool(
     enable_resource_pools_for_interaction_generated_processor_only, false);
 
-THRIFT_FLAG_DEFINE_bool(allow_wildcard_process_via_execute_request, true);
 THRIFT_FLAG_DEFINE_bool(
     allow_resource_pools_set_thread_manager_from_executor, true);
 

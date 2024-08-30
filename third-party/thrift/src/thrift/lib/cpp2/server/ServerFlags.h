@@ -31,7 +31,6 @@ THRIFT_FLAG_DECLARE_bool(enable_resource_pools_for_interaction);
 THRIFT_FLAG_DECLARE_bool(
     enable_resource_pools_for_interaction_generated_processor_only);
 
-THRIFT_FLAG_DECLARE_bool(allow_wildcard_process_via_execute_request);
 THRIFT_FLAG_DECLARE_bool(allow_resource_pools_set_thread_manager_from_executor);
 
 // Use TokenBucketConcurrencyController as a standard concurrency controller in

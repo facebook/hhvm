@@ -132,8 +132,16 @@ uint32_t JSONProtocolWriterCommon::writeJSONBoolInternal(bool val) {
   return appender.size();
 }
 
-static inline folly::StringPiece sp(const char& ch) {
+static folly::StringPiece sp(const char& ch) {
   return {&ch, 1};
+}
+
+static std::string escape(folly::StringPiece str) {
+  return folly::cEscape<std::string>(str);
+}
+
+static std::string quote(folly::StringPiece str) {
+  return fmt::format("\"{}\"", escape(str));
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwBadVersion() {
@@ -144,40 +152,41 @@ static inline folly::StringPiece sp(const char& ch) {
 [[noreturn]] void JSONProtocolReaderCommon::throwUnrecognizableAsBoolean(
     const std::string& s) {
   throw TProtocolException(
-      TProtocolException::INVALID_DATA, s + " is not a valid bool");
+      TProtocolException::INVALID_DATA, quote(s) + " is not a valid bool");
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwUnrecognizableAsIntegral(
     folly::StringPiece s, folly::StringPiece typeName) {
   throw TProtocolException(
       TProtocolException::INVALID_DATA,
-      folly::to<std::string>(s, " is not a valid ", typeName));
+      folly::to<std::string>(quote(s), " is not a valid ", typeName));
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwUnrecognizableAsFloatingPoint(
     const std::string& s) {
   throw TProtocolException(
-      TProtocolException::INVALID_DATA, s + " is not a valid float/double");
+      TProtocolException::INVALID_DATA,
+      quote(s) + " is not a valid float/double");
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwUnrecognizableAsString(
     const std::string& s, const std::exception& e) {
   throw TProtocolException(
       TProtocolException::INVALID_DATA,
-      s + " is not a valid JSON string: " + e.what());
+      quote(s) + " is not a valid JSON string: " + e.what());
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwUnrecognizableAsAny(
     const std::string& s) {
   throw TProtocolException(
-      TProtocolException::INVALID_DATA, s + " is not valid JSON");
+      TProtocolException::INVALID_DATA, quote(s) + " is not valid JSON");
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwInvalidFieldStart(
     const char ch) {
   throw TProtocolException(
       TProtocolException::INVALID_DATA,
-      std::string(1, ch) + " is not a valid start to a JSON field");
+      quote(sp(ch)) + " is not a valid start to a JSON field");
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwUnexpectedChar(
@@ -191,14 +200,15 @@ static inline folly::StringPiece sp(const char& ch) {
     const char ch) {
   throw TProtocolException(
       TProtocolException::INVALID_DATA,
-      folly::to<std::string>("Expected control char, got '", sp(ch), "'."));
+      folly::to<std::string>(
+          "Expected control char, got '", escape(sp(ch)), "'."));
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwInvalidHexChar(const char ch) {
   throw TProtocolException(
       TProtocolException::INVALID_DATA,
       folly::to<std::string>(
-          "Expected hex val ([0-9a-f]); got \'", sp(ch), "\'."));
+          "Expected hex val ([0-9a-f]); got \'", escape(sp(ch)), "\'."));
 }
 } // namespace thrift
 } // namespace apache

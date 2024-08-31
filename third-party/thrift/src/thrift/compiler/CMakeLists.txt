@@ -164,6 +164,26 @@ target_link_libraries(
   fmt::fmt
 )
 
+add_library(
+  whisker
+  whisker/detail/string.cc
+  whisker/ast.cc
+  whisker/eval_context.cc
+  whisker/lexer.cc
+  whisker/mstch_compat.cc
+  whisker/object.cc
+  whisker/parser.cc
+  whisker/print_ast.cc
+  whisker/render.cc
+  whisker/token.cc
+  whisker/tree_printer.cc
+)
+target_link_libraries(
+  whisker
+  fmt::fmt
+  compiler_base
+)
+
 add_subdirectory(generate)
 
 # Force compiler_generators linking (compiler will optimize it out otherwise).
@@ -205,13 +225,20 @@ if (BUILD_SHARED_LIBS)
     compiler_lib
     compiler
     mustache
+    whisker
     compiler_generators
     PROPERTIES VERSION ${PACKAGE_VERSION}
   )
 endif ()
 
 install(
-  TARGETS thrift1 compiler_ast compiler_base compiler_lib compiler mustache
+  TARGETS thrift1
+    compiler_ast
+    compiler_base
+    compiler_lib
+    compiler
+    mustache
+    whisker
   EXPORT fbthrift-exports
   RUNTIME DESTINATION ${BIN_INSTALL_DIR}
   LIBRARY DESTINATION ${LIB_INSTALL_DIR}

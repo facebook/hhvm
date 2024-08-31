@@ -52,5 +52,6 @@ target_link_libraries(
   compiler_lib
   compiler
   mustache
+  whisker
   ${OPENSSL_LIBRARIES}
 )

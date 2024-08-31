@@ -25,7 +25,8 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 
 // "X macro" pattern to de-dupe code:
 //   https://en.wikipedia.org/wiki/X_macro

@@ -32,7 +32,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 
 namespace whisker {
 

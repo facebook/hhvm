@@ -20,11 +20,13 @@
 #include <thrift/compiler/whisker/render.h>
 
 #include <cmath>
+#include <functional>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 
 namespace whisker {
 

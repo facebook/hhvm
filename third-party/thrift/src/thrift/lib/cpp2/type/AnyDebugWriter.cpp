@@ -46,6 +46,9 @@ std::string_view appendTypeUri(const type::TypeUri& uri) {
     case apache::thrift::type::TypeUri::scopedName:
     case apache::thrift::type::TypeUri::__EMPTY__:
       return "(unspecified)";
+    case apache::thrift::type::TypeUri::definitionKey:
+      folly::terminate_with<std::runtime_error>(
+          "TypeUri::definitionKey should not be specified for Thrift Any.");
   }
 }
 

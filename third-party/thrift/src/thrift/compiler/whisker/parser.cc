@@ -124,6 +124,11 @@ struct parser_scan_window {
 };
 
 /**
+ * A marker struct that indicates that parsing failed (non-fatally).
+ */
+struct no_parse_result {};
+
+/**
  * Result of a scan which resulted in a parsed representation of tokens.
  * The (now advanced) parser_scan_window is packaged with the token so the
  * parser can move up its cursor.
@@ -132,7 +137,7 @@ template <typename T>
 struct [[nodiscard]] parse_result {
   parse_result(T value, const parser_scan_window& advanced)
       : result_{success{std::move(value), advanced.make_fresh()}} {}
-  /* implicit */ parse_result(std::nullopt_t) : result_{std::nullopt} {}
+  /* implicit */ parse_result(no_parse_result) : result_{std::nullopt} {}
 
   /**
    * Advances the provided parser_scan_window to the last consumed token as part
@@ -228,21 +233,22 @@ class standalone_lines_scanner {
  public:
   struct result {
     /**
-     * If a partial application is standalone, the renderer needs to make sure
-     * to indent each line when inlining it. Since we've already detected such
-     * partials, let's provide this information to the parser to attach to the
-     * AST.
-     *
-     * The cursors here point to the "{{" token of the corresponding partial
-     * application.
+     * The cursors in the set point to either:
+     *   - the "{{" token of the corresponding standalone construct.
+     *   - tok::whitespace or tok::newline that should be removed.
      *
      * Using std::set here because cursor is an iterator and thus has operator<
      * but not necessarily std::hash<>.
      */
-    std::set<parser_scan_window::cursor> standalone_partial_locations;
+    std::set<parser_scan_window::cursor> standalone_markings;
   };
 
-  static result strip_lines(std::vector<token>& tokens) {
+  /**
+   * Returns a result containing the cursors of the tokens that are "involved"
+   * in standalone constructs. The cursors can be used by the parser to remove
+   * whitespace or add partial standalone offset information.
+   */
+  static result mark(const std::vector<token>& tokens) {
     assert(!tokens.empty());
     if (tokens.back().kind == tok::error) {
       // No point stripping lines
@@ -256,67 +262,46 @@ class standalone_lines_scanner {
 
     using cursor = parser_scan_window::cursor;
 
-    // Chunk scanning into lines. We scan each line and mark tokens for removal
-    // in a bitmap, then make a pass to erase them. This is because we don't
-    // want to modify the vector while iterating over it.
-    enum class token_marking : char {
-      none,
-      remove,
-      standalone_partial,
-    };
-    std::vector<token_marking> marked_tokens(
-        tokens.size(), token_marking::none);
-
-    const auto mark_token = [&](cursor pos, token_marking mark) {
-      assert(mark != token_marking::none);
+    std::set<parser_scan_window::cursor> marked_tokens;
+    const auto mark_token = [&](cursor pos) {
       assert(
           pos->kind == tok::whitespace || pos->kind == tok::newline ||
           pos->kind == tok::open);
-      std::size_t index = std::distance(tokens.cbegin(), pos);
-      assert(marked_tokens[index] == token_marking::none);
-      marked_tokens[index] = mark;
-    };
-
-    // The return value is the set of standalone partial locations.
-    const auto remove_marked_tokens = [&]() -> std::set<cursor> {
-      // Because we are removing tokens and invalidating iterators, we need to
-      // grab the actual cursors after vector::erase.
-      std::vector<std::size_t> standalone_partial_indices;
-      // Poor man's std::remove_if (which does not provide the iterator to the
-      // predicate, which we need to access the bitmap).
-      std::size_t compact = 0;
-      for (std::size_t run = 0; run < tokens.size(); ++run) {
-        if (marked_tokens[run] == token_marking::standalone_partial) {
-          standalone_partial_indices.push_back(compact);
-        }
-        if (marked_tokens[run] != token_marking::remove) {
-          std::swap(tokens[compact], tokens[run]);
-          ++compact;
-        }
-      }
-
-      tokens.erase(tokens.begin() + compact, tokens.end());
-      std::set<cursor> standalone_partial_locations;
-      for (std::size_t index : standalone_partial_indices) {
-        standalone_partial_locations.insert(cursor(tokens.cbegin() + index));
-      }
-      return standalone_partial_locations;
+      assert(marked_tokens.find(pos) == marked_tokens.end());
+      marked_tokens.insert(pos);
     };
 
     struct line_info {
       cursor start;
-      std::vector<cursor> standalone_partials = {};
-      // true iff the line contains a standalone construct described above
-      bool is_standalone_eligible = false;
+      std::vector<cursor> standalones = {};
     };
     line_info current_line{scan.head};
 
     const auto begin_next_line = [&]() {
-      current_line.standalone_partials.clear();
-      current_line = {scan.head, std::move(current_line.standalone_partials)};
+      current_line.standalones.clear();
+      current_line = {scan.head, std::move(current_line.standalones)};
       scan = scan.make_fresh();
     };
 
+    // Only after scanning the entire line can we be sure if there are eligible
+    // standalone constructs. This function "commits" the changes aggregated in
+    // the current line into the output.
+    const auto commit_current_line_markings = [&]() {
+      if (!current_line.standalones.empty()) {
+        for (cursor c : current_line.standalones) {
+          mark_token(c);
+        }
+        for (cursor c = current_line.start; c < scan.head; ++c) {
+          if (c->kind == tok::whitespace || c->kind == tok::newline) {
+            mark_token(c);
+          }
+        }
+      }
+      begin_next_line();
+    };
+
+    // When an ineligible line is detected, we drain the current line's tokens
+    // and dump all the potential standalone candidates from the current line.
     const auto drain_current_line = [&]() {
       do {
         const auto& t = scan.advance();
@@ -327,24 +312,10 @@ class standalone_lines_scanner {
       begin_next_line();
     };
 
-    const auto strip_current_line = [&]() {
-      if (current_line.is_standalone_eligible) {
-        for (cursor c : current_line.standalone_partials) {
-          mark_token(c, token_marking::standalone_partial);
-        }
-        for (cursor c = current_line.start; c < scan.head; ++c) {
-          if (c->kind == tok::whitespace || c->kind == tok::newline) {
-            mark_token(c, token_marking::remove);
-          }
-        }
-      }
-      begin_next_line();
-    };
-
     while (scan.can_advance()) {
       if (scan.peek().kind == tok::newline) {
         scan.advance();
-        strip_current_line();
+        commit_current_line_markings();
       }
 
       if (try_consume_token(&scan, tok::whitespace)) {
@@ -362,21 +333,20 @@ class standalone_lines_scanner {
             drain_current_line();
             continue;
           case standalone_compatible_kind::partial_apply:
-            current_line.standalone_partials.push_back(scan_start);
-            // Do not strip the left side
-            current_line.start = scan.head;
-            if (current_line.is_standalone_eligible) {
+            if (!current_line.standalones.empty()) {
               // Even though we allow multiple standalone constructs on the same
               // line, for partials it does not apply
               drain_current_line();
               continue;
             }
+            // Do not strip the left side
+            current_line.start = scan.head;
             break;
           default:
             // These blocks strip both sides
             break;
         }
-        current_line.is_standalone_eligible = true;
+        current_line.standalones.push_back(scan_start);
       } else {
         // This line is not eligible for stripping
         drain_current_line();
@@ -385,9 +355,9 @@ class standalone_lines_scanner {
 
     // In case, last line is not terminated by a newline.
     // Otherwise, the current line is ineligible so nothing happens.
-    strip_current_line();
+    commit_current_line_markings();
 
-    return result{remove_marked_tokens()};
+    return result{std::move(marked_tokens)};
   }
 
   // A line containing any of the following constructs...
@@ -411,7 +381,7 @@ class standalone_lines_scanner {
       parser_scan_window scan) {
     assert(scan.empty());
     if (!try_consume_token(&scan, tok::open)) {
-      return std::nullopt;
+      return no_parse_result();
     }
 
     standalone_compatible_kind kind;
@@ -477,7 +447,7 @@ class parser {
   std::vector<token> tokens_;
   const source_manager& src_manager_;
   diagnostics_engine& diags_;
-  std::set<parser_scan_window::cursor> standalone_partials_;
+  std::set<parser_scan_window::cursor> standalone_markings_;
 
   // Reports an error without failing the parse.
   template <typename... T>
@@ -508,14 +478,22 @@ class parser {
         to_string(scan.peek().kind));
   }
 
+  [[nodiscard]] bool is_marked_standalone(
+      parser_scan_window::cursor pos, [[maybe_unused]] tok expected) const {
+    assert(pos->kind == expected);
+    return standalone_markings_.find(pos) != standalone_markings_.end();
+  }
+
   // root → { body* }
   std::optional<ast::root> parse_root(parser_scan_window scan) {
     try {
       auto original_scan = scan;
       ast::bodies bodies;
       while (scan.can_advance()) {
-        if (parse_result body = parse_body(scan)) {
-          bodies.emplace_back(std::move(body).consume_and_advance(&scan));
+        if (parse_result maybe_body = parse_body(scan)) {
+          if (auto body = std::move(maybe_body).consume_and_advance(&scan)) {
+            bodies.emplace_back(std::move(*body));
+          }
         } else {
           report_expected(scan, "text, template, or comment");
         }
@@ -528,35 +506,59 @@ class parser {
     }
   }
 
+  // Returns an empty parse result if no body was found.
+  //
+  // Returns an empty optional<ast::body> if body was found but consisted
+  // entirely of stripped whitespace from a standalone construct, with the
+  // advanced scan window.
+  //
+  // Returns the ast::body found otherwise.
+  //
   // body → { text | newline | template | comment }
-  parse_result<ast::body> parse_body(parser_scan_window scan) {
+  parse_result<std::optional<ast::body>> parse_body(parser_scan_window scan) {
     assert(scan.empty());
+    const auto scan_start = scan.head;
+
     std::optional<ast::body> body;
-    if (parse_result text = parse_text(scan)) {
-      body = std::move(text).consume_and_advance(&scan);
-    } else if (parse_result newline = parse_newline(scan)) {
-      body = std::move(newline).consume_and_advance(&scan);
-    } else if (parse_result templ = parse_template(scan)) {
-      detail::variant_match(
-          std::move(templ).consume_and_advance(&scan),
-          [&](ast::variable&& variable) { body = std::move(variable); },
-          [&](ast::section_block&& section_block) {
-            body = std::move(section_block);
-          },
-          [&](ast::partial_apply&& partial_apply) {
-            body = std::move(partial_apply);
-          });
-    } else if (parse_result comment = parse_comment(scan)) {
-      body = std::move(comment).consume_and_advance(&scan);
+    while (!body.has_value()) {
+      if (parse_result maybe_text = parse_text(scan)) {
+        body = std::move(maybe_text).consume_and_advance(&scan);
+      } else if (parse_result maybe_newline = parse_newline(scan)) {
+        body = std::move(maybe_newline).consume_and_advance(&scan);
+      } else if (parse_result templ = parse_template(scan)) {
+        detail::variant_match(
+            std::move(templ).consume_and_advance(&scan),
+            [&](ast::variable&& variable) { body = std::move(variable); },
+            [&](ast::section_block&& section_block) {
+              body = std::move(section_block);
+            },
+            [&](ast::partial_apply&& partial_apply) {
+              body = std::move(partial_apply);
+            });
+      } else if (parse_result comment = parse_comment(scan)) {
+        body = std::move(comment).consume_and_advance(&scan);
+      } else {
+        // Next token is not valid for a body element
+        break;
+      }
     }
-    if (!body.has_value()) {
-      return std::nullopt;
+
+    if (scan.head == scan_start) {
+      // We did not find any body elements. Not even standalone whitespace.
+      return no_parse_result();
     }
-    return {std::move(*body), scan};
+    return {std::move(body), scan};
   }
 
+  // Returns an empty parse result if no text was found.
+  //
+  // Returns an empty optional<ast::text> if text was found but completely
+  // stripped because of standalone constructs, with the advanced scan window.
+  //
+  // Returns the ast::text found otherwise with a non-empty string.
+  //
   // text → { (tok::text | whitespace)+ }
-  parse_result<ast::text> parse_text(parser_scan_window scan) {
+  parse_result<std::optional<ast::text>> parse_text(parser_scan_window scan) {
     assert(scan.empty());
     std::string result;
     while (scan.can_advance()) {
@@ -564,20 +566,46 @@ class parser {
       if (t.kind != tok::text && t.kind != tok::whitespace) {
         break;
       }
-      result += t.string_value();
+      bool is_stripped = t.kind == tok::whitespace &&
+          is_marked_standalone(scan.head, tok::whitespace);
+      if (!is_stripped) {
+        result += t.string_value();
+      }
       scan.advance();
     }
-    return result.empty() ? std::nullopt
-                          : parse_result{ast::text{scan.range(), result}, scan};
+    if (scan.head == scan.start) {
+      // No text was scanned. Not even standalone whitespace.
+      return no_parse_result();
+    }
+    if (result.empty()) {
+      // Text was scanned but they were all stripped. We still need to advance
+      // the scan window.
+      return {std::nullopt, scan};
+    }
+    return parse_result{std::optional{ast::text{scan.range(), result}}, scan};
   }
 
-  parse_result<ast::newline> parse_newline(parser_scan_window scan) {
+  // Returns an empty parse result if no newline was found.
+  //
+  // Returns an empty optional<ast::newline> if newline was found but stripped
+  // because of standalone constructs, with the advanced scan window.
+  //
+  // Returns the ast::newline found otherwise.
+  //
+  // newline → { tok::newline+ }
+  parse_result<std::optional<ast::newline>> parse_newline(
+      parser_scan_window scan) {
     assert(scan.empty());
-    if (const auto& text = scan.advance(); text.kind == tok::newline) {
+    if (scan.peek().kind == tok::newline) {
+      if (is_marked_standalone(scan.head, tok::newline)) {
+        // Stripped because of a standalone construct
+        return {std::nullopt, scan.next()};
+      }
+      const token& text = scan.advance();
       return {
           ast::newline{scan.range(), std::string(text.string_value())}, scan};
     }
-    return std::nullopt;
+    return no_parse_result();
   }
 
   // comment → { basic-comment | escaped-comment }
@@ -589,10 +617,10 @@ class parser {
   parse_result<ast::comment> parse_comment(parser_scan_window scan) {
     assert(scan.empty());
     if (scan.advance().kind != tok::open) {
-      return std::nullopt;
+      return no_parse_result();
     }
     if (scan.advance().kind != tok::bang) {
-      return std::nullopt;
+      return no_parse_result();
     }
     const auto& text = scan.peek();
     switch (text.kind) {
@@ -620,7 +648,7 @@ class parser {
   parse_result<template_body> parse_template(parser_scan_window scan) {
     assert(scan.empty());
     if (scan.peek().kind != tok::open) {
-      return std::nullopt;
+      return no_parse_result();
     }
     switch (scan.next().peek().kind) {
       case tok::bang:
@@ -630,7 +658,7 @@ class parser {
         // parse_template can be called recursively, which means that seeing
         // tok::slash implies that the parent node is closing (so don't fail the
         // parse).
-        return std::nullopt;
+        return no_parse_result();
       default:
         // continue parsing as a template or fail the parse!
         break;
@@ -657,7 +685,7 @@ class parser {
     const auto scan_start = scan.start;
 
     if (!try_consume_token(&scan, tok::open)) {
-      return std::nullopt;
+      return no_parse_result();
     }
     switch (scan.peek().kind.value) {
       case tok::bang:
@@ -669,10 +697,10 @@ class parser {
         [[fallthrough]];
       case tok::slash:
         // this is a section-block-close
-        return std::nullopt;
+        return no_parse_result();
       case tok::gt:
         // this is a partial-apply
-        return std::nullopt;
+        return no_parse_result();
       default:
         // continue parsing as a variable (and fail if it's not!)
         break;
@@ -709,7 +737,7 @@ class parser {
     scan = scan.make_fresh();
     const token& first_id = scan.advance();
     if (first_id.kind != tok::identifier) {
-      return std::nullopt;
+      return no_parse_result();
     }
     std::vector<ast::identifier> path;
     path.emplace_back(
@@ -739,13 +767,13 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
     if (!try_consume_token(&scan, tok::open)) {
-      return std::nullopt;
+      return no_parse_result();
     }
     bool is_inverted = try_consume_token(&scan, tok::caret);
     if (!is_inverted) {
       if (!try_consume_token(&scan, tok::pound)) {
         // neither "#" nor "^" so this is not a section block
-        return std::nullopt;
+        return no_parse_result();
       }
     }
 
@@ -762,8 +790,10 @@ class parser {
 
     scan = scan.make_fresh();
     ast::bodies bodies;
-    while (parse_result body = parse_body(scan)) {
-      bodies.emplace_back(std::move(body).consume_and_advance(&scan));
+    while (parse_result maybe_body = parse_body(scan)) {
+      if (auto body = std::move(maybe_body).consume_and_advance(&scan)) {
+        bodies.emplace_back(std::move(*body));
+      }
     }
 
     if (!try_consume_token(&scan, tok::open)) {
@@ -833,10 +863,10 @@ class parser {
     const source_location scan_start_location = scan.start_location();
 
     if (!try_consume_token(&scan, tok::open)) {
-      return std::nullopt;
+      return no_parse_result();
     }
     if (!try_consume_token(&scan, tok::gt)) {
-      return std::nullopt;
+      return no_parse_result();
     }
     scan = scan.make_fresh();
 
@@ -856,12 +886,9 @@ class parser {
               lookup.as_string()));
     }
 
-    bool is_standalone =
-        standalone_partials_.find(scan_start) != standalone_partials_.end();
-
     using offset_type = std::optional<unsigned>;
     // resolved_location::column() is 1-indexed
-    offset_type offset_within_line = is_standalone
+    offset_type offset_within_line = is_marked_standalone(scan_start, tok::open)
         ? offset_type{resolved_location(scan_start_location, src_manager_).column() - 1}
         : std::nullopt;
 
@@ -881,7 +908,7 @@ class parser {
 
     const token& first_id = scan.advance();
     if (first_id.kind != tok::path_component) {
-      return std::nullopt;
+      return no_parse_result();
     }
     std::vector<ast::path_component> path;
     path.emplace_back(ast::path_component{
@@ -912,8 +939,7 @@ class parser {
       : tokens_(std::move(tokens)),
         src_manager_(src_manager),
         diags_(diags),
-        standalone_partials_(
-            std::move(scan_result.standalone_partial_locations)) {}
+        standalone_markings_(std::move(scan_result.standalone_markings)) {}
 
   std::optional<ast::root> parse() {
     return parse_root(parser_scan_window(
@@ -928,8 +954,7 @@ class parser {
 std::optional<ast::root> parse(
     source src, const source_manager& src_manager, diagnostics_engine& diags) {
   auto tokens = lexer(std::move(src), diags).tokenize_all();
-  auto standalone_scanner_result =
-      standalone_lines_scanner::strip_lines(tokens);
+  auto standalone_scanner_result = standalone_lines_scanner::mark(tokens);
   return parser(
              std::move(tokens),
              src_manager,

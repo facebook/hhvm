@@ -155,7 +155,6 @@ class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServic
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_sixCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::int32_t> fbthrift_semifuture_get_six(apache::thrift::RpcOptions& rpcOptions);
-  FOLLY_NOINLINE folly::SemiFuture<::std::int32_t> fbthrift_semifuture_get_six(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::std::int32_t>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
 };
 

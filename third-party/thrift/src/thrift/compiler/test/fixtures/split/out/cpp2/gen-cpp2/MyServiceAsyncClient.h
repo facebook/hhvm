@@ -148,7 +148,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
-  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_ping(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getRandomData"} */
   virtual void getRandomData(std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -269,7 +268,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getRandomDataCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::string> fbthrift_semifuture_getRandomData(apache::thrift::RpcOptions& rpcOptions);
-  FOLLY_NOINLINE folly::SemiFuture<::std::string> fbthrift_semifuture_getRandomData(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::std::string>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "sink"} */
   virtual void sink(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_sink);
@@ -388,7 +386,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> sinkCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_sink(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sink);
-  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_sink(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_sink);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "putDataById"} */
   virtual void putDataById(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::std::string& p_data);
@@ -507,7 +504,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> putDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_putDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::std::string& p_data);
-  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_putDataById(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_id, const ::std::string& p_data);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "hasDataById"} */
   virtual void hasDataById(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
@@ -628,7 +624,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> hasDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<bool> fbthrift_semifuture_hasDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
-  FOLLY_NOINLINE folly::SemiFuture<bool> fbthrift_semifuture_hasDataById(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<bool>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_id);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "getDataById"} */
   virtual void getDataById(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
@@ -749,7 +744,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> getDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::string> fbthrift_semifuture_getDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
-  FOLLY_NOINLINE folly::SemiFuture<::std::string> fbthrift_semifuture_getDataById(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::std::string>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_id);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "deleteDataById"} */
   virtual void deleteDataById(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id);
@@ -868,7 +862,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> deleteDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_deleteDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
-  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_deleteDataById(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_id);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "MyService", "function": "lobDataById"} */
   virtual void lobDataById(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::std::string& p_data);
@@ -963,7 +956,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> lobDataByIdCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<folly::Unit> fbthrift_semifuture_lobDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::std::string& p_data);
-  FOLLY_NOINLINE folly::SemiFuture<folly::Unit> fbthrift_semifuture_lobDataById(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<folly::Unit>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, ::std::int64_t p_id, const ::std::string& p_data);
  public:
 };
 

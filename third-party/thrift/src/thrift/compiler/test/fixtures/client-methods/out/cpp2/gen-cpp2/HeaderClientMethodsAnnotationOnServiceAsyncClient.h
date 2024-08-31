@@ -154,7 +154,6 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnService> : public apache::th
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> echoCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::cpp2::EchoResponse> fbthrift_semifuture_echo(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
-  FOLLY_NOINLINE folly::SemiFuture<::cpp2::EchoResponse> fbthrift_semifuture_echo(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::cpp2::EchoResponse>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, const ::cpp2::EchoRequest& p_request);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnService", "function": "echo_2"} */
   virtual void echo_2(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::EchoRequest& p_request);
@@ -279,7 +278,6 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnService> : public apache::th
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> echo_2Ctx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::cpp2::EchoResponse> fbthrift_semifuture_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
-  FOLLY_NOINLINE folly::SemiFuture<::cpp2::EchoResponse> fbthrift_semifuture_echo_2(folly::SemiFuture<typename apache::thrift::detail::FutureCallbackHelper<::cpp2::EchoResponse>::PromiseResult> semifuture, apache::thrift::RpcOptions& rpcOptions, apache::thrift::RequestClientCallback::Ptr callback, apache::thrift::ContextStack* contextStack, std::shared_ptr<::apache::thrift::transport::THeader> header, const ::cpp2::EchoRequest& p_request);
  public:
 };
 

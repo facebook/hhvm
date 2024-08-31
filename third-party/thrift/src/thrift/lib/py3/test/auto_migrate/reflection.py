@@ -35,8 +35,10 @@ from testing.types import (
 )
 from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.reflection import (
+    ArgumentSpec,
     inspect,
     inspectable,
+    MethodSpec,
     NumberType,
     Qualifier,
     StructType,
@@ -137,6 +139,219 @@ class ReflectionTests(unittest.TestCase):
         self.assertEqual(r.value, StrI32ListMap)
         self.assertEqual(r.key_kind, NumberType.NOT_A_NUMBER)
         self.assertEqual(r.value_kind, NumberType.NOT_A_NUMBER)
+
+    # Fails because services reflection doesn't work
+    @brokenInAutoMigrate()
+    def test_interface(self) -> None:
+        self.assertTrue(inspectable(TestingService))
+        self.assertTrue(inspectable(TestingServiceInterface))
+        x = inspect(TestingService)
+        self.assertEqual(x, inspect(TestingServiceInterface))
+        self.assertEqual(x.name, "TestingService")
+        self.assertEqual(
+            x.annotations,
+            {
+                "fun_times": "yes",
+                "single_quote": "'",
+                "double_quotes": '"""',
+            },
+        )
+
+        methods = (
+            MethodSpec(
+                name="getName",
+                arguments=[],
+                result=str,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="getMethodName",
+                arguments=[],
+                result=str,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="getRequestId",
+                arguments=[],
+                result=str,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="getRequestTimeout",
+                arguments=[],
+                result=float,
+                result_kind=NumberType.FLOAT,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="shutdown",
+                arguments=[],
+                result=None,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="invert",
+                arguments=[
+                    ArgumentSpec(
+                        name="value",
+                        type=bool,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    )
+                ],
+                result=bool,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="complex_action",
+                arguments=[
+                    ArgumentSpec(
+                        name="first",
+                        type=str,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    ),
+                    ArgumentSpec(
+                        name="second",
+                        type=str,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    ),
+                    ArgumentSpec(
+                        name="third", type=int, kind=NumberType.I64, annotations={}
+                    ),
+                    ArgumentSpec(
+                        name="fourth",
+                        type=str,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={"iv": "4"},
+                    ),
+                ],
+                result=int,
+                result_kind=NumberType.I32,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="takes_a_list",
+                arguments=[
+                    ArgumentSpec(
+                        name="ints",
+                        type=I32List,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    )
+                ],
+                result=None,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[SimpleError],
+                annotations={},
+            ),
+            MethodSpec(
+                name="take_it_easy",
+                arguments=[
+                    ArgumentSpec(
+                        name="how", type=int, kind=NumberType.I32, annotations={}
+                    ),
+                    ArgumentSpec(
+                        name="what",
+                        type=easy,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    ),
+                ],
+                result=None,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={"a": "b.c.d"},
+            ),
+            MethodSpec(
+                name="pick_a_color",
+                arguments=[
+                    ArgumentSpec(
+                        name="color",
+                        type=Color,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    )
+                ],
+                result=None,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="int_sizes",
+                arguments=[
+                    ArgumentSpec(
+                        name="one", type=int, kind=NumberType.BYTE, annotations={}
+                    ),
+                    ArgumentSpec(
+                        name="two", type=int, kind=NumberType.I16, annotations={}
+                    ),
+                    ArgumentSpec(
+                        name="three", type=int, kind=NumberType.I32, annotations={}
+                    ),
+                    ArgumentSpec(
+                        name="four", type=int, kind=NumberType.I64, annotations={}
+                    ),
+                ],
+                result=None,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={},
+            ),
+            MethodSpec(
+                name="hard_error",
+                arguments=[
+                    ArgumentSpec(
+                        name="valid",
+                        type=bool,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    )
+                ],
+                result=None,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[HardError],
+                annotations={},
+            ),
+            MethodSpec(
+                name="renamed_func",
+                arguments=[
+                    ArgumentSpec(
+                        name="ret",
+                        type=bool,
+                        kind=NumberType.NOT_A_NUMBER,
+                        annotations={},
+                    )
+                ],
+                result=bool,
+                result_kind=NumberType.NOT_A_NUMBER,
+                exceptions=[],
+                annotations={"cpp.name": "renamed_func_in_cpp"},
+            ),
+            MethodSpec(
+                name="getPriority",
+                arguments=[],
+                result=int,
+                result_kind=NumberType.I32,
+                exceptions=[],
+                annotations={},
+            ),
+        )
+        self.assertEqual(x.methods, methods)
 
     def test_other(self) -> None:
         x = None

@@ -67,10 +67,10 @@ async function filter_async<Tv as arraykey>(
  * The IO operations for each of calls to `$async_func` will happen in
  * parallel.
  */
-async function map_async<Tv, Tk as arraykey>(
-  Traversable<Tv> $traversable,
-  (function(Tv)[_]: Awaitable<Tk>) $async_func,
-)[ctx $async_func]: Awaitable<keyset<Tk>> {
+async function map_async<Tv1, Tv2 as arraykey>(
+  Traversable<Tv1> $traversable,
+  (function(Tv1)[_]: Awaitable<Tv2>) $async_func,
+)[ctx $async_func]: Awaitable<keyset<Tv2>> {
   return keyset(await Vec\map_async($traversable, $async_func));
 }
 

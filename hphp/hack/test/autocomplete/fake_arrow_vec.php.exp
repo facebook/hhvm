@@ -366,7 +366,7 @@ SORT TEXT: none
 Keyset\map_async
   INSERT Keyset\map_async(
   INSERT , ${1:\$async_func})
-  (function<Tv as mixed, Tk as mixed as arraykey>(Traversable<Tv> $traversable, (function(Tv)[T/[ctx $async_func]]: ~Awaitable<Tk>) $async_func)[T/[ctx $async_func]ctx $async_func]: Awaitable<~keyset<Tk>>)
+  (function<Tv1 as mixed, Tv2 as mixed as arraykey>(Traversable<Tv1> $traversable, (function(Tv1)[T/[ctx $async_func]]: ~Awaitable<Tv2>) $async_func)[T/[ctx $async_func]ctx $async_func]: Awaitable<~keyset<Tv2>>)
 SORT TEXT: none
 Keyset\map_with_key
   INSERT Keyset\map_with_key(

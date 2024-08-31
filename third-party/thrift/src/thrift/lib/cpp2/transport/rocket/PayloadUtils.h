@@ -55,11 +55,6 @@ size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
   return reader.getCursorPosition();
 }
 
-template <typename T>
-size_t unpackCompact(T& output, std::unique_ptr<folly::IOBuf> buffer) {
-  return unpackCompact(output, buffer.get());
-}
-
 namespace detail {
 template <class PayloadType, bool uncompressPayload>
 inline PayloadType unpackPayload(rocket::Payload&& payload) {

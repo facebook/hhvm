@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
       continue;
     }
     std::optional<whisker::ast::root> ast =
-        whisker::parse(*src, src_manager, diagnostics_engine);
+        whisker::parse(*src, diagnostics_engine);
     if (ast.has_value()) {
       fmt::print(stdout, "SUCCESS: '{}'\n", filepath);
     } else {

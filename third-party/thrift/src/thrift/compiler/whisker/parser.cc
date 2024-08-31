@@ -497,7 +497,6 @@ class standalone_lines_scanner {
 class parser {
  private:
   std::vector<token> tokens_;
-  const source_manager& src_manager_;
   diagnostics_engine& diags_;
   standalone_lines_scanner::result standalone_markings_;
 
@@ -989,11 +988,9 @@ class parser {
  public:
   parser(
       std::vector<token> tokens,
-      const source_manager& src_manager,
       diagnostics_engine& diags,
       standalone_lines_scanner::result standalone_markings)
       : tokens_(std::move(tokens)),
-        src_manager_(src_manager),
         diags_(diags),
         standalone_markings_(std::move(standalone_markings)) {}
 
@@ -1007,15 +1004,10 @@ class parser {
 
 } // namespace
 
-std::optional<ast::root> parse(
-    source src, const source_manager& src_manager, diagnostics_engine& diags) {
+std::optional<ast::root> parse(source src, diagnostics_engine& diags) {
   auto tokens = lexer(std::move(src), diags).tokenize_all();
   auto standalone_scanner_result = standalone_lines_scanner::mark(tokens);
-  return parser(
-             std::move(tokens),
-             src_manager,
-             diags,
-             std::move(standalone_scanner_result))
+  return parser(std::move(tokens), diags, std::move(standalone_scanner_result))
       .parse();
 }
 

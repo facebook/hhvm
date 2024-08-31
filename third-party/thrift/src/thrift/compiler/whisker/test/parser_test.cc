@@ -48,9 +48,7 @@ class ParserTest : public testing::Test {
   std::optional<ast::root> parse_ast(const std::string& source) {
     diagnostics.clear();
     return parse(
-        src_manager.add_virtual_file(path_to_file(file_id++), source),
-        src_manager,
-        diags);
+        src_manager.add_virtual_file(path_to_file(file_id++), source), diags);
   }
 
   std::string to_string(const ast::root& ast) {

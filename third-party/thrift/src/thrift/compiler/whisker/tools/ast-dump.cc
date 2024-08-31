@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
       whisker::diagnostic_params::keep_all());
 
   std::optional<whisker::ast::root> ast =
-      whisker::parse(*src, src_manager, diagnostics_engine);
+      whisker::parse(*src, diagnostics_engine);
 
   if (!ast.has_value()) {
     // diagnostics should already have been reported

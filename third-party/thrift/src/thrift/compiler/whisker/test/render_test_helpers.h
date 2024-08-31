@@ -73,7 +73,7 @@ class RenderTest : public testing::Test {
       if (!source.has_value()) {
         return std::nullopt;
       }
-      return parse(*source, src_manager_, diags);
+      return parse(*source, diags);
     }
 
     source_manager& src_manager_;
@@ -104,7 +104,7 @@ class RenderTest : public testing::Test {
     auto& current = last_render_.emplace();
 
     auto src = current.src_manager.add_virtual_file(path_to_file, source);
-    auto ast = parse(src, current.src_manager, current.diags);
+    auto ast = parse(src, current.diags);
     if (!ast.has_value()) {
       return std::nullopt;
     }

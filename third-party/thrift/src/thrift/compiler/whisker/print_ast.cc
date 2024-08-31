@@ -83,7 +83,8 @@ struct ast_visitor {
         partial_apply.path_string());
     if (const auto& offset = partial_apply.standalone_offset_within_line;
         offset.has_value()) {
-      scope.open_property().println(" standalone-offset {}", *offset);
+      scope.open_property().println(
+          " standalone-offset '{}'", tree_printer::escape(*offset));
     }
   }
   void visit(const ast::comment& comment, tree_printer::scope scope) const {

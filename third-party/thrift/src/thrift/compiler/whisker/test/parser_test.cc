@@ -282,7 +282,7 @@ TEST_F(ParserTest, basic_partial_apply) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- partial-apply <line:1:1, col:24> 'path/to/file'\n"
-      "| `- standalone-offset 0\n");
+      "| `- standalone-offset ''\n");
 }
 
 TEST_F(ParserTest, partial_apply_single_id) {
@@ -291,7 +291,7 @@ TEST_F(ParserTest, partial_apply_single_id) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- partial-apply <line:1:1, col:12> 'foo'\n"
-      "| `- standalone-offset 0\n");
+      "| `- standalone-offset ''\n");
 }
 
 TEST_F(ParserTest, partial_apply_in_section) {
@@ -306,7 +306,17 @@ TEST_F(ParserTest, partial_apply_in_section) {
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
       "| |- text <line:2:1, col:3> '  '\n"
       "| |- partial-apply <line:2:3, col:20> 'print/news'\n"
-      "| | `- standalone-offset 2\n");
+      "| | `- standalone-offset '  '\n");
+}
+
+TEST_F(ParserTest, partial_apply_preserves_whitespace_offset) {
+  auto ast = parse_ast(" \t {{ > print/news}}\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:4> ' \\t '\n"
+      "|- partial-apply <line:1:4, col:21> 'print/news'\n"
+      "| `- standalone-offset ' \\t '\n");
 }
 
 TEST_F(ParserTest, partial_apply_no_id) {
@@ -339,7 +349,7 @@ TEST_F(ParserTest, partial_apply_dotted_path) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- partial-apply <line:1:1, col:20> 'path/to.file'\n"
-      "| `- standalone-offset 0\n");
+      "| `- standalone-offset ''\n");
 }
 
 TEST_F(ParserTest, partial_apply_empty_path_part) {

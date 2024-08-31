@@ -840,6 +840,25 @@ TEST_F(RenderTest, partials_indentation_nested) {
       "after\n");
 }
 
+TEST_F(RenderTest, partial_apply_preserves_whitespace_offset) {
+  auto result = render(
+      " \t {{> partial-1}} \t \n",
+      w::map({{"value", w::i64(42)}}),
+      partials(
+          {{"partial-1",
+            "\t 1\n"
+            " \t {{>partial-2}} \n"},
+           {"partial-2",
+            "\t 2\n"
+            " \t {{>partial-3}}! \n"},
+           {"partial-3", "\t{{value}}"}}));
+  EXPECT_EQ(
+      *result,
+      " \t \t 1\n"
+      " \t  \t \t 2\n"
+      " \t  \t  \t \t42! \n");
+}
+
 TEST_F(RenderTest, strip_standalone_lines) {
   auto result = render(
       "| This Is\n"

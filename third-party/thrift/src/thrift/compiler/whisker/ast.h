@@ -158,11 +158,13 @@ struct partial_apply {
    * Standalone partial applications exhibit different indentation behavior:
    *   https://github.com/mustache/spec/blob/v1.4.2/specs/partials.yml#L13-L15
    *
-   * If this is a standalone partial application, the value is the amount of
-   * preceeding whitespace necessary before the partial application
-   * interpolation. Otherwise, this is std::nullopt.
+   * If this is a standalone partial application, the value is the preceeding
+   * whitespace necessary before the partial application interpolation.
+   * Otherwise, this is std::nullopt.
+   *
+   * The contained string is guaranteed to be whitespace only.
    */
-  std::optional<unsigned> standalone_offset_within_line;
+  std::optional<std::string> standalone_offset_within_line;
 
   std::string path_string() const;
 };

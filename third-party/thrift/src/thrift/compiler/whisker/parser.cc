@@ -24,8 +24,8 @@
 #include <cassert>
 #include <cstddef>
 #include <iterator>
+#include <map>
 #include <optional>
-#include <set>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -231,17 +231,37 @@ bool try_consume_token(parser_scan_window* scan, tok kind) {
  */
 class standalone_lines_scanner {
  public:
-  struct result {
+  /**
+   * A marker struct indicating a tok::whitespace or tok::newline that should
+   * be stripped because they are part of a standalone line.
+   */
+  struct removed {};
+  /**
+   * A marker struct indicating a block that is standalone.
+   */
+  struct standalone_block {};
+  /**
+   * A struct indicating a standalone partial application.
+   */
+  struct partial_apply {
     /**
-     * The cursors in the set point to either:
-     *   - the "{{" token of the corresponding standalone construct.
-     *   - tok::whitespace or tok::newline that should be removed.
-     *
-     * Using std::set here because cursor is an iterator and thus has operator<
-     * but not necessarily std::hash<>.
+     * The whitespace content to the left of the partial application that
+     * should be replicated for subsequent lines in multi-line partial
+     * applications.
      */
-    std::set<parser_scan_window::cursor> standalone_markings;
+    std::string preceding_whitespace;
   };
+  using standalone_marking =
+      std::variant<removed, standalone_block, partial_apply>;
+  /**
+   * The cursors in the set point to either:
+   *   - the "{{" token of the corresponding standalone construct.
+   *   - tok::whitespace or tok::newline.
+   *
+   * Using std::map here because cursor is an iterator and thus has operator<
+   * but not necessarily std::hash<>.
+   */
+  using result = std::map<parser_scan_window::cursor, standalone_marking>;
 
   /**
    * Returns a result containing the cursors of the tokens that are "involved"
@@ -262,24 +282,37 @@ class standalone_lines_scanner {
 
     using cursor = parser_scan_window::cursor;
 
-    std::set<parser_scan_window::cursor> marked_tokens;
-    const auto mark_token = [&](cursor pos) {
-      assert(
-          pos->kind == tok::whitespace || pos->kind == tok::newline ||
-          pos->kind == tok::open);
-      assert(marked_tokens.find(pos) == marked_tokens.end());
-      marked_tokens.insert(pos);
+    result marked_tokens;
+    const auto& mark_removal = [&](cursor pos) {
+      assert(pos->kind == tok::whitespace || pos->kind == tok::newline);
+      [[maybe_unused]] const auto& [_, inserted] =
+          marked_tokens.insert({pos, removed()});
+      assert(inserted);
+    };
+
+    const auto& mark_standalone = [&](cursor pos) {
+      assert(pos->kind == tok::open);
+      [[maybe_unused]] const auto& [_, inserted] =
+          marked_tokens.insert({pos, standalone_block()});
+      assert(inserted);
+    };
+
+    const auto& mark_partial_apply = [&](cursor pos, partial_apply partial) {
+      assert(pos->kind == tok::open);
+      [[maybe_unused]] const auto& [_, inserted] =
+          marked_tokens.insert({pos, std::move(partial)});
+      assert(inserted);
     };
 
     struct line_info {
       cursor start;
-      std::vector<cursor> standalones = {};
+      std::vector<std::pair<cursor, standalone_marking>> markings = {};
     };
     line_info current_line{scan.head};
 
     const auto begin_next_line = [&]() {
-      current_line.standalones.clear();
-      current_line = {scan.head, std::move(current_line.standalones)};
+      current_line.markings.clear();
+      current_line = {scan.head, std::move(current_line.markings)};
       scan = scan.make_fresh();
     };
 
@@ -287,14 +320,25 @@ class standalone_lines_scanner {
     // standalone constructs. This function "commits" the changes aggregated in
     // the current line into the output.
     const auto commit_current_line_markings = [&]() {
-      if (!current_line.standalones.empty()) {
-        for (cursor c : current_line.standalones) {
-          mark_token(c);
-        }
+      if (!current_line.markings.empty()) {
         for (cursor c = current_line.start; c < scan.head; ++c) {
           if (c->kind == tok::whitespace || c->kind == tok::newline) {
-            mark_token(c);
+            mark_removal(c);
           }
+        }
+        for (auto& m : current_line.markings) {
+          cursor c = m.first;
+          auto& marking = m.second;
+          detail::variant_match(
+              std::move(marking),
+              [&](standalone_block&&) { mark_standalone(c); },
+              [&](partial_apply&& partial) {
+                mark_partial_apply(c, std::move(partial));
+              },
+              [&](removed&&) {
+                std::logic_error(
+                    "Removal markings should only happen at the end of the line");
+              });
         }
       }
       begin_next_line();
@@ -332,21 +376,29 @@ class standalone_lines_scanner {
           case standalone_compatible_kind::ineligible:
             drain_current_line();
             continue;
-          case standalone_compatible_kind::partial_apply:
-            if (!current_line.standalones.empty()) {
+          case standalone_compatible_kind::partial_apply: {
+            if (!current_line.markings.empty()) {
               // Even though we allow multiple standalone constructs on the same
               // line, for partials it does not apply
               drain_current_line();
               continue;
             }
+            std::string preceding_whitespace;
+            for (cursor c = current_line.start; c != scan_start; ++c) {
+              assert(c->kind == tok::whitespace);
+              preceding_whitespace += c->string_value();
+            }
+            current_line.markings.emplace_back(
+                scan_start, partial_apply{std::move(preceding_whitespace)});
             // Do not strip the left side
             current_line.start = scan.head;
             break;
+          }
           default:
             // These blocks strip both sides
+            current_line.markings.emplace_back(scan_start, standalone_block());
             break;
         }
-        current_line.standalones.push_back(scan_start);
       } else {
         // This line is not eligible for stripping
         drain_current_line();
@@ -357,7 +409,7 @@ class standalone_lines_scanner {
     // Otherwise, the current line is ineligible so nothing happens.
     commit_current_line_markings();
 
-    return result{std::move(marked_tokens)};
+    return marked_tokens;
   }
 
   // A line containing any of the following constructs...
@@ -447,7 +499,7 @@ class parser {
   std::vector<token> tokens_;
   const source_manager& src_manager_;
   diagnostics_engine& diags_;
-  std::set<parser_scan_window::cursor> standalone_markings_;
+  standalone_lines_scanner::result standalone_markings_;
 
   // Reports an error without failing the parse.
   template <typename... T>
@@ -478,10 +530,21 @@ class parser {
         to_string(scan.peek().kind));
   }
 
-  [[nodiscard]] bool is_marked_standalone(
-      parser_scan_window::cursor pos, [[maybe_unused]] tok expected) const {
-    assert(pos->kind == expected);
+  [[nodiscard]] bool is_standalone_whitespace(
+      parser_scan_window::cursor pos) const {
+    assert(pos->kind == tok::whitespace || pos->kind == tok::newline);
     return standalone_markings_.find(pos) != standalone_markings_.end();
+  }
+
+  std::optional<std::string> standalone_partial_offset(
+      parser_scan_window::cursor pos) const {
+    assert(pos->kind == tok::open);
+    if (auto marking = standalone_markings_.find(pos);
+        marking != standalone_markings_.end()) {
+      return std::get<standalone_lines_scanner::partial_apply>(marking->second)
+          .preceding_whitespace;
+    }
+    return std::nullopt;
   }
 
   // root → { body* }
@@ -566,8 +629,8 @@ class parser {
       if (t.kind != tok::text && t.kind != tok::whitespace) {
         break;
       }
-      bool is_stripped = t.kind == tok::whitespace &&
-          is_marked_standalone(scan.head, tok::whitespace);
+      bool is_stripped =
+          t.kind == tok::whitespace && is_standalone_whitespace(scan.head);
       if (!is_stripped) {
         result += t.string_value();
       }
@@ -597,7 +660,7 @@ class parser {
       parser_scan_window scan) {
     assert(scan.empty());
     if (scan.peek().kind == tok::newline) {
-      if (is_marked_standalone(scan.head, tok::newline)) {
+      if (is_standalone_whitespace(scan.head)) {
         // Stripped because of a standalone construct
         return {std::nullopt, scan.next()};
       }
@@ -860,7 +923,6 @@ class parser {
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
-    const source_location scan_start_location = scan.start_location();
 
     if (!try_consume_token(&scan, tok::open)) {
       return no_parse_result();
@@ -886,17 +948,11 @@ class parser {
               lookup.as_string()));
     }
 
-    using offset_type = std::optional<unsigned>;
-    // resolved_location::column() is 1-indexed
-    offset_type offset_within_line = is_marked_standalone(scan_start, tok::open)
-        ? offset_type{resolved_location(scan_start_location, src_manager_).column() - 1}
-        : std::nullopt;
-
     return {
         ast::partial_apply{
             scan.with_start(scan_start).range(),
             std::move(lookup),
-            offset_within_line},
+            standalone_partial_offset(scan_start)},
         scan};
   }
 
@@ -935,11 +991,11 @@ class parser {
       std::vector<token> tokens,
       const source_manager& src_manager,
       diagnostics_engine& diags,
-      standalone_lines_scanner::result scan_result)
+      standalone_lines_scanner::result standalone_markings)
       : tokens_(std::move(tokens)),
         src_manager_(src_manager),
         diags_(diags),
-        standalone_markings_(std::move(scan_result.standalone_markings)) {}
+        standalone_markings_(std::move(standalone_markings)) {}
 
   std::optional<ast::root> parse() {
     return parse_root(parser_scan_window(

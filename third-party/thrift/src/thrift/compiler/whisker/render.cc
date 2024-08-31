@@ -98,18 +98,30 @@ class outputter {
    * buffered output. This is needed for indentation of standalone partial
    * applications.
    */
-  auto make_indent_guard(unsigned amount) {
+  auto make_indent_guard(const std::optional<std::string>& indent) {
+    // This implementation assumes that indent_guard lifetimes are nested.
+    //
+    // That is, if guard A was created before guard B, then guard B must be
+    // destroyed before guard A.
+    //
+    // Otherwise, the guard will pop off the wrong item in the indentation
+    // stack. This assumption allows using a std::vector instead of a std::list
+    // for the stack.
     class indent_guard {
      private:
-      explicit indent_guard(outputter& out, unsigned amount)
-          : out_(&out), amount_(amount) {
-        out_->next_indent_ += amount_;
+      explicit indent_guard(
+          outputter& out, const std::optional<std::string>& indent)
+          : out_(&out), is_empty_(!indent.has_value()) {
+        if (!is_empty_) {
+          out_->next_indent_.emplace_back(*indent);
+        }
       }
 
      public:
       ~indent_guard() {
-        assert(out_->next_indent_ >= amount_);
-        out_->next_indent_ -= amount_;
+        if (!is_empty_) {
+          out_->next_indent_.pop_back();
+        }
       }
 
       indent_guard(indent_guard&& other) = delete;
@@ -118,25 +130,22 @@ class outputter {
      private:
       friend class outputter;
       outputter* out_;
-      unsigned amount_;
+      bool is_empty_;
     };
-    return indent_guard(*this, amount);
+    return indent_guard(*this, indent);
   }
 
  private:
   void writeln_to_sink() {
     assert(current_line_.has_value());
     assert(!current_line_->buffer.empty());
-    for (unsigned i = 0; i < current_line_->indent; ++i) {
-      sink_ << ' ';
-    }
-    sink_ << std::move(current_line_->buffer);
+    sink_ << current_line_->indent << std::move(current_line_->buffer);
     current_line_ = std::nullopt;
   }
 
   struct current_line_info {
     std::string buffer;
-    unsigned indent;
+    std::string indent;
   };
   // Initialization is deferred so that we create the object with the correct
   // indentation at the time of the first print. This allows the renderer to
@@ -146,13 +155,17 @@ class outputter {
 
   current_line_info& current_line() {
     if (!current_line_.has_value()) {
-      current_line_ = {{}, next_indent_};
+      std::string indent;
+      for (const auto& stack : next_indent_) {
+        indent += stack;
+      }
+      current_line_ = {{}, std::move(indent)};
     }
     return *current_line_;
   }
 
   std::ostream& sink_;
-  unsigned next_indent_ = 0;
+  std::vector<std::string> next_indent_;
 };
 
 class render_engine {
@@ -450,8 +463,8 @@ class render_engine {
 
     // Partials are "inlined" into their invocation site. In other words, they
     // execute within the scope where they are invoked.
-    auto indent_guard = out_.make_indent_guard(
-        partial_apply.standalone_offset_within_line.value_or(0u));
+    auto indent_guard =
+        out_.make_indent_guard(partial_apply.standalone_offset_within_line);
     visit(resolved_partial->bodies);
   }
 

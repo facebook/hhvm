@@ -1,12 +1,21 @@
 <?hh
 <<file: __EnableUnstableFeatures('expression_trees')>>
+class :abc {
+  public function __construct() {
+  }
+}
+
+class :def {
+  public function __construct() {
+  }
+}
 
 function f(): void {
   ExampleDsl::makeTree(
     darray[
       "path" => __FILE__,
-      "start_line" => 5,
-      "end_line" => 5,
+      "start_line" => 16,
+      "end_line" => 16,
       "start_column" => 13,
       "end_column" => 33,
     ],
@@ -20,8 +29,8 @@ function f(): void {
         return $v->visitXhp(
           darray[
             "path" => __FILE__,
-            "start_line" => 5,
-            "end_line" => 5,
+            "start_line" => 16,
+            "end_line" => 16,
             "start_column" => 13,
             "end_column" => 33,
           ],
@@ -31,8 +40,8 @@ function f(): void {
             $v->visitXhp(
               darray[
                 "path" => __FILE__,
-                "start_line" => 5,
-                "end_line" => 5,
+                "start_line" => 16,
+                "end_line" => 16,
                 "start_column" => 19,
                 "end_column" => 26,
               ],

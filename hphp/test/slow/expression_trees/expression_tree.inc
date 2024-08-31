@@ -114,6 +114,14 @@ class ExampleDsl {
     return "$op $operand";
   }
 
+  public function visitInstanceMethod(
+    ?ExprPos $_,
+    ExampleDsl::TAst $expr,
+    string $method,
+  ): ExampleDsl::TAst {
+    return "$expr->$method";
+  }
+
   public function visitCall<T>(
     ?ExprPos $_,
     ExampleDsl::TAst $callee,
@@ -208,7 +216,7 @@ class ExampleDsl {
     string $class_name,
     dict<string, ExampleDsl::TAst> $attrs,
     vec<ExampleDsl::TAst> $children,
-  ): ExampleDsl::TAst {
+  )[]: ExampleDsl::TAst {
     $attr_parts = vec[];
     foreach ($attrs as $name => $value) {
       $attr_parts[] = $name."=".$value;

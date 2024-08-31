@@ -284,6 +284,14 @@ class ExampleDsl {
     return "$expr->$prop_name";
   }
 
+  public function visitInstanceMethod(
+    ?ExprPos $_,
+    ExampleDsl::TAst $expr,
+    string $method,
+  ): ExampleDsl::TAst {
+    return "$expr->$method";
+  }
+
   public function visitXhp(
     ?ExprPos $_,
     string $class_name,

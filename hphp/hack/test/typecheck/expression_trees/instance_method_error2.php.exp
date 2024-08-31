@@ -1,5 +1,5 @@
 ERROR: File "instance_method_error2.php", line 8, characters 12-17:
-Expression trees only support named property access. (Parsing[1002])
+Expression trees only support named property or instance method access. (Parsing[1002])
 ERROR: File "instance_method_error2.php", line 8, characters 16-17:
 Dynamic access of properties and methods is only permitted on values of type `dynamic`. (Naming[2011])
   File "instance_method_error2.php", line 8, characters 16-17:

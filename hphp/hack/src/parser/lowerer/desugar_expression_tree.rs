@@ -1204,17 +1204,15 @@ impl RewriteState {
                             desugar_expr,
                         }
                     }
-                    // Source: MyDsl`$x->bar()`
-                    // Virtualized: $x->bar()
-                    // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
-                    ObjGet(og) if og.3 == ast::PropOrMethod::IsMethod => {
-                        self.errors.push((
-                            pos,
-                            "Expression trees do not support calling instance methods".into(),
-                        ));
-                        unchanged_result
-                    }
+                    // Source: MyDsl`...()`
+                    // Virtualized: ...()
+                    // Desugared: $0v->visitCall(new ExprPos(...), ..., vec[])
                     _ => {
+                        let should_virtualize_call = match recv.2 {
+                            // We don't virtualize calls on instance methods
+                            ObjGet(ref og) if og.3 == ast::PropOrMethod::IsMethod => false,
+                            _ => true,
+                        };
                         let rewritten_recv =
                             self.rewrite_expr(Expr((), recv.1, recv.2), visitor_name);
 
@@ -1231,7 +1229,11 @@ impl RewriteState {
                             (),
                             pos.clone(),
                             Call(Box::new(ast::CallExpr {
-                                func: _virtualize_call(rewritten_recv.virtual_expr, &pos),
+                                func: if should_virtualize_call {
+                                    _virtualize_call(rewritten_recv.virtual_expr, &pos)
+                                } else {
+                                    rewritten_recv.virtual_expr
+                                },
                                 targs: vec![],
                                 args: build_args(virtual_args),
                                 unpacked_arg: None,
@@ -1384,16 +1386,22 @@ impl RewriteState {
                     desugar_expr,
                 }
             }
-            // Source: MyDsl`(...)->foo`
-            // Virtualized to: `(...)->foo`
-            // Desugared to `$0v->visitPropertyAccess(new ExprPos(...), ...), 'foo')`
+            // Source:
+            //  MyDsl`(...)->foo` or
+            //  MyDsl`(...)->foo(...)`
+            // Virtualized to:
+            //   `(...)->foo` or
+            //   `(...)->foo(...)`
+            // Desugared to:
+            //   `$0v->visitPropertyAccess(new ExprPos(...), ..., 'foo')` or
+            //   `$0v->visitInstanceMethod(new ExprPos(...), ..., 'foo')`
             ObjGet(og) => {
                 let (e1, e2, null_flavor, is_prop_call) = *og;
 
                 if null_flavor == OgNullFlavor::OGNullsafe {
                     self.errors.push((
                         pos.clone(),
-                        "Expression Trees do not support nullsafe property access".into(),
+                        "Expression Trees do not support nullsafe property or instance method access".into(),
                     ));
                 }
                 let rewritten_e1 = self.rewrite_expr(e1, visitor_name);
@@ -1403,12 +1411,16 @@ impl RewriteState {
                 } else {
                     self.errors.push((
                         pos.clone(),
-                        "Expression trees only support named property access.".into(),
+                        "Expression trees only support named property or instance method access."
+                            .into(),
                     ));
                     e2.clone()
                 };
                 let desugar_expr = v_meth_call(
-                    et::VISIT_PROPERTY_ACCESS,
+                    match is_prop_call {
+                        PropOrMethod::IsProp => et::VISIT_PROPERTY_ACCESS,
+                        PropOrMethod::IsMethod => et::VISIT_INSTANCE_METHOD,
+                    },
                     vec![pos_expr, rewritten_e1.desugar_expr, id],
                     &pos,
                 );

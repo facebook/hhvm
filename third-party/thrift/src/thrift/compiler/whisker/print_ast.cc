@@ -71,7 +71,7 @@ struct ast_visitor {
         section.inverted ? " <inverted>" : "",
         location(section.loc));
     visit(section.variable, scope.open_property());
-    for (const auto& body : section.bodies) {
+    for (const auto& body : section.body_elements) {
       visit(body, scope.open_node());
     }
   }
@@ -109,9 +109,10 @@ struct ast_visitor {
     detail::variant_match(
         body, [&](const auto& node) { visit(node, std::move(scope)); });
   }
-  void visit(const ast::bodies& bodies, tree_printer::scope scope) const {
+  void visit(
+      const ast::bodies& body_elements, tree_printer::scope scope) const {
     // This node is transparent so it does not directly appear in the tree
-    for (const auto& body : bodies) {
+    for (const auto& body : body_elements) {
       visit(body, scope);
     }
   }
@@ -119,7 +120,7 @@ struct ast_visitor {
     scope.println(
         "root [{}]", resolved_location(root.loc, src_manager).file_name());
     auto root_scope = scope.open_node();
-    visit(root.bodies, root_scope);
+    visit(root.body_elements, root_scope);
   }
 
   const source_manager& src_manager;

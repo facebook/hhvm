@@ -121,7 +121,7 @@ struct [[nodiscard]] lex_result {
     assert(scan);
     assert(result_);
     *scan = std::move(result_->new_head);
-    return std::move(result_->token);
+    return std::move(result_->value);
   }
 
   bool has_value() const { return result_.has_value(); }
@@ -129,7 +129,7 @@ struct [[nodiscard]] lex_result {
 
  private:
   struct success {
-    token token;
+    token value;
     detail::lexer_scan_window new_head;
   };
   std::optional<success> result_;

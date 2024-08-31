@@ -268,6 +268,7 @@ std::string to_string(const token& token) {
     case token_value_kind::none:
       return fmt::format("token[kind={}]", to_string(token.kind));
   }
+  throw std::logic_error("Unreachable");
 }
 
 std::ostream& operator<<(std::ostream& out, const token& token) {

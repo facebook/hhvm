@@ -57,9 +57,9 @@ class RenderTest : public testing::Test {
   };
   std::optional<source_state> last_render_;
 
-  class in_memory_partial_resolver : public partial_resolver {
+  class in_memory_template_resolver : public template_resolver {
    public:
-    explicit in_memory_partial_resolver(source_manager& src_manager)
+    explicit in_memory_template_resolver(source_manager& src_manager)
         : src_manager_(src_manager) {}
 
    private:
@@ -122,7 +122,7 @@ class RenderTest : public testing::Test {
     }
     if (!partials.value.empty()) {
       auto partial_resolver =
-          std::make_unique<in_memory_partial_resolver>(current.src_manager);
+          std::make_unique<in_memory_template_resolver>(current.src_manager);
       for (const auto& [name, content] : partials.value) {
         current.src_manager.add_virtual_file(name, content);
       }

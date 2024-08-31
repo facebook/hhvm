@@ -26,15 +26,15 @@
 namespace whisker {
 
 /**
- * A resolver of AST nodes backing partial applications:
+ * A resolver of parsed AST by name, primarily used for partial applications:
  *   "{{> path/to/partial }}".
  *
  * This class allows partials to be lazily loaded and parsed only when they are
  * used.
  */
-class partial_resolver {
+class template_resolver {
  public:
-  virtual ~partial_resolver() noexcept = default;
+  virtual ~template_resolver() noexcept = default;
 
   /**
    * Given a partial lookup path (corresponding to ast::partial_lookup), this
@@ -135,7 +135,7 @@ struct render_options {
    *
    * If this is not set, then all partial applications will fail.
    */
-  std::shared_ptr<partial_resolver> partial_resolver = nullptr;
+  std::shared_ptr<template_resolver> partial_resolver = nullptr;
 };
 
 /**

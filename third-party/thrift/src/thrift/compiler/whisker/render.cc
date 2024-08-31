@@ -79,17 +79,15 @@ class outputter {
    */
   auto make_flush_guard() {
     class flush_guard {
-     private:
+     public:
       explicit flush_guard(outputter& out) : out_(&out) {}
 
-     public:
       ~flush_guard() { out_->flush(); }
 
       flush_guard(flush_guard&& other) = delete;
       flush_guard& operator=(flush_guard&& other) = delete;
 
      private:
-      friend class outputter;
       outputter* out_;
     };
     return flush_guard(*this);
@@ -110,7 +108,7 @@ class outputter {
     // stack. This assumption allows using a std::vector instead of a std::list
     // for the stack.
     class indent_guard {
-     private:
+     public:
       explicit indent_guard(
           outputter& out, const std::optional<std::string>& indent)
           : out_(&out), is_empty_(!indent.has_value()) {
@@ -119,7 +117,6 @@ class outputter {
         }
       }
 
-     public:
       ~indent_guard() {
         if (!is_empty_) {
           out_->next_indent_.pop_back();
@@ -130,7 +127,6 @@ class outputter {
       indent_guard& operator=(indent_guard&& other) = delete;
 
      private:
-      friend class outputter;
       outputter* out_;
       bool is_empty_;
     };
@@ -185,7 +181,7 @@ class render_engine {
   bool visit(const ast::root& root) {
     try {
       auto flush_guard = out_.make_flush_guard();
-      visit(root.bodies);
+      visit(root.body_elements);
       return true;
     } catch (const eval_error&) {
       // errors should have been reported through diagnostics_engine
@@ -358,7 +354,7 @@ class render_engine {
 
     const auto do_visit = [&](const object& scope) {
       eval_context_.push_scope(scope);
-      visit(section.bodies);
+      visit(section.body_elements);
       eval_context_.pop_scope();
     };
 
@@ -467,7 +463,7 @@ class render_engine {
     // execute within the scope where they are invoked.
     auto indent_guard =
         out_.make_indent_guard(partial_apply.standalone_offset_within_line);
-    visit(resolved_partial->bodies);
+    visit(resolved_partial->body_elements);
   }
 
   outputter out_;

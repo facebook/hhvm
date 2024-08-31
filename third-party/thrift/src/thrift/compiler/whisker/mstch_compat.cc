@@ -47,7 +47,7 @@ class mstch_array_proxy final
     return nullptr;
   }
 
-  std::shared_ptr<const sequence> as_sequence() const override {
+  std::shared_ptr<const native_object::sequence> as_sequence() const override {
     return shared_from_this();
   }
 

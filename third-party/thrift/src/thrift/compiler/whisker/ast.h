@@ -44,7 +44,7 @@ using bodies = std::vector<body>;
  */
 struct root {
   source_location loc;
-  bodies bodies;
+  bodies body_elements;
 };
 
 /**
@@ -124,7 +124,7 @@ struct section_block {
    */
   bool inverted;
   variable_lookup variable;
-  bodies bodies;
+  bodies body_elements;
 };
 
 /*

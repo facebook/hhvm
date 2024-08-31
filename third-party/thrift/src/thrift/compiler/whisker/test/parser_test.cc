@@ -65,7 +65,7 @@ class ParserTest : public testing::Test {
 
 TEST_F(ParserTest, empty) {
   auto ast = parse_ast("");
-  EXPECT_TRUE(ast->bodies.empty());
+  EXPECT_TRUE(ast->body_elements.empty());
 }
 
 TEST_F(ParserTest, basic) {

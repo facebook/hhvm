@@ -1,0 +1,36 @@
+ERROR: File "generic_enum_class.php", line 37, characters 18-21:
+Invalid argument (Typing[4110])
+  File "generic_enum_class.php", line 37, characters 18-21:
+  Expected a class with a constant `Int`
+  File "generic_enum_class.php", line 29, characters 20-23:
+  But got `Base`
+  File "generic_enum_class.php", line 21, characters 25-30:
+    via this generic `Tclass`
+  File "generic_enum_class.php", line 3, characters 21-24:
+  `Base` is defined here
+  File "generic_enum_class.php", line 4, characters 9-13:
+  Did you mean `Float`?
+ERROR: File "generic_enum_class.php", line 41, characters 18-22:
+Invalid argument (Typing[4110])
+  File "generic_enum_class.php", line 41, characters 18-22:
+  Expected a class with a constant `Bool`
+  File "generic_enum_class.php", line 29, characters 20-23:
+  But got `Base`
+  File "generic_enum_class.php", line 21, characters 25-30:
+    via this generic `Tclass`
+  File "generic_enum_class.php", line 3, characters 21-24:
+  `Base` is defined here
+  File "generic_enum_class.php", line 4, characters 9-13:
+  Did you mean `Float`?
+ERROR: File "generic_enum_class.php", line 42, characters 16-20:
+Invalid argument (Typing[4110])
+  File "generic_enum_class.php", line 42, characters 16-20:
+  Expected a class with a constant `Bool`
+  File "generic_enum_class.php", line 30, characters 20-24:
+  But got `Enum1`
+  File "generic_enum_class.php", line 21, characters 25-30:
+    via this generic `Tclass`
+  File "generic_enum_class.php", line 7, characters 12-16:
+  `Enum1` is defined here
+  File "generic_enum_class.php", line 4, characters 9-13:
+  Did you mean `Float`?

@@ -84,6 +84,27 @@ namespace HH {
   newtype MemberOf<-TEnumClass, +TType> as TType = TType;
 
   /**
+ * GenericEnumClass is an interface that contains the utility methods provided
+ * by concrete implementations of enum classes. It is used to hide the
+ * implementation details of enum classes from the user, while allowing
+ * to write code that operates across unrelated enum classes generically.
+ *
+ * For instance this allows to restrict a type constant to be a concrete enum class
+ * whose members are known to be arraykeys by writing:
+ *
+ *   type const T as GenericEnumClass<mixed, arraykey>;
+ */
+<<__Sealed(BuiltinEnumClass::class)>>
+interface GenericEnumClass<+Tclass, +T> {
+  require extends BuiltinAbstractEnumClass;
+  public static function getValues()[write_props]: darray<string, T>;
+
+  public static function valueOf<TEnum super Tclass, TType>(
+    \HH\EnumClass\Label<TEnum, TType> $label,
+  )[write_props]: MemberOf<TEnum, TType>;
+}
+
+  /**
    * BuiltinAbstractEnumClass contains the utility methods provided by
    * abstract enum classes.
    *
@@ -107,7 +128,8 @@ namespace HH {
    * provided for the typechecker and for developer reference.
    */
   <<__EnumClass>>
-  abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass {
+abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass
+  implements GenericEnumClass<this, T> {
     /**
      * Get the values of the public consts defined on this class,
      * indexed by the string name of those consts.

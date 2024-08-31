@@ -93,6 +93,16 @@ FoldedClass {
             class_context: "\\E",
             from_req_extends: false,
         },
+        "\\HH\\GenericEnumClass": SubstContext {
+            subst: Subst(
+                {
+                    "Tclass": this,
+                    "T": T,
+                },
+            ),
+            class_context: "\\HH\\BuiltinEnumClass",
+            from_req_extends: false,
+        },
         "\\HH\\BuiltinEnumClass": SubstContext {
             subst: Subst(
                 {
@@ -106,6 +116,7 @@ FoldedClass {
     ancestors: {
         "\\HH\\BuiltinAbstractEnumClass": HH\BuiltinAbstractEnumClass,
         "\\A": A,
+        "\\HH\\GenericEnumClass": HH\GenericEnumClass<this, HH\MemberOf<E, string>>,
         "\\HH\\BuiltinEnumClass": HH\BuiltinEnumClass<HH\MemberOf<E, string>>,
     },
     static_methods: {

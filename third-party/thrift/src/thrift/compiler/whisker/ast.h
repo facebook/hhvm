@@ -53,7 +53,7 @@ struct root {
  */
 struct text {
   source_range loc;
-  std::string text;
+  std::string content;
 };
 
 /**

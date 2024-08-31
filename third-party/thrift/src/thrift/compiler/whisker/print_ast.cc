@@ -56,7 +56,9 @@ struct ast_visitor {
   }
   void visit(const ast::text& text, tree_printer::scope scope) const {
     scope.println(
-        " text {} '{}'", location(text.loc), tree_printer::escape(text.text));
+        " text {} '{}'",
+        location(text.loc),
+        tree_printer::escape(text.content));
   }
   void visit(const ast::newline& newline, tree_printer::scope scope) const {
     scope.println(

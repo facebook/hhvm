@@ -49,7 +49,7 @@ class outputter {
 
   void write(const ast::text& text) {
     // ast::text is guaranteed to have no newlines
-    current_line().buffer += text.text;
+    current_line().buffer += text.content;
   }
 
   void write(const ast::newline& newline) {

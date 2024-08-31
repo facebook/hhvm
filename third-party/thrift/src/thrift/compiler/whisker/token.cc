@@ -96,7 +96,7 @@ constexpr token_kind_info info[] = {
 
 constexpr std::size_t num_token_kinds = sizeof(info) / sizeof(*info);
 
-constexpr struct token_kind_names {
+struct token_kind_names {
   const char* data[num_token_kinds] = {};
 
   constexpr token_kind_names() {
@@ -108,7 +108,9 @@ constexpr struct token_kind_names {
     }
     assert(num_token_kinds == max_kind + 1);
   }
-} names;
+};
+
+constexpr token_kind_names names;
 
 const std::unordered_map<std::string_view, tok> keywords_to_tok = {
 #define WHISKER_KEYWORD(kw) {#kw, tok::kw_##kw},

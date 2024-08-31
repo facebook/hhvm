@@ -522,7 +522,7 @@ THRIFT_REGISTER_GENERATOR(
     "    include_generated: Enables schematization of generated (patch) types.\n"
     "    source_ranges:     Enables population of the identifier source range map.\n"
     "    no_backcompat:     Disables double writes (breaking changes possible!).\n"
-    "    use_hash:          Uses typeHashPrefixSha2_256 in typeUri and instead of extern ids.\n"
+    "    use_hash:          Uses definitionKey in typeUri and instead of extern ids.\n"
     "    root_program_only: Only schematize the root program.\n"
     "");
 

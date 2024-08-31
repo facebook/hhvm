@@ -91,6 +91,14 @@ union TypeUri {
    * rolled out.
    */
   3: string scopedName;
+
+  /**
+   * Warning: not a stable identifier
+   *
+   * A key into the `definitionMap` in schema.thrift when 'use_hash' option is specified.
+   * This MUST be only used in the context of schema.thrift and DO NOT provide any stability guarantee.
+   */
+  4: ByteString definitionKey;
 }
 
 /** Uniquely identifies a Thrift type. */

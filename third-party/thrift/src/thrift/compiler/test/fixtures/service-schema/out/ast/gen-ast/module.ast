@@ -159,7 +159,7 @@ Schema {
             3: type (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 10: enumType (struct) = TypeUri {
-                  2: typeHashPrefixSha2_256 (string) = "\343\217\337\3657\366X\216\250\222 \312P}\255\336",
+                  4: definitionKey (string) = "\343\217\337\3657\366X\216\250\222 \312P}\255\336",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -263,7 +263,7 @@ Schema {
                 3: type (struct) = TypeStruct {
                   1: name (struct) = TypeName {
                     13: exceptionType (struct) = TypeUri {
-                      2: typeHashPrefixSha2_256 (string) = "(\355\023\201\245\006\343;\200\211\270\235&\304u`",
+                      4: definitionKey (string) = "(\355\023\201\245\006\343;\200\211\270\235&\304u`",
                     },
                   },
                   2: params (list) = list<struct>[0] {
@@ -277,7 +277,7 @@ Schema {
             6: returnType (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 10: enumType (struct) = TypeUri {
-                  2: typeHashPrefixSha2_256 (string) = "\343\217\337\3657\366X\216\250\222 \312P}\255\336",
+                  4: definitionKey (string) = "\343\217\337\3657\366X\216\250\222 \312P}\255\336",
                 },
               },
               2: params (list) = list<struct>[0] {

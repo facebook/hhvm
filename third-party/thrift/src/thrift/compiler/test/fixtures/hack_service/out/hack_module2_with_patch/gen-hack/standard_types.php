@@ -81,6 +81,7 @@ enum apache_thrift_type_standard_TypeUriEnum: int {
   uri = 1;
   typeHashPrefixSha2_256 = 2;
   scopedName = 3;
+  definitionKey = 4;
 }
 
 /**
@@ -110,20 +111,28 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       'union' => true,
       'type' => \TType::STRING,
     ),
+    4 => shape(
+      'var' => 'definitionKey',
+      'union' => true,
+      'type' => \TType::STRING,
+      'is_binary' => true,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'uri' => 1,
     'typeHashPrefixSha2_256' => 2,
     'scopedName' => 3,
+    'definitionKey' => 4,
   ];
 
   const type TConstructorShape = shape(
     ?'uri' => ?string,
     ?'typeHashPrefixSha2_256' => ?string,
     ?'scopedName' => ?string,
+    ?'definitionKey' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4999542119567975443;
+  const int STRUCTURAL_ID = 6832884661302265451;
   /**
    * The universal name of this type, sometimes referred to as a Thrift URI.
    * Usually preferred when the name is shorter or has the same length as the
@@ -155,9 +164,19 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
    * 3: string scopedName
    */
   public ?string $scopedName;
+  /**
+   * Warning: not a stable identifier
+   * 
+   * A key into the `definitionMap` in schema.thrift when 'use_hash' option is specified.
+   * This MUST be only used in the context of schema.thrift and DO NOT provide any stability guarantee.
+   * 
+   * Original thrift field:-
+   * 4: standard.ByteString definitionKey
+   */
+  public ?string $definitionKey;
   protected apache_thrift_type_standard_TypeUriEnum $_type = apache_thrift_type_standard_TypeUriEnum::_EMPTY_;
 
-  public function __construct(?string $uri = null, ?string $typeHashPrefixSha2_256 = null, ?string $scopedName = null)[] {
+  public function __construct(?string $uri = null, ?string $typeHashPrefixSha2_256 = null, ?string $scopedName = null, ?string $definitionKey = null)[] {
     $this->_type = apache_thrift_type_standard_TypeUriEnum::_EMPTY_;
     if ($uri !== null) {
       $this->uri = $uri;
@@ -171,6 +190,10 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       $this->scopedName = $scopedName;
       $this->_type = apache_thrift_type_standard_TypeUriEnum::scopedName;
     }
+    if ($definitionKey !== null) {
+      $this->definitionKey = $definitionKey;
+      $this->_type = apache_thrift_type_standard_TypeUriEnum::definitionKey;
+    }
   }
 
   public static function withDefaultValues()[]: this {
@@ -182,6 +205,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       Shapes::idx($shape, 'uri'),
       Shapes::idx($shape, 'typeHashPrefixSha2_256'),
       Shapes::idx($shape, 'scopedName'),
+      Shapes::idx($shape, 'definitionKey'),
     );
   }
 
@@ -203,6 +227,9 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
         break;
       case apache_thrift_type_standard_TypeUriEnum::scopedName:
         $this->scopedName = null;
+        break;
+      case apache_thrift_type_standard_TypeUriEnum::definitionKey:
+        $this->definitionKey = null;
         break;
       case apache_thrift_type_standard_TypeUriEnum::_EMPTY_:
         break;
@@ -270,6 +297,26 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     return $this->scopedName as nonnull;
   }
 
+  public function set_definitionKey(string $definitionKey)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_TypeUriEnum::definitionKey;
+    $this->definitionKey = $definitionKey;
+    return $this;
+  }
+
+  public function get_definitionKey()[]: ?string {
+    return $this->definitionKey;
+  }
+
+  public function getx_definitionKey()[]: string {
+    invariant(
+      $this->_type === apache_thrift_type_standard_TypeUriEnum::definitionKey,
+      'get_definitionKey called on an instance of TypeUri whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->definitionKey as nonnull;
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -317,6 +364,26 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
               "name" => "scopedName",
             )
           ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "standard.ByteString",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "definitionKey",
+            )
+          ),
         ],
         "is_union" => true,
       )
@@ -328,6 +395,22 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       'struct' => dict[],
       'fields' => dict[
         'typeHashPrefixSha2_256' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "folly::fbstring",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
+                "typeClassName" => "io.netty.buffer.ByteBuf",
+              )
+            ),
+          ],
+        ),
+        'definitionKey' => shape(
           'field' => dict[],
           'type' => dict[
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(

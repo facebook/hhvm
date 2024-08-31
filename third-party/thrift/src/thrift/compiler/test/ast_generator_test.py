@@ -459,9 +459,7 @@ class AstGeneratorTest(unittest.TestCase):
             if v.structDef.attrs.name == "Bar":
                 self.assertEqual(
                     ast.definitionsMap[
-                        v.structDef.fields[
-                            0
-                        ].type.name.structType.typeHashPrefixSha2_256
+                        v.structDef.fields[0].type.name.structType.definitionKey
                     ].structDef.attrs.name,
                     "Foo",
                 )

@@ -66,7 +66,7 @@ t_type_ref schematizer::stdType(std::string_view uri) {
 std::unique_ptr<t_const_value> schematizer::typeUri(const t_type& type) {
   auto ret = t_const_value::make_map();
   if (opts_.use_hash) {
-    ret->add_map(val("typeHashPrefixSha2_256"), val(identify_definition(type)));
+    ret->add_map(val("definitionKey"), val(identify_definition(type)));
   } else if (!type.uri().empty()) {
     ret->add_map(val("uri"), val(type.uri()));
   } else {

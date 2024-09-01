@@ -136,10 +136,12 @@ struct T10 {
 typedef i64 t_t1
 
 @rust.Name{name = "U11"}
+@rust.Ord
 union T11 {
   @rust.Name{name = "string"}
   1: string str;
   2: i32 integer;
+  3: set<T11> btreeset;
 }
 
 // --

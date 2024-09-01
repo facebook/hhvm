@@ -488,6 +488,10 @@ class Ord implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

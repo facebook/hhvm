@@ -80,6 +80,7 @@ struct Exhaustive {
 
 @scope.Struct
 @scope.Typedef
+@scope.Union
 struct Ord {
 // # `rust.Ord`
 //

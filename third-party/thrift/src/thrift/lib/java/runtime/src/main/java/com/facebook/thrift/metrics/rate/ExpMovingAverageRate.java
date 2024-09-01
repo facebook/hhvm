@@ -37,10 +37,6 @@ public class ExpMovingAverageRate implements Rate {
   private final AtomicLong lastTick;
   private final Clock clock;
 
-  public ExpMovingAverageRate() {
-    this(NANO_CLOCK);
-  }
-
   public ExpMovingAverageRate(Clock clock) {
     this.m1 = EWMA.oneMinuteEWMA();
     this.m10 = EWMA.tenMinuteEWMA();
@@ -51,7 +47,11 @@ public class ExpMovingAverageRate implements Rate {
     this.lastTick = new AtomicLong(now);
   }
 
-  public void add(long count) {
+  public ExpMovingAverageRate() {
+    this(NANO_CLOCK);
+  }
+
+  public void update(long count) {
     if (lastTick == null) {
       return;
     }

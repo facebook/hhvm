@@ -17,11 +17,11 @@
 package com.facebook.thrift.metrics.rate;
 
 public interface Rate {
-  default void add() {
-    add(1);
+  default void update() {
+    update(1);
   }
 
-  void add(long count);
+  void update(long count);
 
   long oneMinuteRate();
 

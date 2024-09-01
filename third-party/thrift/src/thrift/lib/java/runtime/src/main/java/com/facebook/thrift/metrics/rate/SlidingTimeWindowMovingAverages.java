@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
-public class SlidingTimeWindowMovingCounter implements Rate {
+public class SlidingTimeWindowMovingAverages implements Rate {
   private static final long TIME_WINDOW_DURATION_MINUTES = 60L;
   private static final long TICK_INTERVAL = TimeUnit.SECONDS.toNanos(1L);
   private static final Duration TIME_WINDOW_DURATION =
@@ -41,11 +41,11 @@ public class SlidingTimeWindowMovingCounter implements Rate {
   private final Instant bucketBaseTime;
   Instant oldestBucketTime;
 
-  public SlidingTimeWindowMovingCounter() {
+  public SlidingTimeWindowMovingAverages() {
     this(new NanoClock());
   }
 
-  public SlidingTimeWindowMovingCounter(Clock clock) {
+  public SlidingTimeWindowMovingAverages(Clock clock) {
     this.clock = clock;
     long startTime = clock.tickNanos();
     this.lastTick = new AtomicLong(startTime);
@@ -61,7 +61,7 @@ public class SlidingTimeWindowMovingCounter implements Rate {
     this.currentBucketIndex = 0;
   }
 
-  public void add(long n) {
+  public void update(long n) {
     tickIfNecessary();
     (buckets.get(this.currentBucketIndex)).add(n);
   }

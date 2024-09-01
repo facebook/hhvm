@@ -18,23 +18,23 @@ package com.facebook.thrift.metrics.distribution;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
+import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingAverages;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SlidingTimeWindowMovingAverageTest {
-  private SlidingTimeWindowMovingCounter rate;
+  private SlidingTimeWindowMovingAverages rate;
   private final TestClock testClock = new TestClock();
 
   @Before
   public void setUp() {
-    rate = new SlidingTimeWindowMovingCounter(testClock);
+    rate = new SlidingTimeWindowMovingAverages(testClock);
   }
 
   private void advanceSeconds(long seconds) {
     testClock.incrementSec(seconds);
-    rate.add(0);
+    rate.update(0);
   }
 
   private void advanceMinutes(long minutes) {
@@ -45,7 +45,7 @@ public class SlidingTimeWindowMovingAverageTest {
   public void testNormalQuantilesOverOneCycle() {
     for (int i = 1; i <= 60; i++) {
       advanceSeconds(1);
-      rate.add(1);
+      rate.update(1);
     }
 
     // One Minute, one per second
@@ -57,7 +57,7 @@ public class SlidingTimeWindowMovingAverageTest {
   public void testOneMinuteDataDecaysToZeroOver1Minute() {
     for (int i = 1; i <= 60; i++) {
       advanceSeconds(1);
-      rate.add(1);
+      rate.update(1);
     }
 
     assertThat(rate.oneMinuteRate()).isEqualTo(60);
@@ -72,7 +72,7 @@ public class SlidingTimeWindowMovingAverageTest {
   public void testTenMinuteDataDecaysToZeroOver10Minutes() {
     for (int i = 1; i <= 600; i++) {
       advanceSeconds(1);
-      rate.add(1);
+      rate.update(1);
     }
 
     assertThat(rate.tenMinuteRate()).isEqualTo(600);
@@ -87,7 +87,7 @@ public class SlidingTimeWindowMovingAverageTest {
   public void testOneHourDataDecaysToZeroOver10Minutes() {
     for (int i = 1; i <= 60; i++) {
       advanceMinutes(1);
-      rate.add(1);
+      rate.update(1);
     }
 
     assertThat(rate.oneHourRate()).isEqualTo(60);

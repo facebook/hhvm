@@ -397,14 +397,14 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
     case HeaderKind::Closure:
     case HeaderKind::Object: {
       assertx(cnt->isRefCounted());
-      ObjectData* obj = (ObjectData*)cnt;
+      ObjectData* obj_cnt = (ObjectData*)cnt;
       // If its not a root node, recurse into the object to determine its size
-      if (!isObjprofRoot(obj, env.flags, env.exclude_classes)) {
-        auto obj_size_pair = getObjSize(obj, env, nullptr /* histogram */);
+      if (!isObjprofRoot(obj_cnt, env.flags, env.exclude_classes)) {
+        auto obj_size_pair = getObjSize(obj_cnt, env, nullptr /* histogram */);
         size += obj_size_pair.first;
         auto obj_ref_count = int{cnt->count()};
         FTRACE(3, " ObjectData tv: at {} with ref count {}\n",
-          (void*)obj,
+          (void*)obj_cnt,
           obj_ref_count
         );
         assertx(obj_ref_count > 0);
@@ -412,12 +412,12 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
       } else if (env.stack && env.paths) {
         // notice we might have multiple OBJ->path->OBJ for same path
         // (e.g. packed array where we omit the index number)
-        auto cls = obj->getVMClass();
+        auto cls = obj_cnt->getVMClass();
         env.stack->push_back(std::string("Object:" + cls->name()->toCppString()));
         auto pathStr = pathString(*env.stack, "->");
         env.stack->pop_back();
 
-        auto& pathsToTv = (*env.paths)[obj];
+        auto& pathsToTv = (*env.paths)[obj_cnt];
         auto& referral = pathsToTv[pathStr];
         if (env.source) {
           referral.sources.insert(env.source);
@@ -425,8 +425,8 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
         referral.refs += 1;
 
         FTRACE(3, " ObjectData tv: at {} of type {} at path {}, refs {}\n",
-          (void*)obj,
-          obj->getClassName().data(),
+          (void*)obj_cnt,
+          obj_cnt->getClassName().data(),
           pathStr,
           referral.refs
         );
@@ -1045,9 +1045,9 @@ Array HHVM_FUNCTION(objprof_get_paths,
       metrics.bytes += objsizePair.first;
       metrics.bytes_rel += objsizePair.second;
       for (auto const& pathsIt : *env.paths) {
-        auto cls = pathsIt.first->getVMClass();
+        auto cls_vm = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
-        auto& aggPaths = pathsToClass[cls->name()->toCppString()];
+        auto& aggPaths = pathsToClass[cls_vm->name()->toCppString()];
         for (auto const& pathKV : paths) {
           auto& path = pathKV.first;
           auto& referral = pathKV.second;
@@ -1110,15 +1110,15 @@ Array HHVM_FUNCTION(objprof_get_paths,
       env.stack->pop_back();
 
       for (auto const& pathsIt : *env.paths) {
-        auto cls = pathsIt.first->getVMClass();
+        auto cls_vm = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
-        auto& aggPaths = pathsToClass[cls->name()->toCppString()];
+        auto& aggPaths = pathsToClass[cls_vm->name()->toCppString()];
         for (auto const& pathKV : paths) {
           auto& path = pathKV.first;
           auto& referral = pathKV.second;
           auto& aggReferral = aggPaths[path];
           aggReferral.refs += referral.refs;
-          aggReferral.sources.insert(cls);
+          aggReferral.sources.insert(cls_vm);
         }
       }
       assertx(env.stack->size() == 0);

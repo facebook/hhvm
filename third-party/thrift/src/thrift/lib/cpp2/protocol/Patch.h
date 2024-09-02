@@ -56,6 +56,8 @@ struct ApplyPatch {
   void operator()(Object&& patch, Object& value) const;
 };
 
+type::Type toPatchType(type::Type input);
+
 } // namespace detail
 
 /**

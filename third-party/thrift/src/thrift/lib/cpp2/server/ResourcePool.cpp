@@ -66,10 +66,13 @@ ResourcePool::ResourcePool(
       concurrencyController_(std::move(concurrencyController)),
       name_(name),
       joinExecutorOnStop_(joinExecutorOnStop) {
-  DCHECK(
-      (executor_ == nullptr)
-          ? (requestPile_ == nullptr) && (concurrencyController_ == nullptr)
-          : (requestPile_ == nullptr) == (concurrencyController_ == nullptr));
+  // Current preconditions - either we have all three of these or none of them
+  if (requestPile_ && concurrencyController_ && executor_) {
+    // This is an async pool - that's allowed.
+  } else {
+    // This is a sync/eb pool.
+    DCHECK(!requestPile_ && !concurrencyController && !executor_);
+  }
 }
 
 void ResourcePool::stop() {

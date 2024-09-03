@@ -260,7 +260,7 @@ type init_env = {
   init_start_t: float;
   init_type: string;
   mergebase: Hg.Rev.t option;
-  mergebase_warning_hashes: Warnings_saved_state.t;
+  mergebase_warning_hashes: Warnings_saved_state.t option;
   why_needed_full_check: Init_telemetry.t option; [@opaque]
       (** This is about the first full check (if any) which was deferred after init.
       It gets reset after that first full check is completed.
@@ -374,8 +374,3 @@ let add_changed_files env changed_files =
 
 let show_clock (clock : Watchman.clock option) : string =
   Option.value clock ~default:"[noclock]"
-
-let warnings_saved_state_if_filtering_required env =
-  Option.some_if
-    (not env.tcopt.GlobalOptions.preexisting_warnings)
-    env.init_env.mergebase_warning_hashes

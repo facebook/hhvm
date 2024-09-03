@@ -237,8 +237,7 @@ let defer_or_do_type_check
              ~log_errors:true
              genv
              env)
-        ~warnings_saved_state:
-          (ServerEnv.warnings_saved_state_if_filtering_required env)
+        ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)
     in
     let env = { env with errorl = Errors.merge errorl env.errorl } in
     log_type_check_end

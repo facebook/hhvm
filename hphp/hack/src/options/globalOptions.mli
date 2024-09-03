@@ -262,8 +262,6 @@ type t = {
   tco_package_v2_bypass_package_check_for_class_const: bool;
       (** Option for package v2 to bypass package boundary violation errors on ::class during
           the ::class to nameof migration to unblock V0 of intern-prod separation *)
-  preexisting_warnings: bool;
-      (** Whether to show preexisting warnings from typechecked files *)
   re_no_cache: bool;
       (** Disable RE cache when calling hh_distc. Useful for performance testing.
         Corresponds to the `--no-cache` options of hh_distc. *)
@@ -377,7 +375,6 @@ val set :
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_v2:bool ->
   ?tco_package_v2_bypass_package_check_for_class_const:bool ->
-  ?preexisting_warnings:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->

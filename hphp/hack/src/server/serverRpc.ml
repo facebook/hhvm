@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+open Option.Monad_infix
 
 let remove_dead_warning name =
   "hh_server was started without '--no-load', which is required when removing dead "
@@ -95,9 +96,8 @@ let handle :
       ServerStatusSingle.go
         file_names
         ctx
-        (Option.some_if
-           (not preexisting_warnings)
-           ServerEnv.(env.init_env.mergebase_warning_hashes))
+        (ServerEnv.(env.init_env.mergebase_warning_hashes)
+        >>= Option.some_if (not preexisting_warnings))
     in
     let errors =
       errors

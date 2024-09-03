@@ -354,8 +354,7 @@ let do_type_checking
              ~log_errors:true
              genv
              env)
-        ~warnings_saved_state:
-          (ServerEnv.warnings_saved_state_if_filtering_required env)
+        ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)
     in
     (errorl, telemetry, env, cancelled, time_first_error)
   in

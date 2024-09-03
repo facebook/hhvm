@@ -1231,7 +1231,10 @@ let post_saved_state_initialization
       init_env =
         {
           env.init_env with
-          mergebase_warning_hashes = old_warnings;
+          mergebase_warning_hashes =
+            Option.some_if
+              (not (ServerArgs.preexisting_warnings genv.ServerEnv.options))
+              old_warnings;
           naming_table_manifold_path;
           saved_state_revs_info = Some saved_state_revs_info;
         };

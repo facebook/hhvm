@@ -94,7 +94,13 @@ let saved_state_init_error env genv ~do_indexing err =
       Load_state_failed (user_message, telemetry) )
   | _ -> Exit.exit ~msg:user_message ~telemetry next_step
 
-let saved_state_init ~do_indexing genv env root load_state_approach profiling =
+let saved_state_init
+    ~do_indexing
+    genv
+    env
+    root
+    (load_state_approach : load_state_approach)
+    profiling =
   let result =
     ServerLazyInit.saved_state_init
       ~do_indexing
@@ -111,7 +117,7 @@ let saved_state_init ~do_indexing genv env root load_state_approach profiling =
   | Error err -> saved_state_init_error env genv ~do_indexing err
 
 (** Write symbol info for Glean *)
-let write_symbol_info_init genv env root (load_state : 'a option) profiling =
+let write_symbol_info_init genv env root (load_state : _ option) profiling =
   match load_state with
   | None ->
     ( ServerLazyInit.write_symbol_info_full_init genv env profiling

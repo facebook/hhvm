@@ -7,7 +7,9 @@
 
 #pragma once
 
+#include <folly/json/dynamic.h>
 #include "mcrouter/McrouterFiberContext.h"
+#include "mcrouter/options.h"
 
 namespace facebook {
 namespace memcache {
@@ -140,6 +142,10 @@ folly::StringPiece routingKeyFiberLocal(const Request& req) {
   }
   return req.key_ref()->routingKey();
 }
+
+uint32_t getAdditionalFanout(
+    const folly::dynamic& json,
+    const McrouterOptions& opts);
 
 } // namespace mcrouter
 } // namespace memcache

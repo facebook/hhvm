@@ -56,6 +56,13 @@ const char* const kPoolRoute =
    "hash": { "hash_func": "Crc32" }
  })";
 
+const char* const kPoolRouteInvalidFanout =
+    R"({
+   "type": "PoolRoute",
+   "pool": { "name": "mock", "servers": [ ], "additional_fanout": 40000},
+   "hash": { "hash_func": "Crc32" },
+ })";
+
 const char* const kBucketizedSRRoute =
     R"({
    "type": "SRRoute",
@@ -161,6 +168,16 @@ TEST(McRouteHandleProvider, pool_route) {
   auto asynclogRoutes = setup.provider().releaseAsyncLogRoutes();
   EXPECT_EQ(1, asynclogRoutes.size());
   EXPECT_EQ("asynclog:mock", asynclogRoutes["mock"]->routeName());
+}
+
+TEST(McRouteHandleProvider, pool_route_with_invalid_fanout) {
+  try {
+    TestSetup setup;
+    auto rh = setup.getRoute(kPoolRouteInvalidFanout);
+  } catch (const std::logic_error&) {
+    return;
+  }
+  FAIL() << "No exception thrown";
 }
 
 TEST(McRouteHandleProvider, bucketized_sr_route_and_mcreplay_asynclogRoutes) {

@@ -9,6 +9,8 @@ class Foo {}
 function foo(): mixed {
   echo "I'm in foo\n";
 }
-function getFoo(): Foo {
-  return new Foo();
+enum EFoo: int {
+  ZERO = 0;
+  ONE = 1;
 }
+final class CFoo implements HH\ClassAttribute {}

@@ -968,6 +968,10 @@ struct TrackedInstr {
   // Stores to the stack in catch traces that can be killed to kill the
   // tracked instruction.
   jit::vector<IRInstruction*> stores;
+
+  // Passthrough instructions that canonicalize to this instr, stored *only*
+  // when this instruction produces reference
+  jit::vector<IRInstruction*> passthroughs;
 };
 
 void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
@@ -1054,7 +1058,7 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       continue;
     }
     if (inst->is(IncRef)) {
-      candidateIncRefs[inst->src(0)].push_back(inst);
+      candidateIncRefs[canonical(inst->src(0))].push_back(inst);
       continue;
     }
     if (done) continue;
@@ -1085,7 +1089,8 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
 
   for (auto store : candidateStores) {
     auto const src = store->src(1);
-    auto const it = candidateIncRefs.find(src);
+    auto const canonicalSrc = canonical(store->src(1));
+    auto const it = candidateIncRefs.find(canonicalSrc);
     if (it != candidateIncRefs.end()) {
       FTRACE(3, "Erasing {} for {}\n",
              it->second.back()->toString(), store->toString());
@@ -1096,10 +1101,10 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
         candidateIncRefs.erase(it);
       }
     } else if (src->type().maybe(TCounted)) {
-      auto const srcInst = src->inst();
+      auto const srcInst = canonicalSrc->inst();
       if (!srcInst->producesReference() ||
           !canDCE(*srcInst) ||
-          uses[src] != 1) {
+          uses[canonicalSrc] != 1) {
         if (srcInst->producesReference() && canDCE(*srcInst)) {
           rcInsts[srcInst].stores.emplace_back(store);
         }
@@ -1148,7 +1153,7 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     auto const ins = unit.gen(IncRef, inst->bcctx(), src);
     blk->insert(blk->iteratorTo(inst), ins);
     state[ins].setLive();
-    ++uses[src];
+    ++uses[canonical(src)];
     FTRACE(3, "Adding {}\n", ins->toString());
   };
   auto const decref = [&] (auto inst, auto src) {
@@ -1156,11 +1161,12 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     auto const ins = unit.gen(DecRef, inst->bcctx(), DecRefData{}, src);
     blk->insert(blk->iteratorTo(inst), ins);
     state[ins].setLive();
-    ++uses[src];
+    ++uses[canonical(src)];
     FTRACE(3, "Adding {}\n", ins->toString());
   };
   auto const combine = [&] (auto inst, auto inst_prev,
-                            auto src1, auto src2, auto src3) {
+                            auto src1, auto src2, auto src3, 
+                            bool leftConcat) {
     /*
      * ~~ Converting ~~
      * t1 = ConcatStrStr a b (implicit Decref a)
@@ -1202,29 +1208,39 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
      * Note that later stages of DCE will kill the extra ConcatStrStr and the
      * refcounting.
      */
-    assertx(inst_prev->is(ConcatStrStr));
-    assertx(inst->is(ConcatStrStr));
-    if (uses[inst_prev->dst()] == 1 + rcInsts[inst_prev].decs.size() +
-                                      rcInsts[inst_prev].stores.size()) {
-      FTRACE(3, "Combining {} into {}",
-             inst_prev->toString(), inst->toString());
-      auto next = inst->next();
-      unit.replace(inst, ConcatStr3, inst->taken(), src1, src2, src3);
-      inst->setNext(next);
-      FTRACE(3, " and got {}\n", inst->toString());
-      state[inst].setLive();
-      --uses[inst_prev->dst()];
-      ++uses[inst_prev->src(0)];
-      ++uses[inst_prev->src(1)];
-      // Incref the first source since the first ConcatStrStr controls
-      // its refcount
-      incref(inst_prev, inst_prev->src(0));
-      incref(inst_prev, inst_prev->src(1));
-      // ConcatStr3 ends the blocks, so insert the decrefs to the next block
-      assertx(inst->next() && !inst->next()->empty());
-      decref(&inst->next()->front(), src2);
-      if (src3 == inst_prev->src(1)) decref(&inst->next()->front(), src3);
-    }
+    assertx(inst_prev->is(ConcatStrStr)); // dst of inst_prev is already canonical
+    assertx(inst->is(ConcatStrStr)); // dst of inst is already canonical
+
+    auto const trackedUses = 1 + rcInsts[inst_prev].decs.size() 
+                               + rcInsts[inst_prev].stores.size()
+                               + rcInsts[inst_prev].passthroughs.size();
+
+    if (uses[inst_prev->dst()] != trackedUses) return;
+
+
+    FTRACE(3, "Combining {} into {}",
+            inst_prev->toString(), inst->toString());
+    auto next = inst->next();
+    unit.replace(inst, ConcatStr3, inst->taken(), src1, src2, src3);
+    inst->setNext(next);
+    FTRACE(3, " and got {}\n", inst->toString());
+    state[inst].setLive();
+    --uses[inst_prev->dst()];
+    ++uses[canonical(inst_prev->src(0))];
+    ++uses[canonical(inst_prev->src(1))];
+    // Incref the first source since the first ConcatStrStr controls
+    // its refcount
+    incref(inst_prev, inst_prev->src(0));
+    incref(inst_prev, inst_prev->src(1));
+    // ConcatStr3 ends the blocks, so insert the decrefs to the next block
+    assertx(inst->next() && !inst->next()->empty());
+    decref(&inst->next()->front(), src2);
+    // We might be combining in one of the following ways
+    // 1. ConcatStr3(a, b, c) -> ConcatStrStr(a, b) + {String} (c)
+    // 2. ConcatStr3(a, b, c) -> String (a) + ConcatStrStr(b, c) 
+    // leftConcat is case 1, decRef src3 if it is case 2
+    if (!leftConcat) decref(&inst->next()->front(), src3);
+    
   };
 
   for (auto& inst : concats) {
@@ -1233,10 +1249,10 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     auto const src2 = inst->src(1);
     if (src1->inst()->is(ConcatStrStr)) {
       combine(inst, src1->inst(),
-              src1->inst()->src(0), src1->inst()->src(1), src2);
+              src1->inst()->src(0), src1->inst()->src(1), src2, true);
     } else if (src2->inst()->is(ConcatStrStr)) {
       combine(inst, src2->inst(),
-              src1, src2->inst()->src(0), src2->inst()->src(1));
+              src1, src2->inst()->src(0), src2->inst()->src(1), false);
     }
   }
 }
@@ -1275,7 +1291,7 @@ void killInstrAdjustRC(
     }
   }
   for (auto dec : decs) {
-    auto replaced = dec->src(0) != inst->dst();
+    auto replaced = canonical(dec->src(0)) != canonical(inst->dst());
     auto srcIx = 0;
     if (dec->is(DecReleaseCheck)) {
       if (inst->is(ConstructClosure) && inst->src(0)->type().maybe(TCounted)) {
@@ -1367,16 +1383,36 @@ void fullDCE(IRUnit& unit) {
       if (inst->is(ConcatStrStr)) concats.emplace_back(inst);
       auto const src = inst->src(ix);
       IRInstruction* srcInst = src->inst();
+      auto const srcCanonical = canonical(src);
+      auto const srcCanonicalInst = srcCanonical->inst();
       if (srcInst->op() == DefConst) return;
 
-      if (srcInst->producesReference() && canDCE(*srcInst)) {
-        ++uses[src];
-        if (inst->is(DecRef, DecReleaseCheck)) {
-          rcInsts[srcInst].decs.emplace_back(inst);
-        }
-        if (inst->is(InitVecElem, InitDictElem, InitStructElem,
-                     InitStructPositions, ReleaseShallow, StClosureArg)) {
-          if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
+      // Use the Canonical source for accounting 
+      if (srcCanonicalInst->producesReference() && canDCE(*srcCanonicalInst)) {
+        ++uses[srcCanonical];
+        switch (inst->op()) {
+          case DecRef:
+          case DecReleaseCheck:
+            rcInsts[srcCanonicalInst].decs.emplace_back(inst);
+            break;
+          case InitVecElem:
+          case InitDictElem:
+          case InitStructElem:
+          case InitStructPositions:
+          case ReleaseShallow:
+          case StClosureArg:
+            if (ix == 0) rcInsts[srcCanonicalInst].aux.emplace_back(inst);
+            break;
+          case ConvPtrToLval:
+            // this is a special case passthrough for canonicalization
+            rcInsts[srcCanonicalInst].passthroughs.emplace_back(inst);
+            break;
+          default:
+            if (inst->isPassthrough()) {
+              // keep track of passthroughs since if this source 
+              // instruction is killed later, passthroughs die too
+              rcInsts[srcCanonicalInst].passthroughs.emplace_back(inst);
+            }
         }
       }
 
@@ -1429,10 +1465,11 @@ void fullDCE(IRUnit& unit) {
   for (auto& pair : rcInsts) {
     auto& info = pair.second;
     auto const trackedUses =
-      info.decs.size() + info.aux.size() + info.stores.size();
+      info.decs.size() + info.aux.size() + info.stores.size() + info.passthroughs.size();
     if (uses[pair.first->dst()] != trackedUses) continue;
     killInstrAdjustRC(state, unit, pair.first, info.decs);
     for (auto inst : info.aux) killInstrAdjustRC(state, unit, inst, info.decs);
+    for (auto inst : info.passthroughs) state[inst].setDead();
     for (auto store : info.stores) store->setSrc(1, unit.cns(TInitNull));
   }
 

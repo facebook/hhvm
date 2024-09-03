@@ -28,7 +28,6 @@ type options = {
   preexisting_warnings: bool;
       (** Whether to show preexisting warnings in typechecked files. *)
   ignore_hh_version: bool;
-  enable_global_access_check: bool;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
   max_procs: int option;
@@ -137,7 +136,6 @@ let parse_options () : options =
   let custom_hhi_path = ref None in
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
-  let enable_global_access_check = ref false in
   let from = ref "" in
   let from_emacs = ref false in
   let from_hhclient = ref false in
@@ -191,7 +189,9 @@ let parse_options () : options =
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ( "--enable-global-access-check",
-        Arg.Set enable_global_access_check,
+        Arg.Unit
+          (fun () ->
+            config := ("enable_global_access_check", "true") :: !config),
         Messages.enable_global_access_check );
       ("--from-emacs", Arg.Set from_emacs, Messages.from_emacs);
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
@@ -289,7 +289,6 @@ let parse_options () : options =
     custom_hhi_path = !custom_hhi_path;
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
-    enable_global_access_check = !enable_global_access_check;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     preexisting_warnings = !preexisting_warnings;
@@ -321,7 +320,6 @@ let default_options ~root =
     custom_hhi_path = None;
     custom_telemetry_data = [];
     dump_fanout = false;
-    enable_global_access_check = false;
     from = "";
     gen_saved_ignore_type_errors = false;
     preexisting_warnings = false;
@@ -364,8 +362,6 @@ let custom_hhi_path options = options.custom_hhi_path
 let custom_telemetry_data options = options.custom_telemetry_data
 
 let dump_fanout options = options.dump_fanout
-
-let enable_global_access_check options = options.enable_global_access_check
 
 let from options = options.from
 
@@ -450,7 +446,6 @@ let to_string
       custom_hhi_path;
       custom_telemetry_data;
       dump_fanout;
-      enable_global_access_check;
       from;
       gen_saved_ignore_type_errors;
       preexisting_warnings;
@@ -557,9 +552,6 @@ let to_string
     custom_telemetry_data_str;
     "dump_fanout: ";
     string_of_bool dump_fanout;
-    ", ";
-    "enable_global_access_check: ";
-    string_of_bool enable_global_access_check;
     ", ";
     "from: ";
     from;

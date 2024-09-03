@@ -148,6 +148,8 @@ type t = {
   interrupt_on_client: bool;
   trace_parsing: bool;
   prechecked_files: bool;
+  enable_global_access_check: bool;
+      (** run global access checker to check global writes and reads *)
   enable_type_check_filter_files: bool;
       (** Let the user configure which files to type check and
       which files to ignore. This flag is not expected to be

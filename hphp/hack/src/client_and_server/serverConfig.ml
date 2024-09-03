@@ -583,7 +583,7 @@ let load ~silent (options : ServerArgs.options) : t * ServerLocalConfig.t =
         ~tco_log_inference_constraints:
           local_config.ServerLocalConfig.log_inference_constraints
         ~tco_global_access_check_enabled:
-          (ServerArgs.enable_global_access_check options)
+          local_config.ServerLocalConfig.enable_global_access_check
         ~preexisting_warnings:(ServerArgs.preexisting_warnings options)
         ~dump_tast_hashes:local_config.dump_tast_hashes
         ~dump_tasts:local_config.dump_tasts

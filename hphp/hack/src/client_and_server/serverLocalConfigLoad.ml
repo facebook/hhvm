@@ -54,6 +54,7 @@ let default =
     interrupt_on_client = false;
     trace_parsing = false;
     prechecked_files = false;
+    enable_global_access_check = false;
     enable_type_check_filter_files = false;
     predeclare_ide = false;
     longlived_workers = false;
@@ -311,6 +312,12 @@ let load_
       "enable_fuzzy_search"
       ~default:default.enable_fuzzy_search
       ~current_version
+      config
+  in
+  let enable_global_access_check =
+    bool_
+      "enable_global_access_check"
+      ~default:default.enable_global_access_check
       config
   in
   let max_purgatory_clients =
@@ -851,6 +858,7 @@ let load_
     extend_defs_per_file_bucket_size;
     enable_on_nfs;
     enable_fuzzy_search;
+    enable_global_access_check;
     search_chunk_size;
     io_priority;
     cpu_priority;

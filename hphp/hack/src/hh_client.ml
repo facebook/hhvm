@@ -43,44 +43,16 @@ let init_event_logger root command ~init_id ~from config local_config : unit =
         (ServerLocalConfigLoad.to_rollout_flags local_config));
   ()
 
-let () =
-  (* no-op, needed at entry-point for Daemon hookup *)
-  Daemon.check_entry_point ();
-  Folly.ensure_folly_init ();
-
+let set_up_signals () =
   (* Ignore SIGPIPE since if it arises from clientConnect then it might indicate server hangup;
      we detect this case already and handle it better than a signal (unhandled signals cause program exit). *)
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   Sys_utils.set_signal
     Sys.sigint
     (Sys.Signal_handle (fun _ -> raise Exit_status.(Exit_with Interrupted)));
-  let init_id = Random_id.short_string () in
-  let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
-  let from_default =
-    if Proc.is_likely_from_interactive_shell init_proc_stack then
-      "[sh]"
-    else
-      ""
-  in
-  let command = ClientArgs.parse_args ~from_default in
-  let command_name =
-    match command with
-    | ClientCommand.CCheck _ -> "Check"
-    | ClientCommand.CStart _ -> "Start"
-    | ClientCommand.CStop _ -> "Stop"
-    | ClientCommand.CRestart _ -> "Restart"
-    | ClientCommand.CLsp _ -> "Lsp"
-    | ClientCommand.CSavedStateProjectMetadata _ -> "SavedStateProjectMetadata"
-    | ClientCommand.CDownloadSavedState _ -> "DownloadSavedState"
-    | ClientCommand.CRage _ -> "Rage"
-    | ClientCommand.CDecompressZhhdg _ -> "DecompressZhhdg"
-  in
+  ()
 
-  (* The global variable Relative_path.root must be initialized for a wide variety of things *)
-  let root = ClientArgs.root command in
-  Option.iter root ~f:(Relative_path.set_path_prefix Relative_path.Root);
-  let from = ClientArgs.from command in
-
+let set_up_logger ~command_name ~init_id ~root =
   (* We'll chose where Hh_logger.log gets sent *)
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
@@ -102,56 +74,104 @@ let () =
        with
       | _ -> ())
   end;
+  ()
+
+let set_up_root root =
+  Relative_path.set_path_prefix Relative_path.Root root;
+  Server_progress.set_root root;
+  ()
+
+let load_configs command ~root ~from =
+  match root with
+  | None -> (None, None)
+  | Some root ->
+    (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
+       It requires a ServerArgs structure, solely to pick out --from and --config options. We
+       dont have ServerArgs (we only have client args!) but we do parse --from and --config
+       options and will patch them onto a fake ServerArgs. *)
+    let fake_server_args =
+      ServerArgs.default_options ~root:(Path.to_string root)
+    in
+    let fake_server_args = ServerArgs.set_from fake_server_args from in
+    let fake_server_args =
+      match ClientArgs.config command with
+      | None -> fake_server_args
+      | Some config -> ServerArgs.set_config fake_server_args config
+    in
+    let (config, local_config) =
+      ServerConfig.load ~silent:true fake_server_args
+    in
+    (Some local_config, Some config)
+
+let do_init_proc_stack local_config ~from =
+  String.equal "" from
+  || Option.value_map
+       local_config
+       ~f:(fun c -> c.ServerLocalConfig.log_init_proc_stack_also_on_absent_from)
+       ~default:false
+
+let handle_exn_and_exit exn ~command_name =
+  let e = Exception.wrap exn in
+  (* hide the spinner *)
+  ClientSpinner.report ~to_stderr:false ~angery_reaccs_only:false None;
+  (* We trust that if someone raised Exit_with then they had the decency to print
+     out a user-facing message; we will only print out a user-facing message here
+     for uncaught exceptions: lvl=Error gets sent to stderr, but lvl=Info doesn't. *)
+  let (es, lvl) =
+    match exn with
+    | Exit_status.Exit_with es -> (es, Hh_logger.Level.Info)
+    | _ -> (Exit_status.Uncaught_exception e, Hh_logger.Level.Error)
+  in
+  Hh_logger.log
+    ~lvl
+    "CLIENT_BAD_EXIT [%s] %s"
+    command_name
+    (Exit_status.show_expanded es);
+  HackEventLogger.client_bad_exit ~command_name es e;
+  Exit.exit es
+
+let () =
+  (* no-op, needed at entry-point for Daemon hookup *)
+  Daemon.check_entry_point ();
+  Folly.ensure_folly_init ();
+  set_up_signals ();
+  let init_id = Random_id.short_string () in
+  let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
+  let command =
+    ClientArgs.parse_args
+      ~from_default:
+        (if Proc.is_likely_from_interactive_shell init_proc_stack then
+          "[sh]"
+        else
+          "")
+  in
+  let command_name = ClientCommand.name_camel_case command in
+
+  (* The global variable Relative_path.root must be initialized for a wide variety of things *)
+  let root = ClientArgs.root command in
+  Option.iter root ~f:set_up_root;
+  let from = ClientArgs.from command in
+
+  set_up_logger ~command_name ~init_id ~root;
   Hh_logger.log
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
 
-  (* we also have to patch up HackEventLogger with stuff we learn from root, if available... *)
-  let (local_config, config) =
-    match root with
-    | None -> (None, None)
-    | Some root ->
-      Server_progress.set_root root;
-      (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
-         It requires a ServerArgs structure, solely to pick out --from and --config options. We
-         dont have ServerArgs (we only have client args!) but we do parse --from and --config
-         options and will patch them onto a fake ServerArgs. *)
-      let fake_server_args =
-        ServerArgs.default_options ~root:(Path.to_string root)
-      in
-      let fake_server_args = ServerArgs.set_from fake_server_args from in
-      let fake_server_args =
-        match ClientArgs.config command with
-        | None -> fake_server_args
-        | Some config -> ServerArgs.set_config fake_server_args config
-      in
-      let (config, local_config) =
-        ServerConfig.load ~silent:true fake_server_args
-      in
-      (Some local_config, Some config)
-  in
+  let (local_config, config) = load_configs command ~root ~from in
 
   init_event_logger root command ~init_id ~from config local_config;
 
   let init_proc_stack =
-    match (from, local_config) with
-    | ("", _)
-    | ( _,
-        Some
-          {
-            ServerLocalConfig.log_init_proc_stack_also_on_absent_from = true;
-            _;
-          } ) ->
-      Some init_proc_stack
-    | _ -> None
+    Option.some_if (do_init_proc_stack local_config ~from) init_proc_stack
   in
-
   try
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        let local_config = Option.value_exn local_config in
-        ClientCheck.main check_env local_config ~init_proc_stack
+        ClientCheck.main
+          check_env
+          (Option.value_exn local_config)
+          ~init_proc_stack
         (* never returns; does [Exit.exit] itself *)
       | ClientCommand.CStart env ->
         Lwt_utils.run_main (fun () -> ClientStart.main env)
@@ -160,9 +180,12 @@ let () =
       | ClientCommand.CRestart env ->
         Lwt_utils.run_main (fun () -> ClientRestart.main env)
       | ClientCommand.CLsp args ->
-        let local_config = Option.value_exn local_config in
         Lwt_utils.run_main (fun () ->
-            ClientLsp.main args ~init_id ~local_config ~init_proc_stack)
+            ClientLsp.main
+              args
+              ~init_id
+              ~local_config:(Option.value_exn local_config)
+              ~init_proc_stack)
       | ClientCommand.CRage env ->
         Lwt_utils.run_main (fun () ->
             ClientRage.main env (Option.value_exn local_config))
@@ -178,22 +201,4 @@ let () =
     in
     Exit.exit exit_status
   with
-  | exn ->
-    let e = Exception.wrap exn in
-    (* hide the spinner *)
-    ClientSpinner.report ~to_stderr:false ~angery_reaccs_only:false None;
-    (* We trust that if someone raised Exit_with then they had the decency to print
-       out a user-facing message; we will only print out a user-facing message here
-       for uncaught exceptions: lvl=Error gets sent to stderr, but lvl=Info doesn't. *)
-    let (es, lvl) =
-      match exn with
-      | Exit_status.Exit_with es -> (es, Hh_logger.Level.Info)
-      | _ -> (Exit_status.Uncaught_exception e, Hh_logger.Level.Error)
-    in
-    Hh_logger.log
-      ~lvl
-      "CLIENT_BAD_EXIT [%s] %s"
-      command_name
-      (Exit_status.show_expanded es);
-    HackEventLogger.client_bad_exit ~command_name es e;
-    Exit.exit es
+  | exn -> handle_exn_and_exit exn ~command_name

@@ -55,3 +55,14 @@ let command_name = function
   | CKRage -> "rage"
   | CKDecompressZhhdg -> "decompress-zhhdg"
   | CKNone -> ""
+
+let name_camel_case = function
+  | CCheck _ -> "Check"
+  | CStart _ -> "Start"
+  | CStop _ -> "Stop"
+  | CRestart _ -> "Restart"
+  | CLsp _ -> "Lsp"
+  | CSavedStateProjectMetadata _ -> "SavedStateProjectMetadata"
+  | CDownloadSavedState _ -> "DownloadSavedState"
+  | CRage _ -> "Rage"
+  | CDecompressZhhdg _ -> "DecompressZhhdg"

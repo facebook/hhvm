@@ -71,7 +71,6 @@ TEST(DistributionRouteTest, getSetAreForwardedToRpc) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": true,
     "replay": false,
     "distribution_source_region": "oregon"
   }
@@ -99,7 +98,6 @@ TEST(DistributionRouteTest, getSetAreForwardedToRpc2) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": true,
     "replay": false,
     "distribution_source_region": "oregon"
   }
@@ -127,7 +125,6 @@ TEST(DistributionRouteTest, deleteForwardedToRpcIfDisabled) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": false,
     "replay": false,
     "distribution_source_region": "oregon"
   }
@@ -135,15 +132,19 @@ TEST(DistributionRouteTest, deleteForwardedToRpcIfDisabled) {
 
   auto rh = makeDistributionRoute<MemcacheRouterInfo>(
       mockSrHandle, folly::parseJson(kDistributionRouteConfig));
-  mockFiberContext();
-  fiber_local<MemcacheRouterInfo>::runWithLocals(
-      [&]() { rh->route(McDeleteRequest("test1")); });
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    mockFiberContext();
+    fiber_local<MemcacheRouterInfo>::runWithLocals(
+        [&]() { rh->route(McDeleteRequest("test1")); });
+  }});
+
   EXPECT_FALSE(srHandleVec[0]->saw_keys.empty());
   EXPECT_EQ(srHandleVec[0]->saw_keys[0], "test1");
   EXPECT_EQ("delete", srHandleVec[0]->sawOperations[0]);
 }
 
-TEST(DistributionRouteTest, crossRegionDeleteDisabledRpc) {
+TEST(DistributionRouteTest, crossRegionDelete) {
   std::vector<std::shared_ptr<TestHandle>> srHandleVec{
       std::make_shared<TestHandle>(
           GetRouteTestData(carbon::Result::FOUND, "a")),
@@ -158,7 +159,6 @@ TEST(DistributionRouteTest, crossRegionDeleteDisabledRpc) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": false,
     "replay": false,
     "distribution_source_region": "oregon"
   }
@@ -166,124 +166,29 @@ TEST(DistributionRouteTest, crossRegionDeleteDisabledRpc) {
 
   auto rh = makeDistributionRoute<MemcacheRouterInfo>(
       mockSrHandle, folly::parseJson(kDistributionRouteConfig));
-  mockFiberContext();
-  fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
-    fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
-    fiber_local<MemcacheRouterInfo>::setBucketId(1234);
-    fiber_local<MemcacheRouterInfo>::setDistributionTargetRegion("georgia");
-    rh->route(McDeleteRequest("/georgia/default/test1"));
-  });
-
-  // no keys routed to RPC:
-  EXPECT_TRUE(srHandleVec[0]->saw_keys.empty());
-  // spooled to axon:
-  EXPECT_EQ(tmp.bucketId, 1234);
-  EXPECT_EQ(tmp.region, "georgia");
-  EXPECT_EQ(tmp.pool, "testPool");
-  auto req = apache::thrift::CompactSerializer::deserialize<McDeleteRequest>(
-      tmp.serialized);
-  EXPECT_EQ(
-      static_cast<McDeleteRequestSource>(
-          req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource)->second),
-      memcache::McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION);
-  EXPECT_EQ(tmp.operation, invalidation::DistributionOperation::Delete);
-  EXPECT_EQ(tmp.type, invalidation::DistributionType::Distribution);
-  EXPECT_EQ(tmp.srcRegion, "oregon");
-}
-
-TEST(DistributionRouteTest, crossRegionDeleteEnabledRpc) {
-  std::vector<std::shared_ptr<TestHandle>> srHandleVec{
-      std::make_shared<TestHandle>(
-          GetRouteTestData(carbon::Result::FOUND, "a")),
-  };
-  auto mockSrHandle = get_route_handles(srHandleVec)[0];
-
-  auto axonCtx = std::make_shared<AxonContext>();
-  auto tmp = setupAxonFn(axonCtx);
-  axonCtx->allDelete = false;
-  axonCtx->fallbackAsynclog = false;
-  axonCtx->poolFilter = "testPool";
-
-  constexpr folly::StringPiece kDistributionRouteConfig = R"(
-  {
-    "distributed_delete_rpc_enabled": true,
-    "replay": false,
-    "distribution_source_region": "oregon"
-  }
-  )";
-
-  auto rh = makeDistributionRoute<MemcacheRouterInfo>(
-      mockSrHandle, folly::parseJson(kDistributionRouteConfig));
-  mockFiberContext();
-  fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
-    fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
-    fiber_local<MemcacheRouterInfo>::setBucketId(1234);
-    fiber_local<MemcacheRouterInfo>::setDistributionTargetRegion("georgia");
-    rh->route(McDeleteRequest("/georgia/default/test1"));
-  });
-
-  // the key is routed to RPC:
-  EXPECT_FALSE(srHandleVec[0]->saw_keys.empty());
-  EXPECT_EQ(srHandleVec[0]->saw_keys[0], "/georgia/default/test1");
-  EXPECT_EQ("delete", srHandleVec[0]->sawOperations[0]);
-  // spooled to axon:
-  EXPECT_EQ(tmp.bucketId, 1234);
-  EXPECT_EQ(tmp.region, "georgia");
-  EXPECT_EQ(tmp.pool, "testPool");
-  auto req = apache::thrift::CompactSerializer::deserialize<McDeleteRequest>(
-      tmp.serialized);
-  EXPECT_EQ(
-      static_cast<McDeleteRequestSource>(
-          req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource)->second),
-      memcache::McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION);
-  EXPECT_EQ(tmp.operation, invalidation::DistributionOperation::Delete);
-  EXPECT_EQ(tmp.type, invalidation::DistributionType::Distribution);
-  EXPECT_EQ(tmp.srcRegion, "oregon");
-}
-
-TEST(DistributionRouteTest, broadcastDeleteDisabledRpc) {
-  std::vector<std::shared_ptr<TestHandle>> srHandleVec{
-      std::make_shared<TestHandle>(
-          GetRouteTestData(carbon::Result::FOUND, "a")),
-  };
-  auto mockSrHandle = get_route_handles(srHandleVec)[0];
-
-  auto axonCtx = std::make_shared<AxonContext>();
-  auto tmp = setupAxonFn(axonCtx);
-  axonCtx->allDelete = false;
-  axonCtx->fallbackAsynclog = false;
-  axonCtx->poolFilter = "testPool";
-
-  constexpr folly::StringPiece kDistributionRouteConfig = R"(
-  {
-    "distributed_delete_rpc_enabled": false,
-    "replay": false,
-    "distribution_source_region": "oregon"
-  }
-  )";
-
-  auto rh = makeDistributionRoute<MemcacheRouterInfo>(
-      mockSrHandle, folly::parseJson(kDistributionRouteConfig));
-  mockFiberContext();
-  fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
-    fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
-    fiber_local<MemcacheRouterInfo>::setBucketId(1234);
-    fiber_local<MemcacheRouterInfo>::setDistributionTargetRegion("");
-    rh->route(McDeleteRequest("/*/*/test1"));
-  });
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    mockFiberContext();
+    fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
+      fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
+      fiber_local<MemcacheRouterInfo>::setBucketId(1234);
+      fiber_local<MemcacheRouterInfo>::setDistributionTargetRegion("georgia");
+      rh->route(McDeleteRequest("/georgia/default/test1"));
+    });
+  }});
 
   // the key is not routed to RPC:
   EXPECT_TRUE(srHandleVec[0]->saw_keys.empty());
   // spooled to axon:
   EXPECT_EQ(tmp.bucketId, 1234);
-  EXPECT_EQ(tmp.region, "DistributionRoute");
+  EXPECT_EQ(tmp.region, "georgia");
   EXPECT_EQ(tmp.pool, "testPool");
   auto req = apache::thrift::CompactSerializer::deserialize<McDeleteRequest>(
       tmp.serialized);
   EXPECT_EQ(
       static_cast<McDeleteRequestSource>(
           req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource)->second),
-      memcache::McDeleteRequestSource::CROSS_REGION_BROADCAST_INVALIDATION);
+      memcache::McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION);
   EXPECT_EQ(tmp.operation, invalidation::DistributionOperation::Delete);
   EXPECT_EQ(tmp.type, invalidation::DistributionType::Distribution);
   EXPECT_EQ(tmp.srcRegion, "oregon");
@@ -304,7 +209,6 @@ TEST(DistributionRouteTest, broadcastDeleteEnabledRpc) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": true,
     "replay": false,
     "distribution_source_region": "oregon"
   }
@@ -312,13 +216,16 @@ TEST(DistributionRouteTest, broadcastDeleteEnabledRpc) {
 
   auto rh = makeDistributionRoute<MemcacheRouterInfo>(
       mockSrHandle, folly::parseJson(kDistributionRouteConfig));
-  mockFiberContext();
-  fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
-    fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
-    fiber_local<MemcacheRouterInfo>::setBucketId(1234);
-    fiber_local<MemcacheRouterInfo>::setDistributionTargetRegion("");
-    rh->route(McDeleteRequest("/*/*/test1"));
-  });
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    mockFiberContext();
+    fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
+      fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
+      fiber_local<MemcacheRouterInfo>::setBucketId(1234);
+      fiber_local<MemcacheRouterInfo>::setDistributionTargetRegion("");
+      rh->route(McDeleteRequest("/*/*/test1"));
+    });
+  }});
   // the key is routed to RPC:
   EXPECT_FALSE(srHandleVec[0]->saw_keys.empty());
   EXPECT_EQ(srHandleVec[0]->saw_keys[0], "/*/*/test1");
@@ -349,7 +256,6 @@ TEST(DistributionRouteTest, broadcastSpooledDelete) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": false,
     "replay": true,
     "distribution_source_region": "oregon"
   }
@@ -357,16 +263,19 @@ TEST(DistributionRouteTest, broadcastSpooledDelete) {
 
   auto rh = makeDistributionRoute<MemcacheRouterInfo>(
       mockSrHandle, folly::parseJson(kDistributionRouteConfig));
-  mockFiberContext();
-  fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
-    fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
-    fiber_local<MemcacheRouterInfo>::setBucketId(1234);
-    auto req = McDeleteRequest("/*/*/test1");
-    req = addDeleteRequestSource(
-        req,
-        memcache::McDeleteRequestSource::CROSS_REGION_BROADCAST_INVALIDATION);
-    rh->route(req);
-  });
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    mockFiberContext();
+    fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
+      fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
+      fiber_local<MemcacheRouterInfo>::setBucketId(1234);
+      auto req = McDeleteRequest("/*/*/test1");
+      req = addDeleteRequestSource(
+          req,
+          memcache::McDeleteRequestSource::CROSS_REGION_BROADCAST_INVALIDATION);
+      rh->route(req);
+    });
+  }});
 
   // the key is not routed to RPC:
   EXPECT_TRUE(srHandleVec[0]->saw_keys.empty());
@@ -381,7 +290,7 @@ TEST(DistributionRouteTest, broadcastSpooledDelete) {
           req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource)->second),
       memcache::McDeleteRequestSource::CROSS_REGION_BROADCAST_INVALIDATION);
   EXPECT_EQ(tmp.operation, invalidation::DistributionOperation::Delete);
-  EXPECT_EQ(tmp.type, invalidation::DistributionType::Distribution);
+  EXPECT_EQ(tmp.type, invalidation::DistributionType::Async);
   EXPECT_EQ(tmp.srcRegion, "oregon");
 }
 
@@ -398,7 +307,6 @@ TEST(DistributionRouteTest, crossRegionDirectedSpooledDelete) {
   axonCtx->poolFilter = "testPool";
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": false,
     "replay": true,
     "distribution_source_region": "oregon"
   }
@@ -406,16 +314,19 @@ TEST(DistributionRouteTest, crossRegionDirectedSpooledDelete) {
 
   auto rh = makeDistributionRoute<MemcacheRouterInfo>(
       mockSrHandle, folly::parseJson(kDistributionRouteConfig));
-  mockFiberContext();
-  fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
-    fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
-    fiber_local<MemcacheRouterInfo>::setBucketId(1234);
-    auto req = McDeleteRequest("/altoona/default/test1");
-    req = addDeleteRequestSource(
-        req,
-        memcache::McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION);
-    rh->route(req);
-  });
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    mockFiberContext();
+    fiber_local<MemcacheRouterInfo>::runWithLocals([&]() {
+      fiber_local<MemcacheRouterInfo>::setAxonCtx(axonCtx);
+      fiber_local<MemcacheRouterInfo>::setBucketId(1234);
+      auto req = McDeleteRequest("/altoona/default/test1");
+      req = addDeleteRequestSource(
+          req,
+          memcache::McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION);
+      rh->route(req);
+    });
+  }});
 
   // the key is not routed to RPC:
   EXPECT_TRUE(srHandleVec[0]->saw_keys.empty());
@@ -430,7 +341,7 @@ TEST(DistributionRouteTest, crossRegionDirectedSpooledDelete) {
           req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource)->second),
       memcache::McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION);
   EXPECT_EQ(tmp.operation, invalidation::DistributionOperation::Delete);
-  EXPECT_EQ(tmp.type, invalidation::DistributionType::Distribution);
+  EXPECT_EQ(tmp.type, invalidation::DistributionType::Async);
   EXPECT_EQ(tmp.srcRegion, "oregon");
 }
 
@@ -448,7 +359,6 @@ TEST(DistributionRouteTest, crossRegionSet) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": true,
     "replay": false,
     "distribution_source_region": "oregon"
   }
@@ -495,7 +405,6 @@ TEST(DistributionRouteTest, broadcastSet) {
 
   constexpr folly::StringPiece kDistributionRouteConfig = R"(
   {
-    "distributed_delete_rpc_enabled": true,
     "replay": false,
     "distribution_source_region": "oregon"
   }

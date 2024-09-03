@@ -979,7 +979,7 @@ let type_check_core
       (Errors.as_telemetry
          ~limit:1000
          ~with_context_limit:10
-         ~error_to_context:Contextual_error_formatter.to_string
+         ~error_to_string:Contextual_error_formatter.to_string
          env.errorl);
   ( env,
     {

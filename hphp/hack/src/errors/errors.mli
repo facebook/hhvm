@@ -215,7 +215,7 @@ Does not include fixme'd errors.
 val as_telemetry :
   limit:int ->
   with_context_limit:int ->
-  error_to_context:(finalized_error -> string) ->
+  error_to_string:(finalized_error -> string) ->
   t ->
   Telemetry.t
 

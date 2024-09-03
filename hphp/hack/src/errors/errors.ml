@@ -976,7 +976,7 @@ let as_telemetry_summary : t -> Telemetry.t =
 let as_telemetry
     ~limit
     ~with_context_limit
-    ~(error_to_context : finalized_error -> string)
+    ~(error_to_string : finalized_error -> string)
     (errors : t) : Telemetry.t =
   let module L = struct
     type error_to_process = {
@@ -986,18 +986,15 @@ let as_telemetry
   end in
   let errors = drop_fixmed_errors_in_files errors in
   let total_count = error_count errors in
-  let ( (errors : L.error_to_process list Relative_path.Map.t),
-        _,
-        _,
-        is_truncated ) =
+  let ((errors : L.error_to_process list Relative_path.Map.t), _, is_truncated)
+      =
     Relative_path.Map.fold
       errors
-      ~init:(Relative_path.Map.empty, 0, 0, false)
+      ~init:(Relative_path.Map.empty, 0, false)
       ~f:(fun
            path
            file_errors
-           ((errors_acc, errors_acc_count, with_context_count, is_truncated) as
-           acc)
+           ((errors_acc, errors_acc_count, is_truncated) as acc)
          ->
         if is_truncated then
           acc
@@ -1005,27 +1002,26 @@ let as_telemetry
           let file_errors_count = List.length file_errors in
           let remaining_capacity = limit - errors_acc_count in
           let is_truncated = remaining_capacity < file_errors_count in
-          let (file_errors, file_errors_count) =
+          let file_errors =
             if is_truncated then
-              (List.take file_errors remaining_capacity, limit)
+              List.take file_errors remaining_capacity
             else
-              (file_errors, file_errors_count)
+              file_errors
           in
           let file_errors =
             let remaining_with_context =
-              with_context_limit - with_context_count
+              with_context_limit - errors_acc_count
             in
             List.mapi file_errors ~f:(fun i error ->
-                L.{ error; include_context = remaining_with_context > i })
+                L.{ error; include_context = i < remaining_with_context })
           in
           ( Relative_path.Map.add errors_acc ~key:path ~data:file_errors,
             errors_acc_count + file_errors_count,
-            with_context_count + file_errors_count,
             is_truncated ))
   in
-  (* Convert to Scuba loggable data *)
-  let error_to_telemetry (err : L.error_to_process) : Telemetry.t =
-    let rel_err = User_error.to_relative err.L.error in
+  let error_to_telemetry ({ L.error; include_context } : L.error_to_process) :
+      Telemetry.t =
+    let rel_err = User_error.to_relative error in
     let { User_error.severity; code; _ } = rel_err in
     let telemetry =
       Telemetry.create ()
@@ -1033,6 +1029,9 @@ let as_telemetry
            ~key:"error_severity"
            ~value:(User_error.Severity.to_all_caps_string severity)
       |> Telemetry.int_ ~key:"error_code" ~value:code
+      |> Telemetry.string_
+           ~key:"line_agnostic_hash"
+           ~value:(Printf.sprintf "%x" (Error.hash_for_saved_state error))
       |> Telemetry.json_
            ~key:"error_json"
            ~value:
@@ -1041,19 +1040,19 @@ let as_telemetry
                 ~filename_to_string:Relative_path.suffix
                 rel_err)
     in
-    if err.L.include_context then
+    if include_context then
       telemetry
       |> Telemetry.string_
            ~key:"error_context"
-           ~value:(error_to_context @@ User_error.to_absolute err.L.error)
+           ~value:(error_to_string @@ User_error.to_absolute error)
     else
       telemetry
   in
   let by_file =
-    List.fold
-      (Relative_path.Map.bindings errors)
+    Relative_path.Map.fold
+      errors
       ~init:(Telemetry.create ())
-      ~f:(fun t (path, errors) ->
+      ~f:(fun path errors t ->
         Telemetry.object_list
           t
           ~key:(Relative_path.suffix path)

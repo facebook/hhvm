@@ -38,7 +38,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     private short id;
 
     public enum TypeEnum {
-      __EMPTY__,
+      __FBTHRIFT_EMPTY_UNION__,
     }
 
     public static MyUnion from(int _id, java.lang.Object _field) {
@@ -76,7 +76,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__EMPTY__;
+          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
         default:
           throw new IllegalStateException("unreachable");
       }

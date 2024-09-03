@@ -20,7 +20,6 @@ import com.facebook.nifty.core.RequestContext;
 import java.util.List;
 import org.apache.thrift.TException;
 
-@Deprecated
 public abstract class ThriftEventHandler {
   public Object getContext(String methodName, RequestContext requestContext) {
     return null;

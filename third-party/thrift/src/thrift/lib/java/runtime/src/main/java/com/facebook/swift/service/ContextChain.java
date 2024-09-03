@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.thrift.TException;
 
-@Deprecated
 public class ContextChain {
   private final List<ThriftEventHandler> handlers;
   private final String methodName;

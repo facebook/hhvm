@@ -492,7 +492,15 @@ module.exports = {
               'fb/troubleshooting/dogpiles/development',
             ],
           },
-          'fb/troubleshooting/fb303-counters',
+          {
+            type: 'category',
+            label: 'FB303 Counters',
+            link: {
+              type: 'doc',
+              id: 'fb/troubleshooting/fb303-counters/index',
+            },
+            items: ['fb/troubleshooting/fb303-counters/streaming'],
+          },
           'fb/troubleshooting/overload',
         ],
       },

@@ -142,6 +142,15 @@ TEST(FizzServerContextTest, TestCopy) {
   auto ctx2 = ctx;
   (void)ctx2;
 }
+
+TEST(FizzServerContextTest, TestNoCertManager) {
+  FizzServerContext ctx;
+  EXPECT_EQ(ctx.getCert("non-configured"), nullptr);
+  EXPECT_EQ(
+      ctx.getCert(
+          folly::none, {fizz::SignatureScheme::ecdsa_secp256r1_sha256}, {}),
+      folly::none);
+}
 } // namespace test
 } // namespace server
 } // namespace fizz

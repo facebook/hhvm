@@ -35,7 +35,7 @@ let default_genv =
   {
     options = ServerArgs.default_options ~root:"";
     config = ServerConfig.default_config;
-    local_config = ServerLocalConfig.default;
+    local_config = ServerLocalConfigLoad.default;
     workers = None;
     notifier = ServerNotifier.init_null ();
     indexer = (fun _ () -> []);

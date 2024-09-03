@@ -365,7 +365,7 @@ let initialize1
   HackEventLogger.set_hhconfig_version
     (ServerConfig.version config |> Config_file.version_to_string_opt);
   HackEventLogger.set_rollout_flags
-    (ServerLocalConfig.to_rollout_flags local_config);
+    (ServerLocalConfigLoad.to_rollout_flags local_config);
   HackEventLogger.set_rollout_group local_config.ServerLocalConfig.rollout_group;
 
   Provider_backend.set_local_memory_backend
@@ -1493,7 +1493,7 @@ module Test = struct
     let config =
       Option.value custom_config ~default:ServerConfig.default_config
     in
-    let local_config = ServerLocalConfig.default in
+    let local_config = ServerLocalConfigLoad.default in
     let tcopt = ServerConfig.typechecker_options config in
     let popt = ServerConfig.parser_options config in
     Provider_backend.set_local_memory_backend_with_defaults_for_test ();

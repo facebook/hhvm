@@ -1131,7 +1131,7 @@ let initialize_logging
       ~hhconfig_version
       ~init_id
       ~custom_columns:(ServerArgs.custom_telemetry_data options)
-      ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
+      ~rollout_flags:(ServerLocalConfigLoad.to_rollout_flags local_config)
       ~rollout_group:local_config.ServerLocalConfig.rollout_group
       ~time:(Unix.gettimeofday ())
       ~per_file_profiling:local_config.ServerLocalConfig.per_file_profiling
@@ -1142,7 +1142,7 @@ let initialize_logging
       ~init_id
       ~custom_columns:(ServerArgs.custom_telemetry_data options)
       ~informant_managed
-      ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
+      ~rollout_flags:(ServerLocalConfigLoad.to_rollout_flags local_config)
       ~rollout_group:local_config.ServerLocalConfig.rollout_group
       ~time:(Unix.gettimeofday ())
       ~max_workers:num_workers

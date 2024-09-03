@@ -40,7 +40,7 @@ let init_event_logger root command ~init_id ~from config local_config : unit =
       HackEventLogger.set_rollout_group
         local_config.ServerLocalConfig.rollout_group;
       HackEventLogger.set_rollout_flags
-        (ServerLocalConfig.to_rollout_flags local_config));
+        (ServerLocalConfigLoad.to_rollout_flags local_config));
   ()
 
 let () =

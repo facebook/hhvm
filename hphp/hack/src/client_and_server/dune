@@ -338,7 +338,10 @@
 (library
   (name server_config)
   (wrapped false)
-  (modules serverConfig serverLocalConfig)
+  (modules
+   serverConfig
+   serverLocalConfig
+   serverLocalConfigLoad)
   (libraries
    custom_error_config
    server_args

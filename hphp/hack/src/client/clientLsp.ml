@@ -50,7 +50,7 @@ let env =
         };
       root = Path.dummy_path;
       hhconfig_version_and_switch = "[init]";
-      local_config = ServerLocalConfig.default;
+      local_config = ServerLocalConfigLoad.default;
     }
 
 (** When did this binary start? *)

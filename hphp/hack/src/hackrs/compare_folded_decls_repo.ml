@@ -33,7 +33,8 @@ let make_workers
       HackEventLogger.init_worker
         ~root
         ~custom_columns:[]
-        ~rollout_flags:(ServerLocalConfig.to_rollout_flags server_local_config)
+        ~rollout_flags:
+          (ServerLocalConfigLoad.to_rollout_flags server_local_config)
         ~rollout_group:server_local_config.ServerLocalConfig.rollout_group
         ~hhconfig_version
         ~init_id:(Random_id.short_string ())

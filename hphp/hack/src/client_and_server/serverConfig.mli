@@ -11,6 +11,20 @@ open Hh_prelude
 
 type t [@@deriving show]
 
+(** Load config from these sources (last overrides first):
+  - .hhconfig file in the root directory
+  - Flags passed via CLI option `--config`.
+
+  Also calls into `ServerLocalConfigLoad.load`.
+
+  Those two configs get mingled to make a `TypecheckerOptions.t`,
+  `ParserOptions.t` and `GleanOptions.t` which can
+  then be retrieved using the `typechecker_options`,  `parser_options`,
+  `glean_options` helpers. *)
+val load : silent:bool -> ServerArgs.options -> t * ServerLocalConfig.t
+
+val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
+
 val set_parser_options : t -> ParserOptions.t -> t
 
 val set_tc_options : t -> TypecheckerOptions.t -> t
@@ -20,10 +34,6 @@ val set_glean_options : t -> GleanOptions.t -> t
 val set_symbol_write_options : t -> SymbolWriteOptions.t -> t
 
 val repo_config_path : Relative_path.t
-
-val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
-
-val load : silent:bool -> ServerArgs.options -> t * ServerLocalConfig.t
 
 val is_compatible : t -> t -> bool
 

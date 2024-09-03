@@ -481,7 +481,7 @@ let load_config config options =
       (bool_opt "enable_abstract_method_optional_parameters" config)
     options
 
-let load ~silent options : t * ServerLocalConfig.t =
+let load ~silent (options : ServerArgs.options) : t * ServerLocalConfig.t =
   let command_line_overrides =
     Config_file.of_list @@ ServerArgs.config options
   in
@@ -505,13 +505,13 @@ let load ~silent options : t * ServerLocalConfig.t =
     let deactivate_saved_state_rollout =
       bool_ "deactivate_saved_state_rollout" ~default:false config
     in
-    ServerLocalConfig.load
+    ServerLocalConfigLoad.load
       ~silent
       ~current_version:version
       ~current_rolled_out_flag_idx
       ~deactivate_saved_state_rollout
       ~from:(ServerArgs.from options)
-      command_line_overrides
+      ~overrides:command_line_overrides
   in
   let local_config =
     if Option.is_some (ServerArgs.ai_mode options) then

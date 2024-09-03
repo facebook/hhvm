@@ -244,7 +244,7 @@ let parse_options () =
         ServerConfig.make_sharedmem_config
           config
           (ServerArgs.default_options ~root)
-          ServerLocalConfig.default
+          ServerLocalConfigLoad.default
       in
       no_builtins := true;
       (* Now let CLI options override whatever we just picked *)

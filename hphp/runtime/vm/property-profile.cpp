@@ -88,6 +88,7 @@ uint32_t* getCounterAddr(const StringData* cls, const StringData* prop) {
 
 uint32_t getCount(const StringData* cls, const StringData* prop) {
   if (s_counter_addr_map == nullptr) return 0;
+  if (s_counter_addr_map->empty()) return 0;
 
   auto fullName = ClassPropPair(cls, prop);
   auto iter = s_counter_addr_map->find(fullName);
@@ -140,8 +141,7 @@ void deserialize(jit::ProfDataDeserializer& ser) {
 void clear() {
   if (s_counter_addr_map == nullptr) return;
   std::lock_guard<std::mutex> _(s_counter_creation_lock);
-  delete s_counter_addr_map;
-  s_counter_addr_map = nullptr;
+  s_counter_addr_map->clear();
   s_counters.clear();
   s_count_keys.clear();
 }

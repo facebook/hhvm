@@ -16,6 +16,16 @@
 
 package com.facebook.thrift.metrics.distribution;
 
+import static com.facebook.thrift.metrics.distribution.Quantile.AVG;
+import static com.facebook.thrift.metrics.distribution.Quantile.MAX;
+import static com.facebook.thrift.metrics.distribution.Quantile.MIN;
+import static com.facebook.thrift.metrics.distribution.Quantile.P50;
+import static com.facebook.thrift.metrics.distribution.Quantile.P75;
+import static com.facebook.thrift.metrics.distribution.Quantile.P90;
+import static com.facebook.thrift.metrics.distribution.Quantile.P95;
+import static com.facebook.thrift.metrics.distribution.Quantile.P99;
+import static com.facebook.thrift.metrics.distribution.Quantile.SUM;
+
 import com.facebook.thrift.metrics.common.Clock;
 import com.facebook.thrift.metrics.distribution.history.AllTimeHistogram;
 import com.facebook.thrift.metrics.distribution.history.TimeWindowedHistogram;
@@ -52,14 +62,11 @@ public class MultiWindowDistribution extends AbstractDistribution {
     this(
         Utils.getExecutorService(),
         Utils.getClock(),
-        Arrays.asList(Quantile.P50, Quantile.P75, Quantile.P95, Quantile.P99));
+        Arrays.asList(P50, P75, P90, P95, P99, AVG, MIN, MAX, SUM));
   }
 
   public MultiWindowDistribution(ScheduledExecutorService executorService, Clock clock) {
-    this(
-        executorService,
-        clock,
-        Arrays.asList(Quantile.P50, Quantile.P75, Quantile.P95, Quantile.P99));
+    this(executorService, clock, Arrays.asList(P50, P75, P90, P95, P99, AVG, MIN, MAX, SUM));
   }
 
   public MultiWindowDistribution(

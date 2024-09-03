@@ -28,18 +28,6 @@ void FizzClient<ActionMoveVisitor, SM>::connect(
 }
 
 template <typename ActionMoveVisitor, typename SM>
-void FizzClient<ActionMoveVisitor, SM>::connect(
-    std::shared_ptr<const FizzClientContext> context,
-    folly::Optional<std::string> hostname) {
-  const auto pskIdentity = hostname;
-  connect(
-      std::move(context),
-      std::make_shared<DefaultCertificateVerifier>(VerificationContext::Client),
-      std::move(hostname),
-      std::move(pskIdentity));
-}
-
-template <typename ActionMoveVisitor, typename SM>
 Buf FizzClient<ActionMoveVisitor, SM>::getEarlyEkm(
     const Factory& factory,
     folly::StringPiece label,

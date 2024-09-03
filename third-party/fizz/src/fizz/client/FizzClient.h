@@ -35,13 +35,6 @@ class FizzClient : public FizzBase<
       const std::shared_ptr<ClientExtensions>& extensions = nullptr);
 
   /**
-   * Uses the default verifier to verify certificates
-   */
-  void connect(
-      std::shared_ptr<const FizzClientContext> context,
-      folly::Optional<std::string> hostname);
-
-  /**
    * Returns an exported key material derived from the early secret of the TLS
    * connection. Throws if the early secret is not available.
    */

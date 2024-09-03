@@ -412,3 +412,5 @@ bool pointer_less(const T& lhs, const T& rhs) {
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+
+FOLLY_GNU_DISABLE_WARNING("-Wmissing-prototypes")

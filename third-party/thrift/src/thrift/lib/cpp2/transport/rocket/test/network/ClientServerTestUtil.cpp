@@ -382,7 +382,7 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
     }
     // Validate RequestSetupMetadata
     RequestSetupMetadata meta;
-    size_t unpackedSize = unpackCompact(meta, cursor);
+    size_t unpackedSize = unpack(meta, cursor, false);
     EXPECT_EQ(unpackedSize, frame.payload().metadataSize());
     EXPECT_EQ(expectedSetupMetadata_, meta.opaque_ref().value_or({}));
     version_ = std::min(kServerVersion, meta.maxVersion_ref().value_or(0));

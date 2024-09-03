@@ -58,21 +58,20 @@ size_t unpack(T& output, const BufferType& input) {
 }
 
 template <typename T, typename BufferType>
-size_t unpackBinary(T& output, const BufferType& input) {
-  return unpack<T, BinaryProtocolReader, BufferType>(output, input);
-}
-
-template <typename T, typename BufferType>
-size_t unpackCompact(T& output, const BufferType& input) {
-  return unpack<T, CompactProtocolReader, BufferType>(output, input);
+size_t unpack(T& output, const BufferType& buffer, bool useBinary) {
+  if (useBinary) {
+    return unpack<T, BinaryProtocolReader, BufferType>(output, buffer);
+  }
+  return unpack<T, CompactProtocolReader, BufferType>(output, buffer);
 }
 
 namespace detail {
 template <class PayloadType, bool uncompressPayload>
-inline PayloadType unpackPayload(rocket::Payload&& payload) {
+inline PayloadType unpackPayload(rocket::Payload&& payload, bool useBinary) {
   PayloadType t{{}, {}};
   if (payload.hasNonemptyMetadata()) {
-    if (unpackCompact(t.metadata, payload.buffer()) != payload.metadataSize()) {
+    if (unpack(t.metadata, payload.buffer(), useBinary) !=
+        payload.metadataSize()) {
       folly::throw_exception<std::out_of_range>("metadata size mismatch");
     }
   }
@@ -90,15 +89,17 @@ inline PayloadType unpackPayload(rocket::Payload&& payload) {
 } // namespace detail
 
 template <class T>
-folly::Try<T> unpackAsCompressed(rocket::Payload&& payload) {
-  return folly::makeTryWith(
-      [&] { return detail::unpackPayload<T, false>(std::move(payload)); });
+folly::Try<T> unpackAsCompressed(rocket::Payload&& payload, bool useBinary) {
+  return folly::makeTryWith([&] {
+    return detail::unpackPayload<T, false>(std::move(payload), useBinary);
+  });
 }
 
 template <class T>
-folly::Try<T> unpack(rocket::Payload&& payload) {
-  return folly::makeTryWith(
-      [&] { return detail::unpackPayload<T, true>(std::move(payload)); });
+folly::Try<T> unpack(rocket::Payload&& payload, bool useBinary) {
+  return folly::makeTryWith([&] {
+    return detail::unpackPayload<T, true>(std::move(payload), useBinary);
+  });
 }
 
 template <typename T>

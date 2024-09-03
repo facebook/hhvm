@@ -128,7 +128,7 @@ folly::Try<FirstResponsePayload> decodeResponseError(
 
   ResponseRpcError responseError;
   try {
-    rocket::unpackCompact(responseError, ex.moveErrorData().get());
+    rocket::unpack(responseError, ex.moveErrorData().get(), false);
   } catch (...) {
     return folly::Try<FirstResponsePayload>(
         folly::make_exception_wrapper<TApplicationException>(fmt::format(
@@ -624,7 +624,8 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       stats.responseWireSizeBytes =
           payload->metadataAndDataSize() - payload->metadataSize();
 
-      response = rocket::unpack<FirstResponsePayload>(std::move(*payload));
+      response =
+          rocket::unpack<FirstResponsePayload>(std::move(*payload), false);
       if (response.hasException()) {
         cb_.release()->onResponseError(std::move(response.exception()));
         return;

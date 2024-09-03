@@ -833,7 +833,7 @@ void execute_command_line_end(bool coverage, const char *program,
   }
 }
 
-#define AT_END_OF_TEXT    __attribute__((__section__(".stub")))
+#define AT_END_OF_TEXT    __attribute__((__section__(".never_hugify")))
 
 #define ALIGN_HUGE_PAGE   __attribute__((__aligned__(2 * 1024 * 1024)))
 
@@ -869,48 +869,45 @@ hugifyText(char* from, char* to) {
     // zero size or negative sizes.
     return;
   }
-  size_t sz = to - from;
 
-#ifdef HHVM_FACEBOOK
-  if (RuntimeOption::EvalNewTHPHotText) {
-    auto const hasKernelSupport = [] () -> bool {
-      KernelVersion version;
-      if (version.m_major < 5) return false;
-      if (version.m_major > 5) return true;
-      if (version.m_minor > 2) return true;
-      if ((version.m_minor == 2) && (version.m_fbk >= 5)) return true;
+#ifdef __x86_64__
+  size_t sz = to - from;
+  auto const hasKernelSupport = [] () -> bool {
+    KernelVersion version;
+    if (version.m_major < 5) return false;
+    if (version.m_major > 5) return true;
+    if (version.m_minor > 2) return true;
       return false;
-    };
-    if (hasKernelSupport()) {
-      // The new way doesn't work if the region is locked. Note that this means
-      // Server.LockCodeMemory won't be applied to the region--there is no
-      // guarantee that the region would stay in memory, especially if the
-      // kernel fails to find huge pages for us.
-      munlock(from, sz);
-      madvise(from, sz, MADV_HUGEPAGE);
-      return;
-    }
+  };
+  if (RO::EvalNewTHPHotText && hasKernelSupport()) {
+    // The new way doesn't work if the region is locked. Note that this means
+    // Server.LockCodeMemory won't be applied to the region--there is no
+    // guarantee that the region would stay in memory, especially if the kernel
+    // fails to find huge pages for us.
+    munlock(from, sz);
+    madvise(from, sz, MADV_HUGEPAGE);
+    std::stringstream ss;
+    ss << "Mapped text section onto THP pagecache from " <<
+      std::hex << (uint64_t*)from << " to " << (uint64_t*)to;
+    Logger::Info(ss.str());
+    return;
   }
-#endif
 
   void* mem = malloc(sz);
   memcpy(mem, from, sz);
 
-  // This maps out a portion of our executable
-  // We need to be very careful about what we do
-  // until we replace the original code
+  // This maps out a portion of our executable. We need to be very careful about
+  // what we do until we replace the original code
   mmap(from, sz,
        PROT_READ | PROT_WRITE | PROT_EXEC,
        MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
        -1, 0);
-  // This is in glibc, which isn't a problem, except for
-  // the trampoline code in .plt, which we dealt with
-  // in the linker script
+  // This is in glibc, which isn't a problem, except for the trampoline code in
+  // .plt, which we dealt with in the linker script
   madvise(from, sz, MADV_HUGEPAGE);
-  // Don't use memcpy because its probably one of the
-  // functions thats been mapped out.
-  // Needs the attribute((optimize("2")) to prevent
-  // g++ from turning this back into memcpy(!)
+  // Don't use memcpy because its probably one of the functions thats been
+  // mapped out. Needs the attribute((optimize("2")) to prevent g++ from turning
+  // this back into memcpy(!)
   hugifyMemcpy((uint64_t*)from, (uint64_t*)mem, sz);
   mprotect(from, sz, PROT_READ | PROT_EXEC);
   free(mem);
@@ -920,6 +917,9 @@ hugifyText(char* from, char* to) {
   ss << "Mapped text section onto huge pages from " <<
       std::hex << (uint64_t*)from << " to " << (uint64_t*)to;
   Logger::Info(ss.str());
+#elif defined(__aarch64__)
+  // TODO: we cannot use THP on aarch64, use hugetlb
+#endif
 #endif
 }
 
@@ -1004,26 +1004,31 @@ static void pagein_self(void) {
     }
   };
 
-  char mapname[PATH_MAX];
-  // pad due to the spaces between the inode number and the mapname
-  auto const bufsz =
-    sizeof(unsigned long) * 4 + sizeof(mapname) + sizeof(char) * 11 + 100;
-  auto buf = static_cast<char*>(malloc(bufsz));
   if (auto fp = fopen("/proc/self/maps", "r")) {
+    SCOPE_EXIT {
+      fclose(fp);
+    };
     while (!feof(fp)) {
-      if (fgets(buf, bufsz, fp) == 0)
+      char line[PATH_MAX + 256];
+      if (fgets(line, sizeof(line), fp) == 0)
         break;
       unsigned long begin, end, inode, pgoff;
+      char mapname[PATH_MAX];
       char perm[5];
       char dev[11];
-      int r = sscanf(buf, "%lx-%lx %4s %lx %10s %ld %s",
+      int r = sscanf(line, "%lx-%lx %4s %lx %10s %ld %s",
                      &begin, &end, perm, &pgoff, dev, &inode, mapname);
 
-      // page in read-only segments that correspond to a file on disk
+      // Look for private, read/executable segments that correspond to a file on
+      // disk.
       if (r != 7 ||
-          perm[0] != 'r' ||
-          perm[1] != '-' ||
+          memcmp(perm, "r-xp", 4) ||
           access(mapname, F_OK) != 0) {
+        continue;
+      }
+      // Do it for the main binary only.
+      if (Process::Argv[0] &&
+          strcmp(basename(mapname), basename(Process::Argv[0]))) {
         continue;
       }
 
@@ -1031,7 +1036,7 @@ static void pagein_self(void) {
       auto endPtr = (char*)end;
       auto hotStart = (char*)__hot_start;
       auto hotEnd = (char*)__hot_end;
-      const size_t hugePageBytes = 2L * 1024 * 1024;
+      constexpr size_t hugePageBytes = 2L * 1024 * 1024;
 
       if (mlock(beginPtr, end - begin) == 0) {
         if (try_map_huge && beginPtr <= hotStart && hotEnd <= endPtr) {
@@ -1054,9 +1059,7 @@ static void pagein_self(void) {
         }
       }
     }
-    fclose(fp);
   }
-  free(buf);
 }
 
 /* Sets RuntimeOption::ExecutionMode according to commandline options prior to

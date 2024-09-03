@@ -26,21 +26,24 @@ open Hh_prelude
 
 let () = Random.self_init ()
 
-let init_event_logger root command ~init_id ~from config local_config : unit =
+let init_event_logger
+    root
+    command
+    ~init_id
+    ~from
+    (config : ServerConfig.t)
+    (local_config : ServerLocalConfig.t) : unit =
   HackEventLogger.client_init
     ~init_id
     ~from
     ~is_interactive:(ClientArgs.is_interactive command)
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
     (Option.value root ~default:Path.dummy_path);
-  Option.iter config ~f:(fun config ->
-      HackEventLogger.set_hhconfig_version
-        (ServerConfig.version config |> Config_file.version_to_string_opt));
-  Option.iter local_config ~f:(fun local_config ->
-      HackEventLogger.set_rollout_group
-        local_config.ServerLocalConfig.rollout_group;
-      HackEventLogger.set_rollout_flags
-        (ServerLocalConfigLoad.to_rollout_flags local_config));
+  HackEventLogger.set_hhconfig_version
+    (ServerConfig.version config |> Config_file.version_to_string_opt);
+  HackEventLogger.set_rollout_group local_config.ServerLocalConfig.rollout_group;
+  HackEventLogger.set_rollout_flags
+    (ServerLocalConfigLoad.to_rollout_flags local_config);
   ()
 
 let set_up_signals () =
@@ -80,35 +83,6 @@ let set_up_root root =
   Relative_path.set_path_prefix Relative_path.Root root;
   Server_progress.set_root root;
   ()
-
-let load_configs command ~root ~from =
-  match root with
-  | None -> (None, None)
-  | Some root ->
-    (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
-       It requires a ServerArgs structure, solely to pick out --from and --config options. We
-       dont have ServerArgs (we only have client args!) but we do parse --from and --config
-       options and will patch them onto a fake ServerArgs. *)
-    let fake_server_args =
-      ServerArgs.default_options ~root:(Path.to_string root)
-    in
-    let fake_server_args = ServerArgs.set_from fake_server_args from in
-    let fake_server_args =
-      match ClientArgs.config command with
-      | None -> fake_server_args
-      | Some config -> ServerArgs.set_config fake_server_args config
-    in
-    let (config, local_config) =
-      ServerConfig.load ~silent:true fake_server_args
-    in
-    (Some local_config, Some config)
-
-let do_init_proc_stack local_config ~from =
-  String.equal "" from
-  || Option.value_map
-       local_config
-       ~f:(fun c -> c.ServerLocalConfig.log_init_proc_stack_also_on_absent_from)
-       ~default:false
 
 let handle_exn_and_exit exn ~command_name =
   let e = Exception.wrap exn in
@@ -157,21 +131,28 @@ let () =
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
 
-  let (local_config, config) = load_configs command ~root ~from in
-
+  let (config, local_config) =
+    ServerConfig.load
+      ~silent:true
+      ~from
+      ~ai_options:None
+      ~cli_config_overrides:
+        (ClientArgs.config command |> Option.value ~default:[])
+  in
   init_event_logger root command ~init_id ~from config local_config;
 
   let init_proc_stack =
-    Option.some_if (do_init_proc_stack local_config ~from) init_proc_stack
+    Option.some_if
+      (String.equal "" from
+      || local_config.ServerLocalConfig.log_init_proc_stack_also_on_absent_from
+      )
+      init_proc_stack
   in
   try
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        ClientCheck.main
-          check_env
-          (Option.value_exn local_config)
-          ~init_proc_stack
+        ClientCheck.main check_env local_config ~init_proc_stack
         (* never returns; does [Exit.exit] itself *)
       | ClientCommand.CStart env ->
         Lwt_utils.run_main (fun () -> ClientStart.main env)
@@ -181,22 +162,15 @@ let () =
         Lwt_utils.run_main (fun () -> ClientRestart.main env)
       | ClientCommand.CLsp args ->
         Lwt_utils.run_main (fun () ->
-            ClientLsp.main
-              args
-              ~init_id
-              ~local_config:(Option.value_exn local_config)
-              ~init_proc_stack)
+            ClientLsp.main args ~init_id ~local_config ~init_proc_stack)
       | ClientCommand.CRage env ->
-        Lwt_utils.run_main (fun () ->
-            ClientRage.main env (Option.value_exn local_config))
+        Lwt_utils.run_main (fun () -> ClientRage.main env local_config)
       | ClientCommand.CSavedStateProjectMetadata env ->
         Lwt_utils.run_main (fun () ->
-            ClientSavedStateProjectMetadata.main
-              env
-              (Option.value_exn local_config))
+            ClientSavedStateProjectMetadata.main env local_config)
       | ClientCommand.CDownloadSavedState env ->
         Lwt_utils.run_main (fun () ->
-            ClientDownloadSavedState.main env (Option.value_exn local_config))
+            ClientDownloadSavedState.main env local_config)
       | ClientCommand.CDecompressZhhdg env -> ClientDecompressZhhdg.main env
     in
     Exit.exit exit_status

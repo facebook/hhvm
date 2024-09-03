@@ -12,8 +12,8 @@ open Hh_prelude
 type t [@@deriving show]
 
 (** Load config from these sources (last overrides first):
-  - .hhconfig file in the root directory
-  - Flags passed via CLI option `--config`.
+  - .hhconfig file in the root directory.
+  - Flags passed via CLI option `--config`. These are retrieved from [cli_config_overrides].
 
   Also calls into `ServerLocalConfigLoad.load`.
 
@@ -21,7 +21,12 @@ type t [@@deriving show]
   `ParserOptions.t` and `GleanOptions.t` which can
   then be retrieved using the `typechecker_options`,  `parser_options`,
   `glean_options` helpers. *)
-val load : silent:bool -> ServerArgs.options -> t * ServerLocalConfig.t
+val load :
+  silent:bool ->
+  from:string ->
+  cli_config_overrides:(string * string) list ->
+  ai_options:Ai_options.t option ->
+  t * ServerLocalConfig.t
 
 val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
 
@@ -68,4 +73,7 @@ val ide_fall_back_to_full_index : t -> bool
 val convert_auto_namespace_to_map : string -> (string * string) list
 
 val make_sharedmem_config :
-  Config_file.t -> ServerArgs.options -> ServerLocalConfig.t -> SharedMem.config
+  ?ai_options:Ai_options.t ->
+  Config_file.t ->
+  ServerLocalConfig.t ->
+  SharedMem.config

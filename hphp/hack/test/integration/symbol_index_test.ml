@@ -90,9 +90,13 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
-  let repo_path = Path.to_string harness.repo_dir in
-  let options = ServerArgs.default_options ~root:repo_path in
-  let (hhconfig, _) = ServerConfig.load ~silent:true options in
+  let (hhconfig, _) =
+    ServerConfig.load
+      ~silent:true
+      ~from:""
+      ~ai_options:None
+      ~cli_config_overrides:[]
+  in
   let popt = ServerConfig.parser_options hhconfig in
   let tcopt = ServerConfig.typechecker_options hhconfig in
   let ctx =
@@ -114,10 +118,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       ~quiet:true
   in
   let paths_with_addenda =
-    Find.find
-      ~file_only:true
-      ~filter:FindUtils.file_filter
-      [Path.make repo_path]
+    Find.find ~file_only:true ~filter:FindUtils.file_filter [harness.repo_dir]
     |> List.filter_map ~f:(fun path ->
            let path = Relative_path.create_detect_prefix path in
            let decls = Direct_decl_utils.direct_decl_parse ctx path in

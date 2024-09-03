@@ -58,9 +58,12 @@ let init (root : Path.t) (naming_table_path : string option) :
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmpdir_NOT_USED");
   Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
 
-  let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
   let (server_config, server_local_config) =
-    ServerConfig.load ~silent:true server_args
+    ServerConfig.load
+      ~silent:true
+      ~from:""
+      ~cli_config_overrides:[]
+      ~ai_options:None
   in
   let popt = ServerConfig.parser_options server_config in
   let tcopt =
@@ -282,11 +285,12 @@ let () =
       Relative_path.Tmp
       (Path.make "tmpdir_NOT_USED");
     Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
-    let server_args =
-      ServerArgs.default_options ~root:(Path.to_string www_root)
-    in
     let (server_config, _server_local_config) =
-      ServerConfig.load ~silent:true server_args
+      ServerConfig.load
+        ~silent:true
+        ~from:""
+        ~ai_options:None
+        ~cli_config_overrides:[]
     in
     let tcopt = ServerConfig.typechecker_options server_config in
     tcopt

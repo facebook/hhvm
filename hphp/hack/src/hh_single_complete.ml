@@ -241,10 +241,7 @@ let parse_options () =
         |> Option.map ~f:comma_string_to_iset
       in
       let sharedmem_config =
-        ServerConfig.make_sharedmem_config
-          config
-          (ServerArgs.default_options ~root)
-          ServerLocalConfigLoad.default
+        ServerConfig.make_sharedmem_config config ServerLocalConfigLoad.default
       in
       no_builtins := true;
       (* Now let CLI options override whatever we just picked *)

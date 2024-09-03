@@ -15,13 +15,14 @@ let hhconfig_filename = Filename.concat root ".hhconfig"
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename "timeout = 737";
-  let options = ServerArgs.default_options ~root in
-  let (options : ServerArgs.options) =
-    ServerArgs.set_config
-      options
-      [("timeout", "747"); ("informant_min_distance_restart", "711")]
+  let (config, local_config) =
+    ServerConfig.load
+      ~silent:false
+      ~from:""
+      ~ai_options:None
+      ~cli_config_overrides:
+        [("timeout", "747"); ("informant_min_distance_restart", "711")]
   in
-  let (config, local_config) = ServerConfig.load ~silent:false options in
   let timeout =
     TypecheckerOptions.timeout (ServerConfig.typechecker_options config)
   in

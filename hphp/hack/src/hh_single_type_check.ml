@@ -811,10 +811,7 @@ let parse_options () =
         |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
         |> Option.map ~f:comma_string_to_iset;
       sharedmem_config :=
-        ServerConfig.make_sharedmem_config
-          config
-          (ServerArgs.default_options ~root)
-          ServerLocalConfigLoad.default;
+        ServerConfig.make_sharedmem_config config ServerLocalConfigLoad.default;
       no_builtins := true;
       (* Now let CLI options override whatever we just picked *)
       Arg.parse options (fun _ -> ()) usage;

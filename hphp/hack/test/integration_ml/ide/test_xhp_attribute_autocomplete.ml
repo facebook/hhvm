@@ -78,8 +78,13 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
   let repo_path = Path.to_string harness.repo_dir in
-  let options = ServerArgs.default_options ~root:repo_path in
-  let (hhconfig, _) = ServerConfig.load ~silent:true options in
+  let (hhconfig, _) =
+    ServerConfig.load
+      ~silent:true
+      ~from:""
+      ~ai_options:None
+      ~cli_config_overrides:[]
+  in
   let popt = ServerConfig.parser_options hhconfig in
   let tcopt = ServerConfig.typechecker_options hhconfig in
   let ctx =

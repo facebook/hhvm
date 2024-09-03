@@ -64,7 +64,13 @@ let monitor_daemon_main
   let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "MonitorStart. Monitor init_id: %s" init_id;
-  let (config, local_config) = ServerConfig.load ~silent:false options in
+  let (config, local_config) =
+    ServerConfig.load
+      ~silent:false
+      ~from:(ServerArgs.from options)
+      ~cli_config_overrides:(ServerArgs.config options)
+      ~ai_options:None
+  in
   if not (Sys_utils.enable_telemetry ()) then
     EventLogger.init_fake ()
   else

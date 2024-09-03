@@ -63,7 +63,7 @@ let make_gc_control config =
   in
   { GlobalConfig.gc_control with Gc.Control.minor_heap_size; space_overhead }
 
-let make_sharedmem_config config options local_config =
+let make_sharedmem_config ?ai_options config local_config =
   let { SharedMem.global_size; heap_size; shm_min_avail; _ } =
     SharedMem.default_config
   in
@@ -104,9 +104,12 @@ let make_sharedmem_config config options local_config =
       compression;
     }
   in
-  match ServerArgs.ai_mode options with
-  | None -> config
-  | Some ai_options -> Ai_options.modify_shared_mem ai_options config
+  let config =
+    match ai_options with
+    | None -> config
+    | Some ai_options -> Ai_options.modify_shared_mem ai_options config
+  in
+  config
 
 let config_list_regexp = Str.regexp "[, \t]+"
 
@@ -481,10 +484,12 @@ let load_config config options =
       (bool_opt "enable_abstract_method_optional_parameters" config)
     options
 
-let load ~silent (options : ServerArgs.options) : t * ServerLocalConfig.t =
-  let command_line_overrides =
-    Config_file.of_list @@ ServerArgs.config options
-  in
+let load
+    ~silent
+    ~from
+    ~(cli_config_overrides : (string * string) list)
+    ~(ai_options : Ai_options.t option) : t * ServerLocalConfig.t =
+  let command_line_overrides = Config_file.of_list cli_config_overrides in
   let (config_hash, config) =
     Config_file.parse_hhconfig (Relative_path.to_absolute repo_config_path)
   in
@@ -510,11 +515,11 @@ let load ~silent (options : ServerArgs.options) : t * ServerLocalConfig.t =
       ~current_version:version
       ~current_rolled_out_flag_idx
       ~deactivate_saved_state_rollout
-      ~from:(ServerArgs.from options)
+      ~from
       ~overrides:command_line_overrides
   in
   let local_config =
-    if Option.is_some (ServerArgs.ai_mode options) then
+    if Option.is_some ai_options then
       let open ServerLocalConfig in
       {
         local_config with
@@ -563,7 +568,7 @@ let load ~silent (options : ServerArgs.options) : t * ServerLocalConfig.t =
               default.po with
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
-              parser_errors_only = Option.is_some (ServerArgs.ai_mode options);
+              parser_errors_only = Option.is_some ai_options;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:
@@ -606,7 +611,7 @@ let load ~silent (options : ServerArgs.options) : t * ServerLocalConfig.t =
       version;
       load_script_timeout;
       gc_control = make_gc_control config;
-      sharedmem_config = make_sharedmem_config config options local_config;
+      sharedmem_config = make_sharedmem_config config local_config ?ai_options;
       tc_options = global_opts;
       parser_options = global_opts.GlobalOptions.po;
       glean_options = global_opts;

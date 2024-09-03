@@ -347,11 +347,13 @@ let initialize1
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
-  let server_args =
-    ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
+  let (config, local_config) =
+    ServerConfig.load
+      ~silent:true
+      ~cli_config_overrides:config
+      ~from:""
+      ~ai_options:None
   in
-  let server_args = ServerArgs.set_config server_args config in
-  let (config, local_config) = ServerConfig.load ~silent:true server_args in
   (* Ignore package loading errors for now TODO(jjwu) *)
   let open GlobalOptions in
   log "Loading package configuration";

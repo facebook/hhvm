@@ -38,6 +38,7 @@ type args = {
 val main :
   args ->
   init_id:string ->
+  config:ServerConfig.t ->
   local_config:ServerLocalConfig.t ->
   init_proc_stack:string list option ->
   Exit_status.t Lwt.t

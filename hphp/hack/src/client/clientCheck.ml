@@ -241,6 +241,7 @@ let filter_real_paths ~allow_directories paths =
 
 let main_internal
     (args : ClientEnv.client_check_env)
+    (config : ServerConfig.t)
     (local_config : ServerLocalConfig.t)
     (partial_telemetry_ref : Telemetry.t option ref) :
     (Exit_status.t * Telemetry.t) Lwt.t =
@@ -670,7 +671,7 @@ let main_internal
     let error_filter =
       Filter_errors.Filter.make
         ~default_all:local_config.ServerLocalConfig.warnings_default_all
-        ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
+        ~generated_files:(ServerConfig.warnings_generated_files config)
         args.ClientEnv.warning_switches
     in
     (* We don't do streaming errors under [output_json]: our contract
@@ -731,7 +732,7 @@ let main_internal
     let error_filter =
       Filter_errors.Filter.make
         ~default_all:local_config.ServerLocalConfig.warnings_default_all
-        ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
+        ~generated_files:(ServerConfig.warnings_generated_files config)
         args.ClientEnv.warning_switches
     in
     let%lwt (((error_list, dropped_count), tasts), telemetry) =
@@ -872,7 +873,7 @@ let main_internal
     let error_filter =
       Filter_errors.Filter.make
         ~default_all:local_config.ServerLocalConfig.warnings_default_all
-        ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
+        ~generated_files:(ServerConfig.warnings_generated_files config)
         args.ClientEnv.warning_switches
     in
     let status_cmd =
@@ -982,6 +983,7 @@ let rec flush_event_logger () : unit Lwt.t =
 
 let main
     (args : ClientEnv.client_check_env)
+    (config : ServerConfig.t)
     (local_config : ServerLocalConfig.t)
     ~(init_proc_stack : string list option) : 'a =
   HackEventLogger.client_set_mode
@@ -999,7 +1001,7 @@ let main
        [partial_telemetry_ref], since there's no way for a return value to survive SIGINT. *)
     let (exit_status, telemetry) =
       Lwt_utils.run_main (fun () ->
-          main_internal args local_config partial_telemetry_ref)
+          main_internal args config local_config partial_telemetry_ref)
     in
     let spinner = ClientSpinner.get_latest_report () in
     HackEventLogger.client_check exit_status telemetry ~init_proc_stack ~spinner;

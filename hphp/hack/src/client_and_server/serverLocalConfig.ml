@@ -255,9 +255,4 @@ type t = {
   warnings_default_all: bool;
       (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.
         Otherwise, `hh` is equivalent to `hh -Wnone`, i.e. warnings are not shown. *)
-  warnings_generated_files: Str.regexp list;
-      (** List of regexps for file paths for which any warning will be ignored.
-        Useful to ignore warnings from certain generated files.
-        Passing `-Wgenerated` on the command line will override this behavior
-        and show warnings from those files. *)
 }

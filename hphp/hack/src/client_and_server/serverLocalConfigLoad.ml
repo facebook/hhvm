@@ -106,7 +106,6 @@ let default =
     autocomplete_sort_text = false;
     hack_warnings = GlobalOptions.ASome [];
     warnings_default_all = false;
-    warnings_generated_files = [];
   }
 
 let system_config_path =
@@ -819,12 +818,6 @@ let load_
   let warnings_default_all =
     bool_ "warnings_default_all" ~default:default.warnings_default_all config
   in
-  let warnings_generated_files =
-    string_list_opt "warnings_generated_files" config
-    |> Option.value_map
-         ~default:default.warnings_generated_files
-         ~f:(List.map ~f:Str.regexp)
-  in
   {
     saved_state =
       {
@@ -934,7 +927,6 @@ let load_
     autocomplete_sort_text;
     hack_warnings;
     warnings_default_all;
-    warnings_generated_files;
   }
 
 let load :

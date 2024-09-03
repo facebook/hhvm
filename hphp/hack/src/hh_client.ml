@@ -152,7 +152,7 @@ let () =
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        ClientCheck.main check_env local_config ~init_proc_stack
+        ClientCheck.main check_env config local_config ~init_proc_stack
         (* never returns; does [Exit.exit] itself *)
       | ClientCommand.CStart env ->
         Lwt_utils.run_main (fun () -> ClientStart.main env)
@@ -162,7 +162,7 @@ let () =
         Lwt_utils.run_main (fun () -> ClientRestart.main env)
       | ClientCommand.CLsp args ->
         Lwt_utils.run_main (fun () ->
-            ClientLsp.main args ~init_id ~local_config ~init_proc_stack)
+            ClientLsp.main args ~init_id ~config ~local_config ~init_proc_stack)
       | ClientCommand.CRage env ->
         Lwt_utils.run_main (fun () -> ClientRage.main env local_config)
       | ClientCommand.CSavedStateProjectMetadata env ->

@@ -4798,6 +4798,7 @@ let setup_logging ~root ~verbose =
 let main
     (args : args)
     ~(init_id : string)
+    ~(config : ServerConfig.t)
     ~(local_config : ServerLocalConfig.t)
     ~(init_proc_stack : string list option) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
@@ -4842,7 +4843,7 @@ let main
   let error_filter =
     Filter_errors.Filter.make
       ~default_all:local_config.ServerLocalConfig.warnings_default_all
-      ~generated_files:local_config.ServerLocalConfig.warnings_generated_files
+      ~generated_files:(ServerConfig.warnings_generated_files config)
       []
   in
   (* `ref_unblocked_time` is the time at which we're no longer blocked on either

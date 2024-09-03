@@ -9,6 +9,7 @@
 (** This function never returns; it always calls [Exit.exit] *)
 val main :
   ClientEnv.client_check_env ->
+  ServerConfig.t ->
   ServerLocalConfig.t ->
   init_proc_stack:string list option ->
   'a

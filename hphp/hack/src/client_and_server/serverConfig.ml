@@ -39,6 +39,11 @@ type t = {
   ide_fall_back_to_full_index: bool;
   naming_table_compression_level: int;
   naming_table_compression_threads: int;
+  warnings_generated_files: Str.regexp list; [@show.opaque]
+      (** List of regexps for file paths for which any warning will be ignored.
+        Useful to ignore warnings from certain generated files.
+        Passing `-Wgenerated` on the command line will override this behavior
+        and show warnings from those files. *)
 }
 [@@deriving show]
 
@@ -553,6 +558,10 @@ let load
   let naming_table_compression_threads =
     int_ "naming_table_compression_threads" ~default:1 config
   in
+  let warnings_generated_files =
+    string_list "warnings_generated_files" ~default:[] config
+    |> List.map ~f:Str.regexp
+  in
   let formatter_override =
     Option.map
       (Config_file.Getters.string_opt "formatter_override" config)
@@ -624,6 +633,7 @@ let load
       ide_fall_back_to_full_index;
       naming_table_compression_level;
       naming_table_compression_threads;
+      warnings_generated_files;
     },
     local_config )
 
@@ -646,6 +656,7 @@ let default_config =
     ide_fall_back_to_full_index = false;
     naming_table_compression_level = 6;
     naming_table_compression_threads = 1;
+    warnings_generated_files = [];
   }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -682,3 +693,5 @@ let version config = config.version
 let warn_on_non_opt_build config = config.warn_on_non_opt_build
 
 let ide_fall_back_to_full_index config = config.ide_fall_back_to_full_index
+
+let warnings_generated_files config = config.warnings_generated_files

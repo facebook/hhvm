@@ -20,8 +20,11 @@ apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::CreateMethodMetadataR
 }
 
 #if defined(THRIFT_SCHEMA_AVAILABLE)
-std::optional<std::vector<apache::thrift::type::Schema>> apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::getServiceMetadataV1() {
-  return {};
+std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::ServiceHandler<::cpp2::PrimitivesService>::getServiceSchema() {
+  std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
+  ret->schema = ::apache::thrift::SchemaRegistry::mergeSchemas(cpp2::module_constants::_fbthrift_schema_2926f41c3790ef15_includes());
+  ret->definitions = {"\xdc\x03\x58\x51\x68\x6f\x53\x7e\x9a\x5f\x91\x3b\x78\x92\x36\x0d"};
+  return ret;
 }
 #endif
 

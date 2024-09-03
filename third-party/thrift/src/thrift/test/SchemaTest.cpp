@@ -26,6 +26,7 @@
 #include <thrift/test/gen-cpp2/schema_types.h>
 
 #include <thrift/test/gen-cpp2/schema_constants.h>
+#include <thrift/test/gen-cpp2/schema_handlers.h>
 
 using namespace apache::thrift;
 
@@ -108,4 +109,19 @@ TEST(SchemaTest, static_schema) {
   ASSERT_TRUE(dynamic_program);
 
   EXPECT_EQ(*static_program, *dynamic_program);
+}
+
+TEST(SchemaTest, service_schema) {
+  ServiceHandler<facebook::thrift::test::schema::TestService> handler;
+  auto metadata = handler.getServiceSchema();
+  EXPECT_TRUE(metadata);
+  EXPECT_EQ(metadata->definitions.size(), 1);
+  const auto& service = *metadata->schema.definitionsMap()
+                             ->at(metadata->definitions[0])
+                             .serviceDef_ref();
+  EXPECT_EQ(service.name(), "TestService");
+  EXPECT_EQ(service.functions()->size(), 4);
+  EXPECT_EQ(service.functions()[0].name(), "noParamsNoReturnNoEx");
+  EXPECT_EQ(
+      service.functions()[0].returnType()->baseType(), type::BaseType::Void);
 }

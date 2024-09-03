@@ -17,12 +17,20 @@
 #pragma once
 
 #if __has_include(<thrift/lib/thrift/gen-cpp2/schema_types.h>)
+#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 #define THRIFT_SCHEMA_AVAILABLE
 namespace apache {
 namespace thrift {
 namespace schema {
-using SchemaV1 = type::Schema;
+struct DefinitionsSchema {
+  // Which definitions are of interest (e.g. the root service).
+  // Thrift-generated handlers only have a single entry in this vector,
+  // but multiplexed and custom handlers may have several.
+  std::vector<type::DefinitionKey> definitions;
+  // The schema to look those definitions up in.
+  type::Schema schema;
+};
 } // namespace schema
 } // namespace thrift
 } // namespace apache

@@ -1767,14 +1767,6 @@ class UnimplementedCoroMethod : public std::exception {
 template <typename... Ignore>
 void ignore(Ignore&&...) {}
 
-#if defined(THRIFT_SCHEMA_AVAILABLE)
-inline std::optional<std::vector<schema::SchemaV1>> schemaAsOptionalVector(
-    const schema::SchemaV1& schema) {
-  std::vector<schema::SchemaV1> vec = {};
-  vec.insert(vec.end(), schema);
-  return std::optional<std::vector<schema::SchemaV1>>(vec);
-}
-#endif
 } // namespace si
 } // namespace detail
 

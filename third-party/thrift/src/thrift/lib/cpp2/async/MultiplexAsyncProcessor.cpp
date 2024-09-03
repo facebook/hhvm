@@ -402,16 +402,26 @@ MultiplexAsyncProcessorFactory::flattenProcessorFactories(
 }
 
 #if defined(THRIFT_SCHEMA_AVAILABLE)
-std::optional<std::vector<schema::SchemaV1>>
-MultiplexAsyncProcessorFactory::getServiceMetadataV1() {
-  std::vector<schema::SchemaV1> allSchemas;
+std::optional<schema::DefinitionsSchema>
+MultiplexAsyncProcessorFactory::getServiceSchema() {
+  std::vector<type::Schema> allSchemas;
+  std::set<type::DefinitionKey> allKeys;
   for (auto& processorFactory : processorFactories_) {
-    auto schemas = processorFactory->getServiceMetadataV1();
-    if (schemas.has_value()) {
-      allSchemas.insert(allSchemas.end(), schemas->begin(), schemas->end());
+    auto schema = processorFactory->getServiceSchema();
+    if (schema.has_value()) {
+      allSchemas.insert(allSchemas.end(), std::move(schema->schema));
+      allKeys.insert(
+          std::make_move_iterator(schema->definitions.begin()),
+          std::make_move_iterator(schema->definitions.end()));
     }
   }
-  return allSchemas;
+  schema::DefinitionsSchema result;
+  result.schema = SchemaRegistry::mergeSchemas(std::move(allSchemas));
+  result.definitions.insert(
+      result.definitions.end(),
+      std::make_move_iterator(allKeys.begin()),
+      std::make_move_iterator(allKeys.end()));
+  return result;
 }
 #endif
 

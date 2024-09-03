@@ -216,6 +216,14 @@ bool has_schema(source_manager& sm, const t_program& program) {
       program.scope_name(schematizer::name_schema(sm, program)));
 }
 
+std::string escape_binary_string(std::string_view str) {
+  std::string ret;
+  for (unsigned char chr : str) {
+    fmt::format_to(std::back_inserter(ret), "\\x{:02x}", chr);
+  }
+  return ret;
+}
+
 class cpp2_generator_context {
  public:
   static cpp2_generator_context create() { return cpp2_generator_context(); }
@@ -748,10 +756,11 @@ class cpp_mstch_service : public mstch_service {
       const t_service* service,
       mstch_context& ctx,
       mstch_element_position pos,
+      source_manager& sm,
       const t_service* containing_service = nullptr,
       int32_t split_id = 0,
       int32_t split_count = 1)
-      : mstch_service(service, ctx, pos, containing_service) {
+      : mstch_service(service, ctx, pos, containing_service), sm_(sm) {
     register_cached_methods(
         this,
         {
@@ -774,11 +783,10 @@ class cpp_mstch_service : public mstch_service {
              &cpp_mstch_service::parent_service_qualified_name},
             {"service:thrift_uri_or_service_name",
              &cpp_mstch_service::thrift_uri_or_service_name},
-            {"service:service_schema_name",
-             &cpp_mstch_service::service_schema_name},
             {"service:has_service_schema",
              &cpp_mstch_service::has_service_schema},
             {"service:reduced_client?", &cpp_mstch_service::reduced_client},
+            {"service:definition_key", &cpp_mstch_service::definition_key},
         });
 
     const auto all_functions = mstch_service::get_functions();
@@ -862,22 +870,9 @@ class cpp_mstch_service : public mstch_service {
     return annotation ? true : false;
   }
 
-  mstch::node service_schema_name() {
-    const t_const* annotation =
-        service_->find_structured_annotation_or_null(kGenerateRuntimeSchemaUri);
-    if (!annotation) {
-      return "";
-    }
-
-    std::string name;
-    if (auto nameOverride = annotation
-            ? annotation->get_value_from_structured_annotation_or_null("name")
-            : nullptr) {
-      name = nameOverride->get_string();
-    } else {
-      name = fmt::format("schema{}", service_->name());
-    }
-    return name;
+  mstch::node definition_key() {
+    schematizer s(*service_->program()->scope(), sm_, {});
+    return escape_binary_string(s.identify_definition(*service_));
   }
 
  private:
@@ -886,6 +881,7 @@ class cpp_mstch_service : public mstch_service {
   }
 
   std::vector<t_function*> functions_;
+  source_manager& sm_;
 };
 
 class cpp_mstch_interaction : public cpp_mstch_service {
@@ -896,8 +892,9 @@ class cpp_mstch_interaction : public cpp_mstch_service {
       const t_interaction* interaction,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_service* containing_service)
-      : cpp_mstch_service(interaction, ctx, pos, containing_service) {}
+      const t_service* containing_service,
+      source_manager& sm)
+      : cpp_mstch_service(interaction, ctx, pos, sm, containing_service) {}
 };
 
 class cpp_mstch_function : public mstch_function {
@@ -2437,8 +2434,8 @@ void t_mstch_cpp2_generator::generate_program() {
 
 void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_program>(std::ref(source_mgr_));
-  mstch_context_.add<cpp_mstch_service>();
-  mstch_context_.add<cpp_mstch_interaction>();
+  mstch_context_.add<cpp_mstch_service>(std::ref(source_mgr_));
+  mstch_context_.add<cpp_mstch_interaction>(std::ref(source_mgr_));
   mstch_context_.add<cpp_mstch_function>(cpp_context_);
   mstch_context_.add<cpp_mstch_type>(cpp_context_);
   mstch_context_.add<cpp_mstch_typedef>(cpp_context_);
@@ -2558,8 +2555,13 @@ void t_mstch_cpp2_generator::generate_out_of_line_service(
   auto mstch_service =
       make_mstch_service_cached(get_program(), service, mstch_context_);
 
+  mstch::map context = {
+      {"program", cached_program(get_program())},
+      {"service", mstch_service},
+  };
+
   render_to_file(mstch_service, "ServiceAsyncClient.h", name + "AsyncClient.h");
-  render_to_file(mstch_service, "service.cpp", name + ".cpp");
+  render_to_file(context, "service.cpp", name + ".cpp");
   render_to_file(mstch_service, "service.h", name + ".h");
   render_to_file(mstch_service, "service.tcc", name + ".tcc");
   render_to_file(
@@ -2576,6 +2578,7 @@ void t_mstch_cpp2_generator::generate_out_of_line_service(
           service,
           mstch_context_,
           mstch_element_position(),
+          source_mgr_,
           nullptr,
           split_id,
           split_count);

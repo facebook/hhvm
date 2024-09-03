@@ -27,4 +27,4 @@ FOLLY_GNU_DISABLE_WARNING("-Wtrigraphs")
 
 // Schema constant depends on weak symbols to work around legacy include
 // resolution behavior.
-#define FBTHRIFT_HAVE_SCHEMA FOLLY_HAVE_WEAK_SYMBOLS
+#define FBTHRIFT_CAN_POPULATE_SCHEMA_LIST FOLLY_HAVE_WEAK_SYMBOLS

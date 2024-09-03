@@ -333,12 +333,17 @@ class mstch_base : public mstch::object {
     return make_mstch_array(container, context_.service_factory.get(), args...);
   }
 
-  template <typename C>
+  template <typename C, typename... Args>
   mstch::array make_mstch_interactions(
-      const C& container, const t_service* containing_service) {
+      const C& container,
+      const t_service* containing_service,
+      const Args&... args) {
     if (context_.interaction_factory) {
       return make_mstch_array(
-          container, *context_.interaction_factory, containing_service);
+          container,
+          *context_.interaction_factory,
+          args...,
+          containing_service);
     }
     return make_mstch_array(container, *context_.service_factory);
   }
@@ -595,6 +600,7 @@ class mstch_service : public mstch_base {
     return service_->has_annotation("process_in_event_base") ||
         service_->find_structured_annotation_or_null(kCppProcessInEbThreadUri);
   }
+  mstch::node definition_key();
 
   virtual ~mstch_service() = default;
 

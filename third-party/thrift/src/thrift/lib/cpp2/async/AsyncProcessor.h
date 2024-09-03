@@ -150,7 +150,7 @@ class AsyncProcessorFactory {
    * (https://graphql.org/learn/introspection/) and can be used to build a tool
    * like GraphiQL.
    */
-  virtual std::optional<std::vector<schema::SchemaV1>> getServiceMetadataV1() {
+  virtual std::optional<schema::DefinitionsSchema> getServiceSchema() {
     return {};
   }
 #endif

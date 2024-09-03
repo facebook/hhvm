@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{ > Autogen}}
+}}{{#service}}{{ > Autogen}}
 
 #include "{{service:include_prefix}}{{service:name}}.h"
 #include "{{service:include_prefix}}{{service:name}}.tcc"
@@ -25,3 +25,4 @@
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 {{ > service_cpp/handlers_cpp}}
+{{/service}}

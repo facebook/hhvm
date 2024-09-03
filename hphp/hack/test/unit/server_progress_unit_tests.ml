@@ -534,7 +534,6 @@ let env =
       ignore_hh_version = true;
       saved_state_ignore_hhconfig = true;
       paths = [];
-      log_inference_constraints = false;
       max_errors = None;
       mode = ClientEnv.MODE_STATUS;
       no_load = true;

@@ -31,7 +31,6 @@ type options = {
   enable_global_access_check: bool;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
-  log_inference_constraints: bool;
   max_procs: int option;
   no_load: bool;
   prechecked: bool option;
@@ -92,10 +91,6 @@ module Messages = struct
 
   let json = " output errors in json format (arc lint mode)"
 
-  let log_inference_constraints =
-    " (for hh debugging purpose only) log type"
-    ^ " inference constraints into external logger (e.g. Scuba)"
-
   let max_procs = " max numbers of workers"
 
   let no_load = " don't load from a saved state"
@@ -152,7 +147,6 @@ let parse_options () : options =
   let ignore_hh = ref false in
   let saved_state_ignore_hhconfig = ref false in
   let json_mode = ref false in
-  let log_inference_constraints = ref false in
   let max_procs = ref None in
   let no_load = ref false in
   let prechecked = ref None in
@@ -212,9 +206,6 @@ let parse_options () : options =
       );
       ("--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version);
       ("--json", Arg.Set json_mode, Messages.json);
-      ( "--log-inference-constraints",
-        Arg.Set log_inference_constraints,
-        Messages.log_inference_constraints );
       ("--max-procs", Arg.Int set_max_procs, Messages.max_procs);
       ("--no-load", Arg.Set no_load, Messages.no_load);
       ( "--no-prechecked",
@@ -305,7 +296,6 @@ let parse_options () : options =
     ignore_hh_version = !ignore_hh;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     json_mode = !json_mode;
-    log_inference_constraints = !log_inference_constraints;
     max_procs = !max_procs;
     no_load = !no_load;
     prechecked = !prechecked;
@@ -338,7 +328,6 @@ let default_options ~root =
     ignore_hh_version = false;
     saved_state_ignore_hhconfig = false;
     json_mode = false;
-    log_inference_constraints = false;
     max_procs = None;
     no_load = true;
     prechecked = None;
@@ -387,8 +376,6 @@ let ignore_hh_version options = options.ignore_hh_version
 let saved_state_ignore_hhconfig options = options.saved_state_ignore_hhconfig
 
 let json_mode options = options.json_mode
-
-let log_inference_constraints options = options.log_inference_constraints
 
 let max_procs options = options.max_procs
 
@@ -470,7 +457,6 @@ let to_string
       ignore_hh_version;
       saved_state_ignore_hhconfig;
       json_mode;
-      log_inference_constraints;
       max_procs;
       no_load;
       prechecked;
@@ -592,9 +578,6 @@ let to_string
     ", ";
     "json_mode: ";
     string_of_bool json_mode;
-    ", ";
-    "log_inference_constraints: ";
-    string_of_bool log_inference_constraints;
     ", ";
     "maxprocs: ";
     max_procs_str;

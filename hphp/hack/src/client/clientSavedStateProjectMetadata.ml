@@ -34,7 +34,6 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     show_spinner = _;
     gen_saved_ignore_type_errors = _;
     paths = _;
-    log_inference_constraints = _;
     max_errors = _;
     preexisting_warnings = _;
     mode = _;

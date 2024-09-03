@@ -1349,7 +1349,6 @@ let start_server () : unit =
         from = !env.args.from;
         no_load = false;
         watchman_debug_logging = false;
-        log_inference_constraints = false;
         silent = true;
         exit_on_failure = false;
         ignore_hh_version = false;

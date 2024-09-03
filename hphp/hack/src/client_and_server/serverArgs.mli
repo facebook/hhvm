@@ -51,8 +51,6 @@ val saved_state_ignore_hhconfig : options -> bool
 
 val json_mode : options -> bool
 
-val log_inference_constraints : options -> bool
-
 val max_procs : options -> int option
 
 val no_load : options -> bool

@@ -15,7 +15,6 @@ type env = {
   deadline: float option;
   no_load: bool;
   watchman_debug_logging: bool;
-  log_inference_constraints: bool;
   progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;

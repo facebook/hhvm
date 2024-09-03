@@ -26,6 +26,7 @@ let default =
     log_categories = [];
     log_large_fanouts_threshold = None;
     log_init_proc_stack_also_on_absent_from = false;
+    log_inference_constraints = false;
     experiments = [];
     experiments_config_meta = "";
     use_saved_state = false;
@@ -230,7 +231,16 @@ let load_
     int_opt "log_large_fanouts_threshold" config
   in
   let log_init_proc_stack_also_on_absent_from =
-    bool_ "log_init_proc_stack_also_on_absent_from" ~default:false config
+    bool_
+      "log_init_proc_stack_also_on_absent_from"
+      ~default:default.log_init_proc_stack_also_on_absent_from
+      config
+  in
+  let log_inference_constraints =
+    bool_
+      "log_inference_constraints"
+      ~default:default.log_inference_constraints
+      config
   in
   let min_log_level =
     match
@@ -827,6 +837,7 @@ let load_
     log_categories;
     log_large_fanouts_threshold;
     log_init_proc_stack_also_on_absent_from;
+    log_inference_constraints;
     experiments;
     experiments_config_meta;
     use_saved_state;

@@ -12,7 +12,6 @@ type env = {
   from: string;
   no_load: bool;
   watchman_debug_logging: bool;
-  log_inference_constraints: bool;
   silent: bool;
   exit_on_failure: bool;
   ignore_hh_version: bool;

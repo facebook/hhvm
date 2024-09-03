@@ -51,7 +51,6 @@ type env = {
   from: string;
   no_load: bool;
   watchman_debug_logging: bool;
-  log_inference_constraints: bool;
   silent: bool;
   exit_on_failure: bool;
   ignore_hh_version: bool;
@@ -104,7 +103,6 @@ let start_server (env : env) =
     from;
     no_load;
     watchman_debug_logging;
-    log_inference_constraints;
     silent;
     exit_on_failure;
     ignore_hh_version;
@@ -151,10 +149,6 @@ let start_server (env : env) =
           [||]);
         (if watchman_debug_logging then
           [| "--watchman-debug-logging" |]
-        else
-          [||]);
-        (if log_inference_constraints then
-          [| "--log-inference-constraints" |]
         else
           [||]);
         (* If the client starts up a server monitor process, the output of that

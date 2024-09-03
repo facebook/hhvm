@@ -27,7 +27,6 @@ type env = {
   deadline: float option;
   no_load: bool;
   watchman_debug_logging: bool;
-  log_inference_constraints: bool;
   progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;
@@ -245,7 +244,6 @@ let rec connect
        no_load;
        preexisting_warnings;
        watchman_debug_logging;
-       log_inference_constraints;
        progress_callback;
        do_post_handoff_handshake;
        ignore_hh_version;
@@ -407,7 +405,6 @@ let rec connect
               from;
               no_load;
               watchman_debug_logging;
-              log_inference_constraints;
               silent = false;
               exit_on_failure = false;
               ignore_hh_version;

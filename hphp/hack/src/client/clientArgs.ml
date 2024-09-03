@@ -149,7 +149,6 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let save_64bit = ref None in
   let save_human_readable_64bit_dep_map = ref None in
   let saved_state_ignore_hhconfig = ref false in
-  let log_inference_constraints = ref false in
   let max_errors = ref None in
   let mode = ref None in
   let logname = ref false in
@@ -513,10 +512,6 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         Arg.Unit (fun () -> set_mode MODE_LIST_FILES),
         " (mode) list files with errors" );
       ("--lock-file", Arg.Set lock_file, " (mode) show lock file name and exit");
-      ( "--log-inference-constraints",
-        Arg.Set log_inference_constraints,
-        "  (for hh debugging purpose only) log type"
-        ^ " inference constraints into external logger (e.g. Scuba)" );
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
         " Maximum number of errors to display" );
@@ -830,7 +825,6 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     ignore_hh_version = !ignore_hh_version;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     paths;
-    log_inference_constraints = !log_inference_constraints;
     max_errors = !max_errors;
     preexisting_warnings = !preexisting_warnings;
     mode;
@@ -864,7 +858,6 @@ let parse_start_env command ~from_default =
       command
       (String.capitalize command)
   in
-  let log_inference_constraints = ref false in
   let no_load = ref false in
   let watchman_debug_logging = ref false in
   let ignore_hh_version = ref false in
@@ -890,10 +883,6 @@ let parse_start_env command ~from_default =
       Common_argspecs.custom_telemetry_data custom_telemetry_data;
       Common_argspecs.from from;
       Common_argspecs.ignore_hh_version ignore_hh_version;
-      ( "--log-inference-constraints",
-        Arg.Set log_inference_constraints,
-        " (for hh debugging purpose only) log type"
-        ^ " inference constraints into external logger (e.g. Scuba)" );
       ("--no-load", Arg.Set no_load, " start from a fresh state");
       Common_argspecs.no_prechecked prechecked;
       Common_argspecs.prechecked prechecked;
@@ -922,7 +911,6 @@ let parse_start_env command ~from_default =
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     save_64bit = None;
     save_human_readable_64bit_dep_map = None;
-    log_inference_constraints = !log_inference_constraints;
     no_load = !no_load;
     prechecked = !prechecked;
     mini_state = !mini_state;

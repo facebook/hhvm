@@ -103,7 +103,6 @@ let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
     deadline;
     no_load;
     watchman_debug_logging;
-    log_inference_constraints;
     show_spinner;
     ignore_hh_version;
     save_64bit;
@@ -140,7 +139,6 @@ let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
         deadline;
         no_load;
         watchman_debug_logging;
-        log_inference_constraints;
         progress_callback =
           ClientSpinner.report
             ~to_stderr:show_spinner

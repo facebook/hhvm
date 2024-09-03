@@ -83,7 +83,6 @@ type client_check_env = {
   ignore_hh_version: bool;
   saved_state_ignore_hhconfig: bool;
   paths: string list;
-  log_inference_constraints: bool;
   max_errors: int option;
   preexisting_warnings: bool;
       (** Whether to show preexisint warnings in typechecked files *)

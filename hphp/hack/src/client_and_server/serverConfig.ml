@@ -581,7 +581,7 @@ let load ~silent (options : ServerArgs.options) : t * ServerLocalConfig.t =
         ~tco_skip_tast_checks:local_config.ServerLocalConfig.skip_tast_checks
         ~tco_saved_state:local_config.ServerLocalConfig.saved_state
         ~tco_log_inference_constraints:
-          (ServerArgs.log_inference_constraints options)
+          local_config.ServerLocalConfig.log_inference_constraints
         ~tco_global_access_check_enabled:
           (ServerArgs.enable_global_access_check options)
         ~preexisting_warnings:(ServerArgs.preexisting_warnings options)

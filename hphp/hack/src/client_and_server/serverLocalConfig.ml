@@ -109,6 +109,8 @@ type t = {
       (** A few select events like to log the init_proc_stack, but it's voluminous!
       The default behavior is to log init_proc_stack only when "--from" is absent.
       This flag lets us log it also when "--from" is present. *)
+  log_inference_constraints: bool;
+      (** log type inference constraints into HackEventLogger *)
   experiments: string list;
       (** the list of experiments from the experiments config *)
   experiments_config_meta: string;  (** a free-form diagnostic string *)

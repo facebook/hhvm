@@ -183,7 +183,8 @@ namespace HH\Facts {
   function transitive_subtypes<T>(
     classname<T> $base_type,
     ?DeriveFilters $filters = null,
-  )[]: vec<string>;
+    bool $include_interface_require_extends = false,
+   )[]: vec<string>;
 
   /**
    * Get all types which the given type extends, implements, or uses.

@@ -714,8 +714,10 @@ Array HHVM_FUNCTION(
 Array HHVM_FUNCTION(
     facts_transitive_subtypes,
     const String& baseType,
-    const Variant& filters) {
-  return Facts::getFactsOrThrow().getTransitiveDerivedTypes(baseType, filters);
+    const Variant& filters,
+    bool includeInterfaceRequireExtends) {
+  return Facts::getFactsOrThrow().getTransitiveDerivedTypes(
+      baseType, filters, includeInterfaceRequireExtends);
 }
 
 Array HHVM_FUNCTION(

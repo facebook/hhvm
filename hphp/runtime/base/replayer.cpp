@@ -593,11 +593,11 @@ struct Replayer::FactsStore final : public HPHP::FactsStore {
     return wrapper(baseType, filters);
   }
 
-  Array getTransitiveDerivedTypes(const String& baseType, const Variant& filters)
+  Array getTransitiveDerivedTypes(const String& baseType, const Variant& filters, bool includeInterfaceRequireExtends)
       override {
     static constexpr auto m{&HPHP::FactsStore::getTransitiveDerivedTypes};
     static const auto wrapper{wrap(m, "getTransitiveDerivedTypes")};
-    return wrapper(baseType, filters);
+    return wrapper(baseType, filters, includeInterfaceRequireExtends);
   }
 
   Array getFileAttrArgs(const String& file, const String& attr) override {

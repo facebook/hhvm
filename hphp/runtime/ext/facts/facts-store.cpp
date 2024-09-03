@@ -834,9 +834,11 @@ struct FactsStoreImpl final
 
   Array getTransitiveDerivedTypes(
       const String& baseType,
-      const Variant& filters) override {
+      const Variant& filters,
+      bool includeInterfaceRequireExtends) override {
     return filterTransitiveDerivedTypes(
         baseType,
+        includeInterfaceRequireExtends,
         TypeFilterData::createFromShape(
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
@@ -1332,9 +1334,10 @@ struct FactsStoreImpl final
 
   Array filterTransitiveDerivedTypes(
       const String& baseType,
+      bool includeInterfaceRequireExtends,
       const TypeFilterData& filters) {
     auto derivedTypes = m_symbolMap.getTransitiveDerivedTypes(
-        Symbol<SymKind::Type>{*baseType.get()});
+        Symbol<SymKind::Type>{*baseType.get()}, includeInterfaceRequireExtends);
 
     return makeVecOfString(filterByFlags(
         filterByKind(std::move(derivedTypes), filters.m_kindFilters),

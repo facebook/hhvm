@@ -212,7 +212,8 @@ function subtypes(
 function transitive_subtypes(
   /* classname<T> */ string $base_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
-)[]: vec<string>;
+  bool $include_interface_require_extends = false,
+ )[]: vec<string>;
 
 /**
  * Get all types which the given type extends, implements, or uses.

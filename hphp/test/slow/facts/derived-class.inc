@@ -58,8 +58,14 @@ final class FinalClassUsesTRequireClass {
   use TRequireClassFinalCLass;
 }
 
+class SuperClassOfFinalClassB {};
+
 trait TRequireClassFinalClassB {
   require class FinalClassUsesTRequireClassB;
+  require extends SuperClassOfFinalClassB;
+}
+
+interface IRequireClassFinalClassB {
   require extends SuperClassOfFinalClassB;
 }
 

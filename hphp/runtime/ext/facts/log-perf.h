@@ -93,7 +93,10 @@ struct FactsLogger final : public FactsStore,
 
   Array getBaseTypes(const String&, const Variant&) override;
   Array getDerivedTypes(const String&, const Variant&) override;
-  Array getTransitiveDerivedTypes(const String&, const Variant&) override;
+  Array getTransitiveDerivedTypes(
+      const String&,
+      const Variant&,
+      bool includeInterfaceRequireExtends) override;
   Array getTypesWithAttribute(const String&) override;
   Array getTypeAliasesWithAttribute(const String&) override;
   Array getMethodsWithAttribute(const String&) override;

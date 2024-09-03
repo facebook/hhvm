@@ -248,7 +248,7 @@ struct FactsStore : public AutoloadMap {
    * extend the given type.
    */
   virtual Array getTransitiveDerivedTypes(
-      const String& baseType, const Variant& filters) = 0;
+      const String& baseType, const Variant& filters, bool includeInterfaceRequireExtends) = 0;
 
   /**
    * Return all types decorated with the given attribute.

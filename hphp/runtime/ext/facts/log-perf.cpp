@@ -295,9 +295,11 @@ Array FactsLogger::getDerivedTypes(const String& name, const Variant& filter) {
 
 Array FactsLogger::getTransitiveDerivedTypes(
     const String& name,
-    const Variant& filter) {
+    const Variant& filter,
+    bool includeInterfaceRequireExtends) {
   return logPerf(__func__, name.slice(), [&]() {
-    return m_inner->getTransitiveDerivedTypes(name, filter);
+    return m_inner->getTransitiveDerivedTypes(
+        name, filter, includeInterfaceRequireExtends);
   });
 }
 

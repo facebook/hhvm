@@ -106,7 +106,8 @@ TEST(EvalContextTest, parent_scope) {
           EXPECT_EQ(ex.property_name(), "unknown");
           EXPECT_EQ(
               ex.searched_scopes(),
-              std::vector<object>({child_2, child_1, root}));
+              std::vector<object>(
+                  {child_2, child_1, root, ctx.global_scope()}));
           throw;
         }
       },
@@ -209,6 +210,21 @@ TEST(EvalContextTest, native_object_delegator) {
 
   ctx.push_scope(doubler);
   EXPECT_EQ(ctx.lookup_object({"foo"}), "foofoo");
+}
+
+TEST(EvalContextTest, globals) {
+  map globals{{"global", w::i64(1)}};
+  object root;
+
+  eval_context ctx{root, globals};
+  EXPECT_EQ(ctx.lookup_object({"global"}), i64(1));
+
+  object shadowing = w::map({{"global", w::i64(2)}});
+  ctx.push_scope(shadowing);
+  EXPECT_EQ(ctx.lookup_object({"global"}), i64(2));
+
+  ctx.pop_scope();
+  EXPECT_EQ(ctx.lookup_object({"global"}), i64(1));
 }
 
 } // namespace whisker

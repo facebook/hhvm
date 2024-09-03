@@ -174,7 +174,7 @@ class render_engine {
       diagnostics_engine& diags,
       render_options opts)
       : out_(out),
-        eval_context_(root_context),
+        eval_context_(root_context, std::exchange(opts.globals, {})),
         diags_(diags),
         opts_(std::move(opts)) {}
 

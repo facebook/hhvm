@@ -136,6 +136,13 @@ struct render_options {
    * If this is not set, then all partial applications will fail.
    */
   std::shared_ptr<template_resolver> partial_resolver = nullptr;
+
+  /**
+   * A map of identifiers to objects that will be injected as global bindings,
+   * before even the root scope. These names will be available in the search
+   * path for every lookup.
+   */
+  map globals;
 };
 
 /**

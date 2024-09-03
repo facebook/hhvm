@@ -98,10 +98,23 @@ class RenderTest : public testing::Test {
     return {std::unordered_map<std::string, std::string>{std::move(entries)}};
   }
 
+  struct globals_by_name {
+    /**
+     * Mapping of name in the global scope to whisker::object.
+     */
+    map value;
+  };
+
+  static globals_by_name globals(
+      std::initializer_list<std::pair<const std::string, object>> entries) {
+    return {map{std::move(entries)}};
+  }
+
   std::optional<std::string> render(
       const std::string& source,
       const object& root_context,
-      partials_by_path partials = {}) {
+      partials_by_path partials = {},
+      globals_by_name globals = {}) {
     auto& current = last_render_.emplace();
 
     auto src = current.src_manager.add_virtual_file(path_to_file, source);
@@ -128,6 +141,7 @@ class RenderTest : public testing::Test {
       }
       options.partial_resolver = std::move(partial_resolver);
     }
+    options.globals = std::move(globals.value);
 
     std::ostringstream out;
     if (whisker::render(

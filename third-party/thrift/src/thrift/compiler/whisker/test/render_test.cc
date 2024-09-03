@@ -47,7 +47,9 @@ TEST_F(RenderTest, variable_missing_in_scope) {
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
           "Name 'foo' was not found in the current scope. Tried to search through the following scopes:\n"
-          "#0 map (size=0)\n",
+          "#0 map (size=0)\n"
+          "\n"
+          "#1 <global scope> (size=0)\n",
           path_to_file,
           1)));
 }
@@ -179,7 +181,9 @@ TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
           "  | `-[4]\n"
           "  |   |-map (size=1)\n"
           "  |   | `-'value'\n"
-          "  |   |   |-i64(120)\n",
+          "  |   |   |-i64(120)\n"
+          "\n"
+          "#2 <global scope> (size=0)\n",
           path_to_file,
           3)));
 }
@@ -977,6 +981,32 @@ TEST_F(
       " \n"
       "|\n"
       "| A Line\n");
+}
+
+TEST_F(RenderTest, globals) {
+  auto result = render(
+      "{{global}}\n"
+      "{{#array}}\n"
+      "{{.}} — {{global-2}}\n"
+      "{{/array}}\n",
+      w::map({{"array", w::array({w::i64(1), w::i64(2)})}}),
+      partials({}),
+      globals(
+          {{"global", w::string("hello")}, {"global-2", w::string("hello!")}}));
+  EXPECT_EQ(
+      *result,
+      "hello\n"
+      "1 — hello!\n"
+      "2 — hello!\n");
+}
+
+TEST_F(RenderTest, globals_shadowing) {
+  auto result = render(
+      "{{global}}\n",
+      w::map({{"global", w::string("good")}}),
+      partials({}),
+      globals({{"global", w::string("bad")}}));
+  EXPECT_EQ(*result, "good\n");
 }
 
 } // namespace whisker

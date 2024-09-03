@@ -23,9 +23,12 @@
 
 #include <fmt/core.h>
 
+namespace w = whisker::make;
+
 namespace whisker {
 
 namespace {
+
 const object* find_property(const object& o, std::string_view identifier) {
   using result = const object*;
   return o.visit(
@@ -45,6 +48,40 @@ const object* find_property(const object& o, std::string_view identifier) {
         return nullptr;
       });
 }
+
+/**
+ * A class representing the bag of properties at the global scope (even before
+ * the root scope).
+ *
+ * This could be a w::map but for debugging purposes, a native_object with a
+ * custom print_to function is beneficial.
+ */
+class global_scope_object : public native_object {
+ public:
+  explicit global_scope_object(map properties)
+      : properties_(std::move(properties)) {}
+
+  const object* lookup_property(std::string_view identifier) const override {
+    if (auto property = properties_.find(identifier);
+        property != properties_.end()) {
+      return &property->second;
+    }
+    return nullptr;
+  }
+
+  void print_to(tree_printer::scope scope) const override {
+    scope.println("<global scope> (size={})", properties_.size());
+    for (const auto& [key, value] : properties_) {
+      auto element_scope = scope.open_property();
+      element_scope.println("'{}'", key);
+      whisker::print_to(value, element_scope.open_node());
+    }
+  }
+
+ private:
+  map properties_;
+};
+
 } // namespace
 
 const object* eval_context::lexical_scope::lookup_property(
@@ -55,13 +92,17 @@ const object* eval_context::lexical_scope::lookup_property(
   return find_property(this_ref_, identifier);
 }
 
-eval_context::eval_context(const object& root_scope)
-    : stack_({lexical_scope(root_scope)}) {}
+eval_context::eval_context(const object& root_scope, map globals)
+    : global_scope_(
+          w::make_native_object<global_scope_object>(std::move(globals))),
+      stack_({lexical_scope(global_scope_), lexical_scope(root_scope)}) {}
 
 eval_context::~eval_context() noexcept = default;
 
 std::size_t eval_context::stack_depth() const {
-  return stack_.size();
+  // The global scope is always on the stack but should not count towards the
+  // depth (it's at depth 0).
+  return stack_.size() - 1;
 }
 
 void eval_context::push_scope(const object& object) {
@@ -72,6 +113,10 @@ void eval_context::pop_scope() {
   // The root scope cannot be popped.
   assert(stack_depth() > 1);
   stack_.pop_back();
+}
+
+const object& eval_context::global_scope() const {
+  return global_scope_;
 }
 
 void eval_context::bind_local(std::string name, object value) {

@@ -42,13 +42,16 @@ namespace whisker {
  * begins before falling back to parent scopes. See eval_context::lexical_scope
  * for more details.
  *
+ * The bottom of the stack is the "global" scope (where global bindings are
+ * stored) followed by the provided "root" scope.
+ *
  * The eval_context is also responsible for binding local names to objects in
  * the current scope (analogous to local variables in programming languages).
  * See eval_context::bind_local().
  */
 class eval_context {
  public:
-  explicit eval_context(const object& root_scope);
+  explicit eval_context(const object& root_scope, map globals = {});
   /* implicit */ eval_context(object&&) = delete;
   ~eval_context() noexcept;
 
@@ -76,6 +79,12 @@ class eval_context {
    *   - The stack depth is greater than 1.
    */
   void pop_scope();
+
+  /**
+   * Returns the global scope. That is, the bottom-most lexical scope that is
+   * implicitly created before the provided root scope.
+   */
+  const object& global_scope() const;
 
   /**
    * Binds a name to an object. This binding is local to the current scope,
@@ -155,6 +164,8 @@ class eval_context {
     locals_map locals_;
   };
 
+  // The bottom of the stack holding all global bindings.
+  object global_scope_;
   // We're using a deque because we want to maintain reference stability when
   // push_scope() / pop_scope() are called. This is because there may be
   // manaed_object's passed around with references into those scope objects.

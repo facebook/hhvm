@@ -20,6 +20,8 @@
 
 #include <fmt/core.h>
 
+#include <folly/String.h>
+
 namespace {
 
 class WrappedIOBufQueueAppender {

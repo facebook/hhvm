@@ -18,6 +18,148 @@ module Set_relation = struct
     | Subset -> Superset
     | Superset -> Subset
     | r -> r
+
+  (* Derived from Alloy model. See wellformed_set.als *)
+
+  (** Let rel be the relation between the sets A and B.
+    [complement] determines what a safe approximation of
+    !A rel B, given we know A rel B
+   *)
+  let complement = function
+    (* A = B => !A disj B *)
+    | Equal -> Disjoint
+    (* A ⊇ B => !A disj B *)
+    | Superset -> Disjoint
+    (* A disj B => !A ⊇ B *)
+    | Disjoint -> Superset
+    (* Otherwise we cannot assume anything *)
+    | Subset
+    | Unknown ->
+      Unknown
+
+  (** Let rel be the relation between sets A and B.
+    [union] determines what a safe approximation of
+    (L ∪ R) rel A, given we know L rel A and R rel A
+   *)
+  let rec union l r =
+    match (l, r) with
+    | (Equal, rel)
+    | (rel, Equal) -> begin
+      match rel with
+      (* L = A && R ⊆ A => (L ∪ R) = A *)
+      | Equal
+      | Subset ->
+        Equal
+      (* L = A => (L ∪ R) ⊇ A for any R *)
+      | Superset
+      | Disjoint
+      | Unknown ->
+        Superset
+    end
+    | (Subset, rel)
+    | (rel, Subset) -> begin
+      match rel with
+      (* (L ∪ R) = (R ∪ L) so it is ok to flip query *)
+      | Equal -> union r l
+      (* L ⊆ A && R ⊆ A => (L ∪ R) ⊆ A *)
+      | Subset -> Subset
+      (* L ⊆ A && R ⊇ A => (L ∪ R) ⊇ A *)
+      | Superset -> Superset
+      (* Otherwise we cannot assume anything *)
+      | Disjoint
+      | Unknown ->
+        Unknown
+    end
+    | (Superset, rel)
+    | (rel, Superset) -> begin
+      match rel with
+      (* (L ∪ R) = (R ∪ L) so it is ok to flip query *)
+      | Equal
+      | Subset ->
+        union r l
+      (* L ⊇ A => (L ∪ R) ⊇ A for any R *)
+      | Superset
+      | Disjoint
+      | Unknown ->
+        Superset
+    end
+    | (Disjoint, rel)
+    | (rel, Disjoint) -> begin
+      match rel with
+      (* (L ∪ R) = (R ∪ L) so it is ok to flip query *)
+      | Equal
+      | Subset
+      | Superset ->
+        union r l
+      (* L disj A && R disj A => (L ∪ R) disj A *)
+      | Disjoint -> Disjoint
+      (* Otherwise we cannot assume anything *)
+      | Unknown -> Unknown
+    end
+    (* Otherwise we cannot assume anything *)
+    | (Unknown, Unknown) -> Unknown
+
+  (** Let rel be the relation between sets A and B.
+    [inter] determines what a safe approximation of
+    (L ∩ R) rel A, given we know L rel A and R rel A
+   *)
+  let rec inter l r =
+    match (l, r) with
+    | (Equal, rel)
+    | (rel, Equal) -> begin
+      match rel with
+      (* L = A && R ⊇ A => (L ∩ R) = A *)
+      | Equal
+      | Superset ->
+        Equal
+      (* L = A && R disj A => (L ∩ R) disj A *)
+      | Disjoint -> Disjoint
+      (* L = A => (L ∩ R) ⊆ A for any R *)
+      | Subset
+      | Unknown ->
+        Subset
+    end
+    | (Subset, rel)
+    | (rel, Subset) -> begin
+      match rel with
+      (* (L ∩ R) = (R ∩ L) so it is ok to flip query *)
+      | Equal -> inter r l
+      (* L ⊆ A && R disj A => (L ∩ R) disj A *)
+      | Disjoint -> Disjoint
+      (* L ⊆ A => (L ∩ R) ⊆ A for any R *)
+      | Subset
+      | Superset
+      | Unknown ->
+        Subset
+    end
+    | (Superset, rel)
+    | (rel, Superset) -> begin
+      match rel with
+      (* (L ∩ R) = (R ∩ L) so it is ok to flip query *)
+      | Equal
+      | Subset ->
+        inter r l
+      (* L ⊇ A && R ⊇ A => (L ∩ R) ⊇ A *)
+      | Superset -> Superset
+      (* L ⊇ A && R disj A => (L ∩ R) disj A *)
+      | Disjoint -> Disjoint
+      (* Otherwise we cannot assume anything *)
+      | Unknown -> Unknown
+    end
+    | (Disjoint, rel)
+    | (rel, Disjoint) -> begin
+      match rel with
+      (* (L ∩ R) = (R ∩ L) so it is ok to flip query *)
+      | Equal
+      | Subset
+      | Superset ->
+        inter r l
+      (* L disj A => (L ∩ R) disj A for any R *)
+      | Disjoint -> Disjoint
+      | Unknown -> Disjoint
+    end
+    (* Otherwise we cannot assume anything *)
+    | (Unknown, Unknown) -> Unknown
 end
 
 module type DomainType = sig
@@ -56,6 +198,8 @@ module type S = sig
   val disjoint : Domain.ctx -> t -> t -> disjoint
 
   val are_disjoint : Domain.ctx -> t -> t -> bool
+
+  val relate : Domain.ctx -> t -> t -> Set_relation.t
 end
 
 module Make (Domain : DomainType) : S with module Domain := Domain = struct
@@ -69,6 +213,21 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
 
   (* Sets over [Domain.t]; representation is in NNF by construction *)
   module Impl = struct
+    (* Represents an individual atom in our abstract domain. [elt] is the particular element in
+       the domain that is uniquely indentified by [Domain.t]. [comp] indicates whether it is the
+       complement of the [Domain.t]. i.e.
+
+         {
+           comp = false;
+           elt = [A]
+         }
+       Means all elements represented by A, while:
+         {
+           comp = true;
+           elt = [A]
+         }
+       Means all elements not represented by A
+    *)
     type atom = {
       comp: bool;
       elt: Domain.t;
@@ -81,40 +240,30 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
 
     let singleton elt = Set { comp = false; elt }
 
+    let rec relate ctx set1 set2 =
+      match (set1, set2) with
+      | (Set { comp = false; elt = elt1 }, Set { comp = false; elt = elt2 }) ->
+        Domain.relation ~ctx elt1 elt2
+      | (Union (left, right), set) ->
+        Set_relation.union (relate ctx left set) (relate ctx right set)
+      | (Inter (left, right), set) ->
+        Set_relation.inter (relate ctx left set) (relate ctx right set)
+      | (Set { comp = true; elt }, set) ->
+        Set_relation.complement (relate ctx (singleton elt) set)
+      | ( Set { comp = false; elt },
+          ((Union _ | Inter _ | Set { comp = true; elt = _ }) as set) ) ->
+        Set_relation.flip (relate ctx set (singleton elt))
+
     let flip_unsat = function
       | Sat -> Sat
       | Unsat { left; relation; right } ->
         Unsat
           { left = right; relation = Set_relation.flip relation; right = left }
 
-    let rec disjoint_atom atom1 atom2 ~ctx =
-      match (atom1, atom2) with
-      | ({ comp = false; elt = elt1 }, { comp = false; elt = elt2 }) ->
-        Set_relation.(
-          (match Domain.relation ~ctx elt1 elt2 with
-          | Disjoint -> Sat
-          | (Equal | Subset | Superset | Unknown) as relation ->
-            Unsat { left = elt1; relation; right = elt2 }))
-      | ({ comp = false; elt = elt1 }, { comp = true; elt = elt2 }) ->
-        Set_relation.(
-          (* (A disj !B) if A ⊆ B *)
-          (match Domain.relation ~ctx elt1 elt2 with
-          | Equal
-          | Subset ->
-            Sat
-          | (Superset | Unknown | Disjoint) as relation ->
-            Unsat { left = elt1; relation; right = elt2 }))
-      | ({ comp = true; elt = elt1 }, { comp = true; elt = elt2 }) ->
-        (* Approximation:
-
-           (!A disj !B) iff (A ∪ B) = U && A = !B
-             where U := Universal Set (Set Containing All Elements in the Domain)
-
-           There is no way in our model to determine if (A ∪ B) = U holds
-           so we are forced to approximate the result. The safest approximation
-           is to assume the sets are not disjoint *)
-        Unsat { left = elt1; relation = Set_relation.Unknown; right = elt2 }
-      | _ -> disjoint_atom atom2 atom1 ~ctx |> flip_unsat
+    let disjoint_atom atom1 atom2 ~ctx =
+      match relate ctx (Set atom1) (Set atom2) with
+      | Set_relation.Disjoint -> Sat
+      | relation -> Unsat { left = atom1.elt; relation; right = atom2.elt }
 
     let rec disjoint ctx set1 set2 =
       match (set1, set2) with
@@ -193,4 +342,12 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
     match disjoint ctx set1 set2 with
     | Sat -> true
     | Unsat _ -> false
+
+  let relate ctx set1 set2 =
+    match (set1, set2) with
+    | (None, None) -> Set_relation.Equal
+    | (None, Some _)
+    | (Some _, None) ->
+      Set_relation.Disjoint
+    | (Some set1, Some set2) -> relate ctx set1 set2
 end

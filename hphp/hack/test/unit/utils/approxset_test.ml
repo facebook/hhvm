@@ -11,7 +11,8 @@ open OUnit2
 
 let char_set =
   Char.Set.quickcheck_generator
-  @@ Quickcheck.Generator.of_list ['A'; 'B'; 'C'; 'D'; 'E'; 'F']
+  @@ Quickcheck.Generator.of_list
+       ['A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'; 'I'; 'J']
 
 let non_empty_char_set =
   Quickcheck.Generator.filter char_set ~f:(fun s -> not @@ Set.is_empty s)
@@ -51,7 +52,9 @@ module ASet = struct
     op: op;
     expected: Char.Set.t;
   }
-  [@@deriving sexp_of]
+
+  let sexp_of_t { set = _; op; expected } =
+    [%sexp_of: op * Char.Set.t] (op, expected)
 
   let empty = { set = Impl.empty; op = Empty; expected = Char.Set.empty }
 
@@ -87,6 +90,8 @@ module ASet = struct
   let disjoint l r = Impl.disjoint () l.set r.set
 
   let are_disjoint l r = Impl.are_disjoint () l.set r.set
+
+  let relate l r = Impl.relate () l.set r.set
 
   let non_empty gen =
     Quickcheck.Generator.filter gen ~f:(fun set ->
@@ -223,12 +228,44 @@ let test_unknown _ =
   assert_unsat "Cannot determine if abcd is disjoint from def" abcd def;
   assert_unsat "Cannot determine if def is disjoint from abcd" def abcd
 
-let test_quick _ =
+let test_quick_disjoint _ =
   let f (set1, set2) =
     let expected = Set.are_disjoint set1.ASet.expected set2.ASet.expected in
     if ASet.are_disjoint set1 set2 && not expected then
       assert_failure
         "ApproxSet concluded disjoint when the underlying sets are not disjoint"
+  in
+
+  Quickcheck.test
+    ~trials:10000
+    ~sexp_of:[%sexp_of: ASet.t * ASet.t]
+    ~f
+    Quickcheck.Generator.(tuple2 ASet.gen ASet.gen)
+
+let test_quick_relate _ =
+  let f (set1, set2) =
+    let fail s =
+      assert_failure
+      @@ Printf.sprintf
+           "ApproxSet concluded %s when the underlying sets are not %s"
+           s
+           s
+    in
+    let open ApproxSet.Set_relation in
+    match ASet.relate set1 set2 with
+    | Equal ->
+      if not @@ Set.equal set1.ASet.expected set2.ASet.expected then
+        fail "equal"
+    | Subset ->
+      if not @@ Set.is_subset set1.ASet.expected ~of_:set2.ASet.expected then
+        fail "subset"
+    | Superset ->
+      if not @@ Set.is_subset set2.ASet.expected ~of_:set1.ASet.expected then
+        fail "superset"
+    | Disjoint ->
+      if not @@ Set.are_disjoint set1.ASet.expected set2.ASet.expected then
+        fail "disjoint"
+    | Unknown -> ()
   in
 
   Quickcheck.test
@@ -246,6 +283,7 @@ let () =
          "test_complex" >:: test_complex;
          "test_unknown" >:: test_unknown;
          "test_origin_reporting" >:: test_origin_reporting;
-         "test_quick" >:: test_quick;
+         "test_quick_disjoint" >:: test_quick_disjoint;
+         "test_quick_relate" >:: test_quick_relate;
        ]
   |> run_test_tt_main

@@ -79,6 +79,8 @@ module type S = sig
   val disjoint : Domain.ctx -> t -> t -> disjoint
 
   val are_disjoint : Domain.ctx -> t -> t -> bool
+
+  val relate : Domain.ctx -> t -> t -> Set_relation.t
 end
 
 (** Constructs an approximate set representation over the given [Domain] *)

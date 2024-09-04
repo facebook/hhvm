@@ -1558,3 +1558,31 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertNotEqual(
             s.unqualified_map_string_i32, s_clone.unqualified_map_string_i32
         )
+
+    def test_call_reset_field_to_standard_default(self) -> None:
+        s1 = TestStructCopyMutable(
+            unqualified_i32=2,
+            optional_i32=3,
+            unqualified_string="thrift",
+            optional_string="python",
+            unqualified_list_i32=[1, 2, 3],
+            unqualified_set_string={"1", "2", "3"},
+            unqualified_map_string_i32={"a": 1, "b": 2, "c": 3},
+        )
+
+        # Assigning `None` to a field is resetting the field to its standard
+        # default value
+        s2 = s1(
+            unqualified_i32=None,
+            optional_string=None,
+            unqualified_set_string=None,
+            unqualified_map_string_i32={"d": 4},
+        )
+
+        self.assertEqual(0, s2.unqualified_i32)
+        self.assertEqual(3, s2.optional_i32)
+        self.assertEqual("thrift", s2.unqualified_string)
+        self.assertIsNone(s2.optional_string)
+        self.assertEqual([1, 2, 3], s2.unqualified_list_i32)
+        self.assertEqual(set(), s2.unqualified_set_string)
+        self.assertEqual({"d": 4}, s2.unqualified_map_string_i32)

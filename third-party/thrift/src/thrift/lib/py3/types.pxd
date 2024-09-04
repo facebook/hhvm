@@ -234,6 +234,7 @@ cdef extern from "thrift/lib/cpp2/FieldRef.h" namespace "apache::thrift" nogil:
         void assign "operator="(T)
         T value()
         T value_unchecked()
+        T value_or(T)
         # Cython doesn't handle references very well, so use a different name
         # for value in the contexts where references actually work.
         T& ref "value" ()

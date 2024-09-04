@@ -902,8 +902,23 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
             return False
 
         cdef AdaptedTypeInfo other_typeinfo = other
-        # DO_BEFORE(alperyoney,20240603): Figure out whether `_transitive_annotation_factory`
-        # should be part of the comparison below.
+
+        # TypeInfoBase::same_as specifies the semantics of same_as as follows:
+        #   `same_as()` returns `True` if the `TypeInfo` class maps the same IDL Thrift
+        #   type to the same Python type.
+        #
+        # Adapter is defined as follows:
+        #   class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
+        #       @classmethod
+        #       def from_thrift(...) -> TAdaptTo: ...
+        #       @classmethod
+        #       def to_thrift(...) -> TAdaptFrom: ...
+        #
+        # As you can see the types from_thrift and to_thrift are purely
+        # dependent of the TAdaptFrom (the thrift Type) and the TAdaptTo (the python type)
+        # The transitive annotation has no part in the type calculus and should not
+        # appear in the comparison.
+        # 
         return (self._orig_type_info.same_as(other_typeinfo._orig_type_info) and
             self._adapter_info == other_typeinfo._adapter_info)
 

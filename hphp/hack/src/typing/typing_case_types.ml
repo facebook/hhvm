@@ -711,7 +711,7 @@ let check_overlapping env ~pos ~name (ty1, data_type1) (ty2, data_type2) =
   match Set.disjoint env data_type1 data_type2 with
   | Set.Sat -> None
   | Set.Unsat { left; relation; right } ->
-    let rec why
+    let why
         ((ty1, { TagWithReason.tag = tag1; _ }) as left)
         relation
         ((ty2, { TagWithReason.tag = tag2; _ }) as right) =
@@ -739,7 +739,9 @@ let check_overlapping env ~pos ~name (ty1, data_type1) (ty2, data_type2) =
       in
       let open ApproxSet.Set_relation in
       match relation with
-      | Superset -> why right Subset left
+      | Superset ->
+        primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")
+        @ secondary_why ~f:(Printf.sprintf "Because %s contains %s")
       | Equal ->
         primary_why
           ~f:(Printf.sprintf "It overlaps with `%s`, which also includes ")

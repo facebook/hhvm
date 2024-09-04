@@ -101,85 +101,33 @@ The source code for this program can be found under `fizz/tool`.
 
 ## Building
 
-### Ubuntu 16.04 LTS
+### getdeps.py
 
-To begin, you should install the dependencies we need for build. This largely
-consists of [folly](https://github.com/facebook/folly)'s dependencies, as well as
-[libsodium](https://github.com/jedisct1/libsodium).
+getdeps.py is a script that many fbcode OSS projects use which will
+automatically download dependencies for a project and build the project. This is
+what CI uses as its main entry point.
 
-```sh
-sudo apt-get install \
-    g++ \
-    cmake \
-    libboost-all-dev \
-    libevent-dev \
-    libdouble-conversion-dev \
-    libgoogle-glog-dev \
-    libgflags-dev \
-    libiberty-dev \
-    liblz4-dev \
-    liblzma-dev \
-    libsnappy-dev \
-    make \
-    zlib1g-dev \
-    binutils-dev \
-    libjemalloc-dev \
-    libssl-dev \
-    pkg-config \
-    libsodium-dev
+```
+python3 build/fbcode_builder/getdeps.py --allow-system-packages build
 ```
 
-Then, build and install folly:
+### Manually
+Fizz is a typical CMake project. In order to build Fizz, you must configure
+CMake such that Fizz's dependencies can be found (e.g. using the [`CMAKE_PREFIX_PATH`](https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html) variable)
 
-```sh
-git clone https://github.com/facebook/folly
-mkdir folly/build_ && cd folly/build_
-cmake ..
-make -j $(nproc)
-sudo make install
+For example:
+
 ```
+cmake \
+    -GNinja
+    -DCMAKE_PREFIX_PATH=/path/to/prefix \
+    -DCMAKE_INSTALL_PREFIX=/path/to/prefix \
+    -B/build/fizz \
+    /path/to/checkout/fizz
 
-And lastly, build and install fizz.
-
-```sh
-cd ../..
-git clone https://github.com/facebookincubator/fizz
-mkdir fizz/build_ && cd fizz/build_
-cmake ../fizz
-make -j $(nproc)
-sudo make install
+cmake --build /path/to/checkout/fizz
+cmake --install /atph/to/checkout/fizz
 ```
-
-### Building on Mac
-
-The following instructions were tested on MacOS High Sierra
-with Xcode 9.4.1. They should work with later Xcode versions as well.
-
-Run the helper script from within the `fizz` subdirectory. The helper
-script assumes that you have homebrew installed and are using homebrew
-as your package manager. To install homebrew use the instructions on
-the homebrew [website](https://brew.sh/).
-
-It will install and link the required dependencies and also build folly.
-This may take several minutes the first time.
-
-```sh
-cd fizz
-./mac-build.sh
-```
-
-After building, the directory `out/` will contain the libraries as well as
-`out/bin` will contain the `ClientSocket` and `ServerSocket` binaries.
-Running it again will be faster and only rebuild `fizz`.
-
-You can also install both `fizz` as well as `folly` to a custom directory
-using the build script, by supplying an `INSTALL_PREFIX` env var.
-
-```sh
-INSTALL_PREFIX=/usr/local ./mac-build.sh
-```
-
-You might need to run the script as root to install to certain directories.
 
 ## Contributing
 

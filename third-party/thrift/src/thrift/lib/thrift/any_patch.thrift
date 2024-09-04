@@ -35,7 +35,11 @@ namespace py.asyncio apache_thrift_asyncio.any_patch
 namespace go thrift.lib.thrift.any_patch
 namespace py thrift.lib.thrift.any_patch
 
-/** A patch for Thrift Any. */
+/**
+ * A patch for Thrift Any.
+ *
+ * Warning: Do not use in Thrift IDL directly, use 'AnySafePatch' instead.
+ */
 @cpp.Adapter{
   underlyingName = "AnyPatchStruct",
   name = "::apache::thrift::op::detail::AnyPatchAdapter<::apache::thrift::op::AnyPatchStruct>",
@@ -75,4 +79,12 @@ struct AnyPatch {
   @cpp.Adapter{name = "::apache::thrift::op::detail::TypeToPatchMapAdapter"}
   @python.Py3Hidden
   12: list<any_patch_detail.TypeToPatchInternalDoNotUse> patchIfTypeIsAfter;
+}
+
+/** SafePatch for Thrift Any */
+struct AnySafePatch {
+  1: i32 version (hs.hidden);
+
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  2: binary data (hs.hidden);
 }

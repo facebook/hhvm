@@ -37,6 +37,8 @@ class AnyPatch;
 
 class AnyPatchStruct;
 class TypeToPatchInternalDoNotUse;
+class AnyPatchStruct;
+class AnySafePatch;
 
 class TypeErasedPatches {
  public:
@@ -422,6 +424,28 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       vec.insert(vec.end(), patches.begin(), patches.end());
     }
   }
+};
+
+template <class T>
+struct PatchType;
+template <class T>
+struct SafePatchType;
+template <class T>
+struct SafePatchValueType;
+
+template <>
+struct PatchType<type::struct_t<::apache::thrift::type::AnyStruct>> {
+  using type = AnyPatch<::apache::thrift::op::AnyPatchStruct>;
+};
+
+template <>
+struct SafePatchType<type::struct_t<::apache::thrift::type::AnyStruct>> {
+  using type = ::apache::thrift::op::AnySafePatch;
+};
+
+template <>
+struct SafePatchValueType<::apache::thrift::op::AnySafePatch> {
+  using type = ::apache::thrift::type::AnyStruct;
 };
 
 } // namespace detail

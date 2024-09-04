@@ -184,29 +184,49 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
 
   void apply(type::AnyStruct& val) const {
-    auto applyTypePatches = [&](const std::vector<type::AnyStruct>* prior,
-                                const std::vector<type::AnyStruct>* after) {
-      if (!prior && !after) {
-        return;
-      }
+    auto applyTypePatches =
+        [&](const TypeToPatchMapAdapter::AdaptedType* prior,
+            const TypeToPatchMapAdapter::AdaptedType* after) {
+          std::optional<protocol::Value> dynVal;
 
-      auto dynVal = protocol::detail::parseValueFromAny(val);
-      if (prior) {
-        for (const auto& p : *prior) {
-          auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-          protocol::applyPatch(dynPatch, dynVal);
-        }
-      }
-      if (after) {
-        for (const auto& p : *after) {
-          auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-          protocol::applyPatch(dynPatch, dynVal);
-        }
-      }
-      val = protocol::detail::toAny(
-                dynVal, val.type().value(), val.protocol().value())
-                .toThrift();
-    };
+          // To support applying AnyPatch to Thrift Any storing type with
+          // 'typeHashPrefixSha2_256', we need to iterate the whole map.
+          if (prior) {
+            for (const auto& [type, patches] : *prior) {
+              if (type::identicalType(type, val.type().value())) {
+                dynVal = protocol::detail::parseValueFromAny(val);
+                for (const auto& p : patches) {
+                  auto dynPatch =
+                      protocol::detail::parseValueFromAny(p).as_object();
+                  protocol::applyPatch(dynPatch, dynVal.value());
+                }
+                break;
+              }
+            }
+          }
+          if (after) {
+            for (const auto& [type, patches] : *after) {
+              if (type::identicalType(type, val.type().value())) {
+                if (!dynVal) {
+                  dynVal = protocol::detail::parseValueFromAny(val);
+                }
+                for (const auto& p : patches) {
+                  auto dynPatch =
+                      protocol::detail::parseValueFromAny(p).as_object();
+                  protocol::applyPatch(dynPatch, dynVal.value());
+                }
+                break;
+              }
+            }
+          }
+
+          if (dynVal.has_value()) {
+            val =
+                protocol::detail::toAny(
+                    dynVal.value(), val.type().value(), val.protocol().value())
+                    .toThrift();
+          }
+        };
 
     if (hasAssign()) {
       val = data_.assign().value();
@@ -222,17 +242,12 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
         !type::identicalType(
             data_.ensureAny()->type().value(), val.type().value())) {
       val = data_.ensureAny().value();
-      const auto* afterTypePatches = folly::get_ptr(
-          data_.patchIfTypeIsAfter().value(), val.type().value());
-      applyTypePatches(nullptr, afterTypePatches);
+      applyTypePatches(nullptr, &data_.patchIfTypeIsAfter().value());
       return;
     }
-
-    const auto* priorTypePatches =
-        folly::get_ptr(data_.patchIfTypeIsPrior().value(), val.type().value());
-    const auto* afterTypePatches =
-        folly::get_ptr(data_.patchIfTypeIsAfter().value(), val.type().value());
-    applyTypePatches(priorTypePatches, afterTypePatches);
+    applyTypePatches(
+        &data_.patchIfTypeIsPrior().value(),
+        &data_.patchIfTypeIsAfter().value());
   }
 
   void ensureAny(type::AnyStruct ensureAny) {

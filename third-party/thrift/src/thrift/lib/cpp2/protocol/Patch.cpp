@@ -526,34 +526,60 @@ void impl(Patch&& patch, Object& value) {
     throw std::runtime_error("Failed to convert current object to AnyStruct");
   }
 
-  auto applyTypePatch = [&](const auto& typePatchList) {
-    for (const auto& typePatchVal : typePatchList.as_list()) {
-      op::TypeToPatchInternalDoNotUse type_to_patch;
-      if (!ProtocolValueToThriftValue<
-              type::struct_t<op::TypeToPatchInternalDoNotUse>>{}(
-              typePatchVal, type_to_patch)) {
-        throw std::runtime_error("Invalid AnyPatch PatchIfTypeIsPrior/After");
-      }
-      if (type::identicalType(
-              type_to_patch.type().value(), anyStruct.type().value())) {
-        auto val = protocol::detail::parseValueFromAny(anyStruct);
-        for (const auto& p : type_to_patch.patches().value()) {
-          auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-          ApplyPatch{}(dynPatch, val);
+  auto applyTypePatch = [&](const Value* typePatchListPrior,
+                            const Value* typePatchListAfter) {
+    std::optional<protocol::Value> val;
+
+    if (typePatchListPrior) {
+      for (const auto& typePatchVal : typePatchListPrior->as_list()) {
+        op::TypeToPatchInternalDoNotUse type_to_patch;
+        if (!ProtocolValueToThriftValue<
+                type::struct_t<op::TypeToPatchInternalDoNotUse>>{}(
+                typePatchVal, type_to_patch)) {
+          throw std::runtime_error("Invalid AnyPatch PatchIfTypeIsPrior");
         }
-        anyStruct =
-            protocol::detail::toAny(
-                val, anyStruct.type().value(), anyStruct.protocol().value())
-                .toThrift();
-        break;
+        if (type::identicalType(
+                type_to_patch.type().value(), anyStruct.type().value())) {
+          val = protocol::detail::parseValueFromAny(anyStruct);
+          for (const auto& p : type_to_patch.patches().value()) {
+            auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
+            ApplyPatch{}(dynPatch, val.value());
+          }
+          break;
+        }
       }
     }
-    return;
-  };
 
-  if (typePatchPriorVal) {
-    applyTypePatch(*typePatchPriorVal);
-  }
+    if (typePatchListAfter) {
+      for (const auto& typePatchVal : typePatchListAfter->as_list()) {
+        op::TypeToPatchInternalDoNotUse type_to_patch;
+        if (!ProtocolValueToThriftValue<
+                type::struct_t<op::TypeToPatchInternalDoNotUse>>{}(
+                typePatchVal, type_to_patch)) {
+          throw std::runtime_error("Invalid AnyPatch PatchIfTypeIsAfter");
+        }
+        if (type::identicalType(
+                type_to_patch.type().value(), anyStruct.type().value())) {
+          if (!val) {
+            val = protocol::detail::parseValueFromAny(anyStruct);
+          }
+          for (const auto& p : type_to_patch.patches().value()) {
+            auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
+            ApplyPatch{}(dynPatch, val.value());
+          }
+          break;
+        }
+      }
+    }
+
+    if (val) {
+      anyStruct = protocol::detail::toAny(
+                      val.value(),
+                      anyStruct.type().value(),
+                      anyStruct.protocol().value())
+                      .toThrift();
+    }
+  };
 
   if (ensureAnyVal) {
     type::AnyStruct ensureAny;
@@ -561,16 +587,19 @@ void impl(Patch&& patch, Object& value) {
             *ensureAnyVal, ensureAny)) {
       throw std::runtime_error("Invalid AnyPatch ensureAny");
     }
+    // If 'ensureAny' type does not match the type of stored value in Thrift
+    // Any, we can ignore 'patchIfTypeIsPrior'.
     if (!type::identicalType(
             ensureAny.type().value(), anyStruct.type().value())) {
       anyStruct = std::move(ensureAny);
+      applyTypePatch(nullptr, typePatchAfterVal);
+      value =
+          asValueStruct<type::struct_t<type::AnyStruct>>(anyStruct).as_object();
+      return;
     }
   }
 
-  if (typePatchAfterVal) {
-    applyTypePatch(*typePatchAfterVal);
-  }
-
+  applyTypePatch(typePatchPriorVal, typePatchAfterVal);
   value = asValueStruct<type::struct_t<type::AnyStruct>>(anyStruct).as_object();
 }
 

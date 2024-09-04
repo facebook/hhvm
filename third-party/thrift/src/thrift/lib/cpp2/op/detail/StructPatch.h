@@ -150,7 +150,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
  private:
   template <typename Id>
   void removeImpl() {
-    tryPatchable<Id>();
+    ensurePatchable();
     Base::toThrift().remove()->insert(op::get_field_id_v<T, Id>);
   }
 
@@ -263,7 +263,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     if (!type::is_optional_or_union_field_v<T, Id>) {
       return patch<Id>();
     }
-    tryPatchable<Id>();
+    ensurePatchable();
     if constexpr (!is_thrift_union_v<T>) {
       if (Base::derived().template isRemoved<Id>()) {
         // If field is already cleared, Patch should be ignored.
@@ -413,35 +413,29 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   template <typename Id>
   decltype(auto) patchPrior() {
-    return (tryPatchable<Id>(), getRawPatch<Id>(data_.patchPrior()));
+    return (ensurePatchable(), getRawPatch<Id>(data_.patchPrior()));
   }
 
   template <typename Id>
   decltype(auto) patchAfter() {
-    return (tryPatchable<Id>(), getRawPatch<Id>(data_.patch()));
+    return (ensurePatchable(), getRawPatch<Id>(data_.patch()));
   }
 
-  // For Thrift Union, we ensure the patch is patchable if the specified field
-  // in union is assigned.
-  template <typename Id, typename U = T>
-  if_union_patch<U> tryPatchable() {
+  // If Assign operation exists, we need to replace it with Ensure + Patch
+  // operation so that we can have sub-patches.
+  template <typename U = T>
+  if_union_patch<U> ensurePatchable() {
     if (data_.assign().has_value()) {
-      auto&& field = op::get<Id>(*data_.assign());
-      // If the assigned field is absent, subsequent patch operations should be
-      // ignored.
-      if (isAbsent(field)) {
-        return;
-      }
       data_.clear() = true;
-      op::get<Id>(*data_.ensure()) = std::move(*op::get<Id>(*data_.assign()));
+      *data_.ensure() = std::move(*data_.assign());
       // Unset assign.
       data_.assign().reset();
     }
   }
 
   // For Thrift Struct, we always ensure the patch is patchable.
-  template <typename Id, typename U = T>
-  if_not_union_patch<U> tryPatchable() {
+  template <typename U = T>
+  if_not_union_patch<U> ensurePatchable() {
     if (data_.assign().has_value()) {
       for_each_field_id<T>([&](auto id) {
         using FId = decltype(id);

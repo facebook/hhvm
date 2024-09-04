@@ -29,19 +29,16 @@ function diff<Tv1 as arraykey, Tv2 as arraykey>(
   Traversable<Tv2> $second,
   Container<Tv2> ...$rest
 )[]: vec<Tv1> {
+  /* HH_FIXME[12006] Silence sketchy null check */
   if (!$first) {
     return vec[];
   }
+  /* HH_FIXME[12006] Silence sketchy null check */
   if (!$second && !$rest) {
     return cast_clear_legacy_array_mark($first);
   }
-  $union = !$rest
-    ? keyset($second)
-    : Keyset\union($second, ...$rest);
-  return filter(
-    $first,
-    ($value) ==> !C\contains_key($union, $value),
-  );
+  $union = !$rest ? keyset($second) : Keyset\union($second, ...$rest);
+  return filter($first, ($value) ==> !C\contains_key($union, $value));
 }
 
 /**
@@ -61,17 +58,17 @@ function diff_by<Tv, Ts as arraykey>(
   Traversable<Tv> $second,
   (function(Tv)[_]: Ts) $scalar_func,
 )[ctx $scalar_func]: vec<Tv> {
+  /* HH_FIXME[12006] Silence sketchy null check */
   if (!$first) {
     return vec[];
   }
+  /* HH_FIXME[12006] Silence sketchy null check */
   if (!$second) {
     return cast_clear_legacy_array_mark($first);
   }
   $set = Keyset\map($second, $scalar_func);
-  return filter(
-    $first,
-    ($value) ==> !C\contains_key($set, $scalar_func($value)),
-  );
+  return
+    filter($first, ($value) ==> !C\contains_key($set, $scalar_func($value)));
 }
 
 /**
@@ -83,10 +80,7 @@ function diff_by<Tv, Ts as arraykey>(
  * Time complexity: O(n), where n is the size of `$traversable`
  * Space complexity: O(n), where n is the size of `$traversable`
  */
-function drop<Tv>(
-  Traversable<Tv> $traversable,
-  int $n,
-)[]: vec<Tv> {
+function drop<Tv>(Traversable<Tv> $traversable, int $n)[]: vec<Tv> {
   invariant($n >= 0, 'Expected non-negative N, got %d.', $n);
   $result = vec[];
   $ii = -1;
@@ -132,9 +126,7 @@ function filter<Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
-function filter_nulls<Tv>(
-  Traversable<?Tv> $traversable,
-)[]: vec<Tv> {
+function filter_nulls<Tv>(Traversable<?Tv> $traversable)[]: vec<Tv> {
   $result = vec[];
   foreach ($traversable as $value) {
     if ($value !== null) {
@@ -186,10 +178,7 @@ function intersect<Tv as arraykey>(
   if (!$intersection) {
     return vec[];
   }
-  return filter(
-    $first,
-    ($value) ==> C\contains_key($intersection, $value),
-  );
+  return filter($first, ($value) ==> C\contains_key($intersection, $value));
 }
 
 /**
@@ -198,9 +187,7 @@ function intersect<Tv as arraykey>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
-function keys<Tk, Tv>(
-  KeyedTraversable<Tk, Tv> $traversable,
-)[]: vec<Tk> {
+function keys<Tk, Tv>(KeyedTraversable<Tk, Tv> $traversable)[]: vec<Tk> {
   $result = vec[];
   foreach ($traversable as $key => $_) {
     $result[] = $key;
@@ -217,10 +204,7 @@ function keys<Tk, Tv>(
  * Space complexity: O(n), where n is the size of `$traversable` -- note that n
  * may be bigger than `$sample_size`
  */
-function sample<Tv>(
-  Traversable<Tv> $traversable,
-  int $sample_size,
-): vec<Tv> {
+function sample<Tv>(Traversable<Tv> $traversable, int $sample_size): vec<Tv> {
   invariant(
     $sample_size >= 0,
     'Expected non-negative sample size, got %d.',
@@ -251,7 +235,8 @@ function slice<Tv>(
 )[]: vec<Tv> {
   invariant($length === null || $length >= 0, 'Expected non-negative length.');
   $offset = _Private\validate_offset_lower_bound($offset, C\count($container));
-  return cast_clear_legacy_array_mark(\array_slice($container, $offset, $length));
+  return
+    cast_clear_legacy_array_mark(\array_slice($container, $offset, $length));
 }
 
 /**
@@ -263,10 +248,7 @@ function slice<Tv>(
  * Time complexity: O(n), where n is `$n`
  * Space complexity: O(n), where n is `$n`
  */
-function take<Tv>(
-  Traversable<Tv> $traversable,
-  int $n,
-)[]: vec<Tv> {
+function take<Tv>(Traversable<Tv> $traversable, int $n)[]: vec<Tv> {
   if ($n === 0) {
     return vec[];
   }
@@ -293,9 +275,7 @@ function take<Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
-function unique<Tv as arraykey>(
-  Traversable<Tv> $traversable,
-)[]: vec<Tv> {
+function unique<Tv as arraykey>(Traversable<Tv> $traversable)[]: vec<Tv> {
   return vec(keyset($traversable));
 }
 

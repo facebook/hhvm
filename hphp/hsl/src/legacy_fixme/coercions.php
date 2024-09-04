@@ -66,6 +66,7 @@ function cast_for_arithmetic(mixed $value)[]: dynamic {
     return 0;
   }
   if ($value is bool || $value is resource) {
+    /* HH_FIXME[12005] Silence warning about casting a resource to int */
     return (int)$value;
   }
   return $value is string ? \HH\str_to_numeric($value) ?? 0 : $value;
@@ -213,6 +214,7 @@ enum COMPARISON_TYPE: int {
 function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
   if ($r is bool && !(\HH\is_fun($l) || \HH\is_class_meth($l))) {
     if (!($l is AnyArray<_, _>)) {
+    /* HH_FIXME[12005] Silence warning about casting to int */
       $l = (bool)$l;
     } else if ($ctype === COMPARISON_TYPE::EQ) {
       $l = !C\is_empty($l);
@@ -244,6 +246,7 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
     } else if (
       $l is resource || (\is_object($l) && !($l is \ConstCollection<_>))
     ) {
+    /* HH_FIXME[12005] Silence warning about casting to int and float */
       $l = $r is int ? (int)$l : (float)$l;
     }
     // if we're ==/!= an int and a float, convert both to float
@@ -266,12 +269,14 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
       return __cast_and_compare($l, $r, $ctype);
     } else if (\is_object($l)) {
       if ($l is \StringishObject && !($l is \ConstCollection<_>)) {
+        /* HH_FIXME[12005] Silence warning about casting to string */
         $l = (string)$l;
       } else if (!($l is \ConstCollection<_>)) {
         $l = true;
         $r = false;
       }
     } else if ($l is resource) {
+        /* HH_FIXME[12005] Silence warning about casting to float */
       $l = (float)$l;
       $r = (float)$r;
     } else if (
@@ -289,14 +294,14 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
       $l = false;
       $r = true;
     } else if ($l is bool) {
-      // @lint-ignore CAST_NON_PRIMITIVE 2fax
+      /* HH_FIXME[12005] Silence warning about casting */
       $r = (bool)$r;
     } else if ($l is num) {
-      // @lint-ignore CAST_NON_PRIMITIVE 2fax
+      /* HH_FIXME[12005] Silence warning about casting */
       $r = $l is int ? (int)$r : (float)$r;
     } else if ($l is string) {
       $l = (float)$l;
-      // @lint-ignore CAST_NON_PRIMITIVE 2fax
+      /* HH_FIXME[12005] Silence warning about casting */
       $r = (float)$r;
     } else if (\is_object($l)) {
       $l = true;
@@ -364,6 +369,7 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
     if (
       $l is string && $r is \StringishObject && !($r is \ConstCollection<_>)
     ) {
+      /* HH_FIXME[12005] Silence warning about casting */
       $r = (string)$r;
     } else if (
       $l is null ||
@@ -374,8 +380,10 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
       $r = true;
     } else if ($l is num && !($r is \ConstCollection<_>)) {
       // this probably throws, but sometimes it doesn't!
+      /* HH_FIXME[12005] Silence warning about casting */
       $r = $l is int ? (int)$r : (float)$r;
     } else if ($l is bool) {
+      /* HH_FIXME[12005] Silence warning about casting */
       $r = (bool)$r;
     } else if (
       \is_object($l) &&
@@ -483,6 +491,7 @@ function int_cast_for_switch(
   if ($value === false) return 0;
   if ($value === true) return $first_truthy as ?int ?? SWITCH_INT_SENTINEL;
 
+  /* HH_FIXME[12005] Silence warning about casting */
   if ($value is resource) return (int)$value;
 
   if (\is_object($value) && !($value is \ConstCollection<_>)) {
@@ -491,7 +500,6 @@ function int_cast_for_switch(
 
   return SWITCH_INT_SENTINEL;
 }
-
 
 const string SWITCH_STRING_SENTINEL =
   'This string is to force fail matching a case';
@@ -545,6 +553,7 @@ function string_cast_for_switch(
 
   if ($value is null) return '';
 
+  /* HH_FIXME[12005] Silence warning about casting */
   if ($value is resource) $value = (float)($value);
 
   if ($value is float) {
@@ -555,8 +564,8 @@ function string_cast_for_switch(
       if ($orig_is_str) {
         $floatish_vals = Dict\filter_keys($floatish_vals, \is_numeric<>);
       }
-      return C\find_key($floatish_vals, $n ==> $n === $value) as ?string ??
-        $default;
+      return
+        C\find_key($floatish_vals, $n ==> $n === $value) as ?string ?? $default;
     }
   }
   if ($value is int) {
@@ -566,8 +575,8 @@ function string_cast_for_switch(
     } else if ($value === 0) {
       return $first_zeroish as ?string ?? $default;
     }
-    return C\find_key($intish_vals, $n ==> $n === $value) as ?string ??
-      $default;
+    return
+      C\find_key($intish_vals, $n ==> $n === $value) as ?string ?? $default;
   }
 
   if ($value === true) {

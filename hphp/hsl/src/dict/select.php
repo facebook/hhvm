@@ -27,17 +27,16 @@ function diff_by_key<Tk1 as arraykey, Tk2 as arraykey, Tv>(
   KeyedTraversable<Tk2, mixed> $second,
   KeyedContainer<Tk2, mixed> ...$rest
 )[]: dict<Tk1, Tv> {
+  /* HH_FIXME[12006] Silence sketchy null check */
   if (!$first) {
     return dict[];
   }
+  /* HH_FIXME[12006] Silence sketchy null check */
   if (!$second && !$rest) {
     return cast_clear_legacy_array_mark($first);
   }
   $union = merge($second, ...$rest);
-  return filter_keys(
-    $first,
-    $key ==> !C\contains_key($union, $key),
-  );
+  return filter_keys($first, $key ==> !C\contains_key($union, $key));
 }
 
 /**
@@ -240,14 +239,6 @@ function unique_by<Tk as arraykey, Tv, Ts as arraykey>(
   // We first convert the container to dict[scalar_key => original_key] to
   // remove duplicates, then back to dict[original_key => original_value].
   return $container
-    |> pull_with_key(
-      $$,
-      ($k, $_) ==> $k,
-      ($_, $v) ==> $scalar_func($v),
-    )
-    |> pull(
-      $$,
-      $orig_key ==> $container[$orig_key],
-      $x ==> $x,
-    );
+    |> pull_with_key($$, ($k, $_) ==> $k, ($_, $v) ==> $scalar_func($v))
+    |> pull($$, $orig_key ==> $container[$orig_key], $x ==> $x);
 }

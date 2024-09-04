@@ -104,7 +104,7 @@ let default =
     lsp_sticky_quarantine = false;
     lsp_invalidation = false;
     autocomplete_sort_text = false;
-    hack_warnings = GlobalOptions.ASome [];
+    hack_warnings = GlobalOptions.All;
     warnings_default_all = false;
   }
 

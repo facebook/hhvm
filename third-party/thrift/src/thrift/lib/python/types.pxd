@@ -207,7 +207,7 @@ cdef class EnumTypeInfo(TypeInfoBase):
 cdef class AdaptedTypeInfo(TypeInfoBase):
     cdef object _orig_type_info
     cdef object _adapter_info
-    cdef object _transitive_annotation
+    cdef object _transitive_annotation_factory
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)

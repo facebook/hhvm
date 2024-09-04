@@ -28,11 +28,48 @@
 namespace apache {
 namespace thrift {
 namespace op {
-
-class TypeToPatchInternalDoNotUse;
-
 namespace detail {
 
+template <typename Patch>
+class AnyPatch;
+
+} // namespace detail
+
+class AnyPatchStruct;
+class TypeToPatchInternalDoNotUse;
+
+class TypeErasedPatches {
+ public:
+  const type::Type& type() const { return type_; }
+  // TODO(dokwon): Return Dynamic Patch.
+  std::vector<protocol::Object> patches() const {
+    std::vector<protocol::Object> dynPatches;
+    dynPatches.reserve(patches_.size());
+    for (const auto& p : patches_) {
+      dynPatches.push_back(protocol::detail::parseValueFromAny(p).as_object());
+    }
+    return dynPatches;
+  }
+
+  // Delete copy and move constructors since the lifetime of type and patches
+  // are bounded to the lifetime of AnyPatch.
+  TypeErasedPatches(const TypeErasedPatches&) = delete;
+  TypeErasedPatches& operator=(const TypeErasedPatches&) = delete;
+  TypeErasedPatches(TypeErasedPatches&&) = delete;
+  TypeErasedPatches& operator=(TypeErasedPatches&&) = delete;
+
+ private:
+  TypeErasedPatches(
+      const type::Type& type, const std::vector<type::AnyStruct>& patches)
+      : type_(type), patches_(patches) {}
+
+  const type::Type& type_;
+  const std::vector<type::AnyStruct>& patches_;
+
+  friend class detail::AnyPatch<AnyPatchStruct>;
+};
+
+namespace detail {
 [[noreturn]] void throwDuplicatedType(const type::Type& type);
 [[noreturn]] void throwTypeNotValid(const type::Type& type);
 [[noreturn]] void throwAnyNotValid(const type::AnyStruct& any);
@@ -152,7 +189,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   ///     struct Visitor {
   ///       void assign(const AnyStruct&);
   ///       void clear();
-  ///       void patchIfTypeIs(const Type&, const std::vector<AnyStruct>&);
+  ///       void patchIfTypeIs(const TypeErasedPatches&);
   ///       void ensureAny(const AnyStruct&);
   ///     }
   ///
@@ -162,13 +199,14 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       // Test whether the required methods exist in Visitor
       v.assign(type::AnyStruct{});
       v.clear();
-      v.patchIfTypeIs(type::Type{}, std::vector<type::AnyStruct>{});
+      v.patchIfTypeIs(
+          TypeErasedPatches{type::Type{}, std::vector<type::AnyStruct>{}});
       v.ensureAny(type::AnyStruct{});
     }
     if (!Base::template customVisitAssignAndClear(v)) {
       // patchIfTypeIsPrior
       for (const auto& [type, patches] : data_.patchIfTypeIsPrior().value()) {
-        v.patchIfTypeIs(type, patches);
+        v.patchIfTypeIs(TypeErasedPatches{type, patches});
       }
 
       // ensureAny
@@ -178,7 +216,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
       // patchIfTypeIsAfter
       for (const auto& [type, patches] : data_.patchIfTypeIsAfter().value()) {
-        v.patchIfTypeIs(type, patches);
+        v.patchIfTypeIs(TypeErasedPatches{type, patches});
       }
     }
   }
@@ -370,6 +408,9 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
 
   // Needed for merge.
+  void patchIfTypeIs(const TypeErasedPatches& patches) {
+    patchIfTypeIs(patches.type_, patches.patches_);
+  }
   void patchIfTypeIs(
       const type::Type& type, const std::vector<type::AnyStruct>& patches) {
     tryPatchable(type);

@@ -510,6 +510,26 @@ cdef class MutableMap:
     def __reduce__(self):
         return (MutableMap, (self._key_typeinfo, self._val_typeinfo, self._map_data))
 
+    __sentinel = object()
+
+    def pop(self, key, default=__sentinel):
+        try:
+            internal_key = self._key_typeinfo.to_internal_data(key)
+            return self._val_typeinfo.to_python_value(self._map_data.pop(internal_key))
+        except (TypeError, KeyError):
+            if default is self.__sentinel:
+                raise KeyError(f"{key}")
+            return default
+
+    def popitem(self):
+        """
+        Remove and return a (key, value) pair from the dictionary. Pairs are returned in LIFO order.
+        Changed in version Python 3.7: LIFO order is now guaranteed.
+        In prior versions, popitem() would return an arbitrary key/value pair.
+        """
+        k, v = self._map_data.popitem()
+        return self._key_typeinfo.to_python_value(k), self._val_typeinfo.to_python_value(v)
+
     def clear(self):
         self._map_data.clear()
 
@@ -521,6 +541,10 @@ cdef class MutableMap:
 
     def values(self):
         return MapValuesView(self._val_typeinfo, self._map_data.values())
+
+    def setdefault(self, key, default=None):
+        internal_key = self._key_typeinfo.to_internal_data(key)
+        return self._map_data.setdefault(internal_key, default)
 
     def __setitem__(self, key, value):
         internal_key = self._key_typeinfo.to_internal_data(key)

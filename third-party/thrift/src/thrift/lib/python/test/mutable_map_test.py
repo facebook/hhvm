@@ -16,6 +16,7 @@
 
 import collections.abc
 import pickle
+import string
 import unittest
 
 from thrift.python.mutable_containers import (
@@ -452,3 +453,54 @@ class MutableMapTest(unittest.TestCase):
         mutable_map_unpickled = pickle.loads(pickled)
         self.assertIsInstance(mutable_map_unpickled, MutableMap)
         self.assertEqual(mutable_map, mutable_map_unpickled)
+
+    def test_pop(self) -> None:
+        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+
+        mutable_map["A"] = 65
+        mutable_map["a"] = 97
+
+        with self.assertRaisesRegex(KeyError, "not exists"):
+            mutable_map.pop("not exists")
+
+        self.assertEqual(
+            "default-value", mutable_map.pop("not exists", "default-value")
+        )
+
+        self.assertEqual(65, mutable_map.pop("A"))
+        self.assertEqual({"a": 97}, mutable_map)
+        self.assertEqual(97, mutable_map.pop("a"))
+        self.assertEqual({}, mutable_map)
+
+        with self.assertRaisesRegex(KeyError, "A"):
+            mutable_map.pop("A")
+
+        # Wrong key type raises a KeyError not a TypeError
+        with self.assertRaisesRegex(KeyError, "123"):
+            mutable_map.pop(123)
+
+    def test_popitem(self) -> None:
+        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+
+        for char in string.ascii_letters:
+            mutable_map[char] = ord(char)
+
+        # Python 3.7+ LIFO order is now guaranteed.
+        for char in string.ascii_letters[::-1]:
+            self.assertEqual(mutable_map.popitem(), (char, ord(char)))
+
+        self.assertEqual(0, len(mutable_map))
+
+    def test_setdefault(self) -> None:
+        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+
+        self.assertEqual(65, mutable_map.setdefault("A", 65))
+        self.assertEqual(65, mutable_map["A"])
+        self.assertEqual(65, mutable_map.setdefault("A", 999))
+        self.assertEqual(65, mutable_map["A"])
+
+        # Wrong key type raises a TypeError
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            mutable_map.setdefault(123, 999)

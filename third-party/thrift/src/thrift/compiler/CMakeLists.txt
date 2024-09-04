@@ -166,6 +166,8 @@ target_link_libraries(
 
 add_library(
   whisker
+  STATIC
+
   whisker/detail/string.cc
   whisker/ast.cc
   whisker/eval_context.cc

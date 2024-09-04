@@ -388,8 +388,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 _,
                 aast::Expr_::ClassConst((
                     aast::ClassId(_, _, aast::ClassId_::CI(&Id(_, class_name))),
-                    _,
-                )),
+                    _, // required to be "class" in constant initializer
+                ))
+                | aast::Expr_::Nameof(aast::ClassId(_, _, aast::ClassId_::CI(&Id(_, class_name)))),
             ) => {
                 // Imagine the case <<MyFancyEnum('foo'.X::class)>>
                 // We would expect a user attribute parameter to concatenate
@@ -432,6 +433,24 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             self.namespace_builder
                 .elaborate_raw_id(ElaborateKind::Const, name),
         )
+    }
+
+    fn elaborate_class_id(&self, class_name: Node<'a>) -> Option<Id<'a>> {
+        self.expect_name(class_name).map(|id| {
+            if matches!(class_name, Node::XhpName(..))
+                && self.opts.disable_xhp_element_mangling
+                && self.opts.keep_user_attributes
+            {
+                // for facts, allow xhp class consts to be mangled later
+                // on even when xhp_element_mangling is disabled
+                let mut qualified = bump::String::with_capacity_in(id.1.len() + 1, self.arena);
+                qualified.push_str("\\");
+                qualified.push_str(id.1);
+                Id(id.0, self.arena.alloc_str(&qualified))
+            } else {
+                self.elaborate_id(id)
+            }
+        })
     }
 
     fn start_accumulating_const_refs(&mut self) {
@@ -5508,22 +5527,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         value: Self::Output,
     ) -> Self::Output {
         let pos = self.merge_positions(class_name, value);
-        let Id(class_name_pos, class_name_str) = match self.expect_name(class_name) {
-            Some(id) => {
-                if matches!(class_name, Node::XhpName(..))
-                    && self.opts.disable_xhp_element_mangling
-                    && self.opts.keep_user_attributes
-                {
-                    // for facts, allow xhp class consts to be mangled later
-                    // on even when xhp_element_mangling is disabled
-                    let mut qualified = bump::String::with_capacity_in(id.1.len() + 1, self.arena);
-                    qualified.push_str("\\");
-                    qualified.push_str(id.1);
-                    Id(id.0, self.arena.alloc_str(&qualified))
-                } else {
-                    self.elaborate_id(id)
-                }
-            }
+        let Id(class_name_pos, class_name_str) = match self.elaborate_class_id(class_name) {
+            Some(id) => id,
             None => return Node::Ignored(SK::ScopeResolutionExpression),
         };
         let class_id = self.alloc(aast::ClassId(
@@ -5544,6 +5549,27 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             pos,
             nast::Expr_::ClassConst(self.alloc((class_id, self.alloc((value_id.0, value_id.1))))),
         )))
+    }
+
+    fn make_nameof_expression(
+        &mut self,
+        keyword: Self::Output,
+        class_name: Self::Output,
+    ) -> Self::Output {
+        let pos = self.merge_positions(keyword, class_name);
+        let Id(class_name_pos, class_name_str) = match self.elaborate_class_id(class_name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::NameofExpression),
+        };
+        let class_id = self.alloc(aast::ClassId(
+            (),
+            class_name_pos,
+            match class_name {
+                Node::Name(("self", _)) => aast::ClassId_::CIself,
+                _ => aast::ClassId_::CI(self.alloc(Id(class_name_pos, class_name_str))),
+            },
+        ));
+        Node::Expr(self.alloc(aast::Expr((), pos, nast::Expr_::Nameof(class_id))))
     }
 
     fn make_field_specifier(
@@ -5667,40 +5693,46 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 None => return Node::Ignored(SK::ConstructorCall),
             }
         };
-        let params = self.slice(args.iter().filter_map(|node| match node {
-            Node::Expr(aast::Expr(
-                _,
-                _,
-                aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, _, aast::ClassId_::CI(&Id(pos, class_name))),
-                    (_, "class"),
-                )),
-            )) => {
-                let name = if class_name.starts_with(':') && self.opts.disable_xhp_element_mangling
-                {
-                    // for facts, allow xhp class consts to be mangled later on
-                    // even when xhp_element_mangling is disabled
-                    let mut qualified =
-                        bump::String::with_capacity_in(class_name.len() + 1, self.arena);
-                    qualified.push_str("\\");
-                    qualified.push_str(class_name);
-                    Id(pos, self.arena.alloc_str(&qualified))
-                } else {
-                    self.elaborate_id(Id(pos, class_name))
-                };
-                Some(AttributeParam::Classname(name))
-            }
-            Node::EnumClassLabel(label) => Some(AttributeParam::EnumClassLabel(label)),
-            Node::Expr(e @ aast::Expr(_, pos, _)) => {
-                // Try to parse a sequence of string concatenations
-                let mut acc = bump::Vec::new_in(self.arena);
-                self.fold_string_concat(e, &mut acc)
-                    .then(|| AttributeParam::String(pos, acc.into_bump_slice().into()))
-            }
-            Node::StringLiteral((slit, pos)) => Some(AttributeParam::String(pos, slit)),
-            Node::IntLiteral((ilit, _)) => Some(AttributeParam::Int(ilit)),
-            _ => None,
-        }));
+        let params =
+            self.slice(args.iter().filter_map(|node| match node {
+                Node::Expr(aast::Expr(
+                    _,
+                    _,
+                    aast::Expr_::ClassConst(&(
+                        aast::ClassId(_, _, aast::ClassId_::CI(&Id(pos, class_name))),
+                        (_, "class"),
+                    ))
+                    | aast::Expr_::Nameof(&aast::ClassId(
+                        _,
+                        _,
+                        aast::ClassId_::CI(&Id(pos, class_name)),
+                    )),
+                )) => {
+                    let name =
+                        if class_name.starts_with(':') && self.opts.disable_xhp_element_mangling {
+                            // for facts, allow xhp class consts to be mangled later on
+                            // even when xhp_element_mangling is disabled
+                            let mut qualified =
+                                bump::String::with_capacity_in(class_name.len() + 1, self.arena);
+                            qualified.push_str("\\");
+                            qualified.push_str(class_name);
+                            Id(pos, self.arena.alloc_str(&qualified))
+                        } else {
+                            self.elaborate_id(Id(pos, class_name))
+                        };
+                    Some(AttributeParam::Classname(name))
+                }
+                Node::EnumClassLabel(label) => Some(AttributeParam::EnumClassLabel(label)),
+                Node::Expr(e @ aast::Expr(_, pos, _)) => {
+                    // Try to parse a sequence of string concatenations
+                    let mut acc = bump::Vec::new_in(self.arena);
+                    self.fold_string_concat(e, &mut acc)
+                        .then(|| AttributeParam::String(pos, acc.into_bump_slice().into()))
+                }
+                Node::StringLiteral((slit, pos)) => Some(AttributeParam::String(pos, slit)),
+                Node::IntLiteral((ilit, _)) => Some(AttributeParam::Int(ilit)),
+                _ => None,
+            }));
         let string_literal_param = params.first().and_then(|p| match *p {
             AttributeParam::String(pos, s) => Some((pos, s)),
             _ => None,

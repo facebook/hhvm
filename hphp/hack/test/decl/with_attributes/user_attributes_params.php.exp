@@ -267,6 +267,58 @@
            [{ Typing_defs_core.ua_name = ([31:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
              ];
+           sm_sort_text = None };
+         { Shallow_decl_defs.sm_name = ([35:19-32], "attrClsNameof");
+           sm_type =
+           (Rwitness_from_decl ([35:19-32]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [35:19-32]) };
+                 ft_ret = (Rwitness_from_decl ([35:19-32]), Tany);
+                 ft_flags =
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   is_function_pointer = false; returns_readonly = false;
+                   readonly_this = false; support_dynamic_type = false;
+                   is_memoized = false; variadic = false };
+                 ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes =
+           [{ Typing_defs_core.ua_name = ([34:5-8], "\\Foo");
+              ua_params = [(Typing_defs_core.Classname "\\SomeClass")];
+              ua_raw_val = None }
+             ];
+           sm_sort_text = None };
+         { Shallow_decl_defs.sm_name = ([38:19-35], "attrConcatNameof");
+           sm_type =
+           (Rwitness_from_decl ([38:19-35]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [38:19-35]) };
+                 ft_ret = (Rwitness_from_decl ([38:19-35]), Tany);
+                 ft_flags =
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   is_function_pointer = false; returns_readonly = false;
+                   readonly_this = false; support_dynamic_type = false;
+                   is_memoized = false; variadic = false };
+                 ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes =
+           [{ Typing_defs_core.ua_name = ([37:5-8], "\\Foo");
+              ua_params = [(Typing_defs_core.String "barBaz")];
+              ua_raw_val = None }
+             ];
            sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;

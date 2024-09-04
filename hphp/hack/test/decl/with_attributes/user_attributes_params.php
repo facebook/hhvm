@@ -30,4 +30,10 @@ class C {
 
   <<Foo(shape('a' => 1, 'b' => 2))>>
   public function attrShape() {}
+
+  <<Foo(nameof SomeClass)>>
+  public function attrClsNameof() {}
+
+  <<Foo('bar'.nameof Baz)>>
+  public function attrConcatNameof() {}
 }

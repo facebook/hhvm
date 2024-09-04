@@ -49,10 +49,12 @@ class specify_implicit_field_id {
     if (f.explicit_id()) {
       return;
     }
-    fm_.add(
-        {f.type().src_range().begin.offset(),
-         f.type().src_range().begin.offset(),
-         fmt::format("{}\n    {}: ", kComment, f.id())});
+    auto loc = f.type().src_range().begin.offset();
+    if (f.qualifier() == t_field_qualifier::optional ||
+        f.qualifier() == t_field_qualifier::required) {
+      loc -= std::string_view("optional ").size();
+    }
+    fm_.add({loc, loc, fmt::format("{}\n    {}: ", kComment, f.id())});
   }
 
  private:

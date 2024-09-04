@@ -69,6 +69,11 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     @cpp.Ref{type = cpp.RefType.Unique}
                     string foo;
                 }
+                struct H {
+                    optional string foo;
+                    required string bar;
+                    string baz;
+                }
                 """
             ),
         )
@@ -119,6 +124,14 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     @cpp.Ref{type = cpp.RefType.Unique}
                     // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
                     -1: string foo;
+                }
+                struct H {
+                    // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
+                    -1: optional string foo;
+                    // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
+                    -2: required string bar;
+                    // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
+                    -3: string baz;
                 }
                 """
             ),

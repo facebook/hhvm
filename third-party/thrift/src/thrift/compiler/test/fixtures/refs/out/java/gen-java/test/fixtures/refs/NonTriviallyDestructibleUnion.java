@@ -43,7 +43,7 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
     private short id;
 
     public enum TypeEnum {
-      __EMPTY__,
+      __FBTHRIFT_EMPTY_UNION__,
       INT_FIELD,
     }
 
@@ -112,7 +112,7 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__EMPTY__;
+          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
         case 1:
           return TypeEnum.INT_FIELD;
         default:

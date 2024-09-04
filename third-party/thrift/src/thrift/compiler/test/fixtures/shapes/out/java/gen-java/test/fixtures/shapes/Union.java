@@ -48,7 +48,7 @@ public final class Union implements com.facebook.thrift.payload.ThriftSerializab
     private short id;
 
     public enum TypeEnum {
-      __EMPTY__,
+      __FBTHRIFT_EMPTY_UNION__,
       INT_VALUE,
       STRING_VALUE,
     }
@@ -154,7 +154,7 @@ public final class Union implements com.facebook.thrift.payload.ThriftSerializab
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__EMPTY__;
+          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
         case 1:
           return TypeEnum.INT_VALUE;
         case 5:

@@ -48,7 +48,7 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
     private short id;
 
     public enum TypeEnum {
-      __EMPTY__,
+      __FBTHRIFT_EMPTY_UNION__,
       V1,
       V2,
     }
@@ -152,7 +152,7 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__EMPTY__;
+          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
         case 1:
           return TypeEnum.V1;
         case 2:

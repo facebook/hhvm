@@ -46,7 +46,7 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
     private short id;
 
     public enum TypeEnum {
-      __EMPTY__,
+      __FBTHRIFT_EMPTY_UNION__,
       RESERVED_FIELD,
     }
 
@@ -115,7 +115,7 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__EMPTY__;
+          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
         case 1:
           return TypeEnum.RESERVED_FIELD;
         default:

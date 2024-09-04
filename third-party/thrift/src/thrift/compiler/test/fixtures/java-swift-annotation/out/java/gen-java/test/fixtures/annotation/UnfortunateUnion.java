@@ -48,7 +48,7 @@ public final class UnfortunateUnion implements com.facebook.thrift.payload.Thrif
     private short id;
 
     public enum TypeEnum {
-      __EMPTY__,
+      __FBTHRIFT_EMPTY_UNION__,
       AN_SNAKE_STRING,
       A_CAMEL_I32,
     }
@@ -154,7 +154,7 @@ public final class UnfortunateUnion implements com.facebook.thrift.payload.Thrif
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__EMPTY__;
+          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
         case 1:
           return TypeEnum.AN_SNAKE_STRING;
         case 2:

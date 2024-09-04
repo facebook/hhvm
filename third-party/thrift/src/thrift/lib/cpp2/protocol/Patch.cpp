@@ -534,7 +534,8 @@ void impl(Patch&& patch, Object& value) {
               typePatchVal, type_to_patch)) {
         throw std::runtime_error("Invalid AnyPatch PatchIfTypeIsPrior/After");
       }
-      if (type_to_patch.type() == anyStruct.type().value()) {
+      if (type::identicalType(
+              type_to_patch.type().value(), anyStruct.type().value())) {
         auto val = protocol::detail::parseValueFromAny(anyStruct);
         for (const auto& p : type_to_patch.patches().value()) {
           auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
@@ -560,7 +561,8 @@ void impl(Patch&& patch, Object& value) {
             *ensureAnyVal, ensureAny)) {
       throw std::runtime_error("Invalid AnyPatch ensureAny");
     }
-    if (ensureAny.type() != anyStruct.type()) {
+    if (!type::identicalType(
+            ensureAny.type().value(), anyStruct.type().value())) {
       anyStruct = std::move(ensureAny);
     }
   }

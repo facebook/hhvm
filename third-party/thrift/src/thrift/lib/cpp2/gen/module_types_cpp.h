@@ -413,4 +413,8 @@ bool pointer_less(const T& lhs, const T& rhs) {
 } // namespace thrift
 } // namespace apache
 
-FOLLY_GNU_DISABLE_WARNING("-Wmissing-prototypes")
+// __fbthrift_static_init_* are referenced using extern prototypes to keep them
+// private. This triggers the following warning, which is suppressed.
+// Helpfully, clang triggers this warning for C++ but gcc not only does not but
+// also errors if you try to suppress it, so we only suppress for clang.
+FOLLY_CLANG_DISABLE_WARNING("-Wmissing-prototypes")

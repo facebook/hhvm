@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
+package "thrift.com/python/test"
+
 include "thrift/annotation/python.thrift"
 
 namespace py3 python_test
 
 const list<i16> int_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+@python.Adapter{
+  name = "thrift.python.test.adapters.atoi.AtoiAdapter",
+  typeHint = "int",
+}
+typedef string AtoIValue
+
 typedef list<i32> I32List
 typedef list<easy> EasyList
 typedef list<string> StringList
 typedef list<list<string>> StrList2D
+typedef list<AtoIValue> AtoIValueList
 
 struct easy {
   3: optional string name;

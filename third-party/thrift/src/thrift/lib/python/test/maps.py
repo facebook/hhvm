@@ -41,6 +41,7 @@ from python_test.containers.thrift_types import (
 from python_test.maps.thrift_types import (
     easy as easyType,
     F14MapFollyString as F14MapFollyStringType,
+    StrAtoIValueMap as StrAtoIValueMapType,
     StrEasyMap as StrEasyMapType,
     StrI32ListMap as StrI32ListMapType,
     StrIntMap as StrIntMapType,
@@ -84,6 +85,9 @@ class MapTests(unittest.TestCase):
         )
         self.StrStrMap: Type[StrStrMapType] = self.maps_types.StrStrMap
         self.StrI32ListMap: Type[StrI32ListMapType] = self.maps_types.StrI32ListMap
+        self.StrAtoIValueMap: Type[StrAtoIValueMapType] = (
+            self.maps_types.StrAtoIValueMap
+        )
         self.F14MapFollyString: Type[F14MapFollyStringType] = (
             self.maps_types.F14MapFollyString
         )
@@ -193,8 +197,8 @@ class MapTests(unittest.TestCase):
         self.assertEqual(list(x.items()), list(tx.items()))
 
     def test_struct_in_map(self) -> None:
-        a = self.StrEasyMap({"a": self.easy()})
         b = self.StrEasyMap({"a": self.easy(val=0)})
+        a = self.StrEasyMap({"a": self.easy()})
         c = self.StrEasyMap({"a": self.easy(val=1)})
         d = self.StrEasyMap({"a": self.easy(val_list=[])})
         self.assertEqual(a, b)
@@ -222,12 +226,12 @@ class MapTests(unittest.TestCase):
             ),
         )
         self.assertEqual(s.boolMap, {True: True, False: False})
-        self.assertEqual(s.byteMap, {1: 1, 2: 2, 3: 3})
         self.assertEqual(s.i16Map, {4: 4, 5: 5, 6: 6})
         self.assertEqual(s.i64Map, {7: 7, 8: 8, 9: 9})
         self.assertEqual(s.doubleMap, {1.23: 1.23, 4.56: 4.56})
         self.assertEqual(s.floatMap, {7.89: 7.89, 10.11: 10.11})
         self.assertEqual(s.stringMap, {"foo": "foo", "bar": "bar"})
+        self.assertEqual(s.byteMap, {1: 1, 2: 2, 3: 3})
         self.assertEqual(s.binaryMap, {b"foo": b"foo", b"bar": b"bar"})
         self.assertEqual(
             s.iobufMap, {IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")}
@@ -247,6 +251,11 @@ class MapTests(unittest.TestCase):
             self.assertIs(
                 s.structMap[self.Foo(value=2)], s.structMap[self.Foo(value=2)]
             )
+
+    def test_adapted_maps(self) -> None:
+        the_map = {"foo": 1, "bar": 2}
+
+        self.assertEqual(the_map, self.StrAtoIValueMap(the_map))
 
 
 # TODO: Collapse these two test cases into parameterized test above

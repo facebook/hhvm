@@ -34,6 +34,7 @@ from parameterized import parameterized_class
 
 from python_test.containers.thrift_types import Color, Foo, Lists
 from python_test.lists.thrift_types import (
+    AtoIValueList,
     easy,
     EasyList,
     I32List,
@@ -66,6 +67,7 @@ class ListTests(unittest.TestCase):
         self.I32List: Type[I32List] = self.lists_types.I32List
         self.StrList2D: Type[StrList2D] = self.lists_types.StrList2D
         self.StringList: Type[StringList] = self.lists_types.StringList
+        self.AtoIValueList: Type[AtoIValueList] = self.lists_types.AtoIValueList
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[Foo] = self.containers_types.Foo
         self.Lists: Type[Lists] = self.containers_types.Lists
@@ -300,3 +302,8 @@ class ListTests(unittest.TestCase):
             self.assertEqual(clist.colorList.count(0), 2)
             self.assertEqual(clist.colorList.count(1), 1)
             self.assertEqual(clist.colorList.count(2), 0)
+
+    def test_adapted_lists(self) -> None:
+        int_list = [1, 2, 3]
+
+        self.assertEqual(int_list, self.AtoIValueList(int_list))

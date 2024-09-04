@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
+package "thrift.com/python/test"
+
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 
 namespace py3 python_test
+
+@python.Adapter{
+  name = "thrift.python.test.adapters.atoi.AtoiAdapter",
+  typeHint = "int",
+}
+typedef string AtoIValue
 
 const map<i16, map<i16, i16>> LocationMap = {1: {1: 1}};
 typedef list<i32> I32List
@@ -25,6 +33,7 @@ typedef map<string, i64> StrIntMap
 typedef map<string, I32List> StrI32ListMap
 typedef map<string, easy> StrEasyMap
 typedef map<string, string> StrStrMap
+typedef map<string, AtoIValue> StrAtoIValueMap
 typedef map<string, StrI32ListMap> StrStrIntListMapMap
 @cpp.Type{name = "folly::F14FastMap<std::string, folly::fbstring>"}
 typedef map<string, string> F14MapFollyString

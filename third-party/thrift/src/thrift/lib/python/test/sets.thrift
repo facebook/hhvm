@@ -18,9 +18,16 @@ include "thrift/annotation/python.thrift"
 
 namespace py3 python_test
 
+@python.Adapter{
+  name = "thrift.python.test.adapters.atoi.AtoiAdapter",
+  typeHint = "int",
+}
+typedef string AtoIValue
+
 typedef list<i32> I32List
 typedef set<easy> EasySet
 typedef set<i32> SetI32
+typedef set<AtoIValue> SetAtoIValue
 typedef set<I32List> SetI32Lists
 typedef set<SetI32Lists> SetSetI32Lists
 

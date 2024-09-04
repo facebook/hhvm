@@ -504,3 +504,47 @@ class MutableMapTest(unittest.TestCase):
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
             mutable_map.setdefault(123, 999)
+
+    def test_update(self) -> None:
+        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+
+        mutable_map["A"] = 65
+        mutable_map["a"] = 97
+
+        mutable_map.update({"B": 66})
+        self.assertEqual({"A": 65, "a": 97, "B": 66}, mutable_map)
+
+        mutable_map.update({"B": 166, "A": 165})
+        self.assertEqual({"A": 165, "a": 97, "B": 166}, mutable_map)
+
+        mutable_map.update({"B": 66}, A=65, b=98)
+        self.assertEqual({"A": 65, "a": 97, "B": 66, "b": 98}, mutable_map)
+
+        mutable_map.update({}, B=166, b=198)
+        self.assertEqual({"A": 65, "a": 97, "B": 166, "b": 198}, mutable_map)
+
+        mutable_map.update(B=66, b=98)
+        self.assertEqual({"A": 65, "a": 97, "B": 66, "b": 98}, mutable_map)
+
+    def test_update_exception(self) -> None:
+        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+
+        mutable_map["A"] = 65
+        mutable_map["a"] = 97
+
+        # basic exception safety
+        with self.assertRaisesRegex(
+            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
+        ):
+            # `{"B": 66}` raises before keyword argument
+            mutable_map.update({1: 999}, A=65)
+
+        self.assertEqual({"A": 65, "a": 97}, mutable_map)
+
+        with self.assertRaisesRegex(
+            TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            # `{"B": 66}` updates the mutable map before keyword argument raises
+            mutable_map.update({"B": 66}, x="Not an Integer")
+
+        self.assertEqual({"A": 65, "a": 97, "B": 66}, mutable_map)

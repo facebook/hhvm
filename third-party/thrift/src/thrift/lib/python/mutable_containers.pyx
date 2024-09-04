@@ -451,7 +451,6 @@ cdef class MutableMap:
     the [`MutableMap` abstract base class](https://docs.python.org/3.10/library/collections.abc.html#collections-abstract-base-classes).
     """
 
-    # DO_BEFORE(alperyoney,20240617): Implement missing methods from abstract
     def __cinit__(MutableSet self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict map_data not None):
         """
         map_data: It should contain valid elements. Any invalid elements within
@@ -545,6 +544,25 @@ cdef class MutableMap:
     def setdefault(self, key, default=None):
         internal_key = self._key_typeinfo.to_internal_data(key)
         return self._map_data.setdefault(internal_key, default)
+
+    def update(self, other=(), /, **keywords):
+        """
+        Update MutableMap from mapping/iterable other and keywords
+        """
+        if self._is_same_type_of_map(other):
+            self._map_data.update(<MutableMap>other._map_data)
+        elif isinstance(other, Mapping):
+            for key in other:
+                self[key] = other[key]
+        elif hasattr(other, "keys"):
+            for key in other.keys():
+                self[key] = other[key]
+        else:
+            for key, value in other:
+                self[key] = value
+
+        for key, value in keywords.items():
+            self[key] = value
 
     def __setitem__(self, key, value):
         internal_key = self._key_typeinfo.to_internal_data(key)

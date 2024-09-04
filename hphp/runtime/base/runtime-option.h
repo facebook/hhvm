@@ -116,6 +116,7 @@ SECTIONS_FOR_REPOOPTIONSFLAGS()
   void initHhbcFlags(hackc::HhbcFlags&) const;
   void initParserFlags(hackc::ParserFlags&) const;
   void initAliasedNamespaces(hackc::NativeEnv&) const;
+  void initTrivialBuiltins(hackc::NativeEnv&) const;
 
   std::string autoloadQuery() const { return Query; }
   folly::dynamic autoloadQueryObj() const { return m_cachedQuery; }
@@ -932,6 +933,7 @@ struct RuntimeOption {
   F(bool, FastMethodIntercept, false)                                   \
   F(bool, LogHttpServerSignalSource, true)                              \
   F(bool, CrashOnStaticAnalysisError, debug)                            \
+  F(bool, ReplaceTrivialBuiltins, false)                                \
   /* */
 
 private:

@@ -1814,7 +1814,7 @@ fn emit_call<'a, 'd>(
     readonly_return: bool,
 ) -> Result<InstrSeq> {
     if let Some(ast_defs::Id(_, s)) = expr.as_id() {
-        let fid = hhbc::FunctionName::from_ast_name(s);
+        let fid = e.emit_function_name(s);
         e.add_function_ref(fid);
     }
     let readonly_this = match &expr.2 {
@@ -1833,7 +1833,7 @@ fn emit_call<'a, 'd>(
     match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
         Some(ast_defs::Id(_, id)) => {
-            let fq = hhbc::FunctionName::from_ast_name(id);
+            let fq = e.emit_function_name(id);
             let lower_fq_name = fq.as_str();
             emit_special_function(e, env, pos, targs, args, uarg, lower_fq_name)
                 .transpose()
@@ -2107,7 +2107,7 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
                                         ]),
                                         InstrSeq::gather(vec![instr::f_call_func_d(
                                             fcall_args,
-                                            hhbc::FunctionName::from_ast_name(fid),
+                                            e.emit_function_name(fid),
                                         )]),
                                     ))
                                 }
@@ -2301,12 +2301,12 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
             } = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
                 "min" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
-                    hhbc::FunctionName::from_ast_name("__SystemLib\\min2")
+                    e.emit_function_name("__SystemLib\\min2")
                 }
                 "max" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
-                    hhbc::FunctionName::from_ast_name("__SystemLib\\max2")
+                    e.emit_function_name("__SystemLib\\max2")
                 }
-                _ => hhbc::FunctionName::from_ast_name(&id.1),
+                _ => e.emit_function_name(&id.1),
             };
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
@@ -2317,7 +2317,7 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
         Expr_::String(s) => {
             match std::str::from_utf8(s) {
                 Ok(s) => {
-                    let fq_id = hhbc::FunctionName::intern(s);
+                    let fq_id = e.emit_function_name(s);
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     Ok((
                         InstrSeq::gather(vec![instr::null_uninit(), instr::null_uninit()]),
@@ -5858,17 +5858,17 @@ fn emit_array_get_fixed(last_usage: bool, local: Local, indices: &[isize]) -> In
     InstrSeq::gather(vec![base, indices])
 }
 
-/// Generate code for each lvalue assignment in a list destructuring expression.
-/// Lvalues are assigned right-to-left, regardless of the nesting structure. So
-///      list($a, list($b, $c)) = $d
-///  and list(list($a, $b), $c) = $d
-///  will both assign to $c, $b and $a in that order.
-///  Returns a pair of instructions:
-///  1. initialization part of the left hand side
-///  2. assignment
-///  this is necessary to handle cases like:
-///  list($a[$f()]) = b();
-///  here f() should be invoked before b()
+// Generate code for each lvalue assignment in a list destructuring expression.
+// Lvalues are assigned right-to-left, regardless of the nesting structure. So
+//      list($a, list($b, $c)) = $d
+//  and list(list($a, $b), $c) = $d
+//  will both assign to $c, $b and $a in that order.
+//  Returns a pair of instructions:
+//  1. initialization part of the left hand side
+//  2. assignment
+//  this is necessary to handle cases like:
+//  list($a[$f()]) = b();
+//  here f() should be invoked before b()
 pub fn emit_lval_op_list<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,

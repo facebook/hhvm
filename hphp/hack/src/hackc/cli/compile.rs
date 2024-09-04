@@ -160,6 +160,7 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Resul
         hhbc_flags,
         hhvm: Hhvm {
             include_roots: Default::default(),
+            trivial_builtins: Default::default(),
             parser_options,
         },
         flags: opts.env_flags.clone(),
@@ -252,6 +253,7 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write
             &source_text,
             &arena,
         );
+        #[allow(clippy::arc_with_non_send_sync)]
         let provider: Arc<SingleDeclProvider<'_, NReason>> = Arc::new(SingleDeclProvider::make(
             &arena,
             parsed_file.decls,

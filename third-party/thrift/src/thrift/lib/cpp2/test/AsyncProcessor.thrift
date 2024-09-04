@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
-// @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
-include "thrift/lib/thrift/schema.thrift"
 include "thrift/annotation/cpp.thrift"
 
 namespace cpp2 apache.thrift.test
@@ -54,7 +51,6 @@ service DummySecurity {
   i64 getState();
 }
 
-@thrift.GenerateRuntimeSchema
 service SchemaService {
   i64 getOption();
 }

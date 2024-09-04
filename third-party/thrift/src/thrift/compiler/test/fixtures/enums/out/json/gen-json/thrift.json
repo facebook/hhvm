@@ -8,7 +8,7 @@
   },
   "enumerations" : {
     "RpcPriority" : {
-      "lineno" : 237,
+      "lineno" : 222,
       "constants" : {
         "HIGH_IMPORTANT" : 0,
         "HIGH" : 1,
@@ -18,11 +18,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 237,
+          "line" : 222,
           "column" : 1
         },
         "end" : {
-          "line" : 243,
+          "line" : 228,
           "column" : 2
         }
       }
@@ -235,40 +235,8 @@
         }
       }
     },
-    "GenerateRuntimeSchema" : {
-      "lineno" : 198,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "name" : {
-          "type_enum" : "STRING",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 205,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 205,
-              "column" : 18
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 198,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 206,
-          "column" : 2
-        }
-      }
-    },
     "InternBox" : {
-      "lineno" : 212,
+      "lineno" : 197,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -276,17 +244,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 212,
+          "line" : 197,
           "column" : 1
         },
         "end" : {
-          "line" : 214,
+          "line" : 199,
           "column" : 20
         }
       }
     },
     "Serial" : {
-      "lineno" : 219,
+      "lineno" : 204,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -294,17 +262,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 219,
+          "line" : 204,
           "column" : 1
         },
         "end" : {
-          "line" : 220,
+          "line" : 205,
           "column" : 17
         }
       }
     },
     "Uri" : {
-      "lineno" : 225,
+      "lineno" : 210,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -314,11 +282,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 227,
+              "line" : 212,
               "column" : 3
             },
             "end" : {
-              "line" : 227,
+              "line" : 212,
               "column" : 19
             }
           }
@@ -326,17 +294,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 225,
+          "line" : 210,
           "column" : 1
         },
         "end" : {
-          "line" : 228,
+          "line" : 213,
           "column" : 2
         }
       }
     },
     "Priority" : {
-      "lineno" : 233,
+      "lineno" : 218,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -346,12 +314,44 @@
           "required" : true,
           "source_range" : {
             "begin" : {
+              "line" : 220,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 220,
+              "column" : 24
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 218,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 221,
+          "column" : 2
+        }
+      }
+    },
+    "DeprecatedUnvalidatedAnnotations" : {
+      "lineno" : 233,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "items" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
               "line" : 235,
               "column" : 3
             },
             "end" : {
               "line" : 235,
-              "column" : 24
+              "column" : 32
             }
           }
         }
@@ -367,26 +367,12 @@
         }
       }
     },
-    "DeprecatedUnvalidatedAnnotations" : {
+    "AllowReservedIdentifier" : {
       "lineno" : 248,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
-        "items" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 250,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 250,
-              "column" : 32
-            }
-          }
-        }
+
       },
       "source_range" : {
         "begin" : {
@@ -394,31 +380,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 251,
-          "column" : 2
-        }
-      }
-    },
-    "AllowReservedIdentifier" : {
-      "lineno" : 263,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 263,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 264,
+          "line" : 249,
           "column" : 34
         }
       }
     },
     "AllowReservedFilename" : {
-      "lineno" : 266,
+      "lineno" : 251,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -426,17 +394,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 266,
+          "line" : 251,
           "column" : 1
         },
         "end" : {
-          "line" : 267,
+          "line" : 252,
           "column" : 32
         }
       }
     },
     "AllowReservedIdentifierName" : {
-      "lineno" : 270,
+      "lineno" : 255,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -444,11 +412,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 270,
+          "line" : 255,
           "column" : 1
         },
         "end" : {
-          "line" : 272,
+          "line" : 257,
           "column" : 38
         }
       }

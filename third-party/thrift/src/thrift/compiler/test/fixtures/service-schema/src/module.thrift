@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
 include "include.thrift"
 
 namespace java.swift test.fixtures.service_schema
@@ -30,7 +29,6 @@ exception CustomException {
   2: Result result = Result.SO_SO;
 }
 
-@thrift.GenerateRuntimeSchema
 service PrimitivesService {
   i64 init(1: i64 param0, 2: i64 param1);
   Result method_that_throws() throws (1: CustomException e);

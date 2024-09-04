@@ -23,7 +23,6 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<SerializeInFieldIdOrder>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<BitmaskEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ExceptionMessage>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<GenerateRuntimeSchema>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<InternBox>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Serial>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Uri>::gen(metadata);

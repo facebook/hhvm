@@ -865,9 +865,7 @@ class cpp_mstch_service : public mstch_service {
     return service_->uri().empty() ? parent_service_name() : service_->uri();
   }
   mstch::node has_service_schema() {
-    const t_const* annotation =
-        service_->find_structured_annotation_or_null(kGenerateRuntimeSchemaUri);
-    return annotation ? true : false;
+    return has_schema(sm_, *service_->program());
   }
 
   mstch::node definition_key() {

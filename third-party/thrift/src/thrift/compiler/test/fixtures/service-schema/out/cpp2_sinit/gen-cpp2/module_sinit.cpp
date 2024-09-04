@@ -16,7 +16,7 @@ namespace cpp2 {
 
 
 namespace module_constants {
-extern ::std::string_view _fbthrift_schema_2926f41c3790ef15();
+extern ::std::string_view _fbthrift_schema_b747839c13cb3aa5();
 }
 
 namespace {
@@ -24,7 +24,7 @@ namespace {
 struct StaticInit {
   StaticInit() {
 
-    ::apache::thrift::BaseSchemaRegistry::registerSchema("_fbthrift_schema_2926f41c3790ef15", module_constants::_fbthrift_schema_2926f41c3790ef15(), "thrift/compiler/test/fixtures/service-schema/src/module.thrift");
+    ::apache::thrift::BaseSchemaRegistry::registerSchema("_fbthrift_schema_b747839c13cb3aa5", module_constants::_fbthrift_schema_b747839c13cb3aa5(), "thrift/compiler/test/fixtures/service-schema/src/module.thrift");
   }
 };
 

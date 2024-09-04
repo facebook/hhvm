@@ -30,8 +30,6 @@ inline constexpr auto kExperimentalUri =
     "facebook.com/thrift/annotation/Experimental";
 inline constexpr auto kExceptionMessageUri =
     "facebook.com/thrift/annotation/ExceptionMessage";
-inline constexpr auto kGenerateRuntimeSchemaUri =
-    "facebook.com/thrift/annotation/GenerateRuntimeSchema";
 inline constexpr auto kInjectMetadataFieldsUri =
     "facebook.com/thrift/annotation/InjectMetadataFields";
 inline constexpr auto kMixinUri = "facebook.com/thrift/annotation/Mixin";

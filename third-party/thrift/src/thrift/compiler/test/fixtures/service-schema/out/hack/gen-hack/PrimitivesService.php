@@ -864,12 +864,7 @@ class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TServiceAnnotations {
     return shape(
-      'service' => dict[
-        '\facebook\thrift\annotation\GenerateRuntimeSchema' => \facebook\thrift\annotation\GenerateRuntimeSchema::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'service' => dict[],
       'functions' => dict[
       ],
     );

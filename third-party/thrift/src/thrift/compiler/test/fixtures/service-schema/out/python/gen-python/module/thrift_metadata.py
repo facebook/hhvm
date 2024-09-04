@@ -73,7 +73,6 @@ def _fbthrift_gen_metadata_service_PrimitivesService(metadata_struct: _fbthrift_
     
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
-        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.GenerateRuntimeSchema"), fields= {  }),
     ])
     new_struct = metadata_struct(services=service_dict)
     

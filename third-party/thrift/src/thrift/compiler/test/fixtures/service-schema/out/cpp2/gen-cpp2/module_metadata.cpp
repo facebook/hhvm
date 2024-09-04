@@ -159,7 +159,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_PrimitivesService.structured_annotations()->push_back(*cvStruct("thrift.GenerateRuntimeSchema", {  }).cv_struct_ref());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.PrimitivesService", std::move(module_PrimitivesService));
   context.service_name() = "module.PrimitivesService";

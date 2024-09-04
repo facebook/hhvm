@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
-// @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
-include "thrift/lib/thrift/schema.thrift"
-
 namespace cpp2 apache.thrift.test
 
-@thrift.GenerateRuntimeSchema
 service First {
   i32 one();
   i32 two();

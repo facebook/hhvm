@@ -26,31 +26,31 @@
         "constants" : {
           "HIGH_IMPORTANT" : {
             "name" : "HIGH_IMPORTANT",
-            "lineno" : 238,
+            "lineno" : 223,
             "value" : 0
           },
           "HIGH" : {
             "name" : "HIGH",
-            "lineno" : 239,
+            "lineno" : 224,
             "value" : 1
           },
           "IMPORTANT" : {
             "name" : "IMPORTANT",
-            "lineno" : 240,
+            "lineno" : 225,
             "value" : 2
           },
           "NORMAL" : {
             "name" : "NORMAL",
-            "lineno" : 241,
+            "lineno" : 226,
             "value" : 3
           },
           "BEST_EFFORT" : {
             "name" : "BEST_EFFORT",
-            "lineno" : 242,
+            "lineno" : 227,
             "value" : 4
           }
         },
-        "lineno" : 237
+        "lineno" : 222
       }
       },
   "structs" :
@@ -304,71 +304,6 @@
         "is_union" : false,
         "lineno" : 190
       },
-      "GenerateRuntimeSchema" : {
-        "name" : "GenerateRuntimeSchema",
-        "structured_annotations": {
-          "scope.Structured" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Structured",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "scope.Service" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Service",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "scope.Const" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Const",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "scope.Enum" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Enum",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "thrift.Experimental" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Experimental"
-},
-        "value" : {}
-      }
-        },
-        "docstring" : "Generates a const of type schema. Struct containing the schema of the\nannotated type. Optionally specify name to override default\nschema<structName>.\n",
-        "fields" : {
-          "name" : {
-            "name" : "name",
-            "key" : 1,
-            "lineno" : 205,
-            "required" : "opt-in-req-out",
-            "type" : "string"
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 198
-      },
       "InternBox" : {
         "name" : "InternBox",
         "structured_annotations": {
@@ -391,7 +326,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 212
+        "lineno" : 197
       },
       "Serial" : {
         "name" : "Serial",
@@ -408,7 +343,7 @@
         "docstring" : "Indicates that an interaction's methods should be processed sequentially.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 219
+        "lineno" : 204
       },
       "Uri" : {
         "name" : "Uri",
@@ -427,14 +362,14 @@
           "value" : {
             "name" : "value",
             "key" : 1,
-            "lineno" : 227,
+            "lineno" : 212,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 225
+        "lineno" : 210
       },
       "Priority" : {
         "name" : "Priority",
@@ -453,7 +388,7 @@
           "level" : {
             "name" : "level",
             "key" : 1,
-            "lineno" : 235,
+            "lineno" : 220,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -463,7 +398,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 233
+        "lineno" : 218
       },
       "DeprecatedUnvalidatedAnnotations" : {
         "name" : "DeprecatedUnvalidatedAnnotations",
@@ -482,7 +417,7 @@
           "items" : {
             "name" : "items",
             "key" : 1,
-            "lineno" : 250,
+            "lineno" : 235,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
@@ -493,7 +428,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 248
+        "lineno" : 233
       },
       "AllowReservedIdentifier" : {
         "name" : "AllowReservedIdentifier",
@@ -510,7 +445,7 @@
         "docstring" : "In addition to reserved words, Thrift reserves all identifiers\nthat contain the case-insensitive substring fbthrift preceded\nby one or more underscores.\nThe use of such identifiers requires users to explicitly annotate\nthe usage with\n  `@thrift.AllowReservedFilename` for filenames\n  `@thrift.AllowReservedIdentifier` for all other identifiers\nand may result in undefined behavior.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 263
+        "lineno" : 248
       },
       "AllowReservedFilename" : {
         "name" : "AllowReservedFilename",
@@ -526,7 +461,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 266
+        "lineno" : 251
       },
       "AllowReservedIdentifierName" : {
         "name" : "AllowReservedIdentifierName",
@@ -550,7 +485,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 270
+        "lineno" : 255
       }
       },
   "source_path" : "thrift/annotation/thrift",

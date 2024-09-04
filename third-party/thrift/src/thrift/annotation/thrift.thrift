@@ -191,21 +191,6 @@ struct BitmaskEnum {}
 struct ExceptionMessage {}
 
 /**
- * Generates a const of type schema. Struct containing the schema of the
- * annotated type. Optionally specify name to override default
- * schema<structName>.
- */
-@scope.Structured
-@scope.Service
-@scope.Const
-@scope.Enum
-@scope.Typedef
-@Experimental
-struct GenerateRuntimeSchema {
-  1: string name;
-}
-
-/**
  * Indicates that a field's value should never be stored on the stack, and that
  * identical values can be shared in immutable contexts.
  */

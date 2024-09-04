@@ -14,53 +14,42 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
 
 package "facebook.com/thrift/test/schema"
 
-@thrift.GenerateRuntimeSchema
 struct Empty {}
 
-@thrift.GenerateRuntimeSchema{name = "RenamedSchema"}
 struct Renamed {}
 
-@thrift.GenerateRuntimeSchema
 struct Fields {
   1: i32 num;
   3: optional set<string> keyset;
   7: Empty strct;
 }
 
-@thrift.GenerateRuntimeSchema
 struct Defaults {
   1: i32 none;
   2: i32 some = 42;
 }
 
-@thrift.GenerateRuntimeSchema
 service EmptyService {
 }
 
-@thrift.GenerateRuntimeSchema
 union Union {}
 
-@thrift.GenerateRuntimeSchema
 enum Enum {
   unspecified = 0,
   test = 22,
 }
 
-@thrift.GenerateRuntimeSchema
 exception SimpleException {}
 
-@thrift.GenerateRuntimeSchema
 safe transient server exception FancyException {}
 
-@thrift.GenerateRuntimeSchema
 const i32 IntConst = 11;
 
-@thrift.GenerateRuntimeSchema
 const list<i32> ListConst = [2, 3, 5, 7, IntConst];
 
 exception NonSchematizedException {}
@@ -78,7 +67,6 @@ enum NonSchematizedEnum {
 
 union NonSchematizedUnion {}
 
-@thrift.GenerateRuntimeSchema
 service TestService {
   void noParamsNoReturnNoEx();
   i32 noParamsPrimitiveReturnNoEx();
@@ -90,16 +78,13 @@ service TestService {
   );
 }
 
-@thrift.GenerateRuntimeSchema
 typedef i32 TD
-@thrift.GenerateRuntimeSchema
 struct Typedefs {
   1: TD named;
   @cpp.Type{name = "uint32_t"}
   2: i32 unnamed;
 }
 
-@thrift.GenerateRuntimeSchema
 typedef TD TDTD
 
 @scope.Structured
@@ -107,6 +92,5 @@ struct Annot {
   1: i32 val;
 }
 
-@thrift.GenerateRuntimeSchema
 @Annot{val = 42}
 struct Annotated {} (annot_with_val = 2023, annot_without_val)

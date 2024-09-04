@@ -48,7 +48,7 @@ class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_py_deprecated(self) -> "module.ttypes.CustomException": ...  # type: ignore
 
 
-_fbthrift_schema_2926f41c3790ef15: bytes = ...
+_fbthrift_schema_b747839c13cb3aa5: bytes = ...
 
 
 class _fbthrift_PrimitivesService_init_args(_fbthrift_python_types.Struct):

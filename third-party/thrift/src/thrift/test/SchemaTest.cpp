@@ -90,7 +90,7 @@ TEST(SchemaTest, linked) {
 TEST(SchemaTest, static_schema) {
   auto static_schema = SchemaRegistry::mergeSchemas(
       facebook::thrift::test::schema::schema_constants::
-          _fbthrift_schema_b5658a7a6a556e3f_includes());
+          _fbthrift_schema_fba4d3dcfb7c979a_includes());
   const type::Program* static_program = nullptr;
   for (const auto& program : *static_schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {

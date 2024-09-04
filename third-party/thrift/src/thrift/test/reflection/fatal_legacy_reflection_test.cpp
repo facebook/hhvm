@@ -21,7 +21,6 @@
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/reflection/debug.h>
-#include <thrift/lib/cpp2/reflection/pretty_print.h>
 #include <thrift/lib/thrift/gen-cpp2/reflection_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_legacy_reflection_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_legacy_reflection_types.h>

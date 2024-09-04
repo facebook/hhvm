@@ -23,12 +23,12 @@
 #include <folly/json.h>
 #include <folly/portability/GTest.h>
 
+#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/reflection/debug.h>
 #include <thrift/lib/cpp2/reflection/folly_dynamic.h>
 #include <thrift/lib/cpp2/reflection/helpers.h>
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
-#include <thrift/lib/cpp2/reflection/pretty_print.h>
 #include <thrift/test/reflection/gen-cpp2/compat_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/global_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/reflection_fatal_types.h>
@@ -37,6 +37,12 @@ using namespace cpp2;
 
 namespace apache {
 namespace thrift {
+namespace {
+template <typename T>
+void print_to(std::ostream& out, T stct) {
+  out << apache::thrift::debugStringViaEncode(stct);
+}
+} // namespace
 
 template <typename T>
 void test_to_from(T const& pod, const folly::dynamic& json) {
@@ -60,9 +66,9 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
     const auto actual = apache::thrift::from_dynamic<T>(
         json, apache::thrift::dynamic_format::PORTABLE);
     if (actual != pod) {
-      apache::thrift::detail::pretty_print(log << "actual: ", actual);
+      print_to(log << "actual: ", actual);
       log << std::endl;
-      apache::thrift::detail::pretty_print(log << "expected: ", pod);
+      print_to(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -78,7 +84,7 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
     const auto to = apache::thrift::to_dynamic(
         from, apache::thrift::dynamic_format::PORTABLE);
     if (json != to) {
-      apache::thrift::detail::pretty_print(log << "from: ", from);
+      print_to(log << "from: ", from);
       log << std::endl
           << "to: " << folly::toPrettyJson(to) << std::endl
           << "expected: " << folly::toPrettyJson(json);
@@ -97,9 +103,9 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
         to, apache::thrift::dynamic_format::PORTABLE);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      apache::thrift::detail::pretty_print(log << "from: ", from);
+      print_to(log << "from: ", from);
       log << std::endl;
-      apache::thrift::detail::pretty_print(log << "expected: ", pod);
+      print_to(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -118,9 +124,9 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
         apache::thrift::format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      apache::thrift::detail::pretty_print(log << "from: ", from);
+      print_to(log << "from: ", from);
       log << std::endl;
-      apache::thrift::detail::pretty_print(log << "expected: ", pod);
+      print_to(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -139,9 +145,9 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
         apache::thrift::format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      apache::thrift::detail::pretty_print(log << "from: ", from);
+      print_to(log << "from: ", from);
       log << std::endl;
-      apache::thrift::detail::pretty_print(log << "expected: ", pod);
+      print_to(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -160,9 +166,9 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
         apache::thrift::format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      apache::thrift::detail::pretty_print(log << "from: ", from);
+      print_to(log << "from: ", from);
       log << std::endl;
-      apache::thrift::detail::pretty_print(log << "expected: ", pod);
+      print_to(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -181,9 +187,9 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
         apache::thrift::format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      apache::thrift::detail::pretty_print(log << "from: ", from);
+      print_to(log << "from: ", from);
       log << std::endl;
-      apache::thrift::detail::pretty_print(log << "expected: ", pod);
+      print_to(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }

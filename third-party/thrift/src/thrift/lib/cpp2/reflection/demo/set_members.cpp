@@ -21,7 +21,6 @@
 #include <folly/Conv.h>
 #include <folly/init/Init.h>
 #include <thrift/lib/cpp2/reflection/demo/gen-cpp2/data_fatal_types.h>
-#include <thrift/lib/cpp2/reflection/pretty_print.h>
 #include <thrift/lib/cpp2/reflection/reflection.h>
 
 using namespace apache::thrift;
@@ -73,8 +72,6 @@ int main(int argc, char** argv) {
 
   for (std::string name; prompt(name);) {
     setter::set(name, instance);
-    detail::pretty_print(std::cout, instance);
-    std::cout << std::endl;
   }
 
   return 0;

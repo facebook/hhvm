@@ -19,7 +19,6 @@
 #include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 #include <thrift/lib/cpp2/debug_thrift_data_difference/diff.h>
 #include <thrift/lib/cpp2/reflection/merge.h>
-#include <thrift/lib/cpp2/reflection/pretty_print.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_merge_constants.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_merge_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_merge_types.h>

@@ -47,6 +47,6 @@ public class UnionTest {
   @Test
   public void testEmptyUnion() {
     TestUnion anUnion = new TestUnion();
-    Assert.assertEquals(anUnion.getThriftUnionType(), TestUnion.TypeEnum.__FBTHRIFT_EMPTY_UNION__);
+    Assert.assertEquals(anUnion.getThriftUnionType(), TestUnion.TypeEnum.__EMPTY__);
   }
 }

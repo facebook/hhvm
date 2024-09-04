@@ -48,7 +48,7 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
+      __EMPTY__,
       THING_ONE,
       THING_TWO,
     }
@@ -152,7 +152,7 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+          return TypeEnum.__EMPTY__;
         case 1:
           return TypeEnum.THING_ONE;
         case 2:

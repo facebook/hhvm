@@ -68,7 +68,7 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
+      __EMPTY__,
       INT_VALUE,
       STRING_VALUE,
       INT_LIST_VALUE,
@@ -301,7 +301,7 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+          return TypeEnum.__EMPTY__;
         case 1:
           return TypeEnum.INT_VALUE;
         case 5:

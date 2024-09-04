@@ -38,7 +38,7 @@ public final class Nada implements com.facebook.thrift.payload.ThriftSerializabl
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
+      __EMPTY__,
     }
 
     public static Nada from(int _id, java.lang.Object _field) {
@@ -76,7 +76,7 @@ public final class Nada implements com.facebook.thrift.payload.ThriftSerializabl
     public TypeEnum getThriftUnionType() {
       switch(this.id) {
         case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+          return TypeEnum.__EMPTY__;
         default:
           throw new IllegalStateException("unreachable");
       }

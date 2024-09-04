@@ -1,33 +1,27 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('type_refinements')>>
-
 abstract class C {
   abstract const type T;
 }
 
-function
-  id1<T as C with {type T = mixed},
-      Tacc>(mixed $x): Tacc where Tacc = T::T
-{
+function id1<T as C with { type T = mixed }, Tacc>(mixed $x): Tacc
+where
+  Tacc = T::T {
   return $x;
 }
 
-function
-  id2<T as C with {type T = nothing},
-      Tacc>(Tacc $x): nothing where Tacc = T::T
-{
+function id2<T as C with { type T = nothing }, Tacc>(Tacc $x): nothing
+where
+  Tacc = T::T {
   return $x;
 }
 
-function
-  id<T as C with {type T = nothing}
-       as C with {type T = mixed}
-     >(mixed $x): nothing
-{
+function id<T as C with { type T = nothing } as C with { type T = mixed }>(
+  mixed $x,
+): nothing {
   // Bad! T does not define the type constant ::T
   // unambiguously.
-  return id2<T,_>(id1<T,_>($x));
+  return id2<T, _>(id1<T, _>($x));
 }
 
 function spoof(mixed $x): nothing {

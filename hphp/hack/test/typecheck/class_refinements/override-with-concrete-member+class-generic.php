@@ -1,16 +1,14 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 interface Box {
   abstract const type T;
 }
 abstract class Base<TBox as Box> {
-  abstract protected function mShady<T>(T $_): void
-  where TBox::T = T;
+  abstract protected function mShady<T>(T $_): void where TBox::T = T;
 
   abstract protected function m<T>(T $_): void
-  where TBox as Box with { type T = T };
+  where
+    TBox as Box with { type T = T };
 }
 
 class ConcreteIntBox implements Box {

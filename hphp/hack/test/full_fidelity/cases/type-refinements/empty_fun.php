@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 abstract class A {
   abstract const type T;
 }

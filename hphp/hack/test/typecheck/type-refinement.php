@@ -1,10 +1,8 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 class Box {
   abstract const type Tb as mixed;
-  public function __construct(public this::Tb $val) { }
+  public function __construct(public this::Tb $val) {}
 }
 
 type IBox = Box with { type Tb = int };

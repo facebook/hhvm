@@ -1,11 +1,10 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 interface IUserData {}
 
 abstract class FrameworkA {
-  abstract const type TB as FrameworkB with {type TUserData = this::TUserData};
+  abstract const type TB as FrameworkB with {
+    type TUserData = this::TUserData };
   abstract const type TUserData as IUserData;
 }
 

@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('type_refinements')>>
 
 abstract class Box {
   abstract const type T as mixed;

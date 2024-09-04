@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 class Ref<T> {
   public function __construct(public T $data) {}
 }
@@ -12,15 +10,15 @@ interface Box {
   public function get(): this::T;
 }
 
-function external_get<TB as Box, T>(TB $b) : T where T = TB::T {
+function external_get<TB as Box, T>(TB $b): T where T = TB::T {
   return $b->get();
 }
 
-function mut_get<TB as Box, T>(Ref<TB> $b) : T where T = TB::T {
+function mut_get<TB as Box, T>(Ref<TB> $b): T where T = TB::T {
   return $b->data->get();
 }
 
-function ok1(Box with { type T as int } $b) : int {
+function ok1(Box with { type T as int } $b): int {
   // Accessing on a loose refinement is undesirable
   // however, in the following example, we perform
   // the access on the expression-dependent type
@@ -31,12 +29,12 @@ function ok1(Box with { type T as int } $b) : int {
   return $b->get();
 }
 
-function ok2(Box with { type T as int } $b) : int {
+function ok2(Box with { type T as int } $b): int {
   // Same reasoning as above.
   return external_get($b);
 }
 
-function bad3(Ref<Box with { type T as int }> $mb) : int {
+function bad3(Ref<Box with { type T as int }> $mb): int {
   // Here we are performing a type access on
   // a loose refinement since no expresion-
   // dependent type is created to reflect
@@ -45,7 +43,7 @@ function bad3(Ref<Box with { type T as int }> $mb) : int {
   return mut_get($mb);
 }
 
-function bad4(Ref<Box with { type T as int }> $mb) : int {
+function bad4(Ref<Box with { type T as int }> $mb): int {
   // Same as above, but a different code path
   // in the typechecker because no type variable
   // is created for TB on the call.

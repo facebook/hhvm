@@ -34,12 +34,10 @@ type feature_name =
   | TypeConstMultipleBounds
   | TypeConstSuperBound
   | ClassConstDefault
-  | TypeRefinements
   | MethodTraitDiamond
   | UpcastExpression
   | RequireClass
   | NewtypeSuperBounds
-  | ExpressionTreeBlocks
   | Package
   | CaseTypes
   | ModuleLevelTraits
@@ -51,7 +49,6 @@ type feature_name =
   | ClassType
   | FunctionReferences
   | FunctionTypeOptionalParams
-  | ExpressionTreeMap
   | ExpressionTreeNest
   | SealedMethods
   | AwaitInSplice

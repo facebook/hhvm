@@ -1,12 +1,12 @@
-ERROR: File "covariant-dep-1.php", line 39, characters 15-18:
+ERROR: File "covariant-dep-1.php", line 39, characters 5-8:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "covariant-dep-1.php", line 45, characters 15-18:
+ERROR: File "covariant-dep-1.php", line 45, characters 5-8:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "covariant-dep-1.php", line 51, characters 15-18:
+ERROR: File "covariant-dep-1.php", line 51, characters 5-8:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 51, characters 6-7:
+  File "covariant-dep-1.php", line 49, characters 76-77:
   Expected `T0`
   File "covariant-dep-1.php", line 9, characters 26-32:
   But got `<expr#23>::T as TBox::T`
@@ -14,7 +14,7 @@ Invalid return type (Typing[4110])
     where `<expr#23>` is a reference to this expression
 ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 51, characters 6-7:
+  File "covariant-dep-1.php", line 49, characters 76-77:
   Expected `T0`
   File "covariant-dep-1.php", line 9, characters 32-32:
   But got `TBox::T where TBox::T super <expr#23>::T, TBox::T super T0, TBox::T as Box::T`
@@ -25,16 +25,16 @@ Invalid return type (Typing[4110])
     where `<expr#23>` is a reference to this expression
 ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 51, characters 6-7:
+  File "covariant-dep-1.php", line 49, characters 76-77:
   Expected `T0`
-  File "covariant-dep-1.php", line 51, characters 21-21:
+  File "covariant-dep-1.php", line 51, characters 11-11:
   But got `Box::T super TBox::T`
   by accessing the type constant `T`
-  File "covariant-dep-1.php", line 51, characters 15-21:
+  File "covariant-dep-1.php", line 51, characters 5-11:
   on a value of generic type TBox
 ERROR: File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 51, characters 6-7:
+  File "covariant-dep-1.php", line 49, characters 76-77:
   Expected `T0`
-  File "covariant-dep-1.php", line 51, characters 21-21:
+  File "covariant-dep-1.php", line 51, characters 11-11:
   But got `mixed` arising from an implicit `as mixed` constraint on this type

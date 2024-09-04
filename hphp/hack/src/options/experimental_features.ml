@@ -40,12 +40,10 @@ type feature_name =
   | TypeConstMultipleBounds
   | TypeConstSuperBound
   | ClassConstDefault
-  | TypeRefinements
   | MethodTraitDiamond
   | UpcastExpression
   | RequireClass
   | NewtypeSuperBounds
-  | ExpressionTreeBlocks
   | Package
   | CaseTypes
   | ModuleLevelTraits
@@ -57,7 +55,6 @@ type feature_name =
   | ClassType
   | FunctionReferences
   | FunctionTypeOptionalParams
-  | ExpressionTreeMap
   | ExpressionTreeNest
   | SealedMethods
   | AwaitInSplice
@@ -77,12 +74,10 @@ let feature_name_map =
       ("type_const_multiple_bounds", TypeConstMultipleBounds);
       ("type_const_super_bound", TypeConstSuperBound);
       ("class_const_default", ClassConstDefault);
-      ("type_refinements", TypeRefinements);
       ("method_trait_diamond", MethodTraitDiamond);
       ("upcast_expression", UpcastExpression);
       ("require_class", RequireClass);
       ("newtype_super_bounds", NewtypeSuperBounds);
-      ("expression_tree_blocks", ExpressionTreeBlocks);
       ("package", Package);
       ("case_types", CaseTypes);
       ("module_level_traits", ModuleLevelTraits);
@@ -94,7 +89,6 @@ let feature_name_map =
       ("class_type", ClassType);
       ("function_references", FunctionReferences);
       ("function_type_optional_params", FunctionTypeOptionalParams);
-      ("expression_tree_map", ExpressionTreeMap);
       ("expression_tree_nest", ExpressionTreeNest);
       ("sealed_methods", SealedMethods);
       ("await_in_splice", AwaitInSplice);

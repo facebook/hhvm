@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 class Covar<+T> {
   public function __construct(T $_) {}
 }
@@ -29,7 +27,7 @@ class C2<reify T> extends C<T> {}
 class D extends C<Covar<Box with { type T = int }>> {} // ERROR (nested)
 
 function in_bound_only<
-  reify T as Box with { type T = int } // OK (in bound only)
+  reify T as Box with { type T = int }, // OK (in bound only)
 >(T $x): void {}
 
 class Ok<reify T as Box with { type T = int }> {} // OK (in bound only)

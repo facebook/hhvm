@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 interface Box {
   abstract const type T;
 }

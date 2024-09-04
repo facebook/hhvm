@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 interface I {}
 
 function bad_eq_and_as(): I with { type T as arraykey = int } {}

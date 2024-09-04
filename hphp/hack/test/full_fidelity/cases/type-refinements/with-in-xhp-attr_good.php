@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 class :simple-type extends XHPTest {
   attribute bool with-b;
 }

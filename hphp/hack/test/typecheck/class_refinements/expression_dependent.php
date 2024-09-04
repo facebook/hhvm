@@ -1,13 +1,12 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('type_refinements')>>
-
 abstract class Box {
   abstract const type TData as arraykey;
 }
 
 function getfun<T as arraykey>(Box with { type TData = T } $b): T {
-  while(true) {}
+  while (true) {
+  }
 }
 
 function test(Box $b): arraykey {

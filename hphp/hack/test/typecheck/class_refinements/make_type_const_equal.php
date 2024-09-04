@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('type_refinements')>>
-
 abstract class Box {
   abstract const type TData;
 }
@@ -9,11 +7,13 @@ abstract class Box {
 class Inv<T> {}
 
 function get<T as Box, TData>(Inv<T> $inv): TData where TData = T::TData {
-  while (true) {}
+  while (true) {
+  }
 }
 
 function makeiib(): Inv<Box with { type TData = int }> {
-  while (true) {}
+  while (true) {
+  }
 }
 
 function test(): void {

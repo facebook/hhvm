@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 interface I {}
 
 function bad_no_bounds1(I with { type T } $a): void {}

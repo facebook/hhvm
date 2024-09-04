@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
-
 abstract class A { abstract const ctx C; abstract const type T; }
 
 type AWithTIntSub = A with { type T as int; };

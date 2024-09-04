@@ -650,7 +650,9 @@ let allowed_fixme_codes_strict = ref ISet.empty
 
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
-let is_allowed_code_strict code = ISet.mem code !allowed_fixme_codes_strict
+let is_allowed_code_strict (code : error_code) =
+  ISet.mem code !allowed_fixme_codes_strict
+  || Error_codes.Warning.of_enum code |> Option.is_some
 
 let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
   ref (fun _ _ -> None)

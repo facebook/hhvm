@@ -150,10 +150,10 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   /// Users should provide a visitor with the following methods
   ///
   ///     struct Visitor {
-  ///       void assign(cosnt AnyStruct&);
+  ///       void assign(const AnyStruct&);
   ///       void clear();
-  ///       void patchIfTypeIs(const Type&, const AnyStruct&);
-  ///       void ensureAny(cosnt AnyStruct&);
+  ///       void patchIfTypeIs(const Type&, const std::vector<AnyStruct>&);
+  ///       void ensureAny(const AnyStruct&);
   ///     }
   ///
   template <typename Visitor>

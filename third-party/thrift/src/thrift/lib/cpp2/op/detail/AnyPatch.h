@@ -272,9 +272,9 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     patchIfTypeIsImpl(patch, true);
   }
 
+  // The provided type MUST match with the value type of patch stored in
+  // provided patch as Thrift Any.
   void patchIfTypeIs(type::Type type, type::AnyStruct patch) {
-    // TODO(dokwon): Add validation that the provided type matches with the
-    // value type of patch stored in provided patch as Thrift Any.
     if (!type.isValid()) {
       throwTypeNotValid(type);
     }
@@ -284,9 +284,9 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     patchIfTypeIsImpl(std::move(type), std::move(patch), ensure);
   }
 
+  // The provided type in ensureAny MUST match with the value type of patch
+  // stored in provided patch as Thrift Any.
   void ensureAndPatch(type::AnyStruct ensure, type::AnyStruct patch) {
-    // TODO(dokwon): Add validation that the type in provided ensureAny matches
-    // with the value type of patch stored in provided patch as Thrift Any.
     throwIfInvalidOrUnsupportedAny(ensure);
     throwIfInvalidOrUnsupportedAny(patch);
     type::Type type = ensure.type().value();

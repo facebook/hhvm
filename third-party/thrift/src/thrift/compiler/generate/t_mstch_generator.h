@@ -20,8 +20,12 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <unordered_set>
 
 #include <thrift/compiler/detail/mustache/mstch.h>
+#include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/object.h>
+#include <thrift/compiler/whisker/render.h>
 
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_generator.h>
@@ -44,6 +48,25 @@ class t_mstch_generator : public t_generator {
   virtual std::string template_prefix() const = 0;
 
  protected:
+  struct whisker_options {
+    /**
+     * Whisker, by default, enforces that variables are defined when they are
+     * interpolated. mstch on the other hand silently interpolates the empty
+     * string. Our templates have come to rely on this behavior.
+     *
+     * This set specifies names for which Whisker should also silently
+     * interpolate empty string. This makes Whisker's rendering backwards
+     * compatible with existing Mustache templates.
+     */
+    std::unordered_set<std::string> allowed_undefined_variables;
+  };
+  /**
+   * If true, uses the Whisker template engine instead of Mustache.
+   */
+  virtual std::optional<whisker_options> use_whisker() const {
+    return std::nullopt;
+  }
+
   /**
    * If true, typedefs will be automatically resolved to their underlying type.
    */
@@ -209,8 +232,20 @@ class t_mstch_generator : public t_generator {
   std::map<std::string, std::string> options_;
 
   std::map<std::string, std::string> template_map_;
-
   void gen_template_map(const std::filesystem::path& root);
+
+  struct whisker_render_state {
+    whisker::diagnostics_engine diagnostic_engine;
+    std::shared_ptr<whisker::template_resolver> template_resolver;
+    whisker::render_options render_options;
+  };
+  // std::monostate implies that we have not yet checked if the implemented
+  // requested the use of Whisker.
+  // empty optional implies that we have checked and the implementation is NOT
+  // using Whisker.
+  std::variant<std::monostate, std::optional<whisker_render_state>>
+      whisker_render_state_;
+  whisker_render_state gen_whisker_render_state(whisker_options);
 
   /**
    * For every key in the map, prepends a prefix to that key for mstch.

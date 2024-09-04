@@ -17,16 +17,29 @@
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
 #include <algorithm>
+#include <cassert>
+#include <cstdio>
 #include <fstream>
 #include <memory>
+#include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
+
+#include <fmt/format.h>
 
 #include <thrift/compiler/detail/mustache/mstch.h>
+#include <thrift/compiler/whisker/ast.h>
+#include <thrift/compiler/whisker/mstch_compat.h>
+#include <thrift/compiler/whisker/parser.h>
+#include <thrift/compiler/whisker/source_location.h>
 
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/generate/templates.h>
+
+#include <boost/algorithm/string/split.hpp>
 
 using namespace std;
 
@@ -474,10 +487,119 @@ mstch::map t_mstch_generator::prepend_prefix(
   return res;
 }
 
+t_mstch_generator::whisker_render_state
+t_mstch_generator::gen_whisker_render_state(whisker_options whisker_opts) {
+  /**
+   * This implementation of whisker's template resolver builds on top of the
+   * template_map that already used by mstch. This allows template names to
+   * remain the same (albeit exact file names are not recoverable).
+   *
+   * When a new partial is requested, we lazily parse the corresponding entry in
+   * the template_map and cache the parsed AST.
+   */
+  class whisker_template_parser : public whisker::template_resolver {
+   public:
+    explicit whisker_template_parser(
+        const std::map<std::string, std::string>& template_map)
+        : template_map_(template_map) {}
+
+    std::optional<whisker::ast::root> resolve(
+        const std::vector<std::string>& partial_path,
+        diagnostics_engine& diags) override {
+      // Whisker always breaks down the path into components. However, the
+      // template_map stores them as one concatenated string.
+      std::string template_name =
+          fmt::format("{}", fmt::join(partial_path, "/"));
+
+      if (auto cached = cached_asts_.find(template_name);
+          cached != cached_asts_.end()) {
+        return cached->second;
+      }
+
+      auto source_code = template_map_.find(template_name);
+      if (source_code == template_map_.end()) {
+        return std::nullopt;
+      }
+      auto src =
+          src_manager_.add_virtual_file(template_name, source_code->second);
+      auto ast = whisker::parse(src, diags);
+      auto [result, inserted] =
+          cached_asts_.insert({std::move(template_name), std::move(ast)});
+      assert(inserted);
+      return result->second;
+    }
+
+    whisker::source_manager& source_manager() { return src_manager_; }
+
+   private:
+    const std::map<std::string, std::string>& template_map_;
+    whisker::source_manager src_manager_;
+    std::unordered_map<std::string, std::optional<whisker::ast::root>>
+        cached_asts_;
+  };
+
+  auto template_parser =
+      std::make_shared<whisker_template_parser>(get_template_map());
+  whisker::render_options render_options;
+  render_options.partial_resolver = template_parser;
+  render_options.strict_boolean_conditional = whisker::diagnostic_level::debug;
+  render_options.strict_printable_types = whisker::diagnostic_level::debug;
+  render_options.strict_undefined_variables = whisker::diagnostic_level::error;
+
+  for (const auto& undefined_name : whisker_opts.allowed_undefined_variables) {
+    render_options.globals.insert({undefined_name, whisker::make::null});
+  }
+
+  return whisker_render_state{
+      whisker::diagnostics_engine(
+          template_parser->source_manager(),
+          [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
+          diagnostic_params::only_errors()),
+      template_parser,
+      std::move(render_options),
+  };
+}
+
 std::string t_mstch_generator::render(
     const std::string& template_name, const mstch::node& context) {
-  return mstch::render(
-      get_template(template_name), context, get_template_map());
+  if (std::holds_alternative<std::monostate>(whisker_render_state_)) {
+    auto whisker_requested = use_whisker();
+    whisker_render_state_ = whisker_requested
+        ? gen_whisker_render_state(*whisker_requested)
+        : std::optional<whisker_render_state>();
+  }
+  auto& render_state =
+      std::get<std::optional<whisker_render_state>>(whisker_render_state_);
+
+  if (!render_state.has_value()) {
+    // The implementation chose not to use Whisker.
+    return mstch::render(
+        get_template(template_name), context, get_template_map());
+  }
+
+  std::vector<std::string> partial_path;
+  boost::algorithm::split(
+      partial_path, template_name, [](char c) { return c == '/'; });
+
+  std::optional<whisker::ast::root> ast =
+      render_state->template_resolver->resolve(
+          partial_path, render_state->diagnostic_engine);
+  if (!ast.has_value()) {
+    throw std::runtime_error{
+        fmt::format("Could not find template \"{}\"", template_name)};
+  }
+
+  std::ostringstream out;
+  if (!whisker::render(
+          out,
+          *ast,
+          whisker::from_mstch(context),
+          render_state->diagnostic_engine,
+          render_state->render_options)) {
+    throw std::runtime_error{
+        fmt::format("Failed to render template \"{}\"", template_name)};
+  }
+  return out.str();
 }
 
 void t_mstch_generator::render_to_file(

@@ -51,7 +51,6 @@ find_package(fmt CONFIG REQUIRED)
 
 find_package(OpenSSL REQUIRED)
 find_package(Glog REQUIRED)
-find_package(DoubleConversion REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Zstd REQUIRED)
 if (UNIX AND NOT APPLE)
@@ -201,7 +200,6 @@ target_include_directories(
   PRIVATE
     ${GLOG_INCLUDE_DIRS}
     ${FIZZ_INCLUDE_DIRECTORIES}
-    ${DOUBLE_CONVERSION_INCLUDE_DIR}
 )
 
 
@@ -217,7 +215,6 @@ target_link_libraries(fizz
     ${GLOG_LIBRARIES}
     ${GFLAGS_LIBRARIES}
     ${FIZZ_LINK_LIBRARIES}
-    ${DOUBLE_CONVERSION_LIBRARY}
     ${CMAKE_DL_LIBS}
     ${LIBRT_LIBRARIES})
 

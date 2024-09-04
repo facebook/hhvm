@@ -238,7 +238,10 @@ TEST(TypeTest, IdenticalTypeStructHash) {
       ->structType_ref()
       .ensure()
       .typeHashPrefixSha2_256_ref() =
-      getUniversalHashPrefix(structUri, kDefaultTypeHashBytes).toString();
+      getUniversalHashPrefix(
+          getUniversalHash(type::UniversalHashAlgorithm::Sha2_256, structUri),
+          kDefaultTypeHashBytes)
+          .toString();
   EXPECT_TRUE(identicalTypeStruct(structType, structTypeWithHash));
   // list<struct>
   {

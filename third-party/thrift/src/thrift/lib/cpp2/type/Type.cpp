@@ -94,13 +94,21 @@ bool identicalTypeUri(const TypeUri& lhs, const TypeUri& rhs) {
     if (lhs.uri_ref().has_value() &&
         rhs.typeHashPrefixSha2_256_ref().has_value()) {
       return getUniversalHashPrefix(
-                 lhs.uri_ref().value(), kDefaultTypeHashBytes) ==
+                 getUniversalHash(
+                     type::UniversalHashAlgorithm::Sha2_256,
+
+                     lhs.uri_ref().value()),
+                 kDefaultTypeHashBytes) ==
           rhs.typeHashPrefixSha2_256_ref().value();
     } else if (
         lhs.typeHashPrefixSha2_256_ref().has_value() &&
         rhs.uri_ref().has_value()) {
       return lhs.typeHashPrefixSha2_256_ref().value() ==
-          getUniversalHashPrefix(rhs.uri_ref().value(), kDefaultTypeHashBytes);
+          getUniversalHashPrefix(
+                 getUniversalHash(
+                     type::UniversalHashAlgorithm::Sha2_256,
+                     rhs.uri_ref().value()),
+                 kDefaultTypeHashBytes);
     }
     return false;
   }

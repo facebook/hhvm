@@ -2909,8 +2909,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
           rootRequestContextId_(stub.getRootRequestContextId()),
           reqId_(RequestsRegistry::getRequestId(rootRequestContextId_)),
           reqDebugLog_(collectRequestDebugLog(stub)) {
-      auto requestPayload =
-          rocket::unpack<RequestPayload>(stub.clonePayload(), false);
+      auto requestPayload = rocket::unpack<RequestPayload>(stub.clonePayload());
       payload_ = std::move(*requestPayload->payload);
       auto& metadata = requestPayload->metadata;
       if (metadata.otherMetadata()) {

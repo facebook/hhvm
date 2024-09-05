@@ -179,7 +179,7 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
     }
     ServerPushMetadata serverMeta;
     try {
-      unpack(serverMeta, std::move(mdPushFrame.metadata()), false);
+      unpackCompact(serverMeta, std::move(mdPushFrame.metadata()));
     } catch (...) {
       close(transport::TTransportException(
           transport::TTransportException::CORRUPTED_DATA,
@@ -383,8 +383,7 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
     serverCallback.onInitialError(makeContractViolation(kErrorMsg));
     return {StreamChannelStatus::ContractViolation, kErrorMsg};
   }
-  auto firstResponse =
-      unpack<FirstResponsePayload>(std::move(fullPayload), false);
+  auto firstResponse = unpack<FirstResponsePayload>(std::move(fullPayload));
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
     return StreamChannelStatus::Complete;
@@ -438,7 +437,7 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     bool next,
     bool complete) {
   if (next) {
-    auto streamPayload = unpack<StreamPayload>(std::move(fullPayload), false);
+    auto streamPayload = unpack<StreamPayload>(std::move(fullPayload));
     if (streamPayload.hasException()) {
       return serverCallback.onStreamError(std::move(streamPayload.exception()));
     }
@@ -505,7 +504,7 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
     return {StreamChannelStatus::ContractViolation, std::move(msg)};
   };
   if (next) {
-    auto streamPayload = unpack<StreamPayload>(std::move(fullPayload), false);
+    auto streamPayload = unpack<StreamPayload>(std::move(fullPayload));
     if (streamPayload.hasException()) {
       return serverCallback.onFinalResponseError(
           std::move(streamPayload.exception()));

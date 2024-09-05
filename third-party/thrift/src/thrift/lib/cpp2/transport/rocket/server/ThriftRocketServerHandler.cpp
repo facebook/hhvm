@@ -205,11 +205,18 @@ void ThriftRocketServerHandler::handleSetupFrame(
 
   RequestSetupMetadata meta;
   try {
-    if (unpack(meta, cursor, frame.encodeMetadataUsingBinary()) !=
-        frame.payload().metadataSize()) {
-      return connection.close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP,
-          "Error deserializing SETUP payload: underflow"));
+    if (frame.encodeMetadataUsingBinary()) {
+      if (unpackBinary(meta, cursor) != frame.payload().metadataSize()) {
+        return connection.close(folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID_SETUP,
+            "Error deserializing SETUP payload: underflow"));
+      }
+    } else {
+      if (unpackCompact(meta, cursor) != frame.payload().metadataSize()) {
+        return connection.close(folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID_SETUP,
+            "Error deserializing SETUP payload: underflow"));
+      }
     }
 
     connContext_.readSetupMetadata(meta);
@@ -440,7 +447,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
 
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =
-      unpackAsCompressed<RequestPayload>(std::move(payload), false);
+      unpackAsCompressed<RequestPayload>(std::move(payload));
 
   auto makeActiveRequest = [&](auto&& md, auto&& payload, auto&& reqCtx) {
     serverConfigs_->incActiveRequests();

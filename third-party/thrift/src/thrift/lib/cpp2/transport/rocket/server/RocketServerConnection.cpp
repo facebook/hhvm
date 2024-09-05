@@ -530,7 +530,7 @@ void RocketServerConnection::handleUntrackedFrame(
       MetadataPushFrame metadataFrame(std::move(frame));
       ClientPushMetadata clientMeta;
       try {
-        unpack(clientMeta, metadataFrame.metadata(), false);
+        unpackCompact(clientMeta, metadataFrame.metadata());
       } catch (...) {
         close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID, "Failed to deserialize metadata push frame"));
@@ -675,7 +675,7 @@ void RocketServerConnection::handleSinkFrame(
       bool notViolateContract = true;
       if (next) {
         auto streamPayload =
-            rocket::unpack<StreamPayload>(std::move(*fullPayload), false);
+            rocket::unpack<StreamPayload>(std::move(*fullPayload));
         if (streamPayload.hasException()) {
           notViolateContract =
               clientCallback.onSinkError(std::move(streamPayload.exception()));

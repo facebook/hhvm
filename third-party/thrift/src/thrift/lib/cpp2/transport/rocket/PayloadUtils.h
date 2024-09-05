@@ -58,20 +58,21 @@ size_t unpack(T& output, const BufferType& input) {
 }
 
 template <typename T, typename BufferType>
-size_t unpack(T& output, const BufferType& buffer, bool useBinary) {
-  if (useBinary) {
-    return unpack<T, BinaryProtocolReader, BufferType>(output, buffer);
-  }
-  return unpack<T, CompactProtocolReader, BufferType>(output, buffer);
+size_t unpackBinary(T& output, const BufferType& input) {
+  return unpack<T, BinaryProtocolReader, BufferType>(output, input);
+}
+
+template <typename T, typename BufferType>
+size_t unpackCompact(T& output, const BufferType& input) {
+  return unpack<T, CompactProtocolReader, BufferType>(output, input);
 }
 
 namespace detail {
 template <class PayloadType, bool uncompressPayload>
-inline PayloadType unpackPayload(rocket::Payload&& payload, bool useBinary) {
+inline PayloadType unpackPayload(rocket::Payload&& payload) {
   PayloadType t{{}, {}};
   if (payload.hasNonemptyMetadata()) {
-    if (unpack(t.metadata, payload.buffer(), useBinary) !=
-        payload.metadataSize()) {
+    if (unpackCompact(t.metadata, payload.buffer()) != payload.metadataSize()) {
       folly::throw_exception<std::out_of_range>("metadata size mismatch");
     }
   }
@@ -89,17 +90,15 @@ inline PayloadType unpackPayload(rocket::Payload&& payload, bool useBinary) {
 } // namespace detail
 
 template <class T>
-folly::Try<T> unpackAsCompressed(rocket::Payload&& payload, bool useBinary) {
-  return folly::makeTryWith([&] {
-    return detail::unpackPayload<T, false>(std::move(payload), useBinary);
-  });
+folly::Try<T> unpackAsCompressed(rocket::Payload&& payload) {
+  return folly::makeTryWith(
+      [&] { return detail::unpackPayload<T, false>(std::move(payload)); });
 }
 
 template <class T>
-folly::Try<T> unpack(rocket::Payload&& payload, bool useBinary) {
-  return folly::makeTryWith([&] {
-    return detail::unpackPayload<T, true>(std::move(payload), useBinary);
-  });
+folly::Try<T> unpack(rocket::Payload&& payload) {
+  return folly::makeTryWith(
+      [&] { return detail::unpackPayload<T, true>(std::move(payload)); });
 }
 
 template <typename T>

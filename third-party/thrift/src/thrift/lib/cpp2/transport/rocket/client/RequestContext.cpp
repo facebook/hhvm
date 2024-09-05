@@ -26,7 +26,6 @@
 #include <folly/lang/Assume.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>

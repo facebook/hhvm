@@ -993,12 +993,19 @@ class MutableUnionMeta(type):
             _gen_mutable_union_field_enum_members(field_infos)
         )
 
+        slots = [field_info.py_name for field_info in field_infos]
+        union_class_namespace["__slots__"] = slots
+
+        type_obj = super().__new__(cls, union_name, (MutableUnion,), union_class_namespace)
+
         for field_info in field_infos:
-            union_class_namespace[field_info.py_name] = _MutableUnionFieldDescriptor(
-                field_info
+            type.__setattr__(
+                type_obj,
+                field_info.py_name,
+                _MutableUnionFieldDescriptor(field_info),
             )
 
-        return super().__new__(cls, union_name, (MutableUnion,), union_class_namespace)
+        return type_obj
 
     def _fbthrift_fill_spec(cls):
         (<MutableUnionInfo>cls._fbthrift_mutable_struct_info)._fill_mutable_union_info()

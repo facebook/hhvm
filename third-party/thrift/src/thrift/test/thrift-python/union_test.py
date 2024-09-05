@@ -421,6 +421,13 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertNotEqual(union_immutable, union_mutable)
         self.assertEqual(union_mutable, TestUnionMutable(string_field="hello"))
 
+    def test_set_nonexistent_field(self) -> None:
+        u = TestUnionImmutable(string_field="Hello!")
+        with self.assertRaisesRegex(
+            AttributeError, "object has no attribute 'non_existent_field'"
+        ):
+            u.non_existent_field = 999
+
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def setUp(self) -> None:
@@ -680,6 +687,13 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
 
         u.int_field = 43
         self.assertEqual(u.int_field, 43)
+
+    def test_set_nonexistent_field(self) -> None:
+        u = TestUnionMutable(string_field="Hello!")
+        with self.assertRaisesRegex(
+            AttributeError, "object has no attribute 'non_existent_field'"
+        ):
+            u.non_existent_field = 999
 
     def test_del_field(self) -> None:
         u = TestUnionMutable(string_field="Hello!")

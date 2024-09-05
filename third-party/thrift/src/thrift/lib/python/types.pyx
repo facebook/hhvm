@@ -37,16 +37,18 @@ import threading
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.serializer cimport cserialize, cdeserialize
 
-try:
-    import thrift.py3.types
-    def _is_py3_struct(obj):
+def _is_py3_struct(obj):
+    try: 
+        import thrift.py3.types
         return isinstance(obj, thrift.py3.types.Struct)
-    def _is_py3_enum(obj):
-        return isinstance(obj, thrift.py3.types.Enum)
-except ImportError:
-    def _is_py3_struct(obj):
+    except ImportError:
         return False
-    def _is_py3_enum(obj):
+
+def _is_py3_enum(obj):
+    try: 
+        import thrift.py3.types
+        return isinstance(obj, thrift.py3.types.Enum)
+    except ImportError:
         return False
 
 def _make_noncached_property(getter_function, struct_class, field_name):

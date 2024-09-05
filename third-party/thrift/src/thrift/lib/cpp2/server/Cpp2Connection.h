@@ -317,6 +317,7 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
   std::shared_ptr<Cpp2Connection> this_;
 
   bool connectionAdded_{false};
+  std::unique_ptr<MessageChannel::SendCallback> upgradeToRocketCallback_{};
 };
 
 } // namespace thrift

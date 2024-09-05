@@ -51,12 +51,14 @@ namespace {
 class TransportUpgradeSendCallback : public MessageChannel::SendCallback {
  public:
   TransportUpgradeSendCallback(
+      RocketRoutingHandler* rocketHandler,
       const std::shared_ptr<folly::AsyncTransport>& transport,
       const folly::SocketAddress* peerAddress,
       Cpp2Worker* cpp2Worker,
       Cpp2Connection* cpp2Conn,
       HeaderServerChannel* headerChannel)
-      : transport_(transport),
+      : rocketHandler_(rocketHandler),
+        transport_(transport),
         peerAddress_(peerAddress),
         cpp2Worker_(cpp2Worker),
         cpp2Conn_(cpp2Conn),
@@ -65,50 +67,43 @@ class TransportUpgradeSendCallback : public MessageChannel::SendCallback {
   void sendQueued() override {}
 
   void messageSent() override {
-    SCOPE_EXIT {
-      delete this;
-    };
-    // do the transport upgrade
-    for (auto& routingHandler :
-         *cpp2Worker_->getServer()->getRoutingHandlers()) {
-      if (auto handler =
-              dynamic_cast<RocketRoutingHandler*>(routingHandler.get())) {
-        // Close the channel, since the transport is transferring to rocket
-        DCHECK(headerChannel_);
-        headerChannel_->setCallback(nullptr);
-        headerChannel_->setTransport(nullptr);
-        headerChannel_->closeNow();
-        DCHECK(transport_.use_count() == 1);
+    // Close the channel, since the transport is transferring to rocket
+    DCHECK(headerChannel_);
+    // This should clear all but one shared references to the transport, so that
+    // it can be stolen below and wrapped in a unique_ptr.
+    headerChannel_->setCallback(nullptr);
+    headerChannel_->setTransport(nullptr);
+    headerChannel_->closeNow();
+    DCHECK(transport_.use_count() == 1);
 
-        // Only do upgrade if transport_ is the only one managing the socket.
-        // Otherwise close the connection.
-        if (transport_.use_count() == 1) {
-          // Steal the transport from header channel
-          auto uPtr =
-              std::get_deleter<
-                  apache::thrift::transport::detail::ReleaseDeleter<
-                      folly::AsyncTransport,
-                      folly::DelayedDestruction::Destructor>>(transport_)
-                  ->stealPtr();
+    // Only do upgrade if transport_ is the only one managing the socket.
+    // Otherwise close the connection.
+    if (transport_.use_count() == 1) {
+      // Steal the transport from header channel
+      auto uPtr =
+          std::get_deleter<apache::thrift::transport::detail::ReleaseDeleter<
+              folly::AsyncTransport,
+              folly::DelayedDestruction::Destructor>>(transport_)
+              ->stealPtr();
 
-          // Let RocketRoutingHandler handle the connection from here
-          handler->handleConnection(
-              cpp2Worker_->getConnectionManager(),
-              std::move(uPtr),
-              peerAddress_,
-              wangle::TransportInfo(),
-              cpp2Worker_->getWorkerShared());
-        }
-        DCHECK(cpp2Conn_);
-        cpp2Conn_->stop();
-        break;
-      }
+      // Let RocketRoutingHandler handle the connection from here
+      rocketHandler_->handleConnection(
+          cpp2Worker_->getConnectionManager(),
+          std::move(uPtr),
+          peerAddress_,
+          wangle::TransportInfo(),
+          cpp2Worker_->getWorkerShared());
     }
+    DCHECK(cpp2Conn_);
+    cpp2Conn_->stop();
   }
 
-  void messageSendError(folly::exception_wrapper&&) override { delete this; }
+  void messageSendError(folly::exception_wrapper&& ew) override {
+    VLOG(4) << "Failed to send rocket upgrade response: " << ew.what();
+  }
 
  private:
+  RocketRoutingHandler* rocketHandler_;
   const std::shared_ptr<folly::AsyncTransport>& transport_;
   const folly::SocketAddress* peerAddress_;
   Cpp2Worker* cpp2Worker_;
@@ -445,17 +440,29 @@ void Cpp2Connection::requestReceived(
   std::string& methodName = msgBegin.methodName;
   const auto& meta = msgBegin.metadata;
 
+  // If the transport upgrade has begun, we should reject any requests made
+  // before it's completed.
+  if (upgradeToRocketCallback_ != nullptr) {
+    killRequest(
+        std::move(hreq),
+        TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
+        kMethodUnknownErrorCode,
+        fmt::format(
+            "Unexpected request '{}' while upgrading transport to rocket",
+            methodName)
+            .c_str());
+    return;
+  }
   // Transport upgrade: check if client requested transport upgrade from header
   // to rocket. If yes, check if we support Rocket, then reply immediately and
   // upgrade the transport after sending the reply.
   if (methodName == "upgradeToRocket") {
     auto handlers = worker_->getServer()->getRoutingHandlers();
-    bool hasRocketSupport =
-        std::any_of(handlers->begin(), handlers->end(), [](auto& handler) {
+    auto rocketHandlerIterator =
+        std::find_if(handlers->begin(), handlers->end(), [](auto& handler) {
           return dynamic_cast<RocketRoutingHandler*>(handler.get()) != nullptr;
         });
-    // We check this again in TransportUpgradeSendCallback::messageSent.
-    if (!hasRocketSupport) {
+    if (rocketHandlerIterator == handlers->end()) {
       killRequest(
           std::move(hreq),
           TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
@@ -463,6 +470,10 @@ void Cpp2Connection::requestReceived(
           "Rocket upgrade attempted but RocketRoutingHandler not found");
       return;
     }
+    // We assume the referenced RocketRoutingHandler object will remain alive
+    // while we need it, but there's nothing guaranteeing that.
+    apache::thrift::RocketRoutingHandler* rocketHandler =
+        dynamic_cast<RocketRoutingHandler*>(rocketHandlerIterator->get());
     ResponsePayload response;
     switch (protoId) {
       case apache::thrift::protocol::T_BINARY_PROTOCOL:
@@ -485,14 +496,14 @@ void Cpp2Connection::requestReceived(
         return;
     }
 
-    hreq->sendReply(
-        std::move(response),
-        new TransportUpgradeSendCallback(
-            transport_,
-            context_.getPeerAddress(),
-            getWorker(),
-            this,
-            channel_.get()));
+    upgradeToRocketCallback_ = std::make_unique<TransportUpgradeSendCallback>(
+        rocketHandler,
+        transport_,
+        context_.getPeerAddress(),
+        getWorker(),
+        this,
+        channel_.get());
+    hreq->sendReply(std::move(response), upgradeToRocketCallback_.get());
     return;
   }
 

@@ -92,7 +92,6 @@ void InitialResponse::readNoXfer(Protocol_* iprot) {
 _readField_content:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_content, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -212,7 +211,6 @@ void FinalResponse::readNoXfer(Protocol_* iprot) {
 _readField_content:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_content, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -332,7 +330,6 @@ void SinkPayload::readNoXfer(Protocol_* iprot) {
 _readField_content:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_content, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -452,7 +449,6 @@ void CompatibleWithKeywordSink::readNoXfer(Protocol_* iprot) {
 _readField_sink:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_sink, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -572,7 +568,6 @@ void InitialException::readNoXfer(Protocol_* iprot) {
 _readField_reason:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_reason, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -692,7 +687,6 @@ void SinkException1::readNoXfer(Protocol_* iprot) {
 _readField_reason:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_reason, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -812,7 +806,6 @@ void SinkException2::readNoXfer(Protocol_* iprot) {
 _readField_reason:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_reason, _readState);
-    
   }
  this->__isset.set(0, true);
 

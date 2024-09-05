@@ -50,7 +50,6 @@ void BasicTypes::readNoXfer(Protocol_* iprot) {
 _readField_first:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_first, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -63,7 +62,6 @@ _readField_first:
 _readField_second:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_second, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -77,7 +75,6 @@ _readField_second:
 _readField_third:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_third, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -91,7 +88,6 @@ _readField_third:
 _readField_isTrue:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_isTrue, _readState);
-    
   }
  this->__isset.set(2, true);
 

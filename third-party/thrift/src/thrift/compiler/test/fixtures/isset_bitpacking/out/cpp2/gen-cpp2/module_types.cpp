@@ -46,9 +46,9 @@ std::string_view Default::__fbthrift_get_class_name() {
 Default::Default(const Default&) = default;
 Default& Default::operator=(const Default&) = default;
 Default::Default() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
+    __fbthrift_field_field1(),
+    __fbthrift_field_field2(),
+    __fbthrift_field_field4() {
 }
 
 
@@ -167,9 +167,9 @@ std::string_view NonAtomic::__fbthrift_get_class_name() {
 NonAtomic::NonAtomic(const NonAtomic&) = default;
 NonAtomic& NonAtomic::operator=(const NonAtomic&) = default;
 NonAtomic::NonAtomic() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
+    __fbthrift_field_field1(),
+    __fbthrift_field_field2(),
+    __fbthrift_field_field4() {
 }
 
 
@@ -288,9 +288,9 @@ std::string_view Atomic::__fbthrift_get_class_name() {
 Atomic::Atomic(const Atomic&) = default;
 Atomic& Atomic::operator=(const Atomic&) = default;
 Atomic::Atomic() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
+    __fbthrift_field_field1(),
+    __fbthrift_field_field2(),
+    __fbthrift_field_field4() {
 }
 
 
@@ -409,9 +409,9 @@ std::string_view AtomicFoo::__fbthrift_get_class_name() {
 AtomicFoo::AtomicFoo(const AtomicFoo&) = default;
 AtomicFoo& AtomicFoo::operator=(const AtomicFoo&) = default;
 AtomicFoo::AtomicFoo() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
+    __fbthrift_field_field1(),
+    __fbthrift_field_field2(),
+    __fbthrift_field_field4() {
 }
 
 

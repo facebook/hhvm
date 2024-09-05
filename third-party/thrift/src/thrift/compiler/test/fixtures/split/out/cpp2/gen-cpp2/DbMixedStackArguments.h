@@ -76,6 +76,7 @@ class ServiceHandler<::cpp2::DbMixedStackArguments> : public apache::thrift::Ser
 namespace cpp2 {
 using DbMixedStackArgumentsSvIf [[deprecated("Use apache::thrift::ServiceHandler<DbMixedStackArguments> instead")]] = ::apache::thrift::ServiceHandler<DbMixedStackArguments>;
 } // namespace cpp2
+
 namespace cpp2 {
 class DbMixedStackArgumentsSvNull : public ::apache::thrift::ServiceHandler<DbMixedStackArguments> {
  public:

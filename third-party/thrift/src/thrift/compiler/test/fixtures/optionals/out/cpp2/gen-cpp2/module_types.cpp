@@ -152,7 +152,7 @@ std::string_view Vehicle::__fbthrift_get_class_name() {
 Vehicle::Vehicle(const Vehicle&) = default;
 Vehicle& Vehicle::operator=(const Vehicle&) = default;
 Vehicle::Vehicle() :
-      __fbthrift_field_hasAC(false) {
+    __fbthrift_field_hasAC(false) {
 }
 
 
@@ -288,10 +288,10 @@ std::string_view Person::__fbthrift_get_class_name() {
 Person::Person(const Person&) = default;
 Person& Person::operator=(const Person&) = default;
 Person::Person() :
-      __fbthrift_field_id(),
-      __fbthrift_field_age(),
-      __fbthrift_field_bestFriend(),
-      __fbthrift_field_afraidOfAnimal() {
+    __fbthrift_field_id(),
+    __fbthrift_field_age(),
+    __fbthrift_field_bestFriend(),
+    __fbthrift_field_afraidOfAnimal() {
 }
 
 

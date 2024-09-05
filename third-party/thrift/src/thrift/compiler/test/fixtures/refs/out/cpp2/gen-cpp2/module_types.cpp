@@ -367,12 +367,12 @@ MyField& MyField::operator=(const MyField& other) {
 }
 
 MyField::MyField() :
-      __fbthrift_field_value(std::make_unique<::std::int64_t>()),
-      __fbthrift_field_req_value(std::make_unique<::std::int64_t>()),
-      __fbthrift_field_enum_value(std::make_unique<::cpp2::MyEnum>()),
-      __fbthrift_field_req_enum_value(std::make_unique<::cpp2::MyEnum>()),
-      __fbthrift_field_str_value(std::make_unique<::std::string>()),
-      __fbthrift_field_req_str_value(std::make_unique<::std::string>()) {
+    __fbthrift_field_value(std::make_unique<::std::int64_t>()),
+    __fbthrift_field_req_value(std::make_unique<::std::int64_t>()),
+    __fbthrift_field_enum_value(std::make_unique<::cpp2::MyEnum>()),
+    __fbthrift_field_req_enum_value(std::make_unique<::cpp2::MyEnum>()),
+    __fbthrift_field_str_value(std::make_unique<::std::string>()),
+    __fbthrift_field_req_str_value(std::make_unique<::std::string>()) {
 }
 
 
@@ -519,8 +519,8 @@ MyStruct& MyStruct::operator=(const MyStruct& other) {
 }
 
 MyStruct::MyStruct() :
-      __fbthrift_field_ref(std::make_unique<::cpp2::MyField>()),
-      __fbthrift_field_req_ref(std::make_unique<::cpp2::MyField>()) {
+    __fbthrift_field_ref(std::make_unique<::cpp2::MyField>()),
+    __fbthrift_field_req_ref(std::make_unique<::cpp2::MyField>()) {
 }
 
 
@@ -655,8 +655,8 @@ StructWithUnion& StructWithUnion::operator=(const StructWithUnion& other) {
 }
 
 StructWithUnion::StructWithUnion() :
-      __fbthrift_field_u(std::make_unique<::cpp2::MyUnion>()),
-      __fbthrift_field_aDouble(std::make_unique<double>()) {
+    __fbthrift_field_u(std::make_unique<::cpp2::MyUnion>()),
+    __fbthrift_field_aDouble(std::make_unique<double>()) {
 }
 
 
@@ -913,12 +913,12 @@ StructWithContainers& StructWithContainers::operator=(const StructWithContainers
 }
 
 StructWithContainers::StructWithContainers() :
-      __fbthrift_field_list_ref(std::make_unique<::std::vector<::std::int32_t>>()),
-      __fbthrift_field_set_ref(std::make_unique<::std::set<::std::int32_t>>()),
-      __fbthrift_field_map_ref(std::make_unique<::std::map<::std::int32_t, ::std::int32_t>>()),
-      __fbthrift_field_list_ref_unique(std::make_unique<::std::vector<::std::int32_t>>()),
-      __fbthrift_field_set_ref_shared(std::make_shared<::std::set<::std::int32_t>>()),
-      __fbthrift_field_list_ref_shared_const(std::make_shared<::std::vector<::std::int32_t>>()) {
+    __fbthrift_field_list_ref(std::make_unique<::std::vector<::std::int32_t>>()),
+    __fbthrift_field_set_ref(std::make_unique<::std::set<::std::int32_t>>()),
+    __fbthrift_field_map_ref(std::make_unique<::std::map<::std::int32_t, ::std::int32_t>>()),
+    __fbthrift_field_list_ref_unique(std::make_unique<::std::vector<::std::int32_t>>()),
+    __fbthrift_field_set_ref_shared(std::make_shared<::std::set<::std::int32_t>>()),
+    __fbthrift_field_list_ref_shared_const(std::make_shared<::std::vector<::std::int32_t>>()) {
 }
 
 
@@ -1036,8 +1036,8 @@ std::string_view StructWithSharedConst::__fbthrift_get_class_name() {
 StructWithSharedConst::StructWithSharedConst(const StructWithSharedConst&) = default;
 StructWithSharedConst& StructWithSharedConst::operator=(const StructWithSharedConst&) = default;
 StructWithSharedConst::StructWithSharedConst() :
-      __fbthrift_field_shared_const(std::make_shared<::cpp2::MyField>()),
-      __fbthrift_field_req_shared_const(std::make_shared<::cpp2::MyField>()) {
+    __fbthrift_field_shared_const(std::make_shared<::cpp2::MyField>()),
+    __fbthrift_field_req_shared_const(std::make_shared<::cpp2::MyField>()) {
 }
 
 
@@ -1243,8 +1243,8 @@ StructWithRef& StructWithRef::operator=(const StructWithRef& other) {
 }
 
 StructWithRef::StructWithRef() :
-      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
+    __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
+    __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
 }
 
 
@@ -1472,8 +1472,8 @@ std::string_view StructWithInternBox::__fbthrift_get_class_name() {
 StructWithInternBox::StructWithInternBox(const StructWithInternBox&) = default;
 StructWithInternBox& StructWithInternBox::operator=(const StructWithInternBox&) = default;
 StructWithInternBox::StructWithInternBox() :
-      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
-      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())) {
+    __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
+    __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())) {
 }
 
 
@@ -1588,8 +1588,8 @@ std::string_view StructWithTerseInternBox::__fbthrift_get_class_name() {
 StructWithTerseInternBox::StructWithTerseInternBox(const StructWithTerseInternBox&) = default;
 StructWithTerseInternBox& StructWithTerseInternBox::operator=(const StructWithTerseInternBox&) = default;
 StructWithTerseInternBox::StructWithTerseInternBox() :
-      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
-      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())) {
+    __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
+    __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())) {
 }
 
 
@@ -1713,8 +1713,8 @@ AdaptedStructWithInternBox& AdaptedStructWithInternBox::operator=(const AdaptedS
 }
 
 AdaptedStructWithInternBox::AdaptedStructWithInternBox() :
-      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>())),
-      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>())) {
+    __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>())),
+    __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>())) {
 }
 
 
@@ -1845,8 +1845,8 @@ AdaptedStructWithTerseInternBox& AdaptedStructWithTerseInternBox::operator=(cons
 }
 
 AdaptedStructWithTerseInternBox::AdaptedStructWithTerseInternBox() :
-      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>())),
-      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>())) {
+    __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>())),
+    __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>())) {
 }
 
 
@@ -1975,8 +1975,8 @@ StructWithRefTypeUnique& StructWithRefTypeUnique::operator=(const StructWithRefT
 }
 
 StructWithRefTypeUnique::StructWithRefTypeUnique() :
-      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
+    __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
+    __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
 }
 
 
@@ -2094,8 +2094,8 @@ std::string_view StructWithRefTypeShared::__fbthrift_get_class_name() {
 StructWithRefTypeShared::StructWithRefTypeShared(const StructWithRefTypeShared&) = default;
 StructWithRefTypeShared& StructWithRefTypeShared::operator=(const StructWithRefTypeShared&) = default;
 StructWithRefTypeShared::StructWithRefTypeShared() :
-      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
+    __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
+    __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
 }
 
 
@@ -2213,8 +2213,8 @@ std::string_view StructWithRefTypeSharedConst::__fbthrift_get_class_name() {
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(const StructWithRefTypeSharedConst&) = default;
 StructWithRefTypeSharedConst& StructWithRefTypeSharedConst::operator=(const StructWithRefTypeSharedConst&) = default;
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst() :
-      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
+    __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
+    __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
 }
 
 
@@ -2342,7 +2342,7 @@ StructWithRefAndAnnotCppNoexceptMoveCtor& StructWithRefAndAnnotCppNoexceptMoveCt
 }
 
 StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor() :
-      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()) {
+    __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()) {
 }
 
 
@@ -2455,11 +2455,11 @@ StructWithString& StructWithString::operator=(const StructWithString& other) {
 }
 
 StructWithString::StructWithString() :
-      __fbthrift_field_def_unique_string_ref(std::make_unique<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-      __fbthrift_field_def_shared_string_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-      __fbthrift_field_def_shared_string_const_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-      __fbthrift_field_unique_string_ref(std::make_unique<::std::string>()),
-      __fbthrift_field_shared_string_ref(std::make_shared<::std::string>()) {
+    __fbthrift_field_def_unique_string_ref(std::make_unique<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
+    __fbthrift_field_def_shared_string_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
+    __fbthrift_field_def_shared_string_const_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
+    __fbthrift_field_unique_string_ref(std::make_unique<::std::string>()),
+    __fbthrift_field_shared_string_ref(std::make_shared<::std::string>()) {
 }
 
 

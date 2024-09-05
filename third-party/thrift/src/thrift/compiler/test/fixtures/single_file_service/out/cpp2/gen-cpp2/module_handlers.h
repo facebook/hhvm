@@ -64,6 +64,7 @@ class IServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
 
+
 class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "I"; }
@@ -107,6 +108,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 namespace cpp2 {
 using ASvIf [[deprecated("Use apache::thrift::ServiceHandler<A> instead")]] = ::apache::thrift::ServiceHandler<A>;
 } // namespace cpp2
+
 namespace cpp2 {
 class ASvNull : public ::apache::thrift::ServiceHandler<A> {
  public:
@@ -225,6 +227,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
 namespace cpp2 {
 using BSvIf [[deprecated("Use apache::thrift::ServiceHandler<B> instead")]] = ::apache::thrift::ServiceHandler<B>;
 } // namespace cpp2
+
 namespace cpp2 {
 class BSvNull : public ::apache::thrift::ServiceHandler<B>, virtual public ::apache::thrift::ServiceHandler<::cpp2::A> {
  public:
@@ -312,6 +315,7 @@ class IServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
 
+
 class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "I"; }
@@ -345,6 +349,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 namespace cpp2 {
 using CSvIf [[deprecated("Use apache::thrift::ServiceHandler<C> instead")]] = ::apache::thrift::ServiceHandler<C>;
 } // namespace cpp2
+
 namespace cpp2 {
 class CSvNull : public ::apache::thrift::ServiceHandler<C> {
  public:

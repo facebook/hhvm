@@ -71,7 +71,6 @@ void Mixin1::readNoXfer(Protocol_* iprot) {
 _readField_field1:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_field1, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -193,7 +192,6 @@ _readField_m1:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin1>::readWithContext(*iprot, this->__fbthrift_field_m1, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -207,7 +205,6 @@ _readField_m1:
 _readField_field2:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_field2, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -352,7 +349,6 @@ void Mixin3Base::readNoXfer(Protocol_* iprot) {
 _readField_field3:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -472,7 +468,6 @@ void Foo::readNoXfer(Protocol_* iprot) {
 _readField_field4:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -488,7 +483,6 @@ _readField_m2:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin2>::readWithContext(*iprot, this->__fbthrift_field_m2, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -504,7 +498,6 @@ _readField_m3:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Mixin3>::readWithContext(*iprot, this->__fbthrift_field_m3, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(2, true);
 

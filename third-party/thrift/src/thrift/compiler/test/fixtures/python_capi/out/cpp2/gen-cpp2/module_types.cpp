@@ -82,9 +82,9 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_inty(),
-      __fbthrift_field_myEnumy(),
-      __fbthrift_field_boulet() {
+    __fbthrift_field_inty(),
+    __fbthrift_field_myEnumy(),
+    __fbthrift_field_boulet() {
 }
 
 
@@ -443,7 +443,7 @@ std::string_view DoubledPair::__fbthrift_get_class_name() {
 DoubledPair::DoubledPair(const DoubledPair&) = default;
 DoubledPair& DoubledPair::operator=(const DoubledPair&) = default;
 DoubledPair::DoubledPair() :
-      __fbthrift_field_x() {
+    __fbthrift_field_x() {
 }
 
 
@@ -776,12 +776,12 @@ PrimitiveStruct& PrimitiveStruct::operator=(const PrimitiveStruct& other) {
 }
 
 PrimitiveStruct::PrimitiveStruct() :
-      __fbthrift_field_booly(),
-      __fbthrift_field_charry(),
-      __fbthrift_field_shortay(),
-      __fbthrift_field_inty(),
-      __fbthrift_field_longy(),
-      __fbthrift_field_floaty() {
+    __fbthrift_field_booly(),
+    __fbthrift_field_charry(),
+    __fbthrift_field_shortay(),
+    __fbthrift_field_inty(),
+    __fbthrift_field_longy(),
+    __fbthrift_field_floaty() {
 }
 
 
@@ -1020,8 +1020,8 @@ AdaptedFields& AdaptedFields::operator=(const AdaptedFields& other) {
 }
 
 AdaptedFields::AdaptedFields() :
-      __fbthrift_field_adapted_int(),
-      __fbthrift_field_inline_adapted_int() {
+    __fbthrift_field_adapted_int(),
+    __fbthrift_field_inline_adapted_int() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 1>(__fbthrift_field_adapted_int, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4>(__fbthrift_field_inline_adapted_int, *this);
 }
@@ -1807,10 +1807,10 @@ std::string_view ComposeStruct::__fbthrift_get_class_name() {
 }
 
 ComposeStruct::ComposeStruct() :
-      __fbthrift_field_enum_(),
-      __fbthrift_field_renamed_(),
-      __fbthrift_field_aliased(std::make_shared<::test::fixtures::python_capi::ListAlias>()),
-      __fbthrift_field_xenum() {
+    __fbthrift_field_enum_(),
+    __fbthrift_field_renamed_(),
+    __fbthrift_field_aliased(std::make_shared<::test::fixtures::python_capi::ListAlias>()),
+    __fbthrift_field_xenum() {
 }
 
 

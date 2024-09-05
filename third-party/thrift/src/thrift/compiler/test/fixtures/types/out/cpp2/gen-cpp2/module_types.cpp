@@ -1072,8 +1072,8 @@ std::string_view ComplexNestedWithDefault::__fbthrift_get_class_name() {
 ComplexNestedWithDefault::ComplexNestedWithDefault(const ComplexNestedWithDefault&) = default;
 ComplexNestedWithDefault& ComplexNestedWithDefault::operator=(const ComplexNestedWithDefault&) = default;
 ComplexNestedWithDefault::ComplexNestedWithDefault() :
-      __fbthrift_field_z(apache::thrift::StringTraits<std::string>::fromStringLiteral("4")),
-      __fbthrift_field_n(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(3) } }))) {
+    __fbthrift_field_z(apache::thrift::StringTraits<std::string>::fromStringLiteral("4")),
+    __fbthrift_field_n(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(3) } }))) {
 }
 
 
@@ -1440,8 +1440,8 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_MyIntField(),
-      __fbthrift_field_majorVer() {
+    __fbthrift_field_MyIntField(),
+    __fbthrift_field_majorVer() {
 }
 
 

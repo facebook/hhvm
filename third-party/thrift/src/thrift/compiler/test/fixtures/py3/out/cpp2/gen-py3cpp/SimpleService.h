@@ -476,6 +476,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 namespace py3::simple {
 using SimpleServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<SimpleService> instead")]] = ::apache::thrift::ServiceHandler<SimpleService>;
 } // namespace py3::simple
+
 namespace py3::simple {
 class SimpleServiceSvNull : public ::apache::thrift::ServiceHandler<SimpleService> {
  public:

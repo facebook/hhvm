@@ -52,7 +52,6 @@ _readField_MyIncludedField:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedField, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -68,7 +67,6 @@ _readField_MyOtherIncludedField:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::readWithContext(*iprot, this->__fbthrift_field_MyOtherIncludedField, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -82,7 +80,6 @@ _readField_MyOtherIncludedField:
 _readField_MyIncludedInt:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedInt, _readState);
-    
   }
  this->__isset.set(2, true);
 

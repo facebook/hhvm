@@ -267,6 +267,19 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
+  std::optional<whisker_options> use_whisker() const override {
+    whisker_options opts;
+    opts.allowed_undefined_variables = {
+        "program:autogen_path",
+        "service:autogen_path",
+        "program:namespace_cpp2",
+        "service:namespace_cpp2",
+        "field:fatal_annotations?",
+        "value:enable_referencing?",
+    };
+    return opts;
+  }
+
   std::string template_prefix() const override { return "cpp2"; }
 
   void process_options(

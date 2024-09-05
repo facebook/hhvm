@@ -367,10 +367,10 @@ MyStruct& MyStruct::operator=(const MyStruct& other) {
 }
 
 MyStruct::MyStruct() :
-      __fbthrift_field_MyBoolField(),
-      __fbthrift_field_MyIntField(static_cast<::std::int64_t>(12)),
-      __fbthrift_field_MyStringField(apache::thrift::StringTraits<std::string>::fromStringLiteral("test")),
-      __fbthrift_field_MyMapEnumAndInt(std::initializer_list<::std::map<::some::valid::ns::MyEnumA, ::std::string>::value_type>{ {  ::some::valid::ns::MyEnumA::fieldA, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldA") },
+    __fbthrift_field_MyBoolField(),
+    __fbthrift_field_MyIntField(static_cast<::std::int64_t>(12)),
+    __fbthrift_field_MyStringField(apache::thrift::StringTraits<std::string>::fromStringLiteral("test")),
+    __fbthrift_field_MyMapEnumAndInt(std::initializer_list<::std::map<::some::valid::ns::MyEnumA, ::std::string>::value_type>{ {  ::some::valid::ns::MyEnumA::fieldA, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldA") },
   {  ::some::valid::ns::MyEnumA::fieldC, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldC") },
   { static_cast< ::some::valid::ns::MyEnumA>(9), apache::thrift::StringTraits<std::string>::fromStringLiteral("nothing") } }) {
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
@@ -1173,12 +1173,12 @@ AnException& AnException::operator=(const AnException& other) {
 }
 
 AnException::AnException() :
-      __fbthrift_field_code(),
-      __fbthrift_field_req_code(),
-      __fbthrift_field_exception_list(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_code(),
+    __fbthrift_field_req_code(),
+    __fbthrift_field_exception_list(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3) }),
-      __fbthrift_field_enum_field() {
+    __fbthrift_field_enum_field() {
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
   ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
 }
@@ -1487,8 +1487,8 @@ std::string_view AnotherException::__fbthrift_get_class_name() {
 AnotherException::AnotherException(const AnotherException&) = default;
 AnotherException& AnotherException::operator=(const AnotherException&) = default;
 AnotherException::AnotherException() :
-      __fbthrift_field_code(),
-      __fbthrift_field_req_code() {
+    __fbthrift_field_code(),
+    __fbthrift_field_req_code() {
 }
 
 
@@ -1599,25 +1599,25 @@ std::string_view containerStruct::__fbthrift_get_class_name() {
 }
 
 containerStruct::containerStruct() :
-      fieldA(),
-      req_fieldA(),
-      opt_fieldA(),
-      fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    fieldA(),
+    req_fieldA(),
+    opt_fieldA(),
+    fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-      req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-      opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-      fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-      req_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-      opt_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-      fieldF(std::initializer_list<::std::vector<::std::int32_t>>{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    req_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    opt_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    fieldF(std::initializer_list<::std::vector<::std::int32_t>>{ std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(7),
@@ -1627,8 +1627,8 @@ containerStruct::containerStruct() :
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(10),
   static_cast<::std::int32_t>(12) } }),
-      fieldI(true),
-      fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    fieldI(true),
+    fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(12) } },
@@ -1636,17 +1636,17 @@ containerStruct::containerStruct() :
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(9),
   static_cast<::std::int32_t>(13) } } }),
-      fieldN(),
-      fieldQ(),
-      fieldR( ::some::valid::ns::MyEnumA::fieldB),
-      req_fieldR( ::some::valid::ns::MyEnumA::fieldB),
-      opt_fieldR( ::some::valid::ns::MyEnumA::fieldB),
-      fieldS( ::some::valid::ns::MyEnumA::fieldB),
-      fieldU(std::initializer_list<::some::valid::ns::MyEnumA>{  ::some::valid::ns::MyEnumA::fieldC,
+    fieldN(),
+    fieldQ(),
+    fieldR( ::some::valid::ns::MyEnumA::fieldB),
+    req_fieldR( ::some::valid::ns::MyEnumA::fieldB),
+    opt_fieldR( ::some::valid::ns::MyEnumA::fieldB),
+    fieldS( ::some::valid::ns::MyEnumA::fieldB),
+    fieldU(std::initializer_list<::some::valid::ns::MyEnumA>{  ::some::valid::ns::MyEnumA::fieldC,
    ::some::valid::ns::MyEnumA::fieldB,
    ::some::valid::ns::MyEnumA::fieldA }),
-      fieldAC(),
-      fieldAD() {
+    fieldAC(),
+    fieldAD() {
 }
 
 
@@ -2216,8 +2216,8 @@ MyIncludedStruct& MyIncludedStruct::operator=(const MyIncludedStruct& other) {
 }
 
 MyIncludedStruct::MyIncludedStruct() :
-      __fbthrift_field_MyIncludedInt(static_cast<::a::different::ns::IncludedInt64>(42)),
-      __fbthrift_field_ARefField(std::make_unique<::some::valid::ns::AStruct>()) {
+    __fbthrift_field_MyIncludedInt(static_cast<::a::different::ns::IncludedInt64>(42)),
+    __fbthrift_field_ARefField(std::make_unique<::some::valid::ns::AStruct>()) {
 }
 
 
@@ -2367,23 +2367,23 @@ std::string_view AnnotatedStruct::__fbthrift_get_class_name() {
 }
 
 AnnotatedStruct::AnnotatedStruct() :
-      cpp_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-      cpp2_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-      container_with_ref(std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
-      req_cpp_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-      req_cpp2_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-      req_container_with_ref(std::make_unique<::std::vector<::std::string>>()),
-      ref_type_unique(std::make_unique<::some::valid::ns::containerStruct>()),
-      ref_type_shared(std::make_shared<::some::valid::ns::containerStruct>()),
-      ref_type_const(std::make_shared<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
-      req_ref_type_shared(std::make_shared<::some::valid::ns::containerStruct>()),
-      req_ref_type_const(std::make_shared<::some::valid::ns::containerStruct>()),
-      req_ref_type_unique(std::make_unique<::std::vector<::std::string>>()),
-      base_type(),
-      indirection_a(),
-      iobuf_type_val(apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("value")),
-      iobuf_ptr_val(apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("value2")),
-      struct_struct(::apache::thrift::detail::make_structured_constant<::some::valid::ns::containerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(false))) {
+    cpp_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
+    cpp2_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
+    container_with_ref(std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
+    req_cpp_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
+    req_cpp2_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
+    req_container_with_ref(std::make_unique<::std::vector<::std::string>>()),
+    ref_type_unique(std::make_unique<::some::valid::ns::containerStruct>()),
+    ref_type_shared(std::make_shared<::some::valid::ns::containerStruct>()),
+    ref_type_const(std::make_shared<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
+    req_ref_type_shared(std::make_shared<::some::valid::ns::containerStruct>()),
+    req_ref_type_const(std::make_shared<::some::valid::ns::containerStruct>()),
+    req_ref_type_unique(std::make_unique<::std::vector<::std::string>>()),
+    base_type(),
+    indirection_a(),
+    iobuf_type_val(apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("value")),
+    iobuf_ptr_val(apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("value2")),
+    struct_struct(::apache::thrift::detail::make_structured_constant<::some::valid::ns::containerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(false))) {
 }
 
 

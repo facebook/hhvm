@@ -50,16 +50,16 @@ class reflection_tags {
   struct __fbthrift_languages {
   };
   struct __fbthrift_enums {
-  };
+      };
   struct __fbthrift_unions {
-  };
+      };
   struct __fbthrift_structs {
     using ReflectionStruct = __fbthrift_strings::ReflectionStruct;
   };
   struct __fbthrift_constants {
-  };
+      };
   struct __fbthrift_services {
-  };
+      };
  public:
   struct module {};
 

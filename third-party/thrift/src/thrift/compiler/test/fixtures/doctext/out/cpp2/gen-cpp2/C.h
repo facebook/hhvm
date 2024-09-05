@@ -87,6 +87,7 @@ class ServiceHandler<::cpp2::C> : public apache::thrift::ServerInterface {
 namespace cpp2 {
 using CSvIf [[deprecated("Use apache::thrift::ServiceHandler<C> instead")]] = ::apache::thrift::ServiceHandler<C>;
 } // namespace cpp2
+
 namespace cpp2 {
 class CSvNull : public ::apache::thrift::ServiceHandler<C> {
  public:

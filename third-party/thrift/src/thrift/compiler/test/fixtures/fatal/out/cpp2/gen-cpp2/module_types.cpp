@@ -566,7 +566,7 @@ std::string_view structA::__fbthrift_get_class_name() {
 structA::structA(const structA&) = default;
 structA& structA::operator=(const structA&) = default;
 structA::structA() :
-      __fbthrift_field_a() {
+    __fbthrift_field_a() {
 }
 
 
@@ -919,11 +919,11 @@ std::string_view structC::__fbthrift_get_class_name() {
 structC::structC(const structC&) = default;
 structC& structC::operator=(const structC&) = default;
 structC::structC() :
-      __fbthrift_field_a(),
-      __fbthrift_field_c(),
-      __fbthrift_field_d(),
-      __fbthrift_field_e(),
-      __fbthrift_field_f() {
+    __fbthrift_field_a(),
+    __fbthrift_field_c(),
+    __fbthrift_field_d(),
+    __fbthrift_field_e(),
+    __fbthrift_field_f() {
 }
 
 
@@ -1453,9 +1453,9 @@ std::string_view struct1::__fbthrift_get_class_name() {
 struct1::struct1(const struct1&) = default;
 struct1& struct1::operator=(const struct1&) = default;
 struct1::struct1() :
-      __fbthrift_field_field0(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field3() {
+    __fbthrift_field_field0(),
+    __fbthrift_field_field2(),
+    __fbthrift_field_field3() {
 }
 
 
@@ -1609,9 +1609,9 @@ std::string_view struct2::__fbthrift_get_class_name() {
 struct2::struct2(const struct2&) = default;
 struct2& struct2::operator=(const struct2&) = default;
 struct2::struct2() :
-      __fbthrift_field_fieldA(),
-      __fbthrift_field_fieldC(),
-      __fbthrift_field_fieldD() {
+    __fbthrift_field_fieldA(),
+    __fbthrift_field_fieldC(),
+    __fbthrift_field_fieldD() {
 }
 
 
@@ -1787,9 +1787,9 @@ std::string_view struct3::__fbthrift_get_class_name() {
 struct3::struct3(const struct3&) = default;
 struct3& struct3::operator=(const struct3&) = default;
 struct3::struct3() :
-      __fbthrift_field_fieldA(),
-      __fbthrift_field_fieldC(),
-      __fbthrift_field_fieldD() {
+    __fbthrift_field_fieldA(),
+    __fbthrift_field_fieldC(),
+    __fbthrift_field_fieldD() {
 }
 
 
@@ -2163,9 +2163,9 @@ struct4& struct4::operator=(const struct4& other) {
 }
 
 struct4::struct4() :
-      __fbthrift_field_field0(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
+    __fbthrift_field_field0(),
+    __fbthrift_field_field2(),
+    __fbthrift_field_field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
 }
 
 
@@ -2285,8 +2285,8 @@ std::string_view struct5::__fbthrift_get_class_name() {
 struct5::struct5(const struct5&) = default;
 struct5& struct5::operator=(const struct5&) = default;
 struct5::struct5() :
-      __fbthrift_field_field0(),
-      __fbthrift_field_field2() {
+    __fbthrift_field_field0(),
+    __fbthrift_field_field2() {
 }
 
 
@@ -3393,10 +3393,10 @@ std::string_view struct_with_indirections::__fbthrift_get_class_name() {
 struct_with_indirections::struct_with_indirections(const struct_with_indirections&) = default;
 struct_with_indirections& struct_with_indirections::operator=(const struct_with_indirections&) = default;
 struct_with_indirections::struct_with_indirections() :
-      __fbthrift_field_real(),
-      __fbthrift_field_fake(),
-      __fbthrift_field_number(),
-      __fbthrift_field_result() {
+    __fbthrift_field_real(),
+    __fbthrift_field_fake(),
+    __fbthrift_field_number(),
+    __fbthrift_field_result() {
 }
 
 

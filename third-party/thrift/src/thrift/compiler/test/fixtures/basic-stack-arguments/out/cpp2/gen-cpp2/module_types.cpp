@@ -62,7 +62,7 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_MyIntField() {
+    __fbthrift_field_MyIntField() {
 }
 
 

@@ -46,24 +46,24 @@ std::string_view containerStruct2::__fbthrift_get_class_name() {
 containerStruct2::containerStruct2(const containerStruct2&) = default;
 containerStruct2& containerStruct2::operator=(const containerStruct2&) = default;
 containerStruct2::containerStruct2() :
-      __fbthrift_field_fieldA(),
-      __fbthrift_field_req_fieldA(),
-      __fbthrift_field_opt_fieldA(),
-      __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_fieldA(),
+    __fbthrift_field_req_fieldA(),
+    __fbthrift_field_opt_fieldA(),
+    __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-      __fbthrift_field_req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-      __fbthrift_field_opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-      __fbthrift_field_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-      __fbthrift_field_req_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-      __fbthrift_field_opt_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")) {
+    __fbthrift_field_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    __fbthrift_field_req_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    __fbthrift_field_opt_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")) {
 }
 
 

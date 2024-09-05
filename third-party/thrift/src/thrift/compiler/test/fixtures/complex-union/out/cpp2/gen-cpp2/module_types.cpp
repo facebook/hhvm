@@ -486,7 +486,7 @@ std::string_view Val::__fbthrift_get_class_name() {
 Val::Val(const Val&) = default;
 Val& Val::operator=(const Val&) = default;
 Val::Val() :
-      __fbthrift_field_intVal() {
+    __fbthrift_field_intVal() {
 }
 
 

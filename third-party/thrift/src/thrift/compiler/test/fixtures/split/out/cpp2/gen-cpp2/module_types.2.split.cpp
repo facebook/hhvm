@@ -46,11 +46,11 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_MyIntField(),
-      __fbthrift_field_myEnum(),
-      __fbthrift_field_oneway(),
-      __fbthrift_field_readonly(),
-      __fbthrift_field_idempotent() {
+    __fbthrift_field_MyIntField(),
+    __fbthrift_field_myEnum(),
+    __fbthrift_field_oneway(),
+    __fbthrift_field_readonly(),
+    __fbthrift_field_idempotent() {
 }
 
 

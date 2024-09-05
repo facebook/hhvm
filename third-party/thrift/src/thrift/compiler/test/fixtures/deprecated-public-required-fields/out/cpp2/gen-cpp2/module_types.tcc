@@ -50,7 +50,6 @@ void Foo::readNoXfer(Protocol_* iprot) {
 _readField_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->field, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

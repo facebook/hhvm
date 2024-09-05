@@ -62,19 +62,19 @@ std::string_view StructWithDefaultStruct::__fbthrift_get_class_name() {
 StructWithDefaultStruct::StructWithDefaultStruct(const StructWithDefaultStruct&) = default;
 StructWithDefaultStruct& StructWithDefaultStruct::operator=(const StructWithDefaultStruct&) = default;
 StructWithDefaultStruct::StructWithDefaultStruct() :
-      __fbthrift_field_bool_field(true),
-      __fbthrift_field_byte_field(static_cast<::std::int8_t>(1)),
-      __fbthrift_field_short_field(static_cast<::std::int16_t>(1)),
-      __fbthrift_field_int_field(static_cast<::std::int32_t>(1)),
-      __fbthrift_field_long_field(static_cast<::std::int64_t>(1)),
-      __fbthrift_field_float_field(static_cast<float>(1)),
-      __fbthrift_field_double_field(static_cast<double>(1)),
-      __fbthrift_field_string_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
-      __fbthrift_field_binary_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
-      __fbthrift_field_enum_field( ::apache::thrift::test::MyEnum::ME1),
-      __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
-      __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
-      __fbthrift_field_map_field(std::initializer_list<::std::map<::std::int16_t, ::std::int16_t>::value_type>{ { static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1) } }) {
+    __fbthrift_field_bool_field(true),
+    __fbthrift_field_byte_field(static_cast<::std::int8_t>(1)),
+    __fbthrift_field_short_field(static_cast<::std::int16_t>(1)),
+    __fbthrift_field_int_field(static_cast<::std::int32_t>(1)),
+    __fbthrift_field_long_field(static_cast<::std::int64_t>(1)),
+    __fbthrift_field_float_field(static_cast<float>(1)),
+    __fbthrift_field_double_field(static_cast<double>(1)),
+    __fbthrift_field_string_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
+    __fbthrift_field_binary_field(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
+    __fbthrift_field_enum_field( ::apache::thrift::test::MyEnum::ME1),
+    __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
+    __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{ static_cast<::std::int16_t>(1) }),
+    __fbthrift_field_map_field(std::initializer_list<::std::map<::std::int16_t, ::std::int16_t>::value_type>{ { static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1) } }) {
 }
 
 

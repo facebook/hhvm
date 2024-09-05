@@ -70,6 +70,7 @@ class ServiceHandler<::py3::simple::RederivedService> : virtual public ::py3::si
 namespace py3::simple {
 using RederivedServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<RederivedService> instead")]] = ::apache::thrift::ServiceHandler<RederivedService>;
 } // namespace py3::simple
+
 namespace py3::simple {
 class RederivedServiceSvNull : public ::apache::thrift::ServiceHandler<RederivedService>, virtual public ::apache::thrift::ServiceHandler<::py3::simple::DerivedService> {
  public:

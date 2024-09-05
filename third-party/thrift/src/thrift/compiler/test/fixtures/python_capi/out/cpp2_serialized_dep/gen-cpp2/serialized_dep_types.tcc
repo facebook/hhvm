@@ -85,7 +85,6 @@ void SerializedStruct::readNoXfer(Protocol_* iprot) {
 _readField_s:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_s, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -99,7 +98,6 @@ _readField_s:
 _readField_i:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_i, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -113,7 +111,6 @@ _readField_i:
 _readField_os:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_os, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -127,7 +124,6 @@ _readField_os:
 _readField_rs:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_rs, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -316,7 +312,6 @@ void SerializedUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->s_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.s, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -327,7 +322,6 @@ void SerializedUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
           this->i_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, value_.i, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -453,7 +447,6 @@ void SerializedError::readNoXfer(Protocol_* iprot) {
 _readField_msg:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_msg, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -467,7 +460,6 @@ _readField_msg:
 _readField_os:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_os, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -481,7 +473,6 @@ _readField_os:
 _readField_rs:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_rs, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -648,7 +639,6 @@ void MarshalStruct::readNoXfer(Protocol_* iprot) {
 _readField_s:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_s, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -662,7 +652,6 @@ _readField_s:
 _readField_i:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_i, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -676,7 +665,6 @@ _readField_i:
 _readField_os:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_os, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -690,7 +678,6 @@ _readField_os:
 _readField_rs:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_rs, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -879,7 +866,6 @@ void MarshalUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->s_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.s, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -890,7 +876,6 @@ void MarshalUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
           this->i_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, value_.i, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -1016,7 +1001,6 @@ void MarshalError::readNoXfer(Protocol_* iprot) {
 _readField_msg:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_msg, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -1030,7 +1014,6 @@ _readField_msg:
 _readField_os:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_os, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -1044,7 +1027,6 @@ _readField_os:
 _readField_rs:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_rs, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

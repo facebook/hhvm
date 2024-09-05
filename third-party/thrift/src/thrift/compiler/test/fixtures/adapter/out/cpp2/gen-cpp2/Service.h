@@ -70,6 +70,7 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
 namespace facebook::thrift::test {
 using ServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<Service> instead")]] = ::apache::thrift::ServiceHandler<Service>;
 } // namespace facebook::thrift::test
+
 namespace facebook::thrift::test {
 class ServiceSvNull : public ::apache::thrift::ServiceHandler<Service> {
  public:

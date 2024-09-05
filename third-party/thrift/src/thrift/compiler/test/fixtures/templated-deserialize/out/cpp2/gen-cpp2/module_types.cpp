@@ -178,14 +178,14 @@ containerStruct& containerStruct::operator=(const containerStruct& other) {
 }
 
 containerStruct::containerStruct() :
-      __fbthrift_field_fieldA(),
-      __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_fieldA(),
+    __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-      __fbthrift_field_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
-      __fbthrift_field_fieldI(true),
-      __fbthrift_field_fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_fieldE(apache::thrift::StringTraits<std::string>::fromStringLiteral("somestring")),
+    __fbthrift_field_fieldI(true),
+    __fbthrift_field_fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(12) } },
@@ -193,12 +193,12 @@ containerStruct::containerStruct() :
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(9),
   static_cast<::std::int32_t>(13) } } }),
-      __fbthrift_field_fieldQ(),
-      __fbthrift_field_fieldR(std::make_unique<::std::map<::std::string, bool>>()),
-      __fbthrift_field_fieldS(std::make_unique<::cpp2::SmallStruct>()),
-      __fbthrift_field_fieldT(std::make_shared<::cpp2::SmallStruct>()),
-      __fbthrift_field_fieldU(std::make_shared<::cpp2::SmallStruct>()),
-      __fbthrift_field_fieldX(std::make_unique<::cpp2::SmallStruct>()) {
+    __fbthrift_field_fieldQ(),
+    __fbthrift_field_fieldR(std::make_unique<::std::map<::std::string, bool>>()),
+    __fbthrift_field_fieldS(std::make_unique<::cpp2::SmallStruct>()),
+    __fbthrift_field_fieldT(std::make_shared<::cpp2::SmallStruct>()),
+    __fbthrift_field_fieldU(std::make_shared<::cpp2::SmallStruct>()),
+    __fbthrift_field_fieldX(std::make_unique<::cpp2::SmallStruct>()) {
 }
 
 

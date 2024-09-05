@@ -82,11 +82,11 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_MyIntField(),
-      __fbthrift_field_myEnum(),
-      __fbthrift_field_oneway(),
-      __fbthrift_field_readonly(),
-      __fbthrift_field_idempotent() {
+    __fbthrift_field_MyIntField(),
+    __fbthrift_field_myEnum(),
+    __fbthrift_field_oneway(),
+    __fbthrift_field_readonly(),
+    __fbthrift_field_idempotent() {
 }
 
 
@@ -637,7 +637,7 @@ std::string_view MyException::__fbthrift_get_class_name() {
 MyException::MyException(const MyException&) = default;
 MyException& MyException::operator=(const MyException&) = default;
 MyException::MyException() :
-      __fbthrift_field_MyIntField() {
+    __fbthrift_field_MyIntField() {
 }
 
 
@@ -785,7 +785,7 @@ std::string_view MyExceptionWithMessage::__fbthrift_get_class_name() {
 MyExceptionWithMessage::MyExceptionWithMessage(const MyExceptionWithMessage&) = default;
 MyExceptionWithMessage& MyExceptionWithMessage::operator=(const MyExceptionWithMessage&) = default;
 MyExceptionWithMessage::MyExceptionWithMessage() :
-      __fbthrift_field_MyIntField() {
+    __fbthrift_field_MyIntField() {
 }
 
 MyExceptionWithMessage::MyExceptionWithMessage(std::string __message) : MyExceptionWithMessage() {

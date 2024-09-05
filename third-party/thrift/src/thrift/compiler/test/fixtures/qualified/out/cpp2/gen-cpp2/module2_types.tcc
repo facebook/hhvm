@@ -59,7 +59,6 @@ _readField_first:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module0::Struct>::readWithContext(*iprot, this->__fbthrift_field_first, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -75,7 +74,6 @@ _readField_second:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module1::Struct>::readWithContext(*iprot, this->__fbthrift_field_second, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -220,7 +218,6 @@ _readField_s:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::module2::Struct>::readWithContext(*iprot, this->__fbthrift_field_s, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -234,7 +231,6 @@ _readField_s:
 _readField_id:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_id, _readState);
-    
   }
  this->__isset.set(1, true);
 

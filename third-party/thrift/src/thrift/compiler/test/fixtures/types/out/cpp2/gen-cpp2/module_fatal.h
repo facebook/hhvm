@@ -268,7 +268,7 @@ class module_tags {
     using MyForwardRefEnum = __fbthrift_strings::MyForwardRefEnum;
   };
   struct __fbthrift_unions {
-  };
+      };
   struct __fbthrift_structs {
     using empty_struct = __fbthrift_strings::empty_struct;
     using decorated_struct = __fbthrift_strings::decorated_struct;
@@ -305,7 +305,7 @@ class module_tags {
     using StructWithDoubleUnderscores = __fbthrift_strings::StructWithDoubleUnderscores;
   };
   struct __fbthrift_constants {
-  };
+      };
   struct __fbthrift_services {
     using SomeService = __fbthrift_strings::SomeService;
   };

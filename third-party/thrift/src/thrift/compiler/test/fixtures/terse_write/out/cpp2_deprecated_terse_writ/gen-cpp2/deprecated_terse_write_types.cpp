@@ -141,14 +141,14 @@ std::string_view StructLevelTerseStruct::__fbthrift_get_class_name() {
 StructLevelTerseStruct::StructLevelTerseStruct(const StructLevelTerseStruct&) = default;
 StructLevelTerseStruct& StructLevelTerseStruct::operator=(const StructLevelTerseStruct&) = default;
 StructLevelTerseStruct::StructLevelTerseStruct() :
-      __fbthrift_field_bool_field(),
-      __fbthrift_field_byte_field(),
-      __fbthrift_field_short_field(),
-      __fbthrift_field_int_field(),
-      __fbthrift_field_long_field(),
-      __fbthrift_field_float_field(),
-      __fbthrift_field_double_field(),
-      __fbthrift_field_enum_field() {
+    __fbthrift_field_bool_field(),
+    __fbthrift_field_byte_field(),
+    __fbthrift_field_short_field(),
+    __fbthrift_field_int_field(),
+    __fbthrift_field_long_field(),
+    __fbthrift_field_float_field(),
+    __fbthrift_field_double_field(),
+    __fbthrift_field_enum_field() {
 }
 
 
@@ -373,22 +373,22 @@ std::string_view FieldLevelTerseStruct::__fbthrift_get_class_name() {
 FieldLevelTerseStruct::FieldLevelTerseStruct(const FieldLevelTerseStruct&) = default;
 FieldLevelTerseStruct& FieldLevelTerseStruct::operator=(const FieldLevelTerseStruct&) = default;
 FieldLevelTerseStruct::FieldLevelTerseStruct() :
-      __fbthrift_field_terse_bool_field(),
-      __fbthrift_field_terse_byte_field(),
-      __fbthrift_field_terse_short_field(),
-      __fbthrift_field_terse_int_field(),
-      __fbthrift_field_terse_long_field(),
-      __fbthrift_field_terse_float_field(),
-      __fbthrift_field_terse_double_field(),
-      __fbthrift_field_terse_enum_field(),
-      __fbthrift_field_bool_field(),
-      __fbthrift_field_byte_field(),
-      __fbthrift_field_short_field(),
-      __fbthrift_field_int_field(),
-      __fbthrift_field_long_field(),
-      __fbthrift_field_float_field(),
-      __fbthrift_field_double_field(),
-      __fbthrift_field_enum_field() {
+    __fbthrift_field_terse_bool_field(),
+    __fbthrift_field_terse_byte_field(),
+    __fbthrift_field_terse_short_field(),
+    __fbthrift_field_terse_int_field(),
+    __fbthrift_field_terse_long_field(),
+    __fbthrift_field_terse_float_field(),
+    __fbthrift_field_terse_double_field(),
+    __fbthrift_field_terse_enum_field(),
+    __fbthrift_field_bool_field(),
+    __fbthrift_field_byte_field(),
+    __fbthrift_field_short_field(),
+    __fbthrift_field_int_field(),
+    __fbthrift_field_long_field(),
+    __fbthrift_field_float_field(),
+    __fbthrift_field_double_field(),
+    __fbthrift_field_enum_field() {
 }
 
 

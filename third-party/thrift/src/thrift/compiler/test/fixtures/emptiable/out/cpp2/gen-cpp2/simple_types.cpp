@@ -133,14 +133,14 @@ std::string_view EmptiableStruct::__fbthrift_get_class_name() {
 EmptiableStruct::EmptiableStruct(const EmptiableStruct&) = default;
 EmptiableStruct& EmptiableStruct::operator=(const EmptiableStruct&) = default;
 EmptiableStruct::EmptiableStruct() :
-      __fbthrift_field_bool_field(),
-      __fbthrift_field_byte_field(),
-      __fbthrift_field_short_field(),
-      __fbthrift_field_int_field(),
-      __fbthrift_field_long_field(),
-      __fbthrift_field_float_field(),
-      __fbthrift_field_double_field(),
-      __fbthrift_field_enum_field() {
+    __fbthrift_field_bool_field(),
+    __fbthrift_field_byte_field(),
+    __fbthrift_field_short_field(),
+    __fbthrift_field_int_field(),
+    __fbthrift_field_long_field(),
+    __fbthrift_field_float_field(),
+    __fbthrift_field_double_field(),
+    __fbthrift_field_enum_field() {
 }
 
 
@@ -366,14 +366,14 @@ std::string_view EmptiableTerseStruct::__fbthrift_get_class_name() {
 EmptiableTerseStruct::EmptiableTerseStruct(const EmptiableTerseStruct&) = default;
 EmptiableTerseStruct& EmptiableTerseStruct::operator=(const EmptiableTerseStruct&) = default;
 EmptiableTerseStruct::EmptiableTerseStruct() :
-      __fbthrift_field_bool_field(),
-      __fbthrift_field_byte_field(),
-      __fbthrift_field_short_field(),
-      __fbthrift_field_int_field(),
-      __fbthrift_field_long_field(),
-      __fbthrift_field_float_field(),
-      __fbthrift_field_double_field(),
-      __fbthrift_field_enum_field() {
+    __fbthrift_field_bool_field(),
+    __fbthrift_field_byte_field(),
+    __fbthrift_field_short_field(),
+    __fbthrift_field_int_field(),
+    __fbthrift_field_long_field(),
+    __fbthrift_field_float_field(),
+    __fbthrift_field_double_field(),
+    __fbthrift_field_enum_field() {
 }
 
 
@@ -594,14 +594,14 @@ std::string_view NotEmptiableStruct::__fbthrift_get_class_name() {
 NotEmptiableStruct::NotEmptiableStruct(const NotEmptiableStruct&) = default;
 NotEmptiableStruct& NotEmptiableStruct::operator=(const NotEmptiableStruct&) = default;
 NotEmptiableStruct::NotEmptiableStruct() :
-      __fbthrift_field_bool_field(),
-      __fbthrift_field_byte_field(),
-      __fbthrift_field_short_field(),
-      __fbthrift_field_int_field(),
-      __fbthrift_field_long_field(),
-      __fbthrift_field_float_field(),
-      __fbthrift_field_double_field(),
-      __fbthrift_field_enum_field() {
+    __fbthrift_field_bool_field(),
+    __fbthrift_field_byte_field(),
+    __fbthrift_field_short_field(),
+    __fbthrift_field_int_field(),
+    __fbthrift_field_long_field(),
+    __fbthrift_field_float_field(),
+    __fbthrift_field_double_field(),
+    __fbthrift_field_enum_field() {
 }
 
 

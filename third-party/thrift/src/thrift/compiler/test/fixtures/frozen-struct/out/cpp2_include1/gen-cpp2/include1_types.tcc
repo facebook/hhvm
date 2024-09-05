@@ -50,7 +50,6 @@ void IncludedA::readNoXfer(Protocol_* iprot) {
 _readField_i32Field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_i32Field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -64,7 +63,6 @@ _readField_i32Field:
 _readField_strField:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_strField, _readState);
-    
   }
  this->__isset.set(1, true);
 

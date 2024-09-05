@@ -76,6 +76,7 @@ class ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService> : public ap
 namespace cpp2 {
 using HeaderClientMethodsAnnotationOnServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<HeaderClientMethodsAnnotationOnService> instead")]] = ::apache::thrift::ServiceHandler<HeaderClientMethodsAnnotationOnService>;
 } // namespace cpp2
+
 namespace cpp2 {
 class HeaderClientMethodsAnnotationOnServiceSvNull : public ::apache::thrift::ServiceHandler<HeaderClientMethodsAnnotationOnService> {
  public:

@@ -187,7 +187,6 @@ void structured_annotation_inline::readNoXfer(Protocol_* iprot) {
 _readField_count:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_count, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -201,7 +200,6 @@ _readField_count:
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -344,7 +342,6 @@ void structured_annotation_with_default::readNoXfer(Protocol_* iprot) {
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -464,7 +461,6 @@ void structured_annotation_recursive::readNoXfer(Protocol_* iprot) {
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -482,7 +478,6 @@ _readField_recurse:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_recurse = std::move(ptr);
     _readState.afterSubobject(iprot);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -497,7 +492,6 @@ _readField_forward:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_forward>::readWithContext(*iprot, this->__fbthrift_field_forward, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -665,7 +659,6 @@ void structured_annotation_forward::readNoXfer(Protocol_* iprot) {
 _readField_count:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_count, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -785,7 +778,6 @@ void structured_annotation_nested::readNoXfer(Protocol_* iprot) {
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -801,7 +793,6 @@ _readField_nest:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::readWithContext(*iprot, this->__fbthrift_field_nest, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -944,7 +935,6 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
 _readField_annotated_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_annotated_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -958,7 +948,6 @@ _readField_annotated_field:
 _readField_annotated_type:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::test::fixtures::basic-structured-annotations::annotated_inline_string>::readWithContext(*iprot, this->__fbthrift_field_annotated_type, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -972,7 +961,6 @@ _readField_annotated_type:
 _readField_annotated_recursive:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_annotated_recursive, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -986,7 +974,6 @@ _readField_annotated_recursive:
 _readField_annotated_nested:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_annotated_nested, _readState);
-    
   }
  this->__isset.set(3, true);
 
@@ -1175,7 +1162,6 @@ void MyException::readNoXfer(Protocol_* iprot) {
 _readField_context:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_context, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -1294,7 +1280,6 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->first_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::test::fixtures::basic-structured-annotations::annotated_inline_string>::readWithContext(*iprot, value_.first, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -1305,7 +1290,6 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
           this->second_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::test::fixtures::basic-structured-annotations::annotated_inline_i64>::readWithContext(*iprot, value_.second, _readState);
-          
         } else {
           _readState.skip(iprot);
         }

@@ -19,7 +19,7 @@
 }}{{struct:cpp_underlying_name}}(){{!
   }}{{#struct:explicitly_constructed_fields}}{{ > common/colon_newline}}{{!
     }}{{#field:type}}{{!
-      }}      {{field:cpp_storage_name}}({{!
+      }}    {{field:cpp_storage_name}}({{!
       }}{{#field:cpp_ref_not_boxed?}}{{ > module_types_h/smart_ptr_constructor}}{{/field:cpp_ref_not_boxed?}}{{!
       }}{{#field:boxed_ref?}}{{ > field/default}}{{/field:boxed_ref?}}{{!
         TODO(dokwon): Support custom default for intern boxed field.

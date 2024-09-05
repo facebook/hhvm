@@ -70,6 +70,7 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
 namespace test::fixtures::basic {
 using FB303ServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<FB303Service> instead")]] = ::apache::thrift::ServiceHandler<FB303Service>;
 } // namespace test::fixtures::basic
+
 namespace test::fixtures::basic {
 class FB303ServiceSvNull : public ::apache::thrift::ServiceHandler<FB303Service> {
  public:

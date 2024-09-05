@@ -162,9 +162,9 @@ std::string_view SomeStruct::__fbthrift_get_class_name() {
 SomeStruct::SomeStruct(const SomeStruct&) = default;
 SomeStruct& SomeStruct::operator=(const SomeStruct&) = default;
 SomeStruct::SomeStruct() :
-      __fbthrift_field_reasonable( ::test::fixtures::enums::Metasyntactic::FOO),
-      __fbthrift_field_fine( ::test::fixtures::enums::Metasyntactic::BAR),
-      __fbthrift_field_questionable(static_cast< ::test::fixtures::enums::Metasyntactic>(-1)) {
+    __fbthrift_field_reasonable( ::test::fixtures::enums::Metasyntactic::FOO),
+    __fbthrift_field_fine( ::test::fixtures::enums::Metasyntactic::BAR),
+    __fbthrift_field_questionable(static_cast< ::test::fixtures::enums::Metasyntactic>(-1)) {
 }
 
 

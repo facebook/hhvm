@@ -50,7 +50,7 @@ std::string_view SerializedStruct::__fbthrift_get_class_name() {
 SerializedStruct::SerializedStruct(const SerializedStruct&) = default;
 SerializedStruct& SerializedStruct::operator=(const SerializedStruct&) = default;
 SerializedStruct::SerializedStruct() :
-      __fbthrift_field_i() {
+    __fbthrift_field_i() {
 }
 
 
@@ -419,7 +419,7 @@ std::string_view MarshalStruct::__fbthrift_get_class_name() {
 MarshalStruct::MarshalStruct(const MarshalStruct&) = default;
 MarshalStruct& MarshalStruct::operator=(const MarshalStruct&) = default;
 MarshalStruct::MarshalStruct() :
-      __fbthrift_field_i() {
+    __fbthrift_field_i() {
 }
 
 

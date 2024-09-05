@@ -92,7 +92,6 @@ void Fiery::readNoXfer(Protocol_* iprot) {
 _readField_message:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -211,7 +210,6 @@ void Serious::readNoXfer(Protocol_* iprot) {
 _readField_sonnet:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_sonnet, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -333,7 +331,6 @@ void ComplexFieldNames::readNoXfer(Protocol_* iprot) {
 _readField_error_message:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_error_message, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -347,7 +344,6 @@ _readField_error_message:
 _readField_internal_error_message:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_internal_error_message, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -490,7 +486,6 @@ void CustomFieldNames::readNoXfer(Protocol_* iprot) {
 _readField_error_message:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_error_message, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -504,7 +499,6 @@ _readField_error_message:
 _readField_internal_error_message:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_internal_error_message, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -647,7 +641,6 @@ void ExceptionWithPrimitiveField::readNoXfer(Protocol_* iprot) {
 _readField_message:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -661,7 +654,6 @@ _readField_message:
 _readField_error_code:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_error_code, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -804,7 +796,6 @@ void ExceptionWithStructuredAnnotation::readNoXfer(Protocol_* iprot) {
 _readField_message_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_message_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -818,7 +809,6 @@ _readField_message_field:
 _readField_error_code:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_error_code, _readState);
-    
   }
  this->__isset.set(1, true);
 

@@ -62,7 +62,7 @@ std::string_view CustomException::__fbthrift_get_class_name() {
 CustomException::CustomException(const CustomException&) = default;
 CustomException& CustomException::operator=(const CustomException&) = default;
 CustomException::CustomException() :
-      __fbthrift_field_result( ::cpp2::Result::SO_SO) {
+    __fbthrift_field_result( ::cpp2::Result::SO_SO) {
 }
 
 

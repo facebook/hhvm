@@ -1160,7 +1160,7 @@ LazyCppRef& LazyCppRef::operator=(const LazyCppRef& other) {
 }
 
 LazyCppRef::LazyCppRef() :
-      __fbthrift_field_field4(std::make_unique<::std::vector<::std::int32_t>>()) {
+    __fbthrift_field_field4(std::make_unique<::std::vector<::std::int32_t>>()) {
 }
 
 
@@ -1472,7 +1472,7 @@ std::string_view IndexedFoo::__fbthrift_get_class_name() {
 IndexedFoo::IndexedFoo(const IndexedFoo&) = default;
 IndexedFoo& IndexedFoo::operator=(const IndexedFoo&) = default;
 IndexedFoo::IndexedFoo() :
-      __fbthrift_field_serialized_data_size() {
+    __fbthrift_field_serialized_data_size() {
 }
 
 
@@ -1640,7 +1640,7 @@ std::string_view OptionalIndexedFoo::__fbthrift_get_class_name() {
 OptionalIndexedFoo::OptionalIndexedFoo(const OptionalIndexedFoo&) = default;
 OptionalIndexedFoo& OptionalIndexedFoo::operator=(const OptionalIndexedFoo&) = default;
 OptionalIndexedFoo::OptionalIndexedFoo() :
-      __fbthrift_field_serialized_data_size() {
+    __fbthrift_field_serialized_data_size() {
 }
 
 

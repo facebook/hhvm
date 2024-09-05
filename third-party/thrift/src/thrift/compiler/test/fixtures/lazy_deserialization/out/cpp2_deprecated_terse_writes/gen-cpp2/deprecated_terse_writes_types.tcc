@@ -74,7 +74,6 @@ _readField_field1:
     this->__fbthrift_field_field1 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field1, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -91,7 +90,6 @@ _readField_field2:
     this->__fbthrift_field_field2 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field2, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -108,7 +106,6 @@ _readField_field3:
     this->__fbthrift_field_field3 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(2, true);
 
@@ -125,7 +122,6 @@ _readField_field4:
     this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(3, true);
 
@@ -330,7 +326,6 @@ _readField_field1:
     this->__fbthrift_field_field1 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field1, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -347,7 +342,6 @@ _readField_field2:
     this->__fbthrift_field_field2 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field2, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -374,7 +368,6 @@ _readField_field3:
     this->__fbthrift_field_field3 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(2, true);
 
@@ -401,7 +394,6 @@ _readField_field4:
     this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(3, true);
 
@@ -482,7 +474,7 @@ void TerseLazyFoo::__fbthrift_read_field_field3_impl() const {
   this->__fbthrift_field_field3 = ::std::vector<double>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
   _readState.afterSubobject(iprot);
-  }
+}
 template<class ProtocolReader>
 void TerseLazyFoo::__fbthrift_read_field_field4_impl() const {
   ProtocolReader reader;
@@ -493,7 +485,7 @@ void TerseLazyFoo::__fbthrift_read_field_field4_impl() const {
   this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
   _readState.afterSubobject(iprot);
-  }
+}
 
 template <class Protocol_>
 uint32_t TerseLazyFoo::serializedSize(Protocol_ const* prot_) const {
@@ -699,7 +691,6 @@ _readField_field1:
     this->__fbthrift_field_field1 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field1, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -716,7 +707,6 @@ _readField_field2:
     this->__fbthrift_field_field2 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field2, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -733,7 +723,6 @@ _readField_field3:
     this->__fbthrift_field_field3 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(2, true);
 
@@ -750,7 +739,6 @@ _readField_field4:
     this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(3, true);
 
@@ -955,7 +943,6 @@ _readField_field1:
     this->__fbthrift_field_field1 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field1, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -972,7 +959,6 @@ _readField_field2:
     this->__fbthrift_field_field2 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field2, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -999,7 +985,6 @@ _readField_field3:
     this->__fbthrift_field_field3 = ::std::vector<double>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(2, true);
 
@@ -1026,7 +1011,6 @@ _readField_field4:
     this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(3, true);
 
@@ -1107,7 +1091,7 @@ void TerseOptionalLazyFoo::__fbthrift_read_field_field3_impl() const {
   this->__fbthrift_field_field3 = ::std::vector<double>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
   _readState.afterSubobject(iprot);
-  }
+}
 template<class ProtocolReader>
 void TerseOptionalLazyFoo::__fbthrift_read_field_field4_impl() const {
   ProtocolReader reader;
@@ -1118,7 +1102,7 @@ void TerseOptionalLazyFoo::__fbthrift_read_field_field4_impl() const {
   this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
   _readState.afterSubobject(iprot);
-  }
+}
 
 template <class Protocol_>
 uint32_t TerseOptionalLazyFoo::serializedSize(Protocol_ const* prot_) const {

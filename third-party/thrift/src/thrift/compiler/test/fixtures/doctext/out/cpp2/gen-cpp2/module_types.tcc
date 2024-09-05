@@ -64,7 +64,6 @@ void A::readNoXfer(Protocol_* iprot) {
 _readField_useless_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_useless_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -183,7 +182,6 @@ void U::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
           this->i_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, value_.i, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -194,7 +192,6 @@ void U::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->s_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.s, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -320,7 +317,6 @@ void Bang::readNoXfer(Protocol_* iprot) {
 _readField_message:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_message, _readState);
-    
   }
  this->__isset.set(0, true);
 

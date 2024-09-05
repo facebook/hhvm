@@ -403,8 +403,8 @@ OpEncodeStruct& OpEncodeStruct::operator=(const OpEncodeStruct& other) {
 }
 
 OpEncodeStruct::OpEncodeStruct() :
-      __fbthrift_field_int_field(),
-      __fbthrift_field_enum_field() {
+    __fbthrift_field_int_field(),
+    __fbthrift_field_enum_field() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_adapted_field, *this);
   ::apache::thrift::adapt_detail::construct<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
 }

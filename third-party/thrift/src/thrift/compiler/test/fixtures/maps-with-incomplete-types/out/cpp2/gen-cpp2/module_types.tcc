@@ -60,7 +60,6 @@ _readField_some_map:
     this->__fbthrift_field_some_map = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>::readWithContext(*iprot, this->__fbthrift_field_some_map, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -182,7 +181,6 @@ void B::readNoXfer(Protocol_* iprot) {
 _readField_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_field, _readState);
-    
   }
  this->__isset.set(0, true);
 

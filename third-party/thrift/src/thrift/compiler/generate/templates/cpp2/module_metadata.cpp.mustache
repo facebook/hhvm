@@ -14,7 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{ > Autogen}}
+}}
+{{ > Autogen}}
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "{{program:include_prefix}}{{program:name}}_metadata.h"
 
@@ -136,11 +137,11 @@ void ServiceMetadata<::{{ > service_common/service_class_name}}>::gen_{{function
 {{/function:return_type}}
 {{#function:args}}
   {{ > metadata/func_field_gen}}
-func.arguments()->push_back(std::move({{ > metadata/func_field_name}}));
+  func.arguments()->push_back(std::move({{ > metadata/func_field_name}}));
 {{/function:args}}
 {{#function:exceptions}}
   {{ > metadata/func_field_gen}}
-func.exceptions()->push_back(std::move({{ > metadata/func_field_name}}));
+  func.exceptions()->push_back(std::move({{ > metadata/func_field_name}}));
 {{#field:type}}
 {{#type:struct?}}
   ExceptionMetadata<{{type:cpp_fullname}}>::gen(metadata);

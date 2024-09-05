@@ -457,7 +457,7 @@ std::string_view ExceptionWithPrimitiveField::__fbthrift_get_class_name() {
 ExceptionWithPrimitiveField::ExceptionWithPrimitiveField(const ExceptionWithPrimitiveField&) = default;
 ExceptionWithPrimitiveField& ExceptionWithPrimitiveField::operator=(const ExceptionWithPrimitiveField&) = default;
 ExceptionWithPrimitiveField::ExceptionWithPrimitiveField() :
-      __fbthrift_field_error_code() {
+    __fbthrift_field_error_code() {
 }
 
 ExceptionWithPrimitiveField::ExceptionWithPrimitiveField(std::string __message) : ExceptionWithPrimitiveField() {
@@ -565,7 +565,7 @@ std::string_view ExceptionWithStructuredAnnotation::__fbthrift_get_class_name() 
 ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation(const ExceptionWithStructuredAnnotation&) = default;
 ExceptionWithStructuredAnnotation& ExceptionWithStructuredAnnotation::operator=(const ExceptionWithStructuredAnnotation&) = default;
 ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation() :
-      __fbthrift_field_error_code() {
+    __fbthrift_field_error_code() {
 }
 
 ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation(std::string __message) : ExceptionWithStructuredAnnotation() {

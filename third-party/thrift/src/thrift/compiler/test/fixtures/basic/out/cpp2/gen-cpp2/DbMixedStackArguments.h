@@ -80,6 +80,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
 namespace test::fixtures::basic {
 using DbMixedStackArgumentsSvIf [[deprecated("Use apache::thrift::ServiceHandler<DbMixedStackArguments> instead")]] = ::apache::thrift::ServiceHandler<DbMixedStackArguments>;
 } // namespace test::fixtures::basic
+
 namespace test::fixtures::basic {
 class DbMixedStackArgumentsSvNull : public ::apache::thrift::ServiceHandler<DbMixedStackArguments> {
  public:

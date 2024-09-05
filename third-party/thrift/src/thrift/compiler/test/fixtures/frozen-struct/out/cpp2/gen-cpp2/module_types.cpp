@@ -62,7 +62,7 @@ std::string_view ModuleA::__fbthrift_get_class_name() {
 ModuleA::ModuleA(const ModuleA&) = default;
 ModuleA& ModuleA::operator=(const ModuleA&) = default;
 ModuleA::ModuleA() :
-      __fbthrift_field_i32Field() {
+    __fbthrift_field_i32Field() {
 }
 
 
@@ -396,8 +396,8 @@ std::string_view CppRef::__fbthrift_get_class_name() {
 CppRef::CppRef(const CppRef&) = default;
 CppRef& CppRef::operator=(const CppRef&) = default;
 CppRef::CppRef() :
-      __fbthrift_field_shared_field(std::make_shared<::std::int32_t>()),
-      __fbthrift_field_shared_const_field(std::make_shared<::std::int32_t>()) {
+    __fbthrift_field_shared_field(std::make_shared<::std::int32_t>()),
+    __fbthrift_field_shared_const_field(std::make_shared<::std::int32_t>()) {
 }
 
 

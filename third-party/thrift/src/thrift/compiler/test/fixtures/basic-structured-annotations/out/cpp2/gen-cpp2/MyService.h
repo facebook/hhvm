@@ -82,6 +82,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
 namespace test::fixtures::basic-structured-annotations {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
 } // namespace test::fixtures::basic-structured-annotations
+
 namespace test::fixtures::basic-structured-annotations {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:

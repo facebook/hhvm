@@ -384,8 +384,8 @@ YourStruct& YourStruct::operator=(const YourStruct& other) {
 }
 
 YourStruct::YourStruct() :
-      __fbthrift_field_majorVer(),
-      __fbthrift_field_my_enum() {
+    __fbthrift_field_majorVer(),
+    __fbthrift_field_my_enum() {
   ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
 }
 
@@ -548,7 +548,7 @@ std::string_view SecretStruct::__fbthrift_get_class_name() {
 SecretStruct::SecretStruct(const SecretStruct&) = default;
 SecretStruct& SecretStruct::operator=(const SecretStruct&) = default;
 SecretStruct::SecretStruct() :
-      __fbthrift_field_id() {
+    __fbthrift_field_id() {
 }
 
 

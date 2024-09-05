@@ -90,6 +90,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
 namespace cpp2 {
 using PrimitivesServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<PrimitivesService> instead")]] = ::apache::thrift::ServiceHandler<PrimitivesService>;
 } // namespace cpp2
+
 namespace cpp2 {
 class PrimitivesServiceSvNull : public ::apache::thrift::ServiceHandler<PrimitivesService> {
  public:

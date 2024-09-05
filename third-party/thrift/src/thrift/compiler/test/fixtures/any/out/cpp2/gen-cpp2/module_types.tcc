@@ -65,7 +65,6 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
 _readField_myString:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_myString, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -185,7 +184,6 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->myString_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.myString, _readState);
-          
         } else {
           _readState.skip(iprot);
         }
@@ -291,7 +289,6 @@ void MyException::readNoXfer(Protocol_* iprot) {
 _readField_myString:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_myString, _readState);
-    
   }
  this->__isset.set(0, true);
 

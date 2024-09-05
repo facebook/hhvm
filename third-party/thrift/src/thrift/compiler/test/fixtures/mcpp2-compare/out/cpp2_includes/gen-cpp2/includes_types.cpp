@@ -144,7 +144,7 @@ std::string_view AStructB::__fbthrift_get_class_name() {
 AStructB::AStructB(const AStructB&) = default;
 AStructB& AStructB::operator=(const AStructB&) = default;
 AStructB::AStructB() :
-      __fbthrift_field_FieldA(std::make_shared<::a::different::ns::AStruct>()) {
+    __fbthrift_field_FieldA(std::make_shared<::a::different::ns::AStruct>()) {
 }
 
 

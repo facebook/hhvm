@@ -94,9 +94,9 @@ std::string_view Internship::__fbthrift_get_class_name() {
 Internship::Internship(const Internship&) = default;
 Internship& Internship::operator=(const Internship&) = default;
 Internship::Internship() :
-      __fbthrift_field_weeks(),
-      __fbthrift_field_employer(),
-      __fbthrift_field_compensation() {
+    __fbthrift_field_weeks(),
+    __fbthrift_field_employer(),
+    __fbthrift_field_compensation() {
 }
 
 
@@ -295,8 +295,8 @@ std::string_view struct1::__fbthrift_get_class_name() {
 struct1::struct1(const struct1&) = default;
 struct1& struct1::operator=(const struct1&) = default;
 struct1::struct1() :
-      __fbthrift_field_a(static_cast<::std::int32_t>(1234567)),
-      __fbthrift_field_b(apache::thrift::StringTraits<std::string>::fromStringLiteral("<uninitialized>")) {
+    __fbthrift_field_a(static_cast<::std::int32_t>(1234567)),
+    __fbthrift_field_b(apache::thrift::StringTraits<std::string>::fromStringLiteral("<uninitialized>")) {
 }
 
 
@@ -400,7 +400,7 @@ std::string_view struct2::__fbthrift_get_class_name() {
 struct2::struct2(const struct2&) = default;
 struct2& struct2::operator=(const struct2&) = default;
 struct2::struct2() :
-      __fbthrift_field_a() {
+    __fbthrift_field_a() {
 }
 
 
@@ -538,7 +538,7 @@ std::string_view struct3::__fbthrift_get_class_name() {
 struct3::struct3(const struct3&) = default;
 struct3& struct3::operator=(const struct3&) = default;
 struct3::struct3() :
-      __fbthrift_field_b() {
+    __fbthrift_field_b() {
 }
 
 

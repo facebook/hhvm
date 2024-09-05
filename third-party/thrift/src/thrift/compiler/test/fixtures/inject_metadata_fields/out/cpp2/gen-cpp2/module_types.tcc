@@ -71,7 +71,6 @@ void Fields::readNoXfer(Protocol_* iprot) {
 _readField_injected_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -191,7 +190,6 @@ void FieldsInjectedToEmptyStruct::readNoXfer(Protocol_* iprot) {
 _readField_injected_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -311,7 +309,6 @@ void FieldsInjectedToStruct::readNoXfer(Protocol_* iprot) {
 _readField_string_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_string_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -325,7 +322,6 @@ _readField_string_field:
 _readField_injected_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -468,7 +464,6 @@ void FieldsInjectedWithIncludedStruct::readNoXfer(Protocol_* iprot) {
 _readField_string_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_string_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -482,7 +477,6 @@ _readField_string_field:
 _readField_injected_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_injected_field, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -498,7 +492,6 @@ _readField_injected_structured_annotation_field:
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::std::string>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_injected_structured_annotation_field = std::move(ptr);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -513,7 +506,6 @@ _readField_injected_unstructured_annotation_field:
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::std::string>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_injected_unstructured_annotation_field = std::move(ptr);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

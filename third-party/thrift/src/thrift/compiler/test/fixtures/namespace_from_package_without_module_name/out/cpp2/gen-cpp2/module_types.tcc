@@ -50,7 +50,6 @@ void Foo::readNoXfer(Protocol_* iprot) {
 _readField_MyInt:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_MyInt, _readState);
-    
   }
  this->__isset.set(0, true);
 

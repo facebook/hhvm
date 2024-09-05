@@ -628,7 +628,7 @@ std::string_view SinkException2::__fbthrift_get_class_name() {
 SinkException2::SinkException2(const SinkException2&) = default;
 SinkException2& SinkException2::operator=(const SinkException2&) = default;
 SinkException2::SinkException2() :
-      __fbthrift_field_reason() {
+    __fbthrift_field_reason() {
 }
 
 

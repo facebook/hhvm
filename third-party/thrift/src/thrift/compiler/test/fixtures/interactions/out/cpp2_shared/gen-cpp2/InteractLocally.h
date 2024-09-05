@@ -54,6 +54,7 @@ class SharedInteractionServiceInfoHolder : public apache::thrift::ServiceInfoHol
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
 
+
 class SharedInteractionIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "SharedInteraction"; }
@@ -105,6 +106,7 @@ class SharedInteractionIf : public apache::thrift::Tile, public apache::thrift::
 namespace thrift::shared_interactions {
 using InteractLocallySvIf [[deprecated("Use apache::thrift::ServiceHandler<InteractLocally> instead")]] = ::apache::thrift::ServiceHandler<InteractLocally>;
 } // namespace thrift::shared_interactions
+
 namespace thrift::shared_interactions {
 class InteractLocallySvNull : public ::apache::thrift::ServiceHandler<InteractLocally> {
  public:

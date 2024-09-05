@@ -106,6 +106,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
 namespace cpp2 {
 using NestedContainersSvIf [[deprecated("Use apache::thrift::ServiceHandler<NestedContainers> instead")]] = ::apache::thrift::ServiceHandler<NestedContainers>;
 } // namespace cpp2
+
 namespace cpp2 {
 class NestedContainersSvNull : public ::apache::thrift::ServiceHandler<NestedContainers> {
  public:

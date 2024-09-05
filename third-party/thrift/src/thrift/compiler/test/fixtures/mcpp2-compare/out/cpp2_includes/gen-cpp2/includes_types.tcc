@@ -57,7 +57,6 @@ void AStruct::readNoXfer(Protocol_* iprot) {
 _readField_FieldA:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_FieldA, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -185,7 +184,6 @@ _readField_FieldA:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::a::different::ns::AStruct>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_FieldA = std::move(ptr);
     _readState.afterSubobject(iprot);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

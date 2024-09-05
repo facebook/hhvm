@@ -58,6 +58,7 @@ class ServiceHandler<::some::valid::ns::EmptyService> : public apache::thrift::S
 namespace some::valid::ns {
 using EmptyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<EmptyService> instead")]] = ::apache::thrift::ServiceHandler<EmptyService>;
 } // namespace some::valid::ns
+
 namespace some::valid::ns {
 class EmptyServiceSvNull : public ::apache::thrift::ServiceHandler<EmptyService> {
  public:

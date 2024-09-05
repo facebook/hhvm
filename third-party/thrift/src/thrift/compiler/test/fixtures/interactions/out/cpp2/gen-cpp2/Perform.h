@@ -55,6 +55,7 @@ class MyInteractionServiceInfoHolder : public apache::thrift::ServiceInfoHolder 
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
 
+
 class MyInteractionIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "MyInteraction"; }
@@ -109,6 +110,7 @@ class MyInteractionIf : public apache::thrift::Tile, public apache::thrift::Serv
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
 
+
 class MyInteractionFastIf : public apache::thrift::EventBaseTile, public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "MyInteractionFast"; }
@@ -130,6 +132,7 @@ class MyInteractionFastIf : public apache::thrift::EventBaseTile, public apache:
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
+
 
 class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public apache::thrift::ServerInterface {
  public:
@@ -178,6 +181,7 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
 namespace cpp2 {
 using PerformSvIf [[deprecated("Use apache::thrift::ServiceHandler<Perform> instead")]] = ::apache::thrift::ServiceHandler<Perform>;
 } // namespace cpp2
+
 namespace cpp2 {
 class PerformSvNull : public ::apache::thrift::ServiceHandler<Perform> {
  public:

@@ -70,6 +70,7 @@ class ServiceHandler<::py3::simple::DerivedService> : virtual public ::py3::simp
 namespace py3::simple {
 using DerivedServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<DerivedService> instead")]] = ::apache::thrift::ServiceHandler<DerivedService>;
 } // namespace py3::simple
+
 namespace py3::simple {
 class DerivedServiceSvNull : public ::apache::thrift::ServiceHandler<DerivedService>, virtual public ::apache::thrift::ServiceHandler<::py3::simple::SimpleService> {
  public:

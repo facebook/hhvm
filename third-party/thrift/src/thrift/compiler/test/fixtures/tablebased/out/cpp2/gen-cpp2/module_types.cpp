@@ -118,8 +118,8 @@ TrivialTypesStruct& TrivialTypesStruct::operator=(const TrivialTypesStruct& othe
 }
 
 TrivialTypesStruct::TrivialTypesStruct() :
-      __fbthrift_field_fieldA(),
-      __fbthrift_field_fieldE() {
+    __fbthrift_field_fieldA(),
+    __fbthrift_field_fieldE() {
 }
 
 

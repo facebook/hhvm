@@ -64,7 +64,6 @@ void Color::readNoXfer(Protocol_* iprot) {
 _readField_red:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double>::readWithContext(*iprot, this->__fbthrift_field_red, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -78,7 +77,6 @@ _readField_red:
 _readField_green:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double>::readWithContext(*iprot, this->__fbthrift_field_green, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -92,7 +90,6 @@ _readField_green:
 _readField_blue:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double>::readWithContext(*iprot, this->__fbthrift_field_blue, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -106,7 +103,6 @@ _readField_blue:
 _readField_alpha:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double>::readWithContext(*iprot, this->__fbthrift_field_alpha, _readState);
-    
   }
  this->__isset.set(3, true);
 
@@ -297,7 +293,6 @@ _readField_color:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Color>::readWithContext(*iprot, this->__fbthrift_field_color, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -311,7 +306,6 @@ _readField_color:
 _readField_licensePlate:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_licensePlate, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -325,7 +319,6 @@ _readField_licensePlate:
 _readField_description:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_description, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -339,7 +332,6 @@ _readField_description:
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(3, true);
 
@@ -353,7 +345,6 @@ _readField_name:
 _readField_hasAC:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_hasAC, _readState);
-    
   }
  this->__isset.set(4, true);
 
@@ -573,7 +564,6 @@ void Person::readNoXfer(Protocol_* iprot) {
 _readField_id:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::PersonID>::readWithContext(*iprot, this->__fbthrift_field_id, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -587,7 +577,6 @@ _readField_id:
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -601,7 +590,6 @@ _readField_name:
 _readField_age:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->__fbthrift_field_age, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -615,7 +603,6 @@ _readField_age:
 _readField_address:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_address, _readState);
-    
   }
  this->__isset.set(3, true);
 
@@ -631,7 +618,6 @@ _readField_favoriteColor:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Color>::readWithContext(*iprot, this->__fbthrift_field_favoriteColor, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(4, true);
 
@@ -648,7 +634,6 @@ _readField_friends:
     this->__fbthrift_field_friends = ::std::set<::cpp2::PersonID>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::cpp2::PersonID>>::readWithContext(*iprot, this->__fbthrift_field_friends, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(5, true);
 
@@ -662,7 +647,6 @@ _readField_friends:
 _readField_bestFriend:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::PersonID>::readWithContext(*iprot, this->__fbthrift_field_bestFriend, _readState);
-    
   }
  this->__isset.set(6, true);
 
@@ -679,7 +663,6 @@ _readField_petNames:
     this->__fbthrift_field_petNames = ::std::map<::cpp2::Animal, ::std::string>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::enumeration, ::apache::thrift::type_class::string>, ::std::map<::cpp2::Animal, ::std::string>>::readWithContext(*iprot, this->__fbthrift_field_petNames, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(7, true);
 
@@ -693,7 +676,6 @@ _readField_petNames:
 _readField_afraidOfAnimal:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::Animal>::readWithContext(*iprot, this->__fbthrift_field_afraidOfAnimal, _readState);
-    
   }
  this->__isset.set(8, true);
 
@@ -710,7 +692,6 @@ _readField_vehicles:
     this->__fbthrift_field_vehicles = ::std::vector<::cpp2::Vehicle>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::cpp2::Vehicle>>::readWithContext(*iprot, this->__fbthrift_field_vehicles, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(9, true);
 

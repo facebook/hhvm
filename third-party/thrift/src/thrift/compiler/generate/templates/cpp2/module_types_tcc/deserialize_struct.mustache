@@ -74,7 +74,6 @@ _readField_{{field:cpp_name}}:
   {
 {{/field:lazy?}}
     {{ > module_types_tcc/deserialize_field}}
-
   }
 {{#program:enforce_required?}}{{#field:required?}}
   isset_{{field:cpp_name}} = true;

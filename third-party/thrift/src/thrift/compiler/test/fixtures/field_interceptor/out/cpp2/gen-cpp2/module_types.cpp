@@ -50,9 +50,9 @@ std::string_view InterceptedFields::__fbthrift_get_class_name() {
 InterceptedFields::InterceptedFields(const InterceptedFields&) = default;
 InterceptedFields& InterceptedFields::operator=(const InterceptedFields&) = default;
 InterceptedFields::InterceptedFields() :
-      __fbthrift_field_access_field(),
-      __fbthrift_field_access_shared_field(std::make_shared<::std::int32_t>()),
-      __fbthrift_field_access_shared_const_field(std::make_shared<::std::int32_t>()) {
+    __fbthrift_field_access_field(),
+    __fbthrift_field_access_shared_field(std::make_shared<::std::int32_t>()),
+    __fbthrift_field_access_shared_const_field(std::make_shared<::std::int32_t>()) {
 }
 
 

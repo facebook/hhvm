@@ -50,7 +50,6 @@ void CustomException::readNoXfer(Protocol_* iprot) {
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -64,7 +63,6 @@ _readField_name:
 _readField_result:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::Result>::readWithContext(*iprot, this->__fbthrift_field_result, _readState);
-    
   }
  this->__isset.set(1, true);
 

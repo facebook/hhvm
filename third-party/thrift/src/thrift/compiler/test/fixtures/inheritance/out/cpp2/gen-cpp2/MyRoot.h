@@ -66,6 +66,7 @@ class ServiceHandler<::cpp2::MyRoot> : public apache::thrift::ServerInterface {
 namespace cpp2 {
 using MyRootSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyRoot> instead")]] = ::apache::thrift::ServiceHandler<MyRoot>;
 } // namespace cpp2
+
 namespace cpp2 {
 class MyRootSvNull : public ::apache::thrift::ServiceHandler<MyRoot> {
  public:

@@ -14,7 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{ > Autogen}}
+}}
+{{ > Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/reflection/reflection.h>
@@ -80,19 +81,29 @@ class {{program:name}}_tags {
     {{/fatal_languages:items}}{{/program:fatal_languages}}
   };
   struct __fbthrift_enums {
-    {{#program:fatal_enums}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_enums}}
+{{#program:fatal_enums}}
+    {{ > fatal/fatal_using_string_declaration}}
+{{/program:fatal_enums}}
   };
   struct __fbthrift_unions {
-    {{#program:fatal_unions}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_unions}}
+{{#program:fatal_unions}}
+    {{ > fatal/fatal_using_string_declaration}}
+{{/program:fatal_unions}}
   };
   struct __fbthrift_structs {
-    {{#program:fatal_structs}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_structs}}
+{{#program:fatal_structs}}
+    {{ > fatal/fatal_using_string_declaration}}
+{{/program:fatal_structs}}
   };
   struct __fbthrift_constants {
-    {{#program:fatal_constants}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_constants}}
+{{#program:fatal_constants}}
+    {{ > fatal/fatal_using_string_declaration}}
+{{/program:fatal_constants}}
   };
   struct __fbthrift_services {
-    {{#program:fatal_services}}{{ > fatal/fatal_using_string_declaration}}{{/program:fatal_services}}
+{{#program:fatal_services}}
+    {{ > fatal/fatal_using_string_declaration}}
+{{/program:fatal_services}}
   };
  public:
   struct module {};

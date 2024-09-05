@@ -62,9 +62,9 @@ std::string_view MyStructFloatFieldThrowExp::__fbthrift_get_class_name() {
 MyStructFloatFieldThrowExp::MyStructFloatFieldThrowExp(const MyStructFloatFieldThrowExp&) = default;
 MyStructFloatFieldThrowExp& MyStructFloatFieldThrowExp::operator=(const MyStructFloatFieldThrowExp&) = default;
 MyStructFloatFieldThrowExp::MyStructFloatFieldThrowExp() :
-      __fbthrift_field_myLongField(),
-      __fbthrift_field_MyByteField(),
-      __fbthrift_field_myFloatField() {
+    __fbthrift_field_myLongField(),
+    __fbthrift_field_MyByteField(),
+    __fbthrift_field_myFloatField() {
 }
 
 
@@ -180,7 +180,7 @@ std::string_view MyStructMapFloatThrowExp::__fbthrift_get_class_name() {
 MyStructMapFloatThrowExp::MyStructMapFloatThrowExp(const MyStructMapFloatThrowExp&) = default;
 MyStructMapFloatThrowExp& MyStructMapFloatThrowExp::operator=(const MyStructMapFloatThrowExp&) = default;
 MyStructMapFloatThrowExp::MyStructMapFloatThrowExp() :
-      __fbthrift_field_myLongField() {
+    __fbthrift_field_myLongField() {
 }
 
 
@@ -292,13 +292,13 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_MyIntField(),
-      __fbthrift_field_myEnum(),
-      __fbthrift_field_MyBoolField(),
-      __fbthrift_field_MyByteField(),
-      __fbthrift_field_MyShortField(),
-      __fbthrift_field_MyLongField(),
-      __fbthrift_field_MyDoubleField() {
+    __fbthrift_field_MyIntField(),
+    __fbthrift_field_myEnum(),
+    __fbthrift_field_MyBoolField(),
+    __fbthrift_field_MyByteField(),
+    __fbthrift_field_MyShortField(),
+    __fbthrift_field_MyLongField(),
+    __fbthrift_field_MyDoubleField() {
 }
 
 
@@ -735,8 +735,8 @@ std::string_view SimpleStruct::__fbthrift_get_class_name() {
 SimpleStruct::SimpleStruct(const SimpleStruct&) = default;
 SimpleStruct& SimpleStruct::operator=(const SimpleStruct&) = default;
 SimpleStruct::SimpleStruct() :
-      __fbthrift_field_age(static_cast<::std::int64_t>(60)),
-      __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("Batman")) {
+    __fbthrift_field_age(static_cast<::std::int64_t>(60)),
+    __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("Batman")) {
 }
 
 
@@ -840,39 +840,39 @@ std::string_view defaultStruct::__fbthrift_get_class_name() {
 defaultStruct::defaultStruct(const defaultStruct&) = default;
 defaultStruct& defaultStruct::operator=(const defaultStruct&) = default;
 defaultStruct::defaultStruct() :
-      __fbthrift_field_myLongDFset(static_cast<::std::int64_t>(10)),
-      __fbthrift_field_myLongDF(),
-      __fbthrift_field_portDFset(static_cast<::std::int32_t>(3456)),
-      __fbthrift_field_portNum(),
-      __fbthrift_field_myBinaryDFset(apache::thrift::StringTraits<std::string>::fromStringLiteral("abc")),
-      __fbthrift_field_myByteDFSet(static_cast<::std::int8_t>(17)),
-      __fbthrift_field_myByte(),
-      __fbthrift_field_myDoubleDFset(static_cast<double>(99.7678)),
-      __fbthrift_field_myDoubleDFZero(static_cast<double>(0)),
-      __fbthrift_field_myDouble(),
-      __fbthrift_field_field3(std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{ { static_cast<::std::int32_t>(15), apache::thrift::StringTraits<std::string>::fromStringLiteral("a_value") },
+    __fbthrift_field_myLongDFset(static_cast<::std::int64_t>(10)),
+    __fbthrift_field_myLongDF(),
+    __fbthrift_field_portDFset(static_cast<::std::int32_t>(3456)),
+    __fbthrift_field_portNum(),
+    __fbthrift_field_myBinaryDFset(apache::thrift::StringTraits<std::string>::fromStringLiteral("abc")),
+    __fbthrift_field_myByteDFSet(static_cast<::std::int8_t>(17)),
+    __fbthrift_field_myByte(),
+    __fbthrift_field_myDoubleDFset(static_cast<double>(99.7678)),
+    __fbthrift_field_myDoubleDFZero(static_cast<double>(0)),
+    __fbthrift_field_myDouble(),
+    __fbthrift_field_field3(std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{ { static_cast<::std::int32_t>(15), apache::thrift::StringTraits<std::string>::fromStringLiteral("a_value") },
   { static_cast<::std::int32_t>(2), apache::thrift::StringTraits<std::string>::fromStringLiteral("b_value") } }),
-      __fbthrift_field_myList(std::initializer_list<::cpp2::MyEnum>{  ::cpp2::MyEnum::MyValue1,
+    __fbthrift_field_myList(std::initializer_list<::cpp2::MyEnum>{  ::cpp2::MyEnum::MyValue1,
    ::cpp2::MyEnum::MyValue1,
    ::cpp2::MyEnum::MyValue2 }),
-      __fbthrift_field_mySet(std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("house"),
+    __fbthrift_field_mySet(std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("house"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("car"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("dog") }),
-      __fbthrift_field_simpleStruct(::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(40)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("John")))),
-      __fbthrift_field_listStructDFset(std::initializer_list<::cpp2::SimpleStruct>{ ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(40)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("IronMan"))),
+    __fbthrift_field_simpleStruct(::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(40)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("John")))),
+    __fbthrift_field_listStructDFset(std::initializer_list<::cpp2::SimpleStruct>{ ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(40)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("IronMan"))),
   ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(999)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Thanos"))) }),
-      __fbthrift_field_myUnion(::apache::thrift::detail::make_structured_constant<::cpp2::MyUnion>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::myEnum>( ::cpp2::MyEnum::MyValue2))),
-      __fbthrift_field_listUnionDFset(std::initializer_list<::cpp2::MyUnion>{ ::apache::thrift::detail::make_structured_constant<::cpp2::MyUnion>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::myEnum>( ::cpp2::MyEnum::MyValue2)),
+    __fbthrift_field_myUnion(::apache::thrift::detail::make_structured_constant<::cpp2::MyUnion>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::myEnum>( ::cpp2::MyEnum::MyValue2))),
+    __fbthrift_field_listUnionDFset(std::initializer_list<::cpp2::MyUnion>{ ::apache::thrift::detail::make_structured_constant<::cpp2::MyUnion>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::myEnum>( ::cpp2::MyEnum::MyValue2)),
   ::apache::thrift::detail::make_structured_constant<::cpp2::MyUnion>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::intValue>(static_cast<::std::int32_t>(123))) }),
-      __fbthrift_field_mapNestlistStructDfSet(std::initializer_list<::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>::value_type>{ { static_cast<::std::int32_t>(1), std::initializer_list<::cpp2::SimpleStruct>{ ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(40)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("IronMan"))),
+    __fbthrift_field_mapNestlistStructDfSet(std::initializer_list<::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>::value_type>{ { static_cast<::std::int32_t>(1), std::initializer_list<::cpp2::SimpleStruct>{ ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(40)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("IronMan"))),
   ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(999)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Thanos"))) } },
   { static_cast<::std::int32_t>(2), std::initializer_list<::cpp2::SimpleStruct>{ ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(28)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("BatMan"))),
   ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Robin"))) } },
   { static_cast<::std::int32_t>(5), std::initializer_list<::cpp2::SimpleStruct>{ ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("RatMan"))),
   ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(6)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Catman"))) } } }),
-      __fbthrift_field_mapJavaTypeDFset(std::initializer_list<::cpp2::map_i64_string_5732::value_type>{ { static_cast<::std::int64_t>(15), apache::thrift::StringTraits<std::string>::fromStringLiteral("a_value") },
+    __fbthrift_field_mapJavaTypeDFset(std::initializer_list<::cpp2::map_i64_string_5732::value_type>{ { static_cast<::std::int64_t>(15), apache::thrift::StringTraits<std::string>::fromStringLiteral("a_value") },
   { static_cast<::std::int64_t>(2), apache::thrift::StringTraits<std::string>::fromStringLiteral("b_value") } }),
-      __fbthrift_field_enumMapDFset(std::initializer_list<::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("SANDY BRIDGE"), std::initializer_list<::std::map<::std::int32_t, ::cpp2::MyEnum>::value_type>{ { static_cast<::std::int32_t>(16),  ::cpp2::MyEnum::MyValue1 },
+    __fbthrift_field_enumMapDFset(std::initializer_list<::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("SANDY BRIDGE"), std::initializer_list<::std::map<::std::int32_t, ::cpp2::MyEnum>::value_type>{ { static_cast<::std::int32_t>(16),  ::cpp2::MyEnum::MyValue1 },
   { static_cast<::std::int32_t>(144),  ::cpp2::MyEnum::MyValue1 } } },
   { apache::thrift::StringTraits<std::string>::fromStringLiteral("IVY BRIDGE"), std::initializer_list<::std::map<::std::int32_t, ::cpp2::MyEnum>::value_type>{ { static_cast<::std::int32_t>(32),  ::cpp2::MyEnum::MyValue2 },
   { static_cast<::std::int32_t>(144),  ::cpp2::MyEnum::MyValue2 } } },
@@ -1220,8 +1220,8 @@ std::string_view MyStructTypeDef::__fbthrift_get_class_name() {
 MyStructTypeDef::MyStructTypeDef(const MyStructTypeDef&) = default;
 MyStructTypeDef& MyStructTypeDef::operator=(const MyStructTypeDef&) = default;
 MyStructTypeDef::MyStructTypeDef() :
-      __fbthrift_field_myLongField(),
-      __fbthrift_field_myLongTypeDef() {
+    __fbthrift_field_myLongField(),
+    __fbthrift_field_myLongTypeDef() {
 }
 
 
@@ -2203,7 +2203,7 @@ std::string_view TypeRemapped::__fbthrift_get_class_name() {
 TypeRemapped::TypeRemapped(const TypeRemapped&) = default;
 TypeRemapped& TypeRemapped::operator=(const TypeRemapped&) = default;
 TypeRemapped::TypeRemapped() :
-      __fbthrift_field_BigInteger() {
+    __fbthrift_field_BigInteger() {
 }
 
 
@@ -2419,7 +2419,7 @@ std::string_view reqXcep::__fbthrift_get_class_name() {
 reqXcep::reqXcep(const reqXcep&) = default;
 reqXcep& reqXcep::operator=(const reqXcep&) = default;
 reqXcep::reqXcep() :
-      __fbthrift_field_errorCode() {
+    __fbthrift_field_errorCode() {
 }
 
 
@@ -2517,7 +2517,7 @@ std::string_view optXcep::__fbthrift_get_class_name() {
 optXcep::optXcep(const optXcep&) = default;
 optXcep& optXcep::operator=(const optXcep&) = default;
 optXcep::optXcep() :
-      __fbthrift_field_errorCode() {
+    __fbthrift_field_errorCode() {
 }
 
 
@@ -2622,7 +2622,7 @@ std::string_view complexException::__fbthrift_get_class_name() {
 complexException::complexException(const complexException&) = default;
 complexException& complexException::operator=(const complexException&) = default;
 complexException::complexException() :
-      __fbthrift_field_errorEnum() {
+    __fbthrift_field_errorEnum() {
 }
 
 

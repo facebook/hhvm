@@ -92,7 +92,7 @@ class enums_tags {
     using AnEnumE = __fbthrift_strings::AnEnumE;
   };
   struct __fbthrift_unions {
-  };
+      };
   struct __fbthrift_structs {
     using SomeStruct = __fbthrift_strings::SomeStruct;
   };
@@ -103,7 +103,7 @@ class enums_tags {
     using ConstantMap2 = __fbthrift_strings::ConstantMap2;
   };
   struct __fbthrift_services {
-  };
+      };
  public:
   struct module {};
 

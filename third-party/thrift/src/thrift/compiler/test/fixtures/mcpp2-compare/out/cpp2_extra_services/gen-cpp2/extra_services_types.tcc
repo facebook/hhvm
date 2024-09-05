@@ -50,7 +50,6 @@ void containerStruct2::readNoXfer(Protocol_* iprot) {
 _readField_fieldA:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_fieldA, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -64,7 +63,6 @@ _readField_fieldA:
 _readField_req_fieldA:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_req_fieldA, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -77,7 +75,6 @@ _readField_req_fieldA:
 _readField_opt_fieldA:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldA, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -94,7 +91,6 @@ _readField_fieldB:
     this->__fbthrift_field_fieldB = ::std::map<::std::string, bool>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>>::readWithContext(*iprot, this->__fbthrift_field_fieldB, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(2, true);
 
@@ -111,7 +107,6 @@ _readField_req_fieldB:
     this->__fbthrift_field_req_fieldB = ::std::map<::std::string, bool>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>>::readWithContext(*iprot, this->__fbthrift_field_req_fieldB, _readState);
     _readState.afterSubobject(iprot);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -127,7 +122,6 @@ _readField_opt_fieldB:
     this->__fbthrift_field_opt_fieldB = ::std::map<::std::string, bool>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, bool>>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldB, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(3, true);
 
@@ -144,7 +138,6 @@ _readField_fieldC:
     this->__fbthrift_field_fieldC = ::std::set<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_fieldC, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(4, true);
 
@@ -161,7 +154,6 @@ _readField_req_fieldC:
     this->__fbthrift_field_req_fieldC = ::std::set<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_req_fieldC, _readState);
     _readState.afterSubobject(iprot);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -177,7 +169,6 @@ _readField_opt_fieldC:
     this->__fbthrift_field_opt_fieldC = ::std::set<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldC, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(5, true);
 
@@ -191,7 +182,6 @@ _readField_opt_fieldC:
 _readField_fieldD:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_fieldD, _readState);
-    
   }
  this->__isset.set(6, true);
 
@@ -205,7 +195,6 @@ _readField_fieldD:
 _readField_fieldE:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_fieldE, _readState);
-    
   }
  this->__isset.set(7, true);
 
@@ -219,7 +208,6 @@ _readField_fieldE:
 _readField_req_fieldE:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_req_fieldE, _readState);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -232,7 +220,6 @@ _readField_req_fieldE:
 _readField_opt_fieldE:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_opt_fieldE, _readState);
-    
   }
  this->__isset.set(8, true);
 

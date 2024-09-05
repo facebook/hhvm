@@ -86,6 +86,7 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
 namespace cpp2 {
 using FooBarBazServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<FooBarBazService> instead")]] = ::apache::thrift::ServiceHandler<FooBarBazService>;
 } // namespace cpp2
+
 namespace cpp2 {
 class FooBarBazServiceSvNull : public ::apache::thrift::ServiceHandler<FooBarBazService> {
  public:

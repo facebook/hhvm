@@ -46,7 +46,7 @@ std::string_view IncludedA::__fbthrift_get_class_name() {
 IncludedA::IncludedA(const IncludedA&) = default;
 IncludedA& IncludedA::operator=(const IncludedA&) = default;
 IncludedA::IncludedA() :
-      __fbthrift_field_i32Field() {
+    __fbthrift_field_i32Field() {
 }
 
 

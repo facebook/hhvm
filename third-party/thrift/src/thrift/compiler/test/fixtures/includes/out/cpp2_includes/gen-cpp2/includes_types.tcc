@@ -50,7 +50,6 @@ void Included::readNoXfer(Protocol_* iprot) {
 _readField_MyIntField:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_MyIntField, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -66,7 +65,6 @@ _readField_MyTransitiveField:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::readWithContext(*iprot, this->__fbthrift_field_MyTransitiveField, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 

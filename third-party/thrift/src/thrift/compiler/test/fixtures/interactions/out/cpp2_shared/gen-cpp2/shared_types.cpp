@@ -46,7 +46,7 @@ std::string_view DoSomethingResult::__fbthrift_get_class_name() {
 DoSomethingResult::DoSomethingResult(const DoSomethingResult&) = default;
 DoSomethingResult& DoSomethingResult::operator=(const DoSomethingResult&) = default;
 DoSomethingResult::DoSomethingResult() :
-      __fbthrift_field_i_res() {
+    __fbthrift_field_i_res() {
 }
 
 

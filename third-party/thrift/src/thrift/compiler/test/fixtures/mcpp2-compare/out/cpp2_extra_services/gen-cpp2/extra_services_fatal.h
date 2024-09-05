@@ -94,14 +94,14 @@ class extra_services_tags {
     using cpp2 = __fbthrift_strings::cpp2;
   };
   struct __fbthrift_enums {
-  };
+      };
   struct __fbthrift_unions {
-  };
+      };
   struct __fbthrift_structs {
     using containerStruct2 = __fbthrift_strings::containerStruct2;
   };
   struct __fbthrift_constants {
-  };
+      };
   struct __fbthrift_services {
     using ExtraService = __fbthrift_strings::ExtraService;
   };

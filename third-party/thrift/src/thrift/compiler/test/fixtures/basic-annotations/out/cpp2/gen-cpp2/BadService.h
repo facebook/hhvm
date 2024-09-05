@@ -54,6 +54,7 @@ class BadInteractionServiceInfoHolder : public apache::thrift::ServiceInfoHolder
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
 
+
 class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "BadInteraction"; }
@@ -97,6 +98,7 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
 namespace cpp2 {
 using GoodServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<GoodService> instead")]] = ::apache::thrift::ServiceHandler<GoodService>;
 } // namespace cpp2
+
 namespace cpp2 {
 class GoodServiceSvNull : public ::apache::thrift::ServiceHandler<GoodService> {
  public:

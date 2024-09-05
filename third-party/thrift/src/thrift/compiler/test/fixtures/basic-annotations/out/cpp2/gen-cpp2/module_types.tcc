@@ -78,7 +78,6 @@ void MyStructNestedAnnotation::readNoXfer(Protocol_* iprot) {
 _readField_name:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_name, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -358,7 +357,6 @@ void YourStruct::readNoXfer(Protocol_* iprot) {
 _readField_majorVer:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_majorVer, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -372,7 +370,6 @@ _readField_majorVer:
 _readField_abstract:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_abstract, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -386,7 +383,6 @@ _readField_abstract:
 _readField_annotation_with_quote:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_annotation_with_quote, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -400,7 +396,6 @@ _readField_annotation_with_quote:
 _readField_class_:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_class_, _readState);
-    
   }
  this->__isset.set(3, true);
 
@@ -414,7 +409,6 @@ _readField_class_:
 _readField_annotation_with_trailing_comma:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_annotation_with_trailing_comma, _readState);
-    
   }
  this->__isset.set(4, true);
 
@@ -428,7 +422,6 @@ _readField_annotation_with_trailing_comma:
 _readField_empty_annotations:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_empty_annotations, _readState);
-    
   }
  this->__isset.set(5, true);
 
@@ -442,7 +435,6 @@ _readField_empty_annotations:
 _readField_my_enum:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::YourEnum>::readWithContext(*iprot, this->__fbthrift_field_my_enum, _readState);
-    
   }
  this->__isset.set(6, true);
 
@@ -459,7 +451,6 @@ _readField_cpp_type_annotation:
     this->__fbthrift_field_cpp_type_annotation = ::cpp2::list_string_6884();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::cpp2::list_string_6884>::readWithContext(*iprot, this->__fbthrift_field_cpp_type_annotation, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(7, true);
 
@@ -475,7 +466,6 @@ _readField_my_union:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>>(*iprot, this->__fbthrift_field_my_union);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(8, true);
 
@@ -780,7 +770,6 @@ void SecretStruct::readNoXfer(Protocol_* iprot) {
 _readField_id:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->__fbthrift_field_id, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -794,7 +783,6 @@ _readField_id:
 _readField_password:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_password, _readState);
-    
   }
  this->__isset.set(1, true);
 

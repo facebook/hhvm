@@ -54,7 +54,6 @@ _readField_foo:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_foo = std::move(ptr);
     _readState.afterSubobject(iprot);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -71,7 +70,6 @@ _readField_bar:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_bar = std::move(ptr);
     _readState.afterSubobject(iprot);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

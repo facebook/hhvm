@@ -141,8 +141,8 @@ std::string_view structured_annotation_inline::__fbthrift_get_class_name() {
 structured_annotation_inline::structured_annotation_inline(const structured_annotation_inline&) = default;
 structured_annotation_inline& structured_annotation_inline::operator=(const structured_annotation_inline&) = default;
 structured_annotation_inline::structured_annotation_inline() :
-      __fbthrift_field_count(),
-      __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("abacaba")) {
+    __fbthrift_field_count(),
+    __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("abacaba")) {
 }
 
 
@@ -250,7 +250,7 @@ std::string_view structured_annotation_with_default::__fbthrift_get_class_name()
 structured_annotation_with_default::structured_annotation_with_default(const structured_annotation_with_default&) = default;
 structured_annotation_with_default& structured_annotation_with_default::operator=(const structured_annotation_with_default&) = default;
 structured_annotation_with_default::structured_annotation_with_default() :
-      __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("abacabadabacaba")) {
+    __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("abacabadabacaba")) {
 }
 
 
@@ -700,8 +700,8 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_annotated_field(),
-      __fbthrift_field_annotated_nested() {
+    __fbthrift_field_annotated_field(),
+    __fbthrift_field_annotated_nested() {
 }
 
 

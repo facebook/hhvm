@@ -50,7 +50,6 @@ void InterceptedFields::readNoXfer(Protocol_* iprot) {
 _readField_access_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_access_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -66,7 +65,6 @@ _readField_access_shared_field:
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::int32_t>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_access_shared_field = std::move(ptr);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -81,7 +79,6 @@ _readField_access_optional_shared_field:
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::int32_t>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_access_optional_shared_field = std::move(ptr);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -96,7 +93,6 @@ _readField_access_shared_const_field:
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::int32_t>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_access_shared_const_field = std::move(ptr);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -111,7 +107,6 @@ _readField_access_optional_shared_const_field:
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::int32_t>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_access_optional_shared_const_field = std::move(ptr);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -126,7 +121,6 @@ _readField_access_optional_boxed_field:
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_access_optional_boxed_field = std::move(ptr);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

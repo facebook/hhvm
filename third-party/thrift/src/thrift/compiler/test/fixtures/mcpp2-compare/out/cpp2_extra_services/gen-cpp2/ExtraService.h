@@ -133,6 +133,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
 namespace extra::svc {
 using ExtraServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<ExtraService> instead")]] = ::apache::thrift::ServiceHandler<ExtraService>;
 } // namespace extra::svc
+
 namespace extra::svc {
 class ExtraServiceSvNull : public ::apache::thrift::ServiceHandler<ExtraService>, virtual public ::apache::thrift::ServiceHandler<::some::valid::ns::ParamService> {
  public:

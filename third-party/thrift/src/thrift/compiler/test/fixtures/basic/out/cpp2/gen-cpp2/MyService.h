@@ -160,6 +160,7 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
 namespace test::fixtures::basic {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
 } // namespace test::fixtures::basic
+
 namespace test::fixtures::basic {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:

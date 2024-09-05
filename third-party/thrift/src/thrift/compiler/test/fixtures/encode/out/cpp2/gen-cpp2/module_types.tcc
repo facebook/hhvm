@@ -71,7 +71,6 @@ void Foo::readNoXfer(Protocol_* iprot) {
 _readField_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_field, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -193,7 +192,6 @@ _readField_list_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, this->__fbthrift_field_list_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -315,7 +313,6 @@ _readField_list_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, this->__fbthrift_field_list_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(0, true);
 
@@ -331,7 +328,6 @@ _readField_nested_list_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*iprot, this->__fbthrift_field_nested_list_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(1, true);
 
@@ -474,7 +470,6 @@ void OpEncodeStruct::readNoXfer(Protocol_* iprot) {
 _readField_int_field:
   {
     ::apache::thrift::op::decode<::apache::thrift::type::i32_t>(*iprot, this->__fbthrift_field_int_field);
-    
   }
  this->__isset.set(0, true);
 
@@ -488,7 +483,6 @@ _readField_int_field:
 _readField_enum_field:
   {
     ::apache::thrift::op::decode<::apache::thrift::type::enum_t<::facebook::thrift::test::Enum>>(*iprot, this->__fbthrift_field_enum_field);
-    
   }
  this->__isset.set(1, true);
 
@@ -504,7 +498,6 @@ _readField_foo_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>(*iprot, this->__fbthrift_field_foo_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(2, true);
 
@@ -520,7 +513,6 @@ _readField_adapted_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>(*iprot, this->__fbthrift_field_adapted_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(3, true);
 
@@ -536,7 +528,6 @@ _readField_list_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, this->__fbthrift_field_list_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(4, true);
 
@@ -554,7 +545,6 @@ _readField_list_shared_ptr_field:
     ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, *ptr);
     this->__fbthrift_field_list_shared_ptr_field = std::move(ptr);
     _readState.afterSubobject(iprot);
-    
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -569,7 +559,6 @@ _readField_list_cpp_type_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, this->__fbthrift_field_list_cpp_type_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(5, true);
 
@@ -585,7 +574,6 @@ _readField_set_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, this->__fbthrift_field_set_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(6, true);
 
@@ -601,7 +589,6 @@ _readField_map_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::map<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, this->__fbthrift_field_map_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(7, true);
 
@@ -617,7 +604,6 @@ _readField_nested_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*iprot, this->__fbthrift_field_nested_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(8, true);
 
@@ -633,7 +619,6 @@ _readField_bar_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>>(*iprot, this->__fbthrift_field_bar_field);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(9, true);
 
@@ -649,7 +634,6 @@ _readField_adapted_list_field:
     _readState.beforeSubobject(iprot);
     ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<OpEncodeStruct, ::apache::thrift::field_id<12>>>(*iprot, this->__fbthrift_field_adapted_list_field, *this);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(10, true);
 

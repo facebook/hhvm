@@ -94,7 +94,7 @@ std::string_view SimpleException::__fbthrift_get_class_name() {
 SimpleException::SimpleException(const SimpleException&) = default;
 SimpleException& SimpleException::operator=(const SimpleException&) = default;
 SimpleException::SimpleException() :
-      __fbthrift_field_err_code() {
+    __fbthrift_field_err_code() {
 }
 
 
@@ -700,7 +700,7 @@ std::string_view HiddenException::__fbthrift_get_class_name() {
 HiddenException::HiddenException(const HiddenException&) = default;
 HiddenException& HiddenException::operator=(const HiddenException&) = default;
 HiddenException::HiddenException() :
-      __fbthrift_field_test() {
+    __fbthrift_field_test() {
 }
 
 
@@ -798,8 +798,8 @@ std::string_view ComplexStruct::__fbthrift_get_class_name() {
 ComplexStruct::ComplexStruct(const ComplexStruct&) = default;
 ComplexStruct& ComplexStruct::operator=(const ComplexStruct&) = default;
 ComplexStruct::ComplexStruct() :
-      __fbthrift_field_an_integer(),
-      __fbthrift_field_an_enum() {
+    __fbthrift_field_an_integer(),
+    __fbthrift_field_an_enum() {
 }
 
 

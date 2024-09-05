@@ -76,6 +76,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
 namespace cpp2 {
 using MyServicePrioParentSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyServicePrioParent> instead")]] = ::apache::thrift::ServiceHandler<MyServicePrioParent>;
 } // namespace cpp2
+
 namespace cpp2 {
 class MyServicePrioParentSvNull : public ::apache::thrift::ServiceHandler<MyServicePrioParent> {
  public:

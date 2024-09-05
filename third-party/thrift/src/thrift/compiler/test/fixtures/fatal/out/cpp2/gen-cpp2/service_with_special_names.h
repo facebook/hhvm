@@ -339,6 +339,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
 namespace test_cpp2::cpp_reflection {
 using service_with_special_namesSvIf [[deprecated("Use apache::thrift::ServiceHandler<service_with_special_names> instead")]] = ::apache::thrift::ServiceHandler<service_with_special_names>;
 } // namespace test_cpp2::cpp_reflection
+
 namespace test_cpp2::cpp_reflection {
 class service_with_special_namesSvNull : public ::apache::thrift::ServiceHandler<service_with_special_names> {
  public:

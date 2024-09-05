@@ -57,7 +57,6 @@ void SomeStruct::readNoXfer(Protocol_* iprot) {
 _readField_reasonable:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::readWithContext(*iprot, this->__fbthrift_field_reasonable, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -71,7 +70,6 @@ _readField_reasonable:
 _readField_fine:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::readWithContext(*iprot, this->__fbthrift_field_fine, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -85,7 +83,6 @@ _readField_fine:
 _readField_questionable:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::readWithContext(*iprot, this->__fbthrift_field_questionable, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -102,7 +99,6 @@ _readField_tags:
     this->__fbthrift_field_tags = ::std::set<::std::int32_t>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_tags, _readState);
     _readState.afterSubobject(iprot);
-    
   }
  this->__isset.set(3, true);
 
@@ -291,7 +287,6 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
 _readField_me2_3:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2>::readWithContext(*iprot, this->__fbthrift_field_me2_3, _readState);
-    
   }
  this->__isset.set(0, true);
 
@@ -305,7 +300,6 @@ _readField_me2_3:
 _readField_me3_n3:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3>::readWithContext(*iprot, this->__fbthrift_field_me3_n3, _readState);
-    
   }
  this->__isset.set(1, true);
 
@@ -319,7 +313,6 @@ _readField_me3_n3:
 _readField_me1_t1:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::readWithContext(*iprot, this->__fbthrift_field_me1_t1, _readState);
-    
   }
  this->__isset.set(2, true);
 
@@ -333,7 +326,6 @@ _readField_me1_t1:
 _readField_me1_t2:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::readWithContext(*iprot, this->__fbthrift_field_me1_t2, _readState);
-    
   }
  this->__isset.set(3, true);
 

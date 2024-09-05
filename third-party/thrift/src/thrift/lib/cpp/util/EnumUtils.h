@@ -44,6 +44,9 @@ inline constexpr bool is_thrift_enum_v<
     EnumType,
     folly::void_t<decltype(TEnumTraits<EnumType>::size)>> = true;
 
+template <>
+inline constexpr bool is_thrift_enum_v<void> = false;
+
 /**
  * Parses an enum name to the enum type
  */

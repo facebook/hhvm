@@ -39,8 +39,11 @@ using native_type =
     typename detail::NativeTypes<Tag, if_thrift_type_tag<Tag>>::native_type;
 
 // Infer the Thrift type tag from a standard type.
-template <typename T>
-using infer_tag = typename detail::InferTag<folly::remove_cvref_t<T>>::type;
+// If GuessStringTag is true, then std::string will be mapped to binary_t.
+// Otherwise the mapping is undefined (i.e. compiler error).
+template <typename T, bool GuessStringTag = false>
+using infer_tag =
+    typename detail::InferTag<folly::remove_cvref_t<T>, GuessStringTag>::type;
 
 } // namespace type
 } // namespace thrift

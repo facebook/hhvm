@@ -73,7 +73,7 @@ void to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
 }
 template <typename T>
 void to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
-  using Tag = apache::thrift::type::infer_tag<T>;
+  using Tag = apache::thrift::type::infer_tag<T, true /* GuessStringTag */>;
   return to_dynamic<Tag>(out, std::forward<T>(input), format);
 }
 
@@ -121,7 +121,7 @@ void from_dynamic(
     const folly::dynamic& input,
     dynamic_format format,
     format_adherence adherence = format_adherence::STRICT) {
-  using Tag = apache::thrift::type::infer_tag<T>;
+  using Tag = apache::thrift::type::infer_tag<T, true /* GuessStringTag */>;
   from_dynamic<Tag, T>(out, input, format, adherence);
 }
 template <typename Tag, typename T>
@@ -157,7 +157,7 @@ T from_dynamic(
     const folly::dynamic& input,
     dynamic_format format,
     format_adherence adherence = format_adherence::STRICT) {
-  using Tag = apache::thrift::type::infer_tag<T>;
+  using Tag = apache::thrift::type::infer_tag<T, true /* GuessStringTag */>;
   return from_dynamic<Tag, T>(input, format, adherence);
 }
 template <typename Tag, typename T>

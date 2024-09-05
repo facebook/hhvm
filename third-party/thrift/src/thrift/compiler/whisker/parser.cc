@@ -961,23 +961,22 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    const token& first_id = scan.advance();
-    if (first_id.kind != tok::path_component) {
+    const token& first_component = scan.advance();
+    if (first_component.kind != tok::path_component) {
       return no_parse_result();
     }
     std::vector<ast::path_component> path;
     path.emplace_back(ast::path_component{
-        first_id.range, std::string(first_id.string_value())});
+        first_component.range, std::string(first_component.string_value())});
 
-    while (try_consume_token(&scan, tok::slash) ||
-           try_consume_token(&scan, tok::dot)) {
-      const token& id_part = scan.peek();
-      if (id_part.kind != tok::path_component) {
+    while (try_consume_token(&scan, tok::slash)) {
+      const token& component_part = scan.peek();
+      if (component_part.kind != tok::path_component) {
         report_expected(scan, "path-component in partial-lookup");
       }
       scan.advance();
       path.emplace_back(ast::path_component{
-          id_part.range, std::string(id_part.string_value())});
+          component_part.range, std::string(component_part.string_value())});
     }
     return {
         ast::partial_lookup{

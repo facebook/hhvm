@@ -26,6 +26,7 @@ namespace {
 struct RuntimeState {
   std::vector<std::shared_ptr<apache::thrift::TProcessorEventHandler>>
       legacyClientEventHandlers;
+  std::vector<InitOptions::ThriftServerInitializer> serverInitializers;
 };
 folly::DelayedInit<RuntimeState> gRuntimeState;
 } // namespace
@@ -34,7 +35,9 @@ void init(InitOptions options) {
   bool didInitialize = false;
   gRuntimeState.try_emplace_with([&] {
     didInitialize = true;
-    return RuntimeState{std::move(options.legacyClientEventHandlers)};
+    return RuntimeState{
+        std::move(options.legacyClientEventHandlers),
+        std::move(options.serverInitializers)};
   });
   if (!didInitialize) {
     throw std::logic_error(
@@ -52,6 +55,14 @@ getGlobalLegacyClientEventHandlers() {
     return {};
   }
   return folly::range(gRuntimeState->legacyClientEventHandlers);
+}
+
+folly::Range<const InitOptions::ThriftServerInitializer*>
+getGlobalServerInitializers() {
+  if (!wasInitialized()) {
+    return {};
+  }
+  return folly::range(gRuntimeState->serverInitializers);
 }
 
 } // namespace apache::thrift::runtime

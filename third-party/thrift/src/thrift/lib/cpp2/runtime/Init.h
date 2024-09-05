@@ -18,22 +18,36 @@
 
 #include <vector>
 
+#include <folly/Function.h>
 #include <folly/Range.h>
 
 namespace apache::thrift {
 class TProcessorEventHandler;
-}
+class ThriftServer;
+} // namespace apache::thrift
 
 namespace apache::thrift::runtime {
 
 struct InitOptions {
   std::vector<std::shared_ptr<apache::thrift::TProcessorEventHandler>>
       legacyClientEventHandlers;
+
+  using ThriftServerInitializer = folly::Function<void(ThriftServer&) const>;
+  /**
+   * Initialization functions to be called on ThriftServer instances during
+   * their construction. This is useful for always-on customizations such as:
+   *   - Adding ServerModules via ThriftServer::addModule
+   *   - Configuration via ThriftServer::set* methods
+   */
+  std::vector<ThriftServerInitializer> serverInitializers;
 };
 void init(InitOptions);
 bool wasInitialized() noexcept;
 
 folly::Range<std::shared_ptr<apache::thrift::TProcessorEventHandler>*>
 getGlobalLegacyClientEventHandlers();
+
+folly::Range<const InitOptions::ThriftServerInitializer*>
+getGlobalServerInitializers();
 
 } // namespace apache::thrift::runtime

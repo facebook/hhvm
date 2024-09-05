@@ -50,6 +50,7 @@
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/MultiplexAsyncProcessor.h>
+#include <thrift/lib/cpp2/runtime/Init.h>
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ExecutorToThreadManagerAdaptor.h>
@@ -330,6 +331,11 @@ void ThriftServer::initializeDefaults() {
           THRIFT_SERVER_EVENT(ACC_enabled).log(*this);
         }
       });
+
+  for (const auto& initializer :
+       apache::thrift::runtime::getGlobalServerInitializers()) {
+    initializer(*this);
+  }
 }
 
 std::unique_ptr<RequestPileInterface> ThriftServer::makeStandardRequestPile(

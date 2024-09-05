@@ -9,7 +9,6 @@
 #include <fizz/protocol/ech/Encryption.h>
 #include "fizz/record/Types.h"
 
-#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/protocol/Protocol.h>
 #include <fizz/protocol/ech/ECHExtensions.h>
@@ -206,36 +205,6 @@ static hpke::SetupParam getSetupParam(
       std::move(hkdf),
       std::move(suiteId),
       0};
-}
-
-std::unique_ptr<folly::IOBuf> getRecordDigest(
-    const ECHConfig& echConfig,
-    hpke::KDFId id) {
-  switch (id) {
-    case hpke::KDFId::Sha256: {
-      std::array<uint8_t, fizz::Sha256::HashLen> recordDigest;
-      fizz::openssl::Hasher<Sha256>::hash(
-          *encode(echConfig),
-          folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
-      return folly::IOBuf::copyBuffer(recordDigest);
-    }
-    case hpke::KDFId::Sha384: {
-      std::array<uint8_t, fizz::Sha384::HashLen> recordDigest;
-      fizz::openssl::Hasher<Sha384>::hash(
-          *encode(echConfig),
-          folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
-      return folly::IOBuf::copyBuffer(recordDigest);
-    }
-    case hpke::KDFId::Sha512: {
-      std::array<uint8_t, fizz::Sha512::HashLen> recordDigest;
-      fizz::openssl::Hasher<Sha512>::hash(
-          *encode(echConfig),
-          folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
-      return folly::IOBuf::copyBuffer(recordDigest);
-    }
-    default:
-      throw std::runtime_error("kdf: not implemented");
-  }
 }
 
 hpke::SetupResult constructHpkeSetupResult(

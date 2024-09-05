@@ -250,8 +250,12 @@ class render_engine {
       std::vector<std::string> scope_trace;
       scope_trace.reserve(ex.searched_scopes().size());
       for (std::size_t i = 0; i < ex.searched_scopes().size(); ++i) {
-        scope_trace.push_back(
-            fmt::format("#{} {}", i, to_string(ex.searched_scopes()[i])));
+        object_print_options print_opts;
+        print_opts.max_depth = 1;
+        scope_trace.push_back(fmt::format(
+            "#{} {}",
+            i,
+            to_string(ex.searched_scopes()[i], std::move(print_opts))));
       }
 
       maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
@@ -275,11 +279,13 @@ class render_engine {
             return chain[ex.success_path().size()].loc;
           });
       maybe_report(std::move(src_range), undefined_diag_level, [&] {
+        object_print_options print_opts;
+        print_opts.max_depth = 1;
         return fmt::format(
             "Object '{}' has no property named '{}'. The object with the missing property is:\n{}",
             fmt::join(ex.success_path(), "."),
             ex.property_name(),
-            to_string(ex.missing_from()));
+            to_string(ex.missing_from(), std::move(print_opts)));
       });
       if (undefined_diag_level == diagnostic_level::error) {
         // Fail rendering in strict mode

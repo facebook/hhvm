@@ -141,9 +141,15 @@ module SketchyNullCheck = struct
 
   let lint_severity _ = Lints_core.Lint_warning
 
-  let claim { Typing_warning.SketchyNullCheck.name; kind } =
+  let claim { Typing_warning.SketchyNullCheck.name; kind; ty } =
     let name = Option.value name ~default:"$x" in
-    "This is a sketchy null check.\nIt detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `\"\"`, `\"0\"`, empty Containers, and more.\nIf you want to test for them, please consider doing so explicitly.\nIf you only meant to test for `null`, "
+
+    "This is a sketchy null check on an expression of type "
+    ^ ty
+    ^ ".\n"
+    ^ "It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `\"\"`, `\"0\"`, empty Containers, and more.\n"
+    ^ "If you want to test for them, please consider doing so explicitly.\n"
+    ^ "If you only meant to test for `null`, "
     ^
     match kind with
     | Typing_warning.SketchyNullCheck.Coalesce ->
@@ -240,7 +246,7 @@ module TruthinessTest = struct
 
   let lint_severity _ = Lints_core.Lint_warning
 
-  let claim { kind; ty } =
+  let claim { kind; ty; expr; not } =
     match kind with
     | Invalid { truthy } ->
       Printf.sprintf
@@ -252,19 +258,48 @@ module TruthinessTest = struct
           "falsy")
     | Sketchy sketchy ->
       Printf.sprintf
-        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n%s"
+        "%sketchy condition: testing the %s of %s may not behave as expected.\n%s"
+        (match expr with
+        | None -> "S"
+        | Some e ->
+          Printf.sprintf
+            "`%s%s` is a s"
+            (if not then
+              "!"
+            else
+              "")
+            e)
+        (if not then
+          "falsiness"
+        else
+          "truthiness")
         ty
         (match sketchy with
         | String ->
-          "The values `\"\"` and `\"0\"` are both considered falsy. To check for emptiness, use `Str\\is_empty`."
+          Printf.sprintf
+            "The values `\"\"` and `\"0\"` are both considered falsy. To check for %semptiness, use `%sStr\\is_empty%s`."
+            (if not then
+              ""
+            else
+              "non-")
+            (if not then
+              ""
+            else
+              "!")
+            (match expr with
+            | None -> ""
+            | Some e -> Printf.sprintf "(%s)" e)
         | Arraykey ->
           "The values `0`, `\"\"`, and `\"0\"` are all considered falsy. Test for them explicitly."
         | Stringish ->
-          "The values `\"\"` and `\"0\"` are both considered falsy, but objects will be truthy even if their `__toString` returns `\"\"` or `\"0\"`.\nTo check for emptiness, convert to a string and use `Str\\is_empty`."
+          "The values `\"\"` and `\"0\"` are both considered falsy, but objects will be truthy even if their `__toString` returns `\"\"` or `\"0\"`.\n"
+          ^ "To check for emptiness, convert to a string and use `Str\\is_empty`."
         | Xhp_child ->
           "The values `\"\"` and `\"0\"` are both considered falsy, but objects (including XHP elements) will be truthy even if their `__toString` returns `\"\"` or `\"0\"`."
         | Traversable ->
-          "A value of this type may be truthy even when empty.\nHack collections and arrays are falsy when empty, but user-defined Traversables will always be truthy, even when empty.\nIf you would like to only allow containers which are falsy when empty, use the `Container` or `KeyedContainer` interfaces.")
+          "A value of this type may be truthy even when empty.\n"
+          ^ "Hack collections and arrays are falsy when empty, but user-defined Traversables will always be truthy, even when empty.\n"
+          ^ "If you would like to only allow containers which are falsy when empty, use the `Container` or `KeyedContainer` interfaces.")
 
   let reasons _ = []
 

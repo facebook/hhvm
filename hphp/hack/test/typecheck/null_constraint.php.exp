@@ -1,8 +1,8 @@
 WARN: File "null_constraint.php", line 27, characters 7-10:
-This is a sketchy null check.
+This is a sketchy null check on an expression of type T.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
 If you want to test for them, please consider doing so explicitly.
 If you only meant to test for `null`, use `$arg is nonnull` instead (Warn[12003])
 WARN: File "null_constraint.php", line 27, characters 7-10:
-Sketchy condition: testing the truthiness of a string may not behave as expected.
-The values `""` and `"0"` are both considered falsy. To check for emptiness, use `Str\is_empty`. (Warn[12006])
+`$arg` is a sketchy condition: testing the truthiness of a string may not behave as expected.
+The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty($arg)`. (Warn[12006])

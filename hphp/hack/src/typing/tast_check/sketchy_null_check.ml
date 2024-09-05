@@ -52,7 +52,13 @@ let sketchy_null_check env ~as_lint (ty, p, e) kind =
               Some None
             else
               None)
-          (p, warning_kind, { Typing_warning.SketchyNullCheck.name; kind })
+          ( p,
+            warning_kind,
+            {
+              Typing_warning.SketchyNullCheck.name;
+              kind;
+              ty = Tast_env.print_ty env ty;
+            } )
       | Always_truthy
       | Always_falsy
       | Unknown ->

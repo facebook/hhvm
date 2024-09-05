@@ -8,4 +8,4 @@ Invalid return type (Typing[4110])
   But got `string`
 WARN: File "if_assign.php", line 13, characters 7-13:
 Sketchy condition: testing the truthiness of a string may not behave as expected.
-The values `""` and `"0"` are both considered falsy. To check for emptiness, use `Str\is_empty`. (Warn[12006])
+The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty`. (Warn[12006])

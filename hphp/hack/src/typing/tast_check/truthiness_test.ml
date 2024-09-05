@@ -19,7 +19,11 @@ let warning_kind = Typing_warning.Truthiness_test
 
 let error_codes = Typing_warning_utils.codes warning_kind
 
-let add_warning env ~as_lint pos kind ty =
+let get_lvar_name = function
+  | Lvar (_, id) -> Some (Local_id.get_name id)
+  | _ -> None
+
+let add_warning env ~as_lint pos kind ty e not =
   Typing_warning_utils.add_for_migration
     (Env.get_tcopt env)
     ~as_lint:
@@ -29,9 +33,9 @@ let add_warning env ~as_lint pos kind ty =
         None)
     ( pos,
       Typing_warning.Truthiness_test,
-      { Typing_warning.TruthinessTest.kind; ty } )
+      { Typing_warning.TruthinessTest.kind; ty; expr = get_lvar_name e; not } )
 
-let truthiness_test env ~as_lint (ty, p, _e) =
+let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
   let module TruthinessTest = Typing_warning.TruthinessTest in
   let prim_to_string prim =
     Env.print_error_ty env (MakeType.prim_type (get_reason ty) prim)
@@ -39,18 +43,39 @@ let truthiness_test env ~as_lint (ty, p, _e) =
   List.iter (Tast_utils.find_sketchy_types env ty) ~f:(function
       | Tast_utils.String ->
         let tystr = prim_to_string Aast_defs.Tstring in
-        add_warning env ~as_lint p TruthinessTest.(Sketchy String) tystr
+        add_warning env ~as_lint p TruthinessTest.(Sketchy String) tystr e not
       | Tast_utils.Arraykey ->
         let tystr = prim_to_string Aast_defs.Tarraykey in
-        add_warning env ~as_lint p TruthinessTest.(Sketchy Arraykey) tystr
+        add_warning env ~as_lint p TruthinessTest.(Sketchy Arraykey) tystr e not
       | Tast_utils.Stringish ->
         let tystr = Utils.strip_ns SN.Classes.cStringish in
-        add_warning env ~as_lint p TruthinessTest.(Sketchy Stringish) tystr
+        add_warning
+          env
+          ~as_lint
+          p
+          TruthinessTest.(Sketchy Stringish)
+          tystr
+          e
+          not
       | Tast_utils.XHPChild ->
         let tystr = Utils.strip_ns SN.Classes.cXHPChild in
-        add_warning env ~as_lint p TruthinessTest.(Sketchy Xhp_child) tystr
+        add_warning
+          env
+          ~as_lint
+          p
+          TruthinessTest.(Sketchy Xhp_child)
+          tystr
+          e
+          not
       | Tast_utils.Traversable_interface tystr ->
-        add_warning env ~as_lint p TruthinessTest.(Sketchy Traversable) tystr);
+        add_warning
+          env
+          ~as_lint
+          p
+          TruthinessTest.(Sketchy Traversable)
+          tystr
+          e
+          not);
   match Tast_utils.truthiness env ty with
   | Tast_utils.Always_truthy ->
     add_warning
@@ -59,6 +84,8 @@ let truthiness_test env ~as_lint (ty, p, _e) =
       p
       TruthinessTest.(Invalid { truthy = true })
       (Env.print_ty env ty)
+      e
+      not
   | Tast_utils.Always_falsy ->
     add_warning
       env
@@ -66,6 +93,8 @@ let truthiness_test env ~as_lint (ty, p, _e) =
       p
       TruthinessTest.(Invalid { truthy = false })
       (Env.print_ty env ty)
+      e
+      not
   | Tast_utils.Possibly_falsy
   | Tast_utils.Unknown ->
     ()
@@ -76,12 +105,11 @@ let handler ~as_lint =
 
     method! at_expr env (_, _, x) =
       match x with
-      | Unop (Unot, e)
-      | Eif (e, _, _) ->
-        truthiness_test env ~as_lint e
+      | Unop (Unot, e) -> truthiness_test env ~as_lint e ~not:true
+      | Eif (e, _, _) -> truthiness_test env ~as_lint e ~not:false
       | Binop { bop = Ampamp | Barbar; lhs = e1; rhs = e2 } ->
-        truthiness_test env ~as_lint e1;
-        truthiness_test env ~as_lint e2
+        truthiness_test env ~as_lint e1 ~not:false;
+        truthiness_test env ~as_lint e2 ~not:false
       | _ -> ()
 
     method! at_stmt env x =
@@ -90,6 +118,6 @@ let handler ~as_lint =
       | Do (_, e)
       | While (e, _)
       | For (_, Some e, _, _) ->
-        truthiness_test env ~as_lint e
+        truthiness_test env ~as_lint e ~not:false
       | _ -> ()
   end

@@ -39,6 +39,7 @@ module SketchyNullCheck = struct
   type t = {
     name: string option;
     kind: kind;
+    ty: string;
   }
 end
 
@@ -83,6 +84,8 @@ module TruthinessTest = struct
   type t = {
     kind: kind;
     ty: string;
+    expr: string option;
+    not: bool;
   }
 end
 

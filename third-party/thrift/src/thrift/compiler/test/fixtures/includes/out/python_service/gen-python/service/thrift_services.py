@@ -63,8 +63,6 @@ class MyServiceInterface(
         args_struct = deserialize(service.thrift_types._fbthrift_MyService_query_args, args, protocol)
         value = await self.query(args_struct.s,args_struct.i,)
         return_struct = service.thrift_types._fbthrift_MyService_query_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -79,7 +77,5 @@ class MyServiceInterface(
         args_struct = deserialize(service.thrift_types._fbthrift_MyService_has_arg_docs_args, args, protocol)
         value = await self.has_arg_docs(args_struct.s,args_struct.i,)
         return_struct = service.thrift_types._fbthrift_MyService_has_arg_docs_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 

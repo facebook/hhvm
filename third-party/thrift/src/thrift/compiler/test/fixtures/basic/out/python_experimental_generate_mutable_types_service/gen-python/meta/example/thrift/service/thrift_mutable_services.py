@@ -59,13 +59,10 @@ class EchoServiceInterface(
         try:
             value = await self.echo(args_struct.request,)
             return_struct = meta.example.thrift.service.thrift_mutable_types._fbthrift_EchoService_echo_result(success=value)
-            
         except meta.example.thrift.service.thrift_mutable_types.WhisperException as e:
             return_struct = meta.example.thrift.service.thrift_mutable_types._fbthrift_EchoService_echo_result(ex=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('meta.example.thrift.WhisperException', str(e), buf)
             raise exp
-
-
         return serialize_iobuf(return_struct, protocol)
 

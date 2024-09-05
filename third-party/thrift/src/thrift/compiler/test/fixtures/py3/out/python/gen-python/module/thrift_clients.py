@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import __static__
 
-
 import typing as _typing
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
@@ -2011,7 +2010,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
-    
+
 
 class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedService.Sync"]):
     @staticmethod
@@ -2025,7 +2024,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-    """bar""": """1""","""foo""": """\"\"\"""",    }
+            """bar""": """1""",        """foo""": """\"\"\"""",    }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2099,7 +2098,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
-    
+
 
 class RederivedService(_fbthrift_python_Client["RederivedService.Async", "RederivedService.Sync"]):
     @staticmethod
@@ -2187,4 +2186,4 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
-    
+

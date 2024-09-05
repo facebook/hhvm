@@ -28,8 +28,8 @@ def _fbthrift_gen_metadata_struct_Mixin1(metadata_struct: _fbthrift_metadata.Thr
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # field1
-
+    # field1
+    
     return new_struct
 def gen_metadata_struct_Mixin1() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Mixin1(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -55,9 +55,9 @@ def _fbthrift_gen_metadata_struct_Mixin2(metadata_struct: _fbthrift_metadata.Thr
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_struct_Mixin1(new_struct) # m1
-     # field2
-
+    # m1
+    new_struct = _fbthrift_gen_metadata_struct_Mixin1(new_struct)    # field2
+    
     return new_struct
 def gen_metadata_struct_Mixin2() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Mixin2(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -80,8 +80,8 @@ def _fbthrift_gen_metadata_struct_Mixin3Base(metadata_struct: _fbthrift_metadata
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # field3
-
+    # field3
+    
     return new_struct
 def gen_metadata_struct_Mixin3Base() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Mixin3Base(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -110,10 +110,10 @@ def _fbthrift_gen_metadata_struct_Foo(metadata_struct: _fbthrift_metadata.Thrift
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # field4
-    new_struct = _fbthrift_gen_metadata_struct_Mixin2(new_struct) # m2
-    new_struct = _fbthrift_gen_metadata_struct_Mixin3Base(new_struct) # m3
-
+    # field4
+        # m2
+    new_struct = _fbthrift_gen_metadata_struct_Mixin2(new_struct)    # m3
+    new_struct = _fbthrift_gen_metadata_struct_Mixin3Base(new_struct)
     return new_struct
 def gen_metadata_struct_Foo() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Foo(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

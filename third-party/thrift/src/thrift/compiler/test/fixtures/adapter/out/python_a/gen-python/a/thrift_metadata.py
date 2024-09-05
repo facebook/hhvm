@@ -36,10 +36,10 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = b.thrift_metadata._fbthrift_gen_metadata_struct__fbthrift_unadapted_B(new_struct) # a
-    new_struct = c.thrift_metadata._fbthrift_gen_metadata_struct__fbthrift_unadapted_C1(new_struct) # b
-    new_struct = c.thrift_metadata._fbthrift_gen_metadata_struct_C2(new_struct) # c
-
+    # a
+    new_struct = b.thrift_metadata._fbthrift_gen_metadata_struct__fbthrift_unadapted_B(new_struct)    # b
+    new_struct = c.thrift_metadata._fbthrift_gen_metadata_struct__fbthrift_unadapted_C1(new_struct)    # c
+    new_struct = c.thrift_metadata._fbthrift_gen_metadata_struct_C2(new_struct)
     return new_struct
 def gen_metadata_struct_MyStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

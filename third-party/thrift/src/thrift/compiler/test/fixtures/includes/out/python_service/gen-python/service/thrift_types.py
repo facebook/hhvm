@@ -99,5 +99,4 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_MyService_query_result,
     _fbthrift_MyService_has_arg_docs_args,
     _fbthrift_MyService_has_arg_docs_result,
-    
 )

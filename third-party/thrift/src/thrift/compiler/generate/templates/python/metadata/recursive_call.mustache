@@ -24,7 +24,7 @@ Used to turn a thrift type into a gen_metadata call
 }}{{#type:list?}}{{#type:list_elem_type}}{{> metadata/recursive_call }}{{/type:list_elem_type}}{{/type:list?}}{{!
 }}{{#type:set?}}{{#type:set_elem_type}}{{> metadata/recursive_call }}{{/type:set_elem_type}}{{/type:set?}}{{!
 }}{{#type:map?}}{{#type:key_type}}{{> metadata/recursive_call }}{{/type:key_type}} # key
-    {{#type:value_type}}{{> metadata/recursive_call }}{{/type:value_type}} # val {{/type:map?}}{{!
+{{#type:value_type}}{{> metadata/recursive_call }}{{/type:value_type}} # val {{/type:map?}}{{!
 }}{{#type:struct?}}{{#type:struct}}new_struct = {{#type:external_program?}}{{type:metadata_path}}.{{/type:external_program?}}{{!
   }}_fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}(new_struct){{/type:struct}}{{/type:struct?}}{{!
 }}{{#type:enum?}}{{#type:enum}}new_struct = {{#type:external_program?}}{{type:metadata_path}}.{{/type:external_program?}}{{!

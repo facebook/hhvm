@@ -110,5 +110,4 @@ class _fbthrift_HsTestService_init_result(metaclass=_fbthrift_python_types.Struc
 _fbthrift_python_types.fill_specs(
     _fbthrift_HsTestService_init_args,
     _fbthrift_HsTestService_init_result,
-    
 )

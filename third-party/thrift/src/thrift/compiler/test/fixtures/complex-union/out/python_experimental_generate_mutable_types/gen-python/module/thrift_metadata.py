@@ -39,14 +39,14 @@ def _fbthrift_gen_metadata_struct_ComplexUnion(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # intValue
-     # stringValue
-     # intListValue
-     # stringListValue
+    # intValue
+        # stringValue
+        # intListValue
+        # stringListValue
+        # typedefValue
      # key
-     # val  # typedefValue
-     # stringRef
-
+     # val     # stringRef
+    
     return new_struct
 def gen_metadata_struct_ComplexUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_ComplexUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -71,9 +71,9 @@ def _fbthrift_gen_metadata_struct_ListUnion(metadata_struct: _fbthrift_metadata.
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # intListValue
-     # stringListValue
-
+    # intListValue
+        # stringListValue
+    
     return new_struct
 def gen_metadata_struct_ListUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_ListUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -98,9 +98,9 @@ def _fbthrift_gen_metadata_struct_DataUnion(metadata_struct: _fbthrift_metadata.
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # binaryData
-     # stringData
-
+    # binaryData
+        # stringData
+    
     return new_struct
 def gen_metadata_struct_DataUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_DataUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -127,11 +127,11 @@ def _fbthrift_gen_metadata_struct_Val(metadata_struct: _fbthrift_metadata.Thrift
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # strVal
-     # intVal
+    # strVal
+        # intVal
+        # typedefValue
      # key
-     # val  # typedefValue
-
+     # val 
     return new_struct
 def gen_metadata_struct_Val() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Val(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -156,9 +156,9 @@ def _fbthrift_gen_metadata_struct_ValUnion(metadata_struct: _fbthrift_metadata.T
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_struct_Val(new_struct) # v1
-    new_struct = _fbthrift_gen_metadata_struct_Val(new_struct) # v2
-
+    # v1
+    new_struct = _fbthrift_gen_metadata_struct_Val(new_struct)    # v2
+    new_struct = _fbthrift_gen_metadata_struct_Val(new_struct)
     return new_struct
 def gen_metadata_struct_ValUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_ValUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -183,9 +183,9 @@ def _fbthrift_gen_metadata_struct_VirtualComplexUnion(metadata_struct: _fbthrift
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # thingOne
-     # thingTwo
-
+    # thingOne
+        # thingTwo
+    
     return new_struct
 def gen_metadata_struct_VirtualComplexUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_VirtualComplexUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -208,8 +208,8 @@ def _fbthrift_gen_metadata_struct_NonCopyableStruct(metadata_struct: _fbthrift_m
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # num
-
+    # num
+    
     return new_struct
 def gen_metadata_struct_NonCopyableStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_NonCopyableStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -232,8 +232,8 @@ def _fbthrift_gen_metadata_struct_NonCopyableUnion(metadata_struct: _fbthrift_me
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_struct_NonCopyableStruct(new_struct) # s
-
+    # s
+    new_struct = _fbthrift_gen_metadata_struct_NonCopyableStruct(new_struct)
     return new_struct
 def gen_metadata_struct_NonCopyableUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_NonCopyableUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

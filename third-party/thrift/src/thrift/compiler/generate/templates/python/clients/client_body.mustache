@@ -30,7 +30,9 @@ def __get_thrift_uri__() -> _typing.Optional[str]:
 @staticmethod
 def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
     return {
-        {{#service:annotations}}{{> common/annotation}}{{/service:annotations}}
+        {{#service:annotations}}
+        {{> common/annotation}}
+        {{/service:annotations}}
     }
 
 {{^service:interaction?}}

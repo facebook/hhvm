@@ -34,10 +34,10 @@ def _fbthrift_gen_metadata_struct_Fields(metadata_struct: _fbthrift_metadata.Thr
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # injected_field
-     # injected_structured_annotation_field
-     # injected_unstructured_annotation_field
-
+    # injected_field
+        # injected_structured_annotation_field
+        # injected_unstructured_annotation_field
+    
     return new_struct
 def gen_metadata_struct_Fields() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Fields(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

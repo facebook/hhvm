@@ -2173,11 +2173,8 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_SimpleService_get_binary_union_struct_result,
     _fbthrift_SimpleService_get_struct_hidden_args,
     _fbthrift_SimpleService_get_struct_hidden_result,
-    
     _fbthrift_DerivedService_get_six_args,
     _fbthrift_DerivedService_get_six_result,
-    
     _fbthrift_RederivedService_get_seven_args,
     _fbthrift_RederivedService_get_seven_result,
-    
 )

@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-
 import typing as _typing
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
@@ -102,4 +101,4 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
             )
             if _fbthrift_resp.ex is not None:
                 raise _fbthrift_resp.ex
-    
+

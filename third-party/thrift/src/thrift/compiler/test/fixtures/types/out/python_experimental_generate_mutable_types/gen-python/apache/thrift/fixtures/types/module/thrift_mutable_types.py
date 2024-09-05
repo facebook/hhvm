@@ -1870,5 +1870,4 @@ _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_SomeService_bounce_map_result,
     _fbthrift_SomeService_binary_keyed_map_args,
     _fbthrift_SomeService_binary_keyed_map_result,
-    
 )

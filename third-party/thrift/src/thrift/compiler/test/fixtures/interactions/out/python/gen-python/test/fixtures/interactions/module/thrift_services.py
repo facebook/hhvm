@@ -62,8 +62,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args, args, protocol)
         value = await self.foo()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -77,8 +75,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_args, args, protocol)
         value = await self.interact(args_struct.arg,)
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -91,8 +87,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_args, args, protocol)
         value = await self.interactFast()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -113,8 +107,6 @@ class MyServiceInterface(
             stream = await stream
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result(success=value)
         return_stream = self._fbthrift__stream_wrapper_serialize(stream, protocol)
-        
-
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class FactoriesInterface(
@@ -158,8 +150,6 @@ class FactoriesInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_Factories_foo_args, args, protocol)
         value = await self.foo()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_Factories_foo_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -173,8 +163,6 @@ class FactoriesInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interact_args, args, protocol)
         value = await self.interact(args_struct.arg,)
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interact_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -187,8 +175,6 @@ class FactoriesInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interactFast_args, args, protocol)
         value = await self.interactFast()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_Factories_interactFast_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -209,8 +195,6 @@ class FactoriesInterface(
             stream = await stream
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_Factories_serialize_result(success=value)
         return_stream = self._fbthrift__stream_wrapper_serialize(stream, protocol)
-        
-
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class PerformInterface(
@@ -251,8 +235,6 @@ class PerformInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_args, args, protocol)
         value = await self.foo()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_Perform_foo_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 class InteractWithSharedInterface(
@@ -293,7 +275,5 @@ class InteractWithSharedInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_InteractWithShared_do_some_similar_things_args, args, protocol)
         value = await self.do_some_similar_things()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_InteractWithShared_do_some_similar_things_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 

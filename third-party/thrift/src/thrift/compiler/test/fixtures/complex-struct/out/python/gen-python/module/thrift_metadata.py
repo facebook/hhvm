@@ -34,11 +34,11 @@ def _fbthrift_gen_metadata_struct_MyStructFloatFieldThrowExp(metadata_struct: _f
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # myLongField
-     # MyByteField
-     # myStringField
-     # myFloatField
-
+    # myLongField
+        # MyByteField
+        # myStringField
+        # myFloatField
+    
     return new_struct
 def gen_metadata_struct_MyStructFloatFieldThrowExp() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStructFloatFieldThrowExp(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -63,10 +63,10 @@ def _fbthrift_gen_metadata_struct_MyStructMapFloatThrowExp(metadata_struct: _fbt
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # myLongField
+    # myLongField
+        # mapListOfFloats
      # key
-     # val  # mapListOfFloats
-
+     # val 
     return new_struct
 def gen_metadata_struct_MyStructMapFloatThrowExp() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStructMapFloatThrowExp(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -143,42 +143,42 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # MyIntField
-     # MyStringField
-    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct) # MyDataField
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # myEnum
-     # MyBoolField
-     # MyByteField
-     # MyShortField
-     # MyLongField
-     # MyDoubleField
-     # lDouble
-     # lShort
-     # lInteger
-     # lLong
-     # lString
-     # lBool
-     # lByte
+    # MyIntField
+        # MyStringField
+        # MyDataField
+    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # myEnum
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # MyBoolField
+        # MyByteField
+        # MyShortField
+        # MyLongField
+        # MyDoubleField
+        # lDouble
+        # lShort
+        # lInteger
+        # lLong
+        # lString
+        # lBool
+        # lByte
+        # mShortString
      # key
-     # val  # mShortString
+     # val     # mIntegerString
      # key
-     # val  # mIntegerString
+     # val     # mStringMyStruct
      # key
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val  # mStringMyStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val     # mStringBool
      # key
-     # val  # mStringBool
+     # val     # mIntegerInteger
      # key
-     # val  # mIntegerInteger
+     # val     # mIntegerBool
      # key
-     # val  # mIntegerBool
-     # sShort
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # sMyStruct
-     # sLong
-     # sString
-     # sByte
+     # val     # sShort
+        # sMyStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # sLong
+        # sString
+        # sByte
+        # mListList
      # key
-     # val  # mListList
-
+     # val 
     return new_struct
 def gen_metadata_struct_MyStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -203,9 +203,9 @@ def _fbthrift_gen_metadata_struct_SimpleStruct(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # age
-     # name
-
+    # age
+        # name
+    
     return new_struct
 def gen_metadata_struct_SimpleStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_SimpleStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -270,35 +270,35 @@ def _fbthrift_gen_metadata_struct_defaultStruct(metadata_struct: _fbthrift_metad
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # myLongDFset
-     # myLongDF
-     # portDFset
-     # portNum
-     # myBinaryDFset
-     # myBinary
-     # myByteDFSet
-     # myByte
-     # myDoubleDFset
-     # myDoubleDFZero
-     # myDouble
+    # myLongDFset
+        # myLongDF
+        # portDFset
+        # portNum
+        # myBinaryDFset
+        # myBinary
+        # myByteDFSet
+        # myByte
+        # myDoubleDFset
+        # myDoubleDFZero
+        # myDouble
+        # field3
      # key
-     # val  # field3
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # myList
-     # mySet
-    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # simpleStruct
-    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # listStructDFset
-    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct) # myUnion
-    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct) # listUnionDFset
+     # val     # myList
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # mySet
+        # simpleStruct
+    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct)    # listStructDFset
+    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct)    # myUnion
+    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct)    # listUnionDFset
+    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct)    # mapNestlistStructDfSet
      # key
-    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # val  # mapNestlistStructDfSet
+    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # val     # mapJavaTypeDFset
      # key
-     # val  # mapJavaTypeDFset
+     # val     # emptyMap
      # key
-     # val  # emptyMap
+     # val     # enumMapDFset
      # key
      # key
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # val  # val  # enumMapDFset
-
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # val  # val 
     return new_struct
 def gen_metadata_struct_defaultStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_defaultStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -337,19 +337,19 @@ def _fbthrift_gen_metadata_struct_MyStructTypeDef(metadata_struct: _fbthrift_met
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # myLongField
-     # myLongTypeDef
-     # myStringField
-     # myStringTypedef
+    # myLongField
+        # myLongTypeDef
+        # myStringField
+        # myStringTypedef
+        # myMapField
      # key
-     # val  # myMapField
+     # val     # myMapTypedef
      # key
-     # val  # myMapTypedef
-     # myListField
-     # myListTypedef
+     # val     # myListField
+        # myListTypedef
+        # myMapListOfTypeDef
      # key
-     # val  # myMapListOfTypeDef
-
+     # val 
     return new_struct
 def gen_metadata_struct_MyStructTypeDef() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStructTypeDef(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -403,13 +403,13 @@ def _fbthrift_gen_metadata_struct_MyUnion(metadata_struct: _fbthrift_metadata.Th
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # myEnum
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # myStruct
-    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct) # myDataItem
-    new_struct = _fbthrift_gen_metadata_struct_ComplexNestedStruct(new_struct) # complexNestedStruct
-     # longValue
-     # intValue
-
+    # myEnum
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # myStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # myDataItem
+    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # complexNestedStruct
+    new_struct = _fbthrift_gen_metadata_struct_ComplexNestedStruct(new_struct)    # longValue
+        # intValue
+    
     return new_struct
 def gen_metadata_struct_MyUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -438,11 +438,11 @@ def _fbthrift_gen_metadata_struct_MyUnionFloatFieldThrowExp(metadata_struct: _fb
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # myEnum
-     # setFloat
-    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct) # myDataItem
-    new_struct = _fbthrift_gen_metadata_struct_ComplexNestedStruct(new_struct) # complexNestedStruct
-
+    # myEnum
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # setFloat
+        # myDataItem
+    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # complexNestedStruct
+    new_struct = _fbthrift_gen_metadata_struct_ComplexNestedStruct(new_struct)
     return new_struct
 def gen_metadata_struct_MyUnionFloatFieldThrowExp() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyUnionFloatFieldThrowExp(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -499,45 +499,45 @@ def _fbthrift_gen_metadata_struct_ComplexNestedStruct(metadata_struct: _fbthrift
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # setOfSetOfInt
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # listofListOfListOfListOfEnum
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # listOfListOfMyStruct
-     # setOfListOfListOfLong
-     # setOfSetOfsetOfLong
+    # setOfSetOfInt
+        # listofListOfListOfListOfEnum
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # listOfListOfMyStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # setOfListOfListOfLong
+        # setOfSetOfsetOfLong
+        # mapStructListOfListOfLong
      # key
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val  # mapStructListOfListOfLong
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val     # mKeyStructValInt
     new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # key
-     # val  # mKeyStructValInt
+     # val     # listOfMapKeyIntValInt
      # key
-     # val  # listOfMapKeyIntValInt
+     # val     # listOfMapKeyStrValList
      # key
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val  # listOfMapKeyStrValList
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val     # mapKeySetValLong
      # key
-     # val  # mapKeySetValLong
+     # val     # mapKeyListValLong
      # key
-     # val  # mapKeyListValLong
-     # key
-     # val  # key
-     # key
-     # val  # val  # mapKeyMapValMap
-     # key
-     # key
-     # val  # val  # mapKeySetValMap
+     # val     # mapKeyMapValMap
      # key
      # val  # key
+     # key
+     # val  # val     # mapKeySetValMap
+     # key
+     # key
+     # val  # val     # NestedMaps
+     # key
+     # val  # key
      # val  # key
      # key
-     # val  # val  # NestedMaps
+     # val  # val     # mapKeyIntValList
      # key
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val  # mapKeyIntValList
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # val     # mapKeyIntValSet
      # key
-     # val  # mapKeyIntValSet
+     # val     # mapKeySetValInt
      # key
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # val  # mapKeySetValInt
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # val     # mapKeyListValSet
      # key
      # key
-     # val  # val  # mapKeyListValSet
-
+     # val  # val 
     return new_struct
 def gen_metadata_struct_ComplexNestedStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_ComplexNestedStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -566,14 +566,14 @@ def _fbthrift_gen_metadata_struct_TypeRemapped(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
+    # lsMap
      # key
-     # val  # lsMap
+     # val     # ioMap
      # key
      # key
-     # val  # val  # ioMap
-     # BigInteger
-     # binaryTestBuffer
-
+     # val  # val     # BigInteger
+        # binaryTestBuffer
+    
     return new_struct
 def gen_metadata_struct_TypeRemapped() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_TypeRemapped(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -617,9 +617,9 @@ def _fbthrift_gen_metadata_exception_reqXcep(metadata_struct: _fbthrift_metadata
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # message
-     # errorCode
-
+    # message
+        # errorCode
+    
     return new_struct
 def gen_metadata_exception_reqXcep() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_reqXcep(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -643,9 +643,9 @@ def _fbthrift_gen_metadata_exception_optXcep(metadata_struct: _fbthrift_metadata
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # message
-     # errorCode
-
+    # message
+        # errorCode
+    
     return new_struct
 def gen_metadata_exception_optXcep() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_optXcep(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -677,14 +677,14 @@ def _fbthrift_gen_metadata_exception_complexException(metadata_struct: _fbthrift
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # message
-     # listStrings
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # errorEnum
-    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct) # unionError
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # structError
+    # message
+        # listStrings
+        # errorEnum
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # unionError
+    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct)    # structError
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # lsMap
      # key
-     # val  # lsMap
-
+     # val 
     return new_struct
 def gen_metadata_exception_complexException() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_complexException(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

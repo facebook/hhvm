@@ -19,6 +19,7 @@ Generates a top-level file to be imported in the user's service code. It provide
 wrappers for each of the service handlers that the user is then able to extend.
 }}
 {{> common/auto_generated_py}}
+
 from abc import ABCMeta
 import typing as _typing
 
@@ -123,7 +124,6 @@ class {{service:name}}Interface(
         try:
             {{> services/get_handler_result }}
         {{#function:exceptions}}{{#field:type}}
-
         except {{type:module_path}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
             return_struct = {{> types/function_return_type}}({{field:py_name}}=e)
             buf = serialize_iobuf(return_struct, protocol)
@@ -135,8 +135,6 @@ class {{service:name}}Interface(
         {{^function:exceptions?}}
         {{> services/get_handler_result }}
         {{/function:exceptions?}}
-
-
         {{^function:oneway?}}
         {{^function:stream?}}
         return serialize_iobuf(return_struct, protocol)

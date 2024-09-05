@@ -18,6 +18,7 @@
 Generated Python classes for Thrift types
 }}
 {{> common/auto_generated_py}}
+
 import folly.iobuf as _fbthrift_iobuf
 import {{program:base_library_package}}.types as _fbthrift_python_types
 {{^program:generate_mutable_types}}
@@ -218,13 +219,11 @@ _fbthrift_python_mutable_types.fill_specs(
 {{^program:generate_mutable_types}}
 _fbthrift_python_types.fill_specs(
 {{/program:generate_mutable_types}}
-    {{#program:services}}
+{{#program:services}}
     {{> types/service_arg_type_list}}
-
-    {{#service:interactions}}
+{{#service:interactions}}
     {{> types/service_arg_type_list}}
-
-    {{/service:interactions}}
-    {{/program:services}}
+{{/service:interactions}}
+{{/program:services}}
 )
 {{/program:services?}}

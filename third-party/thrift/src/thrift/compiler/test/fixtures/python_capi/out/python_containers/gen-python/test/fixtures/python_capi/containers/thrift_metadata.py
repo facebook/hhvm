@@ -40,12 +40,12 @@ def _fbthrift_gen_metadata_struct_TemplateLists(metadata_struct: _fbthrift_metad
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # std_string
-     # deque_string
-     # small_vector_iobuf
-     # nested_small_vector
-     # small_vector_tensor
-
+    # std_string
+        # deque_string
+        # small_vector_iobuf
+        # nested_small_vector
+        # small_vector_tensor
+    
     return new_struct
 def gen_metadata_struct_TemplateLists() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_TemplateLists(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -87,14 +87,14 @@ def _fbthrift_gen_metadata_struct_TemplateSets(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # std_set
-     # std_unordered
-     # folly_fast
-     # folly_node
-     # folly_value
-     # folly_vector
-     # folly_sorted_vector
-
+    # std_set
+        # std_unordered
+        # folly_fast
+        # folly_node
+        # folly_value
+        # folly_vector
+        # folly_sorted_vector
+    
     return new_struct
 def gen_metadata_struct_TemplateSets() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_TemplateSets(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -136,21 +136,21 @@ def _fbthrift_gen_metadata_struct_TemplateMaps(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
+    # std_map
      # key
-     # val  # std_map
+     # val     # std_unordered
      # key
-     # val  # std_unordered
+     # val     # folly_fast
      # key
-     # val  # folly_fast
+     # val     # folly_node
      # key
-     # val  # folly_node
+     # val     # folly_value
      # key
-     # val  # folly_value
+     # val     # folly_vector
      # key
-     # val  # folly_vector
+     # val     # folly_sorted_vector
      # key
-     # val  # folly_sorted_vector
-
+     # val 
     return new_struct
 def gen_metadata_struct_TemplateMaps() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_TemplateMaps(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -175,9 +175,9 @@ def _fbthrift_gen_metadata_struct_TWrapped(metadata_struct: _fbthrift_metadata.T
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # fieldA
-     # fieldB
-
+    # fieldA
+        # fieldB
+    
     return new_struct
 def gen_metadata_struct_TWrapped() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_TWrapped(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -200,8 +200,8 @@ def _fbthrift_gen_metadata_struct_IndirectionA(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_struct_TWrapped(new_struct) # lst
-
+    # lst
+    new_struct = _fbthrift_gen_metadata_struct_TWrapped(new_struct)
     return new_struct
 def gen_metadata_struct_IndirectionA() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_IndirectionA(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -224,8 +224,8 @@ def _fbthrift_gen_metadata_struct_IndirectionB(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_struct_TWrapped(new_struct) # lst
-
+    # lst
+    new_struct = _fbthrift_gen_metadata_struct_TWrapped(new_struct)
     return new_struct
 def gen_metadata_struct_IndirectionB() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_IndirectionB(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -248,8 +248,8 @@ def _fbthrift_gen_metadata_struct_IndirectionC(metadata_struct: _fbthrift_metada
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_struct_TWrapped(new_struct) # lst
-
+    # lst
+    new_struct = _fbthrift_gen_metadata_struct_TWrapped(new_struct)
     return new_struct
 def gen_metadata_struct_IndirectionC() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_IndirectionC(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

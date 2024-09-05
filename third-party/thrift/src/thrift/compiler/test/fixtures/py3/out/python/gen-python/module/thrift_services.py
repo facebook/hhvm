@@ -100,8 +100,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_five_args, args, protocol)
         value = await self.get_five()
         return_struct = module.thrift_types._fbthrift_SimpleService_get_five_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -115,8 +113,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_add_five_args, args, protocol)
         value = await self.add_five(args_struct.num,)
         return_struct = module.thrift_types._fbthrift_SimpleService_add_five_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -129,8 +125,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_do_nothing_args, args, protocol)
         value = await self.do_nothing()
         return_struct = module.thrift_types._fbthrift_SimpleService_do_nothing_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -145,8 +139,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_concat_args, args, protocol)
         value = await self.concat(args_struct.first,args_struct.second,)
         return_struct = module.thrift_types._fbthrift_SimpleService_concat_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -160,8 +152,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_value_args, args, protocol)
         value = await self.get_value(args_struct.simple_struct,)
         return_struct = module.thrift_types._fbthrift_SimpleService_get_value_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -175,8 +165,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_negate_args, args, protocol)
         value = await self.negate(args_struct.input,)
         return_struct = module.thrift_types._fbthrift_SimpleService_negate_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -190,8 +178,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_tiny_args, args, protocol)
         value = await self.tiny(args_struct.input,)
         return_struct = module.thrift_types._fbthrift_SimpleService_tiny_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -205,8 +191,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_small_args, args, protocol)
         value = await self.small(args_struct.input,)
         return_struct = module.thrift_types._fbthrift_SimpleService_small_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -220,8 +204,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_big_args, args, protocol)
         value = await self.big(args_struct.input,)
         return_struct = module.thrift_types._fbthrift_SimpleService_big_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -235,8 +217,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_two_args, args, protocol)
         value = await self.two(args_struct.input,)
         return_struct = module.thrift_types._fbthrift_SimpleService_two_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -250,14 +230,11 @@ class SimpleServiceInterface(
         try:
             value = await self.expected_exception()
             return_struct = module.thrift_types._fbthrift_SimpleService_expected_exception_result()
-            
         except module.thrift_types.SimpleException as e:
             return_struct = module.thrift_types._fbthrift_SimpleService_expected_exception_result(se=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('SimpleException', str(e), buf)
             raise exp
-
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -270,8 +247,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_unexpected_exception_args, args, protocol)
         value = await self.unexpected_exception()
         return_struct = module.thrift_types._fbthrift_SimpleService_unexpected_exception_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -285,8 +260,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_i16_list_args, args, protocol)
         value = await self.sum_i16_list(args_struct.numbers,)
         return_struct = module.thrift_types._fbthrift_SimpleService_sum_i16_list_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -300,8 +273,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_i32_list_args, args, protocol)
         value = await self.sum_i32_list(args_struct.numbers,)
         return_struct = module.thrift_types._fbthrift_SimpleService_sum_i32_list_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -315,8 +286,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_i64_list_args, args, protocol)
         value = await self.sum_i64_list(args_struct.numbers,)
         return_struct = module.thrift_types._fbthrift_SimpleService_sum_i64_list_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -330,8 +299,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_concat_many_args, args, protocol)
         value = await self.concat_many(args_struct.words,)
         return_struct = module.thrift_types._fbthrift_SimpleService_concat_many_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -345,8 +312,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_count_structs_args, args, protocol)
         value = await self.count_structs(args_struct.items,)
         return_struct = module.thrift_types._fbthrift_SimpleService_count_structs_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -360,8 +325,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_set_args, args, protocol)
         value = await self.sum_set(args_struct.numbers,)
         return_struct = module.thrift_types._fbthrift_SimpleService_sum_set_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -376,8 +339,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_contains_word_args, args, protocol)
         value = await self.contains_word(args_struct.words,args_struct.word,)
         return_struct = module.thrift_types._fbthrift_SimpleService_contains_word_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -392,8 +353,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_map_value_args, args, protocol)
         value = await self.get_map_value(args_struct.words,args_struct.key,)
         return_struct = module.thrift_types._fbthrift_SimpleService_get_map_value_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -407,8 +366,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_map_length_args, args, protocol)
         value = await self.map_length(args_struct.items,)
         return_struct = module.thrift_types._fbthrift_SimpleService_map_length_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -422,8 +379,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_map_values_args, args, protocol)
         value = await self.sum_map_values(args_struct.items,)
         return_struct = module.thrift_types._fbthrift_SimpleService_sum_map_values_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -437,8 +392,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_complex_sum_i32_args, args, protocol)
         value = await self.complex_sum_i32(args_struct.counter,)
         return_struct = module.thrift_types._fbthrift_SimpleService_complex_sum_i32_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -452,8 +405,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_repeat_name_args, args, protocol)
         value = await self.repeat_name(args_struct.counter,)
         return_struct = module.thrift_types._fbthrift_SimpleService_repeat_name_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -466,8 +417,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_struct_args, args, protocol)
         value = await self.get_struct()
         return_struct = module.thrift_types._fbthrift_SimpleService_get_struct_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -481,8 +430,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_fib_args, args, protocol)
         value = await self.fib(args_struct.n,)
         return_struct = module.thrift_types._fbthrift_SimpleService_fib_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -496,8 +443,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_unique_words_args, args, protocol)
         value = await self.unique_words(args_struct.words,)
         return_struct = module.thrift_types._fbthrift_SimpleService_unique_words_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -511,8 +456,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_words_count_args, args, protocol)
         value = await self.words_count(args_struct.words,)
         return_struct = module.thrift_types._fbthrift_SimpleService_words_count_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -526,8 +469,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_set_enum_args, args, protocol)
         value = await self.set_enum(args_struct.in_enum,)
         return_struct = module.thrift_types._fbthrift_SimpleService_set_enum_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -542,8 +483,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_list_of_lists_args, args, protocol)
         value = await self.list_of_lists(args_struct.num_lists,args_struct.num_items,)
         return_struct = module.thrift_types._fbthrift_SimpleService_list_of_lists_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -557,8 +496,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_word_character_frequency_args, args, protocol)
         value = await self.word_character_frequency(args_struct.sentence,)
         return_struct = module.thrift_types._fbthrift_SimpleService_word_character_frequency_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -572,8 +509,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_list_of_sets_args, args, protocol)
         value = await self.list_of_sets(args_struct.some_words,)
         return_struct = module.thrift_types._fbthrift_SimpleService_list_of_sets_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -587,8 +522,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_nested_map_argument_args, args, protocol)
         value = await self.nested_map_argument(args_struct.struct_map,)
         return_struct = module.thrift_types._fbthrift_SimpleService_nested_map_argument_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -602,8 +535,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_make_sentence_args, args, protocol)
         value = await self.make_sentence(args_struct.word_chars,)
         return_struct = module.thrift_types._fbthrift_SimpleService_make_sentence_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -617,8 +548,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_union_args, args, protocol)
         value = await self.get_union(args_struct.sets,)
         return_struct = module.thrift_types._fbthrift_SimpleService_get_union_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -632,8 +561,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_keys_args, args, protocol)
         value = await self.get_keys(args_struct.string_map,)
         return_struct = module.thrift_types._fbthrift_SimpleService_get_keys_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -647,8 +574,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_lookup_double_args, args, protocol)
         value = await self.lookup_double(args_struct.key,)
         return_struct = module.thrift_types._fbthrift_SimpleService_lookup_double_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -662,8 +587,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_retrieve_binary_args, args, protocol)
         value = await self.retrieve_binary(args_struct.something,)
         return_struct = module.thrift_types._fbthrift_SimpleService_retrieve_binary_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -677,8 +600,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_contain_binary_args, args, protocol)
         value = await self.contain_binary(args_struct.binaries,)
         return_struct = module.thrift_types._fbthrift_SimpleService_contain_binary_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -692,8 +613,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_contain_enum_args, args, protocol)
         value = await self.contain_enum(args_struct.the_enum,)
         return_struct = module.thrift_types._fbthrift_SimpleService_contain_enum_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -707,8 +626,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_args, args, protocol)
         value = await self.get_binary_union_struct(args_struct.u,)
         return_struct = module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -721,8 +638,6 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_struct_hidden_args, args, protocol)
         value = await self.get_struct_hidden()
         return_struct = module.thrift_types._fbthrift_SimpleService_get_struct_hidden_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 class DerivedServiceInterface(
@@ -763,8 +678,6 @@ SimpleServiceInterface,
         args_struct = deserialize(module.thrift_types._fbthrift_DerivedService_get_six_args, args, protocol)
         value = await self.get_six()
         return_struct = module.thrift_types._fbthrift_DerivedService_get_six_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 class RederivedServiceInterface(
@@ -805,7 +718,5 @@ DerivedServiceInterface,
         args_struct = deserialize(module.thrift_types._fbthrift_RederivedService_get_seven_args, args, protocol)
         value = await self.get_seven()
         return_struct = module.thrift_types._fbthrift_RederivedService_get_seven_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 

@@ -31,9 +31,9 @@ def _fbthrift_gen_metadata_exception_CustomException(metadata_struct: _fbthrift_
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # name
-    new_struct = _fbthrift_gen_metadata_enum_Result(new_struct) # result
-
+    # name
+        # result
+    new_struct = _fbthrift_gen_metadata_enum_Result(new_struct)
     return new_struct
 def gen_metadata_exception_CustomException() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_CustomException(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

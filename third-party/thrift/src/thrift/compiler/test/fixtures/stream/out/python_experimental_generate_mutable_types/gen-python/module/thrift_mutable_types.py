@@ -628,5 +628,4 @@ _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_PubSubStreamingService_returnstreamFast_args,
     _fbthrift_PubSubStreamingService_returnstreamFast_result,
     _fbthrift_PubSubStreamingService_returnstreamFast_result_stream,
-    
 )

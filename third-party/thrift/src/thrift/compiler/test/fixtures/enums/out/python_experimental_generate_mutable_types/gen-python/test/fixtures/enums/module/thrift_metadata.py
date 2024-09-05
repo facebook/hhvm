@@ -34,11 +34,11 @@ def _fbthrift_gen_metadata_struct_SomeStruct(metadata_struct: _fbthrift_metadata
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_enum_Metasyntactic(new_struct) # reasonable
-    new_struct = _fbthrift_gen_metadata_enum_Metasyntactic(new_struct) # fine
-    new_struct = _fbthrift_gen_metadata_enum_Metasyntactic(new_struct) # questionable
-     # tags
-
+    # reasonable
+    new_struct = _fbthrift_gen_metadata_enum_Metasyntactic(new_struct)    # fine
+    new_struct = _fbthrift_gen_metadata_enum_Metasyntactic(new_struct)    # questionable
+    new_struct = _fbthrift_gen_metadata_enum_Metasyntactic(new_struct)    # tags
+    
     return new_struct
 def gen_metadata_struct_SomeStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_SomeStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -67,11 +67,11 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum2(new_struct) # me2_3
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum3(new_struct) # me3_n3
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum1(new_struct) # me1_t1
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum1(new_struct) # me1_t2
-
+    # me2_3
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum2(new_struct)    # me3_n3
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum3(new_struct)    # me1_t1
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum1(new_struct)    # me1_t2
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum1(new_struct)
     return new_struct
 def gen_metadata_struct_MyStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

@@ -60,5 +60,4 @@ class _fbthrift_ExtendTestService_check_result(metaclass=_fbthrift_python_types.
 _fbthrift_python_types.fill_specs(
     _fbthrift_ExtendTestService_check_args,
     _fbthrift_ExtendTestService_check_result,
-    
 )

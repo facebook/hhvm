@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-
 import typing as _typing
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
@@ -245,4 +244,4 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
-    
+

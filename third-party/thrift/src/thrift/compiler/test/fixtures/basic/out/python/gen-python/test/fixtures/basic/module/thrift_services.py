@@ -57,8 +57,6 @@ class FooServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_args, args, protocol)
         value = await self.simple_rpc()
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 class FB303ServiceInterface(
@@ -100,8 +98,6 @@ class FB303ServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_args, args, protocol)
         value = await self.simple_rpc(args_struct.int_parameter,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 class MyServiceInterface(
@@ -151,8 +147,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_args, args, protocol)
         value = await self.ping()
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -165,8 +159,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_args, args, protocol)
         value = await self.getRandomData()
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -180,8 +172,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_args, args, protocol)
         value = await self.sink(args_struct.sink,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -196,8 +186,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_args, args, protocol)
         value = await self.putDataById(args_struct.id,args_struct.data,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -211,8 +199,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_args, args, protocol)
         value = await self.hasDataById(args_struct.id,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -226,8 +212,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_args, args, protocol)
         value = await self.getDataById(args_struct.id,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -241,8 +225,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_args, args, protocol)
         value = await self.deleteDataById(args_struct.id,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -256,8 +238,6 @@ class MyServiceInterface(
     async def _fbthrift__handler_lobDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_lobDataById_args, args, protocol)
         value = await self.lobDataById(args_struct.id,args_struct.data,)
-        
-
 
 
     async def invalid_return_for_hack(
@@ -269,8 +249,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_args, args, protocol)
         value = await self.invalid_return_for_hack()
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -283,8 +261,6 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_args, args, protocol)
         value = await self.rpc_skipped_codegen()
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 class DbMixedStackArgumentsInterface(
@@ -327,8 +303,6 @@ class DbMixedStackArgumentsInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_args, args, protocol)
         value = await self.getDataByKey0(args_struct.key,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -342,7 +316,5 @@ class DbMixedStackArgumentsInterface(
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_args, args, protocol)
         value = await self.getDataByKey1(args_struct.key,)
         return_struct = test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 

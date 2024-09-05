@@ -222,5 +222,4 @@ class _fbthrift_EchoService_echo_result(metaclass=_fbthrift_python_types.StructM
 _fbthrift_python_types.fill_specs(
     _fbthrift_EchoService_echo_args,
     _fbthrift_EchoService_echo_result,
-    
 )

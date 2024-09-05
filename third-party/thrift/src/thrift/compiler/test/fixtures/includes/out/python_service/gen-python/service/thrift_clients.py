@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-
 import typing as _typing
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
@@ -144,4 +143,4 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
-    
+

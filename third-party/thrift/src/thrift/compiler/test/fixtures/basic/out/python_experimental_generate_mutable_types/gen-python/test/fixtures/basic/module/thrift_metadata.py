@@ -46,16 +46,16 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # MyIntField
-     # MyStringField
-    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct) # MyDataField
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # myEnum
-     # oneway
-     # readonly
-     # idempotent
-     # floatSet
-     # no_hack_codegen_field
-
+    # MyIntField
+        # MyStringField
+        # MyDataField
+    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # myEnum
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # oneway
+        # readonly
+        # idempotent
+        # floatSet
+        # no_hack_codegen_field
+    
     return new_struct
 def gen_metadata_struct_MyStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -82,11 +82,11 @@ def _fbthrift_gen_metadata_struct_Containers(metadata_struct: _fbthrift_metadata
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # I32List
-     # StringSet
+    # I32List
+        # StringSet
+        # StringToI64Map
      # key
-     # val  # StringToI64Map
-
+     # val 
     return new_struct
 def gen_metadata_struct_Containers() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Containers(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -137,11 +137,11 @@ def _fbthrift_gen_metadata_struct_MyUnion(metadata_struct: _fbthrift_metadata.Th
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # myEnum
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # myStruct
-    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct) # myDataItem
-     # floatSet
-
+    # myEnum
+    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # myStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # myDataItem
+    new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # floatSet
+    
     return new_struct
 def gen_metadata_struct_MyUnion() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyUnion(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -169,11 +169,11 @@ def _fbthrift_gen_metadata_exception_MyException(metadata_struct: _fbthrift_meta
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # MyIntField
-     # MyStringField
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # myStruct
-    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct) # myUnion
-
+    # MyIntField
+        # MyStringField
+        # myStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # myUnion
+    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct)
     return new_struct
 def gen_metadata_exception_MyException() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_MyException(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -202,11 +202,11 @@ def _fbthrift_gen_metadata_exception_MyExceptionWithMessage(metadata_struct: _fb
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # MyIntField
-     # MyStringField
-    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct) # myStruct
-    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct) # myUnion
-
+    # MyIntField
+        # MyStringField
+        # myStruct
+    new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # myUnion
+    new_struct = _fbthrift_gen_metadata_struct_MyUnion(new_struct)
     return new_struct
 def gen_metadata_exception_MyExceptionWithMessage() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_MyExceptionWithMessage(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -231,8 +231,8 @@ def _fbthrift_gen_metadata_struct_ReservedKeyword(metadata_struct: _fbthrift_met
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # reserved_field
-
+    # reserved_field
+    
     return new_struct
 def gen_metadata_struct_ReservedKeyword() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_ReservedKeyword(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -257,8 +257,8 @@ def _fbthrift_gen_metadata_struct_UnionToBeRenamed(metadata_struct: _fbthrift_me
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # reserved_field
-
+    # reserved_field
+    
     return new_struct
 def gen_metadata_struct_UnionToBeRenamed() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_UnionToBeRenamed(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

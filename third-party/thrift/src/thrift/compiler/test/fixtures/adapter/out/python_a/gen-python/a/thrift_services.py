@@ -66,8 +66,6 @@ class MyServiceInterface(
         args_struct = deserialize(a.thrift_types._fbthrift_MyService_adapted_return_args, args, protocol)
         value = await self.adapted_return()
         return_struct = a.thrift_types._fbthrift_MyService_adapted_return_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -81,7 +79,5 @@ class MyServiceInterface(
         args_struct = deserialize(a.thrift_types._fbthrift_MyService_adapted_param_args, args, protocol)
         value = await self.adapted_param(args_struct.param,)
         return_struct = a.thrift_types._fbthrift_MyService_adapted_param_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 

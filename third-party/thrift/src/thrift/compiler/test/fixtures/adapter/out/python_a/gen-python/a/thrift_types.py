@@ -149,5 +149,4 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_MyService_adapted_return_result,
     _fbthrift_MyService_adapted_param_args,
     _fbthrift_MyService_adapted_param_result,
-    
 )

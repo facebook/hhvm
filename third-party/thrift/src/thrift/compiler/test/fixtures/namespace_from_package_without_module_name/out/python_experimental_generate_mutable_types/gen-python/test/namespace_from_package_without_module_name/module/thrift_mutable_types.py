@@ -103,5 +103,4 @@ class _fbthrift_TestService_init_result(metaclass=_fbthrift_python_mutable_types
 _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_TestService_init_args,
     _fbthrift_TestService_init_result,
-    
 )

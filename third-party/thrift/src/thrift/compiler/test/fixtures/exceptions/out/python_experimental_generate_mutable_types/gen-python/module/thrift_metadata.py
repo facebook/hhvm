@@ -28,8 +28,8 @@ def _fbthrift_gen_metadata_exception_Fiery(metadata_struct: _fbthrift_metadata.T
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # message
-
+    # message
+    
     return new_struct
 def gen_metadata_exception_Fiery() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_Fiery(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -53,8 +53,8 @@ def _fbthrift_gen_metadata_exception_Serious(metadata_struct: _fbthrift_metadata
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # sonnet
-
+    # sonnet
+    
     return new_struct
 def gen_metadata_exception_Serious() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_Serious(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -79,9 +79,9 @@ def _fbthrift_gen_metadata_exception_ComplexFieldNames(metadata_struct: _fbthrif
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # error_message
-     # internal_error_message
-
+    # error_message
+        # internal_error_message
+    
     return new_struct
 def gen_metadata_exception_ComplexFieldNames() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_ComplexFieldNames(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -106,9 +106,9 @@ def _fbthrift_gen_metadata_exception_CustomFieldNames(metadata_struct: _fbthrift
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # error_message
-     # internal_error_message
-
+    # error_message
+        # internal_error_message
+    
     return new_struct
 def gen_metadata_exception_CustomFieldNames() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_CustomFieldNames(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -133,9 +133,9 @@ def _fbthrift_gen_metadata_exception_ExceptionWithPrimitiveField(metadata_struct
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # message
-     # error_code
-
+    # message
+        # error_code
+    
     return new_struct
 def gen_metadata_exception_ExceptionWithPrimitiveField() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_ExceptionWithPrimitiveField(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -160,9 +160,9 @@ def _fbthrift_gen_metadata_exception_ExceptionWithStructuredAnnotation(metadata_
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 
-     # message_field
-     # error_code
-
+    # message_field
+        # error_code
+    
     return new_struct
 def gen_metadata_exception_ExceptionWithStructuredAnnotation() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_ExceptionWithStructuredAnnotation(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

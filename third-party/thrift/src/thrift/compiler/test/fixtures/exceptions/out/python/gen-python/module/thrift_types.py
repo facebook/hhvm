@@ -584,5 +584,4 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_Raiser_get200_result,
     _fbthrift_Raiser_get500_args,
     _fbthrift_Raiser_get500_result,
-    
 )

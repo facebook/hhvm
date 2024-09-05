@@ -62,8 +62,6 @@ class PrimitivesServiceInterface(
         args_struct = deserialize(module.thrift_mutable_types._fbthrift_PrimitivesService_init_args, args, protocol)
         value = await self.init(args_struct.param0,args_struct.param1,)
         return_struct = module.thrift_mutable_types._fbthrift_PrimitivesService_init_result(success=value)
-        
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -77,14 +75,11 @@ class PrimitivesServiceInterface(
         try:
             value = await self.method_that_throws()
             return_struct = module.thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_result(success=value)
-            
         except module.thrift_mutable_types.CustomException as e:
             return_struct = module.thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_result(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('CustomException', str(e), buf)
             raise exp
-
-
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -98,7 +93,5 @@ class PrimitivesServiceInterface(
         args_struct = deserialize(module.thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_args, args, protocol)
         value = await self.return_void_method(args_struct.id,)
         return_struct = module.thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_result()
-        
-
         return serialize_iobuf(return_struct, protocol)
 

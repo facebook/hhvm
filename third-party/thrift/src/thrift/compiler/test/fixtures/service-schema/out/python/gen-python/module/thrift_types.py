@@ -218,5 +218,4 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_PrimitivesService_method_that_throws_result,
     _fbthrift_PrimitivesService_return_void_method_args,
     _fbthrift_PrimitivesService_return_void_method_result,
-    
 )

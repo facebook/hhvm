@@ -42,15 +42,15 @@ def _fbthrift_gen_metadata_struct_Limits(metadata_struct: _fbthrift_metadata.Thr
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # max_i64_field
-     # min_i64_field
-     # max_i32_field
-     # min_i32_field
-     # max_i16_field
-     # min_i16_field
-     # max_byte_field
-     # min_byte_field
-
+    # max_i64_field
+        # min_i64_field
+        # max_i32_field
+        # min_i32_field
+        # max_i16_field
+        # min_i16_field
+        # max_byte_field
+        # min_byte_field
+    
     return new_struct
 def gen_metadata_struct_Limits() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Limits(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

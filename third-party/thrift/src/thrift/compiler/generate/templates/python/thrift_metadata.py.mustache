@@ -18,6 +18,7 @@
 Metadata for Thrift types
 }}
 {{> common/auto_generated_py}}
+
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 {{#program:include_namespaces}}
@@ -63,7 +64,10 @@ def _fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}
     new_struct = metadata_struct({{#struct:exception?}}exceptions{{/struct:exception?}}{{^struct:exception?}}structs{{/struct:exception?}}=struct_dict)
 
     {{#struct:fields}}
-    {{#field:type}}{{> metadata/recursive_call }}{{/field:type}} # {{field:name}}
+    {{#field:type}}
+    # {{field:name}}
+    {{> metadata/recursive_call }}
+    {{/field:type}}
     {{/struct:fields}}
 
     return new_struct

@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-
 import typing as _typing
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
@@ -283,4 +282,4 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return module.thrift_metadata.gen_metadata_service_PubSubStreamingService()
-    
+

@@ -28,8 +28,8 @@ def _fbthrift_gen_metadata_struct_Foo(metadata_struct: _fbthrift_metadata.Thrift
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
-     # a
-
+    # a
+    
     return new_struct
 def gen_metadata_struct_Foo() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Foo(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-
 import typing as _typing
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
@@ -199,4 +198,4 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
                 uri_or_name="PrimitivesService",
                 rpc_options=rpc_options,
             )
-    
+

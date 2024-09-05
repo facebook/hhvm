@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-
 import typing as _typing
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
@@ -96,7 +95,7 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
                 uri_or_name="test.dev/fixtures/basic/FooService",
                 rpc_options=rpc_options,
             )
-    
+
 
 class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.Sync"]):
     @staticmethod
@@ -188,7 +187,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
-    
+
 
 class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     @staticmethod
@@ -611,7 +610,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
-    
+
 
 class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async", "DbMixedStackArguments.Sync"]):
     @staticmethod
@@ -750,4 +749,4 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
-    
+

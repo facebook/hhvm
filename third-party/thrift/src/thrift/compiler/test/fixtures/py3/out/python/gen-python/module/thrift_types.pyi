@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import __static__
 
-
 import typing as _typing
 
 import enum

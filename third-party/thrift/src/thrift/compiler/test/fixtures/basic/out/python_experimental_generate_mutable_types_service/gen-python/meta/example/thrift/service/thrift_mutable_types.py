@@ -192,5 +192,4 @@ class _fbthrift_EchoService_echo_result(metaclass=_fbthrift_python_mutable_types
 _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_EchoService_echo_args,
     _fbthrift_EchoService_echo_result,
-    
 )

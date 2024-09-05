@@ -928,6 +928,52 @@ type::Type toPatchType(type::Type input) {
       apache::thrift::util::enumNameSafe(input.toThrift().name()->getType())));
 }
 
+int32_t calculateMinSafePatchVersion(const protocol::Object& patch) {
+  int32_t version = 1;
+  for (const auto& [fieldId, patch] : *patch.members()) {
+    switch (static_cast<PatchOp>(fieldId)) {
+      case PatchOp::Assign:
+      case PatchOp::Clear:
+      case PatchOp::EnsureUnion:
+      case PatchOp::EnsureStruct:
+      case PatchOp::Remove:
+      case PatchOp::Add:
+      case PatchOp::Put:
+        version = std::max(version, 1);
+        break;
+      case PatchOp::PatchPrior:
+      case PatchOp::PatchAfter: {
+        // We need to handle both StructPatch and MapPatch here.
+        if (const auto* fieldPatch = patch.if_object()) {
+          for (const auto& [_, p] : *fieldPatch) {
+            version =
+                std::max(version, calculateMinSafePatchVersion(p.as_object()));
+          }
+        } else if (const auto* elemPatch = patch.if_map()) {
+          for (const auto& [_, p] : *elemPatch) {
+            version =
+                std::max(version, calculateMinSafePatchVersion(p.as_object()));
+          }
+        } else {
+          folly::throw_exception<std::runtime_error>(
+              "Invalid PatchOp::PatchPrior/PatchAfter");
+        }
+        break;
+      }
+      case PatchOp::PatchIfTypeIsPrior:
+      case PatchOp::PatchIfTypeIsAfter:
+      case PatchOp::EnsureAny:
+        // For now, we don't need to peek into AnyPatch to calculate Thrift
+        // SafePatch version.
+        version = std::max(version, 2);
+        break;
+      case PatchOp::Unspecified:
+        folly::throw_exception<std::runtime_error>("Invalid patch operation");
+    }
+  }
+  return version;
+}
+
 } // namespace detail
 
 ExtractedMasksFromPatch extractMaskViewFromPatch(
@@ -993,7 +1039,7 @@ Object fromSafePatch(const protocol::Object& safePatch) {
 Object toSafePatch(const protocol::Object& patch) {
   Object safePatch;
   safePatch[detail::kSafePatchVersionId].emplace_i32(
-      op::detail::kThriftDynamicPatchVersion);
+      detail::calculateMinSafePatchVersion(patch));
   safePatch[detail::kSafePatchDataId].emplace_binary(
       *serializeObject<CompactProtocolWriter>(patch));
   return safePatch;

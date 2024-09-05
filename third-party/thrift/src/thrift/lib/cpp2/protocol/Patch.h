@@ -29,7 +29,7 @@ namespace detail {
 // Latest Thrift Dynamic Patch version that the process is aware of. Note, this
 // may differ from `kThriftStaticPatchVersion` if we introduce new operations in
 // Thrift State Patch first.
-inline constexpr int32_t kThriftDynamicPatchVersion = 1;
+inline constexpr int32_t kThriftDynamicPatchVersion = 2;
 
 } // namespace detail
 } // namespace op
@@ -57,6 +57,12 @@ struct ApplyPatch {
 };
 
 type::Type toPatchType(type::Type input);
+
+/**
+ * Returns the minimum version of Thrift Patch library required to safely decode
+ * and apply the given Thrift Dynamic Patch.
+ */
+int32_t calculateMinSafePatchVersion(const protocol::Object& patch);
 
 } // namespace detail
 

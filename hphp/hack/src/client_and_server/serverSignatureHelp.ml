@@ -116,22 +116,7 @@ let get_occurrence_info
                    (Folded_class.get_method cls methodname)
                    (Folded_class.get_smethod cls methodname))
         |> Option.map ~f:(fun class_elt ->
-               (* We'll convert class_elt to fun_decl here solely as a lazy
-                  convenience, so that the "display" code below can display
-                  both class_elt and fun_decl uniformally. *)
-               {
-                 fe_module = None;
-                 fe_package_override = None;
-                 fe_internal = false;
-                 Typing_defs.fe_pos = Lazy.force class_elt.Typing_defs.ce_pos;
-                 fe_type = Lazy.force class_elt.Typing_defs.ce_type;
-                 fe_deprecated = class_elt.Typing_defs.ce_deprecated;
-                 fe_php_std_lib = false;
-                 fe_support_dynamic_type =
-                   Typing_defs.get_ce_support_dynamic_type class_elt;
-                 fe_no_auto_dynamic = false;
-                 fe_no_auto_likes = false;
-               })
+               Lazy.force class_elt.Typing_defs.ce_type)
       in
       (ft, occurrence)
     | _ ->
@@ -140,7 +125,11 @@ let get_occurrence_info
           (Provider_context.get_popt ctx).ParserOptions.auto_namespace_map
           occurrence.SO.name
       in
-      let ft = Decl_provider.get_fun ctx fun_name |> Decl_entry.to_option in
+      let ft =
+        Decl_provider.get_fun ctx fun_name
+        |> Decl_entry.to_option
+        |> Option.map ~f:(fun fun_elt -> fun_elt.Typing_defs.fe_type)
+      in
       let full_occurrence =
         match occurrence.SO.type_ with
         | SO.Function -> { occurrence with SO.name = fun_name }
@@ -189,14 +178,14 @@ let go_quarantined
       in
       (match get_occurrence_info ctx ast head_result with
       | None -> None
-      | Some (occurrence, fe, def_opt) ->
+      | Some (occurrence, ty, def_opt) ->
         let open Typing_defs in
         let open Lsp.SignatureHelp in
         let tast_env = Tast_env.empty ctx in
         let siginfo_label =
           Tast_env.print_ty_with_identity
             tast_env
-            (DeclTy fe.fe_type)
+            (DeclTy ty)
             occurrence
             def_opt
         in
@@ -219,7 +208,7 @@ let go_quarantined
           | None -> None
         in
         let ft_params =
-          match get_node fe.fe_type with
+          match get_node ty with
           | Tfun ft -> ft.ft_params
           | _ -> []
         in
@@ -228,7 +217,7 @@ let go_quarantined
               let parinfo_label =
                 match param.fp_name with
                 | Some s -> s
-                | None -> Tast_env.print_decl_ty tast_env fe.fe_type
+                | None -> Tast_env.print_decl_ty tast_env ty
               in
               let parinfo_documentation =
                 match param_docs with

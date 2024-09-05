@@ -77,4 +77,6 @@ service StressTest {
   BasicResponse, sink<BasicResponse, BasicResponse> sinkTm(
     1: StreamRequest req,
   );
+
+  double calculateSquares(1: i32 count);
 }

@@ -54,6 +54,8 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
   ResponseAndSinkConsumer<BasicResponse, BasicResponse, BasicResponse> sinkTm(
       std::unique_ptr<StreamRequest> request) override;
 
+  folly::coro::Task<double> co_calculateSquares(int32_t count) override;
+
  private:
   void requestResponseImpl(
       HandlerCallbackPtr<std::unique_ptr<BasicResponse>> callback,

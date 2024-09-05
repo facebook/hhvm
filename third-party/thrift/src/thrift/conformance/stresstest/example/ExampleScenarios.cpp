@@ -117,3 +117,7 @@ THRIFT_STRESS_TEST(SinkAndStream) {
   sinkReq.processInfo()->chunkSize() = 256;
   co_await client->co_sinkTm(sinkReq);
 }
+
+THRIFT_STRESS_TEST(CoroTest_10) {
+  co_await client->co_calculateSquares(10);
+}

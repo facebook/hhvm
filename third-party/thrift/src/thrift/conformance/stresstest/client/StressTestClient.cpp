@@ -103,6 +103,15 @@ folly::coro::Task<void> ThriftStressTestClient::co_sinkTm(
   });
 }
 
+folly::coro::Task<double> ThriftStressTestClient::co_calculateSquares(
+    int32_t count) {
+  double ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_calculateSquares(count);
+  });
+  co_return ret;
+}
+
 template <class Fn>
 folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
   if (!connectionGood_) {

@@ -51,6 +51,7 @@ class StressTestClient {
   virtual folly::coro::Task<void> co_requestResponseTm(const BasicRequest&) = 0;
   virtual folly::coro::Task<void> co_streamTm(const StreamRequest&) = 0;
   virtual folly::coro::Task<void> co_sinkTm(const StreamRequest&) = 0;
+  virtual folly::coro::Task<double> co_calculateSquares(int32_t) = 0;
 
   bool connectionGood() const { return connectionGood_; }
 
@@ -81,6 +82,8 @@ class ThriftStressTestClient : public StressTestClient {
   folly::coro::Task<void> co_streamTm(const StreamRequest&) override;
 
   folly::coro::Task<void> co_sinkTm(const StreamRequest&) override;
+
+  folly::coro::Task<double> co_calculateSquares(int32_t) override;
 
  private:
   template <class Fn>

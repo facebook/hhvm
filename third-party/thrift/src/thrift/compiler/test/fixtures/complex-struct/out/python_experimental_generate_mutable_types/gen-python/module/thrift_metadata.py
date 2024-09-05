@@ -703,8 +703,10 @@ def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.Thrif
         4: "MyValue4",
         5: "MyValue5",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct

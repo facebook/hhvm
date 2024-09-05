@@ -262,8 +262,10 @@ def _fbthrift_gen_metadata_enum_EmptyEnum(metadata_struct: _fbthrift_metadata.Th
         return metadata_struct
     elements = {
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct
@@ -281,8 +283,10 @@ def _fbthrift_gen_metadata_enum_City(metadata_struct: _fbthrift_metadata.ThriftM
         2: "SEA",
         3: "LON",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct
@@ -300,8 +304,10 @@ def _fbthrift_gen_metadata_enum_Company(metadata_struct: _fbthrift_metadata.Thri
         2: "OCULUS",
         3: "INSTAGRAM",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct

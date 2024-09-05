@@ -1035,8 +1035,10 @@ def _fbthrift_gen_metadata_enum_has_bitwise_ops(metadata_struct: _fbthrift_metad
         4: "two",
         8: "three",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct
@@ -1052,8 +1054,10 @@ def _fbthrift_gen_metadata_enum_is_unscoped(metadata_struct: _fbthrift_metadata.
         0: "hello",
         1: "world",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct
@@ -1069,8 +1073,10 @@ def _fbthrift_gen_metadata_enum_MyForwardRefEnum(metadata_struct: _fbthrift_meta
         0: "ZERO",
         12: "NONZERO",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct

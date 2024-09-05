@@ -908,8 +908,10 @@ def _fbthrift_gen_metadata_enum_AnEnum(metadata_struct: _fbthrift_metadata.Thrif
         3: "THREE",
         4: "FOUR",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct
@@ -926,8 +928,10 @@ def _fbthrift_gen_metadata_enum_AnEnumRenamed(metadata_struct: _fbthrift_metadat
         1: "value",
         2: "normal",
     }
+    structured_annotations = [
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct
@@ -945,8 +949,11 @@ def _fbthrift_gen_metadata_enum_Flags(metadata_struct: _fbthrift_metadata.Thrift
         4: "flag_C",
         8: "flag_D",
     }
+    structured_annotations = [
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="python.Flags"), fields= {  }),
+    ]
     enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
     new_struct = metadata_struct(enums=enum_dict)
 
     return new_struct

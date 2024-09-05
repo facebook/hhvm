@@ -65,13 +65,14 @@ class mstch_array_proxy final
     return converted_[index];
   }
 
-  void print_to(tree_printer::scope scope) const override {
+  void print_to(tree_printer::scope scope, const object_print_options& options)
+      const override {
     const auto size = proxied_.size();
     scope.println("mstch::array (size={})", size);
     for (std::size_t i = 0; i < size; ++i) {
-      auto element_scope = scope.open_property();
+      auto element_scope = scope.open_transparent_property();
       element_scope.println("[{}]", i);
-      whisker::print_to(at(i), element_scope.open_node());
+      whisker::print_to(at(i), element_scope.open_node(), options);
     }
   }
 
@@ -122,7 +123,8 @@ class mstch_map_proxy final : public native_object {
     return nullptr;
   }
 
-  void print_to(tree_printer::scope scope) const override {
+  void print_to(tree_printer::scope scope, const object_print_options& options)
+      const override {
     const auto size = proxied_.size();
     scope.println("mstch::map (size={})", size);
 
@@ -131,7 +133,7 @@ class mstch_map_proxy final : public native_object {
       assert(cached != nullptr);
       auto element_scope = scope.open_property();
       element_scope.println("'{}'", key);
-      whisker::print_to(*cached, element_scope.open_node());
+      whisker::print_to(*cached, element_scope.open_node(), options);
     }
   }
 
@@ -181,14 +183,16 @@ class mstch_object_proxy : public native_object {
     return &result->second;
   }
 
-  void print_to(tree_printer::scope scope) const override {
+  void print_to(
+      tree_printer::scope scope, const object_print_options&) const override {
     scope.println("mstch::object");
 
     for (const auto& key : proxied_->property_names()) {
-      auto element_scope = scope.open_property();
+      auto element_scope = scope.open_transparent_property();
       element_scope.println("'{}'", key);
       // It's not safe to access the mstch::object properties since they can
       // have side-effects. So we can only report property names.
+      element_scope.open_node().println("...");
     }
   }
 

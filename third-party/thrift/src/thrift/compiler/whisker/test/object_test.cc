@@ -28,7 +28,8 @@ class basic_native_object : public native_object {
   const object* lookup_property(std::string_view) const override {
     return nullptr;
   }
-  void print_to(tree_printer::scope scope) const override {
+  void print_to(
+      tree_printer::scope scope, const object_print_options&) const override {
     scope.println("<basic_native_object>");
   }
 };
@@ -346,8 +347,8 @@ TEST(ObjectTest, to_string) {
             w::array({w::string("foo")}),
             w::map({{"bar", w::i64(1)}, {"baz", w::array({w::null})}})})},
   });
-  EXPECT_EQ(
-      to_string(o),
+
+  constexpr std::string_view full_output =
       "map (size=4)\n"
       "`-'abc'\n"
       "  |-null\n"
@@ -376,7 +377,85 @@ TEST(ObjectTest, to_string) {
       "  |   | `-'baz'\n"
       "  |   |   |-array (size=1)\n"
       "  |   |   | `-[0]\n"
-      "  |   |   |   |-null\n");
+      "  |   |   |   |-null\n";
+
+  EXPECT_EQ(to_string(o), full_output);
+
+  const auto with_depth = [](unsigned depth) {
+    return object_print_options{depth};
+  };
+
+  // Trying to print with depth 0 is not meaningful but it should not crash.
+  EXPECT_EQ(to_string(o, with_depth(0)), "...\n");
+
+  EXPECT_EQ(
+      to_string(o, with_depth(1)),
+      "map (size=4)\n"
+      "`-'abc'\n"
+      "  |-null\n"
+      "`-'baz'\n"
+      "  |-...\n"
+      "`-'foo'\n"
+      "  |-i64(1)\n"
+      "`-'fun'\n"
+      "  |-...\n");
+
+  EXPECT_EQ(
+      to_string(o, with_depth(2)),
+      "map (size=4)\n"
+      "`-'abc'\n"
+      "  |-null\n"
+      "`-'baz'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-'foo'\n"
+      "  | `-[1]\n"
+      "  |   |-true\n"
+      "  | `-[2]\n"
+      "  |   |-...\n"
+      "`-'foo'\n"
+      "  |-i64(1)\n"
+      "`-'fun'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-f64(2)\n"
+      "  | `-[1]\n"
+      "  |   |-...\n"
+      "  | `-[2]\n"
+      "  |   |-...\n");
+
+  EXPECT_EQ(
+      to_string(o, with_depth(3)),
+      "map (size=4)\n"
+      "`-'abc'\n"
+      "  |-null\n"
+      "`-'baz'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-'foo'\n"
+      "  | `-[1]\n"
+      "  |   |-true\n"
+      "  | `-[2]\n"
+      "  |   |-<basic_native_object>\n"
+      "`-'foo'\n"
+      "  |-i64(1)\n"
+      "`-'fun'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-f64(2)\n"
+      "  | `-[1]\n"
+      "  |   |-array (size=1)\n"
+      "  |   | `-[0]\n"
+      "  |   |   |-'foo'\n"
+      "  | `-[2]\n"
+      "  |   |-map (size=2)\n"
+      "  |   | `-'bar'\n"
+      "  |   |   |-i64(1)\n"
+      "  |   | `-'baz'\n"
+      "  |   |   |-...\n");
+
+  EXPECT_EQ(to_string(o, with_depth(4)), full_output);
+  EXPECT_EQ(to_string(o, with_depth(5)), full_output);
 }
 
 } // namespace whisker

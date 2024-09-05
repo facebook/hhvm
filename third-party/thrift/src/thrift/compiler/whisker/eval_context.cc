@@ -69,12 +69,13 @@ class global_scope_object : public native_object {
     return nullptr;
   }
 
-  void print_to(tree_printer::scope scope) const override {
+  void print_to(tree_printer::scope scope, const object_print_options& options)
+      const override {
     scope.println("<global scope> (size={})", properties_.size());
     for (const auto& [key, value] : properties_) {
-      auto element_scope = scope.open_property();
+      auto element_scope = scope.open_transparent_property();
       element_scope.println("'{}'", key);
-      whisker::print_to(value, element_scope.open_node());
+      whisker::print_to(value, element_scope.open_node(), options);
     }
   }
 

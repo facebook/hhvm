@@ -89,11 +89,44 @@ class scope {
   };
 
  public:
+  /**
+   * Returns the "semantic" depth of this scope in the domain of the object
+   * being printed.
+   *
+   * For example, a single whisker::object (like whisker::map) can produce a
+   * subtree of depth 2. However, in the domain of whisker::object's the
+   * semantic depth of such a tree is still 1.
+   */
+  unsigned semantic_depth() const { return semantic_depth_; }
+
+  /**
+   * Opens a new node scope as described above and increases the semantic depth
+   * by 1.
+   */
   scope open_node() const {
-    return scope(*out_, nesting_context_->open_node());
+    return scope(*out_, nesting_context_->open_node(), semantic_depth_ + 1);
   }
+  /**
+   * Opens a new node scope as described above without changing the semantic
+   * depth of this tree.
+   */
+  scope open_transparent_node() const {
+    return scope(*out_, nesting_context_->open_node(), semantic_depth_);
+  }
+
+  /**
+   * Opens a new property scope as described above and increases the semantic
+   * depth by 1.
+   */
   scope open_property() const {
-    return scope(*out_, nesting_context_->open_property());
+    return scope(*out_, nesting_context_->open_property(), semantic_depth_ + 1);
+  }
+  /**
+   * Opens a new property scope as described above without changing the semantic
+   * depth of this tree.
+   */
+  scope open_transparent_property() const {
+    return scope(*out_, nesting_context_->open_property(), semantic_depth_);
   }
 
   template <typename... T>
@@ -103,17 +136,23 @@ class scope {
   }
 
   static scope make_root(std::ostream& out) {
-    return scope(out, nesting_context::make_root());
+    return scope(out, nesting_context::make_root(), 0 /* semantic_depth */);
   }
 
  private:
-  explicit scope(std::ostream& out, std::shared_ptr<const nesting_context> ctx)
-      : out_(&out), nesting_context_(std::move(ctx)) {
+  explicit scope(
+      std::ostream& out,
+      std::shared_ptr<const nesting_context> ctx,
+      unsigned semantic_depth)
+      : out_(&out),
+        nesting_context_(std::move(ctx)),
+        semantic_depth_(semantic_depth) {
     assert(nesting_context_ != nullptr);
   }
 
   std::ostream* out_;
   std::shared_ptr<const nesting_context> nesting_context_;
+  unsigned semantic_depth_;
 
   friend std::ostream& operator<<(
       std::ostream& out, const nesting_context& self);

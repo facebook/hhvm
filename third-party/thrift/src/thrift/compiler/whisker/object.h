@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <functional>
 #include <iosfwd>
+#include <limits>
 #include <map>
 #include <memory>
 #include <optional>
@@ -74,6 +75,37 @@ using map = std::map<std::string, object, std::less<>>;
 using array = std::vector<object>;
 
 /**
+ * Options for whisker::to_string() and whisker::print_to().
+ */
+struct object_print_options {
+  /**
+   * The maximum recursive depth of the object to print before truncating the
+   * output. This is useful for:
+   *   - Preventing infinite recursion when printing a cyclic object
+   *   - Preventing excessive output when printing a deeply nested object
+   *
+   * The depth value refers to the depth of the whisker::object hierarchy, which
+   * may not necessarily be the same as the depth of the printed tree.
+   *
+   * When the depth is reached, the output may be truncated based on the type of
+   * object being printed:
+   *   - For whisker::map, the property names are printed but values are
+   *     truncated.
+   *   - For whisker::array, the array indices are printed by elements are
+   *     truncated.
+   *   - For whisker::native_object, the behavior is implementation-defined. See
+   *     whisker::native_object::print_to().
+   *
+   * For all other whisker::object types, no truncation occurs because they do
+   * not incur additional depth.
+   *
+   * Truncated output appears as "...". This indicates that there are values
+   * beyond the specified depth that remain unexpanded.
+   */
+  unsigned max_depth = std::numeric_limits<unsigned>::max();
+};
+
+/**
  * A native_object is the most powerful type in Whisker. Its properties and
  * behavior are fully defined by user C++ code.
  *
@@ -118,7 +150,7 @@ class native_object {
    * printing as well as encodes the location in an existing print tree where
    * this object should be inline. See its documentation for more details.
    */
-  virtual void print_to(tree_printer::scope) const;
+  virtual void print_to(tree_printer::scope, const object_print_options&) const;
 
   /**
    * Determines if this native_object compares equal to the other object. It is
@@ -454,7 +486,6 @@ class object final : private detail::object_base<object> {
   }
 };
 
-std::string to_string(const object&);
 /**
  * An alternative to to_string() that allows printing a whisker::object within
  * an ongoing tree printing session. The output is appended to the provided
@@ -462,7 +493,8 @@ std::string to_string(const object&);
  *
  * This is primarily needed for native_object::print_to() implementations.
  */
-void print_to(const object&, tree_printer::scope);
+void print_to(const object&, tree_printer::scope, const object_print_options&);
+std::string to_string(const object&, const object_print_options& = {});
 
 std::ostream& operator<<(std::ostream&, const object&);
 

@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/whisker/object.h>
 
+#include <cassert>
 #include <ostream>
 #include <sstream>
 
@@ -23,46 +24,9 @@ namespace whisker {
 
 namespace {
 
-struct to_string_visitor {
-  static void visit(i64 value, tree_printer::scope scope) {
-    scope.println("i64({})", value);
-  }
-
-  static void visit(f64 value, tree_printer::scope scope) {
-    scope.println("f64({})", value);
-  }
-
-  static void visit(const std::string& value, tree_printer::scope scope) {
-    scope.println("'{}'", tree_printer::escape(value));
-  }
-
-  static void visit(bool value, tree_printer::scope scope) {
-    scope.println("{}", value ? "true" : "false");
-  }
-
-  static void visit(null, tree_printer::scope scope) { scope.println("null"); }
-
-  static void visit(const array& arr, tree_printer::scope scope) {
-    scope.println("array (size={})", arr.size());
-    for (std::size_t i = 0; i < arr.size(); ++i) {
-      auto element_scope = scope.open_property();
-      element_scope.println("[{}]", i);
-      visit(arr[i], element_scope.open_node());
-    }
-  }
-
-  static void visit(const map& m, tree_printer::scope scope) {
-    scope.println("map (size={})", m.size());
-    for (const auto& [key, value] : m) {
-      auto element_scope = scope.open_property();
-      element_scope.println("'{}'", key);
-      visit(value, element_scope.open_node());
-    }
-  }
-
-  static void visit(const native_object::ptr& o, tree_printer::scope scope) {
-    o->print_to(std::move(scope));
-  }
+class to_string_visitor {
+ public:
+  explicit to_string_visitor(const object_print_options& opts) : opts_(opts) {}
 
   // Prevent implicit conversion to whisker::object. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing
@@ -70,14 +34,93 @@ struct to_string_visitor {
   template <
       typename T = object,
       typename = std::enable_if_t<std::is_same_v<T, object>>>
-  static void visit(const T& value, tree_printer::scope scope) {
-    value.visit([&](auto&& alternative) { visit(alternative, scope); });
+  void visit(const T& value, tree_printer::scope scope) const {
+    value.visit(
+        [&](const array& a) { visit_maybe_truncate(a, std::move(scope)); },
+        [&](const map& m) { visit_maybe_truncate(m, std::move(scope)); },
+        [&](const native_object::ptr& o) {
+          visit_maybe_truncate(o, std::move(scope));
+        },
+        // All other types are printed inline so no truncation is necessary.
+        [&](auto&& alternative) { visit(alternative, std::move(scope)); });
   }
+
+ private:
+  template <typename T>
+  void visit_maybe_truncate(const T& value, tree_printer::scope scope) const {
+    if (at_max_depth(scope)) {
+      scope.println("...");
+      return;
+    }
+    visit(value, scope);
+  }
+
+  void visit(i64 value, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    scope.println("i64({})", value);
+  }
+
+  void visit(f64 value, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    scope.println("f64({})", value);
+  }
+
+  void visit(const std::string& value, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    scope.println("'{}'", tree_printer::escape(value));
+  }
+
+  void visit(bool value, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    scope.println("{}", value ? "true" : "false");
+  }
+
+  void visit(null, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    scope.println("null");
+  }
+
+  void visit(const array& arr, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    scope.println("array (size={})", arr.size());
+    for (std::size_t i = 0; i < arr.size(); ++i) {
+      auto element_scope = scope.open_transparent_property();
+      element_scope.println("[{}]", i);
+      visit(arr[i], element_scope.open_node());
+    }
+  }
+
+  void visit(const map& m, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    scope.println("map (size={})", m.size());
+    for (const auto& [key, value] : m) {
+      auto element_scope = scope.open_transparent_property();
+      element_scope.println("'{}'", key);
+      visit(value, element_scope.open_node());
+    }
+  }
+
+  void visit(const native_object::ptr& o, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    o->print_to(std::move(scope), opts_);
+  }
+
+  [[nodiscard]] bool at_max_depth(const tree_printer::scope& scope) const {
+    return scope.semantic_depth() == opts_.max_depth;
+  }
+
+  void require_within_max_depth(
+      [[maybe_unused]] const tree_printer::scope& scope) const {
+    assert(scope.semantic_depth() <= opts_.max_depth);
+  }
+
+  const object_print_options& opts_;
 };
 
 } // namespace
 
-void native_object::print_to(tree_printer::scope scope) const {
+void native_object::print_to(
+    tree_printer::scope scope, const object_print_options&) const {
   scope.println("<native_object>");
 }
 
@@ -85,14 +128,17 @@ bool native_object::operator==(const native_object& other) const {
   return &other == this;
 }
 
-std::string to_string(const object& obj) {
+std::string to_string(const object& obj, const object_print_options& options) {
   std::ostringstream out;
-  print_to(obj, tree_printer::scope::make_root(out));
+  print_to(obj, tree_printer::scope::make_root(out), options);
   return std::move(out).str();
 }
 
-void print_to(const object& obj, tree_printer::scope scope) {
-  to_string_visitor::visit(obj, std::move(scope));
+void print_to(
+    const object& obj,
+    tree_printer::scope scope,
+    const object_print_options& options) {
+  to_string_visitor(options).visit(obj, std::move(scope));
 }
 
 std::ostream& operator<<(std::ostream& out, const object& o) {

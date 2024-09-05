@@ -231,7 +231,7 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
           static_cast<const detail::StructInfo*>(typeInfo.typeExt);
       value = UniquePyObjectPtr(
           structInfo->unionExt != nullptr
-              ? createUnionTuple()
+              ? createMutableUnionDataHolder()
               : createStructListWithDefaultValues(
                     *structInfo, getStandardMutableDefaultValueForType));
       break;
@@ -564,7 +564,8 @@ void* setMutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
   return getListObjectItemBase(list);
 }
 
-void* setUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+void* setImmutableUnion(
+    void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
   return setPyObject(objectPtr, UniquePyObjectPtr{createUnionTuple()});
 }
 
@@ -576,6 +577,13 @@ bool getImmutableIsset(const void* object, ptrdiff_t offset) {
   const char* flags = getDataHolderIssetFlags<TupleContainer>(
       static_cast<const PyObject*>(object));
   return flags[offset];
+}
+
+void* setMutableUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
+  PyObject* list =
+      setPyObject(objectPtr, UniquePyObjectPtr{createMutableUnionDataHolder()});
+
+  return getListObjectItemBase(list);
 }
 
 /**
@@ -643,6 +651,25 @@ void clearImmutableUnion(void* object) {
   clearUnionDataHolder<TupleContainer>(object);
 }
 
+void clearMutableUnion(void* object) {
+  PyObject** unionDataHolder = toPyObjectPtr(object);
+
+  // Clear field id of "present field" (if any).
+  PyObject* const previousActiveFieldId = *unionDataHolder;
+  UniquePyObjectPtr zero{PyLong_FromLong(0)};
+  if (zero == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  *unionDataHolder = zero.release();
+  Py_XDECREF(previousActiveFieldId);
+
+  // Clear value (if any).
+  PyObject* const previousValue = *++unionDataHolder;
+  *unionDataHolder = Py_None;
+  Py_INCREF(Py_None);
+  Py_XDECREF(previousValue);
+}
+
 /**
  * Returns the id of the field that is currently set for the given union data
  * holder, or 0 if the union is empty.
@@ -663,6 +690,15 @@ int getUnionDataHolderActiveFieldId(const void* unionDataHolderObject) {
 
 int getImmutableUnionActiveFieldId(const void* object) {
   return getUnionDataHolderActiveFieldId<TupleContainer>(object);
+}
+
+int getMutableUnionActiveFieldId(const void* object) {
+  PyObject* const unionDataHolder = *toPyObjectPtr(object);
+  const long id = PyLong_AsLong(unionDataHolder);
+  if (id == -1) {
+    THRIFT_PY3_CHECK_POSSIBLE_ERROR();
+  }
+  return id;
 }
 
 /**
@@ -691,6 +727,18 @@ void setImmutableUnionActiveFieldId(void* object, int fieldId) {
   setUnionDataHolderActiveFieldId<TupleContainer>(object, fieldId);
 }
 
+void setMutableUnionActiveFieldId(void* object, int fieldId) {
+  UniquePyObjectPtr fieldIdPyObj{PyLong_FromLong(fieldId)};
+  if (fieldIdPyObj == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+
+  PyObject** unionDataHolder = toPyObjectPtr(object);
+  PyObject* previousFieldId = *unionDataHolder;
+  *unionDataHolder = fieldIdPyObj.release();
+  Py_DECREF(previousFieldId);
+}
+
 const detail::UnionExtN<1> kImmutableUnionExt = {
     /* .clear */ clearImmutableUnion,
     /* .unionTypeOffset */ 0,
@@ -698,6 +746,23 @@ const detail::UnionExtN<1> kImmutableUnionExt = {
     /* .setActiveId */ setImmutableUnionActiveFieldId,
     /* .initMember */ {nullptr},
 };
+
+const detail::UnionExtN<1> kMutableUnionExt = {
+    /* .clear */ clearMutableUnion,
+    /* .unionTypeOffset */ 0,
+    /* .getActiveId */ getMutableUnionActiveFieldId,
+    /* .setActiveId */ setMutableUnionActiveFieldId,
+    /* .initMember */ {nullptr},
+};
+
+const detail::UnionExt* getStructInfoUnionExt(bool isUnion, bool isMutable) {
+  if (!isUnion) {
+    return nullptr;
+  }
+
+  return reinterpret_cast<const detail::UnionExt*>(
+      isMutable ? &kMutableUnionExt : &kImmutableUnionExt);
+}
 
 /**
  * Creates a new (table-based) serializer StructInfo for the thrift-python
@@ -729,9 +794,7 @@ detail::StructInfo* newTableBasedSerializerStructInfo(
       std::align_val_t{alignof(detail::StructInfo)}));
   structInfo->numFields = numFields;
   structInfo->name = namePtr;
-  structInfo->unionExt = isUnion
-      ? reinterpret_cast<const detail::UnionExt*>(&kImmutableUnionExt)
-      : nullptr;
+  structInfo->unionExt = getStructInfoUnionExt(isUnion, isMutable);
   structInfo->getIsset = isMutable ? getMutableIsset : getImmutableIsset;
   structInfo->setIsset = isMutable ? setMutableIsset : setIsset;
   structInfo->getFieldValuesBasePtr = nullptr;
@@ -1050,8 +1113,14 @@ PyObject* createUnionDataHolder() {
 
 } // namespace
 
+// DO_BEFORE(aristidis,20240920): For consistency, rename method to
+// createImmutableUnionDataHolder() - and update references.
 PyObject* createUnionTuple() {
   return createUnionDataHolder<TupleContainer>();
+}
+
+PyObject* createMutableUnionDataHolder() {
+  return createUnionDataHolder<ListContainer>();
 }
 
 template <typename Container>
@@ -1201,7 +1270,7 @@ detail::TypeInfo createImmutableStructTypeInfo(
       /* .get */ getStruct,
       /* .set */
       reinterpret_cast<detail::VoidFuncPtr>(
-          dynamicStructInfo.isUnion() ? setUnion : setImmutableStruct),
+          dynamicStructInfo.isUnion() ? setImmutableUnion : setImmutableStruct),
       /* .typeExt */ &dynamicStructInfo.getStructInfo(),
   };
 }
@@ -1219,7 +1288,7 @@ detail::TypeInfo createMutableStructTypeInfo(
       /* .get */ getMutableStruct,
       /* .set */
       reinterpret_cast<detail::VoidFuncPtr>(
-          dynamicStructInfo.isUnion() ? setUnion : setMutableStruct),
+          dynamicStructInfo.isUnion() ? setMutableUnion : setMutableStruct),
       /* .typeExt */ &dynamicStructInfo.getStructInfo(),
   };
 }

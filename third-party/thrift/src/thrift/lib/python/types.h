@@ -74,6 +74,8 @@ inline PyObject* toPyObject(void* object) {
  */
 PyObject* createUnionTuple();
 
+PyObject* createMutableUnionDataHolder();
+
 /***
  * Returns a new "struct tuple" whose field elements are uninitialized.
  *

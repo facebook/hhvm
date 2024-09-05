@@ -84,6 +84,7 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef void setMutableStructIsset(object, int index, bint set) except+
 
     cdef object createUnionTuple() except+
+    cdef object createMutableUnionDataHolder() except+
 
 cdef class MutableStructOrUnion:
     cdef object _fbthrift_data

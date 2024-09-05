@@ -630,7 +630,7 @@ cdef class MutableUnionInfo:
             self.type_infos[field_info.id] = field_info.type_info
             self.id_to_adapter_info[field_info.id] = field_info.adapter_info
             self.name_to_index[field_info.py_name] = idx
-            dynamic_struct_info.addFieldInfo(
+            dynamic_struct_info.addMutableFieldInfo(
                 field_info.id,
                 field_info.qualifier,
                 PyUnicode_AsUTF8(field_info.name),
@@ -666,7 +666,7 @@ cdef object _fbthrift_compare_union_less(
 
 cdef class MutableUnion(MutableStructOrUnion):
     def __cinit__(self):
-        self._fbthrift_data = createUnionTuple()
+        self._fbthrift_data = createMutableUnionDataHolder()
 
     def __init__(self, **kwargs):
         self_type = type(self)
@@ -705,15 +705,14 @@ cdef class MutableUnion(MutableStructOrUnion):
                 )
             )
 
-            Py_INCREF(field_id)
-            old_field_id = self._fbthrift_data[0]
-            PyTuple_SET_ITEM(self._fbthrift_data, 0, field_id)
-            Py_DECREF(old_field_id)
-
-            old_value = self._fbthrift_data[1]
-            Py_INCREF(field_internal_value)
-            PyTuple_SET_ITEM(self._fbthrift_data, 1, field_internal_value)
-            Py_DECREF(old_value)
+            # For immutable types, `._fbthrift_set_union_value()` method is more
+            # complicated because we use `tuple` as the internal data container.
+            # Since `tuple` is immutable, to update an immutable container, we
+            # use `PyTuple_SET_ITEM()`. We also need to manually handle `INCREF`
+            # and `DECREF`. After switching to `list` as the internal data
+            # container for mutable types, we simply update the `list` as usual.
+            self._fbthrift_data[0] = field_id
+            self._fbthrift_data[1] = field_internal_value
 
             self._fbthrift_update_current_field_attributes()
         except Exception as exc:
@@ -880,6 +879,18 @@ cdef class MutableUnion(MutableStructOrUnion):
             other,
             True, # return_if_same_value
         )
+
+    cdef IOBuf _fbthrift_serialize(self, Protocol proto):
+        cdef MutableUnionInfo info = self._fbthrift_mutable_struct_info
+        return from_unique_ptr(
+            std_move(c_mutable_serialize(deref(info.cpp_obj), self._fbthrift_data, proto))
+        )
+
+    cdef uint32_t _fbthrift_deserialize(self, IOBuf buf, Protocol proto) except? 0:
+        cdef MutableUnionInfo info = self._fbthrift_mutable_struct_info
+        cdef uint32_t size = c_mutable_deserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
+        self._fbthrift_update_current_field_attributes()
+        return size
 
 
 def _gen_mutable_union_field_enum_members(field_infos):

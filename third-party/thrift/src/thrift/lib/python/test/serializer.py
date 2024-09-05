@@ -166,10 +166,6 @@ class SerializerTests(unittest.TestCase):
             self.serializer.deserialize(Protocol, b"")
 
     def test_from_thread_pool(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         control = self.easy(val=5, val_list=[1, 2, 3, 4])
         loop = asyncio.get_event_loop()
         coro = loop.run_in_executor(None, self.serializer.serialize, control)
@@ -181,10 +177,6 @@ class SerializerTests(unittest.TestCase):
         self.assertEqual(control, decoded)
 
     def test_serialize_iobuf(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         control = self.easy(val=5, val_list=[1, 2, 3, 4, 5])
         iobuf = self.serializer.serialize_iobuf(control)
         decoded = self.serializer.deserialize(type(control), iobuf)
@@ -218,10 +210,6 @@ class SerializerTests(unittest.TestCase):
         self.assertEqual(control, decoded)
 
     def test_serialize_easy_struct(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         control = self.easy(val=5, val_list=[1, 2, 3, 4])
         self.thrift_serialization_round_trip(control)
 
@@ -237,10 +225,6 @@ class SerializerTests(unittest.TestCase):
         self.pickle_round_trip(control=self.StrEasyMap({"foo": val}))
 
     def test_serialize_hard_struct(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         control = self.hard(
             val=0, val_list=[1, 2, 3, 4], name="foo", an_int=self.Integers(tiny=1)
         )
@@ -257,9 +241,6 @@ class SerializerTests(unittest.TestCase):
         self.pickle_round_trip(control)
 
     def test_serialize_Integers_union(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
         control = self.Integers(medium=1337)
 
         self.thrift_serialization_round_trip(control)
@@ -308,10 +289,6 @@ class SerializerTests(unittest.TestCase):
         self.pickle_round_trip(control=self.StrI32ListMap({"a": self.I32List([1, 2])}))
 
     def test_serialize_Complex(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         control = self.Complex(
             val_bool=True,
             val_i32=42,
@@ -401,10 +378,6 @@ class SerializerTests(unittest.TestCase):
         self.thrift_serialization_round_trip(control)
 
     def test_deserialize_with_length(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         control = self.easy(val=5, val_list=[1, 2, 3, 4, 5])
         for proto in Protocol:
             encoded = self.serializer.serialize(control, protocol=proto)
@@ -432,10 +405,6 @@ class SerializerTests(unittest.TestCase):
 
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         json_bytes = b'{"val_bool":false,"val_i32":0,"val_i64":0,"val_string":"abcdef","val_binary":"YWJjZGU","val_iobuf":"YWJjZGVm","val_enum":0,"val_union":{},"val_list":[],"val_map":{},"val_struct_with_containers":{"color_list":[],"color_set":[],"color_map":{}}}'
         s = self.Complex(
             val_string="abcdef",
@@ -512,10 +481,6 @@ class SerializerTerseWriteTests(unittest.TestCase):
         thrift_serialization_round_trip(self, control, self.serializer)
 
     def test_field_level_terse_write(self) -> None:
-        if self.is_mutable_run:
-            # TODO: Remove this after implementing mutable union serialization.
-            return
-
         obj = self.FieldLevelTerseStruct(
             bool_field=True,
             byte_field=1,

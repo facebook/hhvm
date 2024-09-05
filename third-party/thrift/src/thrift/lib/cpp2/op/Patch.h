@@ -178,7 +178,7 @@ op::safe_patch_type<Tag> toSafePatch(const op::patch_type<Tag>& patch) {
 
   op::safe_patch_type<Tag> safePatch;
   safePatch.data() = queue.move();
-  safePatch.version() = detail::kThriftStaticPatchVersion;
+  safePatch.version() = detail::calculateMinSafePatchVersion(patch);
 
   return safePatch;
 }

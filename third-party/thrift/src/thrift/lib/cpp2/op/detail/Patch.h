@@ -39,7 +39,7 @@ namespace detail {
 // binary. This is to ensure that the binary does not attempt to process a
 // Thrift Static Patch that includes operations or features it does not support,
 // which could lead to data corruption or other issues
-inline constexpr int32_t kThriftStaticPatchVersion = 1;
+inline constexpr int32_t kThriftStaticPatchVersion = 2;
 
 // Adapter for all base types.
 template <typename T>
@@ -72,6 +72,84 @@ using MapPatchAdapter = InlineAdapter<MapPatch<T>>;
 // Adapters for Thrift Any
 template <typename T>
 using AnyPatchAdapter = InlineAdapter<AnyPatch<T>>;
+
+template <class>
+constexpr inline bool is_map_patch_v = false;
+template <class Patch>
+constexpr inline bool is_map_patch_v<MapPatch<Patch>> = true;
+template <class>
+constexpr inline bool is_structured_patch_v = false;
+template <class Patch>
+constexpr inline bool is_structured_patch_v<StructPatch<Patch>> = true;
+template <class Patch>
+constexpr inline bool is_structured_patch_v<UnionPatch<Patch>> = true;
+template <class>
+constexpr inline bool is_any_patch_v = false;
+template <class Patch>
+constexpr inline bool is_any_patch_v<AnyPatch<Patch>> = true;
+
+class MinSafePatchVersionVisitor {
+ public:
+  // Shared
+  template <typename T>
+  void assign(const T&) {}
+  void clear() {}
+  template <typename Patch>
+  void recurse(const Patch& patch) {
+    if constexpr (
+        is_map_patch_v<Patch> || is_structured_patch_v<Patch> ||
+        is_any_patch_v<Patch>) {
+      // Since all v2 operations are supported with AnyPatch, skip all other
+      // patches.
+      MinSafePatchVersionVisitor visitor;
+      patch.customVisit(visitor);
+      version = std::max(version, visitor.version);
+    }
+  }
+
+  // Container
+  template <typename T>
+  void add(const T&) {}
+  template <typename T>
+  void put(const T&) {}
+  template <typename T>
+  void remove(const T&) {}
+  template <typename Key, typename ValuePatch>
+  void patchIfSet(const folly::F14NodeMap<Key, ValuePatch>& patches) {
+    for (const auto& [k, vp] : patches) {
+      recurse(vp);
+    }
+  }
+
+  // Structured
+  template <typename>
+  void ensure() {}
+  template <typename, typename Field>
+  void ensure(const Field&) {}
+  template <typename>
+  void remove() {}
+  template <typename, typename FieldPatch>
+  void patchIfSet(const FieldPatch& fieldPatch) {
+    recurse(fieldPatch);
+  }
+
+  // Thrift Any
+  template <typename T>
+  void patchIfTypeIs(T) {
+    version = std::max(version, 2);
+  }
+  void ensureAny(const type::AnyStruct&) { version = std::max(version, 2); }
+
+  int32_t version = 1;
+};
+
+template <typename Patch>
+int32_t calculateMinSafePatchVersion(const Patch& patch) {
+  // is_patch_v
+  MinSafePatchVersionVisitor visitor;
+  patch.customVisit(visitor);
+  return visitor.version;
+}
 
 } // namespace detail
 } // namespace op

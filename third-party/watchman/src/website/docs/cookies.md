@@ -106,4 +106,4 @@ quiescence before the watcher is considered caught up.
 
 ## Credits
 
-The idea was originally proposed by Matt Mackall <mpm@selenic.com>.
+The idea was originally proposed by Olivia Mackall <olivia@selenic.com>.

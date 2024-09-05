@@ -65,4 +65,4 @@ system in the rare case that a file changes case.
 
 ## Credits
 
-The levels of correctness were proposed by Matt Mackall <mpm@selenic.com>.
+The levels of correctness were proposed by Olivia Mackall <olivia@selenic.com>.

@@ -169,6 +169,7 @@ struct DaemonInfo {
 */
 struct PrivHelperInfo {
   1: bool connected;
+  2: pid_t pid;
 }
 
 /**

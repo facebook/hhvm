@@ -251,7 +251,7 @@ function class_id(): void {
 
 let class_id_cases =
   [
-    (("class_id.php", 3, 12), "A");
+    (("class_id.php", 3, 12), "(function(int $id): void)");
     (("class_id.php", 5, 3), "A");
     (("class_id.php", 7, 3), "A");
     (("class_id.php", 9, 3), "A");

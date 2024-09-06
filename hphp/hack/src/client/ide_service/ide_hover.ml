@@ -443,22 +443,6 @@ let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
       let snippet =
         match (occurrence, info_opt) with
         | ({ name; _ }, None) -> Utils.strip_hh_lib_ns name
-        | ({ type_ = Method (ClassName classname, name); _ }, Some info)
-          when String.equal name Naming_special_names.Members.__construct ->
-          let env = ServerInferType.get_env info in
-          let snippet_opt =
-            Option.Monad_infix.(
-              Decl_provider.get_class ctx classname |> Decl_entry.to_option
-              >>= fun c ->
-              fst (Folded_class.construct c) >>| fun elt ->
-              let ty = Lazy.force_val elt.ce_type in
-              Tast_env.print_ty_with_identity env (DeclTy ty) occurrence def_opt)
-          in
-          defined_in
-          ^
-          (match snippet_opt with
-          | Some s -> s
-          | None -> print_locl_ty_with_identity info)
         | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
           let param_name = nth_param ctx recv i in
           Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)

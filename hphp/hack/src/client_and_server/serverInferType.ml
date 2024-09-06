@@ -162,7 +162,18 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
       in
       List.map2_exn lhss rhss ~f:merge_opt
 
-    method! on_expr env ((ty, pos, _) as expr) =
+    method! on_expr env ((ty, pos, expr_) as expr) =
+      (* For new expressions such as new C(x,y) when hovering over
+       * the C we would like to see the constructor's function signature,
+       * not the type of the created instance. Easiest way to arrange this is
+       * to patch the type before recursing.
+       *)
+      let expr =
+        match expr_ with
+        | Aast.New ((_, pos_cid, _cid), targs, el, e, ctor_ty) ->
+          (ty, pos, Aast.New ((ctor_ty, pos_cid, _cid), targs, el, e, ctor_ty))
+        | _ -> expr
+      in
       let res = self#select_pos pos env ty in
       match shape_indexing_receiver env expr with
       | Some recv when human_friendly ->

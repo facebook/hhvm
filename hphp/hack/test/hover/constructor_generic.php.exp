@@ -1,0 +1,3 @@
+// Defined in Thingy
+public function __construct(int $item): void
+Make a Thingy

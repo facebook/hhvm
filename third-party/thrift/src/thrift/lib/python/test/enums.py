@@ -356,6 +356,9 @@ class FlagTests(unittest.TestCase):
         self.OptionalColorGroups: Type[OptionalColorGroups] = (
             self.test_types.OptionalColorGroups
         )
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
@@ -399,9 +402,18 @@ class FlagTests(unittest.TestCase):
 
     def test_combination(self) -> None:
         combo = self.Perm(self.Perm.read.value | self.Perm.execute.value)
+        self.assertEqual(combo, self.Perm.read.value + self.Perm.execute.value)
         self.assertNotIn(combo, self.Perm)
         self.assertIsInstance(combo, self.Perm)
         self.assertIs(combo, self.Perm.read | self.Perm.execute)
+
+        # make sure it works when creating a combo in a struct
+        x = self.File(name="/bin/sh", permissions=(self.Perm.read | self.Perm.execute))
+        self.assertEqual(x.permissions, self.Perm.read.value + self.Perm.execute.value)
+        self.assertEqual(x.permissions, 5)
+        self.assertNotIn(x.permissions, self.Perm)
+        self.assertIsInstance(x.permissions, self.Perm)
+        self.assertIs(x.permissions, self.Perm.read | self.Perm.execute)
 
     def test_is(self) -> None:
         allp = self.Perm(7)

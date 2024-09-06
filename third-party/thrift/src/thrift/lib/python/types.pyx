@@ -2214,6 +2214,7 @@ class EnumMeta(type):
         for name, value in dct.items():
             if not isinstance(value, int):
                 continue
+            # pass value to int parent class constructor
             arm = klass.__new__(klass, value)
             arm._fbthrift_name_ = name
             arm._fbthrift_value_ = value
@@ -2329,7 +2330,8 @@ class Flag(Enum):
         """
         pseudo_member = cls.__reversed_map__.get(value, None)
         if pseudo_member is None:
-            pseudo_member = object.__new__(cls)
+            # must pass value to int parent class constructor
+            pseudo_member = cls.__new__(cls, value)
             pseudo_member._fbthrift_name_ = None
             pseudo_member._fbthrift_value_ = value
             # use setdefault in case another thread already created a composite

@@ -3532,9 +3532,8 @@ TEST(FieldMaskTest, testDuplicateEntryInTypeMaskList) {
   entries.emplace_back().type() = type::infer_tag<Foo>{};
 
   EXPECT_THROW(
-      (::apache::thrift::detail::
-           TypeToMaskAdapter<protocol::TypeAndMaskEntry, Mask>::fromThrift(
-               std::move(entries))),
+      (protocol::detail::TypeToMaskAdapter<protocol::TypeAndMaskEntry, Mask>::
+           fromThrift(std::move(entries))),
       std::runtime_error);
 }
 

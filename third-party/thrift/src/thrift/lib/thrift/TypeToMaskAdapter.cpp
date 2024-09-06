@@ -18,10 +18,10 @@
 
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 
-namespace apache::thrift::detail {
+namespace apache::thrift::protocol::detail {
 
 std::string debugFormatType(const type::Type& type) {
   return debugStringViaEncode(type);
 }
 
-} // namespace apache::thrift::detail
+} // namespace apache::thrift::protocol::detail

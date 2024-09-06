@@ -52,7 +52,7 @@ struct TypeAndMaskEntry {
  * given type within the list
  */
 @cpp.Adapter{
-  name = "::apache::thrift::detail::TypeToMaskAdapter<
+  name = "::apache::thrift::protocol::detail::TypeToMaskAdapter<
       ::apache::thrift::protocol::TypeAndMaskEntry,
       ::apache::thrift::protocol::Mask
     >",

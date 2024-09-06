@@ -20,7 +20,7 @@
 #include <folly/container/F14Map.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>
 
-namespace apache::thrift::detail {
+namespace apache::thrift::protocol::detail {
 
 std::string debugFormatType(const type::Type& type);
 
@@ -75,4 +75,4 @@ class TypeToMaskAdapter {
   // materializing intermediate thrift struct)
 };
 
-} // namespace apache::thrift::detail
+} // namespace apache::thrift::protocol::detail

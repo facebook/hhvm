@@ -83,6 +83,15 @@ class StructTestsParameterized(unittest.TestCase):
         self.File: Type[File] = self.test_types.File
         self.Kind: Type[Kind] = self.test_types.Kind
         self.UnusedError: Type[UnusedError] = self.test_types.UnusedError
+        self.Integers: Type[Integers] = self.test_types.Integers
+        self.easy: Type[easy] = self.test_types.easy
+        self.Optionals: Type[Optionals] = self.test_types.Optionals
+        self.Runtime: Type[Runtime] = self.test_types.Runtime
+        self.Color: Type[Color] = self.test_types.Color
+        self.Reserved: Type[Reserved] = self.test_types.Reserved
+        self.StructuredAnnotation: Type[StructuredAnnotation] = (
+            self.test_types.StructuredAnnotation
+        )
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -108,44 +117,172 @@ class StructTestsParameterized(unittest.TestCase):
         # pyre-ignore[6]: `mutable_isset` expected ...
         self.assertTrue(self.isset(e)["message"])
 
-
-class StructTests(unittest.TestCase):
     def test_isset_Union(self) -> None:
-        i = Integers(large=2)
+        i = self.Integers(large=2)
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: for test
-            isset(i)["large"]
+            self.isset(i)["large"]
 
+    def test_no_dict(self) -> None:
+        with self.assertRaises(AttributeError):
+            self.easy().__dict__
+        # TODO: make it a tuple instead of a list
+        # self.assertIsInstance(easy().__class__.__slots__, tuple)
+        # pyre-ignore[16]
+        self.assertIs(self.easy().__class__.__slots__, self.easy().__slots__)
+        self.assertIs(self.easy(val=5).__slots__, self.easy(name="yo").__slots__)
+
+    def test_optional_struct_creation(self) -> None:
+        with self.assertRaises(TypeError):
+            # pyre-ignore[19]: for test
+            self.easy(1, [1, 1], "test", self.Integers(tiny=1))
+        self.easy(val=1, an_int=self.Integers(small=500))
+        with self.assertRaises(TypeError):
+            # pyre-ignore[6]: for test
+            self.easy(name=b"binary")
+        # Only Required Fields don't accept None
+        self.easy(val=5, an_int=None)
+
+    def test_call_replace_container(self) -> None:
+        x = self.Optionals(values=["a", "b", "c"])
+        z = x(values=["b", "c"])
+        y = z(values=None)
+        self.assertIsNone(y.values)
+
+    def test_runtime_checks(self) -> None:
+        x = self.Runtime()
+        with self.assertRaises(TypeError):
+            # pyre-ignore[6]: for test
+            x(bool_val=5)
+
+        with self.assertRaises(TypeError):
+            # pyre-ignore[6]: for test
+            self.Runtime(bool_val=5)
+
+        with self.assertRaises(TypeError):
+            # pyre-ignore[6]: for test
+            x(enum_val=2)
+
+        with self.assertRaises(TypeError):
+            # pyre-ignore[6]: for test
+            self.Runtime(enum_val=2)
+
+        with self.assertRaises(TypeError):
+            # pyre-ignore[6]: for test
+            x(int_list_val=["foo", "bar", "baz"])
+
+        with self.assertRaises(TypeError):
+            # pyre-ignore[6]: for test
+            self.Runtime(int_list_val=["foo", "bar", "baz"])
+
+        with self.assertRaises(TypeError):
+            self.Runtime(
+                bool_val=True,
+                enum_val=self.Color.red,
+                # pyre-ignore[6]: for test
+                int_list_val=[1, 2, "foo"],
+            )
+
+    def test_ordering(self) -> None:
+        x = self.Runtime(
+            bool_val=False, enum_val=self.Color.red, int_list_val=[64, 128]
+        )
+        y = x(bool_val=True)
+        self.assertLess(x, y)
+        self.assertLessEqual(x, y)
+        self.assertGreater(y, x)
+        self.assertGreaterEqual(y, x)
+        self.assertEqual([x, y], sorted([y, x]))
+
+    def test_init_with_invalid_field(self) -> None:
+        with self.assertRaises(TypeError):
+            # pyre-ignore[28]: for test
+            self.easy(
+                val=1,
+                an_int=self.Integers(small=300),
+                name="foo",
+                val_lists=[1, 2, 3, 4],
+            )
+
+    def test_init_with_invalid_field_value(self) -> None:
+        with self.assertRaisesRegex(
+            TypeError, "Cannot create internal string data representation"
+        ):
+            # pyre-ignore[6]: name is string, but under test
+            self.easy(val=1, an_int=self.Integers(small=300), name=1)
+
+    def test_iterate(self) -> None:
+        x = self.Reserved(
+            from_="hello",
+            nonlocal_=3,
+            ok="bye",
+            is_cpdef=True,
+            move="Qh4xe1",
+            inst="foo",
+            changes="bar",
+            _Reserved__mangled_str="secret",
+            _Reserved__mangled_int=42,
+        )
+        self.assertEqual(
+            list(x),
+            [
+                ("from_", "hello"),
+                ("nonlocal_", 3),
+                ("ok", "bye"),
+                ("is_cpdef", True),
+                ("move", "Qh4xe1"),
+                ("inst", "foo"),
+                ("changes", "bar"),
+                ("_Reserved__mangled_str", "secret"),
+                ("_Reserved__mangled_int", 42),
+            ],
+        )
+        self.assertEqual(
+            [k for k, _ in self.Reserved],
+            [
+                "from_",
+                "nonlocal_",
+                "ok",
+                "is_cpdef",
+                "move",
+                "inst",
+                "changes",
+                "_Reserved__mangled_str",
+                "_Reserved__mangled_int",
+            ],
+        )
+
+    def test_recursive_init(self) -> None:
+        self.StructuredAnnotation()
+
+
+class StructTestsImmutable(unittest.TestCase):
+    """
+    Unittest only valid for immutable types
+    """
+
+    def test_hashability(self) -> None:
+        hash(easy())
+        hash(EmptyStruct())
+
+    def test_to_python(self) -> None:
+        e = easy()
+        self.assertEqual(e, e._to_python())
+
+    def test_immutability(self) -> None:
+        e = easy()
+        with self.assertRaises(AttributeError):
+            # pyre-ignore[41]: Cannot reassign final attribute `name`.
+            e.name = "foo"
+
+
+class StructTests(unittest.TestCase):
     def test_copy(self) -> None:
         x = easy(val=1, an_int=Integers(small=300), name="foo", val_list=[1, 2, 3, 4])
         dif_list = copy.copy(x.val_list)
         self.assertEqual(x.val_list, dif_list)
         dif_int = copy.copy(x.an_int)
         self.assertEqual(x.an_int, dif_int)
-
-    def test_no_dict(self) -> None:
-        with self.assertRaises(AttributeError):
-            easy().__dict__
-        # TODO: make it a tuple instead of a list
-        # self.assertIsInstance(easy().__class__.__slots__, tuple)
-        # pyre-ignore[16]
-        self.assertIs(easy().__class__.__slots__, easy().__slots__)
-        self.assertIs(easy(val=5).__slots__, easy(name="yo").__slots__)
-
-    def test_hashability(self) -> None:
-        hash(easy())
-        hash(EmptyStruct())
-
-    def test_optional_struct_creation(self) -> None:
-        with self.assertRaises(TypeError):
-            # pyre-ignore[19]: for test
-            easy(1, [1, 1], "test", Integers(tiny=1))
-        easy(val=1, an_int=Integers(small=500))
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            easy(name=b"binary")
-        # Only Required Fields don't accept None
-        easy(val=5, an_int=None)
 
     def test_call_replace(self) -> None:
         x = easy(val=1, an_int=Integers(small=300), name="foo")
@@ -162,42 +299,6 @@ class StructTests(unittest.TestCase):
         self.assertIsNotNone(x.val_list)
         self.assertIsNone(x.name)
         self.assertIsNotNone(x.an_int)
-
-    def test_call_replace_container(self) -> None:
-        x = Optionals(values=["a", "b", "c"])
-        z = x(values=["b", "c"])
-        y = z(values=None)
-        self.assertIsNone(y.values)
-
-    def test_runtime_checks(self) -> None:
-        x = Runtime()
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            x(bool_val=5)
-
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            Runtime(bool_val=5)
-
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            x(enum_val=2)
-
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            Runtime(enum_val=2)
-
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            x(int_list_val=["foo", "bar", "baz"])
-
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            Runtime(int_list_val=["foo", "bar", "baz"])
-
-        with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
-            Runtime(bool_val=True, enum_val=Color.red, int_list_val=[1, 2, "foo"])
 
     def test_reserved(self) -> None:
         x = Reserved(
@@ -229,68 +330,6 @@ class StructTests(unittest.TestCase):
         )
         self.assertEqual(y._Reserved__mangled_str, "secret")
         self.assertEqual(y._Reserved__mangled_int, 42)
-
-    def test_ordering(self) -> None:
-        x = Runtime(bool_val=False, enum_val=Color.red, int_list_val=[64, 128])
-        y = x(bool_val=True)
-        self.assertLess(x, y)
-        self.assertLessEqual(x, y)
-        self.assertGreater(y, x)
-        self.assertGreaterEqual(y, x)
-        self.assertEqual([x, y], sorted([y, x]))
-
-    def test_init_with_invalid_field(self) -> None:
-        with self.assertRaises(TypeError):
-            # pyre-ignore[28]: for test
-            easy(val=1, an_int=Integers(small=300), name="foo", val_lists=[1, 2, 3, 4])
-
-    def test_init_with_invalid_field_value(self) -> None:
-        with self.assertRaisesRegex(
-            TypeError, "Cannot create internal string data representation"
-        ):
-            # pyre-ignore[6]: name is string, but under test
-            easy(val=1, an_int=Integers(small=300), name=1)
-
-    def test_iterate(self) -> None:
-        x = Reserved(
-            from_="hello",
-            nonlocal_=3,
-            ok="bye",
-            is_cpdef=True,
-            move="Qh4xe1",
-            inst="foo",
-            changes="bar",
-            _Reserved__mangled_str="secret",
-            _Reserved__mangled_int=42,
-        )
-        self.assertEqual(
-            list(x),
-            [
-                ("from_", "hello"),
-                ("nonlocal_", 3),
-                ("ok", "bye"),
-                ("is_cpdef", True),
-                ("move", "Qh4xe1"),
-                ("inst", "foo"),
-                ("changes", "bar"),
-                ("_Reserved__mangled_str", "secret"),
-                ("_Reserved__mangled_int", 42),
-            ],
-        )
-        self.assertEqual(
-            [k for k, _ in Reserved],
-            [
-                "from_",
-                "nonlocal_",
-                "ok",
-                "is_cpdef",
-                "move",
-                "inst",
-                "changes",
-                "_Reserved__mangled_str",
-                "_Reserved__mangled_int",
-            ],
-        )
 
     def test_dir(self) -> None:
         expected = ["__iter__", "an_int", "name", "py3_hidden", "val", "val_list"]
@@ -347,19 +386,6 @@ class StructTests(unittest.TestCase):
                     "a.b.c.val": 256,
                 },
             )
-
-    def test_to_python(self) -> None:
-        e = easy()
-        self.assertEqual(e, e._to_python())
-
-    def test_immutability(self) -> None:
-        e = easy()
-        with self.assertRaises(AttributeError):
-            # pyre-ignore[41]: Cannot reassign final attribute `name`.
-            e.name = "foo"
-
-    def test_recursive_init(self) -> None:
-        StructuredAnnotation()
 
 
 @parameterized_class(

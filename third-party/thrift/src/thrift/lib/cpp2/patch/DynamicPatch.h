@@ -20,7 +20,6 @@
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
-#include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
 namespace apache::thrift::protocol {

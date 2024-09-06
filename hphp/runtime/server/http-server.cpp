@@ -429,7 +429,7 @@ void HttpServer::runOrExitProcess() {
     Lock lock(this);
     BootStats::markFromStart("start_server");
     if (!jit::mcgen::retranslateAllPending()) {
-      BootStats::done();
+      BootStats::done(Cfg::Server::LogBootStats);
     } // else we log after retranslateAll finishes
 
     // Play extended warmup requests after server starts running. This works on

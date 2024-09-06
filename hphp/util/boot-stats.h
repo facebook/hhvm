@@ -75,7 +75,7 @@ struct BootStats {
     return s.count();
   }
   // Stops the timer and logs information
-  static void done();
+  static void done(bool log);
   // Computes the time elapsed from start or from the previous call to this
   // method and stores it as a sample with the given name
   static void mark(const std::string& name);

@@ -661,6 +661,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - int Server.InternalWarmupThreads = 0, UNKNOWN
 - boost::container::flat_set<std::string> Server.HighPriorityEndPoints = {}, UNKNOWN
 - bool Server.ExitOnBindFail = false, UNKNOWN
+- bool Server.LogBootStats = true, UNKNOWN
 - std::string Server.Host = "", UNKNOWN
 - int Server.Port = 80, UNKNOWN
 - int Server.PortFd = -1, UNKNOWN, nobind

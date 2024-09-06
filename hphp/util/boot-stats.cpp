@@ -130,13 +130,13 @@ void BootStats::start() {
   BootStats::s_instance = std::make_unique<BootStats::Impl>();
 }
 
-void BootStats::done() {
+void BootStats::done(bool log) {
   if (!s_started) return;
   s_started = false;
 
   BootStats::s_instance->dumpMarks();
 
-  if (StructuredLog::enabled()) {
+  if (log && StructuredLog::enabled()) {
     std::lock_guard<std::mutex> lock(s_instance->m_marks_guard_);
     StructuredLogEntry cols;
     for (auto const& sample : s_instance->m_marks) {

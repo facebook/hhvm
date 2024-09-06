@@ -53,6 +53,8 @@ namespace {
   ): int;
   <<__PHPStdLib>>
   function xbox_process_call_message(string $msg): mixed;
+  <<__PHPStdLib>>
+  function xbox_tasks_started(): int;
 }
 
 namespace HH {

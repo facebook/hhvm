@@ -69,7 +69,8 @@ TYPED_TEST(MultiProtocolTest, test_structs_populate) {
     }
     ASSERT_EQ(*(a.field14_ref()), *(b.field14_ref()));
     ASSERT_EQ(*(a.field15_ref()), *(b.field15_ref()));
-    ASSERT_EQ(a.field16_ref(), b.field16_ref());
+    ASSERT_EQ(*a.field16_ref(), *b.field16_ref());
+    ASSERT_EQ(*a.field17_ref(), *b.field17_ref());
   }
 }
 

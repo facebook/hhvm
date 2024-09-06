@@ -152,6 +152,7 @@ struct struct7 {
   15: smallstruct field15;
   @cpp.Ref{type = cpp.RefType.Unique}
   16: optional map<i32, string> field16;
+  17: AdaptedLong field17;
 }
 
 struct struct8 {

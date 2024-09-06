@@ -24,13 +24,13 @@
 #include <type_traits>
 #include <vector>
 
-#include <fatal/type/array.h>
-#include <fatal/type/conditional.h>
-#include <fatal/type/convert.h>
 #include <folly/Traits.h>
 #include <folly/io/Cursor.h>
+#include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/Thrift.h>
-#include <thrift/lib/cpp2/reflection/reflection.h>
+#include <thrift/lib/cpp2/op/Create.h>
+#include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/type/NativeType.h>
 
 namespace apache {
 namespace thrift {
@@ -67,10 +67,10 @@ template <typename Int, typename Rng>
 Int rand_in_range(Rng& rng, const populator_opts::range<Int>& range) {
   // uniform_int_distribution undefined for char,
   // use the next larger type if it's small
-  using int_type = fatal::conditional<
+  using int_type = std::conditional_t<
       (sizeof(Int) > 1),
       Int,
-      fatal::conditional<
+      std::conditional_t<
           std::numeric_limits<Int>::is_signed,
           signed short,
           unsigned short>>;
@@ -100,15 +100,6 @@ using enable_if_smart_pointer =
 template <typename T>
 using disable_if_smart_pointer =
     typename std::enable_if<!is_smart_pointer<T>::value>::type;
-
-// helper predicate for determining if a struct's MemberInfo is required
-// to be read out of the protocol
-struct is_required_field {
-  template <typename MemberInfo>
-  using apply = std::integral_constant<
-      bool,
-      MemberInfo::optional::value == optionality::required>;
-};
 
 struct extract_descriptor_fid {
   template <typename T>
@@ -154,13 +145,19 @@ struct deref<PtrType, enable_if_smart_pointer<PtrType>> {
   }
 };
 
+template <typename T>
+using infer_tag = type::infer_tag<T, true /* GuessStringTag */>;
+
 } // namespace detail
 
-template <typename TypeClass, typename Type, typename Enable = void>
+template <typename Tag, typename Type, typename Enable = void>
 struct populator_methods;
 
 template <typename Int>
-struct populator_methods<type_class::integral, Int> {
+struct populator_methods<
+    detail::infer_tag<Int>,
+    Int,
+    std::enable_if_t<type::is_a_v<detail::infer_tag<Int>, type::integral_c>>> {
   template <typename Rng>
   static Int next_value(Rng& rng) {
     using limits = std::numeric_limits<Int>;
@@ -184,7 +181,11 @@ struct populator_methods<type_class::integral, Int> {
 };
 
 template <typename Fp>
-struct populator_methods<type_class::floating_point, Fp> {
+struct populator_methods<
+    detail::infer_tag<Fp>,
+    Fp,
+    std::enable_if_t<
+        type::is_a_v<detail::infer_tag<Fp>, type::floating_point_c>>> {
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts&, Fp& out) {
     std::uniform_real_distribution<Fp> gen;
@@ -194,11 +195,11 @@ struct populator_methods<type_class::floating_point, Fp> {
 };
 
 template <>
-struct populator_methods<type_class::string, std::string> {
+struct populator_methods<type::string_t, std::string> {
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, std::string& str) {
     using larger_char =
-        fatal::conditional<std::numeric_limits<char>::is_signed, int, unsigned>;
+        std::conditional_t<std::numeric_limits<char>::is_signed, int, unsigned>;
 
     // all printable chars (see `man ascii`)
     std::uniform_int_distribution<larger_char> char_gen(0x20, 0x7E);
@@ -225,7 +226,7 @@ void generate_bytes(
 }
 
 template <>
-struct populator_methods<type_class::binary, std::string> {
+struct populator_methods<type::binary_t, std::string> {
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, std::string& bin) {
     const auto length = detail::rand_in_range(rng, opts.bin_len);
@@ -236,7 +237,9 @@ struct populator_methods<type_class::binary, std::string> {
 };
 
 template <>
-struct populator_methods<type_class::binary, folly::IOBuf> {
+struct populator_methods<
+    type::cpp_type<folly::IOBuf, type::binary_t>,
+    folly::IOBuf> {
   template <typename Rng>
   static void populate(
       Rng& rng, const populator_opts& opts, folly::IOBuf& bin) {
@@ -250,26 +253,29 @@ struct populator_methods<type_class::binary, folly::IOBuf> {
 };
 
 template <>
-struct populator_methods<type_class::binary, std::unique_ptr<folly::IOBuf>> {
+struct populator_methods<
+    type::cpp_type<std::unique_ptr<folly::IOBuf>, type::binary_t>,
+    std::unique_ptr<folly::IOBuf>> {
   template <typename Rng>
   static void populate(
       Rng& rng,
       const populator_opts& opts,
       std::unique_ptr<folly::IOBuf>& bin) {
     bin = std::make_unique<folly::IOBuf>();
-    return populator_methods<type_class::binary, folly::IOBuf>::populate(
-        rng, opts, *bin);
+    return populator_methods<
+        type::cpp_type<folly::IOBuf, type::binary_t>,
+        folly::IOBuf>::populate(rng, opts, *bin);
   }
 };
 
 // handle dereferencing smart pointers
-template <typename TypeClass, typename PtrType>
+template <typename Tag, typename PtrType>
 struct populator_methods<
-    TypeClass,
+    Tag,
     PtrType,
     detail::enable_if_smart_pointer<PtrType>> {
   using element_type = typename PtrType::element_type;
-  using type_methods = populator_methods<TypeClass, element_type>;
+  using type_methods = populator_methods<Tag, element_type>;
 
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, PtrType& out) {
@@ -279,9 +285,12 @@ struct populator_methods<
 
 // Enumerations
 template <typename Type>
-struct populator_methods<type_class::enumeration, Type> {
+struct populator_methods<
+    detail::infer_tag<Type>,
+    Type,
+    std::enable_if_t<type::is_a_v<detail::infer_tag<Type>, type::enum_c>>> {
   using int_type = typename std::underlying_type<Type>::type;
-  using int_methods = populator_methods<type_class::integral, int_type>;
+  using int_methods = populator_methods<detail::infer_tag<int_type>, int_type>;
 
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, Type& out) {
@@ -292,15 +301,10 @@ struct populator_methods<type_class::enumeration, Type> {
 };
 
 // Lists
-template <typename ElemClass, typename Type>
-struct populator_methods<type_class::list<ElemClass>, Type> {
+template <typename ElemTag, typename Type>
+struct populator_methods<type::list<ElemTag>, Type> {
   using elem_type = typename Type::value_type;
-  using elem_tclass = ElemClass;
-  static_assert(
-      !std::is_same<elem_tclass, type_class::unknown>(),
-      "Unable to serialize unknown list element");
-
-  using elem_methods = populator_methods<elem_tclass, elem_type>;
+  using elem_methods = populator_methods<ElemTag, elem_type>;
 
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, Type& out) {
@@ -317,16 +321,12 @@ struct populator_methods<type_class::list<ElemClass>, Type> {
 };
 
 // Sets
-template <typename ElemClass, typename Type>
-struct populator_methods<type_class::set<ElemClass>, Type> {
+template <typename ElemTag, typename Type>
+struct populator_methods<type::set<ElemTag>, Type> {
   // TODO: fair amount of shared code bewteen this and specialization for
   // type_class::list
   using elem_type = typename Type::value_type;
-  using elem_tclass = ElemClass;
-  static_assert(
-      !std::is_same<elem_tclass, type_class::unknown>(),
-      "Unable to serialize unknown type");
-  using elem_methods = populator_methods<elem_tclass, elem_type>;
+  using elem_methods = populator_methods<ElemTag, elem_type>;
 
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, Type& out) {
@@ -344,23 +344,13 @@ struct populator_methods<type_class::set<ElemClass>, Type> {
 };
 
 // Maps
-template <typename KeyClass, typename MappedClass, typename Type>
-struct populator_methods<type_class::map<KeyClass, MappedClass>, Type> {
+template <typename KeyTag, typename MappedTag, typename Type>
+struct populator_methods<type::map<KeyTag, MappedTag>, Type> {
   using key_type = typename Type::key_type;
-  using key_tclass = KeyClass;
-
   using mapped_type = typename Type::mapped_type;
-  using mapped_tclass = MappedClass;
 
-  static_assert(
-      !std::is_same<key_tclass, type_class::unknown>(),
-      "Unable to serialize unknown key type in map");
-  static_assert(
-      !std::is_same<mapped_tclass, type_class::unknown>(),
-      "Unable to serialize unknown mapped type in map");
-
-  using key_methods = populator_methods<key_tclass, key_type>;
-  using mapped_methods = populator_methods<mapped_tclass, mapped_type>;
+  using key_methods = populator_methods<KeyTag, key_type>;
+  using mapped_methods = populator_methods<MappedTag, mapped_type>;
 
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, Type& out) {
@@ -379,82 +369,40 @@ struct populator_methods<type_class::map<KeyClass, MappedClass>, Type> {
 
 // specialization for variants (Thrift unions)
 template <typename Union>
-struct populator_methods<type_class::variant, Union> {
-  using traits = fatal::variant_traits<Union>;
-
- private:
-  struct write_member_by_fid {
-    template <typename Fid, std::size_t Index, typename Rng>
-    void operator()(
-        fatal::indexed<Fid, Index>,
-        Rng& rng,
-        const populator_opts& opts,
-        Union& obj) {
-      using descriptor = fatal::get<
-          typename traits::descriptors,
-          Fid,
-          detail::extract_descriptor_fid>;
-      using methods = populator_methods<
-          typename descriptor::metadata::type_class,
-          typename descriptor::type>;
-
-      assert(Fid::value == descriptor::metadata::id::value);
-
-      DVLOG(3) << "writing union field "
-               << fatal::z_data<typename descriptor::metadata::name>()
-               << ", fid: " << descriptor::metadata::id::value;
-
-      typename descriptor::type tmp;
-      typename descriptor::setter setter;
-
-      methods::populate(rng, opts, tmp);
-      setter(obj, std::move(tmp));
-    }
-  };
-
- public:
+struct populator_methods<type::union_t<Union>, Union> {
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, Union& out) {
     DVLOG(3) << "begin writing union: "
-             << fatal::z_data<typename traits::name>()
-             << ", type: " << folly::to_underlying(out.getType());
+             << op::get_class_name_v<Union> << ", type: "
+             << folly::to_underlying(out.getType());
 
-    // array of all possible FIDs of this union
-    using fids_seq = fatal::sort<fatal::as_sequence<
-        fatal::transform<
-            typename traits::descriptors,
-            detail::extract_descriptor_fid>,
-        fatal::sequence,
-        field_id_t>>;
+    const auto selected = static_cast<type::Ordinal>(detail::rand_in_range(
+        rng, populator_opts::range<size_t>{0, op::size_v<Union> - 1}));
 
-    // std::array of field_id_t
-    const auto range = populator_opts::range<std::size_t>(
-        0, fatal::size<fids_seq>::value - !fatal::empty<fids_seq>::value);
-    const auto selected = detail::rand_in_range(rng, range);
+    op::for_each_ordinal<Union>([&](auto ord) {
+      using Ord = decltype(ord);
+      if (ord != selected) {
+        return;
+      }
+      using methods = populator_methods<
+          op::get_type_tag<Union, Ord>,
+          op::get_native_type<Union, Ord>>;
 
-    fatal::sorted_search<fids_seq>(
-        fatal::as_array<fids_seq>::data[selected],
-        write_member_by_fid(),
-        rng,
-        opts,
-        out);
+      DVLOG(3) << "writing union field "
+               << op::get_name_v<Union, Ord> << ", fid: "
+               << folly::to_underlying(op::get_field_id_v<Union, Ord>);
+
+      methods::populate(rng, opts, op::get<Ord>(out).ensure());
+    });
+
     DVLOG(3) << "end writing union";
   }
 };
 
 // specialization for structs
 template <typename Struct>
-struct populator_methods<type_class::structure, Struct> {
+struct populator_methods<type::struct_t<Struct>, Struct> {
  private:
-  using traits = apache::thrift::reflect_struct<Struct>;
-
-  using all_fields =
-      fatal::partition<typename traits::members, detail::is_required_field>;
-  using required_fields = fatal::first<all_fields>;
-  using optional_fields = fatal::second<all_fields>;
-
-  using isset_array = std::array<bool, fatal::size<required_fields>::value>;
-
   template <
       typename Member,
       typename MemberType,
@@ -494,56 +442,62 @@ struct populator_methods<type_class::structure, Struct> {
 
   class member_populator {
    public:
-    template <typename Member, std::size_t Index, typename Rng>
-    void operator()(
-        fatal::indexed<Member, Index>,
-        Rng& rng,
-        const populator_opts& opts,
-        Struct& out) {
-      using methods =
-          populator_methods<typename Member::type_class, typename Member::type>;
+    template <typename Ord, typename Rng>
+    void operator()(Ord, Rng& rng, const populator_opts& opts, Struct& out) {
+      using methods = populator_methods<
+          op::get_type_tag<Struct, Ord>,
+          op::get_native_type<Struct, Ord>>;
 
-      auto&& got = typename Member::field_ref_getter{}(out);
-      using member_type = folly::remove_cvref_t<decltype(*got)>;
+      auto&& got = op::get<Ord>(out);
 
       // Popualate optional fields with `optional_field_prob` probability.
       const auto skip = //
-          Member::optional::value == optionality::optional &&
+          ::apache::thrift::detail::is_optional_field_ref_v<
+              std::decay_t<decltype(got)>> &&
           !detail::get_bernoulli(rng, opts.optional_field_prob);
       if (skip) {
         return;
       }
 
-      DVLOG(3) << "populating member: "
-               << fatal::z_data<typename Member::name>();
+      DVLOG(3) << "populating member: " << op::get_name_v<Struct, Ord>;
 
-      Member::mark_set(out, true);
-      ensure_cpp_ref(got);
-      field_populator<Member, member_type, methods>::populate(rng, opts, *got);
-    }
-
-   private:
-    template <class T>
-    static void ensure_cpp_ref(T&&) {}
-
-    template <class T>
-    static void ensure_cpp_ref(std::unique_ptr<T>& v) {
-      v = std::make_unique<T>();
-    }
-
-    template <class T>
-    static void ensure_cpp_ref(std::shared_ptr<T>& v) {
-      v = std::make_shared<T>();
+      op::ensure<Ord>(out);
+      field_populator<
+          op::get_type_tag<Struct, Ord>,
+          op::get_native_type<Struct, Ord>,
+          methods>::populate(rng, opts, *got);
     }
   };
 
  public:
   template <typename Rng>
   static void populate(Rng& rng, const populator_opts& opts, Struct& out) {
-    fatal::foreach<typename traits::members>(
-        member_populator(), rng, opts, out);
+    op::for_each_ordinal<Struct>(
+        [&](auto ord) { member_populator()(ord, rng, opts, out); });
   }
 };
+template <typename Exn>
+struct populator_methods<type::exception_t<Exn>, Exn>
+    : populator_methods<type::struct_t<Exn>, Exn> {};
+
+// TODO: support field adapters too.
+template <typename Adapter, typename InnerTag, typename T>
+struct populator_methods<type::adapted<Adapter, InnerTag>, T> {
+  using inner_type = std::decay_t<adapt_detail::thrift_t<Adapter, T>>;
+  using inner_methods = populator_methods<InnerTag, inner_type>;
+
+  template <typename Rng>
+  static void populate(Rng& rng, const populator_opts& opts, T& out) {
+    inner_type tmp;
+    inner_methods::populate(rng, opts, tmp);
+    out = Adapter::fromThrift(std::move(tmp));
+  }
+};
+
+// cpp.type is handled transparently by each implementation
+template <typename T, typename Tag>
+struct populator_methods<type::cpp_type<T, Tag>, T>
+    : populator_methods<Tag, T> {};
 
 /**
  * Entrypoints for using populator
@@ -560,8 +514,8 @@ struct populator_methods<type_class::structure, Struct> {
 
 template <typename Type, typename Rng>
 void populate(Type& out, const populator_opts& opts, Rng& rng) {
-  using TypeClass = type_class_of_thrift_class_t<Type>;
-  return populator_methods<TypeClass, Type>::populate(rng, opts, out);
+  return populator_methods<detail::infer_tag<Type>, Type>::populate(
+      rng, opts, out);
 }
 
 } // namespace populator

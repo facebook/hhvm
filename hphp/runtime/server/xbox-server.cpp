@@ -115,6 +115,14 @@ static THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 struct XboxWorker
   : JobQueueWorker<XboxTransport*,Server*,true,false,JobQueueDropVMStack>
 {
+  void abortJob(XboxTransport *job) override {
+    Logger::Warning("Job dropped by JobQueueDispatcher because of timeout in xbox.");    
+    auto const handler = createRequestHandler();
+    handler->abortRequest(job);
+    destroyRequestHandler();
+    job->decRefCount();
+  }
+
   void doJob(XboxTransport *job) override {
     try {
       // If this job or the previous job that ran on this thread have
@@ -176,7 +184,9 @@ void XboxServer::Restart() {
          Cfg::Xbox::ServerInfoThreadCount,
          Cfg::Server::ThreadDropCacheTimeoutSeconds,
          Cfg::Server::ThreadDropStack,
-         nullptr);
+         nullptr,
+         INT_MAX,
+         Cfg::Xbox::ServerInfoMaxJobQueuingMs);
       s_counters = new ServiceData::CounterCallback(
           [](std::map<std::string, int64_t>& counters) {
             // For the entire duration when the counters are registered, we make

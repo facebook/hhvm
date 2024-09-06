@@ -172,6 +172,8 @@ void XboxRequestHandler::abortRequest(Transport *transport) {
   if (!vmStack().isAllocated()) {
     hphp_memory_cleanup();
   }
+  
+  transport->onSendEnd();
 }
 
 const StaticString

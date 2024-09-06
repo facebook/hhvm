@@ -1,0 +1,28 @@
+In cli
+int(10)
+In xbox
+xbox done.
+int(9)
+Job dropped by JobQueueDispatcher because of timeout in xbox.
+
+Fatal error: Uncaught exception 'Exception' with message 'Service Unavailable' in %s/xbox_timeout.php:15
+Stack trace:
+#0 %s/xbox_timeout.php(15): <unknown>()
+#1 %s/xbox_timeout.php(15): HH\Asio\join()
+#2 (): recursive_xbox()
+#3 (): xbox_process_call_message()
+#4 {main}
+
+Fatal error: Uncaught exception 'Exception' with message 'exception 'Exception' with message 'Service Unavailable' in %s/xbox_timeout.php:15
+Stack trace:
+#0 %s/xbox_timeout.php(15): <unknown>()
+#1 %s/xbox_timeout.php(15): HH\Asio\join()
+#2 (): recursive_xbox()
+#3 (): xbox_process_call_message()
+#4 {main}' in %s/xbox_timeout.php:15
+Stack trace:
+#0 %s/xbox_timeout.php(15): <unknown>()
+#1 %s/xbox_timeout.php(15): HH\Asio\join()
+#2 %s/xbox_timeout.php(24): recursive_xbox()
+#3 (): main()
+#4 {main}

@@ -900,6 +900,10 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - int Xbox.ServerInfo.ThreadCount = 10, UNKNOWN
 - int Xbox.ServerInfo.MaxQueueLength = INT_MAX, UNKNOWN, postprocess
+- int Xbox.ServerInfo.MaxJobQueuingMs = -1, UNKNOWN
+
+  Maximum duration in ms an xbox thread may sit in the queue.
+
 - std::string Xbox.ServerInfo.RequestInitFunction = "", UNKNOWN
 - std::string Xbox.ServerInfo.RequestInitDocument = "", UNKNOWN
 - bool Xbox.ServerInfo.LogInfo = false, UNKNOWN

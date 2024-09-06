@@ -433,6 +433,7 @@ impl HhConfig {
                 }
             }),
             hack_warnings: hhconfig.get_all_or_some_ints_or("hack_warnings", default.hack_warnings)?,
+            warnings_default_all: hhconfig.get_bool_or("warnings_default_all", default.warnings_default_all)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
             tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,
             tco_package_v2_bypass_package_check_for_class_const: hhconfig.get_bool_or("package_v2_bypass_package_check_for_class_const", default.tco_package_v2_bypass_package_check_for_class_const)?,

@@ -135,6 +135,7 @@ impl Default for GlobalOptions {
             tco_autocomplete_sort_text: false,
             tco_extended_reasons: None,
             hack_warnings: AllOrSome::ASome(vec![]),
+            warnings_default_all: false,
             tco_strict_switch: false,
             tco_allowed_files_for_ignore_readonly: vec![],
             tco_package_v2: false,

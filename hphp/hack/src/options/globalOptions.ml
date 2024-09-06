@@ -177,6 +177,7 @@ type t = {
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
   hack_warnings: int all_or_some;
+  warnings_default_all: bool;
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_v2: bool;
@@ -285,6 +286,7 @@ let default =
     tco_autocomplete_sort_text = false;
     tco_extended_reasons = None;
     hack_warnings = ASome [];
+    warnings_default_all = false;
     tco_strict_switch = false;
     tco_allowed_files_for_ignore_readonly = [];
     tco_package_v2 = false;
@@ -391,6 +393,7 @@ let set
     ?tco_autocomplete_sort_text
     ?tco_extended_reasons
     ?hack_warnings
+    ?warnings_default_all
     ?tco_strict_switch
     ?tco_allowed_files_for_ignore_readonly
     ?tco_package_v2
@@ -654,6 +657,8 @@ let set
     tco_extended_reasons =
       setting_opt tco_extended_reasons options.tco_extended_reasons;
     hack_warnings = setting hack_warnings options.hack_warnings;
+    warnings_default_all =
+      setting warnings_default_all options.warnings_default_all;
     tco_strict_switch = setting tco_strict_switch options.tco_strict_switch;
     tco_allowed_files_for_ignore_readonly =
       setting

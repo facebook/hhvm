@@ -473,6 +473,7 @@ let load_config config options =
     ?tco_log_exhaustivity_check:(bool_opt "log_exhaustivity_check" config)
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
     ?hack_warnings:(all_or_some_ints_opt "hack_warnings" config)
+    ?warnings_default_all:(bool_opt "warnings_default_all" config)
     ?tco_strict_switch:(bool_opt "strict_switch" config)
     ?tco_allowed_files_for_ignore_readonly:
       (string_list_opt "allowed_files_for_ignore_readonly" config)
@@ -605,6 +606,7 @@ let load
         ~tco_lsp_invalidation:local_config.lsp_invalidation
         ~tco_autocomplete_sort_text:local_config.autocomplete_sort_text
         ~hack_warnings:local_config.hack_warnings
+        ~warnings_default_all:local_config.warnings_default_all
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
         GlobalOptions.default

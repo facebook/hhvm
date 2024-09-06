@@ -22,14 +22,15 @@ let typed_linters tcopt =
   let warning_handlers =
     List.filter_map Tast_check.warning_checks ~f:(fun (module M) ->
         if
-          (* If at least one code is not checked as a hack warning,
-             then check it as a legacy lint. *)
-          List.exists M.error_codes ~f:(fun code ->
-              not @@ Typing_warning_utils.code_is_enabled tcopt code)
+          (* We only deactivate if all codes for this lint are checked as warnings
+             and warnings are turned on by default *)
+          tcopt.GlobalOptions.warnings_default_all
+          && List.for_all M.error_codes ~f:(fun code ->
+                 Typing_warning_utils.code_is_enabled tcopt code)
         then
-          Some (M.handler ~as_lint:true)
+          None
         else
-          None)
+          Some (M.handler ~as_lint:true))
   in
   [
     Linter_switch_check.handler;

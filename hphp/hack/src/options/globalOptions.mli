@@ -254,6 +254,7 @@ type t = {
   tco_extended_reasons: extended_reasons_config option;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
   hack_warnings: int all_or_some;  (** turn on hack warnings *)
+  warnings_default_all: bool;
   tco_strict_switch: bool;
       (** Enable strict case checking in switch statements *)
   tco_allowed_files_for_ignore_readonly: string list;
@@ -371,6 +372,7 @@ val set :
   ?tco_autocomplete_sort_text:bool ->
   ?tco_extended_reasons:extended_reasons_config ->
   ?hack_warnings:int all_or_some ->
+  ?warnings_default_all:bool ->
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_v2:bool ->

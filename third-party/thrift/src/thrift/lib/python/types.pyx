@@ -2251,6 +2251,13 @@ class EnumMeta(type):
                 f"Enum type {cls.__name__} has no attribute with value {value!r}"
             ) from None
 
+    def __dir__(cls):
+        return list(cls.__members__.keys()) + [
+            '__class__',
+            '__doc__',
+            '__members__',
+            '__module__',
+        ]
 
 class Enum(metaclass=EnumMeta):
     def __init__(self, _):

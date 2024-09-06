@@ -471,6 +471,8 @@ class EnumMetaTests(unittest.TestCase):
 
     def test_enum_metaclass_dir(self) -> None:
         attrs = set(dir(self.Color))
+        self.assertEqual(len(self.Color), 3)
+        self.assertEqual(len(attrs), 4 + len(self.Color))
         self.assertIn("red", attrs)
         self.assertIn("blue", attrs)
         self.assertIn("green", attrs)

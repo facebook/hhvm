@@ -299,6 +299,14 @@ void clear_fields(MaskRef ref, T& t) {
   }
 }
 
+bool filter_fields(MaskRef ref, const type::AnyStruct& t, type::AnyStruct& ret);
+
+inline bool filter_fields(
+    MaskRef ref, const type::AnyData& t, type::AnyData& ret) {
+  static_assert(std::is_same_v<type::AnyStruct&, decltype(ret.toThrift())>);
+  return filter_fields(ref, t.toThrift(), ret.toThrift());
+}
+
 // Writes masked fields from src (as specified by ref) into ret (ret must be
 // empty). Returns true if any masked field was written into ret.
 template <typename T>

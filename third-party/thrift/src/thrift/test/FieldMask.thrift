@@ -116,4 +116,5 @@ typedef any.Any AdaptedAny
 struct StructWithAny {
   1: any.Any rawAny;
   2: AdaptedAny adaptedAny;
+  3: optional any.Any optAny;
 }

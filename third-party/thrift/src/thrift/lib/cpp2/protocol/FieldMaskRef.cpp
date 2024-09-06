@@ -55,20 +55,6 @@ void clear_impl(MaskRef ref, T& obj, Id id, Value& value) {
   ref.clear(value);
 }
 
-// call copy based on the type of the value.
-protocol::Value filter(MaskRef ref, const Value& src) {
-  protocol::Value ret;
-  if (src.is_object()) {
-    ret.emplace_object(ref.filter(src.as_object()));
-  } else if (src.is_map()) {
-    ret.emplace_map(ref.filter(src.as_map()));
-  } else {
-    folly::throw_exception<std::runtime_error>(
-        "The mask and object are incompatible.");
-  }
-  return ret;
-}
-
 template <typename T, typename Id>
 void filter_impl(MaskRef ref, const T& src, T& ret, Id id) {
   // Id doesn't exist in field mask, skip.
@@ -317,7 +303,47 @@ void MaskRef::clear(folly::F14FastMap<Value, Value>& map) const {
   }
 }
 
+protocol::Value MaskRef::filter(const Value& src) const {
+  protocol::Value ret;
+  if (isAllMask()) {
+    ret = src;
+  } else if (src.is_object()) {
+    ret.emplace_object(filter(src.as_object()));
+  } else if (src.is_map()) {
+    ret.emplace_map(filter(src.as_map()));
+  } else {
+    folly::throw_exception<std::runtime_error>(
+        "The mask and object are incompatible.");
+  }
+  return ret;
+}
+
 protocol::Object MaskRef::filter(const protocol::Object& src) const {
+  if (isTypeMask()) {
+    // obj -> any
+    type::AnyData any;
+    if (!detail::ProtocolValueToThriftValue<type::infer_tag<type::AnyData>>{}(
+            src, any)) {
+      folly::throw_exception<std::runtime_error>(
+          "Incompatible mask and data: expected Any for type-mask");
+    };
+
+    auto nestedMask = get(any.type());
+    if (nestedMask.isNoneMask()) {
+      // Filter failed, return empty object
+      return {};
+    } else {
+      // Recurse
+      any = detail::toAny(
+          nestedMask.filter(detail::parseValueFromAny(any)),
+          any.type(),
+          any.protocol());
+    }
+
+    return detail::asValueStruct<type::infer_tag<type::AnyData>>(std::move(any))
+        .as_object();
+  }
+
   throwIfNotFieldMask();
   protocol::Object ret;
   for (auto& [fieldId, _] : src) {

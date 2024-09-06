@@ -48,4 +48,28 @@ void clear_fields(MaskRef ref, type::AnyStruct& t) {
   }
 }
 
+bool filter_fields(
+    MaskRef ref, const type::AnyStruct& t, type::AnyStruct& ret) {
+  if (ref.isFieldMask()) {
+    // Retain field-mask support for backwards compatibility
+    return filter_fields<type::AnyStruct>(ref, t, ret);
+  }
+
+  if (!ref.isTypeMask()) {
+    folly::throw_exception<std::runtime_error>(
+        "The mask and struct are incompatible");
+  }
+
+  auto nested = ref.get(*t.type_ref());
+  if (nested.isNoneMask()) {
+    return false;
+  }
+
+  // recurse
+  ret =
+      toAny(
+          nested.filter(parseValueFromAny(t)), *t.type_ref(), *t.protocol_ref())
+          .toThrift();
+  return true;
+}
 } // namespace apache::thrift::protocol::detail

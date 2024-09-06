@@ -108,6 +108,8 @@ class MaskRef {
 
   // Returns a new object that contains only the masked fields.
   // Throws a runtime exception if the mask and objects are incompatible.
+  // See docblock on protocol::filter for exact semantics.
+  protocol::Value filter(const protocol::Value& src) const;
   protocol::Object filter(const protocol::Object& src) const;
   folly::F14FastMap<Value, Value> filter(
       const folly::F14FastMap<Value, Value>& src) const;

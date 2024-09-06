@@ -88,11 +88,22 @@ void clear(const Mask& mask, T& t) {
   return detail::clear_fields(MaskRef{mask, false}, t);
 }
 
-// Returns a new object that contains only the masked fields.
-// Throws a runtime exception if the mask and objects are incompatible.
-// Note: Masked structured (struct/union) fields will be pruned (i.e left unset
-// for optional/union fields, or set to default for unqualified fields) if no
-// masked unstructued child fields exist in src.
+/**
+ * Returns a new object that contains only the masked fields.
+ * Throws a runtime exception if the mask and objects are incompatible.
+ * Note: Masked structured (struct/union) fields will be pruned (i.e left unset
+ * for optional/union fields, or set to default for unqualified fields) if no
+ * masked unstructued child fields exist in src.
+ *
+ * Semantics for masks specified on data contained within thrift.Any:
+ *  1. If the mask doesn't select the actual type contained within thrift.Any,
+ * the returned object will be default inialized (i.e. cleared).
+ *  2. If the mask selects the actual type contained within thrift.Any, but is a
+ * noneMask, same behavior as (1).
+ *  3. If the mask selects the actual type contained within thrift.Any, is a
+ * non-noneMask, thrift.Any retains its type and the mask is used to filter the
+ * contained data.
+ */
 template <typename T>
 inline T filter(const Mask& mask, const T& src) {
   static_assert(

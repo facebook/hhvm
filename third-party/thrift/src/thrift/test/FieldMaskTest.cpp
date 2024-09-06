@@ -1224,6 +1224,135 @@ TEST(FieldMaskTest, FilterUnion) {
       *dst.recurse_ref().value().foo_ref().value().field2(), 0); // not filtered
 }
 
+bool compareAny(const type::AnyStruct& lhs, const type::AnyStruct& rhs) {
+  if (lhs.type() != rhs.type()) {
+    return false;
+  }
+
+  if (lhs.type() == type::Type{}) {
+    return true;
+  }
+
+  return protocol::detail::parseValueFromAny(lhs) ==
+      protocol::detail::parseValueFromAny(rhs);
+}
+
+// Tests that schemaful + schemless clear do the same thing
+template <typename T, typename Eq>
+T applyFilter(const Mask& m, const T& val, Eq eq) {
+  auto filtered = protocol::filter(m, val);
+  auto filteredObject = protocol::filter(m, protocol::asObject(val));
+
+  // Make sure filtered and filteredObject are the same
+  EXPECT_TRUE(
+      eq(filtered,
+         protocol::fromObjectStruct<type::infer_tag<T>>(filteredObject)));
+
+  return filtered;
+}
+
+type::AnyStruct applyFilterOnAny(const Mask& m, const type::AnyStruct& val) {
+  return applyFilter(m, val, compareAny);
+}
+
+StructWithAny applyFilterOnStructWithAny(
+    const Mask& m, const StructWithAny& val) {
+  return applyFilter(
+      m, val, [](const StructWithAny& lhs, const StructWithAny& rhs) {
+        if (!compareAny(*lhs.rawAny(), *rhs.rawAny())) {
+          return false;
+        }
+        if (!compareAny(
+                lhs.adaptedAny()->toThrift(), rhs.adaptedAny()->toThrift())) {
+          return false;
+        }
+        if (lhs.optAny().has_value() != rhs.optAny().has_value()) {
+          return false;
+        }
+        if (lhs.optAny().has_value()) {
+          return compareAny(*lhs.optAny(), *rhs.optAny());
+        }
+        return true;
+      });
+}
+
+template <typename Tag, typename T = type::native_type<Tag>>
+void testFilterAnyStruct(T data) {
+  // Baz is used for type mismatch test
+  static_assert(!std::is_same_v<T, Baz>);
+  auto wrappedData = type::AnyData::toAny<Tag>(folly::copy(data)).toThrift();
+
+  MaskBuilder<type::AnyStruct> m;
+
+  // noneMask
+  m.reset_to_none();
+  EXPECT_EQ(applyFilterOnAny(m.toThrift(), wrappedData), type::AnyStruct{});
+
+  // type mismatch
+  m.reset_to_none().includes_type<>(type::infer_tag<Baz>{});
+  EXPECT_EQ(applyFilterOnAny(m.toThrift(), wrappedData), type::AnyStruct{});
+
+  // type match
+  m.reset_to_none().includes_type<>(Tag{});
+  EXPECT_EQ(
+      type::AnyData(applyFilterOnAny(m.toThrift(), wrappedData)).get<Tag>(),
+      data);
+}
+
+TEST(FieldMaskTest, FilterAny) {
+  Foo foo;
+  foo.field1_ref() = 123;
+  MaskBuilder<Foo> fooMask;
+  fooMask.reset_to_none().includes<ident::field1>();
+
+  testFilterAnyStruct<type::bool_t>(true);
+  testFilterAnyStruct<type::i32_t>(123);
+  testFilterAnyStruct<type::binary_t>("foobar");
+  testFilterAnyStruct<type::list<type::float_t>>(std::vector<float>{1.0, 3.0});
+  testFilterAnyStruct<type::set<type::i64_t>>(std::set<int64_t>{1, 2, 3});
+  testFilterAnyStruct<type::map<type::binary_t, type::i64_t>>(
+      std::map<std::string, int64_t>{{"1", 1}, {"3", 3}});
+  testFilterAnyStruct<type::infer_tag<Foo>>(foo);
+
+  // nested field filter
+  StructWithAny s;
+  s.rawAny() = type::AnyData::toAny<type::infer_tag<Foo>>(foo).toThrift();
+  MaskBuilder<StructWithAny> m;
+  m.reset_to_none().includes_type<ident::rawAny>(
+      type::infer_tag<Foo>{}, fooMask.toThrift());
+  EXPECT_EQ(
+      foo.field1(),
+      type::AnyData(*applyFilterOnStructWithAny(m.toThrift(), s).rawAny())
+          .get<type::infer_tag<Foo>>()
+          .field1());
+
+  // nested field filter that fails
+  s.optAny() = type::AnyData::toAny<type::infer_tag<Foo>>(foo).toThrift();
+  m.reset_to_none().includes_type<ident::optAny>(
+      type::struct_t<Bar>{}, MaskBuilder<Bar>().reset_to_all().toThrift());
+  EXPECT_FALSE(
+      applyFilterOnStructWithAny(m.toThrift(), s).optAny().has_value());
+
+  // Nested any
+  // StructWithAny -> Any -> Any -> Foo
+  s.rawAny_ref() =
+      type::AnyData::toAny<type::infer_tag<type::AnyStruct>>(
+          type::AnyData::toAny<type::infer_tag<Foo>>(foo).toThrift())
+          .toThrift();
+  m.reset_to_none().includes_type<ident::rawAny>(
+      type::infer_tag<type::AnyStruct>{},
+      MaskBuilder<type::AnyStruct>()
+          .reset_to_none()
+          .includes_type<>(type::infer_tag<Foo>{}, fooMask.toThrift())
+          .toThrift());
+  EXPECT_EQ(
+      foo.field1(),
+      type::AnyData(*applyFilterOnStructWithAny(m.toThrift(), s).rawAny())
+          .get<type::infer_tag<type::AnyData>>()
+          .get<type::infer_tag<Foo>>()
+          .field1());
+}
+
 TEST(FieldMaskTest, IsCompatibleWithSimple) {
   EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(allMask()));
   EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(noneMask()));

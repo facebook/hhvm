@@ -43,10 +43,6 @@ struct HeapObjectSanitizer {
   static constexpr size_t kPageSize = 4096ull;
   static constexpr size_t kPageSizeMask = kPageSize - 1;
 
-  static inline constexpr size_t ru(size_t size) {
-    return (size + kPageSizeMask) & ~kPageSizeMask;
-  }
-
   // Allocate a piece of memory, for which the range beyond offset won't be
   // watched. Usually, we want to put the refcount word and the rest of the
   // HeapObject on different pages, to avoid unnecessarily watching all changes

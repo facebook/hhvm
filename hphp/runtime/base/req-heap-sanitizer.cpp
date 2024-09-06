@@ -41,8 +41,8 @@ __thread HeapObjectSanitizer* tl_heap_sanitizer;
 void* HeapObjectSanitizer::alloc(size_t size, uint32_t offset) {
   offset = (offset + 0xf) & ~0xf;       // first few pages
   auto const remaining = size - offset; // remaining pages
-  auto const firstPageSize = ru(offset);
-  auto const remainingPageSize = ru(remaining);
+  auto const firstPageSize = ru<kPageSize>(offset);
+  auto const remainingPageSize = ru<kPageSize>(remaining);
   auto const totalSize = firstPageSize + remainingPageSize;
   auto ret = (char*)mmap(nullptr, totalSize,
                          PROT_READ | PROT_WRITE,

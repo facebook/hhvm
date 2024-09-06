@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/util/address-range.h"
+#include "hphp/util/alloc-defs.h"
 #include "hphp/util/slab-manager.h"
 #include "hphp/util/service-data.h"
 
@@ -147,12 +148,6 @@ struct ReadOnlyArena : TaggedSlabList {
   }
 
  private:
-  template<size_t align, typename T>
-  static T ru(T n) {
-    static_assert((align & (align - 1)) == 0, "");
-    return (T)(((uintptr_t)n + align - 1) & ~(align - 1));
-  }
-
   // Need to hold the lock before calling this.
   void* addChunk(size_t size) {
     ReadOnlyChunk* chunk = nullptr;

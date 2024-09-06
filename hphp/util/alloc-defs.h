@@ -16,6 +16,8 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
+#include <type_traits>
 
 #include <folly/CPortability.h>
 #include "folly/memory/detail/MallocImpl.h"
@@ -70,5 +72,20 @@ constexpr size_t kStackSizeMinimum =
 #endif
 
 extern const size_t s_pageSize;
+
+// Rounding a value/pointer down to align.
+template<size_t align, typename T>
+constexpr T rd(T const n) {
+  static_assert(std::is_integral<T>::value || std::is_pointer<T>::value, "");
+  static_assert(sizeof(T) <= sizeof(uintptr_t), "");
+  static_assert((align & (align - 1)) == 0, "");
+  return (T)(((uintptr_t)n) & ~(align - 1));
+}
+
+// Rounding a value/pointer up to align.
+template<size_t align, typename T>
+constexpr T ru(T const n) {
+  return rd<align, T>(T(((uintptr_t)n) + align - 1));
+}
 
 }

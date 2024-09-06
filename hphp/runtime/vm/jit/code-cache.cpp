@@ -36,8 +36,6 @@ namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg);
 
-static constexpr size_t kRoundUp = 2ull << 20;
-
 /* Initialized by RuntimeOption. */
 uint32_t CodeCache::ASize = 0;
 uint32_t CodeCache::AColdSize = 0;
@@ -53,17 +51,13 @@ uint32_t CodeCache::TCNumHugeHotMB = 0;
 uint32_t CodeCache::TCNumHugeMainMB = 0;
 uint32_t CodeCache::TCNumHugeColdMB = 0;
 
-static size_t ru(size_t sz) { return sz + (-sz & (kRoundUp - 1)); }
-
-static size_t rd(size_t sz) { return sz & ~(kRoundUp - 1); }
-
 /////////////////////////////////////////////////////////////////////////
 
 namespace {
 
 void enhugen(void* base, unsigned numMB) {
   if (CodeCache::MapTCHuge) {
-    assertx((uintptr_t(base) & (kRoundUp - 1)) == 0);
+    assertx((uintptr_t(base) & (size2m - 1)) == 0);
     assertx(numMB < (1 << 12));
     remap_interleaved_2m_pages(base, /* number of 2M pages */ numMB / 2);
     madvise(base, numMB << 20, MADV_DONTFORK);
@@ -78,11 +72,11 @@ uintptr_t shiftTC(uintptr_t base) {
   if (!CodeCache::AutoTCShift || __hot_start == nullptr) return base;
   // Make sure the offset from hot text is either odd or even number
   // of huge pages.
-  const auto hugePagesDelta = (ru(base) -
-                               rd(reinterpret_cast<size_t>(__hot_start))) /
-                              kRoundUp;
+  const auto hugePagesDelta =
+    (ru<size2m>(base) -
+     rd<size2m>(reinterpret_cast<uintptr_t>(__hot_start))) / size2m;
   const size_t shiftAmount =
-    ((hugePagesDelta & 1) == (CodeCache::AutoTCShift & 1)) ? 0 : kRoundUp;
+    ((hugePagesDelta & 1) == (CodeCache::AutoTCShift & 1)) ? 0 : size2m;
 
   return base + shiftAmount;
 }
@@ -95,29 +89,29 @@ CodeCache::CodeCache() {
   // We want to ensure that all code blocks are close to each other so that we
   // can short jump/point between them. Thus we allocate one slab and divide it
   // between the various blocks.
-  auto const thread_local_size = ru(
+  auto const thread_local_size = ru<size2m>(
     RuntimeOption::EvalThreadTCMainBufferSize +
     RuntimeOption::EvalThreadTCColdBufferSize +
     RuntimeOption::EvalThreadTCFrozenBufferSize +
     RuntimeOption::EvalThreadTCDataBufferSize
   );
 
-  auto const kASize         = ru(CodeCache::ASize);
-  auto const kAColdSize     = ru(CodeCache::AColdSize);
-  auto const kAFrozenSize   = ru(CodeCache::AFrozenSize);
-  auto const kABytecodeSize = ru(CodeCache::ABytecodeSize);
+  auto const kASize         = ru<size2m>(CodeCache::ASize);
+  auto const kAColdSize     = ru<size2m>(CodeCache::AColdSize);
+  auto const kAFrozenSize   = ru<size2m>(CodeCache::AFrozenSize);
+  auto const kABytecodeSize = ru<size2m>(CodeCache::ABytecodeSize);
 
-  auto kGDataSize = ru(CodeCache::GlobalDataSize);
-  m_totalSize = ru(kASize + kAColdSize + kAFrozenSize + kABytecodeSize +
-                   kGDataSize + thread_local_size);
+  auto kGDataSize = ru<size2m>(CodeCache::GlobalDataSize);
+  m_totalSize = ru<size2m>(kASize + kAColdSize + kAFrozenSize +
+                           kABytecodeSize + kGDataSize + thread_local_size);
   m_tcSize = m_totalSize - kABytecodeSize - kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
 
   always_assert_flog(
-    (kASize >= (2 << 20)) &&
-    (kAColdSize >= (2 << 20)) &&
-    (kAFrozenSize >= (2 << 20)) &&
-    (kGDataSize >= (2 << 20)),
+    (kASize >= size2m) &&
+    (kAColdSize >= size2m) &&
+    (kAFrozenSize >= size2m) &&
+    (kGDataSize >= size2m),
     "Allocation sizes are too small.\n"
     "  ASize = {}\n"
     "  AColdSize = {}\n"
@@ -130,7 +124,7 @@ CodeCache::CodeCache() {
   );
 
   auto const currBase = (uintptr_t)sbrk(0);
-  auto const usedBase = shiftTC(ru(currBase));
+  auto const usedBase = shiftTC(ru<size2m>(currBase));
 
   if (m_totalSize > (2ul << 30)) {
     fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize, "
@@ -246,11 +240,11 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
     ASize + AColdSize + AFrozenSize + ABytecodeSize + GlobalDataSize;
   if (total <= targetSize) return;
 
-  ASize = rd(ASize * targetSize / total);
-  AColdSize = rd(AColdSize * targetSize / total);
-  AFrozenSize = rd(AFrozenSize * targetSize / total);
-  ABytecodeSize = rd(ABytecodeSize * targetSize / total);
-  GlobalDataSize = rd(GlobalDataSize * targetSize / total);
+  ASize = rd<size2m>(ASize * targetSize / total);
+  AColdSize = rd<size2m>(AColdSize * targetSize / total);
+  AFrozenSize = rd<size2m>(AFrozenSize * targetSize / total);
+  ABytecodeSize = rd<size2m>(ABytecodeSize * targetSize / total);
+  GlobalDataSize = rd<size2m>(GlobalDataSize * targetSize / total);
 
   std::array<uint32_t*, 4> sizes = {
     &ASize, &AColdSize, &AFrozenSize, &GlobalDataSize
@@ -261,15 +255,15 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
   for (int i = 0; i < sizes.size(); ++i) {
     if (!*sizes[i]) {
       adj += 1;
-      *sizes[i] = kRoundUp;
+      *sizes[i] = size2m;
       continue;
     }
-    assertx(*sizes[i] >= kRoundUp);
+    assertx(*sizes[i] >= size2m);
 
     auto const sub = std::min(
-      adj / (sizes.size() - i), *sizes[i] / kRoundUp - 1
+      adj / (sizes.size() - i), *sizes[i] / size2m - 1
     );
-    *sizes[i] -= kRoundUp * sub;
+    *sizes[i] -= size2m * sub;
     adj -= sub;
   }
 
@@ -279,7 +273,7 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
     "insufficient space for each section to be at least {}",
     total,
     targetSize,
-    kRoundUp
+    size2m
   );
 
   AMaxUsage = maxUsage(ASize);

@@ -1214,11 +1214,10 @@ SSATmp* simplifyXorBool(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-template<class Oper>
+template<Opcode Opcode, class Oper>
 SSATmp* shiftImpl(State& env, const IRInstruction* inst, Oper op) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
-
   if (src1->hasConstVal()) {
     if (src1->intVal() == 0) {
       return cns(env, 0);
@@ -1233,25 +1232,38 @@ SSATmp* shiftImpl(State& env, const IRInstruction* inst, Oper op) {
     return src1;
   }
 
+  auto const inst1 = src1->inst();
+  // (X << A) << B --> X << (A + B) if (A + B) < 64
+  if (inst1->is(Opcode) && inst1->src(1)->hasConstVal() && src2->hasConstVal()) {
+    if (0 <= inst1->src(1)->intVal() && inst1->src(1)->intVal() < 64 &&
+        0 <= src2->intVal() && src2->intVal() < 64) {
+      auto operand = inst1->src(1)->intVal() + src2->intVal();
+      // Restrict shifting by at most 63 to be platform independent
+      if (operand < 64) {
+        return gen(env, Opcode, inst1->src(0), cns(env, operand));
+      }
+    }
+  }
+
   return nullptr;
 }
 
 SSATmp* simplifyShl(State& env, const IRInstruction* inst) {
-  return shiftImpl(env, inst,
+  return shiftImpl<Shl>(env, inst,
                    [] (uint64_t a, int64_t b) -> int64_t {
                      return a << b;
                    });
 }
 
 SSATmp* simplifyLshr(State& env, const IRInstruction* inst) {
-  return shiftImpl(env, inst,
+  return shiftImpl<Lshr>(env, inst,
                    [] (uint64_t a, int64_t b) -> int64_t {
                      return a >> b;
                    });
 }
 
 SSATmp* simplifyShr(State& env, const IRInstruction* inst) {
-  return shiftImpl(env, inst,
+  return shiftImpl<Shr>(env, inst,
                    [] (int64_t a, int64_t b) {
                      // avoid implementation defined behavior
                      // gcc optimizes this to a signed right shift.

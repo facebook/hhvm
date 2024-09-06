@@ -168,7 +168,7 @@ TEST_F(PlaintextRecordTest, TestWriteClientHello) {
 }
 
 TEST_F(PlaintextRecordTest, TestWriteAppData) {
-  TLSMessage msg{ContentType::application_data};
+  TLSMessage msg{ContentType::application_data, IOBuf::create(0)};
   EXPECT_ANY_THROW(write_.write(std::move(msg), Aead::AeadOptions()));
 }
 

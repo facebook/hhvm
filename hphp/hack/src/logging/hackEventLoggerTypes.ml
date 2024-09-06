@@ -123,4 +123,6 @@ type rollout_flags = {
       (** POC: @ljw - relates to how we invalidate folded decls for quarantine *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete results will be sorted using sort text attribute *)
+  warnings_default_all: bool;
+      (** POC: @catg - whether the client shows warnings by default. *)
 }

@@ -82,6 +82,7 @@ module Kind = struct
     | Enum
     | Tuple
     | Shape
+    | Awaitable
   [@@deriving enum, eq]
 
   let pick ~for_alias =
@@ -238,6 +239,7 @@ end = struct
     | Mixed
     | Primitive of Primitive.t
     | Option of t
+    | Awaitable of t
     | Classish of {
         name: string;
         kind: Kind.classish;
@@ -298,6 +300,7 @@ end = struct
       List.for_all conjuncts ~f:is_immediately_inhabited && not open_
     | Shape { fields; open_ = _ } ->
       List.for_all fields ~f:(fun field -> is_immediately_inhabited field.ty)
+    | Awaitable ty -> is_immediately_inhabited ty
     | Mixed
     | Option _
     | Alias _
@@ -355,6 +358,10 @@ end = struct
          | Num -> [Primitive Int; Primitive Float]
        end
        | Option ty -> Primitive Primitive.Null :: subtypes_of ty
+       | Awaitable ty ->
+         let open List.Let_syntax in
+         let+ ty = subtypes_of ty in
+         Awaitable ty
        | Classish info -> List.concat_map ~f:subtypes_of info.children
        | Alias info -> subtypes_of info.aliased
        | TypeConst info -> subtypes_of info.aliased
@@ -413,6 +420,7 @@ end = struct
       | Num -> "num"
     end
     | Option ty -> "?" ^ show ty
+    | Awaitable ty -> Format.sprintf "Awaitable<%s>" (show ty)
     | Classish { name; generic; children = _; kind = _ } ->
       let generic =
         match generic with
@@ -471,6 +479,7 @@ end = struct
         let open List.Let_syntax in
         let+ ty = weaken_for_disjointness ty in
         Option ty
+      | Awaitable _ -> [Awaitable Mixed]
       | Alias info -> weaken_for_disjointness info.aliased
       | TypeConst info -> weaken_for_disjointness info.aliased
       | Newtype _ -> [Mixed]
@@ -558,6 +567,10 @@ end = struct
       |> Option.all
       |> Option.map ~f:(fun fields ->
              String.concat ~sep:", " fields |> Format.sprintf "shape(%s)")
+    | Awaitable ty ->
+      let open Option.Let_syntax in
+      let+ expr = expr_of ty in
+      Format.sprintf "async { return %s; }" expr
     | Mixed
     | Option _
     | Alias _
@@ -651,6 +664,9 @@ end = struct
         | (ty, defs) -> (Option ty, defs)
       in
       candidate ()
+    | Kind.Awaitable ->
+      let (ty, defs) = mk () in
+      (Awaitable ty, defs)
     | Kind.Classish -> mk_classish ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in

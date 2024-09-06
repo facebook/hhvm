@@ -69,6 +69,16 @@ module Primitive = struct
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 end
 
+module Container = struct
+  type t =
+    | Vec
+    | Dict
+    | Keyset
+  [@@deriving enum, ord, eq]
+
+  let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
+end
+
 module Kind = struct
   type t =
     | Mixed
@@ -80,6 +90,7 @@ module Kind = struct
     | TypeConst
     | Case
     | Enum
+    | Container
     | Tuple
     | Shape
     | Awaitable
@@ -263,6 +274,12 @@ end = struct
         disjuncts: t list;
       }
     | Enum of { name: string }
+    | Vec of t
+    | Dict of {
+        key: t;
+        value: t;
+      }
+    | Keyset of t
     | Tuple of {
         conjuncts: t list;
         open_: bool;
@@ -296,6 +313,9 @@ end = struct
     end
     | Newtype _ -> true
     | Enum _ -> true
+    | Vec _ -> true
+    | Dict _ -> true
+    | Keyset _ -> true
     | Tuple { conjuncts; open_ } ->
       List.for_all conjuncts ~f:is_immediately_inhabited && not open_
     | Shape { fields; open_ = _ } ->
@@ -368,6 +388,19 @@ end = struct
        | Newtype _ -> []
        | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
        | Enum _ -> []
+       | Vec ty ->
+         let open List.Let_syntax in
+         let+ ty = subtypes_of ty in
+         Vec ty
+       | Dict { key; value } ->
+         let open List.Let_syntax in
+         let* key = subtypes_of key in
+         let+ value = subtypes_of value in
+         Dict { key; value }
+       | Keyset ty ->
+         let open List.Let_syntax in
+         let+ ty = subtypes_of ty in
+         Keyset ty
        | Tuple { conjuncts; open_ } ->
          let open List.Let_syntax in
          let* conjuncts =
@@ -433,6 +466,10 @@ end = struct
     | TypeConst info -> info.name
     | Case info -> info.name
     | Enum info -> info.name
+    | Vec ty -> Format.sprintf "vec<%s>" (show ty)
+    | Dict { key; value } ->
+      Format.sprintf "dict<%s, %s>" (show key) (show value)
+    | Keyset ty -> Format.sprintf "keyset<%s>" (show ty)
     | Tuple { conjuncts; open_ } ->
       let is_nullary = List.length conjuncts = 0 in
       let conjuncts = List.map ~f:show conjuncts |> String.concat ~sep:", " in
@@ -491,8 +528,19 @@ end = struct
         in
         Case { name; disjuncts }
       | Enum _ -> [Primitive Primitive.Arraykey]
-      | Tuple _ -> [Tuple { conjuncts = []; open_ = true }]
-      | Shape _ -> [Shape { fields = []; open_ = true }]
+      | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
+      | Dict _ ->
+        [
+          Dict { key = Primitive Primitive.Arraykey; value = Mixed };
+          Shape { fields = []; open_ = true };
+        ]
+      | Keyset _ -> [Keyset (Primitive Primitive.Arraykey)]
+      | Tuple _ -> [Tuple { conjuncts = []; open_ = true }; Vec Mixed]
+      | Shape _ ->
+        [
+          Shape { fields = []; open_ = true };
+          Dict { key = Primitive Primitive.Arraykey; value = Mixed };
+        ]
       | Mixed
       | Primitive _
       | Classish _ ->
@@ -550,6 +598,9 @@ end = struct
     end
     | Newtype info -> Some (info.producer ^ "()")
     | Enum info -> Some (info.name ^ "::A")
+    | Vec _ -> Some "vec[]"
+    | Dict _ -> Some "dict[]"
+    | Keyset _ -> Some "keyset[]"
     | Tuple { conjuncts; open_ = _ } ->
       List.map ~f:expr_of conjuncts
       |> Option.all
@@ -588,6 +639,9 @@ end = struct
            ("Tried to find an inhabitant for a type: "
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
+
+  let mk_arraykey () =
+    subtypes_of ~pick:true (Primitive Primitive.Arraykey) |> List.hd_exn
 
   let rec mk_classish
       ~(parent : (Kind.classish * string * generic option) option)
@@ -722,6 +776,19 @@ end = struct
       let value = inhabitant_of underlying_ty in
       let enum_def = Definition.enum ~name underlying_ty ~value in
       (Enum { name }, [enum_def])
+    | Kind.Container -> begin
+      match Container.pick () with
+      | Container.Vec ->
+        let (ty, defs) = mk () in
+        (Vec ty, defs)
+      | Container.Dict ->
+        let key = mk_arraykey () in
+        let (value, defs) = mk () in
+        (Dict { key; value }, defs)
+      | Container.Keyset ->
+        let ty = mk_arraykey () in
+        (Keyset ty, [])
+    end
     | Kind.Tuple ->
       (* Sadly, although nullary tuples can be generated with an expression,
          there is no corresponding denotable type. *)

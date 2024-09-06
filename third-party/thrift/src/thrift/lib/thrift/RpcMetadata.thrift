@@ -38,6 +38,24 @@ cpp_include "folly/container/F14Map.h"
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
 typedef binary IOBufPtr
 
+enum ChecksumAlgorithm {
+  NONE = 0,
+  CRC32 = 1,
+  XXH3_64 = 2,
+}
+
+// Checksum Metadata for RSocket Data field
+struct Checksum {
+  // The Algorthim used
+  1: ChecksumAlgorithm algorithm;
+
+  // The checksum of Payload Request Field
+  2: i64 checksum;
+
+  // prevent collision
+  3: i64 salt;
+}
+
 enum ProtocolId {
   // The values must match those in thrift/lib/cpp/protocol/TProtocolTypes.h
   BINARY = 0,
@@ -211,6 +229,10 @@ struct RequestRpcMetadata {
   23: optional LoggingContext loggingContext;
   // Pass tenantId to support multi-tenant platforms.
   24: optional string tenantId;
+  // checksum metadata
+  25: optional Checksum checksum;
+  // require checksumed response
+  26: optional bool checksumResponse;
 }
 
 struct ErrorClassification {
@@ -312,6 +334,8 @@ struct ResponseRpcMetadata {
   @thrift.Box
   12: optional FdMetadata fdMetadata;
   13: optional IOBufPtr frameworkMetadata;
+  // checksum metadata
+  14: optional Checksum checksum;
 }
 
 enum ResponseRpcErrorCategory {
@@ -418,6 +442,8 @@ struct StreamPayloadMetadata {
   // 4: Deprecated
   @thrift.Box
   5: optional FdMetadata fdMetadata;
+  // checksum metadata
+  6: optional Checksum checksum;
 }
 
 // Setup metadata sent from the client to the server at the time

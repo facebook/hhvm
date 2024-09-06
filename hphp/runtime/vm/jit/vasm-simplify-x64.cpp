@@ -264,6 +264,10 @@ bool simplify(Env& env, Vlabel b, size_t i) {
   not_reached();
 }
 
+bool psimplify(Env& env, Vlabel b, size_t i) {
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

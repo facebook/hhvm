@@ -2164,6 +2164,8 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
       } else {
         allocateRegistersWithXLS(unit, abi);
       }
+
+      postRASimplify(unit);
     }
   }
 

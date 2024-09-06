@@ -1778,6 +1778,13 @@ bool simplify(Env& env, Vlabel b, size_t i) {
   not_reached();
 }
 
+/*
+ * Perform architecture-specific peephole simplification.
+ */
+bool simplify_arch(Env& env, Vlabel b, size_t i) {
+  return ARCH_SWITCH_CALL(simplify, env, b, i);
+}
+
 bool psimplify(Env& env, Vlabel b, size_t i) {
   assertx(i <= env.unit.blocks[b].code.size());
   auto& inst = env.unit.blocks[b].code[i];
@@ -1796,13 +1803,33 @@ bool psimplify(Env& env, Vlabel b, size_t i) {
 /*
  * Perform architecture-specific peephole simplification.
  */
-bool simplify_arch(Env& env, Vlabel b, size_t i) {
-  return ARCH_SWITCH_CALL(simplify, env, b, i);
+bool psimplify_arch(Env& env, Vlabel b, size_t i) {
+  return ARCH_SWITCH_CALL(psimplify, env, b, i);
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Env::init(const jit::vector<Vlabel>& labels) {
+  use_counts.resize(unit.next_vr);
+  def_insts.resize(unit.next_vr, Vinstr::nop);
+  consts.resize(unit.next_vr);
+
+  for (auto const b : labels) {
+    assertx(!unit.blocks[b].code.empty());
+
+    for (auto const& inst : unit.blocks[b].code) {
+      visitDefs(unit, inst, [&] (Vreg r) { def_insts[r] = inst.op; });
+      visitUses(unit, inst, [&] (Vreg r) { ++use_counts[r]; });
+    }
+  };
+  for (auto const& p : unit.regToConst) {
+    consts[p.first] = p.second;
+  }
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Peephole simplification pass for a Vunit.
@@ -1810,26 +1837,8 @@ bool simplify_arch(Env& env, Vlabel b, size_t i) {
 void simplify(Vunit& unit) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
-
-  Env env { unit };
-  env.use_counts.resize(unit.next_vr);
-  env.def_insts.resize(unit.next_vr, Vinstr::nop);
-  env.consts.resize(unit.next_vr);
-
   auto const labels = sortBlocks(unit);
-
-  // Set up Env, only visiting reachable blocks.
-  for (auto const b : labels) {
-    assertx(!blocks[b].code.empty());
-
-    for (auto const& inst : blocks[b].code) {
-      visitDefs(unit, inst, [&] (Vreg r) { env.def_insts[r] = inst.op; });
-      visitUses(unit, inst, [&] (Vreg r) { ++env.use_counts[r]; });
-    }
-  };
-  for (auto const& p : env.unit.regToConst) {
-    env.consts[p.first] = p.second;
-  }
+  Env env(unit, labels);
 
   // The simplify() implementations may allocate scratch blocks and modify
   // instruction streams, so we cannot use standard iterators here.
@@ -1853,16 +1862,15 @@ void simplify(Vunit& unit) {
 void postRASimplify(Vunit& unit) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
-
-  Env env { unit };
   auto const labels = sortBlocks(unit);
+  Env env(unit, labels);
 
   // The simplify() implementations may allocate scratch blocks and modify
   // instruction streams, so we cannot use standard iterators here.
   for (auto const b : labels) {
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {
       // Simplify at this index until no changes are made.
-      while (psimplify(env, b, i)) {
+      while (psimplify(env, b, i) || psimplify_arch(env, b, i)) {
         // Stop if we simplified away the tail of the block.
         if (i >= blocks[b].code.size()) break;
       }

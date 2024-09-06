@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/util/safe-cast.h"
 
 namespace HPHP::jit {
@@ -113,7 +114,7 @@ inline bool allowable(Vr<RegXMM>*, Vreg r) { return r.isVirt() || r.isSIMD(); }
 template<class Reg>
 /* implicit */ Vr<Reg>::Vr(Vreg r)
   : rn(size_t(r)) {
-  assertx(allowable(this, r) || !r.isValid());
+  assert_flog(allowable(this, r) || !r.isValid(), "r = {}\n", show(r));
 }
 
 template<class Reg>

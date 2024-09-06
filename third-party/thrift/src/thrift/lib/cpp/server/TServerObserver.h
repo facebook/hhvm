@@ -118,14 +118,16 @@ class TServerObserver {
     }
 
     folly::Optional<uint64_t> writeDelayLatencyUsec() const {
-      if (writeBegin != clock::time_point()) {
+      if (writeBegin != clock::time_point() &&
+          processEnd != clock::time_point()) {
         return to_microseconds(writeBegin - processEnd);
       }
       return {};
     }
 
     folly::Optional<uint64_t> writeLatencyUsec() const {
-      if (writeBegin != clock::time_point()) {
+      if (writeBegin != clock::time_point() &&
+          writeEnd != clock::time_point()) {
         return to_microseconds(writeEnd - writeBegin);
       }
       return {};

@@ -892,6 +892,14 @@ cdef class MutableUnion(MutableStructOrUnion):
         self._fbthrift_update_current_field_attributes()
         return size
 
+    def __dir__(self):
+        return dir(type(self))
+
+    def get_type(self):
+        return self.fbthrift_current_field
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.fbthrift_current_field.name}={self.fbthrift_current_value!r})"
 
 def _gen_mutable_union_field_enum_members(field_infos):
     yield ("FBTHRIFT_UNION_EMPTY", 0)
@@ -1009,3 +1017,10 @@ class MutableUnionMeta(type):
 
     def _fbthrift_fill_spec(cls):
         (<MutableUnionInfo>cls._fbthrift_mutable_struct_info)._fill_mutable_union_info()
+
+    def __dir__(cls):
+        return (
+            tuple((<MutableUnionInfo>cls._fbthrift_mutable_struct_info).name_to_index.keys())
+            +
+            ('fbthrift_current_field', 'fbthrift_current_value')
+        )

@@ -38,4 +38,4 @@ Please submit a [GitHub issue](https://github.com/facebook/watchman/issues/) to 
 
 ## Contributing
 
-Please see the [contributing guide](https://facebook.github.io/watchman/docs/contributing).
+Please see the [contributing document](CONTRIBUTING.md).

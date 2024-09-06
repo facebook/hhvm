@@ -15,15 +15,33 @@
 
 from __future__ import annotations
 
-from thrift.python.client.async_client import AsyncClient  # noqa: F401
-from thrift.python.client.async_client_factory import (  # noqa: F401
-    get_client,
-    get_proxy_factory,
-    install_proxy_factory,
-)
-from thrift.python.client.client_wrapper import Client  # noqa: F401
-from thrift.python.client.request_channel import ClientType  # noqa: F401
-from thrift.python.client.sync_client import SyncClient  # noqa: F401
-from thrift.python.client.sync_client_factory import (  # noqa: F401
-    get_client as get_sync_client,
-)
+try:
+    from thrift.python.client.async_client import AsyncClient  # noqa: F401
+except ModuleNotFoundError:
+    pass
+try:
+    from thrift.python.client.async_client_factory import (  # noqa: F401
+        get_client,  # noqa: F401
+        get_proxy_factory,
+        install_proxy_factory,
+    )
+except ModuleNotFoundError:
+    pass
+try:
+    from thrift.python.client.client_wrapper import Client  # noqa: F401
+except ModuleNotFoundError:
+    pass
+try:
+    from thrift.python.client.request_channel import ClientType  # noqa: F401
+except ModuleNotFoundError:
+    pass
+try:
+    from thrift.python.client.sync_client import SyncClient  # noqa: F401
+except ModuleNotFoundError:
+    pass
+try:
+    from thrift.python.client.sync_client_factory import (  # noqa: F401
+        get_client as get_sync_client,
+    )
+except ModuleNotFoundError:
+    pass

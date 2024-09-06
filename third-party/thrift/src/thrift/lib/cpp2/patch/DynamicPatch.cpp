@@ -216,15 +216,13 @@ Object DynamicMapPatch::toObject() && {
   }
 
   for (auto& [k, p] : patchPrior_) {
-    Value patch;
-    patch.emplace_object(std::move(p).toObject());
-    ret[FieldId(op::PatchOp::PatchPrior)].ensure_map().insert_or_assign(
-        std::move(k), std::move(patch));
+    ret[FieldId(op::PatchOp::PatchPrior)].ensure_map()[k].emplace_object(
+        std::move(p).toObject());
   }
 
-  for (const auto& [k, p] : patchAfter_) {
+  for (auto& [k, p] : patchAfter_) {
     ret[FieldId(op::PatchOp::PatchAfter)].ensure_map()[k].emplace_object(
-        p.toObject());
+        std::move(p).toObject());
   }
 
   if (!add_.empty()) {

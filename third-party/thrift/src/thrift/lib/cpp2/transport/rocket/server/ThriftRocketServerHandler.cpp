@@ -210,7 +210,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
       reader.setInput(cursor);
       // Throws on read error
       meta.read(&reader);
-      if (reader.getCursorPosition() > frame.payload().metadataSize()) {
+      if (reader.getCursorPosition() != frame.payload().metadataSize()) {
         return connection.close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID_SETUP,
             "Error deserializing SETUP payload: underflow"));
@@ -220,7 +220,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
       reader.setInput(cursor);
       // Throws on read error
       meta.read(&reader);
-      if (reader.getCursorPosition() > frame.payload().metadataSize()) {
+      if (reader.getCursorPosition() != frame.payload().metadataSize()) {
         return connection.close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID_SETUP,
             "Error deserializing SETUP payload: underflow"));

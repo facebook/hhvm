@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
-#include <thrift/lib/cpp2/patch/DynamicPatch.h>
+#include <thrift/lib/thrift/detail/DynamicPatch.h>
 
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 

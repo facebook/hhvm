@@ -132,8 +132,8 @@ class MinSafePatchVersionVisitor {
   }
 
   // Thrift Any
-  template <typename T>
-  void patchIfTypeIs(T) {
+  template <typename... T>
+  void patchIfTypeIs(T&&...) {
     version = std::max(version, 2);
   }
   void ensureAny(const type::AnyStruct&) { version = std::max(version, 2); }

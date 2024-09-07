@@ -456,12 +456,14 @@ class DynamicPatch {
 
   Object toObject() &&;
   Object toObject() const&;
+  type::AnyStruct toAny(detail::Badge, type::Type type) const;
 
   [[nodiscard]] bool empty(detail::Badge) const;
 
   void apply(detail::Badge, Value&) const;
 
   void fromObject(detail::Badge, Object);
+  void fromAny(detail::Badge, const type::AnyStruct& any);
 
   template <class T>
   bool holds_alternative(detail::Badge) const {

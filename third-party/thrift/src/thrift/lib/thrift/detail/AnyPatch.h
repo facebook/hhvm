@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/cpp2/type/Type.h>
+#include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_detail_types.h>
 #include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>
 
@@ -40,37 +41,6 @@ class AnyPatchStruct;
 class TypeToPatchInternalDoNotUse;
 class AnyPatchStruct;
 class AnySafePatch;
-
-class TypeErasedPatches {
- public:
-  const type::Type& type() const { return type_; }
-  // TODO(dokwon): Return Dynamic Patch.
-  std::vector<protocol::Object> patches() const {
-    std::vector<protocol::Object> dynPatches;
-    dynPatches.reserve(patches_.size());
-    for (const auto& p : patches_) {
-      dynPatches.push_back(protocol::detail::parseValueFromAny(p).as_object());
-    }
-    return dynPatches;
-  }
-
-  // Delete copy and move constructors since the lifetime of type and patches
-  // are bounded to the lifetime of AnyPatch.
-  TypeErasedPatches(const TypeErasedPatches&) = delete;
-  TypeErasedPatches& operator=(const TypeErasedPatches&) = delete;
-  TypeErasedPatches(TypeErasedPatches&&) = delete;
-  TypeErasedPatches& operator=(TypeErasedPatches&&) = delete;
-
- private:
-  TypeErasedPatches(
-      const type::Type& type, const std::vector<type::AnyStruct>& patches)
-      : type_(type), patches_(patches) {}
-
-  const type::Type& type_;
-  const std::vector<type::AnyStruct>& patches_;
-
-  friend class detail::AnyPatch<AnyPatchStruct>;
-};
 
 namespace detail {
 [[noreturn]] void throwDuplicatedType(const type::Type& type);
@@ -91,8 +61,7 @@ inline void throwIfInvalidOrUnsupportedAny(const type::AnyStruct& any) {
 
 struct TypeToPatchMapAdapter {
   using StandardType = std::vector<TypeToPatchInternalDoNotUse>;
-  using AdaptedType =
-      folly::F14FastMap<type::Type, std::vector<type::AnyStruct>>;
+  using AdaptedType = folly::F14FastMap<type::Type, protocol::DynamicPatch>;
 
   static AdaptedType fromThrift(StandardType&& vec);
   static StandardType toThrift(const AdaptedType& map);
@@ -102,7 +71,7 @@ struct TypeToPatchMapAdapter {
       Protocol& prot, const TypeToPatchMapAdapter::AdaptedType& map) {
     uint32_t s = 0;
     s += prot.writeListBegin(protocol::TType::T_STRUCT, map.size());
-    for (const auto& [type, patches] : map) {
+    for (const auto& [type, patch] : map) {
       s += prot.writeStructBegin(
           op::get_class_name_v<TypeToPatchInternalDoNotUse>.data());
       s += prot.writeFieldBegin("type", protocol::TType::T_STRUCT, 1);
@@ -110,7 +79,7 @@ struct TypeToPatchMapAdapter {
       s += prot.writeFieldEnd();
       s += prot.writeFieldBegin("patches", protocol::TType::T_LIST, 2);
       s += op::encode<type::list<type::struct_t<type::AnyStruct>>>(
-          prot, patches);
+          prot, std::vector{toAny(patch, type)});
       s += prot.writeFieldEnd();
       s += prot.writeStructEnd();
     }
@@ -132,16 +101,22 @@ struct TypeToPatchMapAdapter {
         TypeToPatchInternalDoNotUse typeToPatchStruct;
         op::decode<type::struct_t<TypeToPatchInternalDoNotUse>>(
             prot, typeToPatchStruct);
-        if (!map.emplace(
-                    typeToPatchStruct.type().value(),
-                    std::move(typeToPatchStruct.patches().value()))
-                 .second) {
+        if (!addDynamicPatchToMap(map, typeToPatchStruct)) {
           throwDuplicatedType(typeToPatchStruct.type().value());
         }
       }
     }
     prot.readListEnd();
   }
+
+  static bool equal(const AdaptedType&, const AdaptedType&);
+
+ private:
+  static bool addDynamicPatchToMap(
+      AdaptedType&, const TypeToPatchInternalDoNotUse&);
+
+  static type::AnyStruct toAny(
+      const protocol::DynamicPatch&, const type::Type&);
 };
 
 /// Patch for Thrift Any.
@@ -177,14 +152,13 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       // Test whether the required methods exist in Visitor
       v.assign(type::AnyStruct{});
       v.clear();
-      v.patchIfTypeIs(
-          TypeErasedPatches{type::Type{}, std::vector<type::AnyStruct>{}});
+      v.patchIfTypeIs(type::Type{}, protocol::DynamicPatch{});
       v.ensureAny(type::AnyStruct{});
     }
     if (!Base::template customVisitAssignAndClear(v)) {
       // patchIfTypeIsPrior
-      for (const auto& [type, patches] : data_.patchIfTypeIsPrior().value()) {
-        v.patchIfTypeIs(TypeErasedPatches{type, patches});
+      for (const auto& [type, patch] : data_.patchIfTypeIsPrior().value()) {
+        v.patchIfTypeIs(type, patch);
       }
 
       // ensureAny
@@ -193,8 +167,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       }
 
       // patchIfTypeIsAfter
-      for (const auto& [type, patches] : data_.patchIfTypeIsAfter().value()) {
-        v.patchIfTypeIs(TypeErasedPatches{type, patches});
+      for (const auto& [type, patch] : data_.patchIfTypeIsAfter().value()) {
+        v.patchIfTypeIs(type, patch);
       }
     }
   }
@@ -301,23 +275,14 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
         type::Type::create<type::infer_tag<typename VPatch::value_type>>();
     auto anyStruct =
         type::AnyData::toAny<type::infer_tag<VPatch>>(patch).toThrift();
-    if (after) {
-      data_.patchIfTypeIsAfter().value()[std::move(type)].push_back(
-          std::move(anyStruct));
-    } else {
-      data_.patchIfTypeIsPrior().value()[std::move(type)].push_back(
-          std::move(anyStruct));
-    }
+    patchIfTypeIsImpl(type, std::move(anyStruct), after);
   }
 
-  void patchIfTypeIsImpl(type::Type type, type::AnyStruct patch, bool after);
+  void patchIfTypeIsImpl(type::Type type, type::AnyStruct any, bool after);
 
   // Needed for merge.
-  void patchIfTypeIs(const TypeErasedPatches& patches) {
-    patchIfTypeIs(patches.type_, patches.patches_);
-  }
   void patchIfTypeIs(
-      const type::Type& type, const std::vector<type::AnyStruct>& patches);
+      const type::Type& type, const protocol::DynamicPatch& patch);
 };
 
 template <class T>

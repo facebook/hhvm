@@ -1403,4 +1403,17 @@ DynamicPatch& DynamicPatch::operator=(const DynamicPatch& other) {
 DynamicPatch::DynamicPatch(DynamicPatch&&) noexcept = default;
 DynamicPatch& DynamicPatch::operator=(DynamicPatch&& other) noexcept = default;
 DynamicPatch::~DynamicPatch() = default;
+
+type::AnyStruct DynamicPatch::toAny(detail::Badge, type::Type type) const {
+  type::AnyStruct any;
+  any.protocol() = type::StandardProtocol::Compact;
+  any.data() = *protocol::serializeObject<CompactProtocolWriter>(toObject());
+  any.type() = protocol::detail::toPatchType(type);
+  return any;
+}
+
+void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
+  auto v = protocol::detail::parseValueFromAny(any);
+  fromObject(badge, std::move(v.as_object()));
+}
 } // namespace apache::thrift::protocol

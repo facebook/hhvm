@@ -15,12 +15,17 @@
  */
 
 #include <folly/lang/Exception.h>
+#include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/thrift/detail/AnyPatch.h>
+#include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
 namespace apache::thrift::op::detail {
+
+using apache::thrift::protocol::DynamicPatch;
+using apache::thrift::protocol::detail::badge;
 
 void throwDuplicatedType(const type::Type& type) {
   folly::throw_exception<std::runtime_error>(fmt::format(
@@ -44,17 +49,19 @@ void throwUnsupportedAnyProtocol(const type::AnyStruct& any) {
 }
 
 auto TypeToPatchMapAdapter::fromThrift(StandardType&& vec) -> AdaptedType {
-  TypeToPatchMapAdapter::AdaptedType map;
+  AdaptedType map;
   map.reserve(vec.size());
   for (auto& typeToPatchStruct : vec) {
-    auto it = map.emplace(
-        typeToPatchStruct.type().value(),
-        std::move(typeToPatchStruct.patches().value()));
+    DynamicPatch patch;
+    for (auto& any : *typeToPatchStruct.patches()) {
+      throwIfInvalidOrUnsupportedAny(any);
+      DynamicPatch subPatch;
+      subPatch.fromAny(badge, std::move(any));
+      patch.merge(badge, subPatch);
+    }
+    auto it = map.emplace(typeToPatchStruct.type().value(), std::move(patch));
     if (!it.second) {
       throwDuplicatedType(typeToPatchStruct.type().value());
-    }
-    for (const auto& any : it.first->second) {
-      throwIfInvalidOrUnsupportedAny(any);
     }
   }
   return map;
@@ -63,12 +70,50 @@ auto TypeToPatchMapAdapter::fromThrift(StandardType&& vec) -> AdaptedType {
 auto TypeToPatchMapAdapter::toThrift(const AdaptedType& map) -> StandardType {
   TypeToPatchMapAdapter::StandardType vec;
   vec.reserve(map.size());
-  for (const auto& [type, patches] : map) {
+  for (const auto& [type, patch] : map) {
     auto& obj = vec.emplace_back();
     obj.type() = type;
-    obj.patches() = patches;
+    obj.patches() = {patch.toAny(badge, type)};
   }
   return vec;
+}
+
+bool TypeToPatchMapAdapter::equal(
+    const AdaptedType& lhs, const AdaptedType& rhs) {
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
+
+  for (const auto& [type, patch] : lhs) {
+    auto p = folly::get_ptr(rhs, type);
+    if (!p) {
+      return false;
+    }
+
+    // TODO: this can probably be optimized
+    if (patch.toObject() != p->toObject()) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool TypeToPatchMapAdapter::addDynamicPatchToMap(
+    AdaptedType& map, const TypeToPatchInternalDoNotUse& typeToPatchStruct) {
+  DynamicPatch patch;
+  for (auto& any : *typeToPatchStruct.patches()) {
+    throwIfInvalidOrUnsupportedAny(any);
+    DynamicPatch subPatch;
+    subPatch.fromAny(badge, std::move(any));
+    patch.merge(badge, subPatch);
+  }
+  return map.emplace(typeToPatchStruct.type().value(), std::move(patch)).second;
+}
+
+type::AnyStruct TypeToPatchMapAdapter::toAny(
+    const protocol::DynamicPatch& patch, const type::Type& type) {
+  return patch.toAny(badge, type);
 }
 
 template <class Patch>
@@ -80,27 +125,21 @@ void AnyPatch<Patch>::apply(type::AnyStruct& val) const {
     // To support applying AnyPatch to Thrift Any storing type with
     // 'typeHashPrefixSha2_256', we need to iterate the whole map.
     if (prior) {
-      for (const auto& [type, patches] : *prior) {
+      for (const auto& [type, patch] : *prior) {
         if (type::identicalType(type, val.type().value())) {
           dynVal = protocol::detail::parseValueFromAny(val);
-          for (const auto& p : patches) {
-            auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-            protocol::applyPatch(dynPatch, dynVal.value());
-          }
+          patch.apply(badge, *dynVal);
           break;
         }
       }
     }
     if (after) {
-      for (const auto& [type, patches] : *after) {
+      for (const auto& [type, patch] : *after) {
         if (type::identicalType(type, val.type().value())) {
           if (!dynVal) {
             dynVal = protocol::detail::parseValueFromAny(val);
           }
-          for (const auto& p : patches) {
-            auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-            protocol::applyPatch(dynPatch, dynVal.value());
-          }
+          patch.apply(badge, *dynVal);
           break;
         }
       }
@@ -136,26 +175,24 @@ void AnyPatch<Patch>::apply(type::AnyStruct& val) const {
 
 template <class Patch>
 void AnyPatch<Patch>::patchIfTypeIsImpl(
-    type::Type type, type::AnyStruct patch, bool after) {
+    type::Type type, type::AnyStruct any, bool after) {
+  DynamicPatch patch;
+  patch.fromAny(badge, any);
   if (after) {
-    data_.patchIfTypeIsAfter().value()[std::move(type)].push_back(
-        std::move(patch));
+    data_.patchIfTypeIsAfter()[type].merge(badge, patch);
   } else {
-    data_.patchIfTypeIsPrior().value()[std::move(type)].push_back(
-        std::move(patch));
+    data_.patchIfTypeIsPrior()[type].merge(badge, patch);
   }
 }
 
 template <class Patch>
 void AnyPatch<Patch>::patchIfTypeIs(
-    const type::Type& type, const std::vector<type::AnyStruct>& patches) {
+    const type::Type& type, const protocol::DynamicPatch& patch) {
   tryPatchable(type);
   if (ensures(type)) {
-    auto& vec = data_.patchIfTypeIsAfter().value()[type];
-    vec.insert(vec.end(), patches.begin(), patches.end());
+    data_.patchIfTypeIsAfter()[type].merge(badge, patch);
   } else {
-    auto& vec = data_.patchIfTypeIsPrior().value()[type];
-    vec.insert(vec.end(), patches.begin(), patches.end());
+    data_.patchIfTypeIsPrior()[type].merge(badge, patch);
   }
 }
 

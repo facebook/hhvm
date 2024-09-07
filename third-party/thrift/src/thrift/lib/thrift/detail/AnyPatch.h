@@ -19,6 +19,7 @@
 #include <vector>
 #include <fmt/format.h>
 #include <folly/container/F14Map.h>
+#include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/cpp2/type/Type.h>
@@ -447,6 +448,10 @@ template <>
 struct SafePatchValueType<::apache::thrift::op::AnySafePatch> {
   using type = ::apache::thrift::type::AnyStruct;
 };
+
+// Adapters for Thrift Any
+template <typename T>
+using AnyPatchAdapter = InlineAdapter<AnyPatch<T>>;
 
 } // namespace detail
 } // namespace op

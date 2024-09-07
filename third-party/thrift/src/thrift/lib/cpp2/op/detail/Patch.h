@@ -22,7 +22,6 @@
 
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Adapter.h>
-#include <thrift/lib/cpp2/op/detail/AnyPatch.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/op/detail/ContainerPatch.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
@@ -33,6 +32,9 @@ namespace apache {
 namespace thrift {
 namespace op {
 namespace detail {
+
+template <class>
+class AnyPatch;
 
 // Latest Thrift Static Patch version that the process is aware of. Any Thrift
 // Static Patch with a version higher than this will not be processed by the
@@ -68,10 +70,6 @@ template <typename T>
 using SetPatchAdapter = InlineAdapter<SetPatch<T>>;
 template <typename T>
 using MapPatchAdapter = InlineAdapter<MapPatch<T>>;
-
-// Adapters for Thrift Any
-template <typename T>
-using AnyPatchAdapter = InlineAdapter<AnyPatch<T>>;
 
 template <class>
 constexpr inline bool is_map_patch_v = false;

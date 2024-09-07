@@ -21,7 +21,7 @@ include "thrift/lib/thrift/any_rep.thrift"
 include "thrift/lib/thrift/any_patch_detail.thrift"
 
 cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
-cpp_include "thrift/lib/cpp2/op/detail/AnyPatch.h"
+cpp_include "thrift/lib/thrift/detail/AnyPatch.h"
 
 @thrift.TerseWrite
 @thrift.Experimental

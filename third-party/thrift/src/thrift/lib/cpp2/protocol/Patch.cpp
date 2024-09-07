@@ -541,10 +541,10 @@ void impl(Patch&& patch, Object& value) {
         if (type::identicalType(
                 type_to_patch.type().value(), anyStruct.type().value())) {
           val = protocol::detail::parseValueFromAny(anyStruct);
-          for (const auto& p : type_to_patch.patches().value()) {
-            auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-            ApplyPatch{}(dynPatch, val.value());
-          }
+          auto dynPatch =
+              protocol::detail::parseValueFromAny(type_to_patch.patch().value())
+                  .as_object();
+          ApplyPatch{}(dynPatch, val.value());
           break;
         }
       }
@@ -563,10 +563,10 @@ void impl(Patch&& patch, Object& value) {
           if (!val) {
             val = protocol::detail::parseValueFromAny(anyStruct);
           }
-          for (const auto& p : type_to_patch.patches().value()) {
-            auto dynPatch = protocol::detail::parseValueFromAny(p).as_object();
-            ApplyPatch{}(dynPatch, val.value());
-          }
+          auto dynPatch =
+              protocol::detail::parseValueFromAny(type_to_patch.patch().value())
+                  .as_object();
+          ApplyPatch{}(dynPatch, val.value());
           break;
         }
       }

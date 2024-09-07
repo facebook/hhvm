@@ -77,9 +77,9 @@ struct TypeToPatchMapAdapter {
       s += prot.writeFieldBegin("type", protocol::TType::T_STRUCT, 1);
       s += op::encode<type::infer_tag<type::Type>>(prot, type);
       s += prot.writeFieldEnd();
-      s += prot.writeFieldBegin("patches", protocol::TType::T_LIST, 2);
-      s += op::encode<type::list<type::struct_t<type::AnyStruct>>>(
-          prot, std::vector{toAny(patch, type)});
+      s += prot.writeFieldBegin("patch", protocol::TType::T_LIST, 2);
+      s +=
+          op::encode<type::struct_t<type::AnyStruct>>(prot, toAny(patch, type));
       s += prot.writeFieldEnd();
       s += prot.writeStructEnd();
     }

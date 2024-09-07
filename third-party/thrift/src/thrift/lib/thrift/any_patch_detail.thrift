@@ -36,5 +36,5 @@ package "facebook.com/thrift/op"
 struct TypeToPatchInternalDoNotUse {
   @python.Py3Hidden
   1: type.Type type;
-  2: list<any_rep.AnyStruct> patches;
+  2: any_rep.AnyStruct patch;
 }

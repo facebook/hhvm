@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
+#include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 
@@ -188,7 +189,7 @@ bool DynamicPatch::empty(detail::Badge badge) const {
           return v.empty();
         }
       },
-      patch_);
+      *patch_);
 }
 
 template <class SubPatch>
@@ -1072,33 +1073,33 @@ void DynamicSetPatch::apply(detail::Badge, detail::ValueSet& v) const {
 void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
   // If only one of the patch is Unknown patch, convert the Unknown patch type
   // to the known patch type.
-  if (std::holds_alternative<DynamicUnknownPatch>(patch_) &&
-      !std::holds_alternative<DynamicUnknownPatch>(other.patch_)) {
+  if (std::holds_alternative<DynamicUnknownPatch>(*patch_) &&
+      !std::holds_alternative<DynamicUnknownPatch>(*other.patch_)) {
     std::visit(
         [&](auto&& other) {
-          patch_ = detail::createPatchFromObject<
+          *patch_ = detail::createPatchFromObject<
               std::remove_cvref_t<decltype(other)>>(badge, toObject());
         },
-        other.patch_);
+        *other.patch_);
   }
-  if (!std::holds_alternative<DynamicUnknownPatch>(patch_) &&
-      std::holds_alternative<DynamicUnknownPatch>(other.patch_)) {
+  if (!std::holds_alternative<DynamicUnknownPatch>(*patch_) &&
+      std::holds_alternative<DynamicUnknownPatch>(*other.patch_)) {
     return std::visit(
         [&](auto&& patch) {
           auto tmp = DynamicPatch{detail::createPatchFromObject<
               std::remove_cvref_t<decltype(patch)>>(badge, other.toObject())};
           return merge(badge, tmp);
         },
-        patch_);
+        *patch_);
   }
-  if (std::holds_alternative<op::StringPatch>(patch_) &&
-      std::holds_alternative<op::BinaryPatch>(other.patch_)) {
-    patch_ = detail::createPatchFromObject<op::BinaryPatch>(badge, toObject());
+  if (std::holds_alternative<op::StringPatch>(*patch_) &&
+      std::holds_alternative<op::BinaryPatch>(*other.patch_)) {
+    *patch_ = detail::createPatchFromObject<op::BinaryPatch>(badge, toObject());
     return merge(badge, other);
   }
-  if (std::holds_alternative<op::BinaryPatch>(patch_) &&
-      std::holds_alternative<op::StringPatch>(other.patch_)) {
-    patch_ = detail::createPatchFromObject<op::StringPatch>(badge, toObject());
+  if (std::holds_alternative<op::BinaryPatch>(*patch_) &&
+      std::holds_alternative<op::StringPatch>(*other.patch_)) {
+    *patch_ = detail::createPatchFromObject<op::StringPatch>(badge, toObject());
     return merge(badge, other);
   }
 
@@ -1128,8 +1129,8 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
               folly::pretty_name<R>()));
         }
       },
-      patch_,
-      other.patch_);
+      *patch_,
+      *other.patch_);
 }
 
 void DynamicPatch::fromObject(detail::Badge, Object obj) {
@@ -1137,7 +1138,7 @@ void DynamicPatch::fromObject(detail::Badge, Object obj) {
     if (p->getType() == Value::Type::objectValue) {
       DynamicStructPatch patch;
       patch.fromObject(badge, std::move(obj));
-      patch_ = std::move(patch);
+      *patch_ = std::move(patch);
       return;
     }
     if (p->getType() != Value::Type::mapValue) {
@@ -1146,14 +1147,14 @@ void DynamicPatch::fromObject(detail::Badge, Object obj) {
     }
     DynamicMapPatch patch;
     patch.fromObject(badge, std::move(obj));
-    patch_ = std::move(patch);
+    *patch_ = std::move(patch);
     return;
   }
 
   if (get_ptr(obj, op::PatchOp::EnsureUnion)) {
     DynamicUnionPatch patch;
     patch.fromObject(badge, std::move(obj));
-    patch_ = std::move(patch);
+    *patch_ = std::move(patch);
     return;
   }
 
@@ -1162,7 +1163,7 @@ void DynamicPatch::fromObject(detail::Badge, Object obj) {
     if (remove->is_list()) {
       DynamicStructPatch patch;
       patch.fromObject(badge, std::move(obj));
-      patch_ = std::move(patch);
+      *patch_ = std::move(patch);
       return;
     }
   }
@@ -1170,7 +1171,8 @@ void DynamicPatch::fromObject(detail::Badge, Object obj) {
   if (get_ptr(obj, op::PatchOp::PatchIfTypeIsPrior) ||
       get_ptr(obj, op::PatchOp::PatchIfTypeIsAfter) ||
       get_ptr(obj, op::PatchOp::EnsureAny)) {
-    patch_ = detail::createPatchFromObject<op::AnyPatch>(badge, std::move(obj));
+    *patch_ =
+        detail::createPatchFromObject<op::AnyPatch>(badge, std::move(obj));
     return;
   }
 
@@ -1194,7 +1196,7 @@ void DynamicPatch::fromObject(detail::Badge, Object obj) {
 
   DynamicUnknownPatch patch;
   patch.fromObject(badge, std::move(obj));
-  patch_ = std::move(patch);
+  *patch_ = std::move(patch);
 }
 
 auto DynamicUnknownPatch::validateAndGetCategory() const -> Category {
@@ -1328,59 +1330,77 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
 
 void DynamicPatch::apply(detail::Badge, Value& v) const {
   if (holds_alternative<DynamicUnknownPatch>(badge)) {
-    return std::get<DynamicUnknownPatch>(patch_).apply(badge, v);
+    return std::get<DynamicUnknownPatch>(*patch_).apply(badge, v);
   }
   switch (v.getType()) {
     case Value::Type::boolValue:
-      return std::get<op::BoolPatch>(patch_).apply(v.as_bool());
+      return std::get<op::BoolPatch>(*patch_).apply(v.as_bool());
     case Value::Type::byteValue:
-      return std::get<op::BytePatch>(patch_).apply(v.as_byte());
+      return std::get<op::BytePatch>(*patch_).apply(v.as_byte());
     case Value::Type::i16Value:
-      return std::get<op::I16Patch>(patch_).apply(v.as_i16());
+      return std::get<op::I16Patch>(*patch_).apply(v.as_i16());
     case Value::Type::i32Value:
-      return std::get<op::I32Patch>(patch_).apply(v.as_i32());
+      return std::get<op::I32Patch>(*patch_).apply(v.as_i32());
     case Value::Type::i64Value:
-      return std::get<op::I64Patch>(patch_).apply(v.as_i64());
+      return std::get<op::I64Patch>(*patch_).apply(v.as_i64());
     case Value::Type::floatValue:
-      return std::get<op::FloatPatch>(patch_).apply(v.as_float());
+      return std::get<op::FloatPatch>(*patch_).apply(v.as_float());
     case Value::Type::doubleValue:
-      return std::get<op::DoublePatch>(patch_).apply(v.as_double());
+      return std::get<op::DoublePatch>(*patch_).apply(v.as_double());
     case Value::Type::stringValue: {
       if (holds_alternative<op::BinaryPatch>(badge)) {
         return detail::createPatchFromObject<op::StringPatch>(badge, toObject())
             .apply(v.as_string());
       }
-      return std::get<op::StringPatch>(patch_).apply(v.as_string());
+      return std::get<op::StringPatch>(*patch_).apply(v.as_string());
     }
     case Value::Type::binaryValue: {
       if (holds_alternative<op::StringPatch>(badge)) {
         return detail::createPatchFromObject<op::BinaryPatch>(badge, toObject())
             .apply(v.as_binary());
       }
-      return std::get<op::BinaryPatch>(patch_).apply(v.as_binary());
+      return std::get<op::BinaryPatch>(*patch_).apply(v.as_binary());
     }
     case Value::Type::listValue:
-      return std::get<DynamicListPatch>(patch_).apply(badge, v.as_list());
+      return std::get<DynamicListPatch>(*patch_).apply(badge, v.as_list());
     case Value::Type::setValue:
-      return std::get<DynamicSetPatch>(patch_).apply(badge, v.as_set());
+      return std::get<DynamicSetPatch>(*patch_).apply(badge, v.as_set());
     case Value::Type::mapValue:
-      return std::get<DynamicMapPatch>(patch_).apply(badge, v.as_map());
+      return std::get<DynamicMapPatch>(*patch_).apply(badge, v.as_map());
     case Value::Type::objectValue:
       if (holds_alternative<op::AnyPatch>(badge)) {
         using Tag = type::struct_t<type::AnyStruct>;
         auto any = fromValueStruct<Tag>(v);
-        std::get<op::AnyPatch>(patch_).apply(any);
+        std::get<op::AnyPatch>(*patch_).apply(any);
         v = asValueStruct<Tag>(any);
         return;
       }
       if (holds_alternative<DynamicStructPatch>(badge)) {
-        return std::get<DynamicStructPatch>(patch_).apply(badge, v.as_object());
+        return std::get<DynamicStructPatch>(*patch_).apply(
+            badge, v.as_object());
       }
-      return std::get<DynamicUnionPatch>(patch_).apply(badge, v.as_object());
+      return std::get<DynamicUnionPatch>(*patch_).apply(badge, v.as_object());
     case Value::Type::__EMPTY__:
       folly::throw_exception<std::runtime_error>("value is empty.");
     default:
       notImpl();
   }
 }
+Object DynamicPatch::toObject() && {
+  return std::visit([&](auto&& v) { return std::move(v).toObject(); }, *patch_);
+}
+Object DynamicPatch::toObject() const& {
+  return std::visit([&](auto&& v) { return v.toObject(); }, *patch_);
+}
+DynamicPatch::DynamicPatch() : patch_(std::make_unique<Patch>()) {}
+DynamicPatch::DynamicPatch(const DynamicPatch& other) : DynamicPatch() {
+  *patch_ = *other.patch_;
+}
+DynamicPatch& DynamicPatch::operator=(const DynamicPatch& other) {
+  *patch_ = *other.patch_;
+  return *this;
+}
+DynamicPatch::DynamicPatch(DynamicPatch&&) noexcept = default;
+DynamicPatch& DynamicPatch::operator=(DynamicPatch&& other) noexcept = default;
+DynamicPatch::~DynamicPatch() = default;
 } // namespace apache::thrift::protocol

@@ -20,7 +20,16 @@
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
-#include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
+
+namespace apache::thrift::op::detail {
+template <typename>
+class AnyPatch;
+}
+
+namespace apache::thrift::op {
+class AnyPatchStruct;
+using AnyPatch = detail::AnyPatch<AnyPatchStruct>;
+} // namespace apache::thrift::op
 
 namespace apache::thrift::protocol {
 class DiffVisitorBase;
@@ -434,40 +443,40 @@ class DynamicUnionPatch : public DynamicStructurePatch<true> {
 
 class DynamicPatch {
  public:
-  DynamicPatch() = default;
+  DynamicPatch();
+  DynamicPatch(const DynamicPatch&);
+  DynamicPatch& operator=(const DynamicPatch&);
+
+  DynamicPatch(DynamicPatch&&) noexcept;
+  DynamicPatch& operator=(DynamicPatch&&) noexcept;
+  ~DynamicPatch();
 
   template <class T>
-  explicit DynamicPatch(T t) : patch_(std::move(t)) {}
+  explicit DynamicPatch(T t) : patch_(std::make_unique<Patch>(std::move(t))) {}
 
-  Object toObject() && {
-    return std::visit(
-        [&](auto&& v) { return std::move(v).toObject(); }, patch_);
-  }
-
-  Object toObject() const& {
-    return std::visit([&](auto&& v) { return v.toObject(); }, patch_);
-  }
+  Object toObject() &&;
+  Object toObject() const&;
 
   [[nodiscard]] bool empty(detail::Badge) const;
 
   void apply(detail::Badge, Value&) const;
 
-  void fromObject(detail::Badge badge, Object obj);
+  void fromObject(detail::Badge, Object);
 
   template <class T>
   bool holds_alternative(detail::Badge) const {
-    return std::holds_alternative<T>(patch_);
+    return std::get_if<T>(patch_.get()) != nullptr;
   }
 
   template <class PatchType>
-  PatchType& get(detail::Badge) {
-    return std::get<PatchType>(patch_);
+  PatchType* get_if(detail::Badge) {
+    return std::get_if<PatchType>(patch_.get());
   }
 
   void merge(detail::Badge, const DynamicPatch& other);
 
  private:
-  std::variant<
+  using Patch = std::variant<
       DynamicUnknownPatch,
       op::BoolPatch,
       op::BytePatch,
@@ -483,8 +492,8 @@ class DynamicPatch {
       DynamicSetPatch,
       DynamicMapPatch,
       DynamicStructPatch,
-      DynamicUnionPatch>
-      patch_;
+      DynamicUnionPatch>;
+  std::unique_ptr<Patch> patch_;
 };
 
 template <class Visitor>

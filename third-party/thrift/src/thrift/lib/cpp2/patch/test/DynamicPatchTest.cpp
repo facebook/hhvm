@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/patch/DynamicPatch.h>
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
+#include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
 #include <thrift/lib/cpp2/patch/test/gen-cpp2/gen_patch_DynamicPatchTest_types.h>
 

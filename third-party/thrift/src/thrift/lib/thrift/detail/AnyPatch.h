@@ -94,33 +94,8 @@ struct TypeToPatchMapAdapter {
   using AdaptedType =
       folly::F14FastMap<type::Type, std::vector<type::AnyStruct>>;
 
-  static AdaptedType fromThrift(StandardType&& vec) {
-    TypeToPatchMapAdapter::AdaptedType map;
-    map.reserve(vec.size());
-    for (auto& typeToPatchStruct : vec) {
-      auto it = map.emplace(
-          typeToPatchStruct.type().value(),
-          std::move(typeToPatchStruct.patches().value()));
-      if (!it.second) {
-        throwDuplicatedType(typeToPatchStruct.type().value());
-      }
-      for (const auto& any : it.first->second) {
-        throwIfInvalidOrUnsupportedAny(any);
-      }
-    }
-    return map;
-  }
-
-  static StandardType toThrift(const AdaptedType& map) {
-    TypeToPatchMapAdapter::StandardType vec;
-    vec.reserve(map.size());
-    for (const auto& [type, patches] : map) {
-      auto& obj = vec.emplace_back();
-      obj.type() = type;
-      obj.patches() = patches;
-    }
-    return vec;
-  }
+  static AdaptedType fromThrift(StandardType&& vec);
+  static StandardType toThrift(const AdaptedType& map);
 
   template <typename Tag, typename Protocol>
   static uint32_t encode(
@@ -224,72 +199,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     }
   }
 
-  void apply(type::AnyStruct& val) const {
-    auto applyTypePatches =
-        [&](const TypeToPatchMapAdapter::AdaptedType* prior,
-            const TypeToPatchMapAdapter::AdaptedType* after) {
-          std::optional<protocol::Value> dynVal;
-
-          // To support applying AnyPatch to Thrift Any storing type with
-          // 'typeHashPrefixSha2_256', we need to iterate the whole map.
-          if (prior) {
-            for (const auto& [type, patches] : *prior) {
-              if (type::identicalType(type, val.type().value())) {
-                dynVal = protocol::detail::parseValueFromAny(val);
-                for (const auto& p : patches) {
-                  auto dynPatch =
-                      protocol::detail::parseValueFromAny(p).as_object();
-                  protocol::applyPatch(dynPatch, dynVal.value());
-                }
-                break;
-              }
-            }
-          }
-          if (after) {
-            for (const auto& [type, patches] : *after) {
-              if (type::identicalType(type, val.type().value())) {
-                if (!dynVal) {
-                  dynVal = protocol::detail::parseValueFromAny(val);
-                }
-                for (const auto& p : patches) {
-                  auto dynPatch =
-                      protocol::detail::parseValueFromAny(p).as_object();
-                  protocol::applyPatch(dynPatch, dynVal.value());
-                }
-                break;
-              }
-            }
-          }
-
-          if (dynVal.has_value()) {
-            val =
-                protocol::detail::toAny(
-                    dynVal.value(), val.type().value(), val.protocol().value())
-                    .toThrift();
-          }
-        };
-
-    if (hasAssign()) {
-      val = data_.assign().value();
-      return;
-    }
-    if (data_.clear().value()) {
-      apache::thrift::clear(val);
-    }
-
-    // If 'ensureAny' type does not match the type of stored value in Thrift
-    // Any, we can ignore 'patchIfTypeIsPrior'.
-    if (data_.ensureAny().has_value() &&
-        !type::identicalType(
-            data_.ensureAny()->type().value(), val.type().value())) {
-      val = data_.ensureAny().value();
-      applyTypePatches(nullptr, &data_.patchIfTypeIsAfter().value());
-      return;
-    }
-    applyTypePatches(
-        &data_.patchIfTypeIsPrior().value(),
-        &data_.patchIfTypeIsAfter().value());
-  }
+  void apply(type::AnyStruct& val) const;
 
   void ensureAny(type::AnyStruct ensureAny) {
     throwIfInvalidOrUnsupportedAny(ensureAny);
@@ -400,31 +310,14 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     }
   }
 
-  void patchIfTypeIsImpl(type::Type type, type::AnyStruct patch, bool after) {
-    if (after) {
-      data_.patchIfTypeIsAfter().value()[std::move(type)].push_back(
-          std::move(patch));
-    } else {
-      data_.patchIfTypeIsPrior().value()[std::move(type)].push_back(
-          std::move(patch));
-    }
-  }
+  void patchIfTypeIsImpl(type::Type type, type::AnyStruct patch, bool after);
 
   // Needed for merge.
   void patchIfTypeIs(const TypeErasedPatches& patches) {
     patchIfTypeIs(patches.type_, patches.patches_);
   }
   void patchIfTypeIs(
-      const type::Type& type, const std::vector<type::AnyStruct>& patches) {
-    tryPatchable(type);
-    if (ensures(type)) {
-      auto& vec = data_.patchIfTypeIsAfter().value()[type];
-      vec.insert(vec.end(), patches.begin(), patches.end());
-    } else {
-      auto& vec = data_.patchIfTypeIsPrior().value()[type];
-      vec.insert(vec.end(), patches.begin(), patches.end());
-    }
-  }
+      const type::Type& type, const std::vector<type::AnyStruct>& patches);
 };
 
 template <class T>

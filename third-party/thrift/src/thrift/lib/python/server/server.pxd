@@ -63,9 +63,6 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namesp
 cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::thrift::python::detail":
     cdef cbool cAreResourcePoolsEnabledForPython "::thrift::python::detail::areResourcePoolsEnabledForPython"()
 
-cdef extern from "thrift/lib/python/server/flagged/EnableResourcePoolsForPython.h" namespace "::thrift::python::detail":
-    cdef cbool cAreResourcePoolsEnabledForPython "::thrift::python::detail::areResourcePoolsEnabledForPython"()
-
 cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift":
     cdef cppclass SerializedRequest "::apache::thrift::SerializedRequest":
         unique_ptr[cIOBuf] buffer

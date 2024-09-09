@@ -78,8 +78,8 @@ func (c *InteractLocallyClient) Close() error {
 
 
 type InteractLocallyProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            InteractLocally
 }
 // Compile time interface enforcer
@@ -87,16 +87,21 @@ var _ thrift.Processor = (*InteractLocallyProcessor)(nil)
 
 func NewInteractLocallyProcessor(handler InteractLocally) *InteractLocallyProcessor {
     p := &InteractLocallyProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
 
     return p
 }
 
-func (p *InteractLocallyProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *InteractLocallyProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *InteractLocallyProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *InteractLocallyProcessor) AddToFunctionServiceMap(key, service string) {
@@ -104,11 +109,16 @@ func (p *InteractLocallyProcessor) AddToFunctionServiceMap(key, service string) 
 }
 
 func (p *InteractLocallyProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *InteractLocallyProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *InteractLocallyProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *InteractLocallyProcessor) FunctionServiceMap() map[string]string {

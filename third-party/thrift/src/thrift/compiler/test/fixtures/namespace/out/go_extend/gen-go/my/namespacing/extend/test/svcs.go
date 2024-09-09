@@ -426,7 +426,7 @@ func NewExtendTestServiceProcessor(handler ExtendTestService) *ExtendTestService
     p := &ExtendTestServiceProcessor{
         test0.NewHsTestServiceProcessor(handler),
     }
-    p.AddToProcessorMap("check", &procFuncExtendTestServiceCheck{handler: handler})
+    p.AddToProcessorFunctionMap("check", &procFuncExtendTestServiceCheck{handler: handler})
     p.AddToFunctionServiceMap("check", "ExtendTestService")
 
     return p

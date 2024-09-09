@@ -257,8 +257,8 @@ func (x *respMyServiceFoo) String() string {
 
 
 type MyServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            MyService
 }
 // Compile time interface enforcer
@@ -266,18 +266,23 @@ var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("foo", &procFuncMyServiceFoo{handler: handler})
+    p.AddToProcessorFunctionMap("foo", &procFuncMyServiceFoo{handler: handler})
     p.AddToFunctionServiceMap("foo", "MyService")
 
     return p
 }
 
-func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *MyServiceProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *MyServiceProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
@@ -285,11 +290,16 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *MyServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *MyServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
@@ -584,8 +594,8 @@ func (x *respFactoriesFoo) String() string {
 
 
 type FactoriesProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            Factories
 }
 // Compile time interface enforcer
@@ -593,18 +603,23 @@ var _ thrift.Processor = (*FactoriesProcessor)(nil)
 
 func NewFactoriesProcessor(handler Factories) *FactoriesProcessor {
     p := &FactoriesProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("foo", &procFuncFactoriesFoo{handler: handler})
+    p.AddToProcessorFunctionMap("foo", &procFuncFactoriesFoo{handler: handler})
     p.AddToFunctionServiceMap("foo", "Factories")
 
     return p
 }
 
-func (p *FactoriesProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *FactoriesProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *FactoriesProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *FactoriesProcessor) AddToFunctionServiceMap(key, service string) {
@@ -612,11 +627,16 @@ func (p *FactoriesProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *FactoriesProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *FactoriesProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *FactoriesProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *FactoriesProcessor) FunctionServiceMap() map[string]string {
@@ -911,8 +931,8 @@ func (x *respPerformFoo) String() string {
 
 
 type PerformProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            Perform
 }
 // Compile time interface enforcer
@@ -920,18 +940,23 @@ var _ thrift.Processor = (*PerformProcessor)(nil)
 
 func NewPerformProcessor(handler Perform) *PerformProcessor {
     p := &PerformProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("foo", &procFuncPerformFoo{handler: handler})
+    p.AddToProcessorFunctionMap("foo", &procFuncPerformFoo{handler: handler})
     p.AddToFunctionServiceMap("foo", "Perform")
 
     return p
 }
 
-func (p *PerformProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *PerformProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *PerformProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *PerformProcessor) AddToFunctionServiceMap(key, service string) {
@@ -939,11 +964,16 @@ func (p *PerformProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *PerformProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *PerformProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *PerformProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *PerformProcessor) FunctionServiceMap() map[string]string {
@@ -1313,8 +1343,8 @@ func (x *respInteractWithSharedDoSomeSimilarThings) String() string {
 
 
 type InteractWithSharedProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            InteractWithShared
 }
 // Compile time interface enforcer
@@ -1322,18 +1352,23 @@ var _ thrift.Processor = (*InteractWithSharedProcessor)(nil)
 
 func NewInteractWithSharedProcessor(handler InteractWithShared) *InteractWithSharedProcessor {
     p := &InteractWithSharedProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("do_some_similar_things", &procFuncInteractWithSharedDoSomeSimilarThings{handler: handler})
+    p.AddToProcessorFunctionMap("do_some_similar_things", &procFuncInteractWithSharedDoSomeSimilarThings{handler: handler})
     p.AddToFunctionServiceMap("do_some_similar_things", "InteractWithShared")
 
     return p
 }
 
-func (p *InteractWithSharedProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *InteractWithSharedProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *InteractWithSharedProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *InteractWithSharedProcessor) AddToFunctionServiceMap(key, service string) {
@@ -1341,11 +1376,16 @@ func (p *InteractWithSharedProcessor) AddToFunctionServiceMap(key, service strin
 }
 
 func (p *InteractWithSharedProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *InteractWithSharedProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *InteractWithSharedProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *InteractWithSharedProcessor) FunctionServiceMap() map[string]string {

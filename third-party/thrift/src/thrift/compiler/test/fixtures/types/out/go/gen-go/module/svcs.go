@@ -776,8 +776,8 @@ func (x *respSomeServiceBinaryKeyedMap) String() string {
 
 
 type SomeServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            SomeService
 }
 // Compile time interface enforcer
@@ -785,20 +785,25 @@ var _ thrift.Processor = (*SomeServiceProcessor)(nil)
 
 func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {
     p := &SomeServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("bounce_map", &procFuncSomeServiceBounceMap{handler: handler})
-    p.AddToProcessorMap("binary_keyed_map", &procFuncSomeServiceBinaryKeyedMap{handler: handler})
+    p.AddToProcessorFunctionMap("bounce_map", &procFuncSomeServiceBounceMap{handler: handler})
+    p.AddToProcessorFunctionMap("binary_keyed_map", &procFuncSomeServiceBinaryKeyedMap{handler: handler})
     p.AddToFunctionServiceMap("bounce_map", "SomeService")
     p.AddToFunctionServiceMap("binary_keyed_map", "SomeService")
 
     return p
 }
 
-func (p *SomeServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *SomeServiceProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *SomeServiceProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *SomeServiceProcessor) AddToFunctionServiceMap(key, service string) {
@@ -806,11 +811,16 @@ func (p *SomeServiceProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *SomeServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *SomeServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *SomeServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *SomeServiceProcessor) FunctionServiceMap() map[string]string {

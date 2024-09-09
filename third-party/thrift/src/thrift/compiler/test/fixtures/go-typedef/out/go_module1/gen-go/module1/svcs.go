@@ -1005,8 +1005,8 @@ func (x *respFinderPreviousPlate) String() string {
 
 
 type FinderProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            Finder
 }
 // Compile time interface enforcer
@@ -1014,13 +1014,13 @@ var _ thrift.Processor = (*FinderProcessor)(nil)
 
 func NewFinderProcessor(handler Finder) *FinderProcessor {
     p := &FinderProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("byPlate", &procFuncFinderByPlate{handler: handler})
-    p.AddToProcessorMap("aliasByPlate", &procFuncFinderAliasByPlate{handler: handler})
-    p.AddToProcessorMap("previousPlate", &procFuncFinderPreviousPlate{handler: handler})
+    p.AddToProcessorFunctionMap("byPlate", &procFuncFinderByPlate{handler: handler})
+    p.AddToProcessorFunctionMap("aliasByPlate", &procFuncFinderAliasByPlate{handler: handler})
+    p.AddToProcessorFunctionMap("previousPlate", &procFuncFinderPreviousPlate{handler: handler})
     p.AddToFunctionServiceMap("byPlate", "Finder")
     p.AddToFunctionServiceMap("aliasByPlate", "Finder")
     p.AddToFunctionServiceMap("previousPlate", "Finder")
@@ -1028,8 +1028,13 @@ func NewFinderProcessor(handler Finder) *FinderProcessor {
     return p
 }
 
-func (p *FinderProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *FinderProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *FinderProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *FinderProcessor) AddToFunctionServiceMap(key, service string) {
@@ -1037,11 +1042,16 @@ func (p *FinderProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *FinderProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *FinderProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *FinderProcessor) FunctionServiceMap() map[string]string {

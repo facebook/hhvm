@@ -6579,8 +6579,8 @@ func (x *respGetEntityGetErr1Collision) String() string {
 
 
 type GetEntityProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            GetEntity
 }
 // Compile time interface enforcer
@@ -6588,32 +6588,32 @@ var _ thrift.Processor = (*GetEntityProcessor)(nil)
 
 func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p := &GetEntityProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("getEntity", &procFuncGetEntityGetEntity{handler: handler})
-    p.AddToProcessorMap("getBool", &procFuncGetEntityGetBool{handler: handler})
-    p.AddToProcessorMap("getByte", &procFuncGetEntityGetByte{handler: handler})
-    p.AddToProcessorMap("getI16", &procFuncGetEntityGetI16{handler: handler})
-    p.AddToProcessorMap("getI32", &procFuncGetEntityGetI32{handler: handler})
-    p.AddToProcessorMap("getI64", &procFuncGetEntityGetI64{handler: handler})
-    p.AddToProcessorMap("getDouble", &procFuncGetEntityGetDouble{handler: handler})
-    p.AddToProcessorMap("getString", &procFuncGetEntityGetString{handler: handler})
-    p.AddToProcessorMap("getBinary", &procFuncGetEntityGetBinary{handler: handler})
-    p.AddToProcessorMap("getMap", &procFuncGetEntityGetMap{handler: handler})
-    p.AddToProcessorMap("getSet", &procFuncGetEntityGetSet{handler: handler})
-    p.AddToProcessorMap("getList", &procFuncGetEntityGetList{handler: handler})
-    p.AddToProcessorMap("getLegacyStuff", &procFuncGetEntityGetLegacyStuff{handler: handler})
-    p.AddToProcessorMap("getCtxCollision", &procFuncGetEntityGetCtxCollision{handler: handler})
-    p.AddToProcessorMap("getCtx1Collision", &procFuncGetEntityGetCtx1Collision{handler: handler})
-    p.AddToProcessorMap("getContextCollision", &procFuncGetEntityGetContextCollision{handler: handler})
-    p.AddToProcessorMap("getOutCollision", &procFuncGetEntityGetOutCollision{handler: handler})
-    p.AddToProcessorMap("getOut1Collision", &procFuncGetEntityGetOut1Collision{handler: handler})
-    p.AddToProcessorMap("getInCollision", &procFuncGetEntityGetInCollision{handler: handler})
-    p.AddToProcessorMap("getIn1Collision", &procFuncGetEntityGetIn1Collision{handler: handler})
-    p.AddToProcessorMap("getErrCollision", &procFuncGetEntityGetErrCollision{handler: handler})
-    p.AddToProcessorMap("getErr1Collision", &procFuncGetEntityGetErr1Collision{handler: handler})
+    p.AddToProcessorFunctionMap("getEntity", &procFuncGetEntityGetEntity{handler: handler})
+    p.AddToProcessorFunctionMap("getBool", &procFuncGetEntityGetBool{handler: handler})
+    p.AddToProcessorFunctionMap("getByte", &procFuncGetEntityGetByte{handler: handler})
+    p.AddToProcessorFunctionMap("getI16", &procFuncGetEntityGetI16{handler: handler})
+    p.AddToProcessorFunctionMap("getI32", &procFuncGetEntityGetI32{handler: handler})
+    p.AddToProcessorFunctionMap("getI64", &procFuncGetEntityGetI64{handler: handler})
+    p.AddToProcessorFunctionMap("getDouble", &procFuncGetEntityGetDouble{handler: handler})
+    p.AddToProcessorFunctionMap("getString", &procFuncGetEntityGetString{handler: handler})
+    p.AddToProcessorFunctionMap("getBinary", &procFuncGetEntityGetBinary{handler: handler})
+    p.AddToProcessorFunctionMap("getMap", &procFuncGetEntityGetMap{handler: handler})
+    p.AddToProcessorFunctionMap("getSet", &procFuncGetEntityGetSet{handler: handler})
+    p.AddToProcessorFunctionMap("getList", &procFuncGetEntityGetList{handler: handler})
+    p.AddToProcessorFunctionMap("getLegacyStuff", &procFuncGetEntityGetLegacyStuff{handler: handler})
+    p.AddToProcessorFunctionMap("getCtxCollision", &procFuncGetEntityGetCtxCollision{handler: handler})
+    p.AddToProcessorFunctionMap("getCtx1Collision", &procFuncGetEntityGetCtx1Collision{handler: handler})
+    p.AddToProcessorFunctionMap("getContextCollision", &procFuncGetEntityGetContextCollision{handler: handler})
+    p.AddToProcessorFunctionMap("getOutCollision", &procFuncGetEntityGetOutCollision{handler: handler})
+    p.AddToProcessorFunctionMap("getOut1Collision", &procFuncGetEntityGetOut1Collision{handler: handler})
+    p.AddToProcessorFunctionMap("getInCollision", &procFuncGetEntityGetInCollision{handler: handler})
+    p.AddToProcessorFunctionMap("getIn1Collision", &procFuncGetEntityGetIn1Collision{handler: handler})
+    p.AddToProcessorFunctionMap("getErrCollision", &procFuncGetEntityGetErrCollision{handler: handler})
+    p.AddToProcessorFunctionMap("getErr1Collision", &procFuncGetEntityGetErr1Collision{handler: handler})
     p.AddToFunctionServiceMap("getEntity", "GetEntity")
     p.AddToFunctionServiceMap("getBool", "GetEntity")
     p.AddToFunctionServiceMap("getByte", "GetEntity")
@@ -6640,8 +6640,13 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     return p
 }
 
-func (p *GetEntityProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *GetEntityProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *GetEntityProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *GetEntityProcessor) AddToFunctionServiceMap(key, service string) {
@@ -6649,11 +6654,16 @@ func (p *GetEntityProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *GetEntityProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *GetEntityProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *GetEntityProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {

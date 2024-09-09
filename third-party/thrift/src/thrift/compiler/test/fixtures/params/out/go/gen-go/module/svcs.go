@@ -1745,8 +1745,8 @@ func (x *respNestedContainersTurtles) String() string {
 
 
 type NestedContainersProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            NestedContainers
 }
 // Compile time interface enforcer
@@ -1754,15 +1754,15 @@ var _ thrift.Processor = (*NestedContainersProcessor)(nil)
 
 func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {
     p := &NestedContainersProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("mapList", &procFuncNestedContainersMapList{handler: handler})
-    p.AddToProcessorMap("mapSet", &procFuncNestedContainersMapSet{handler: handler})
-    p.AddToProcessorMap("listMap", &procFuncNestedContainersListMap{handler: handler})
-    p.AddToProcessorMap("listSet", &procFuncNestedContainersListSet{handler: handler})
-    p.AddToProcessorMap("turtles", &procFuncNestedContainersTurtles{handler: handler})
+    p.AddToProcessorFunctionMap("mapList", &procFuncNestedContainersMapList{handler: handler})
+    p.AddToProcessorFunctionMap("mapSet", &procFuncNestedContainersMapSet{handler: handler})
+    p.AddToProcessorFunctionMap("listMap", &procFuncNestedContainersListMap{handler: handler})
+    p.AddToProcessorFunctionMap("listSet", &procFuncNestedContainersListSet{handler: handler})
+    p.AddToProcessorFunctionMap("turtles", &procFuncNestedContainersTurtles{handler: handler})
     p.AddToFunctionServiceMap("mapList", "NestedContainers")
     p.AddToFunctionServiceMap("mapSet", "NestedContainers")
     p.AddToFunctionServiceMap("listMap", "NestedContainers")
@@ -1772,8 +1772,13 @@ func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersPro
     return p
 }
 
-func (p *NestedContainersProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *NestedContainersProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *NestedContainersProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *NestedContainersProcessor) AddToFunctionServiceMap(key, service string) {
@@ -1781,11 +1786,16 @@ func (p *NestedContainersProcessor) AddToFunctionServiceMap(key, service string)
 }
 
 func (p *NestedContainersProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *NestedContainersProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *NestedContainersProcessor) FunctionServiceMap() map[string]string {

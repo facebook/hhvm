@@ -255,8 +255,8 @@ func (x *respMyRootDoRoot) String() string {
 
 
 type MyRootProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            MyRoot
 }
 // Compile time interface enforcer
@@ -264,18 +264,23 @@ var _ thrift.Processor = (*MyRootProcessor)(nil)
 
 func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
     p := &MyRootProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("do_root", &procFuncMyRootDoRoot{handler: handler})
+    p.AddToProcessorFunctionMap("do_root", &procFuncMyRootDoRoot{handler: handler})
     p.AddToFunctionServiceMap("do_root", "MyRoot")
 
     return p
 }
 
-func (p *MyRootProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *MyRootProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *MyRootProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *MyRootProcessor) AddToFunctionServiceMap(key, service string) {
@@ -283,11 +288,16 @@ func (p *MyRootProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *MyRootProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *MyRootProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *MyRootProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *MyRootProcessor) FunctionServiceMap() map[string]string {
@@ -604,7 +614,7 @@ func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
     p := &MyNodeProcessor{
         NewMyRootProcessor(handler),
     }
-    p.AddToProcessorMap("do_mid", &procFuncMyNodeDoMid{handler: handler})
+    p.AddToProcessorFunctionMap("do_mid", &procFuncMyNodeDoMid{handler: handler})
     p.AddToFunctionServiceMap("do_mid", "MyNode")
 
     return p
@@ -920,7 +930,7 @@ func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
     p := &MyLeafProcessor{
         NewMyNodeProcessor(handler),
     }
-    p.AddToProcessorMap("do_leaf", &procFuncMyLeafDoLeaf{handler: handler})
+    p.AddToProcessorFunctionMap("do_leaf", &procFuncMyLeafDoLeaf{handler: handler})
     p.AddToFunctionServiceMap("do_leaf", "MyLeaf")
 
     return p

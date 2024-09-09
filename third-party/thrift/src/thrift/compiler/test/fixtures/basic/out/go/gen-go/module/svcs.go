@@ -255,8 +255,8 @@ func (x *respFooServiceSimpleRPC) String() string {
 
 
 type FooServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            FooService
 }
 // Compile time interface enforcer
@@ -264,18 +264,23 @@ var _ thrift.Processor = (*FooServiceProcessor)(nil)
 
 func NewFooServiceProcessor(handler FooService) *FooServiceProcessor {
     p := &FooServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("simple_rpc", &procFuncFooServiceSimpleRPC{handler: handler})
+    p.AddToProcessorFunctionMap("simple_rpc", &procFuncFooServiceSimpleRPC{handler: handler})
     p.AddToFunctionServiceMap("simple_rpc", "FooService")
 
     return p
 }
 
-func (p *FooServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *FooServiceProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *FooServiceProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *FooServiceProcessor) AddToFunctionServiceMap(key, service string) {
@@ -283,11 +288,16 @@ func (p *FooServiceProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *FooServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *FooServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *FooServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *FooServiceProcessor) FunctionServiceMap() map[string]string {
@@ -713,8 +723,8 @@ func (x *respFB303ServiceSimpleRPC) String() string {
 
 
 type FB303ServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            FB303Service
 }
 // Compile time interface enforcer
@@ -722,18 +732,23 @@ var _ thrift.Processor = (*FB303ServiceProcessor)(nil)
 
 func NewFB303ServiceProcessor(handler FB303Service) *FB303ServiceProcessor {
     p := &FB303ServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("simple_rpc", &procFuncFB303ServiceSimpleRPC{handler: handler})
+    p.AddToProcessorFunctionMap("simple_rpc", &procFuncFB303ServiceSimpleRPC{handler: handler})
     p.AddToFunctionServiceMap("simple_rpc", "FB303Service")
 
     return p
 }
 
-func (p *FB303ServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *FB303ServiceProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *FB303ServiceProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *FB303ServiceProcessor) AddToFunctionServiceMap(key, service string) {
@@ -741,11 +756,16 @@ func (p *FB303ServiceProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *FB303ServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *FB303ServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *FB303ServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *FB303ServiceProcessor) FunctionServiceMap() map[string]string {
@@ -3383,8 +3403,8 @@ func (x *respMyServiceRpcSkippedCodegen) String() string {
 
 
 type MyServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            MyService
 }
 // Compile time interface enforcer
@@ -3392,20 +3412,20 @@ var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("ping", &procFuncMyServicePing{handler: handler})
-    p.AddToProcessorMap("getRandomData", &procFuncMyServiceGetRandomData{handler: handler})
-    p.AddToProcessorMap("sink", &procFuncMyServiceSink{handler: handler})
-    p.AddToProcessorMap("putDataById", &procFuncMyServicePutDataById{handler: handler})
-    p.AddToProcessorMap("hasDataById", &procFuncMyServiceHasDataById{handler: handler})
-    p.AddToProcessorMap("getDataById", &procFuncMyServiceGetDataById{handler: handler})
-    p.AddToProcessorMap("deleteDataById", &procFuncMyServiceDeleteDataById{handler: handler})
-    p.AddToProcessorMap("lobDataById", &procFuncMyServiceLobDataById{handler: handler})
-    p.AddToProcessorMap("invalid_return_for_hack", &procFuncMyServiceInvalidReturnForHack{handler: handler})
-    p.AddToProcessorMap("rpc_skipped_codegen", &procFuncMyServiceRpcSkippedCodegen{handler: handler})
+    p.AddToProcessorFunctionMap("ping", &procFuncMyServicePing{handler: handler})
+    p.AddToProcessorFunctionMap("getRandomData", &procFuncMyServiceGetRandomData{handler: handler})
+    p.AddToProcessorFunctionMap("sink", &procFuncMyServiceSink{handler: handler})
+    p.AddToProcessorFunctionMap("putDataById", &procFuncMyServicePutDataById{handler: handler})
+    p.AddToProcessorFunctionMap("hasDataById", &procFuncMyServiceHasDataById{handler: handler})
+    p.AddToProcessorFunctionMap("getDataById", &procFuncMyServiceGetDataById{handler: handler})
+    p.AddToProcessorFunctionMap("deleteDataById", &procFuncMyServiceDeleteDataById{handler: handler})
+    p.AddToProcessorFunctionMap("lobDataById", &procFuncMyServiceLobDataById{handler: handler})
+    p.AddToProcessorFunctionMap("invalid_return_for_hack", &procFuncMyServiceInvalidReturnForHack{handler: handler})
+    p.AddToProcessorFunctionMap("rpc_skipped_codegen", &procFuncMyServiceRpcSkippedCodegen{handler: handler})
     p.AddToFunctionServiceMap("ping", "MyService")
     p.AddToFunctionServiceMap("getRandomData", "MyService")
     p.AddToFunctionServiceMap("sink", "MyService")
@@ -3420,8 +3440,13 @@ func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     return p
 }
 
-func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *MyServiceProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *MyServiceProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
@@ -3429,11 +3454,16 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
 }
 
 func (p *MyServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *MyServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
@@ -4608,8 +4638,8 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
 
 
 type DbMixedStackArgumentsProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
-    functionServiceMap map[string]string
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
     handler            DbMixedStackArguments
 }
 // Compile time interface enforcer
@@ -4617,20 +4647,25 @@ var _ thrift.Processor = (*DbMixedStackArgumentsProcessor)(nil)
 
 func NewDbMixedStackArgumentsProcessor(handler DbMixedStackArguments) *DbMixedStackArgumentsProcessor {
     p := &DbMixedStackArgumentsProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
-        functionServiceMap: make(map[string]string),
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
     }
-    p.AddToProcessorMap("getDataByKey0", &procFuncDbMixedStackArgumentsGetDataByKey0{handler: handler})
-    p.AddToProcessorMap("getDataByKey1", &procFuncDbMixedStackArgumentsGetDataByKey1{handler: handler})
+    p.AddToProcessorFunctionMap("getDataByKey0", &procFuncDbMixedStackArgumentsGetDataByKey0{handler: handler})
+    p.AddToProcessorFunctionMap("getDataByKey1", &procFuncDbMixedStackArgumentsGetDataByKey1{handler: handler})
     p.AddToFunctionServiceMap("getDataByKey0", "DbMixedStackArguments")
     p.AddToFunctionServiceMap("getDataByKey1", "DbMixedStackArguments")
 
     return p
 }
 
-func (p *DbMixedStackArgumentsProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
-    p.processorMap[key] = processor
+func (p *DbMixedStackArgumentsProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+// Deprecated: use AddToProcessorFunctionMap() instead.
+func (p *DbMixedStackArgumentsProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
 }
 
 func (p *DbMixedStackArgumentsProcessor) AddToFunctionServiceMap(key, service string) {
@@ -4638,11 +4673,16 @@ func (p *DbMixedStackArgumentsProcessor) AddToFunctionServiceMap(key, service st
 }
 
 func (p *DbMixedStackArgumentsProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
-    return p.processorMap[key]
+    return p.processorFunctionMap[key]
 }
 
+func (p *DbMixedStackArgumentsProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+// Deprecated: use ProcessorFunctionMap() instead.
 func (p *DbMixedStackArgumentsProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
-    return p.processorMap
+    return p.processorFunctionMap
 }
 
 func (p *DbMixedStackArgumentsProcessor) FunctionServiceMap() map[string]string {

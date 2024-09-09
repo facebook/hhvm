@@ -213,6 +213,21 @@ let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
   |> ServerPos.resolve env
   |> Pos.to_absolute
 
+(**
+  It is more appropriate to create a label place holder instead of a variable
+  placeholder when the parameter type is an enum class label.
+
+  This helper method selects that prefix based on the given type.
+  *)
+let param_snippet_prefix : type a. a Typing_defs.ty -> string =
+ fun ty ->
+  match Typing_defs.get_node ty with
+  | Typing_defs.Tnewtype (label_kind, _, _)
+  | Typing_defs.Tapply ((_, label_kind), _)
+    when String.equal label_kind Naming_special_names.Classes.cEnumClassLabel ->
+    "#"
+  | _ -> "\\$"
+
 let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
   (* A function call snippet looks like this:
 
@@ -222,9 +237,14 @@ let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
      https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables *)
   let param_templates =
     List.mapi params ~f:(fun i param ->
-        match param.fp_name with
-        | Some param_name -> Printf.sprintf "${%d:\\%s}" (i + 1) param_name
-        | None -> Printf.sprintf "${%d}" (i + 1))
+        let prefix = param_snippet_prefix param.fp_type in
+        let placeholder =
+          match param.fp_name with
+          | Some param_name ->
+            String.substr_replace_first param_name ~pattern:"$" ~with_:prefix
+          | None -> prefix ^ string_of_int (i + 1)
+        in
+        Printf.sprintf "${%d:%s}" (i + 1) placeholder)
   in
   String.concat ~sep:", " param_templates
 

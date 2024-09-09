@@ -3,7 +3,7 @@ public function foo(): int
 
 This is a docblock 2
 
-(from J, K)
+(from J)
 
 ---
 

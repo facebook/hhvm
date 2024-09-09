@@ -25,7 +25,8 @@ let get_docblock_for_member ctx class_info member_name =
   let open Option.Monad_infix in
   Cls.get_method class_info member_name >>= fun member ->
   match Typing_defs.get_node @@ Lazy.force member.Typing_defs.ce_type with
-  | Typing_defs.Tfun _ ->
+  | Typing_defs.Tfun _
+    when String.equal (Cls.name class_info) member.Typing_defs.ce_origin ->
     let pos =
       Lazy.force member.Typing_defs.ce_pos
       |> Naming_provider.resolve_position ctx

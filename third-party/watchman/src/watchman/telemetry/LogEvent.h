@@ -156,7 +156,7 @@ struct SavedState {
   std::string project;
   std::string path;
   int64_t commit_date = 0;
-  std::string metadata;
+  std::optional<std::string> projectMetadata;
   std::string properties;
   bool success = false;
 
@@ -169,8 +169,8 @@ struct SavedState {
       event.addString("path", path);
     }
     event.addInt("commit_date", commit_date);
-    if (!metadata.empty()) {
-      event.addString("metadata", metadata);
+    if (projectMetadata.has_value()) {
+      event.addString("metadata", projectMetadata.value());
     }
     if (!properties.empty()) {
       event.addString("properties", properties);

@@ -234,6 +234,23 @@ TEST(CompareTest, InternMap_Flt) {
   EXPECT_TRUE(less<Tag>(map, largerMap));
 }
 
+TEST(CompareTest, MapOfUnorderedMaps) {
+  using InnerMapTag = InternMapTag<type::i32_t, type::i32_t>;
+  using Tag = type::map<type::i32_t, InnerMapTag>;
+
+  using MapT = type::native_type<Tag>;
+
+  // using res_t = decltype(less<Tag>(MapT{}, MapT{}));
+  static_assert(detail::less_than_comparable_v<Tag>, "");
+  static_assert(detail::comparable_v<Tag>, "");
+
+  MapT map{{1, {{0, 1}}}, {2, {{2, 3}}}};
+  MapT largerMap{{1, {{0, 1}}}, {2, {{2, 3}, {3, 5}}}};
+  EXPECT_FALSE(identical<Tag>(map, largerMap));
+  EXPECT_FALSE(equal<Tag>(map, largerMap));
+  EXPECT_TRUE(less<Tag>(map, largerMap));
+}
+
 TEST(CompareTest, Struct) {
   detail::StructEquality equalTo;
   detail::StructLessThan lessThan;

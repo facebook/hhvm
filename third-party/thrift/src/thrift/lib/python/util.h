@@ -18,10 +18,9 @@
 
 #include <Python.h>
 
+#include <folly/Executor.h>
+#include <folly/coro/AsyncGenerator.h>
 #include <folly/futures/Future.h>
-#include <folly/python/AsyncioExecutor.h>
-#include <folly/python/async_generator.h>
-#include <folly/python/executor.h>
 
 #if FOLLY_HAS_COROUTINES
 

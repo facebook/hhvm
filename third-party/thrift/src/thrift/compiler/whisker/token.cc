@@ -28,6 +28,7 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
+// clang-format off
 // "X macro" pattern to de-dupe code:
 //   https://en.wikipedia.org/wiki/X_macro
 #define WHISKER_KEYWORDS() \
@@ -43,7 +44,7 @@
   WHISKER_KEYWORD(let)     \
   WHISKER_KEYWORD(and)     \
   WHISKER_KEYWORD(or)      \
-  WHISKER_KEYWORD(not )    \
+  WHISKER_KEYWORD(not)     \
   WHISKER_KEYWORD(with)    \
   WHISKER_KEYWORD(this)    \
   WHISKER_KEYWORD(define)  \
@@ -52,9 +53,9 @@
   WHISKER_KEYWORD(import)  \
   WHISKER_KEYWORD(export)  \
   WHISKER_KEYWORD(from)
+// clang-format on
 
 namespace whisker {
-
 namespace {
 struct token_kind_info {
   tok kind;

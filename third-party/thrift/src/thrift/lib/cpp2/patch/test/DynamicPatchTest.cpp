@@ -86,7 +86,7 @@ TYPED_TEST(DynamicPatchesTest, Clear) {
   patch.clear(badge);
   const auto& obj = patch.toObject();
   EXPECT_EQ(obj.size(), 1);
-  EXPECT_EQ(obj[static_cast<FieldId>(op::PatchOp::Clear)].as_bool(), true);
+  EXPECT_EQ(obj.at(static_cast<FieldId>(op::PatchOp::Clear)).as_bool(), true);
 }
 
 template <class Tag, class PatchType, class T = type::native_type<Tag>>

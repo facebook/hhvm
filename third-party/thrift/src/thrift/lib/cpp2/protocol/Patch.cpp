@@ -1032,7 +1032,7 @@ Object fromSafePatch(const protocol::Object& safePatch) {
         fmt::format("Unsupported patch version: {}", version->as_i32()));
   }
   Object patch =
-      parseObject<CompactProtocolReader>(safePatch[FieldId{2}].as_binary());
+      parseObject<CompactProtocolReader>(safePatch.at(FieldId{2}).as_binary());
   return patch;
 }
 

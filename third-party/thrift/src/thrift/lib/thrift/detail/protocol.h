@@ -58,10 +58,6 @@ class ObjectWrapper : public Base {
 
   Value& operator[](FieldId i) { return (*members())[folly::to_underlying(i)]; }
 
-  const Value& operator[](FieldId i) const {
-    return (*members())[folly::to_underlying(i)];
-  }
-
   Value& at(FieldId i) { return members()->at(folly::to_underlying(i)); }
   const Value& at(FieldId i) const {
     return members()->at(folly::to_underlying(i));

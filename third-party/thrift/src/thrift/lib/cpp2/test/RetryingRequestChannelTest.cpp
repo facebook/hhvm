@@ -301,7 +301,7 @@ TEST_F(RetryingRequestChannelTest, sinkSuccess) {
     auto res =
         co_await consumer.sink([]() -> folly::coro::AsyncGenerator<int32_t&&> {
           for (int32_t i = 1; i <= 5; ++i) {
-            co_yield std::move(i);
+            co_yield int32_t(i);
           }
         }());
     EXPECT_EQ(res, 15);

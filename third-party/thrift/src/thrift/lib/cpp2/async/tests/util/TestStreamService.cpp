@@ -25,14 +25,14 @@ namespace apache::thrift::detail::test {
 ServerStream<int32_t> TestStreamGeneratorService::range(
     int32_t from, int32_t to) {
   for (int i = from; i <= to; i++) {
-    co_yield std::move(i);
+    co_yield int(i);
   }
 }
 
 ServerStream<int32_t> TestStreamGeneratorService::rangeThrow(
     int32_t from, int32_t to) {
   for (int i = from; i <= to; i++) {
-    co_yield std::move(i);
+    co_yield int(i);
   }
   throw std::runtime_error("I am a search bar");
 }
@@ -40,7 +40,7 @@ ServerStream<int32_t> TestStreamGeneratorService::rangeThrow(
 ServerStream<int32_t> TestStreamGeneratorService::rangeThrowUDE(
     int32_t from, int32_t to) {
   for (int i = from; i <= to; i++) {
-    co_yield std::move(i);
+    co_yield int(i);
   }
   throw UserDefinedException();
 }
@@ -333,7 +333,7 @@ class TestProducerCallback : public ServerGeneratorStream::ProducerCallback {
       if (credits_ == 0 && updateCreditsOrCancel()) {
         return;
       }
-      stream_->publish((*encoder_)(std::move(i)));
+      stream_->publish((*encoder_)(int(i)));
       --credits_;
     }
     if (ew_) {

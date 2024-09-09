@@ -94,7 +94,7 @@ TEST(ServerStreamTest, PublishConsumeCoro) {
   ServerStream<int> factory(
       folly::coro::co_invoke([]() -> folly::coro::AsyncGenerator<int&&> {
         for (int i = 0; i < 10; ++i) {
-          co_yield std::move(i);
+          co_yield int(i);
         }
       }));
   clientEb.add(
@@ -129,7 +129,7 @@ TEST(ServerStreamTest, ImmediateCancel) {
       folly::coro::co_invoke([]() -> folly::coro::AsyncGenerator<int&&> {
         for (int i = 0; i < 10; ++i) {
           co_await folly::coro::sleep(std::chrono::milliseconds(10));
-          co_yield std::move(i);
+          co_yield int(i);
         }
         EXPECT_TRUE(false);
       }));
@@ -160,7 +160,7 @@ TEST(ServerStreamTest, DelayedCancel) {
       folly::coro::co_invoke([]() -> folly::coro::AsyncGenerator<int&&> {
         for (int i = 0; i < 10; ++i) {
           co_await folly::coro::sleep(std::chrono::milliseconds(10));
-          co_yield std::move(i);
+          co_yield int(i);
         }
         EXPECT_TRUE(false);
       }));
@@ -217,7 +217,7 @@ TEST(ServerStreamTest, CancelCoro) {
           for (int i = 0;; ++i) {
             EXPECT_LT(i, 10);
             co_await folly::coro::sleep(std::chrono::milliseconds(10));
-            co_yield std::move(i);
+            co_yield int(i);
           }
         }));
     clientEb.add(
@@ -398,7 +398,7 @@ TEST(ServerStreamTest, FactoryLeak) {
   std::move(publisher).complete();
   stream = folly::coro::co_invoke([]() -> folly::coro::AsyncGenerator<int&&> {
     for (int i = 0; i < 10; ++i) {
-      co_yield std::move(i);
+      co_yield int(i);
     }
   });
   stream = apache::thrift::ServerStream<int>::createEmpty();

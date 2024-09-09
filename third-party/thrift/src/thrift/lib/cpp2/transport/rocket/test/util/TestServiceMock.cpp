@@ -151,7 +151,7 @@ ResponseAndServerStream<int32_t, int32_t> TestStreamServiceMock::leakCheck(
       [=,
        detector = LeakDetector()]() -> folly::coro::AsyncGenerator<int32_t&&> {
         for (int i = from; i < to; ++i) {
-          co_yield std::move(i);
+          co_yield int(i);
         }
       });
 #else

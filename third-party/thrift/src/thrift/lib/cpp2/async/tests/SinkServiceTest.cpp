@@ -45,9 +45,8 @@ TEST_F(SinkServiceTest, SimpleSink) {
         auto sink = co_await client.co_range(0, 100);
         bool finalResponse =
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
-              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 100; i++) {
-                co_yield std::move(i);
+                co_yield int(i);
               }
             }());
         EXPECT_TRUE(finalResponse);
@@ -99,9 +98,8 @@ TEST_F(SinkServiceTest, SinkFinalThrow) {
         bool throwed = false;
         try {
           co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
-            // @lint-ignore CLANGTIDY bugprone-use-after-move
             for (int i = 0; i <= 100; i++) {
-              co_yield std::move(i);
+              co_yield int(i);
             }
           }());
         } catch (const std::exception& ex) {
@@ -119,9 +117,8 @@ TEST_F(SinkServiceTest, SinkFinalThrowStruct) {
         bool throwed = false;
         try {
           co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
-            // @lint-ignore CLANGTIDY bugprone-use-after-move
             for (int i = 0; i <= 100; i++) {
-              co_yield std::move(i);
+              co_yield int(i);
             }
           }());
         } catch (const FinalException& ex) {
@@ -139,9 +136,8 @@ TEST_F(SinkServiceTest, SinkEarlyFinalResponse) {
 
         int finalResponse =
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
-              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 100; i++) {
-                co_yield std::move(i);
+                co_yield int(i);
               }
             }());
         EXPECT_EQ(20, finalResponse);
@@ -249,12 +245,11 @@ TEST_F(SinkServiceTest, SinkChunkTimeout) {
         try {
           co_await [&]() -> folly::coro::Task<void> {
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
-              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 100; i++) {
                 if (i == 20) {
                   co_await folly::coro::sleep(std::chrono::milliseconds{500});
                 }
-                co_yield std::move(i);
+                co_yield int(i);
               }
             }());
           }();
@@ -345,9 +340,8 @@ TEST_F(SinkServiceTest, SinkServerCancellation) {
         bool finalResponse =
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
               // enter wait after 5 values, server should cancel
-              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 5; i++) {
-                co_yield std::move(i);
+                co_yield int(i);
               }
               co_await neverStream();
             }());
@@ -375,9 +369,8 @@ TEST_F(SinkServiceTest, SinkClientCancellation) {
                 cancelSource.getToken(),
                 sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
                   co_await neverStream();
-                  // @lint-ignore CLANGTIDY bugprone-use-after-move
                   for (int i = 0; i <= 10; i++) {
-                    co_yield std::move(i);
+                    co_yield int(i);
                   }
                 }())),
             folly::OperationCancelled);
@@ -394,9 +387,8 @@ TEST_F(SinkServiceTest, SinkClientCancellation) {
             co_await folly::coro::co_withCancellation(
                 cancelSource.getToken(),
                 sink.sink([&]() -> folly::coro::AsyncGenerator<int&&> {
-                  // @lint-ignore CLANGTIDY bugprone-use-after-move
                   for (int i = 0; i <= 10; i++) {
-                    co_yield std::move(i);
+                    co_yield int(i);
                   }
                   cancelSource.requestCancellation();
                 }())),

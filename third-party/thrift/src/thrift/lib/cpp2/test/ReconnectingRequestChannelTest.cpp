@@ -209,7 +209,7 @@ TEST_F(ReconnectingRequestChannelTest, sinkReconnect) {
     auto res =
         co_await consumer.sink([]() -> folly::coro::AsyncGenerator<int32_t&&> {
           for (int32_t i = 1; i <= 5; ++i) {
-            co_yield std::move(i);
+            co_yield int(i);
           }
         }());
     EXPECT_EQ(res, 15);
@@ -225,7 +225,7 @@ TEST_F(ReconnectingRequestChannelTest, sinkReconnect) {
     res =
         co_await consumer.sink([]() -> folly::coro::AsyncGenerator<int32_t&&> {
           for (int32_t i = 1; i <= 5; ++i) {
-            co_yield std::move(i);
+            co_yield int(i);
           }
         }());
     EXPECT_EQ(res, 15);

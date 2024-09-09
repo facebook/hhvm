@@ -395,6 +395,18 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   /* Initialize a key update. */
   virtual void initiateKeyUpdate(KeyUpdateRequest keyUpdateRequest) = 0;
 
+  /**
+   * Set pre-received app data, to be returned to read callback before any
+   * decrypted data from fizz.
+   */
+  void setPreReceivedAppData(std::unique_ptr<folly::IOBuf> data) {
+    appBytesReceived_ += data->computeChainDataLength();
+    if (appDataBuf_) {
+      data->appendToChain(std::move(appDataBuf_));
+    }
+    appDataBuf_ = std::move(data);
+  }
+
  protected:
   /**
    * Start reading raw data from the transport.

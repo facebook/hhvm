@@ -32,7 +32,10 @@ namespace py thrift.lib.thrift.any
  * Always contains enough information to deserialize the stored value,  if the
  * type/protocol are recognized.
  */
-typedef any_rep.AnyStruct Any (thrift.uri = "")
+typedef any_rep.AnyStruct Any (
+  thrift.uri = "",
+  thrift.patch.uri = "facebook.com/thrift/op/AnyPatch",
+)
 
 /** A type that can hold any subset of 'any' value.
  *

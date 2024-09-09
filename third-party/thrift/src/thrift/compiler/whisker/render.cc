@@ -166,6 +166,34 @@ class outputter {
   std::vector<std::string> next_indent_;
 };
 
+// The following coercion functions follow the rules described in
+// render_options::strict_boolean_conditional.
+
+bool coerce_to_boolean(null) {
+  return false;
+}
+bool coerce_to_boolean(i64 value) {
+  return value != 0;
+}
+bool coerce_to_boolean(f64 value) {
+  return value != 0.0 && !std::isnan(value);
+}
+bool coerce_to_boolean(const string& value) {
+  return !value.empty();
+}
+bool coerce_to_boolean(const array& value) {
+  return !value.empty();
+}
+bool coerce_to_boolean(const native_object::ptr& value) {
+  if (auto sequence = value->as_sequence(); sequence != nullptr) {
+    return sequence->size() != 0;
+  }
+  return true;
+}
+bool coerce_to_boolean(const map&) {
+  return true;
+}
+
 class render_engine {
  public:
   explicit render_engine(
@@ -214,7 +242,14 @@ class render_engine {
       visit(body);
     }
   }
-  void visit(const ast::body& body) {
+
+  // Prevent implicit conversion to ast::body. Otherwise, we can silently
+  // compile an infinitely recursive visit() chain if there is a missing
+  // overload for one of the alternatives in the variant.
+  template <
+      typename T = ast::body,
+      typename = std::enable_if_t<std::is_same_v<T, ast::body>>>
+  void visit(const T& body) {
     detail::variant_match(body, [&](const auto& node) { visit(node); });
   }
 
@@ -341,21 +376,30 @@ class render_engine {
     out_.write(std::move(output));
   }
 
+  /**
+   * Reports a diagnostic and fails rendering depending on the type of the
+   * provided value and render_options::strict_boolean_conditional.
+   */
+  void maybe_report_boolean_coercion(
+      const ast::variable_lookup& lookup, const object& value) {
+    auto diag_level = opts_.strict_boolean_conditional;
+    maybe_report(lookup.loc, diag_level, [&] {
+      return fmt::format(
+          "Condition '{}' is not a boolean. The encountered value is:\n{}",
+          lookup.chain_string(),
+          to_string(value));
+    });
+    if (diag_level == diagnostic_level::error) {
+      // Fail rendering in strict mode
+      throw abort_rendering();
+    }
+  }
+
   void visit(const ast::section_block& section) {
     const object& section_variable = lookup_variable(section.variable);
 
-    const auto maybe_report_boolean_coercion = [&]() {
-      auto diag_level = opts_.strict_boolean_conditional;
-      maybe_report(section.variable.loc, diag_level, [&] {
-        return fmt::format(
-            "Condition '{}' is not a boolean. The encountered value is:\n{}",
-            section.variable.chain_string(),
-            to_string(section_variable));
-      });
-      if (diag_level == diagnostic_level::error) {
-        // Fail rendering in strict mode
-        throw abort_rendering();
-      }
+    const auto maybe_report_coercion = [&] {
+      maybe_report_boolean_coercion(section.variable, section_variable);
     };
 
     const auto do_visit = [&](const object& scope) {
@@ -373,25 +417,11 @@ class render_engine {
     // See render_options::strict_boolean_conditional for the coercion
     // rules
     section_variable.visit(
-        [&](boolean value) { do_conditional_visit(value); },
-        [&](null) {
-          maybe_report_boolean_coercion();
-          do_conditional_visit(false);
-        },
-        [&](i64 value) {
-          maybe_report_boolean_coercion();
-          do_conditional_visit(value != 0);
-        },
-        [&](f64 value) {
-          maybe_report_boolean_coercion();
-          do_conditional_visit(value != 0.0 && !std::isnan(value));
-        },
-        [&](const string& value) { do_conditional_visit(!value.empty()); },
         [&](const array& value) {
           if (section.inverted) {
             // This array is being used as a conditional
-            maybe_report_boolean_coercion();
-            if (value.empty()) {
+            maybe_report_coercion();
+            if (!coerce_to_boolean(value)) {
               // Empty arrays are falsy
               do_visit(whisker::make::null);
             }
@@ -404,9 +434,8 @@ class render_engine {
         [&](const native_object::ptr& value) {
           if (section.inverted) {
             // This native_object is being used as a conditional
-            maybe_report_boolean_coercion();
-            if (auto sequence = value->as_sequence();
-                sequence != nullptr && sequence->size() == 0) {
+            maybe_report_coercion();
+            if (!coerce_to_boolean(value)) {
               // Empty sequences are falsy
               do_visit(whisker::make::null);
             }
@@ -430,13 +459,48 @@ class render_engine {
         [&](const map&) {
           if (section.inverted) {
             // This map is being used as a conditional
-            maybe_report_boolean_coercion();
+            maybe_report_coercion();
             return;
           }
           // When maps are used in sections, they are "unpacked" into the block.
           // In other words, their properties become available in the current
           // scope.
           do_visit(section_variable);
+        },
+        [&](boolean value) { do_conditional_visit(value); },
+        [&](const auto& value) {
+          maybe_report_coercion();
+          do_conditional_visit(coerce_to_boolean(value));
+        });
+  }
+
+  void visit(const ast::if_block& if_block) {
+    const object& condition = lookup_variable(if_block.variable);
+
+    const auto maybe_report_coercion = [&] {
+      maybe_report_boolean_coercion(if_block.variable, condition);
+    };
+
+    const auto do_visit = [&](const object& scope,
+                              const ast::bodies& body_elements) {
+      eval_context_.push_scope(scope);
+      visit(body_elements);
+      eval_context_.pop_scope();
+    };
+
+    const auto do_conditional_visit = [&](bool condition) {
+      if (condition) {
+        do_visit(whisker::make::null, if_block.body_elements);
+      } else if (if_block.else_clause.has_value()) {
+        do_visit(whisker::make::null, if_block.else_clause->body_elements);
+      }
+    };
+
+    condition.visit(
+        [&](boolean value) { do_conditional_visit(value); },
+        [&](const auto& value) {
+          maybe_report_coercion();
+          do_conditional_visit(coerce_to_boolean(value));
         });
   }
 

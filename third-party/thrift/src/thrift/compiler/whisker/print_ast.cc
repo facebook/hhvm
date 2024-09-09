@@ -77,6 +77,17 @@ struct ast_visitor {
       visit(body, scope.open_node());
     }
   }
+  void visit(const ast::if_block& if_block, tree_printer::scope scope) const {
+    scope.println(" if-block {}", location(if_block.loc));
+    visit(if_block.variable, scope.open_property());
+    visit(if_block.body_elements, scope.open_node());
+
+    if (auto else_clause = if_block.else_clause) {
+      auto else_scope = scope.open_property();
+      else_scope.println(" else-block {}", location(else_clause->loc));
+      visit(else_clause->body_elements, else_scope.open_node());
+    }
+  }
   void visit(const ast::partial_apply& partial_apply, tree_printer::scope scope)
       const {
     scope.println(
@@ -106,7 +117,13 @@ struct ast_visitor {
     scope.println(
         " variable {} '{}'", location(variable.loc), variable.chain_string());
   }
-  void visit(const ast::body& body, tree_printer::scope scope) const {
+  // Prevent implicit conversion to ast::body. Otherwise, we can silently
+  // compile an infinitely recursive visit() chain if there is a missing
+  // overload for one of the alternatives in the variant.
+  template <
+      class T = ast::body,
+      typename = std::enable_if_t<std::is_same_v<T, ast::body>>>
+  void visit(const T& body, tree_printer::scope scope) const {
     // This node is transparent so it does not directly appear in the tree
     detail::variant_match(
         body, [&](const auto& node) { visit(node, std::move(scope)); });

@@ -453,6 +453,50 @@ TEST_F(RenderTest, section_block_inversion_non_boolean_condition_warning) {
           1)));
 }
 
+TEST_F(RenderTest, if_block) {
+  {
+    auto result = render(
+        "{{#if news.has-update?}}\n"
+        "Stuff is {{foo}} happening!\n"
+        "{{/if}}\n",
+        w::map(
+            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+             {"foo", w::string("now")}}));
+    EXPECT_EQ(*result, "Stuff is now happening!\n");
+  }
+  {
+    auto result = render(
+        "{{#if news.has-update?}}Stuff is {{foo}} happening!{{/if}}",
+        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+    EXPECT_EQ(*result, "");
+  }
+}
+
+TEST_F(RenderTest, if_else_block) {
+  {
+    auto result = render(
+        "{{#if news.has-update?}}\n"
+        "Stuff is {{foo}} happening!\n"
+        "{{else}}\n"
+        "Nothing is happening!\n"
+        "{{/if}}\n",
+        w::map(
+            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+             {"foo", w::string("now")}}));
+    EXPECT_EQ(*result, "Stuff is now happening!\n");
+  }
+  {
+    auto result = render(
+        "{{#if news.has-update?}}\n"
+        "Stuff is {{foo}} happening!\n"
+        "{{else}}\n"
+        "Nothing is happening!\n"
+        "{{/if}}\n",
+        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+    EXPECT_EQ(*result, "Nothing is happening!\n");
+  }
+}
+
 TEST_F(RenderTest, printable_types_strict_failure) {
   {
     auto result = render(

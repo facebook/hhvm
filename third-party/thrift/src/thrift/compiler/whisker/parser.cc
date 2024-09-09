@@ -418,6 +418,7 @@ class standalone_lines_scanner {
   //   - "{{^ ... }}"
   //   - "{{/ ... }}"
   //   - "{{> ... }}"
+  //   - "{{else}}"
   // ..and ONLY those constructs are candidates for whitespace stripping. That's
   // because these kind of templates are invisible in the output — their purpose
   // is purely to express intent within the templating language.
@@ -427,6 +428,7 @@ class standalone_lines_scanner {
     comment, // "{{!"
     block, // "{{#", "{{^", or "{{"/"}
     partial_apply, // "{{>"
+    else_clause, // "{{else}}"
     ineligible // "{{variable}} for example
   };
   static parse_result<standalone_compatible_kind> parse_standalone_compatible(
@@ -448,6 +450,9 @@ class standalone_lines_scanner {
         break;
       case tok::gt:
         kind = standalone_compatible_kind::partial_apply;
+        break;
+      case tok::kw_else:
+        kind = standalone_compatible_kind::else_clause;
         break;
       default:
         kind = standalone_compatible_kind::ineligible;
@@ -548,6 +553,7 @@ class parser {
 
   // root → { body* }
   std::optional<ast::root> parse_root(parser_scan_window scan) {
+    constexpr std::string_view expected_types = "text, template, or comment";
     try {
       auto original_scan = scan;
       ast::bodies bodies;
@@ -556,8 +562,15 @@ class parser {
           if (auto body = std::move(maybe_body).consume_and_advance(&scan)) {
             bodies.emplace_back(std::move(*body));
           }
+        } else if (auto else_clause = parse_else_clause(scan)) {
+          // "{{else}}" marks the end of a body and beginning of a new one,
+          // which cannot happen at the root scope.
+          report_fatal_error(
+              scan,
+              "expected {} but found dangling else-clause",
+              expected_types);
         } else {
-          report_expected(scan, "text, template, or comment");
+          report_expected(scan, expected_types);
         }
       }
       return ast::root{original_scan.start_location(), std::move(bodies)};
@@ -566,6 +579,19 @@ class parser {
       // engine
       return std::nullopt;
     }
+  }
+
+  // Parses the "{{else}}" clause which is a special construct that looks like
+  // variable interpolation but is actually a separator between two ast::bodies.
+  //
+  // else-clause → { "{{" ~ "else" ~ "}}" }
+  parse_result<std::monostate> parse_else_clause(parser_scan_window scan) {
+    if (!(try_consume_token(&scan, tok::open) &&
+          try_consume_token(&scan, tok::kw_else) &&
+          try_consume_token(&scan, tok::close))) {
+      return no_parse_result();
+    }
+    return {{}, scan};
   }
 
   // Returns an empty parse result if no body was found.
@@ -587,16 +613,16 @@ class parser {
         body = std::move(maybe_text).consume_and_advance(&scan);
       } else if (parse_result maybe_newline = parse_newline(scan)) {
         body = std::move(maybe_newline).consume_and_advance(&scan);
+      } else if (parse_result else_clause = parse_else_clause(scan)) {
+        // The "{{else}}" clause looks like variable interpolation so we should
+        // capture it first before recursing into parse_template. The else
+        // clause actually marks the end of the current block (and the beginning
+        // of the next one).
+        break;
       } else if (parse_result templ = parse_template(scan)) {
         detail::variant_match(
             std::move(templ).consume_and_advance(&scan),
-            [&](ast::variable&& variable) { body = std::move(variable); },
-            [&](ast::section_block&& section_block) {
-              body = std::move(section_block);
-            },
-            [&](ast::partial_apply&& partial_apply) {
-              body = std::move(partial_apply);
-            });
+            [&](auto&& t) { body = std::move(t); });
       } else if (parse_result comment = parse_comment(scan)) {
         body = std::move(comment).consume_and_advance(&scan);
       } else {
@@ -610,6 +636,22 @@ class parser {
       return no_parse_result();
     }
     return {std::move(body), scan};
+  }
+  /**
+   * Parses the grammar for "body*". If there are no bodies present, returns an
+   * empty vector.
+   *
+   * Post-condition:
+   *   - result.has_value() == true
+   */
+  parse_result<ast::bodies> parse_bodies(parser_scan_window scan) {
+    ast::bodies bodies;
+    while (parse_result maybe_body = parse_body(scan)) {
+      if (auto body = std::move(maybe_body).consume_and_advance(&scan)) {
+        bodies.emplace_back(std::move(*body));
+      }
+    }
+    return {std::move(bodies), scan};
   }
 
   // Returns an empty parse result if no text was found.
@@ -704,8 +746,11 @@ class parser {
     return {ast::comment{scan.range(), std::string(text.string_value())}, scan};
   }
 
-  using template_body =
-      std::variant<ast::variable, ast::section_block, ast::partial_apply>;
+  using template_body = std::variant<
+      ast::variable,
+      ast::section_block,
+      ast::if_block,
+      ast::partial_apply>;
   // template → { variable | section-block | partial-apply }
   parse_result<template_body> parse_template(parser_scan_window scan) {
     assert(scan.empty());
@@ -729,14 +774,15 @@ class parser {
     std::optional<template_body> templ;
     if (parse_result variable = parse_variable(scan)) {
       templ = std::move(variable).consume_and_advance(&scan);
+    } else if (parse_result if_block = parse_if_block(scan)) {
+      templ = std::move(if_block).consume_and_advance(&scan);
     } else if (parse_result section_block = parse_section_block(scan)) {
       templ = std::move(section_block).consume_and_advance(&scan);
     } else if (parse_result partial_apply = parse_partial_apply(scan)) {
       templ = std::move(partial_apply).consume_and_advance(&scan);
     }
     if (!templ.has_value()) {
-      report_expected(
-          scan, "variable, section-block, or partial-apply in template");
+      report_expected(scan, "variable, block, or partial-apply in template");
     }
     return {std::move(*templ), scan};
   }
@@ -849,14 +895,9 @@ class parser {
       report_expected(
           scan, fmt::format("{} to open section-block", tok::close));
     }
-
     scan = scan.make_fresh();
-    ast::bodies bodies;
-    while (parse_result maybe_body = parse_body(scan)) {
-      if (auto body = std::move(maybe_body).consume_and_advance(&scan)) {
-        bodies.emplace_back(std::move(*body));
-      }
-    }
+
+    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
 
     if (!try_consume_token(&scan, tok::open)) {
       report_expected(
@@ -913,6 +954,80 @@ class parser {
             is_inverted,
             std::move(open),
             std::move(bodies),
+        },
+        scan};
+  }
+
+  // if-block → { if-block-open ~ body* ~ else-block? ~ if-block-close }
+  // if-block-open → { "{{" ~ "#" ~ "if" ~ variable-lookup ~ "}}" }
+  // else-block → { "{{" ~ "else" ~ "}}" ~ body* }
+  // if-block-close → { "{{" ~ "/" ~ "if" ~ "}}" }
+  parse_result<ast::if_block> parse_if_block(parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!(try_consume_token(&scan, tok::open) &&
+          try_consume_token(&scan, tok::pound) &&
+          try_consume_token(&scan, tok::kw_if))) {
+      return no_parse_result();
+    }
+    scan = scan.make_fresh();
+
+    parse_result lookup = parse_variable_lookup(scan);
+    if (!lookup.has_value()) {
+      report_expected(scan, "variable-lookup to open if-block");
+    }
+    ast::variable_lookup open = std::move(lookup).consume_and_advance(&scan);
+    if (!try_consume_token(&scan, tok::close)) {
+      report_expected(scan, fmt::format("{} to open if-block", tok::close));
+    }
+    scan = scan.make_fresh();
+
+    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
+
+    auto else_ = std::invoke(
+        [this, scan]() mutable -> parse_result<ast::if_block::else_block> {
+          const auto else_scan_start = scan.start;
+          if (parse_result e = parse_else_clause(scan)) {
+            std::ignore = std::move(e).consume_and_advance(&scan);
+          } else {
+            return no_parse_result();
+          }
+          scan = scan.make_fresh();
+          auto else_bodies = parse_bodies(scan).consume_and_advance(&scan);
+          return {
+              ast::if_block::else_block{
+                  scan.with_start(else_scan_start).range(),
+                  std::move(else_bodies)},
+              scan};
+        });
+    auto else_block =
+        std::invoke([&]() -> std::optional<ast::if_block::else_block> {
+          if (else_.has_value()) {
+            return std::move(else_).consume_and_advance(&scan);
+          }
+          return std::nullopt;
+        });
+
+    const auto expect_on_close = [&](tok kind) {
+      if (!try_consume_token(&scan, kind)) {
+        report_expected(
+            scan,
+            fmt::format(
+                "{} to close if-block '{}'", kind, open.chain_string()));
+      }
+    };
+    expect_on_close(tok::open);
+    expect_on_close(tok::slash);
+    expect_on_close(tok::kw_if);
+    expect_on_close(tok::close);
+
+    return {
+        ast::if_block{
+            scan.with_start(scan_start).range(),
+            std::move(open),
+            std::move(bodies),
+            std::move(else_block),
         },
         scan};
   }

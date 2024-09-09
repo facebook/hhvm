@@ -274,6 +274,153 @@ TEST_F(ParserTest, section_close_by_itself) {
           1)));
 }
 
+TEST_F(ParserTest, basic_if) {
+  auto ast = parse_ast(
+      "{{#if news.has-update?}}\n"
+      "  Stuff is {{foo}} happening!\n"
+      "{{/if}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- if-block <line:1:1, line:3:8>\n"
+      "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
+      "| |- text <line:2:1, col:12> '  Stuff is '\n"
+      "| |- variable <line:2:12, col:19> 'foo'\n"
+      "| |- text <line:2:19, col:30> ' happening!'\n"
+      "| |- newline <line:2:30, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, basic_if_else) {
+  auto ast = parse_ast(
+      "{{#if news.has-update?}}\n"
+      "  Stuff is {{foo}} happening!\n"
+      "{{else}}\n"
+      "  Nothing is happening!\n"
+      "{{/if}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- if-block <line:1:1, line:5:8>\n"
+      "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
+      "| |- text <line:2:1, col:12> '  Stuff is '\n"
+      "| |- variable <line:2:12, col:19> 'foo'\n"
+      "| |- text <line:2:19, col:30> ' happening!'\n"
+      "| |- newline <line:2:30, line:3:1> '\\n'\n"
+      "| `- else-block <line:3:1, line:5:1>\n"
+      "|   |- text <line:4:1, col:24> '  Nothing is happening!'\n"
+      "|   |- newline <line:4:24, line:5:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, if_block_repeated_else) {
+  auto ast = parse_ast(
+      "{{#if news.has-update?}}\n"
+      "  Stuff is {{foo}} happening!\n"
+      "{{else}}\n"
+      "  Nothing is happening!\n"
+      "{{else}}\n"
+      "  Nothing is happening!\n"
+      "{{/if}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `/` to close if-block 'news.has-update?' but found `else`",
+          path_to_file(1),
+          5)));
+}
+
+TEST_F(ParserTest, if_block_else_by_itself) {
+  auto ast = parse_ast("{{else}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected text, template, or comment but found dangling else-clause",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, if_block_unclosed_with_else) {
+  auto ast = parse_ast("{{#if news.has-update?}}{{else}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `{{` to close if-block 'news.has-update?' but found EOF",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, if_block_nested) {
+  auto ast = parse_ast(
+      "{{#if news.has-update?}}\n"
+      "  {{#if update.is-important?}}\n"
+      "    Important stuff is {{foo}} happening!\n"
+      "  {{else}}\n"
+      "    Boring stuff is happening!\n"
+      "  {{/if}}\n"
+      "{{/if}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- if-block <line:1:1, line:7:8>\n"
+      "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
+      "| |- if-block <line:2:3, line:6:10>\n"
+      "| | `- variable-lookup <line:2:9, col:29> 'update.is-important?'\n"
+      "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
+      "| | |- variable <line:3:24, col:31> 'foo'\n"
+      "| | |- text <line:3:31, col:42> ' happening!'\n"
+      "| | |- newline <line:3:42, line:4:1> '\\n'\n"
+      "| | `- else-block <line:4:3, line:6:3>\n"
+      "| |   |- text <line:5:1, col:31> '    Boring stuff is happening!'\n"
+      "| |   |- newline <line:5:31, line:6:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, mismatched_if_hierarchy) {
+  auto ast = parse_ast(
+      "{{#if news.has-update?}}\n"
+      "  {{#update.is-important?}}\n"
+      "    Important stuff is {{foo}} happening!\n"
+      "    {{#inner}}{{/inner}}\n"
+      "  {{/if}}\n"
+      "{{/update.is-important?}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected variable-lookup to close section-block 'update.is-important?' but found `if`",
+          path_to_file(1),
+          5)));
+}
+
+TEST_F(ParserTest, if_by_itself) {
+  auto ast = parse_ast("{{#if}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected variable-lookup to open if-block but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, if_close_by_itself) {
+  auto ast = parse_ast("{{/if}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected text, template, or comment but found `{{`",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, basic_partial_apply) {
   auto ast = parse_ast("{{> path / to / file }}");
   EXPECT_EQ(

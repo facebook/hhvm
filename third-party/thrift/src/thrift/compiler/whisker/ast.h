@@ -29,14 +29,21 @@ struct text;
 struct newline;
 struct comment;
 struct section_block;
+struct if_block;
 struct partial_apply;
 struct variable;
 
 /**
  * The top-level types of constructs allowed in a Whisker source file.
  */
-using body = std::
-    variant<text, newline, comment, variable, section_block, partial_apply>;
+using body = std::variant<
+    text,
+    newline,
+    comment,
+    variable,
+    section_block,
+    if_block,
+    partial_apply>;
 using bodies = std::vector<body>;
 
 /**
@@ -125,6 +132,23 @@ struct section_block {
   bool inverted;
   variable_lookup variable;
   bodies body_elements;
+};
+
+/**
+ * A Whisker construct for conditionals. This matches Handlebars:
+ *   https://handlebarsjs.com/guide/builtin-helpers.html#if
+ */
+struct if_block {
+  source_range loc;
+  variable_lookup variable;
+  bodies body_elements;
+
+  // The {{else}} clause, if present.
+  struct else_block {
+    source_range loc;
+    bodies body_elements;
+  };
+  std::optional<else_block> else_clause;
 };
 
 /*

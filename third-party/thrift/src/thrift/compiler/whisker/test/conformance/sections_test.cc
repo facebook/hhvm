@@ -87,6 +87,7 @@ TEST_F(SectionsTest, ParentContexts) {
 // content conditionally if a variable exists.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L71-L78
 TEST_F(SectionsTest, VariableTest) {
+  strict_boolean_conditional = diagnostic_level::debug;
   EXPECT_EQ(
       "\"bar is bar\"",
       *render(

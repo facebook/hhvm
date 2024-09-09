@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "307",
+        "line": "319",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "307",
-        "bodyend": "310"
+        "bodystart": "319",
+        "bodyend": "322"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator-=(U&amp;&amp; val)",

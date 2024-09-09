@@ -17,11 +17,11 @@
       "name_html": "invert",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "169",
+        "line": "181",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "169",
-        "bodyend": "172"
+        "bodystart": "181",
+        "bodyend": "184"
       },
       "definition": {
         "simple_html": "void invert()",

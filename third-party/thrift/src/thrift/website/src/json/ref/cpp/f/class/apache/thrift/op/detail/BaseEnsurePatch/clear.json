@@ -58,11 +58,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "376",
+        "line": "398",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "376",
-        "bodyend": "384"
+        "bodystart": "398",
+        "bodyend": "406"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",

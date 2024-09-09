@@ -18,11 +18,11 @@
       "name_html": "release",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1014",
+        "line": "1019",
         "column": "31",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1014",
-        "bodyend": "1016"
+        "bodystart": "1019",
+        "bodyend": "1021"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE std::unique_ptr&lt;element_type&gt; release()",

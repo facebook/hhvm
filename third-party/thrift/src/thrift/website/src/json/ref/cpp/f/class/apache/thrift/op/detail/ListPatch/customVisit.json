@@ -32,7 +32,7 @@
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
         "bodystart": "120",
-        "bodyend": "135"
+        "bodyend": "136"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",

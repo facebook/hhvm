@@ -31,7 +31,7 @@
   "href": "/ref/cpp/thrift/lib/cpp2/op/StdSerializer.cpp",
   "free_functions": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1acdb06f18f0bb74ebd476ab7725dc497f",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a8a308bfad433b5349d096d30d38d118a",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -50,12 +50,17 @@
       ],
       "type_html": "void",
       "definition_html": "void apache::thrift::op::registerStdSerializers",
-      "argsstring_html": "(type::TypeRegistry &amp;registry)",
+      "argsstring_html": "(type::TypeRegistry &amp;registry, bool skipDuplicates=false)",
       "name_html": "registerStdSerializers",
       "param": [
         {
           "type_html": "type::TypeRegistry &amp;",
           "declname_html": "registry"
+        },
+        {
+          "type_html": "bool",
+          "declname_html": "skipDuplicates",
+          "defval_html": "false"
         }
       ],
       "location": {
@@ -64,15 +69,15 @@
         "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
         "bodystart": "67",
-        "bodyend": "76"
+        "bodyend": "77"
       },
       "definition": {
-        "simple_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(type::TypeRegistry&amp; registry)",
-        "simple_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(type::TypeRegistry& registry)",
-        "detailed_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(type::TypeRegistry&amp; registry)",
-        "detailed_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(type::TypeRegistry& registry)",
+        "simple_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(\n    type::TypeRegistry&amp; registry, bool skipDuplicates = false)",
+        "simple_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(\n    type::TypeRegistry& registry, bool skipDuplicates = false)",
+        "detailed_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(\n    type::TypeRegistry&amp; registry, bool skipDuplicates = false)",
+        "detailed_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(\n    type::TypeRegistry& registry, bool skipDuplicates = false)",
         "original_definition_html": "void apache::thrift::op::registerStdSerializers",
-        "original_argsstring_html": "(type::TypeRegistry &amp;registry)"
+        "original_argsstring_html": "(type::TypeRegistry &amp;registry, bool skipDuplicates=false)"
       },
       "compoundname_html": "apache::thrift::op::registerStdSerializers",
       "namespace_html": "apache::thrift::op"
@@ -88,7 +93,7 @@
           "compoundname_html": "apache::thrift::op::registerStdSerializers",
           "functions": [
             {
-              "refid": "namespaceapache_1_1thrift_1_1op_1acdb06f18f0bb74ebd476ab7725dc497f",
+              "refid": "namespaceapache_1_1thrift_1_1op_1a8a308bfad433b5349d096d30d38d118a",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -107,12 +112,17 @@
               ],
               "type_html": "void",
               "definition_html": "void apache::thrift::op::registerStdSerializers",
-              "argsstring_html": "(type::TypeRegistry &amp;registry)",
+              "argsstring_html": "(type::TypeRegistry &amp;registry, bool skipDuplicates=false)",
               "name_html": "registerStdSerializers",
               "param": [
                 {
                   "type_html": "type::TypeRegistry &amp;",
                   "declname_html": "registry"
+                },
+                {
+                  "type_html": "bool",
+                  "declname_html": "skipDuplicates",
+                  "defval_html": "false"
                 }
               ],
               "location": {
@@ -121,15 +131,15 @@
                 "column": "6",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
                 "bodystart": "67",
-                "bodyend": "76"
+                "bodyend": "77"
               },
               "definition": {
-                "simple_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(type::TypeRegistry&amp; registry)",
-                "simple_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(type::TypeRegistry& registry)",
-                "detailed_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(type::TypeRegistry&amp; registry)",
-                "detailed_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(type::TypeRegistry& registry)",
+                "simple_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(\n    type::TypeRegistry&amp; registry, bool skipDuplicates = false)",
+                "simple_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(\n    type::TypeRegistry& registry, bool skipDuplicates = false)",
+                "detailed_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(\n    type::TypeRegistry&amp; registry, bool skipDuplicates = false)",
+                "detailed_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(\n    type::TypeRegistry& registry, bool skipDuplicates = false)",
                 "original_definition_html": "void apache::thrift::op::registerStdSerializers",
-                "original_argsstring_html": "(type::TypeRegistry &amp;registry)"
+                "original_argsstring_html": "(type::TypeRegistry &amp;registry, bool skipDuplicates=false)"
               },
               "compoundname_html": "apache::thrift::op::registerStdSerializers",
               "namespace_html": "apache::thrift::op"

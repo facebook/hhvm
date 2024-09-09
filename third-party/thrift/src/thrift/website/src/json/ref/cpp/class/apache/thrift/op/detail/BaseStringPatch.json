@@ -37,10 +37,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "345",
+        "line": "357",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "345",
+        "bodystart": "357",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch"
@@ -54,10 +54,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "346",
+        "line": "358",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "346",
+        "bodystart": "358",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch"
@@ -109,11 +109,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "354",
+        "line": "366",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "354",
-        "bodyend": "357"
+        "bodystart": "366",
+        "bodyend": "369"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator+=(U&amp;&amp; val)",
@@ -154,11 +154,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "380",
+        "line": "392",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "380",
-        "bodyend": "392"
+        "bodystart": "392",
+        "bodyend": "404"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -205,11 +205,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "402",
+        "line": "414",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "402",
-        "bodyend": "404"
+        "bodystart": "414",
+        "bodyend": "416"
       },
       "description": {
         "brief_html": "<p>Concat two strings. </p>"
@@ -244,11 +244,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "407",
+        "line": "419",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "407",
-        "bodyend": "410"
+        "bodystart": "419",
+        "bodyend": "422"
       },
       "description": {
         "brief_html": "<p>Concat two strings. </p>"
@@ -257,11 +257,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "line": "344",
+    "line": "356",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "bodystart": "344",
-    "bodyend": "411"
+    "bodystart": "356",
+    "bodyend": "423"
   },
   "namespacednames_html": [
     "apache",
@@ -792,11 +792,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "354",
+                "line": "366",
                 "column": "11",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "354",
-                "bodyend": "357"
+                "bodystart": "366",
+                "bodyend": "369"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator+=(U&amp;&amp; val)",
@@ -859,11 +859,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "380",
+                "line": "392",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "380",
-                "bodyend": "392"
+                "bodystart": "392",
+                "bodyend": "404"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",

@@ -27,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "565",
+        "line": "577",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "565",
-        "bodyend": "569"
+        "bodystart": "577",
+        "bodyend": "581"
       },
       "definition": {
         "simple_html": "bool operator()(const Object&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
@@ -70,11 +70,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "570",
+        "line": "582",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "570",
-        "bodyend": "577"
+        "bodystart": "582",
+        "bodyend": "589"
       },
       "definition": {
         "simple_html": "bool operator()(const Value&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",

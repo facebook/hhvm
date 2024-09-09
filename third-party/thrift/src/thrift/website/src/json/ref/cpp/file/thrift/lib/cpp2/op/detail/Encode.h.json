@@ -22,6 +22,10 @@
     },
     {
       "local": "no",
+      "text_html": "folly/container/Reserve.h"
+    },
+    {
+      "local": "no",
       "text_html": "folly/io/IOBuf.h"
     },
     {

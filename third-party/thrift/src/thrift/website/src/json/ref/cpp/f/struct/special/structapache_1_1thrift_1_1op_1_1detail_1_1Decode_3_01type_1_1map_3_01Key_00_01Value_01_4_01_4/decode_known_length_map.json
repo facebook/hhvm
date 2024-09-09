@@ -39,11 +39,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "985",
+        "line": "1014",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "985",
-        "bodyend": "1009"
+        "bodystart": "1014",
+        "bodyend": "1038"
       },
       "definition": {
         "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
@@ -94,11 +94,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "1015",
+        "line": "1044",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "1015",
-        "bodyend": "1026"
+        "bodystart": "1044",
+        "bodyend": "1055"
       },
       "definition": {
         "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",

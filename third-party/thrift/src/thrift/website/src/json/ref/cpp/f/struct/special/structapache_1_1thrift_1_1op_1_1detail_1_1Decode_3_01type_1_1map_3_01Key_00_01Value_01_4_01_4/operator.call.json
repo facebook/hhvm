@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "1030",
+        "line": "1059",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "1030",
-        "bodyend": "1057"
+        "bodystart": "1059",
+        "bodyend": "1086"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nvoid operator()(Protocol&amp; prot, MapType&amp; map) const",

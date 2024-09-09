@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "172",
+        "line": "173",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "172",
+        "bodystart": "173",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1SetPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "173",
+        "line": "174",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "173",
+        "bodystart": "174",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1SetPatch"
@@ -107,11 +107,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "182",
+        "line": "183",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "182",
-        "bodyend": "185"
+        "bodystart": "183",
+        "bodyend": "186"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid add(C&amp;&amp; keys)",
@@ -154,11 +154,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "188",
+        "line": "189",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "188",
-        "bodyend": "190"
+        "bodystart": "189",
+        "bodyend": "191"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid emplace(Args&amp;&amp;... args)",
@@ -200,11 +200,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "193",
+        "line": "194",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "193",
-        "bodyend": "195"
+        "bodystart": "194",
+        "bodyend": "196"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid insert(U&amp;&amp; val)",
@@ -246,11 +246,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "199",
+        "line": "200",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "199",
-        "bodyend": "206"
+        "bodystart": "200",
+        "bodyend": "207"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid remove(C&amp;&amp; keys)",
@@ -292,11 +292,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "209",
+        "line": "210",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "209",
-        "bodyend": "211"
+        "bodystart": "210",
+        "bodyend": "212"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid erase(U&amp;&amp; val)",
@@ -337,11 +337,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "235",
+        "line": "236",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "235",
-        "bodyend": "250"
+        "bodystart": "236",
+        "bodyend": "251"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -377,11 +377,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "252",
+        "line": "253",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "252",
-        "bodyend": "262"
+        "bodystart": "253",
+        "bodyend": "263"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -397,11 +397,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-    "line": "171",
+    "line": "172",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-    "bodystart": "171",
-    "bodyend": "267"
+    "bodystart": "172",
+    "bodyend": "268"
   },
   "namespacednames_html": [
     "apache",
@@ -934,11 +934,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "182",
+                "line": "183",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "182",
-                "bodyend": "185"
+                "bodystart": "183",
+                "bodyend": "186"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nvoid add(C&amp;&amp; keys)",
@@ -1003,11 +1003,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "188",
+                "line": "189",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "188",
-                "bodyend": "190"
+                "bodystart": "189",
+                "bodyend": "191"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nvoid emplace(Args&amp;&amp;... args)",
@@ -1071,11 +1071,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "193",
+                "line": "194",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "193",
-                "bodyend": "195"
+                "bodystart": "194",
+                "bodyend": "196"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid insert(U&amp;&amp; val)",
@@ -1139,11 +1139,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "199",
+                "line": "200",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "199",
-                "bodyend": "206"
+                "bodystart": "200",
+                "bodyend": "207"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nvoid remove(C&amp;&amp; keys)",
@@ -1207,11 +1207,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "209",
+                "line": "210",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "209",
-                "bodyend": "211"
+                "bodystart": "210",
+                "bodyend": "212"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid erase(U&amp;&amp; val)",
@@ -1274,11 +1274,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "235",
+                "line": "236",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "235",
-                "bodyend": "250"
+                "bodystart": "236",
+                "bodyend": "251"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -1653,11 +1653,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "252",
+                "line": "253",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "252",
-                "bodyend": "262"
+                "bodystart": "253",
+                "bodyend": "263"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",

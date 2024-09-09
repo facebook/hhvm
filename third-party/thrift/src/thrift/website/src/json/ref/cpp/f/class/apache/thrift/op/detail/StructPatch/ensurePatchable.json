@@ -4,31 +4,76 @@
   "compoundname_html": "apache::thrift::op::detail::StructPatch::ensurePatchable",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a69e192e5e9c63c134fe13994d3585eaf",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a2cacd962b7bba639c189cba26dc3ef39",
       "prot": "protected",
       "static": "no",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "T"
+        }
+      ],
+      "type_html": "<code>if_union_patch</code>&lt; U &gt;",
+      "definition_html": "if_union_patch&lt;U&gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
       "argsstring_html": "()",
       "name_html": "ensurePatchable",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "402",
-        "column": "8",
+        "line": "427",
+        "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "402",
-        "bodyend": "423"
+        "bodystart": "427",
+        "bodyend": "434"
       },
       "definition": {
-        "simple_html": "void ensurePatchable()",
-        "simple_raw": "void ensurePatchable()",
-        "detailed_html": "protected inline void ensurePatchable()",
-        "detailed_raw": "protected inline void ensurePatchable()",
-        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
+        "simple_html": "template &lt;typename U = T&gt;\nif_union_patch&lt;U&gt; ensurePatchable()",
+        "simple_raw": "template <typename U = T>\nif_union_patch<U> ensurePatchable()",
+        "detailed_html": "template &lt;typename U = T&gt; protected inline if_union_patch&lt;U&gt; ensurePatchable()",
+        "detailed_raw": "template <typename U = T> protected inline if_union_patch<U> ensurePatchable()",
+        "original_definition_html": "if_union_patch&lt;U&gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+      "compoundname_html": "apache::thrift::op::detail::StructPatch::ensurePatchable"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1adb696a295bf8d6507e5b081b24726ecb",
+      "prot": "protected",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "T"
+        }
+      ],
+      "type_html": "<code>if_not_union_patch</code>&lt; U &gt;",
+      "definition_html": "if_not_union_patch&lt;U&gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
+      "argsstring_html": "()",
+      "name_html": "ensurePatchable",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "438",
+        "column": "22",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "438",
+        "bodyend": "459"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = T&gt;\nif_not_union_patch&lt;U&gt; ensurePatchable()",
+        "simple_raw": "template <typename U = T>\nif_not_union_patch<U> ensurePatchable()",
+        "detailed_html": "template &lt;typename U = T&gt;\nprotected inline if_not_union_patch&lt;U&gt; ensurePatchable()",
+        "detailed_raw": "template <typename U = T>\nprotected inline if_not_union_patch<U> ensurePatchable()",
+        "original_definition_html": "if_not_union_patch&lt;U&gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",

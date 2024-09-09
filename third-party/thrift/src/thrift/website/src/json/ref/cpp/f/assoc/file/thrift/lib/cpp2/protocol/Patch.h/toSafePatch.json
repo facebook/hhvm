@@ -23,10 +23,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "120",
+        "line": "129",
         "column": "8",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "120",
+        "declline": "129",
         "declcolumn": "8"
       },
       "definition": {

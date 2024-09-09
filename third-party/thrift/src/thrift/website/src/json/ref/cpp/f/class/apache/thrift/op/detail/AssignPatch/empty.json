@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "empty",
+  "compoundname_html": "apache::thrift::op::detail::AssignPatch::empty",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1a35505ce0b57d5fd6dd506eaa7112498c",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+      "argsstring_html": "() const",
+      "name_html": "empty",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "136",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "136",
+        "bodyend": "136"
+      },
+      "definition": {
+        "simple_html": "bool empty() const",
+        "simple_raw": "bool empty() const",
+        "detailed_html": "inline bool empty() const",
+        "detailed_raw": "inline bool empty() const",
+        "original_definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/empty",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/empty",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch",
+      "compoundname_html": "apache::thrift::op::detail::AssignPatch::empty"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/AssignPatch/empty",
+  "minprot": "public",
+  "displayname_html": "empty",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/empty",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/empty",
+  "parent_links": [
+    {
+      "text_html": "AssignPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+    }
+  ]
+}

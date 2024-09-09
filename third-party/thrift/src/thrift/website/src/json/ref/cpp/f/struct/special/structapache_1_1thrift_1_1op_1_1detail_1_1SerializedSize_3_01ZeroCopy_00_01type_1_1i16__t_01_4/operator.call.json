@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "160",
+        "line": "161",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "160",
-        "bodyend": "162"
+        "bodystart": "161",
+        "bodyend": "163"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, int16_t i) const",
@@ -80,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "164",
+        "line": "165",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "164",
-        "bodyend": "166"
+        "bodystart": "165",
+        "bodyend": "167"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, uint16_t i) const",

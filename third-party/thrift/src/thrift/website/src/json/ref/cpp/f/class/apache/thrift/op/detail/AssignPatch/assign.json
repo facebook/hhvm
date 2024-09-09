@@ -195,11 +195,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "64",
+        "line": "66",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "64",
-        "bodyend": "67"
+        "bodystart": "66",
+        "bodyend": "69"
       },
       "definition": {
         "simple_html": "void assign(T a)",

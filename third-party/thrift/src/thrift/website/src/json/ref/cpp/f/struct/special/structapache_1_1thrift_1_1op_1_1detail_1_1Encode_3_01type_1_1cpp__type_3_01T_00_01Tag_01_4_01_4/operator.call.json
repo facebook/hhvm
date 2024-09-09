@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "656",
+        "line": "659",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "656",
-        "bodyend": "662"
+        "bodystart": "659",
+        "bodyend": "665"
       },
       "definition": {
         "simple_html": "template &lt;class Protocol, class U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",

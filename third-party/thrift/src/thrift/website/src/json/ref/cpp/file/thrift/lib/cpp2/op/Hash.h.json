@@ -35,7 +35,7 @@
   "href": "/ref/cpp/thrift/lib/cpp2/op/Hash.h",
   "free_vars": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a1c8a7acb64724d5c2b00a809b2fc1f07",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a2663ce89161e89c9c1f5839cf4d78212",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -43,34 +43,42 @@
       "tparams": [
         {
           "type_html": "typename Tag"
+        },
+        {
+          "type_html": "typename Hasher",
+          "defval_html": "void"
         }
       ],
-      "type_html": "constexpr <code>Hash</code>&lt; Tag &gt;",
-      "definition_html": "constexpr Hash&lt;Tag&gt; apache::thrift::op::hash",
+      "type_html": "constexpr <code>Hash</code>&lt; Tag, Hasher &gt;",
+      "definition_html": "constexpr Hash&lt;Tag, Hasher&gt; apache::thrift::op::hash",
       "argsstring_html": "",
       "name_html": "hash",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Hash.h",
-        "line": "37",
+        "line": "38",
         "column": "23",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Hash.h",
-        "bodystart": "37",
+        "bodystart": "38",
         "bodyend": "-1"
       }
     }
   ],
   "free_typedefs": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a8d72c791012dab4f41fefcf2fc35b690",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a851401609f0715afe6ba90f006169554",
       "prot": "public",
       "tparams": [
         {
           "type_html": "typename Tag"
+        },
+        {
+          "type_html": "typename Hasher",
+          "defval_html": "void"
         }
       ],
-      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Hash\">detail::Hash</a>&lt;Tag&gt;",
-      "definition_html": "using apache::thrift::op::Hash = typedef detail::Hash&lt;Tag&gt;",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Hash\">detail::Hash</a>&lt;Tag, Hasher&gt;",
+      "definition_html": "using apache::thrift::op::Hash = typedef detail::Hash&lt;Tag, Hasher&gt;",
       "argsstring_html": "",
       "name_html": "Hash",
       "location": {

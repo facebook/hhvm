@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "115",
+        "line": "118",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "115",
-        "bodyend": "121"
+        "bodystart": "118",
+        "bodyend": "124"
       },
       "definition": {
         "simple_html": "template &lt;class Protocol&gt;\nuint32_t encode(Protocol&amp; prot) const",

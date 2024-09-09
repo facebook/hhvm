@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "303",
+        "line": "313",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "303",
-        "bodyend": "364"
+        "bodystart": "313",
+        "bodyend": "386"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -43,7 +43,7 @@
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
       },
       "description": {
-        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre> For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre> and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice \n</pre> </p>"
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  // For optional fields in structs and fields in unions\n  template&lt;class Id&gt; void ensure(const op::get_native_type&lt;Id&gt;&amp;);\n  // For non-optional fields in structs\n  template&lt;class Id&gt; void ensure();\n}\n</pre> For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre> and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice \n</pre> </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
@@ -54,7 +54,7 @@
   "filepath": "f/class/apache/thrift/op/detail/UnionPatch/customVisit",
   "minprot": "public",
   "displayname_html": "customVisit",
-  "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre> For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre> and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice \n</pre> </p>",
+  "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  // For optional fields in structs and fields in unions\n  template&lt;class Id&gt; void ensure(const op::get_native_type&lt;Id&gt;&amp;);\n  // For non-optional fields in structs\n  template&lt;class Id&gt; void ensure();\n}\n</pre> For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre> and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice \n</pre> </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisit",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisit",

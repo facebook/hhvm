@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2286",
+        "line": "2300",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2286",
-        "bodyend": "2289"
+        "bodystart": "2300",
+        "bodyend": "2303"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void copy_from(const terse_field_ref&lt;U&gt;&amp; other)",

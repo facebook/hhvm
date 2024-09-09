@@ -407,7 +407,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "168",
+        "line": "175",
         "column": "19"
       },
       "definition": {
@@ -443,7 +443,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "169",
+        "line": "176",
         "column": "19"
       },
       "definition": {

@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "56",
+        "line": "58",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "56",
+        "bodystart": "58",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "57",
+        "line": "59",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "57",
+        "bodystart": "59",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch"
@@ -68,10 +68,10 @@
       "name_html": "Tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "58",
+        "line": "60",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "58",
+        "bodystart": "60",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch"
@@ -118,11 +118,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "64",
+        "line": "66",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "64",
-        "bodyend": "67"
+        "bodystart": "66",
+        "bodyend": "69"
       },
       "definition": {
         "simple_html": "void assign(T a)",
@@ -155,11 +155,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "69",
+        "line": "71",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "69",
-        "bodyend": "72"
+        "bodystart": "71",
+        "bodyend": "74"
       },
       "definition": {
         "simple_html": "auto&amp; operator=(T a)",
@@ -192,11 +192,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "74",
+        "line": "76",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "74",
-        "bodyend": "82"
+        "bodystart": "76",
+        "bodyend": "84"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -229,11 +229,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "84",
+        "line": "86",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "84",
-        "bodyend": "112"
+        "bodystart": "86",
+        "bodyend": "115"
       },
       "definition": {
         "simple_html": "void merge(AssignPatch other)",
@@ -271,11 +271,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "115",
+        "line": "118",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "115",
-        "bodyend": "121"
+        "bodystart": "118",
+        "bodyend": "124"
       },
       "definition": {
         "simple_html": "template &lt;class Protocol&gt;\nuint32_t encode(Protocol&amp; prot) const",
@@ -313,11 +313,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "124",
+        "line": "127",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "124",
-        "bodyend": "131"
+        "bodystart": "127",
+        "bodyend": "134"
       },
       "definition": {
         "simple_html": "template &lt;class Protocol&gt;\nvoid decode(Protocol&amp; prot)",
@@ -329,6 +329,68 @@
       },
       "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/decode",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/decode"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1a35505ce0b57d5fd6dd506eaa7112498c",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+      "argsstring_html": "() const",
+      "name_html": "empty",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "136",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "136",
+        "bodyend": "136"
+      },
+      "definition": {
+        "simple_html": "bool empty() const",
+        "simple_raw": "bool empty() const",
+        "detailed_html": "inline bool empty() const",
+        "detailed_raw": "inline bool empty() const",
+        "original_definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/empty",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/empty"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1ae1e3e576acc65d980c130b1ab8fca8dc",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::reset",
+      "argsstring_html": "()",
+      "name_html": "reset",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "138",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "138",
+        "bodyend": "141"
+      },
+      "definition": {
+        "simple_html": "void reset()",
+        "simple_raw": "void reset()",
+        "detailed_html": "inline void reset()",
+        "detailed_raw": "inline void reset()",
+        "original_definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::reset",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/reset",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/reset"
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1ab8c8b911261fd9d7a9eac81b2a0ff739",
@@ -350,11 +412,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "137",
+        "line": "147",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "137",
-        "bodyend": "144"
+        "bodystart": "147",
+        "bodyend": "156"
       },
       "definition": {
         "simple_html": "void createFromObject(protocol::Object v)",
@@ -393,21 +455,21 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "147",
+        "line": "159",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "147",
+        "bodystart": "159",
         "bodyend": "-1"
       }
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "line": "55",
+    "line": "57",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "bodystart": "55",
-    "bodyend": "148"
+    "bodystart": "57",
+    "bodyend": "160"
   },
   "namespacednames_html": [
     "apache",
@@ -429,10 +491,10 @@
       "name_html": "dynPatch_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "135",
+        "line": "145",
         "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "135",
+        "bodystart": "145",
         "bodyend": "-1"
       }
     }
@@ -931,11 +993,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "64",
+                "line": "66",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "64",
-                "bodyend": "67"
+                "bodystart": "66",
+                "bodyend": "69"
               },
               "definition": {
                 "simple_html": "void assign(T a)",
@@ -1304,11 +1366,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "69",
+                "line": "71",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "69",
-                "bodyend": "72"
+                "bodystart": "71",
+                "bodyend": "74"
               },
               "definition": {
                 "simple_html": "auto&amp; operator=(T a)",
@@ -1636,11 +1698,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "74",
+                "line": "76",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "74",
-                "bodyend": "82"
+                "bodystart": "76",
+                "bodyend": "84"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -1742,11 +1804,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "84",
+                "line": "86",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "84",
-                "bodyend": "112"
+                "bodystart": "86",
+                "bodyend": "115"
               },
               "definition": {
                 "simple_html": "void merge(AssignPatch other)",
@@ -1806,11 +1868,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "115",
+                "line": "118",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "115",
-                "bodyend": "121"
+                "bodystart": "118",
+                "bodyend": "124"
               },
               "definition": {
                 "simple_html": "template &lt;class Protocol&gt;\nuint32_t encode(Protocol&amp; prot) const",
@@ -1870,11 +1932,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "124",
+                "line": "127",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "124",
-                "bodyend": "131"
+                "bodystart": "127",
+                "bodyend": "134"
               },
               "definition": {
                 "simple_html": "template &lt;class Protocol&gt;\nvoid decode(Protocol&amp; prot)",
@@ -1897,6 +1959,112 @@
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/decode",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/decode",
+          "parent_links": [
+            {
+              "text_html": "AssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "empty",
+          "compoundname_html": "apache::thrift::op::detail::AssignPatch::empty",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1a35505ce0b57d5fd6dd506eaa7112498c",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+              "argsstring_html": "() const",
+              "name_html": "empty",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "line": "136",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "bodystart": "136",
+                "bodyend": "136"
+              },
+              "definition": {
+                "simple_html": "bool empty() const",
+                "simple_raw": "bool empty() const",
+                "detailed_html": "inline bool empty() const",
+                "detailed_raw": "inline bool empty() const",
+                "original_definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/empty",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/empty",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch",
+              "compoundname_html": "apache::thrift::op::detail::AssignPatch::empty"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/detail/AssignPatch/empty",
+          "minprot": "public",
+          "displayname_html": "empty",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/empty",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/empty",
+          "parent_links": [
+            {
+              "text_html": "AssignPatch",
+              "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "reset",
+          "compoundname_html": "apache::thrift::op::detail::AssignPatch::reset",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1ae1e3e576acc65d980c130b1ab8fca8dc",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::reset",
+              "argsstring_html": "()",
+              "name_html": "reset",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "line": "138",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "bodystart": "138",
+                "bodyend": "141"
+              },
+              "definition": {
+                "simple_html": "void reset()",
+                "simple_raw": "void reset()",
+                "detailed_html": "inline void reset()",
+                "detailed_raw": "inline void reset()",
+                "original_definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::reset",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/reset",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AssignPatch/reset",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch",
+              "compoundname_html": "apache::thrift::op::detail::AssignPatch::reset"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/detail/AssignPatch/reset",
+          "minprot": "public",
+          "displayname_html": "reset",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/reset",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AssignPatch/reset",
           "parent_links": [
             {
               "text_html": "AssignPatch",
@@ -1929,11 +2097,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "137",
+                "line": "147",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "137",
-                "bodyend": "144"
+                "bodystart": "147",
+                "bodyend": "156"
               },
               "definition": {
                 "simple_html": "void createFromObject(protocol::Object v)",

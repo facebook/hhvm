@@ -24,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1749",
+        "line": "1760",
         "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1749",
-        "bodyend": "1750"
+        "bodystart": "1760",
+        "bodyend": "1761"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE required_field_ref(reference_type value)",
@@ -59,7 +59,7 @@
         },
         {
           "type_html": "typename",
-          "defval_html": "<code>detail::EnableIfImplicit</code>&lt;T, U&gt;"
+          "defval_html": "<code>apache::thrift::detail::EnableIfImplicit</code>&lt;T, U&gt;"
         }
       ],
       "type_html": "FOLLY_ERASE",
@@ -74,17 +74,17 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1753",
+        "line": "1766",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1753",
-        "bodyend": "1755"
+        "bodystart": "1766",
+        "bodyend": "1768"
       },
       "definition": {
-        "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE required_field_ref(const required_field_ref&lt;U&gt;&amp; other)",
-        "simple_raw": "template <typename U, typename = detail::EnableIfImplicit<T, U>>\nFOLLY_ERASE required_field_ref(const required_field_ref<U>& other)",
-        "detailed_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\ninline FOLLY_ERASE required_field_ref(\n    const required_field_ref&lt;U&gt;&amp; other) noexcept",
-        "detailed_raw": "template <typename U, typename = detail::EnableIfImplicit<T, U>>\ninline FOLLY_ERASE required_field_ref(\n    const required_field_ref<U>& other) noexcept",
+        "simple_html": "template &lt;typename U, typename = apache::thrift::detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE required_field_ref(const required_field_ref&lt;U&gt;&amp; other)",
+        "simple_raw": "template <typename U, typename = apache::thrift::detail::EnableIfImplicit<T, U>>\nFOLLY_ERASE required_field_ref(const required_field_ref<U>& other)",
+        "detailed_html": "template &lt;typename U, typename = apache::thrift::detail::EnableIfImplicit&lt;T, U&gt;&gt;\ninline FOLLY_ERASE required_field_ref(\n    const required_field_ref&lt;U&gt;&amp; other) noexcept",
+        "detailed_raw": "template <typename U, typename = apache::thrift::detail::EnableIfImplicit<T, U>>\ninline FOLLY_ERASE required_field_ref(\n    const required_field_ref<U>& other) noexcept",
         "original_definition_html": "FOLLY_ERASE apache::thrift::required_field_ref&lt; T &gt;::required_field_ref",
         "original_argsstring_html": "(const required_field_ref&lt; U &gt; &amp;other) noexcept"
       },

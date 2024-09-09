@@ -17,11 +17,11 @@
       "name_html": "to_optional",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "929",
+        "line": "934",
         "column": "29",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "929",
-        "bodyend": "933"
+        "bodystart": "934",
+        "bodyend": "938"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE std::optional&lt;std::remove_const_t&lt;value_type&gt;&gt; to_optional() const",

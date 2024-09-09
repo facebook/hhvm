@@ -204,11 +204,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "629",
+        "line": "675",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "629",
-        "bodyend": "631"
+        "bodystart": "675",
+        "bodyend": "677"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\nvoid assign(U&amp;&amp; val)",

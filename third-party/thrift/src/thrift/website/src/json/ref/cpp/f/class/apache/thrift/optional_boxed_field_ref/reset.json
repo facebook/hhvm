@@ -18,11 +18,11 @@
       "name_html": "reset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "941",
+        "line": "946",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "941",
-        "bodyend": "941"
+        "bodystart": "946",
+        "bodyend": "946"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void reset()",
@@ -58,11 +58,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1018",
+        "line": "1023",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1018",
-        "bodyend": "1020"
+        "bodystart": "1023",
+        "bodyend": "1025"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void reset(std::unique_ptr&lt;element_type&gt; ptr)",

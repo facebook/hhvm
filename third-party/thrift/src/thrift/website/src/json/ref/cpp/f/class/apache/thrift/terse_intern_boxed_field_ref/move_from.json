@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1434",
+        "line": "1443",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1434",
-        "bodyend": "1438"
+        "bodystart": "1443",
+        "bodyend": "1447"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void move_from(terse_intern_boxed_field_ref&lt;U&gt; other)",

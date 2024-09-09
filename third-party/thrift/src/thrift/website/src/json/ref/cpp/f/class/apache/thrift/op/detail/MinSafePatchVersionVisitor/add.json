@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "add",
+  "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::add",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor_1a127571a5ff9276beaa51a84749f4e7d2",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::add",
+      "argsstring_html": "(const T &amp;)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "const T &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "line": "110",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "bodystart": "110",
+        "bodyend": "110"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nvoid add(const T&amp;)",
+        "simple_raw": "template <typename T>\nvoid add(const T&)",
+        "detailed_html": "template &lt;typename T&gt;\ninline void add(const T&amp;)",
+        "detailed_raw": "template <typename T>\ninline void add(const T&)",
+        "original_definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::add",
+        "original_argsstring_html": "(const T &amp;)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/add",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/add",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor",
+      "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::add"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/add",
+  "minprot": "public",
+  "displayname_html": "add",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/add",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/add",
+  "parent_links": [
+    {
+      "text_html": "MinSafePatchVersionVisitor",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MinSafePatchVersionVisitor"
+    }
+  ]
+}

@@ -22,11 +22,11 @@
       "name_html": "removeImpl",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "145",
+        "line": "152",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "145",
-        "bodyend": "148"
+        "bodystart": "152",
+        "bodyend": "155"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid removeImpl()",

@@ -340,11 +340,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "366",
+        "line": "388",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "366",
-        "bodyend": "366"
+        "bodystart": "388",
+        "bodyend": "388"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",

@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "193",
+        "line": "194",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "193",
-        "bodyend": "195"
+        "bodystart": "194",
+        "bodyend": "196"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid insert(U&amp;&amp; val)",

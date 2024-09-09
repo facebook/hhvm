@@ -29,11 +29,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "651",
+    "line": "654",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "651",
-    "bodyend": "651"
+    "bodystart": "654",
+    "bodyend": "654"
   },
   "namespacednames_html": [
     "apache",
@@ -92,11 +92,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "635",
+                "line": "636",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "635",
-                "bodyend": "647"
+                "bodystart": "636",
+                "bodyend": "650"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",

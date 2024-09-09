@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "245",
+        "line": "257",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "245",
-        "bodyend": "247"
+        "bodystart": "257",
+        "bodyend": "259"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid add(U&amp;&amp; val)",

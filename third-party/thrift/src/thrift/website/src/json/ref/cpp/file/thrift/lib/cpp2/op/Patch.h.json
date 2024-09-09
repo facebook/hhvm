@@ -111,20 +111,6 @@
       "is_transitive_innerclass": false
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1struct__t_3_01T_01_4_01_4",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::PatchType&lt; type::struct_t&lt; T &gt; &gt;",
-      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1struct__t_3_01T_01_4_01_4",
-      "is_transitive_innerclass": false
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1union__t_3_01T_01_4_01_4",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::PatchType&lt; type::union_t&lt; T &gt; &gt;",
-      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1union__t_3_01T_01_4_01_4",
-      "is_transitive_innerclass": false
-    },
-    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::SafePatchType",
@@ -132,17 +118,10 @@
       "is_transitive_innerclass": false
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1struct__t_3_01T_01_4_01_4",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchValueType",
       "prot": "public",
-      "text_html": "apache::thrift::op::detail::SafePatchType&lt; type::struct_t&lt; T &gt; &gt;",
-      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1struct__t_3_01T_01_4_01_4",
-      "is_transitive_innerclass": false
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1union__t_3_01T_01_4_01_4",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::SafePatchType&lt; type::union_t&lt; T &gt; &gt;",
-      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1union__t_3_01T_01_4_01_4",
+      "text_html": "apache::thrift::op::detail::SafePatchValueType",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/SafePatchValueType",
       "is_transitive_innerclass": false
     }
   ],
@@ -192,10 +171,10 @@
       "initializer_html": "= false",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "129",
+        "line": "120",
         "column": "23",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "129",
+        "bodystart": "120",
         "bodyend": "-1"
       }
     },
@@ -217,10 +196,35 @@
       "initializer_html": "= false",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "137",
+        "line": "128",
         "column": "23",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "137",
+        "bodystart": "128",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1ad417717ac49554902037f939181876e8",
+      "prot": "public",
+      "static": "yes",
+      "constexpr": "yes",
+      "mutable": "no",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "constexpr static bool",
+      "definition_html": "constexpr static bool apache::thrift::op::is_safe_patch_v",
+      "argsstring_html": "",
+      "name_html": "is_safe_patch_v",
+      "initializer_html": "=\n    folly::is_detected_v&lt;<code>detail::detect_safe_patch_value_type</code>, T&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "line": "133",
+        "column": "23",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "bodystart": "133",
         "bodyend": "-1"
       }
     }
@@ -256,11 +260,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "142",
+        "line": "137",
         "column": "13",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "142",
-        "bodyend": "148"
+        "bodystart": "137",
+        "bodyend": "143"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
@@ -302,11 +306,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "159",
+        "line": "154",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "159",
-        "bodyend": "172"
+        "bodystart": "154",
+        "bodyend": "167"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Tag = type::infer_tag&lt;T&gt;&gt;\nop::patch_type&lt;Tag&gt; fromSafePatch(const op::safe_patch_type&lt;Tag&gt;&amp; safePatch)",
@@ -359,11 +363,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "178",
+        "line": "173",
         "column": "21",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "178",
-        "bodyend": "189"
+        "bodystart": "173",
+        "bodyend": "184"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Tag = type::infer_tag&lt;T&gt;&gt;\nop::safe_patch_type&lt;Tag&gt; toSafePatch(const op::patch_type&lt;Tag&gt;&amp; patch)",
@@ -395,14 +399,38 @@
       "name_html": "safe_patch_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "105",
+        "line": "92",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "106",
+        "bodystart": "93",
         "bodyend": "-1"
       },
       "description": {
         "detailed_html": "<p>The safe patch represenations for the base thrift types.</p>\n<p>Safe patch provides versioning to indicate the minimum Thrift Patch version required to safely and successfully process that patch as well as opaque storage that is resilient to Thrift schema compatibility. </p>"
+      }
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1ac146d03bd0ea85c88138b6636b8630db",
+      "prot": "public",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "typename <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/SafePatchValueType\">detail::SafePatchValueType</a>&lt;T&gt;::type",
+      "definition_html": "using apache::thrift::op::safe_patch_value_type = typedef typename detail::SafePatchValueType&lt;T&gt;::type",
+      "argsstring_html": "",
+      "name_html": "safe_patch_value_type",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "line": "97",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "bodystart": "97",
+        "bodyend": "-1"
+      },
+      "description": {
+        "brief_html": "<p>The value type for the safe patch. </p>"
       }
     },
     {
@@ -419,10 +447,10 @@
       "name_html": "patch_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "126",
+        "line": "117",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "126",
+        "bodystart": "117",
         "bodyend": "-1"
       },
       "description": {
@@ -469,11 +497,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "line": "142",
+                "line": "137",
                 "column": "13",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "bodystart": "142",
-                "bodyend": "148"
+                "bodystart": "137",
+                "bodyend": "143"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
@@ -530,11 +558,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "line": "159",
+                "line": "154",
                 "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "bodystart": "159",
-                "bodyend": "172"
+                "bodystart": "154",
+                "bodyend": "167"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename Tag = type::infer_tag&lt;T&gt;&gt;\nop::patch_type&lt;Tag&gt; fromSafePatch(const op::safe_patch_type&lt;Tag&gt;&amp; safePatch)",
@@ -602,11 +630,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "line": "178",
+                "line": "173",
                 "column": "21",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-                "bodystart": "178",
-                "bodyend": "189"
+                "bodystart": "173",
+                "bodyend": "184"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename Tag = type::infer_tag&lt;T&gt;&gt;\nop::safe_patch_type&lt;Tag&gt; toSafePatch(const op::patch_type&lt;Tag&gt;&amp; patch)",

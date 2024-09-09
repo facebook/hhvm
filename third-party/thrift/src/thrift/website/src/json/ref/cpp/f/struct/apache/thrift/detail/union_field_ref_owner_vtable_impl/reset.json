@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1941",
+        "line": "1954",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1941",
-        "bodyend": "1943"
+        "bodystart": "1954",
+        "bodyend": "1956"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic void reset(void* obj)",

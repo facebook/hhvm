@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "478",
+        "line": "490",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "478",
+        "bodystart": "490",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "479",
+        "line": "491",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "479",
+        "bodystart": "491",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch"
@@ -101,11 +101,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "486",
+        "line": "498",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "486",
-        "bodyend": "496"
+        "bodystart": "498",
+        "bodyend": "508"
       },
       "definition": {
         "simple_html": "void assign(std::string s)",
@@ -143,11 +143,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "499",
+        "line": "511",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "499",
-        "bodyend": "501"
+        "bodystart": "511",
+        "bodyend": "513"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nBinaryPatch&amp; operator=(T&amp;&amp; other)",
@@ -187,11 +187,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "505",
+        "line": "517",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "505",
-        "bodyend": "511"
+        "bodystart": "517",
+        "bodyend": "523"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid append(Args&amp;&amp;... args)",
@@ -232,11 +232,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "515",
+        "line": "527",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "515",
-        "bodyend": "521"
+        "bodystart": "527",
+        "bodyend": "533"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",
@@ -272,11 +272,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "523",
+        "line": "535",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "523",
-        "bodyend": "541"
+        "bodystart": "535",
+        "bodyend": "553"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -309,11 +309,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "543",
+        "line": "555",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "543",
-        "bodyend": "547"
+        "bodystart": "555",
+        "bodyend": "559"
       },
       "definition": {
         "simple_html": "void apply(std::string&amp; val) const",
@@ -329,11 +329,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "line": "477",
+    "line": "489",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "bodystart": "477",
-    "bodyend": "552"
+    "bodystart": "489",
+    "bodyend": "564"
   },
   "namespacednames_html": [
     "apache",
@@ -1032,11 +1032,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "486",
+                "line": "498",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "486",
-                "bodyend": "496"
+                "bodystart": "498",
+                "bodyend": "508"
               },
               "definition": {
                 "simple_html": "void assign(std::string s)",
@@ -1481,11 +1481,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "499",
+                "line": "511",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "499",
-                "bodyend": "501"
+                "bodystart": "511",
+                "bodyend": "513"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nBinaryPatch&amp; operator=(T&amp;&amp; other)",
@@ -1547,11 +1547,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "505",
+                "line": "517",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "505",
-                "bodyend": "511"
+                "bodystart": "517",
+                "bodyend": "523"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nvoid append(Args&amp;&amp;... args)",
@@ -1614,11 +1614,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "515",
+                "line": "527",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "515",
-                "bodyend": "521"
+                "bodystart": "527",
+                "bodyend": "533"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",
@@ -1993,11 +1993,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "523",
+                "line": "535",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "523",
-                "bodyend": "541"
+                "bodystart": "535",
+                "bodyend": "553"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -2032,11 +2032,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "543",
+                "line": "555",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "543",
-                "bodyend": "547"
+                "bodystart": "555",
+                "bodyend": "559"
               },
               "definition": {
                 "simple_html": "void apply(std::string&amp; val) const",
@@ -2096,11 +2096,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "354",
+                "line": "366",
                 "column": "11",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "354",
-                "bodyend": "357"
+                "bodystart": "366",
+                "bodyend": "369"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator+=(U&amp;&amp; val)",
@@ -2163,11 +2163,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "380",
+                "line": "392",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "380",
-                "bodyend": "392"
+                "bodystart": "392",
+                "bodyend": "404"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",

@@ -54,11 +54,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "985",
+        "line": "1014",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "985",
-        "bodyend": "1009"
+        "bodystart": "1014",
+        "bodyend": "1038"
       },
       "definition": {
         "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
@@ -107,11 +107,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "1015",
+        "line": "1044",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "1015",
-        "bodyend": "1026"
+        "bodystart": "1044",
+        "bodyend": "1055"
       },
       "definition": {
         "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
@@ -156,11 +156,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "1030",
+        "line": "1059",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "1030",
-        "bodyend": "1057"
+        "bodystart": "1059",
+        "bodyend": "1086"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nvoid operator()(Protocol&amp; prot, MapType&amp; map) const",
@@ -176,11 +176,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "979",
+    "line": "1008",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "979",
-    "bodyend": "1058"
+    "bodystart": "1008",
+    "bodyend": "1087"
   },
   "namespacednames_html": [
     "apache",
@@ -242,11 +242,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "985",
+                "line": "1014",
                 "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "985",
-                "bodyend": "1009"
+                "bodystart": "1014",
+                "bodyend": "1038"
               },
               "definition": {
                 "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
@@ -297,11 +297,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "1015",
+                "line": "1044",
                 "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "1015",
-                "bodyend": "1026"
+                "bodystart": "1044",
+                "bodyend": "1055"
               },
               "definition": {
                 "simple_html": "template &lt;typename Map, typename Protocol&gt;\nstatic std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
@@ -368,11 +368,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "1030",
+                "line": "1059",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "1030",
-                "bodyend": "1057"
+                "bodystart": "1059",
+                "bodyend": "1086"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nvoid operator()(Protocol&amp; prot, MapType&amp; map) const",

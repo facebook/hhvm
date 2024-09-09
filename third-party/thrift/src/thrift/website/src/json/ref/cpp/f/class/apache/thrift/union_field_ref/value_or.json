@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2036",
+        "line": "2049",
         "column": "35",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2036",
-        "bodyend": "2041"
+        "bodystart": "2049",
+        "bodyend": "2054"
       },
       "definition": {
         "simple_html": "template &lt;typename U = std::remove_const_t&lt;value_type&gt;&gt;\nFOLLY_ERASE std::remove_const_t&lt;value_type&gt; value_or(U&amp;&amp; default_value) const",

@@ -49,6 +49,15 @@
       "text_html": "thrift/lib/thrift/gen-cpp2/patch_op_types.h"
     }
   ],
+  "innerclass": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MinSafePatchVersionVisitor",
+      "is_transitive_innerclass": false
+    }
+  ],
   "innernamespace": [
     {
       "refid": "namespaceapache",

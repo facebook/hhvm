@@ -15,7 +15,7 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault",
       "prot": "public",
       "virtual": "non-virtual",
-      "text_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; Tag, typename &gt;"
+      "text_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; Tag &gt;"
     }
   ],
   "includes": {
@@ -26,15 +26,11 @@
   "tparams": [
     {
       "type_html": "typename Tag"
-    },
-    {
-      "type_html": "typename",
-      "defval_html": "void"
     }
   ],
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_1acc628ba7ea0406d36fdfe2806599d88a",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_1a164351e988180b8bc22e1906b11a11d7",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -43,7 +39,7 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "constexpr auto",
-      "definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag, typename &gt;::operator()",
+      "definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
       "argsstring_html": "() const",
       "name_html": "operator()",
       "location": {
@@ -59,7 +55,7 @@
         "simple_raw": "constexpr auto operator()() const",
         "detailed_html": "inline constexpr auto operator()() const",
         "detailed_raw": "inline constexpr auto operator()() const",
-        "original_definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag, typename &gt;::operator()",
+        "original_definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetDefault/operator.call",
@@ -85,8 +81,8 @@
   "types": [],
   "members": [],
   "friends": [],
-  "declaration_raw": "template <\n  typename Tag,\n  typename = void\n> struct GetDefault;",
-  "declaration_html": "template &lt;\n  typename Tag,\n  typename = void\n&gt; struct GetDefault;",
+  "declaration_raw": "template < typename Tag >\nstruct GetDefault;",
+  "declaration_html": "template &lt; typename Tag &gt;\nstruct GetDefault;",
   "filepath": "struct/apache/thrift/op/detail/GetDefault",
   "href": "/ref/cpp/struct/apache/thrift/op/detail/GetDefault",
   "specializedBy": [
@@ -107,7 +103,7 @@
           "compoundname_html": "apache::thrift::op::detail::GetDefault::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_1acc628ba7ea0406d36fdfe2806599d88a",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_1a164351e988180b8bc22e1906b11a11d7",
               "prot": "public",
               "static": "no",
               "constexpr": "yes",
@@ -116,7 +112,7 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "constexpr auto",
-              "definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag, typename &gt;::operator()",
+              "definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
               "location": {
@@ -132,7 +128,7 @@
                 "simple_raw": "constexpr auto operator()() const",
                 "detailed_html": "inline constexpr auto operator()() const",
                 "detailed_raw": "inline constexpr auto operator()() const",
-                "original_definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag, typename &gt;::operator()",
+                "original_definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/GetDefault/operator.call",

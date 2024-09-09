@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "365",
+        "line": "367",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "365",
-        "bodyend": "367"
+        "bodystart": "367",
+        "bodyend": "369"
       },
       "definition": {
         "simple_html": "template &lt;typename Index&gt;\nFOLLY_ERASE auto operator[](const Index&amp; index) const -&gt; decltype(auto)",

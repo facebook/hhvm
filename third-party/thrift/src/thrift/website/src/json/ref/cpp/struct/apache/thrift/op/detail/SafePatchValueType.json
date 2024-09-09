@@ -1,0 +1,43 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchValueType",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::SafePatchValueType",
+  "includes": {
+    "refid": "op_2Patch_8h",
+    "local": "no",
+    "text_html": "Patch.h"
+  },
+  "tparams": [
+    {
+      "type_html": "class T"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
+    "line": "79",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
+    "bodystart": "79",
+    "bodyend": "79"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "SafePatchValueType"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template < class T >\nstruct SafePatchValueType;",
+  "declaration_html": "template &lt; class T &gt;\nstruct SafePatchValueType;",
+  "filepath": "struct/apache/thrift/op/detail/SafePatchValueType",
+  "href": "/ref/cpp/struct/apache/thrift/op/detail/SafePatchValueType",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

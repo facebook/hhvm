@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "580",
+        "line": "583",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "580",
-        "bodyend": "590"
+        "bodystart": "583",
+        "bodyend": "593"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void from_optional(const std::optional&lt;U&gt;&amp; other)",
@@ -74,11 +74,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "595",
+        "line": "598",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "595",
-        "bodyend": "605"
+        "bodystart": "598",
+        "bodyend": "608"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void from_optional(std::optional&lt;U&gt;&amp;&amp; other)",

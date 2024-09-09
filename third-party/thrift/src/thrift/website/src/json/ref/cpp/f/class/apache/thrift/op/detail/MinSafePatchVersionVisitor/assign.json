@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "assign",
+  "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::assign",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor_1a31b4fe5195e844125908c4e8f1d405b3",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::assign",
+      "argsstring_html": "(const T &amp;)",
+      "name_html": "assign",
+      "param": [
+        {
+          "type_html": "const T &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "line": "93",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "bodystart": "93",
+        "bodyend": "93"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nvoid assign(const T&amp;)",
+        "simple_raw": "template <typename T>\nvoid assign(const T&)",
+        "detailed_html": "template &lt;typename T&gt;\ninline void assign(const T&amp;)",
+        "detailed_raw": "template <typename T>\ninline void assign(const T&)",
+        "original_definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::assign",
+        "original_argsstring_html": "(const T &amp;)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/assign",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor",
+      "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::assign"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/assign",
+  "minprot": "public",
+  "displayname_html": "assign",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/assign",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/assign",
+  "parent_links": [
+    {
+      "text_html": "MinSafePatchVersionVisitor",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MinSafePatchVersionVisitor"
+    }
+  ]
+}

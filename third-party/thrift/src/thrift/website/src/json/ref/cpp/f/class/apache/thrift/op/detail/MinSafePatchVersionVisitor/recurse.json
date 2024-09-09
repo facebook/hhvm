@@ -1,0 +1,64 @@
+{
+  "kind": "overloadset",
+  "name_html": "recurse",
+  "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::recurse",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor_1a8e3bf09f0b5c2c8ecfb49a7921cdaaf2",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Patch"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::recurse",
+      "argsstring_html": "(const Patch &amp;patch)",
+      "name_html": "recurse",
+      "param": [
+        {
+          "type_html": "const Patch &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "line": "96",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "bodystart": "96",
+        "bodyend": "106"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Patch&gt;\nvoid recurse(const Patch&amp; patch)",
+        "simple_raw": "template <typename Patch>\nvoid recurse(const Patch& patch)",
+        "detailed_html": "template &lt;typename Patch&gt;\ninline void recurse(const Patch&amp; patch)",
+        "detailed_raw": "template <typename Patch>\ninline void recurse(const Patch& patch)",
+        "original_definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::recurse",
+        "original_argsstring_html": "(const Patch &amp;patch)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/recurse",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/recurse",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor",
+      "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::recurse"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/recurse",
+  "minprot": "public",
+  "displayname_html": "recurse",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/recurse",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/recurse",
+  "parent_links": [
+    {
+      "text_html": "MinSafePatchVersionVisitor",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MinSafePatchVersionVisitor"
+    }
+  ]
+}

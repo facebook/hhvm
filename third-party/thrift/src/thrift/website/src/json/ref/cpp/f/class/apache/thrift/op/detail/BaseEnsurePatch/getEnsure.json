@@ -31,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "388",
+        "line": "410",
         "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "388",
-        "bodyend": "390"
+        "bodystart": "410",
+        "bodyend": "412"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U&gt;\nstatic decltype(auto) getEnsure(U&amp;&amp; data)",

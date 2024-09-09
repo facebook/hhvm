@@ -82,10 +82,10 @@
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "68",
+        "line": "76",
         "column": "37",
         "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "bodystart": "68",
+        "bodystart": "76",
         "bodyend": "-1"
       },
       "description": {
@@ -128,10 +128,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "89",
+        "line": "98",
         "column": "25",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "89",
+        "declline": "98",
         "declcolumn": "25"
       },
       "definition": {
@@ -168,10 +168,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "92",
+        "line": "101",
         "column": "25",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "92",
+        "declline": "101",
         "declcolumn": "25"
       },
       "definition": {
@@ -205,10 +205,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "98",
+        "line": "107",
         "column": "25",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "98",
+        "declline": "107",
         "declcolumn": "25"
       },
       "definition": {
@@ -256,10 +256,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "101",
+        "line": "110",
         "column": "17",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "101",
+        "declline": "110",
         "declcolumn": "17"
       },
       "definition": {
@@ -293,10 +293,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "114",
+        "line": "123",
         "column": "8",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "114",
+        "declline": "123",
         "declcolumn": "8"
       },
       "definition": {
@@ -341,10 +341,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "line": "120",
+        "line": "129",
         "column": "8",
         "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-        "declline": "120",
+        "declline": "129",
         "declcolumn": "8"
       },
       "definition": {
@@ -391,10 +391,10 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "89",
+                "line": "98",
                 "column": "25",
                 "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "declline": "89",
+                "declline": "98",
                 "declcolumn": "25"
               },
               "definition": {
@@ -431,10 +431,10 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "92",
+                "line": "101",
                 "column": "25",
                 "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "declline": "92",
+                "declline": "101",
                 "declcolumn": "25"
               },
               "definition": {
@@ -483,10 +483,10 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "98",
+                "line": "107",
                 "column": "25",
                 "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "declline": "98",
+                "declline": "107",
                 "declcolumn": "25"
               },
               "definition": {
@@ -549,10 +549,10 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "101",
+                "line": "110",
                 "column": "17",
                 "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "declline": "101",
+                "declline": "110",
                 "declcolumn": "17"
               },
               "definition": {
@@ -601,10 +601,10 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "114",
+                "line": "123",
                 "column": "8",
                 "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "declline": "114",
+                "declline": "123",
                 "declcolumn": "8"
               },
               "definition": {
@@ -664,10 +664,10 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "line": "120",
+                "line": "129",
                 "column": "8",
                 "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
-                "declline": "120",
+                "declline": "129",
                 "declcolumn": "8"
               },
               "definition": {

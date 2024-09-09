@@ -43,11 +43,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1641",
+        "line": "1652",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1641",
-        "bodyend": "1646"
+        "bodystart": "1652",
+        "bodyend": "1657"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;   auto operator() (optional_field_ref&lt; T &gt; ref, F functor) const noexcept(",
@@ -63,11 +63,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1639",
+    "line": "1650",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1639",
-    "bodyend": "1647"
+    "bodystart": "1650",
+    "bodyend": "1658"
   },
   "namespacednames_html": [
     "apache",
@@ -125,11 +125,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "1641",
+                "line": "1652",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "1641",
-                "bodyend": "1646"
+                "bodystart": "1652",
+                "bodyend": "1657"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename F&gt;   auto operator() (optional_field_ref&lt; T &gt; ref, F functor) const noexcept(",

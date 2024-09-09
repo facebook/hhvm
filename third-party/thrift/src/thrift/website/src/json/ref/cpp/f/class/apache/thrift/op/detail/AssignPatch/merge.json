@@ -70,11 +70,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "84",
+        "line": "86",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "84",
-        "bodyend": "112"
+        "bodystart": "86",
+        "bodyend": "115"
       },
       "definition": {
         "simple_html": "void merge(AssignPatch other)",

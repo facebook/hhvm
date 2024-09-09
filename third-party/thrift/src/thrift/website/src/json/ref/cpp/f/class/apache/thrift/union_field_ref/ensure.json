@@ -17,11 +17,11 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2066",
+        "line": "2079",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2066",
-        "bodyend": "2071"
+        "bodystart": "2079",
+        "bodyend": "2084"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type ensure()",

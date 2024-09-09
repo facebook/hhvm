@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "159",
+        "line": "154",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "159",
-        "bodyend": "172"
+        "bodystart": "154",
+        "bodyend": "167"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Tag = type::infer_tag&lt;T&gt;&gt;\nop::patch_type&lt;Tag&gt; fromSafePatch(const op::safe_patch_type&lt;Tag&gt;&amp; safePatch)",

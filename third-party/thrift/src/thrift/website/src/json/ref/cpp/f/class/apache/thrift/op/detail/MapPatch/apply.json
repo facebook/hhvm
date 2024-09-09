@@ -340,11 +340,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "410",
+        "line": "411",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "410",
-        "bodyend": "435"
+        "bodystart": "411",
+        "bodyend": "436"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",

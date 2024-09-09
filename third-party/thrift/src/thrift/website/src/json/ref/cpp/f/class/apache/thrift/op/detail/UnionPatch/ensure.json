@@ -22,11 +22,11 @@
       "name_html": "ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "220",
+        "line": "227",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "220",
-        "bodyend": "226"
+        "bodystart": "227",
+        "bodyend": "233"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid ensure()",
@@ -73,11 +73,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "229",
+        "line": "236",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "229",
-        "bodyend": "245"
+        "bodystart": "236",
+        "bodyend": "252"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\nstd::enable_if_t&lt;type::is_optional_or_union_field_v&lt;T, Id&gt;&gt; ensure(\n    U&amp;&amp; defaultVal)",

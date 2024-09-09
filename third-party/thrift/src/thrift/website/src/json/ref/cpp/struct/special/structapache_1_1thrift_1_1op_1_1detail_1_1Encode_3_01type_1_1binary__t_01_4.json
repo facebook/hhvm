@@ -40,11 +40,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "471",
+        "line": "472",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "471",
-        "bodyend": "473"
+        "bodystart": "472",
+        "bodyend": "474"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const folly::IOBuf&amp; s) const",
@@ -86,11 +86,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "475",
+        "line": "476",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "475",
-        "bodyend": "477"
+        "bodystart": "476",
+        "bodyend": "478"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, folly::StringPiece s) const",
@@ -132,11 +132,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "479",
+        "line": "480",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "479",
-        "bodyend": "482"
+        "bodystart": "480",
+        "bodyend": "483"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(\n    Protocol&amp; prot, const std::unique_ptr&lt;folly::IOBuf&gt;&amp; s) const",
@@ -152,11 +152,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "469",
+    "line": "470",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "469",
-    "bodyend": "483"
+    "bodystart": "470",
+    "bodyend": "484"
   },
   "namespacednames_html": [
     "apache",
@@ -211,11 +211,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "471",
+                "line": "472",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "471",
-                "bodyend": "473"
+                "bodystart": "472",
+                "bodyend": "474"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const folly::IOBuf&amp; s) const",
@@ -259,11 +259,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "475",
+                "line": "476",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "475",
-                "bodyend": "477"
+                "bodystart": "476",
+                "bodyend": "478"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, folly::StringPiece s) const",
@@ -307,11 +307,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "479",
+                "line": "480",
                 "column": "12",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "479",
-                "bodyend": "482"
+                "bodystart": "480",
+                "bodyend": "483"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(\n    Protocol&amp; prot, const std::unique_ptr&lt;folly::IOBuf&gt;&amp; s) const",

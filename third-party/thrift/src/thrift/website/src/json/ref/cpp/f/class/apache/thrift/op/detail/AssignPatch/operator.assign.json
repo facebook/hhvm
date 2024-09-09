@@ -337,11 +337,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "69",
+        "line": "71",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "69",
-        "bodyend": "72"
+        "bodystart": "71",
+        "bodyend": "74"
       },
       "definition": {
         "simple_html": "auto&amp; operator=(T a)",

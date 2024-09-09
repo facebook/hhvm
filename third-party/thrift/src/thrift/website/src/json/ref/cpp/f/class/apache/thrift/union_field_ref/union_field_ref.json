@@ -40,11 +40,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1994",
+        "line": "2007",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1994",
-        "bodyend": "2004"
+        "bodystart": "2007",
+        "bodyend": "2017"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE union_field_ref(\n    storage_reference_type storage_value,\n    int_t&amp; type,\n    int field_type,\n    owner ow,\n    const vtable&amp; vt)",

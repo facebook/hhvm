@@ -413,11 +413,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "499",
+        "line": "511",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "499",
-        "bodyend": "501"
+        "bodystart": "511",
+        "bodyend": "513"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nBinaryPatch&amp; operator=(T&amp;&amp; other)",

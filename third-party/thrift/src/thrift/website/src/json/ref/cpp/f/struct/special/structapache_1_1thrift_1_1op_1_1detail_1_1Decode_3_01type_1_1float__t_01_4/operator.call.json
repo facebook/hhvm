@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "762",
+        "line": "765",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "762",
-        "bodyend": "764"
+        "bodystart": "765",
+        "bodyend": "767"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, float&amp; f) const",

@@ -17,11 +17,11 @@
       "name_html": "removedFields",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "588",
+        "line": "634",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "588",
-        "bodyend": "600"
+        "bodystart": "634",
+        "bodyend": "646"
       },
       "definition": {
         "simple_html": "std::unordered_set&lt;FieldId&gt; removedFields() const",

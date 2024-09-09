@@ -1,0 +1,101 @@
+{
+  "kind": "overloadset",
+  "name_html": "remove",
+  "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor_1a77b58bd9185a0e159d598e41d831f3e0",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
+      "argsstring_html": "(const T &amp;)",
+      "name_html": "remove",
+      "param": [
+        {
+          "type_html": "const T &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "line": "114",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "bodystart": "114",
+        "bodyend": "114"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nvoid remove(const T&amp;)",
+        "simple_raw": "template <typename T>\nvoid remove(const T&)",
+        "detailed_html": "template &lt;typename T&gt;\ninline void remove(const T&amp;)",
+        "detailed_raw": "template <typename T>\ninline void remove(const T&)",
+        "original_definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
+        "original_argsstring_html": "(const T &amp;)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/remove",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/remove",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor",
+      "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::remove"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor_1a44e70eae4ecdd32bd4d5e619d7d31b35",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
+      "argsstring_html": "()",
+      "name_html": "remove",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "line": "128",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "bodystart": "128",
+        "bodyend": "128"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename&gt;\nvoid remove()",
+        "simple_raw": "template <typename>\nvoid remove()",
+        "detailed_html": "template &lt;typename&gt;\ninline void remove()",
+        "detailed_raw": "template <typename>\ninline void remove()",
+        "original_definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/remove",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/remove",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor",
+      "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::remove"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/remove",
+  "minprot": "public",
+  "displayname_html": "remove",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/remove",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/remove",
+  "parent_links": [
+    {
+      "text_html": "MinSafePatchVersionVisitor",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MinSafePatchVersionVisitor"
+    }
+  ]
+}

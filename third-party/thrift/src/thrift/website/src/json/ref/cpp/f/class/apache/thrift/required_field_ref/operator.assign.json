@@ -30,11 +30,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1761",
+        "line": "1774",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1761",
-        "bodyend": "1765"
+        "bodystart": "1774",
+        "bodyend": "1778"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    required_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
@@ -70,11 +70,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1768",
+        "line": "1781",
         "column": "34",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1768",
-        "bodyend": "1773"
+        "bodystart": "1781",
+        "bodyend": "1785"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE required_field_ref&amp; operator=(value_type&amp;&amp; value)",

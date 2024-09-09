@@ -22,11 +22,11 @@
       "name_html": "patchIfSet",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "255",
+        "line": "262",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "255",
-        "bodyend": "269"
+        "bodystart": "262",
+        "bodyend": "276"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",
@@ -72,11 +72,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "469",
+        "line": "515",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "469",
-        "bodyend": "471"
+        "bodystart": "515",
+        "bodyend": "517"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; p)",

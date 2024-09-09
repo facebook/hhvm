@@ -1,0 +1,58 @@
+{
+  "kind": "overloadset",
+  "name_html": "ensureAny",
+  "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::ensureAny",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor_1aebad36e73a82f23a0a9697251746c0c0",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::ensureAny",
+      "argsstring_html": "(const type::AnyStruct &amp;)",
+      "name_html": "ensureAny",
+      "param": [
+        {
+          "type_html": "const type::AnyStruct &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "line": "139",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
+        "bodystart": "139",
+        "bodyend": "139"
+      },
+      "definition": {
+        "simple_html": "void ensureAny(const type::AnyStruct&amp;)",
+        "simple_raw": "void ensureAny(const type::AnyStruct&)",
+        "detailed_html": "inline void ensureAny(const type::AnyStruct&amp;)",
+        "detailed_raw": "inline void ensureAny(const type::AnyStruct&)",
+        "original_definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::ensureAny",
+        "original_argsstring_html": "(const type::AnyStruct &amp;)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/ensureAny",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/ensureAny",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MinSafePatchVersionVisitor",
+      "compoundname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::ensureAny"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/ensureAny",
+  "minprot": "public",
+  "displayname_html": "ensureAny",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/ensureAny",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MinSafePatchVersionVisitor/ensureAny",
+  "parent_links": [
+    {
+      "text_html": "MinSafePatchVersionVisitor",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/MinSafePatchVersionVisitor"
+    }
+  ]
+}

@@ -22,11 +22,11 @@
       "name_html": "isRemoved",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "563",
+        "line": "609",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "563",
-        "bodyend": "585"
+        "bodystart": "609",
+        "bodyend": "631"
       },
       "definition": {
         "simple_html": "template &lt;class Id&gt;\nbool isRemoved() const",

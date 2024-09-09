@@ -33,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "142",
+        "line": "137",
         "column": "13",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "142",
-        "bodyend": "148"
+        "bodystart": "137",
+        "bodyend": "143"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",

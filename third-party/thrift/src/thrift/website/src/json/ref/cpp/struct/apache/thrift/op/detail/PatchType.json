@@ -47,9 +47,7 @@
     "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1i16__t_01_4",
     "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1i32__t_01_4",
     "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1i64__t_01_4",
-    "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1string__t_01_4",
-    "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1struct__t_3_01T_01_4_01_4",
-    "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1union__t_3_01T_01_4_01_4"
+    "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1string__t_01_4"
   ],
   "overloadgroups": [],
   "free_overloadgroups": []

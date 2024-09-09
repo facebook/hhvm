@@ -27,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "444",
+        "line": "445",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "444",
-        "bodyend": "451"
+        "bodystart": "445",
+        "bodyend": "452"
       },
       "definition": {
         "simple_html": "void applyPatch(T&amp; val, const P&amp; patch) const",

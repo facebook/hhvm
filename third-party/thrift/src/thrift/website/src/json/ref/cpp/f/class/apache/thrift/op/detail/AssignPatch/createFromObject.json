@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "137",
+        "line": "147",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "137",
-        "bodyend": "144"
+        "bodystart": "147",
+        "bodyend": "156"
       },
       "definition": {
         "simple_html": "void createFromObject(protocol::Object v)",

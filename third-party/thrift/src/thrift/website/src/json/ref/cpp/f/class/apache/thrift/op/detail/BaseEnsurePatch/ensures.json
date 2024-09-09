@@ -23,11 +23,11 @@
       "name_html": "ensures",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "174",
+        "line": "181",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "174",
-        "bodyend": "176"
+        "bodystart": "181",
+        "bodyend": "183"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nconstexpr bool ensures() const",

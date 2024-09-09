@@ -147,6 +147,7 @@ class py3_mstch_program : public mstch_program {
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
             {"program:hasPyContainerTypes",
              &py3_mstch_program::hasPyContainerTypes},
+            {"program:hasEnumTypes", &py3_mstch_program::hasEnumTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
             {"program:moveContainerTypes",
@@ -190,6 +191,18 @@ class py3_mstch_program : public mstch_program {
   mstch::node hasPyContainerTypes() {
     for (const auto* ttype : containers_) {
       if (ttype->is_list()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  mstch::node hasEnumTypes() {
+    if (!program_->enums().empty()) {
+      return true;
+    }
+    for (const auto* ttype : objects_) {
+      if (ttype->is_union()) {
         return true;
       }
     }
@@ -1388,6 +1401,7 @@ void t_mstch_py3_generator::generate_types() {
       "types_empty.pyx",
       "types_fields.pxd",
       "types_fields.pyx",
+      "types_impl_FBTHRIFT_ONLY_DO_NOT_USE.py",
       "types_reflection.py",
   };
 

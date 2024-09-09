@@ -84,23 +84,25 @@ struct KeyOrderHash {
 // TODO(kshaunak): Move this wrapper to a utilities file.
 template <typename T>
 struct CopyAtomic {
-  CopyAtomic(): value() {}
-  /* implicit */ CopyAtomic(T value): value(value) {}
+  static_assert(std::is_trivial_v<T>);
 
-  CopyAtomic(const CopyAtomic<T>& other)
+  CopyAtomic() noexcept = default;
+  /* implicit */ CopyAtomic(T value) noexcept : value(value) {}
+
+  CopyAtomic(const CopyAtomic<T>& other) noexcept
     : value(other.value.load(std::memory_order_acquire))
   {}
 
-  CopyAtomic& operator=(const CopyAtomic<T>& other) {
+  CopyAtomic& operator=(const CopyAtomic<T>& other) noexcept {
     value = other.value.load(std::memory_order_acquire);
     return *this;
   }
 
-  operator T() const {
+  operator T() const noexcept {
     return value;
   }
 
-  std::atomic<T> value;
+  std::atomic<T> value{};
 };
 
 // TODO(kshaunak): We can switch this over to a folly::F14Map.

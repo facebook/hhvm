@@ -591,6 +591,11 @@ cdef class MutableMap:
         return (self._key_typeinfo.same_as((<MutableMap>other)._key_typeinfo)
             and self._val_typeinfo.same_as((<MutableMap>other)._val_typeinfo))
 
+    def __repr__(self):
+        if not self:
+            return 'i{}'
+        return f'i{{{", ".join(map(lambda i: f"{repr(i[0])}: {repr(i[1])}", self.items()))}}}'
+
 
 MutableMapping.register(MutableMap)
 

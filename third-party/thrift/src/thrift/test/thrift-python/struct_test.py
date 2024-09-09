@@ -75,6 +75,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
     TestStructAdaptedTypes as TestStructAdaptedTypesImmutable,
+    TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
@@ -1586,3 +1587,14 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([1, 2, 3], s2.unqualified_list_i32)
         self.assertEqual(set(), s2.unqualified_set_string)
         self.assertEqual({"d": 4}, s2.unqualified_map_string_i32)
+
+    def test_struct_repr(self) -> None:
+        mutable = TestStructAllThriftPrimitiveTypesMutable()
+        immutable = TestStructAllThriftPrimitiveTypesImmutable()
+
+        self.assertEqual(repr(mutable), repr(immutable))
+
+        mutable = TestStructAllThriftContainerTypesMutable()
+        immutable = TestStructAllThriftContainerTypesImmutable()
+
+        self.assertEqual(repr(mutable), repr(immutable))

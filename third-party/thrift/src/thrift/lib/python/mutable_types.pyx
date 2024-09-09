@@ -350,6 +350,10 @@ cdef class MutableStruct(MutableStructOrUnion):
         for name in info.name_to_index:
             yield name, getattr(self, name)
 
+    def __repr__(self):
+        fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
+        return f"{type(self).__name__}({fields})"
+
     def __reduce__(self):
         return (_unpickle_struct, (type(self), b''.join(self._fbthrift_serialize(Protocol.COMPACT))))
 

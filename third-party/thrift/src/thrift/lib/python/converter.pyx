@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from thrift.python.mutable_types cimport (
+from thrift.python.mutable_types import (
     MutableStruct,
     MutableUnion,
 )
 from thrift.python.types cimport (
-    Struct,
-    Union,
+    FieldInfo,
     StructInfo,
     UnionInfo,
     StructTypeInfo,
@@ -26,10 +25,13 @@ from thrift.python.types cimport (
     SetTypeInfo,
     MapTypeInfo,
     EnumTypeInfo,
-    FieldInfo,
+)
+from thrift.python.types import (
+    Struct,
+    Union,
     BadEnum,
 )
-cimport thrift.py3.types as py3_types
+import thrift.py3.types as py3_types
 
 
 def to_python_struct(immutable_thrift_python_cls, src_struct_or_union):

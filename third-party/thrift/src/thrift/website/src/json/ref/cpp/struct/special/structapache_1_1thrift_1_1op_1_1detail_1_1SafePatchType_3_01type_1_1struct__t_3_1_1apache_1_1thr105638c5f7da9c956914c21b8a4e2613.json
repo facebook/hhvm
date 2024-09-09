@@ -1,0 +1,58 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1struct__t_3_1_1apache_1_1thr105638c5f7da9c956914c21b8a4e2613",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::SafePatchType&lt; type::struct_t&lt;::apache::thrift::type::AnyStruct &gt; &gt;",
+  "includes": {
+    "refid": "AnyPatch_8h",
+    "local": "no",
+    "text_html": "AnyPatch.h"
+  },
+  "tparams": [],
+  "types": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1struct__t_3_1_1apache_1_1thr105638c5f7da9c956914c21b8a4e2613_1a6f8ec74d4d045598179d02a4fc35df6a",
+      "prot": "public",
+      "type_html": "::apache::thrift::op::AnySafePatch",
+      "definition_html": "using apache::thrift::op::detail::SafePatchType&lt; type::struct_t&lt;::apache::thrift::type::AnyStruct &gt; &gt;::type =  ::apache::thrift::op::AnySafePatch",
+      "argsstring_html": "",
+      "name_html": "type",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "line": "307",
+        "column": "3",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "bodystart": "307",
+        "bodyend": "-1"
+      },
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1struct__t_3_1_1apache_1_1thr105638c5f7da9c956914c21b8a4e2613"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+    "line": "306",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+    "bodystart": "306",
+    "bodyend": "308"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "SafePatchType&lt; type::struct_t&lt;::apache::thrift::type::AnyStruct &gt; &gt;"
+  ],
+  "enums": [],
+  "functions": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template <> struct SafePatchType< type::struct_t<::apache::thrift::type::AnyStruct > >;",
+  "declaration_html": "template &lt;&gt; struct SafePatchType&lt; type::struct_t&lt;::apache::thrift::type::AnyStruct &gt; &gt;;",
+  "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1struct__t_3_1_1apache_1_1thr105638c5f7da9c956914c21b8a4e2613",
+  "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType_3_01type_1_1struct__t_3_1_1apache_1_1thr105638c5f7da9c956914c21b8a4e2613",
+  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchType",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

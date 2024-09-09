@@ -1,0 +1,153 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfTypeIs",
+  "compoundname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1abf7155508c8c7a421373eaf8bf88e22a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename VPatch"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+      "argsstring_html": "(const VPatch &amp;patch)",
+      "name_html": "patchIfTypeIs",
+      "param": [
+        {
+          "type_html": "const VPatch &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "line": "197",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "bodystart": "197",
+        "bodyend": "205"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename VPatch&gt;\nvoid patchIfTypeIs(const VPatch&amp; patch)",
+        "simple_raw": "template <typename VPatch>\nvoid patchIfTypeIs(const VPatch& patch)",
+        "detailed_html": "template &lt;typename VPatch&gt;\ninline void patchIfTypeIs(const VPatch&amp; patch)",
+        "detailed_raw": "template <typename VPatch>\ninline void patchIfTypeIs(const VPatch& patch)",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+        "original_argsstring_html": "(const VPatch &amp;patch)"
+      },
+      "description": {
+        "detailed_html": "<p>Patches the value in Thrift Any if the type matches with the provided patch. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch",
+      "compoundname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1adeeea2d6a775836b1da90918a35862ef",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+      "argsstring_html": "(type::Type type, type::AnyStruct patch)",
+      "name_html": "patchIfTypeIs",
+      "param": [
+        {
+          "type_html": "type::Type",
+          "declname_html": "type"
+        },
+        {
+          "type_html": "type::AnyStruct",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "line": "222",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "bodystart": "222",
+        "bodyend": "230"
+      },
+      "definition": {
+        "simple_html": "void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
+        "simple_raw": "void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
+        "detailed_html": "inline void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
+        "detailed_raw": "inline void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+        "original_argsstring_html": "(type::Type type, type::AnyStruct patch)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch",
+      "compoundname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a3992dc02b2ce1e9bfc8b5372c93736e0",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+      "argsstring_html": "(const type::Type &amp;type, const protocol::DynamicPatch &amp;patch)",
+      "name_html": "patchIfTypeIs",
+      "param": [
+        {
+          "type_html": "const type::Type &amp;",
+          "declname_html": "type"
+        },
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">protocol::DynamicPatch</a> &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "line": "289",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
+        "bodystart": "181",
+        "bodyend": "189"
+      },
+      "definition": {
+        "simple_html": "void patchIfTypeIs(const type::Type&amp; type, const protocol::DynamicPatch&amp; patch)",
+        "simple_raw": "void patchIfTypeIs(const type::Type& type, const protocol::DynamicPatch& patch)",
+        "detailed_html": "private void patchIfTypeIs(\n    const type::Type&amp; type, const protocol::DynamicPatch&amp; patch)",
+        "detailed_raw": "private void patchIfTypeIs(\n    const type::Type& type, const protocol::DynamicPatch& patch)",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+        "original_argsstring_html": "(const type::Type &amp;type, const protocol::DynamicPatch &amp;patch)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch",
+      "compoundname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+  "minprot": "public",
+  "displayname_html": "patchIfTypeIs",
+  "brief_html": "<p>Patches the value in Thrift Any if the type matches with the provided patch. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
+  "parent_links": [
+    {
+      "text_html": "AnyPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AnyPatch"
+    }
+  ]
+}

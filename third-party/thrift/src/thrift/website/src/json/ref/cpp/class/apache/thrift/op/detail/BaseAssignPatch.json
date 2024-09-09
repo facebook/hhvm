@@ -19,6 +19,12 @@
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
       "prot": "public",
       "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, AnyPatch&lt; Patch &gt; &gt;"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
+      "prot": "public",
+      "virtual": "non-virtual",
       "text_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, UnionPatch&lt; Patch &gt; &gt;"
     },
     {

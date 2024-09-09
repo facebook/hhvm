@@ -1,0 +1,68 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchByKeyImpl",
+  "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1acf5e21513c303d242e7524a1d89f19c0",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class SubPatch"
+        }
+      ],
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+      "argsstring_html": "(Value k, SubPatch &amp;&amp;p)",
+      "name_html": "patchByKeyImpl",
+      "param": [
+        {
+          "type_html": "Value",
+          "declname_html": "k"
+        },
+        {
+          "type_html": "SubPatch &amp;&amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "347",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "196",
+        "bodyend": "207"
+      },
+      "definition": {
+        "simple_html": "template &lt;class SubPatch&gt;\nDynamicPatch&amp; patchByKeyImpl(Value k, SubPatch&amp;&amp; p)",
+        "simple_raw": "template <class SubPatch>\nDynamicPatch& patchByKeyImpl(Value k, SubPatch&& p)",
+        "detailed_html": "template &lt;class SubPatch&gt;\nprivate DynamicPatch&amp; patchByKeyImpl(Value k, SubPatch&amp;&amp; p)",
+        "detailed_raw": "template <class SubPatch>\nprivate DynamicPatch& patchByKeyImpl(Value k, SubPatch&& p)",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+        "original_argsstring_html": "(Value k, SubPatch &amp;&amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+  "minprot": "private",
+  "displayname_html": "patchByKeyImpl",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+  "parent_links": [
+    {
+      "text_html": "DynamicMapPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+    }
+  ]
+}

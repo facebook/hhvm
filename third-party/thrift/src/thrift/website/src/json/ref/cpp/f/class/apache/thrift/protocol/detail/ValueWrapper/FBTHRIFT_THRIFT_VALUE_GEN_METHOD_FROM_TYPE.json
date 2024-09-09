@@ -1,0 +1,475 @@
+{
+  "kind": "overloadset",
+  "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+  "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1aa689d2e3f047acfa7cefef2e466ee73b",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(bool)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "bool"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "144",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(bool)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1a96c2e566422dee9e1e374c9341df7fe5",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(byte)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "byte"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "145",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(byte)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(byte)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(byte)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(byte)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(byte)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1aae05ef4c8665341bf2710baf202e3433",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(i16)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "i16"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "146",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i16)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i16)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i16)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i16)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(i16)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1a985c0b7bfdda8e3e219b5bc91feee631",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(i32)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "i32"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "147",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i32)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i32)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i32)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i32)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(i32)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1a0eb382b23ad7ede72e3e524f96d9e994",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(i64)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "i64"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "148",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i64)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i64)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i64)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i64)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(i64)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1a19cb644f893c8f962bc8f86cca0f8e98",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(float)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "float"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "149",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(float)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(float)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(float)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(float)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(float)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1acffdeff90bf1e2baed7a063162932726",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(double)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "double"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "150",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(double)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(double)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(double)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(double)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(double)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1ae31373b83bdf148295d85a95e34c9f7b",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(string)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "string"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "151",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(string)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(string)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(string)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(string)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(string)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1a49603b943fa9ee57d03dd42b01d3f6b8",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(binary)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "binary"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "152",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(binary)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(binary)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(binary)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(binary)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(binary)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1ad89800b3ce0e0ed9bceeaa02369d98b7",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(object)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "object"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "153",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(object)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(object)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(object)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(object)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(object)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1abab973457297afbdd7d9254a571d7546",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(list)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "list"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "154",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(list)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(list)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(list)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(list)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(list)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1ada1719bee0dd969bdbc4bf39bb67b6d8",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(set)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "set"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "155",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(set)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(set)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(set)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(set)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(set)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1a37981baa7e794907610f79a52f43a41d",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "argsstring_html": "(map)",
+      "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "param": [
+        {
+          "type_html": "map"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "156",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map)",
+        "simple_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map)",
+        "detailed_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map)",
+        "detailed_raw": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "original_argsstring_html": "(map)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+  "minprot": "public",
+  "displayname_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ValueWrapper/FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+  "parent_links": [
+    {
+      "text_html": "ValueWrapper",
+      "href": "/ref/cpp/class/apache/thrift/protocol/detail/ValueWrapper"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "kind": "overloadset",
+  "name_html": "erase",
+  "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::erase",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a9556b5bc3335d24efcfe8461554228ea",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "std::size_t",
+      "definition_html": "std::size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::erase",
+      "argsstring_html": "(FieldId i)",
+      "name_html": "erase",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "84",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "84",
+        "bodyend": "86"
+      },
+      "definition": {
+        "simple_html": "std::size_t erase(FieldId i)",
+        "simple_raw": "std::size_t erase(FieldId i)",
+        "detailed_html": "inline std::size_t erase(FieldId i)",
+        "detailed_raw": "inline std::size_t erase(FieldId i)",
+        "original_definition_html": "std::size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::erase",
+        "original_argsstring_html": "(FieldId i)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::erase"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+  "minprot": "public",
+  "displayname_html": "erase",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+  "parent_links": [
+    {
+      "text_html": "ObjectWrapper",
+      "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+    }
+  ]
+}

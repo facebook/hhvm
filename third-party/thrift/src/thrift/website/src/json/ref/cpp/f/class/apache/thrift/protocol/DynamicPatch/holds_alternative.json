@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "holds_alternative",
+  "compoundname_html": "apache::thrift::protocol::DynamicPatch::holds_alternative",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch_1add27b9e933835dab81426e6182eb6120",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class T"
+        }
+      ],
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::DynamicPatch::holds_alternative",
+      "argsstring_html": "(detail::Badge) const",
+      "name_html": "holds_alternative",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "469",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "469",
+        "bodyend": "471"
+      },
+      "definition": {
+        "simple_html": "template &lt;class T&gt;\nbool holds_alternative(detail::Badge) const",
+        "simple_raw": "template <class T>\nbool holds_alternative(detail::Badge) const",
+        "detailed_html": "template &lt;class T&gt;\ninline bool holds_alternative(detail::Badge) const",
+        "detailed_raw": "template <class T>\ninline bool holds_alternative(detail::Badge) const",
+        "original_definition_html": "bool apache::thrift::protocol::DynamicPatch::holds_alternative",
+        "original_argsstring_html": "(detail::Badge) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatch/holds_alternative",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatch/holds_alternative",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicPatch::holds_alternative"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicPatch/holds_alternative",
+  "minprot": "public",
+  "displayname_html": "holds_alternative",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatch/holds_alternative",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatch/holds_alternative",
+  "parent_links": [
+    {
+      "text_html": "DynamicPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicPatch"
+    }
+  ]
+}

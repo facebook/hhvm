@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "diffDouble",
+  "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::diffDouble",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1a5f7519ce01fdd0d8c0efe19cf5e6f96b",
+      "prot": "protected",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "virtual",
+      "type_html": "op::DoublePatch",
+      "definition_html": "op::DoublePatch apache::thrift::protocol::DiffVisitorBase::diffDouble",
+      "argsstring_html": "(double src, double dst)",
+      "name_html": "diffDouble",
+      "param": [
+        {
+          "type_html": "double",
+          "declname_html": "src"
+        },
+        {
+          "type_html": "double",
+          "declname_html": "dst"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "607",
+        "column": "28",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "666",
+        "bodyend": "668"
+      },
+      "definition": {
+        "simple_html": "virtual op::DoublePatch diffDouble(double src, double dst)",
+        "simple_raw": "virtual op::DoublePatch diffDouble(double src, double dst)",
+        "detailed_html": "protected virtual op::DoublePatch diffDouble(double src, double dst)",
+        "detailed_raw": "protected virtual op::DoublePatch diffDouble(double src, double dst)",
+        "original_definition_html": "op::DoublePatch apache::thrift::protocol::DiffVisitorBase::diffDouble",
+        "original_argsstring_html": "(double src, double dst)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/diffDouble",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DiffVisitorBase/diffDouble",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase",
+      "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::diffDouble"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DiffVisitorBase/diffDouble",
+  "minprot": "protected",
+  "displayname_html": "diffDouble",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/diffDouble",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/diffDouble",
+  "parent_links": [
+    {
+      "text_html": "DiffVisitorBase",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DiffVisitorBase"
+    }
+  ]
+}

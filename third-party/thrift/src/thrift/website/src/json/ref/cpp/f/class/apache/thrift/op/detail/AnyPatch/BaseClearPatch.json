@@ -1,0 +1,93 @@
+{
+  "kind": "overloadset",
+  "name_html": "BaseClearPatch",
+  "compoundname_html": "apache::thrift::op::detail::AnyPatch::BaseClearPatch",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch_1a32312161652a20e7038c3725f18e9ed8",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::BaseClearPatch",
+      "argsstring_html": "(const BaseClearPatch &amp;)=default",
+      "name_html": "BaseClearPatch",
+      "param": [
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/BaseClearPatch\">BaseClearPatch</a> &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "line": "234",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "BaseClearPatch(const BaseClearPatch&amp;)",
+        "simple_raw": "BaseClearPatch(const BaseClearPatch&)",
+        "detailed_html": "BaseClearPatch(const BaseClearPatch&amp;) = default",
+        "detailed_raw": "BaseClearPatch(const BaseClearPatch&) = default",
+        "original_definition_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::BaseClearPatch",
+        "original_argsstring_html": "(const BaseClearPatch &amp;)=default"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseClearPatch/BaseClearPatch",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseClearPatch/BaseClearPatch",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::op::detail::AnyPatch::BaseClearPatch"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch_1a7bd1eb5aece57c268905563fe723cede",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "noexcept": "yes",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::BaseClearPatch",
+      "argsstring_html": "(BaseClearPatch &amp;&amp;) noexcept=default",
+      "name_html": "BaseClearPatch",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/BaseClearPatch\">BaseClearPatch</a> &amp;&amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "line": "235",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "BaseClearPatch(BaseClearPatch&amp;&amp;)",
+        "simple_raw": "BaseClearPatch(BaseClearPatch&&)",
+        "detailed_html": "BaseClearPatch(BaseClearPatch&amp;&amp;) = default noexcept",
+        "detailed_raw": "BaseClearPatch(BaseClearPatch&&) = default noexcept",
+        "original_definition_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::BaseClearPatch",
+        "original_argsstring_html": "(BaseClearPatch &amp;&amp;) noexcept=default"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseClearPatch/BaseClearPatch",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseClearPatch/BaseClearPatch",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::op::detail::AnyPatch::BaseClearPatch"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/AnyPatch/BaseClearPatch",
+  "minprot": "public",
+  "displayname_html": "(constructor)",
+  "brief_html": "Constructs the BaseClearPatch.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/AnyPatch/BaseClearPatch",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AnyPatch/BaseClearPatch",
+  "parent_links": [
+    {
+      "text_html": "AnyPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AnyPatch"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "diffAny",
+  "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::diffAny",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ad43e6fdd73f1feff9b6624250a76517a",
+      "prot": "protected",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "<code>op::AnyPatch</code>",
+      "definition_html": "op::AnyPatch apache::thrift::protocol::DiffVisitorBase::diffAny",
+      "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
+      "name_html": "diffAny",
+      "param": [
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "src"
+        },
+        {
+          "type_html": "const Object &amp;",
+          "declname_html": "dst"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "622",
+        "column": "17",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "901",
+        "bodyend": "938"
+      },
+      "definition": {
+        "simple_html": "op::AnyPatch diffAny(const Object&amp; src, const Object&amp; dst)",
+        "simple_raw": "op::AnyPatch diffAny(const Object& src, const Object& dst)",
+        "detailed_html": "protected op::AnyPatch diffAny(const Object&amp; src, const Object&amp; dst)",
+        "detailed_raw": "protected op::AnyPatch diffAny(const Object& src, const Object& dst)",
+        "original_definition_html": "op::AnyPatch apache::thrift::protocol::DiffVisitorBase::diffAny",
+        "original_argsstring_html": "(const Object &amp;src, const Object &amp;dst)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/diffAny",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DiffVisitorBase/diffAny",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase",
+      "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::diffAny"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DiffVisitorBase/diffAny",
+  "minprot": "protected",
+  "displayname_html": "diffAny",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/diffAny",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/diffAny",
+  "parent_links": [
+    {
+      "text_html": "DiffVisitorBase",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DiffVisitorBase"
+    }
+  ]
+}

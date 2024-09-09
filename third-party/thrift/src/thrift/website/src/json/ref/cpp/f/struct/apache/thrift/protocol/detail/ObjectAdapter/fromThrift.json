@@ -1,0 +1,64 @@
+{
+  "kind": "overloadset",
+  "name_html": "fromThrift",
+  "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter_1aa537611b7ea9f2ae0b028ba7cd721c0c",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class <code>Object</code>"
+        }
+      ],
+      "type_html": "auto",
+      "definition_html": "static auto apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+      "argsstring_html": "(Object &amp;&amp;obj)",
+      "name_html": "fromThrift",
+      "param": [
+        {
+          "type_html": "<code>Object</code> &amp;&amp;",
+          "declname_html": "obj"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "98",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "98",
+        "bodyend": "100"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Object&gt;\nstatic auto fromThrift(Object&amp;&amp; obj)",
+        "simple_raw": "template <class Object>\nstatic auto fromThrift(Object&& obj)",
+        "detailed_html": "template &lt;class Object&gt;\ninline static auto fromThrift(Object&amp;&amp; obj)",
+        "detailed_raw": "template <class Object>\ninline static auto fromThrift(Object&& obj)",
+        "original_definition_html": "static auto apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+        "original_argsstring_html": "(Object &amp;&amp;obj)"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+      "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter",
+      "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter::fromThrift"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+  "minprot": "public",
+  "displayname_html": "fromThrift",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+  "refid": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+  "parent_links": [
+    {
+      "text_html": "ObjectAdapter",
+      "href": "/ref/cpp/struct/apache/thrift/protocol/detail/ObjectAdapter"
+    }
+  ]
+}

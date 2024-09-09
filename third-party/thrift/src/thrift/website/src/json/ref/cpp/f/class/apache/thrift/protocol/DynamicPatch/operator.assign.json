@@ -1,0 +1,96 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator=",
+  "compoundname_html": "apache::thrift::protocol::DynamicPatch::operator=",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch_1a4d3386bb289eb77b4d6697885eeca463",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "<code>DynamicPatch</code> &amp;",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicPatch::operator=",
+      "argsstring_html": "(const DynamicPatch &amp;)",
+      "name_html": "operator=",
+      "param": [
+        {
+          "type_html": "const <code>DynamicPatch</code> &amp;",
+          "defname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "448",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "1399",
+        "bodyend": "1402"
+      },
+      "definition": {
+        "simple_html": "DynamicPatch&amp; operator=(const DynamicPatch&amp;)",
+        "simple_raw": "DynamicPatch& operator=(const DynamicPatch&)",
+        "detailed_html": "DynamicPatch&amp; operator=(const DynamicPatch&amp;)",
+        "detailed_raw": "DynamicPatch& operator=(const DynamicPatch&)",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicPatch::operator=",
+        "original_argsstring_html": "(const DynamicPatch &amp;)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatch/operator.assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatch/operator.assign",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicPatch::operator="
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch_1a312bcb580c0e2a6373ab03b882de07cf",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "noexcept": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<code>DynamicPatch</code> &amp;",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicPatch::operator=",
+      "argsstring_html": "(DynamicPatch &amp;&amp;) noexcept",
+      "name_html": "operator=",
+      "param": [
+        {
+          "type_html": "<code>DynamicPatch</code> &amp;&amp;",
+          "defname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "451",
+        "column": "16"
+      },
+      "definition": {
+        "simple_html": "DynamicPatch&amp; operator=(DynamicPatch&amp;&amp;)",
+        "simple_raw": "DynamicPatch& operator=(DynamicPatch&&)",
+        "detailed_html": "DynamicPatch&amp; operator=(DynamicPatch&amp;&amp;) noexcept",
+        "detailed_raw": "DynamicPatch& operator=(DynamicPatch&&) noexcept",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicPatch::operator=",
+        "original_argsstring_html": "(DynamicPatch &amp;&amp;) noexcept"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatch/operator.assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatch/operator.assign",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicPatch::operator="
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicPatch/operator.assign",
+  "minprot": "public",
+  "displayname_html": "operator=",
+  "brief_html": "Assignment operator.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatch/operator.assign",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatch/operator.assign",
+  "parent_links": [
+    {
+      "text_html": "DynamicPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicPatch"
+    }
+  ]
+}

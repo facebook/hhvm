@@ -1,0 +1,98 @@
+{
+  "kind": "overloadset",
+  "name_html": "get_ptr",
+  "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::get_ptr",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1aab40c6ce8cbe13740ab4656e291577f2",
+      "prot": "protected",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "Value *",
+      "definition_html": "Value* apache::thrift::protocol::DynamicPatchBase::get_ptr",
+      "argsstring_html": "(op::PatchOp patchOp)",
+      "name_html": "get_ptr",
+      "param": [
+        {
+          "type_html": "op::PatchOp",
+          "declname_html": "patchOp"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "118",
+        "column": "10",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "118",
+        "bodyend": "120"
+      },
+      "definition": {
+        "simple_html": "Value* get_ptr(op::PatchOp patchOp)",
+        "simple_raw": "Value* get_ptr(op::PatchOp patchOp)",
+        "detailed_html": "protected inline Value* get_ptr(op::PatchOp patchOp)",
+        "detailed_raw": "protected inline Value* get_ptr(op::PatchOp patchOp)",
+        "original_definition_html": "Value* apache::thrift::protocol::DynamicPatchBase::get_ptr",
+        "original_argsstring_html": "(op::PatchOp patchOp)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatchBase/get_ptr",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatchBase/get_ptr",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase",
+      "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::get_ptr"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1a3c950f2fa3a04374d39260edae1845be",
+      "prot": "protected",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "const Value *",
+      "definition_html": "const Value* apache::thrift::protocol::DynamicPatchBase::get_ptr",
+      "argsstring_html": "(op::PatchOp patchOp) const",
+      "name_html": "get_ptr",
+      "param": [
+        {
+          "type_html": "op::PatchOp",
+          "declname_html": "patchOp"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "122",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "122",
+        "bodyend": "124"
+      },
+      "definition": {
+        "simple_html": "const Value* get_ptr(op::PatchOp patchOp) const",
+        "simple_raw": "const Value* get_ptr(op::PatchOp patchOp) const",
+        "detailed_html": "protected inline const Value* get_ptr(op::PatchOp patchOp) const",
+        "detailed_raw": "protected inline const Value* get_ptr(op::PatchOp patchOp) const",
+        "original_definition_html": "const Value* apache::thrift::protocol::DynamicPatchBase::get_ptr",
+        "original_argsstring_html": "(op::PatchOp patchOp) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatchBase/get_ptr",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatchBase/get_ptr",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase",
+      "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::get_ptr"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicSetPatch/get_ptr",
+  "minprot": "protected",
+  "displayname_html": "get_ptr",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicSetPatch/get_ptr",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicSetPatch/get_ptr",
+  "parent_links": [
+    {
+      "text_html": "DynamicSetPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicSetPatch"
+    }
+  ]
+}

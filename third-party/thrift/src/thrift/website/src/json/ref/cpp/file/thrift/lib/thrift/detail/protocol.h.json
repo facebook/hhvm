@@ -1,0 +1,107 @@
+{
+  "refid": "protocol_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "protocol.h",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "optional"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/Utility.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/Thrift.h"
+    }
+  ],
+  "innerclass": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+      "prot": "public",
+      "text_html": "apache::thrift::protocol::detail::ObjectWrapper",
+      "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper",
+      "is_transitive_innerclass": false
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter",
+      "prot": "public",
+      "text_html": "apache::thrift::protocol::detail::ObjectAdapter",
+      "href": "/ref/cpp/struct/apache/thrift/protocol/detail/ObjectAdapter",
+      "is_transitive_innerclass": false
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "prot": "public",
+      "text_html": "apache::thrift::protocol::detail::ValueWrapper",
+      "href": "/ref/cpp/class/apache/thrift/protocol/detail/ValueWrapper",
+      "is_transitive_innerclass": false
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ValueAdapter",
+      "prot": "public",
+      "text_html": "apache::thrift::protocol::detail::ValueAdapter",
+      "href": "/ref/cpp/struct/apache/thrift/protocol/detail/ValueAdapter",
+      "is_transitive_innerclass": false
+    },
+    {
+      "refid": "structstd_1_1hash_3_01apache_1_1thrift_1_1protocol_1_1detail_1_1Value_01_4",
+      "prot": "public",
+      "text_html": "std::hash&lt; apache::thrift::protocol::detail::Value &gt;",
+      "href": "/ref/cpp/struct/special/structstd_1_1hash_3_01apache_1_1thrift_1_1protocol_1_1detail_1_1Value_01_4",
+      "is_transitive_innerclass": false
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol",
+      "text_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1_1detail",
+      "text_html": "apache::thrift::protocol::detail"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1_1detail_1_1detail",
+      "text_html": "apache::thrift::protocol::detail::detail"
+    }
+  ],
+  "defines": {
+    "macros": [
+      {
+        "refid": "protocol_8h_1ac201f90f55e17dd05ee759803ffa2d6b",
+        "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+        "param": [
+          {
+            "defname_html": "TYPE"
+          }
+        ],
+        "initializer_html": "decltype(auto) as_##TYPE() { return *Base::TYPE##Value_ref(); }             \\\n  decltype(auto) as_##TYPE() const { return *Base::TYPE##Value_ref(); }       \\\n  bool is_##TYPE() const { return Base::TYPE##Value_ref().has_value(); }      \\\n  decltype(auto) ensure_##TYPE() { return Base::TYPE##Value_ref().ensure(); } \\\n  template &lt;typename... Args&gt;                                                 \\\n  decltype(auto) emplace_##TYPE(Args&amp;&amp;... args) {                             \\\n    return Base::TYPE##Value_ref().emplace(static_cast&lt;Args&amp;&amp;&gt;(args)...);     \\\n  }                                                                           \\\n  decltype(auto) if_##TYPE() {                                                \\\n    return is_##TYPE() ? &amp;*Base::TYPE##Value_ref() : nullptr;                 \\\n  }                                                                           \\\n  decltype(auto) if_##TYPE() const {                                          \\\n    return is_##TYPE() ? &amp;*Base::TYPE##Value_ref() : nullptr;                 \\\n  }                                                                           \\\n  /* enforce semicolon after macro */ static_assert(true, \"\")",
+        "location": {
+          "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+          "line": "127",
+          "column": "9",
+          "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+          "bodystart": "127",
+          "bodyend": "-1"
+        }
+      }
+    ]
+  },
+  "file_location": {
+    "file": "fbcode/thrift/lib/thrift/detail/protocol.h"
+  },
+  "filepath": "file/thrift/lib/thrift/detail/protocol.h",
+  "href": "/ref/cpp/thrift/lib/thrift/detail/protocol.h",
+  "free_overloadgroups": []
+}

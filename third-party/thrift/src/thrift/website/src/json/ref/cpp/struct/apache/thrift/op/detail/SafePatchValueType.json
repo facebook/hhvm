@@ -38,6 +38,9 @@
   "declaration_html": "template &lt; class T &gt;\nstruct SafePatchValueType;",
   "filepath": "struct/apache/thrift/op/detail/SafePatchValueType",
   "href": "/ref/cpp/struct/apache/thrift/op/detail/SafePatchValueType",
+  "specializedBy": [
+    "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchValueType_3_1_1apache_1_1thrift_1_1op_1_1AnySafePatch_01_4"
+  ],
   "overloadgroups": [],
   "free_overloadgroups": []
 }

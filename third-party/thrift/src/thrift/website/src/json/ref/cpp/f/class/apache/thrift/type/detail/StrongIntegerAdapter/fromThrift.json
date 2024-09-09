@@ -1,0 +1,59 @@
+{
+  "kind": "overloadset",
+  "name_html": "fromThrift",
+  "compoundname_html": "apache::thrift::type::detail::StrongIntegerAdapter::fromThrift",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1type_1_1detail_1_1StrongIntegerAdapter_1ad67edc623b4f0b0d4737c05dfda1663c",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "StrongInteger",
+      "definition_html": "static StrongInteger apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::fromThrift",
+      "argsstring_html": "(T t)",
+      "name_html": "fromThrift",
+      "param": [
+        {
+          "type_html": "T",
+          "declname_html": "t"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/id.h",
+        "line": "41",
+        "column": "24",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/id.h",
+        "bodystart": "41",
+        "bodyend": "41"
+      },
+      "definition": {
+        "simple_html": "static StrongInteger fromThrift(T t)",
+        "simple_raw": "static StrongInteger fromThrift(T t)",
+        "detailed_html": "inline static StrongInteger fromThrift(T t)",
+        "detailed_raw": "inline static StrongInteger fromThrift(T t)",
+        "original_definition_html": "static StrongInteger apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::fromThrift",
+        "original_argsstring_html": "(T t)"
+      },
+      "filepath": "fns/class/apache/thrift/type/detail/StrongIntegerAdapter/fromThrift",
+      "href": "/ref/cpp/fns/class/apache/thrift/type/detail/StrongIntegerAdapter/fromThrift",
+      "parentid": "classapache_1_1thrift_1_1type_1_1detail_1_1StrongIntegerAdapter",
+      "compoundname_html": "apache::thrift::type::detail::StrongIntegerAdapter::fromThrift"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/type/detail/StrongIntegerAdapter/fromThrift",
+  "minprot": "public",
+  "displayname_html": "fromThrift",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/type/detail/StrongIntegerAdapter/fromThrift",
+  "refid": "/ref/cpp/f/class/apache/thrift/type/detail/StrongIntegerAdapter/fromThrift",
+  "parent_links": [
+    {
+      "text_html": "StrongIntegerAdapter",
+      "href": "/ref/cpp/class/apache/thrift/type/detail/StrongIntegerAdapter"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "merge",
+  "compoundname_html": "apache::thrift::protocol::DynamicUnknownPatch::merge",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnknownPatch_1aa7ea1734b0249594a8d9bcda0c2a65ef",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicUnknownPatch::merge",
+      "argsstring_html": "(detail::Badge badge, const DynamicUnknownPatch &amp;other)",
+      "name_html": "merge",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>DynamicUnknownPatch</code> &amp;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "144",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "144",
+        "bodyend": "146"
+      },
+      "definition": {
+        "simple_html": "void merge(detail::Badge badge, const DynamicUnknownPatch&amp; other)",
+        "simple_raw": "void merge(detail::Badge badge, const DynamicUnknownPatch& other)",
+        "detailed_html": "inline void merge(detail::Badge badge, const DynamicUnknownPatch&amp; other)",
+        "detailed_raw": "inline void merge(detail::Badge badge, const DynamicUnknownPatch& other)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicUnknownPatch::merge",
+        "original_argsstring_html": "(detail::Badge badge, const DynamicUnknownPatch &amp;other)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicUnknownPatch/merge",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicUnknownPatch/merge",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnknownPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicUnknownPatch::merge"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicUnknownPatch/merge",
+  "minprot": "public",
+  "displayname_html": "merge",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnknownPatch/merge",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnknownPatch/merge",
+  "parent_links": [
+    {
+      "text_html": "DynamicUnknownPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicUnknownPatch"
+    }
+  ]
+}

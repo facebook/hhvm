@@ -1,0 +1,50 @@
+{
+  "kind": "overloadset",
+  "name_html": "~DiffVisitorBase",
+  "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ad3fccf30116e66284ced49937408fb0a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "virtual",
+      "type_html": "",
+      "definition_html": "virtual apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
+      "argsstring_html": "()=default",
+      "name_html": "~DiffVisitorBase",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "594",
+        "column": "11"
+      },
+      "definition": {
+        "simple_html": "virtual ~DiffVisitorBase()",
+        "simple_raw": "virtual ~DiffVisitorBase()",
+        "detailed_html": "virtual ~DiffVisitorBase() = default",
+        "detailed_raw": "virtual ~DiffVisitorBase() = default",
+        "original_definition_html": "virtual apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
+        "original_argsstring_html": "()=default"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/DiffVisitorBase.dtor",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DiffVisitorBase/DiffVisitorBase.dtor",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase",
+      "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DiffVisitorBase/DiffVisitorBase.dtor",
+  "minprot": "public",
+  "displayname_html": "(destructor)",
+  "brief_html": "Destructs the DiffVisitorBase.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/DiffVisitorBase.dtor",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/DiffVisitorBase.dtor",
+  "parent_links": [
+    {
+      "text_html": "DiffVisitorBase",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DiffVisitorBase"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "merge",
+  "compoundname_html": "apache::thrift::protocol::DynamicUnionPatch::merge",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnionPatch_1a045d586cfda5ec7d1723dfe3c32cda08",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicUnionPatch::merge",
+      "argsstring_html": "(detail::Badge badge, const DynamicUnionPatch &amp;p)",
+      "name_html": "merge",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>DynamicUnionPatch</code> &amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "435",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "435",
+        "bodyend": "437"
+      },
+      "definition": {
+        "simple_html": "void merge(detail::Badge badge, const DynamicUnionPatch&amp; p)",
+        "simple_raw": "void merge(detail::Badge badge, const DynamicUnionPatch& p)",
+        "detailed_html": "inline void merge(detail::Badge badge, const DynamicUnionPatch&amp; p)",
+        "detailed_raw": "inline void merge(detail::Badge badge, const DynamicUnionPatch& p)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicUnionPatch::merge",
+        "original_argsstring_html": "(detail::Badge badge, const DynamicUnionPatch &amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicUnionPatch/merge",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicUnionPatch/merge",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnionPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicUnionPatch::merge"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicUnionPatch/merge",
+  "minprot": "public",
+  "displayname_html": "merge",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnionPatch/merge",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnionPatch/merge",
+  "parent_links": [
+    {
+      "text_html": "DynamicUnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicUnionPatch"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "kind": "overloadset",
+  "name_html": "diffElement",
+  "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::diffElement",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1a2452164eb04e5f4172633e9375647751",
+      "prot": "protected",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffElement",
+      "argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst, const Value &amp;key, DynamicMapPatch &amp;patch)",
+      "name_html": "diffElement",
+      "param": [
+        {
+          "type_html": "const <code>detail::ValueMap</code> &amp;",
+          "declname_html": "src"
+        },
+        {
+          "type_html": "const <code>detail::ValueMap</code> &amp;",
+          "declname_html": "dst"
+        },
+        {
+          "type_html": "const Value &amp;",
+          "declname_html": "key"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch\">DynamicMapPatch</a> &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "628",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "800",
+        "bodyend": "827"
+      },
+      "definition": {
+        "simple_html": "void diffElement(\n    const detail::ValueMap&amp; src,\n    const detail::ValueMap&amp; dst,\n    const Value&amp; key,\n    DynamicMapPatch&amp; patch)",
+        "simple_raw": "void diffElement(\n    const detail::ValueMap& src,\n    const detail::ValueMap& dst,\n    const Value& key,\n    DynamicMapPatch& patch)",
+        "detailed_html": "protected void diffElement(\n    const detail::ValueMap&amp; src,\n    const detail::ValueMap&amp; dst,\n    const Value&amp; key,\n    DynamicMapPatch&amp; patch)",
+        "detailed_raw": "protected void diffElement(\n    const detail::ValueMap& src,\n    const detail::ValueMap& dst,\n    const Value& key,\n    DynamicMapPatch& patch)",
+        "original_definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffElement",
+        "original_argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst, const Value &amp;key, DynamicMapPatch &amp;patch)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/diffElement",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DiffVisitorBase/diffElement",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase",
+      "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::diffElement"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DiffVisitorBase/diffElement",
+  "minprot": "protected",
+  "displayname_html": "diffElement",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/diffElement",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/diffElement",
+  "parent_links": [
+    {
+      "text_html": "DiffVisitorBase",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DiffVisitorBase"
+    }
+  ]
+}

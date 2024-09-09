@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "put",
+  "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::put",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a3e469ad7189ef8d550f7459f9afc025a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::put",
+      "argsstring_html": "(detail::Badge badge, const detail::ValueMap &amp;m)",
+      "name_html": "put",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>detail::ValueMap</code> &amp;",
+          "declname_html": "m"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "303",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "303",
+        "bodyend": "307"
+      },
+      "definition": {
+        "simple_html": "void put(detail::Badge badge, const detail::ValueMap&amp; m)",
+        "simple_raw": "void put(detail::Badge badge, const detail::ValueMap& m)",
+        "detailed_html": "inline void put(detail::Badge badge, const detail::ValueMap&amp; m)",
+        "detailed_raw": "inline void put(detail::Badge badge, const detail::ValueMap& m)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::put",
+        "original_argsstring_html": "(detail::Badge badge, const detail::ValueMap &amp;m)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/put",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/put",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::put"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/put",
+  "minprot": "public",
+  "displayname_html": "put",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/put",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/put",
+  "parent_links": [
+    {
+      "text_html": "DynamicMapPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "kind": "overloadset",
+  "name_html": "ValueWrapper",
+  "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::ValueWrapper",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1add366c26ed722b868a0950b9efac13a8",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "yes",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::ValueWrapper",
+      "argsstring_html": "(const Base &amp;base)",
+      "name_html": "ValueWrapper",
+      "param": [
+        {
+          "type_html": "const Base &amp;",
+          "declname_html": "base"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "121",
+        "column": "12",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "121",
+        "bodyend": "121"
+      },
+      "definition": {
+        "simple_html": "ValueWrapper(const Base&amp; base)",
+        "simple_raw": "ValueWrapper(const Base& base)",
+        "detailed_html": "explicit inline ValueWrapper(const Base&amp; base)",
+        "detailed_raw": "explicit inline ValueWrapper(const Base& base)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::ValueWrapper",
+        "original_argsstring_html": "(const Base &amp;base)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/ValueWrapper",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/ValueWrapper",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::ValueWrapper"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper_1a5c24c49a7b22eddb147d899f4b20c3a3",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "yes",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::ValueWrapper",
+      "argsstring_html": "(Base &amp;&amp;base)",
+      "name_html": "ValueWrapper",
+      "param": [
+        {
+          "type_html": "Base &amp;&amp;",
+          "declname_html": "base"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "122",
+        "column": "12",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "122",
+        "bodyend": "122"
+      },
+      "definition": {
+        "simple_html": "ValueWrapper(Base&amp;&amp; base)",
+        "simple_raw": "ValueWrapper(Base&& base)",
+        "detailed_html": "explicit inline ValueWrapper(Base&amp;&amp; base)",
+        "detailed_raw": "explicit inline ValueWrapper(Base&& base)",
+        "original_definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::ValueWrapper",
+        "original_argsstring_html": "(Base &amp;&amp;base)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ValueWrapper/ValueWrapper",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ValueWrapper/ValueWrapper",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ValueWrapper",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::protocol::detail::ValueWrapper::ValueWrapper"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/detail/ValueWrapper/ValueWrapper",
+  "minprot": "public",
+  "displayname_html": "(constructor)",
+  "brief_html": "Constructs the ValueWrapper.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ValueWrapper/ValueWrapper",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ValueWrapper/ValueWrapper",
+  "parent_links": [
+    {
+      "text_html": "ValueWrapper",
+      "href": "/ref/cpp/class/apache/thrift/protocol/detail/ValueWrapper"
+    }
+  ]
+}

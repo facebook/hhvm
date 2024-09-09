@@ -1,0 +1,62 @@
+{
+  "refid": "thrift_2detail_2AnyPatch_8cpp",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "AnyPatch.cpp",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "folly/lang/Exception.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/patch/detail/PatchBadge.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/DebugProtocol.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Type.h"
+    },
+    {
+      "refid": "AnyPatch_8h",
+      "local": "no",
+      "text_html": "thrift/lib/thrift/detail/AnyPatch.h"
+    },
+    {
+      "refid": "DynamicPatch_8h",
+      "local": "no",
+      "text_html": "thrift/lib/thrift/detail/DynamicPatch.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/thrift/gen-cpp2/any_patch_types.h"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1_1detail",
+      "text_html": "apache::thrift::op::detail"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp"
+  },
+  "filepath": "file/thrift/lib/thrift/detail/AnyPatch.cpp",
+  "href": "/ref/cpp/thrift/lib/thrift/detail/AnyPatch.cpp",
+  "free_overloadgroups": []
+}

@@ -1,0 +1,223 @@
+{
+  "kind": "overloadset",
+  "name_html": "DynamicPatchBase",
+  "compoundname_html": "apache::thrift::protocol::DynamicListPatch::DynamicPatchBase",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1a9957cc89b2acd6624b2c038c3eb7bbdb",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+      "argsstring_html": "()=default",
+      "name_html": "DynamicPatchBase",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "77",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "DynamicPatchBase()",
+        "simple_raw": "DynamicPatchBase()",
+        "detailed_html": "DynamicPatchBase() = default",
+        "detailed_raw": "DynamicPatchBase() = default",
+        "original_definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+        "original_argsstring_html": "()=default"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatchBase/DynamicPatchBase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatchBase/DynamicPatchBase",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::protocol::DynamicListPatch::DynamicPatchBase"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1ac8ee161e4e7dd3d29beb65bffa88c02f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+      "argsstring_html": "(const DynamicPatchBase &amp;)=default",
+      "name_html": "DynamicPatchBase",
+      "param": [
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "78",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "DynamicPatchBase(const DynamicPatchBase&amp;)",
+        "simple_raw": "DynamicPatchBase(const DynamicPatchBase&)",
+        "detailed_html": "DynamicPatchBase(const DynamicPatchBase&amp;) = default",
+        "detailed_raw": "DynamicPatchBase(const DynamicPatchBase&) = default",
+        "original_definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+        "original_argsstring_html": "(const DynamicPatchBase &amp;)=default"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatchBase/DynamicPatchBase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatchBase/DynamicPatchBase",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::protocol::DynamicListPatch::DynamicPatchBase"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1a4044870fe067e7c118737905ebe8c03f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+      "argsstring_html": "(DynamicPatchBase &amp;&amp;)=default",
+      "name_html": "DynamicPatchBase",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;&amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "79",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "DynamicPatchBase(DynamicPatchBase&amp;&amp;)",
+        "simple_raw": "DynamicPatchBase(DynamicPatchBase&&)",
+        "detailed_html": "DynamicPatchBase(DynamicPatchBase&amp;&amp;) = default",
+        "detailed_raw": "DynamicPatchBase(DynamicPatchBase&&) = default",
+        "original_definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+        "original_argsstring_html": "(DynamicPatchBase &amp;&amp;)=default"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatchBase/DynamicPatchBase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatchBase/DynamicPatchBase",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase",
+      "constructor": true,
+      "compoundname_html": "apache::thrift::protocol::DynamicListPatch::DynamicPatchBase"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch_1a9957cc89b2acd6624b2c038c3eb7bbdb",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+      "argsstring_html": "()=default",
+      "name_html": "DynamicPatchBase",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "176",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "DynamicPatchBase()",
+        "simple_raw": "DynamicPatchBase()",
+        "detailed_html": "DynamicPatchBase() = default",
+        "detailed_raw": "DynamicPatchBase() = default",
+        "original_definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+        "original_argsstring_html": "()=default"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicListPatch::DynamicPatchBase"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch_1ac8ee161e4e7dd3d29beb65bffa88c02f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+      "argsstring_html": "(const DynamicPatchBase &amp;)=default",
+      "name_html": "DynamicPatchBase",
+      "param": [
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "176",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "DynamicPatchBase(const DynamicPatchBase&amp;)",
+        "simple_raw": "DynamicPatchBase(const DynamicPatchBase&)",
+        "detailed_html": "DynamicPatchBase(const DynamicPatchBase&amp;) = default",
+        "detailed_raw": "DynamicPatchBase(const DynamicPatchBase&) = default",
+        "original_definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+        "original_argsstring_html": "(const DynamicPatchBase &amp;)=default"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicListPatch::DynamicPatchBase"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch_1a4044870fe067e7c118737905ebe8c03f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+      "argsstring_html": "(DynamicPatchBase &amp;&amp;)=default",
+      "name_html": "DynamicPatchBase",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;&amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "176",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "DynamicPatchBase(DynamicPatchBase&amp;&amp;)",
+        "simple_raw": "DynamicPatchBase(DynamicPatchBase&&)",
+        "detailed_html": "DynamicPatchBase(DynamicPatchBase&amp;&amp;) = default",
+        "detailed_raw": "DynamicPatchBase(DynamicPatchBase&&) = default",
+        "original_definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
+        "original_argsstring_html": "(DynamicPatchBase &amp;&amp;)=default"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicListPatch::DynamicPatchBase"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+  "minprot": "public",
+  "displayname_html": "(constructor)",
+  "brief_html": "Constructs the DynamicPatchBase.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicListPatch/DynamicPatchBase",
+  "parent_links": [
+    {
+      "text_html": "DynamicListPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicListPatch"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "merge",
+  "compoundname_html": "apache::thrift::protocol::DynamicStructPatch::merge",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructPatch_1a9a289863c8a3e1d228e16fa0ff0add7f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicStructPatch::merge",
+      "argsstring_html": "(detail::Badge badge, const DynamicStructPatch &amp;p)",
+      "name_html": "merge",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>DynamicStructPatch</code> &amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "429",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "429",
+        "bodyend": "431"
+      },
+      "definition": {
+        "simple_html": "void merge(detail::Badge badge, const DynamicStructPatch&amp; p)",
+        "simple_raw": "void merge(detail::Badge badge, const DynamicStructPatch& p)",
+        "detailed_html": "inline void merge(detail::Badge badge, const DynamicStructPatch&amp; p)",
+        "detailed_raw": "inline void merge(detail::Badge badge, const DynamicStructPatch& p)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicStructPatch::merge",
+        "original_argsstring_html": "(detail::Badge badge, const DynamicStructPatch &amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicStructPatch/merge",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicStructPatch/merge",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicStructPatch::merge"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicStructPatch/merge",
+  "minprot": "public",
+  "displayname_html": "merge",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicStructPatch/merge",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicStructPatch/merge",
+  "parent_links": [
+    {
+      "text_html": "DynamicStructPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicStructPatch"
+    }
+  ]
+}

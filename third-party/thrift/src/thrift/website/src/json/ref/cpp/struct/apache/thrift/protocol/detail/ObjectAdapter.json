@@ -1,0 +1,343 @@
+{
+  "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter",
+  "includes": {
+    "refid": "protocol_8h",
+    "local": "no",
+    "text_html": "protocol.h"
+  },
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter_1aa537611b7ea9f2ae0b028ba7cd721c0c",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class <code>Object</code>"
+        }
+      ],
+      "type_html": "auto",
+      "definition_html": "static auto apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+      "argsstring_html": "(Object &amp;&amp;obj)",
+      "name_html": "fromThrift",
+      "param": [
+        {
+          "type_html": "<code>Object</code> &amp;&amp;",
+          "declname_html": "obj"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "98",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "98",
+        "bodyend": "100"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Object&gt;\nstatic auto fromThrift(Object&amp;&amp; obj)",
+        "simple_raw": "template <class Object>\nstatic auto fromThrift(Object&& obj)",
+        "detailed_html": "template &lt;class Object&gt;\ninline static auto fromThrift(Object&amp;&amp; obj)",
+        "detailed_raw": "template <class Object>\ninline static auto fromThrift(Object&& obj)",
+        "original_definition_html": "static auto apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+        "original_argsstring_html": "(Object &amp;&amp;obj)"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter_1a7bb6d657cff639f32ff4b88e4fa8c563",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class <code>Object</code>"
+        }
+      ],
+      "type_html": "<code>Object</code> &amp;",
+      "definition_html": "static Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+      "argsstring_html": "(ObjectWrapper&lt; Object &gt; &amp;obj)",
+      "name_html": "toThrift",
+      "param": [
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper\">ObjectWrapper</a>&lt; <code>Object</code> &gt; &amp;",
+          "declname_html": "obj"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "103",
+        "column": "17",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "103",
+        "bodyend": "105"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Object&gt;\nstatic Object&amp; toThrift(ObjectWrapper&lt;Object&gt;&amp; obj)",
+        "simple_raw": "template <class Object>\nstatic Object& toThrift(ObjectWrapper<Object>& obj)",
+        "detailed_html": "template &lt;class Object&gt;\ninline static Object&amp; toThrift(ObjectWrapper&lt;Object&gt;&amp; obj)",
+        "detailed_raw": "template <class Object>\ninline static Object& toThrift(ObjectWrapper<Object>& obj)",
+        "original_definition_html": "static Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+        "original_argsstring_html": "(ObjectWrapper&lt; Object &gt; &amp;obj)"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter_1ae60bce37aa6a94bfd29d1f842dc26749",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class <code>Object</code>"
+        }
+      ],
+      "type_html": "const <code>Object</code> &amp;",
+      "definition_html": "static const Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+      "argsstring_html": "(const ObjectWrapper&lt; Object &gt; &amp;obj)",
+      "name_html": "toThrift",
+      "param": [
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper\">ObjectWrapper</a>&lt; <code>Object</code> &gt; &amp;",
+          "declname_html": "obj"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "107",
+        "column": "23",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "107",
+        "bodyend": "109"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Object&gt;\nstatic const Object&amp; toThrift(const ObjectWrapper&lt;Object&gt;&amp; obj)",
+        "simple_raw": "template <class Object>\nstatic const Object& toThrift(const ObjectWrapper<Object>& obj)",
+        "detailed_html": "template &lt;class Object&gt;\ninline static const Object&amp; toThrift(const ObjectWrapper&lt;Object&gt;&amp; obj)",
+        "detailed_raw": "template <class Object>\ninline static const Object& toThrift(const ObjectWrapper<Object>& obj)",
+        "original_definition_html": "static const Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+        "original_argsstring_html": "(const ObjectWrapper&lt; Object &gt; &amp;obj)"
+      },
+      "filepath": "fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+      "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+    "line": "96",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+    "bodystart": "96",
+    "bodyend": "110"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "protocol",
+    "detail",
+    "ObjectAdapter"
+  ],
+  "enums": [],
+  "types": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "struct ObjectAdapter;",
+  "declaration_html": "struct ObjectAdapter;",
+  "filepath": "struct/apache/thrift/protocol/detail/ObjectAdapter",
+  "href": "/ref/cpp/struct/apache/thrift/protocol/detail/ObjectAdapter",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "fromThrift",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter_1aa537611b7ea9f2ae0b028ba7cd721c0c",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class <code>Object</code>"
+                }
+              ],
+              "type_html": "auto",
+              "definition_html": "static auto apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+              "argsstring_html": "(Object &amp;&amp;obj)",
+              "name_html": "fromThrift",
+              "param": [
+                {
+                  "type_html": "<code>Object</code> &amp;&amp;",
+                  "declname_html": "obj"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "98",
+                "column": "15",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "98",
+                "bodyend": "100"
+              },
+              "definition": {
+                "simple_html": "template &lt;class Object&gt;\nstatic auto fromThrift(Object&amp;&amp; obj)",
+                "simple_raw": "template <class Object>\nstatic auto fromThrift(Object&& obj)",
+                "detailed_html": "template &lt;class Object&gt;\ninline static auto fromThrift(Object&amp;&amp; obj)",
+                "detailed_raw": "template <class Object>\ninline static auto fromThrift(Object&& obj)",
+                "original_definition_html": "static auto apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
+                "original_argsstring_html": "(Object &amp;&amp;obj)"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter::fromThrift"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+          "minprot": "public",
+          "displayname_html": "fromThrift",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+          "refid": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ObjectAdapter/fromThrift",
+          "parent_links": [
+            {
+              "text_html": "ObjectAdapter",
+              "href": "/ref/cpp/struct/apache/thrift/protocol/detail/ObjectAdapter"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "toThrift",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter_1a7bb6d657cff639f32ff4b88e4fa8c563",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class <code>Object</code>"
+                }
+              ],
+              "type_html": "<code>Object</code> &amp;",
+              "definition_html": "static Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+              "argsstring_html": "(ObjectWrapper&lt; Object &gt; &amp;obj)",
+              "name_html": "toThrift",
+              "param": [
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper\">ObjectWrapper</a>&lt; <code>Object</code> &gt; &amp;",
+                  "declname_html": "obj"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "103",
+                "column": "17",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "103",
+                "bodyend": "105"
+              },
+              "definition": {
+                "simple_html": "template &lt;class Object&gt;\nstatic Object&amp; toThrift(ObjectWrapper&lt;Object&gt;&amp; obj)",
+                "simple_raw": "template <class Object>\nstatic Object& toThrift(ObjectWrapper<Object>& obj)",
+                "detailed_html": "template &lt;class Object&gt;\ninline static Object&amp; toThrift(ObjectWrapper&lt;Object&gt;&amp; obj)",
+                "detailed_raw": "template <class Object>\ninline static Object& toThrift(ObjectWrapper<Object>& obj)",
+                "original_definition_html": "static Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+                "original_argsstring_html": "(ObjectWrapper&lt; Object &gt; &amp;obj)"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter::toThrift"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter_1ae60bce37aa6a94bfd29d1f842dc26749",
+              "prot": "public",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class <code>Object</code>"
+                }
+              ],
+              "type_html": "const <code>Object</code> &amp;",
+              "definition_html": "static const Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+              "argsstring_html": "(const ObjectWrapper&lt; Object &gt; &amp;obj)",
+              "name_html": "toThrift",
+              "param": [
+                {
+                  "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper\">ObjectWrapper</a>&lt; <code>Object</code> &gt; &amp;",
+                  "declname_html": "obj"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "107",
+                "column": "23",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "107",
+                "bodyend": "109"
+              },
+              "definition": {
+                "simple_html": "template &lt;class Object&gt;\nstatic const Object&amp; toThrift(const ObjectWrapper&lt;Object&gt;&amp; obj)",
+                "simple_raw": "template <class Object>\nstatic const Object& toThrift(const ObjectWrapper<Object>& obj)",
+                "detailed_html": "template &lt;class Object&gt;\ninline static const Object&amp; toThrift(const ObjectWrapper&lt;Object&gt;&amp; obj)",
+                "detailed_raw": "template <class Object>\ninline static const Object& toThrift(const ObjectWrapper<Object>& obj)",
+                "original_definition_html": "static const Object&amp; apache::thrift::protocol::detail::ObjectAdapter::toThrift",
+                "original_argsstring_html": "(const ObjectWrapper&lt; Object &gt; &amp;obj)"
+              },
+              "filepath": "fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+              "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+              "parentid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectAdapter",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectAdapter::toThrift"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+          "minprot": "public",
+          "displayname_html": "toThrift",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+          "refid": "/ref/cpp/f/struct/apache/thrift/protocol/detail/ObjectAdapter/toThrift",
+          "parent_links": [
+            {
+              "text_html": "ObjectAdapter",
+              "href": "/ref/cpp/struct/apache/thrift/protocol/detail/ObjectAdapter"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

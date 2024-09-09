@@ -1,0 +1,67 @@
+{
+  "kind": "overloadset",
+  "name_html": "customVisit",
+  "compoundname_html": "apache::thrift::op::detail::AnyPatch::customVisit",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a7dbc6238485605c40ca36251a171715c",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Visitor"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::customVisit",
+      "argsstring_html": "(Visitor &amp;&amp;v) const",
+      "name_html": "customVisit",
+      "param": [
+        {
+          "type_html": "Visitor &amp;&amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "line": "150",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "bodystart": "150",
+        "bodyend": "174"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
+        "simple_raw": "template <typename Visitor>\nvoid customVisit(Visitor&& v) const",
+        "detailed_html": "template &lt;typename Visitor&gt;\ninline void customVisit(Visitor&amp;&amp; v) const",
+        "detailed_raw": "template <typename Visitor>\ninline void customVisit(Visitor&& v) const",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::customVisit",
+        "original_argsstring_html": "(Visitor &amp;&amp;v) const"
+      },
+      "description": {
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const AnyStruct&amp;);\n  void clear();\n  void patchIfTypeIs(const Type&amp;, const DynamicPatch&amp;);\n  void ensureAny(const AnyStruct&amp;);\n}\n</pre> </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/customVisit",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AnyPatch/customVisit",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch",
+      "compoundname_html": "apache::thrift::op::detail::AnyPatch::customVisit"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/AnyPatch/customVisit",
+  "minprot": "public",
+  "displayname_html": "customVisit",
+  "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const AnyStruct&amp;);\n  void clear();\n  void patchIfTypeIs(const Type&amp;, const DynamicPatch&amp;);\n  void ensureAny(const AnyStruct&amp;);\n}\n</pre> </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/AnyPatch/customVisit",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/AnyPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "AnyPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/AnyPatch"
+    }
+  ]
+}

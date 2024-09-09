@@ -1,0 +1,58 @@
+{
+  "kind": "overloadset",
+  "name_html": "doNotConvertStringToBinary",
+  "compoundname_html": "apache::thrift::protocol::DynamicPatchBase::doNotConvertStringToBinary",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1a4a3f702cde1e5cfb549bff8cc735cb18",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicPatchBase::doNotConvertStringToBinary",
+      "argsstring_html": "(detail::Badge)",
+      "name_html": "doNotConvertStringToBinary",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "101",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "101",
+        "bodyend": "103"
+      },
+      "definition": {
+        "simple_html": "void doNotConvertStringToBinary(detail::Badge)",
+        "simple_raw": "void doNotConvertStringToBinary(detail::Badge)",
+        "detailed_html": "inline void doNotConvertStringToBinary(detail::Badge)",
+        "detailed_raw": "inline void doNotConvertStringToBinary(detail::Badge)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicPatchBase::doNotConvertStringToBinary",
+        "original_argsstring_html": "(detail::Badge)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatchBase/doNotConvertStringToBinary",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatchBase/doNotConvertStringToBinary",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase",
+      "compoundname_html": "apache::thrift::protocol::DynamicPatchBase::doNotConvertStringToBinary"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicPatchBase/doNotConvertStringToBinary",
+  "minprot": "public",
+  "displayname_html": "doNotConvertStringToBinary",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatchBase/doNotConvertStringToBinary",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatchBase/doNotConvertStringToBinary",
+  "parent_links": [
+    {
+      "text_html": "DynamicPatchBase",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase"
+    }
+  ]
+}

@@ -17,11 +17,11 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
-          "type_html": "Value &amp;",
+          "type_html": "<code>Value</code> &amp;",
           "declname_html": "value"
         }
       ],
@@ -57,7 +57,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -97,7 +97,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -137,7 +137,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -177,7 +177,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -217,7 +217,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -257,7 +257,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -297,7 +297,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -337,7 +337,7 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
@@ -377,11 +377,11 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
-          "type_html": "std::vector&lt; Value &gt; &amp;",
+          "type_html": "std::vector&lt; <code>Value</code> &gt; &amp;",
           "declname_html": "value"
         }
       ],
@@ -417,11 +417,11 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
-          "type_html": "folly::F14FastSet&lt; Value &gt; &amp;",
+          "type_html": "folly::F14FastSet&lt; <code>Value</code> &gt; &amp;",
           "declname_html": "value"
         }
       ],
@@ -457,11 +457,11 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
-          "type_html": "folly::F14FastMap&lt; Value, Value &gt; &amp;",
+          "type_html": "folly::F14FastMap&lt; <code>Value</code>, <code>Value</code> &gt; &amp;",
           "declname_html": "value"
         }
       ],
@@ -497,11 +497,11 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "const Object &amp;",
+          "type_html": "const <code>Object</code> &amp;",
           "declname_html": "patch"
         },
         {
-          "type_html": "Object &amp;",
+          "type_html": "<code>Object</code> &amp;",
           "declname_html": "value"
         }
       ],
@@ -537,11 +537,11 @@
       "name_html": "operator()",
       "param": [
         {
-          "type_html": "Object &amp;&amp;",
+          "type_html": "<code>Object</code> &amp;&amp;",
           "declname_html": "patch"
         },
         {
-          "type_html": "Object &amp;",
+          "type_html": "<code>Object</code> &amp;",
           "declname_html": "value"
         }
       ],

@@ -1,0 +1,1532 @@
+{
+  "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+  "kind": "class",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper",
+  "basecompoundref": [
+    {
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "Base"
+    }
+  ],
+  "includes": {
+    "refid": "protocol_8h",
+    "local": "no",
+    "text_html": "protocol.h"
+  },
+  "tparams": [
+    {
+      "type_html": "class Base"
+    }
+  ],
+  "types": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a0e92b9df388b580c7d11bf9ff9537ffc",
+      "prot": "public",
+      "type_html": "type::adapted&lt;<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/detail/ObjectAdapter\">ObjectAdapter</a>, type::struct_t&lt;<code>detail::Object</code>&gt;&gt;",
+      "definition_html": "using apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::Tag =  type::adapted&lt;ObjectAdapter, type::struct_t&lt;detail::Object&gt; &gt;",
+      "argsstring_html": "",
+      "name_html": "Tag",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "51",
+        "column": "3",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "51",
+        "bodyend": "-1"
+      },
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper"
+    }
+  ],
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ae01d06956bd4a02d596ad6819bb16a07",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "const char *",
+      "definition_html": "template const char * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::__fbthrift_thrift_uri",
+      "argsstring_html": "()",
+      "name_html": "__fbthrift_thrift_uri",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "46",
+        "column": "21",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.cpp",
+        "bodystart": "31",
+        "bodyend": "34"
+      },
+      "definition": {
+        "simple_html": "static const char* __fbthrift_thrift_uri()",
+        "simple_raw": "static const char* __fbthrift_thrift_uri()",
+        "detailed_html": "private static const char* __fbthrift_thrift_uri()",
+        "detailed_raw": "private static const char* __fbthrift_thrift_uri()",
+        "original_definition_html": "template const char * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::__fbthrift_thrift_uri",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/__fbthrift_thrift_uri",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/__fbthrift_thrift_uri"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a73772d66abdacdc719ad22728194cd62",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "yes",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+      "argsstring_html": "(const Base &amp;base)",
+      "name_html": "ObjectWrapper",
+      "param": [
+        {
+          "type_html": "const Base &amp;",
+          "declname_html": "base"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "53",
+        "column": "12",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "53",
+        "bodyend": "53"
+      },
+      "definition": {
+        "simple_html": "ObjectWrapper(const Base&amp; base)",
+        "simple_raw": "ObjectWrapper(const Base& base)",
+        "detailed_html": "explicit inline ObjectWrapper(const Base&amp; base)",
+        "detailed_raw": "explicit inline ObjectWrapper(const Base& base)",
+        "original_definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+        "original_argsstring_html": "(const Base &amp;base)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aba41ef84504b51f68721697595136f48",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "yes",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+      "argsstring_html": "(Base &amp;&amp;base)",
+      "name_html": "ObjectWrapper",
+      "param": [
+        {
+          "type_html": "Base &amp;&amp;",
+          "declname_html": "base"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "54",
+        "column": "12",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "54",
+        "bodyend": "54"
+      },
+      "definition": {
+        "simple_html": "ObjectWrapper(Base&amp;&amp; base)",
+        "simple_raw": "ObjectWrapper(Base&& base)",
+        "detailed_html": "explicit inline ObjectWrapper(Base&amp;&amp; base)",
+        "detailed_raw": "explicit inline ObjectWrapper(Base&& base)",
+        "original_definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+        "original_argsstring_html": "(Base &amp;&amp;base)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a4ef81440023fe63e6d1c766683378b60",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<code>Value</code> &amp;",
+      "definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+      "argsstring_html": "(FieldId i)",
+      "name_html": "operator[]",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "59",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "59",
+        "bodyend": "59"
+      },
+      "definition": {
+        "simple_html": "Value&amp; operator[](FieldId i)",
+        "simple_raw": "Value& operator[](FieldId i)",
+        "detailed_html": "inline Value&amp; operator[](FieldId i)",
+        "detailed_raw": "inline Value& operator[](FieldId i)",
+        "original_definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+        "original_argsstring_html": "(FieldId i)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1acf3c72bc0c138b5cd90f5a1532cfad70",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "const <code>Value</code> &amp;",
+      "definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+      "argsstring_html": "(FieldId i) const",
+      "name_html": "operator[]",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "61",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "61",
+        "bodyend": "63"
+      },
+      "definition": {
+        "simple_html": "const Value&amp; operator[](FieldId i) const",
+        "simple_raw": "const Value& operator[](FieldId i) const",
+        "detailed_html": "inline const Value&amp; operator[](FieldId i) const",
+        "detailed_raw": "inline const Value& operator[](FieldId i) const",
+        "original_definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+        "original_argsstring_html": "(FieldId i) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ab053ed8466237b48cbe603e4d0827edc",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<code>Value</code> &amp;",
+      "definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+      "argsstring_html": "(FieldId i)",
+      "name_html": "at",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "65",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "65",
+        "bodyend": "65"
+      },
+      "definition": {
+        "simple_html": "Value&amp; at(FieldId i)",
+        "simple_raw": "Value& at(FieldId i)",
+        "detailed_html": "inline Value&amp; at(FieldId i)",
+        "detailed_raw": "inline Value& at(FieldId i)",
+        "original_definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+        "original_argsstring_html": "(FieldId i)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/at"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a1a4a0fa747d9c830304fa2daa21ad63d",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "const <code>Value</code> &amp;",
+      "definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+      "argsstring_html": "(FieldId i) const",
+      "name_html": "at",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "66",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "66",
+        "bodyend": "68"
+      },
+      "definition": {
+        "simple_html": "const Value&amp; at(FieldId i) const",
+        "simple_raw": "const Value& at(FieldId i) const",
+        "detailed_html": "inline const Value&amp; at(FieldId i) const",
+        "detailed_raw": "inline const Value& at(FieldId i) const",
+        "original_definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+        "original_argsstring_html": "(FieldId i) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/at"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aa58111a8e78aed0e6fab6562e6609cca",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<code>Value</code> *",
+      "definition_html": "Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+      "argsstring_html": "(FieldId i)",
+      "name_html": "if_contains",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "70",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "70",
+        "bodyend": "73"
+      },
+      "definition": {
+        "simple_html": "Value* if_contains(FieldId i)",
+        "simple_raw": "Value* if_contains(FieldId i)",
+        "detailed_html": "inline Value* if_contains(FieldId i)",
+        "detailed_raw": "inline Value* if_contains(FieldId i)",
+        "original_definition_html": "Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+        "original_argsstring_html": "(FieldId i)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a121f12facfd56b5765408489aebb6ceb",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "const <code>Value</code> *",
+      "definition_html": "const Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+      "argsstring_html": "(FieldId i) const",
+      "name_html": "if_contains",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "75",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "75",
+        "bodyend": "78"
+      },
+      "definition": {
+        "simple_html": "const Value* if_contains(FieldId i) const",
+        "simple_raw": "const Value* if_contains(FieldId i) const",
+        "detailed_html": "inline const Value* if_contains(FieldId i) const",
+        "detailed_raw": "inline const Value* if_contains(FieldId i) const",
+        "original_definition_html": "const Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+        "original_argsstring_html": "(FieldId i) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ac0c1d09c68f1e3f00822fbb61a623b6c",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::contains",
+      "argsstring_html": "(FieldId i) const",
+      "name_html": "contains",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "80",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "80",
+        "bodyend": "82"
+      },
+      "definition": {
+        "simple_html": "bool contains(FieldId i) const",
+        "simple_raw": "bool contains(FieldId i) const",
+        "detailed_html": "inline bool contains(FieldId i) const",
+        "detailed_raw": "inline bool contains(FieldId i) const",
+        "original_definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::contains",
+        "original_argsstring_html": "(FieldId i) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/contains"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a9556b5bc3335d24efcfe8461554228ea",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "std::size_t",
+      "definition_html": "std::size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::erase",
+      "argsstring_html": "(FieldId i)",
+      "name_html": "erase",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "84",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "84",
+        "bodyend": "86"
+      },
+      "definition": {
+        "simple_html": "std::size_t erase(FieldId i)",
+        "simple_raw": "std::size_t erase(FieldId i)",
+        "detailed_html": "inline std::size_t erase(FieldId i)",
+        "detailed_raw": "inline std::size_t erase(FieldId i)",
+        "original_definition_html": "std::size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::erase",
+        "original_argsstring_html": "(FieldId i)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/erase"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aec11908cddc42abf00398ec04a6fed02",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "auto",
+      "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+      "argsstring_html": "()",
+      "name_html": "begin",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "88",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "88",
+        "bodyend": "88"
+      },
+      "definition": {
+        "simple_html": "auto begin()",
+        "simple_raw": "auto begin()",
+        "detailed_html": "inline auto begin()",
+        "detailed_raw": "inline auto begin()",
+        "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a40d297d0ec90920b2ab266493d9d901c",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "auto",
+      "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+      "argsstring_html": "() const",
+      "name_html": "begin",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "89",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "89",
+        "bodyend": "89"
+      },
+      "definition": {
+        "simple_html": "auto begin() const",
+        "simple_raw": "auto begin() const",
+        "detailed_html": "inline auto begin() const",
+        "detailed_raw": "inline auto begin() const",
+        "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a968b440705864f33ccf0b863cf33c63d",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "auto",
+      "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+      "argsstring_html": "()",
+      "name_html": "end",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "90",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "90",
+        "bodyend": "90"
+      },
+      "definition": {
+        "simple_html": "auto end()",
+        "simple_raw": "auto end()",
+        "detailed_html": "inline auto end()",
+        "detailed_raw": "inline auto end()",
+        "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/end"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aa69b9f0da840a33ea042e79a0aba0595",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "auto",
+      "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+      "argsstring_html": "() const",
+      "name_html": "end",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "91",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "91",
+        "bodyend": "91"
+      },
+      "definition": {
+        "simple_html": "auto end() const",
+        "simple_raw": "auto end() const",
+        "detailed_html": "inline auto end() const",
+        "detailed_raw": "inline auto end() const",
+        "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/end"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a835c6f83239003f0a2c5ce127a7cff98",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "size_t",
+      "definition_html": "size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::size",
+      "argsstring_html": "() const",
+      "name_html": "size",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "92",
+        "column": "11",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "92",
+        "bodyend": "92"
+      },
+      "definition": {
+        "simple_html": "size_t size() const",
+        "simple_raw": "size_t size() const",
+        "detailed_html": "inline size_t size() const",
+        "detailed_raw": "inline size_t size() const",
+        "original_definition_html": "size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::size",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/size",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/size"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aa9d988467e8a90c9376aad2bf7141b41",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::empty",
+      "argsstring_html": "() const",
+      "name_html": "empty",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "93",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "93",
+        "bodyend": "93"
+      },
+      "definition": {
+        "simple_html": "bool empty() const",
+        "simple_raw": "bool empty() const",
+        "detailed_html": "inline bool empty() const",
+        "detailed_raw": "inline bool empty() const",
+        "original_definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::empty",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/empty",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/empty"
+    }
+  ],
+  "friends": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a1f4dc4afef64fc0eb06e52937020abaa",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "struct",
+      "definition_html": "friend struct ::apache::thrift::detail::st::struct_private_access",
+      "argsstring_html": "",
+      "name_html": "::apache::thrift::detail::st::struct_private_access",
+      "param": [
+        {
+          "type_html": "::apache::thrift::detail::st::struct_private_access"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "45",
+        "column": "3",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "44",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+    "line": "42",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+    "bodystart": "42",
+    "bodyend": "94"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "protocol",
+    "detail",
+    "ObjectWrapper"
+  ],
+  "enums": [],
+  "members": [],
+  "declaration_raw": "template < class Base >\nclass ObjectWrapper;",
+  "declaration_html": "template &lt; class Base &gt;\nclass ObjectWrapper;",
+  "filepath": "class/apache/thrift/protocol/detail/ObjectWrapper",
+  "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "ObjectWrapper",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::ObjectWrapper",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a73772d66abdacdc719ad22728194cd62",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "yes",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+              "argsstring_html": "(const Base &amp;base)",
+              "name_html": "ObjectWrapper",
+              "param": [
+                {
+                  "type_html": "const Base &amp;",
+                  "declname_html": "base"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "53",
+                "column": "12",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "53",
+                "bodyend": "53"
+              },
+              "definition": {
+                "simple_html": "ObjectWrapper(const Base&amp; base)",
+                "simple_raw": "ObjectWrapper(const Base& base)",
+                "detailed_html": "explicit inline ObjectWrapper(const Base&amp; base)",
+                "detailed_raw": "explicit inline ObjectWrapper(const Base& base)",
+                "original_definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+                "original_argsstring_html": "(const Base &amp;base)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "constructor": true,
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::ObjectWrapper"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aba41ef84504b51f68721697595136f48",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "yes",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "",
+              "definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+              "argsstring_html": "(Base &amp;&amp;base)",
+              "name_html": "ObjectWrapper",
+              "param": [
+                {
+                  "type_html": "Base &amp;&amp;",
+                  "declname_html": "base"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "54",
+                "column": "12",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "54",
+                "bodyend": "54"
+              },
+              "definition": {
+                "simple_html": "ObjectWrapper(Base&amp;&amp; base)",
+                "simple_raw": "ObjectWrapper(Base&& base)",
+                "detailed_html": "explicit inline ObjectWrapper(Base&amp;&amp; base)",
+                "detailed_raw": "explicit inline ObjectWrapper(Base&& base)",
+                "original_definition_html": "apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::ObjectWrapper",
+                "original_argsstring_html": "(Base &amp;&amp;base)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "constructor": true,
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::ObjectWrapper"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+          "minprot": "public",
+          "displayname_html": "(constructor)",
+          "brief_html": "Constructs the ObjectWrapper.",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/ObjectWrapper",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "__fbthrift_thrift_uri",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::__fbthrift_thrift_uri",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ae01d06956bd4a02d596ad6819bb16a07",
+              "prot": "private",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "const char *",
+              "definition_html": "template const char * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::__fbthrift_thrift_uri",
+              "argsstring_html": "()",
+              "name_html": "__fbthrift_thrift_uri",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "46",
+                "column": "21",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.cpp",
+                "bodystart": "31",
+                "bodyend": "34"
+              },
+              "definition": {
+                "simple_html": "static const char* __fbthrift_thrift_uri()",
+                "simple_raw": "static const char* __fbthrift_thrift_uri()",
+                "detailed_html": "private static const char* __fbthrift_thrift_uri()",
+                "detailed_raw": "private static const char* __fbthrift_thrift_uri()",
+                "original_definition_html": "template const char * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::__fbthrift_thrift_uri",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/__fbthrift_thrift_uri",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/__fbthrift_thrift_uri",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::__fbthrift_thrift_uri"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/__fbthrift_thrift_uri",
+          "minprot": "private",
+          "displayname_html": "__fbthrift_thrift_uri",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/__fbthrift_thrift_uri",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/__fbthrift_thrift_uri",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "operator[]",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::operator[]",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a4ef81440023fe63e6d1c766683378b60",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<code>Value</code> &amp;",
+              "definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+              "argsstring_html": "(FieldId i)",
+              "name_html": "operator[]",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "59",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "59",
+                "bodyend": "59"
+              },
+              "definition": {
+                "simple_html": "Value&amp; operator[](FieldId i)",
+                "simple_raw": "Value& operator[](FieldId i)",
+                "detailed_html": "inline Value&amp; operator[](FieldId i)",
+                "detailed_raw": "inline Value& operator[](FieldId i)",
+                "original_definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+                "original_argsstring_html": "(FieldId i)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::operator[]"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1acf3c72bc0c138b5cd90f5a1532cfad70",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "const <code>Value</code> &amp;",
+              "definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+              "argsstring_html": "(FieldId i) const",
+              "name_html": "operator[]",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "61",
+                "column": "15",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "61",
+                "bodyend": "63"
+              },
+              "definition": {
+                "simple_html": "const Value&amp; operator[](FieldId i) const",
+                "simple_raw": "const Value& operator[](FieldId i) const",
+                "detailed_html": "inline const Value&amp; operator[](FieldId i) const",
+                "detailed_raw": "inline const Value& operator[](FieldId i) const",
+                "original_definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+                "original_argsstring_html": "(FieldId i) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::operator[]"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+          "minprot": "public",
+          "displayname_html": "operator[]",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "at",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::at",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ab053ed8466237b48cbe603e4d0827edc",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<code>Value</code> &amp;",
+              "definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+              "argsstring_html": "(FieldId i)",
+              "name_html": "at",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "65",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "65",
+                "bodyend": "65"
+              },
+              "definition": {
+                "simple_html": "Value&amp; at(FieldId i)",
+                "simple_raw": "Value& at(FieldId i)",
+                "detailed_html": "inline Value&amp; at(FieldId i)",
+                "detailed_raw": "inline Value& at(FieldId i)",
+                "original_definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+                "original_argsstring_html": "(FieldId i)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::at"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a1a4a0fa747d9c830304fa2daa21ad63d",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "const <code>Value</code> &amp;",
+              "definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+              "argsstring_html": "(FieldId i) const",
+              "name_html": "at",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "66",
+                "column": "15",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "66",
+                "bodyend": "68"
+              },
+              "definition": {
+                "simple_html": "const Value&amp; at(FieldId i) const",
+                "simple_raw": "const Value& at(FieldId i) const",
+                "detailed_html": "inline const Value&amp; at(FieldId i) const",
+                "detailed_raw": "inline const Value& at(FieldId i) const",
+                "original_definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::at",
+                "original_argsstring_html": "(FieldId i) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::at"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+          "minprot": "public",
+          "displayname_html": "at",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/at",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "if_contains",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::if_contains",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aa58111a8e78aed0e6fab6562e6609cca",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<code>Value</code> *",
+              "definition_html": "Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+              "argsstring_html": "(FieldId i)",
+              "name_html": "if_contains",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "70",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "70",
+                "bodyend": "73"
+              },
+              "definition": {
+                "simple_html": "Value* if_contains(FieldId i)",
+                "simple_raw": "Value* if_contains(FieldId i)",
+                "detailed_html": "inline Value* if_contains(FieldId i)",
+                "detailed_raw": "inline Value* if_contains(FieldId i)",
+                "original_definition_html": "Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+                "original_argsstring_html": "(FieldId i)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::if_contains"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a121f12facfd56b5765408489aebb6ceb",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "const <code>Value</code> *",
+              "definition_html": "const Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+              "argsstring_html": "(FieldId i) const",
+              "name_html": "if_contains",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "75",
+                "column": "15",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "75",
+                "bodyend": "78"
+              },
+              "definition": {
+                "simple_html": "const Value* if_contains(FieldId i) const",
+                "simple_raw": "const Value* if_contains(FieldId i) const",
+                "detailed_html": "inline const Value* if_contains(FieldId i) const",
+                "detailed_raw": "inline const Value* if_contains(FieldId i) const",
+                "original_definition_html": "const Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+                "original_argsstring_html": "(FieldId i) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::if_contains"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+          "minprot": "public",
+          "displayname_html": "if_contains",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "contains",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::contains",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ac0c1d09c68f1e3f00822fbb61a623b6c",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::contains",
+              "argsstring_html": "(FieldId i) const",
+              "name_html": "contains",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "80",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "80",
+                "bodyend": "82"
+              },
+              "definition": {
+                "simple_html": "bool contains(FieldId i) const",
+                "simple_raw": "bool contains(FieldId i) const",
+                "detailed_html": "inline bool contains(FieldId i) const",
+                "detailed_raw": "inline bool contains(FieldId i) const",
+                "original_definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::contains",
+                "original_argsstring_html": "(FieldId i) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::contains"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+          "minprot": "public",
+          "displayname_html": "contains",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "erase",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::erase",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a9556b5bc3335d24efcfe8461554228ea",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "std::size_t",
+              "definition_html": "std::size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::erase",
+              "argsstring_html": "(FieldId i)",
+              "name_html": "erase",
+              "param": [
+                {
+                  "type_html": "FieldId",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "84",
+                "column": "15",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "84",
+                "bodyend": "86"
+              },
+              "definition": {
+                "simple_html": "std::size_t erase(FieldId i)",
+                "simple_raw": "std::size_t erase(FieldId i)",
+                "detailed_html": "inline std::size_t erase(FieldId i)",
+                "detailed_raw": "inline std::size_t erase(FieldId i)",
+                "original_definition_html": "std::size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::erase",
+                "original_argsstring_html": "(FieldId i)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::erase"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+          "minprot": "public",
+          "displayname_html": "erase",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/erase",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "begin",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::begin",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aec11908cddc42abf00398ec04a6fed02",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "auto",
+              "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+              "argsstring_html": "()",
+              "name_html": "begin",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "88",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "88",
+                "bodyend": "88"
+              },
+              "definition": {
+                "simple_html": "auto begin()",
+                "simple_raw": "auto begin()",
+                "detailed_html": "inline auto begin()",
+                "detailed_raw": "inline auto begin()",
+                "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::begin"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a40d297d0ec90920b2ab266493d9d901c",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "auto",
+              "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+              "argsstring_html": "() const",
+              "name_html": "begin",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "89",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "89",
+                "bodyend": "89"
+              },
+              "definition": {
+                "simple_html": "auto begin() const",
+                "simple_raw": "auto begin() const",
+                "detailed_html": "inline auto begin() const",
+                "detailed_raw": "inline auto begin() const",
+                "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::begin"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+          "minprot": "public",
+          "displayname_html": "begin",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/begin",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "end",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::end",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a968b440705864f33ccf0b863cf33c63d",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "auto",
+              "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+              "argsstring_html": "()",
+              "name_html": "end",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "90",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "90",
+                "bodyend": "90"
+              },
+              "definition": {
+                "simple_html": "auto end()",
+                "simple_raw": "auto end()",
+                "detailed_html": "inline auto end()",
+                "detailed_raw": "inline auto end()",
+                "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::end"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aa69b9f0da840a33ea042e79a0aba0595",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "auto",
+              "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+              "argsstring_html": "() const",
+              "name_html": "end",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "91",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "91",
+                "bodyend": "91"
+              },
+              "definition": {
+                "simple_html": "auto end() const",
+                "simple_raw": "auto end() const",
+                "detailed_html": "inline auto end() const",
+                "detailed_raw": "inline auto end() const",
+                "original_definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::end",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::end"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+          "minprot": "public",
+          "displayname_html": "end",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/end",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "size",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::size",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a835c6f83239003f0a2c5ce127a7cff98",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "size_t",
+              "definition_html": "size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::size",
+              "argsstring_html": "() const",
+              "name_html": "size",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "92",
+                "column": "11",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "92",
+                "bodyend": "92"
+              },
+              "definition": {
+                "simple_html": "size_t size() const",
+                "simple_raw": "size_t size() const",
+                "detailed_html": "inline size_t size() const",
+                "detailed_raw": "inline size_t size() const",
+                "original_definition_html": "size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::size",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/size",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/size",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::size"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/size",
+          "minprot": "public",
+          "displayname_html": "size",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/size",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/size",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "empty",
+          "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::empty",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aa9d988467e8a90c9376aad2bf7141b41",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::empty",
+              "argsstring_html": "() const",
+              "name_html": "empty",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "line": "93",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+                "bodystart": "93",
+                "bodyend": "93"
+              },
+              "definition": {
+                "simple_html": "bool empty() const",
+                "simple_raw": "bool empty() const",
+                "detailed_html": "inline bool empty() const",
+                "detailed_raw": "inline bool empty() const",
+                "original_definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::empty",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/empty",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/empty",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+              "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::empty"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/empty",
+          "minprot": "public",
+          "displayname_html": "empty",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/empty",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/empty",
+          "parent_links": [
+            {
+              "text_html": "ObjectWrapper",
+              "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

@@ -122,9 +122,9 @@ struct TypeToPatchMapAdapter {
 /// Patch for Thrift Any.
 /// * `optional AnyStruct assign`
 /// * `terse bool clear`
-/// * `terse map<Type, AnyStruct> patchIfTypeIsPrior`
+/// * `terse map<Type, DynamicPatch> patchIfTypeIsPrior`
 /// * `optional AnyStruct ensureAny`
-/// * `terse map<Type, AnyStruct> patchIfTypeIsAfter`
+/// * `terse map<Type, DynamicPatch> patchIfTypeIsAfter`
 template <typename Patch>
 class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   using Base = BaseClearPatch<Patch, AnyPatch>;
@@ -142,7 +142,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   ///     struct Visitor {
   ///       void assign(const AnyStruct&);
   ///       void clear();
-  ///       void patchIfTypeIs(const TypeErasedPatches&);
+  ///       void patchIfTypeIs(const Type&, const DynamicPatch&);
   ///       void ensureAny(const AnyStruct&);
   ///     }
   ///
@@ -175,6 +175,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   void apply(type::AnyStruct& val) const;
 
+  /// Ensures the given type is set in Thrift Any.
   void ensureAny(type::AnyStruct ensureAny) {
     throwIfInvalidOrUnsupportedAny(ensureAny);
     if (data_.assign().has_value()) {
@@ -190,6 +191,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     data_.ensureAny() = std::move(ensureAny);
   }
 
+  /// Patches the value in Thrift Any if the type matches with the provided
+  /// patch.
   template <typename VPatch>
   void patchIfTypeIs(const VPatch& patch) {
     // TODO(dokwon): Refactor PatchTrait to use is_patch_v.
@@ -201,6 +204,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
         patch, ensures<type::infer_tag<typename VPatch::value_type>>());
   }
 
+  /// Ensures the given value type is set in Thrift Any, and patches the value
+  /// in Thrift Any if the type matches with the provided patch.
   template <typename VPatch>
   void ensureAndPatch(const VPatch& patch) {
     // TODO(dokwon): Refactor PatchTrait to use is_patch_v.

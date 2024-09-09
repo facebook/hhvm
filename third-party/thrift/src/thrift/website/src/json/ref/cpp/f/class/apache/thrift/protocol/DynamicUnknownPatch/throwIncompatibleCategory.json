@@ -1,0 +1,59 @@
+{
+  "kind": "overloadset",
+  "name_html": "throwIncompatibleCategory",
+  "compoundname_html": "apache::thrift::protocol::DynamicUnknownPatch::throwIncompatibleCategory",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnknownPatch_1a2ffd13eaa55bdbedb5ac26455f3bdf4a",
+      "prot": "private",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicUnknownPatch::throwIncompatibleCategory",
+      "argsstring_html": "(std::string_view method) const",
+      "name_html": "throwIncompatibleCategory",
+      "param": [
+        {
+          "type_html": "std::string_view",
+          "declname_html": "method"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "168",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "1250",
+        "bodyend": "1256"
+      },
+      "definition": {
+        "simple_html": "void throwIncompatibleCategory(std::string_view method) const",
+        "simple_raw": "void throwIncompatibleCategory(std::string_view method) const",
+        "detailed_html": "private void throwIncompatibleCategory(std::string_view method) const",
+        "detailed_raw": "private void throwIncompatibleCategory(std::string_view method) const",
+        "original_definition_html": "void apache::thrift::protocol::DynamicUnknownPatch::throwIncompatibleCategory",
+        "original_argsstring_html": "(std::string_view method) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicUnknownPatch/throwIncompatibleCategory",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicUnknownPatch/throwIncompatibleCategory",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnknownPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicUnknownPatch::throwIncompatibleCategory"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicUnknownPatch/throwIncompatibleCategory",
+  "minprot": "private",
+  "displayname_html": "throwIncompatibleCategory",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnknownPatch/throwIncompatibleCategory",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnknownPatch/throwIncompatibleCategory",
+  "parent_links": [
+    {
+      "text_html": "DynamicUnknownPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicUnknownPatch"
+    }
+  ]
+}

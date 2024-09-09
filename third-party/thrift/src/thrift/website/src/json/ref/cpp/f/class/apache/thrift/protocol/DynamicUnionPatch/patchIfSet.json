@@ -1,0 +1,112 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfSet",
+  "compoundname_html": "apache::thrift::protocol::DynamicUnionPatch::patchIfSet",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1afb93a4707852a5f39b8f6d3a5be9594b",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+      "argsstring_html": "(detail::Badge, FieldId id, const DynamicPatch &amp;p)",
+      "name_html": "patchIfSet",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "FieldId",
+          "declname_html": "id"
+        },
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "382",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "382",
+        "bodyend": "384"
+      },
+      "definition": {
+        "simple_html": "DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, const DynamicPatch&amp; p)",
+        "simple_raw": "DynamicPatch& patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p)",
+        "detailed_html": "inline DynamicPatch&amp; patchIfSet(\n    detail::Badge, FieldId id, const DynamicPatch&amp; p)",
+        "detailed_raw": "inline DynamicPatch& patchIfSet(\n    detail::Badge, FieldId id, const DynamicPatch& p)",
+        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+        "original_argsstring_html": "(detail::Badge, FieldId id, const DynamicPatch &amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicUnionPatch::patchIfSet"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a989657af096f1fd64388e60f7aa1c9c1",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+      "argsstring_html": "(detail::Badge, FieldId id, DynamicPatch &amp;&amp;p)",
+      "name_html": "patchIfSet",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "FieldId",
+          "declname_html": "id"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;&amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "385",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "385",
+        "bodyend": "387"
+      },
+      "definition": {
+        "simple_html": "DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, DynamicPatch&amp;&amp; p)",
+        "simple_raw": "DynamicPatch& patchIfSet(detail::Badge, FieldId id, DynamicPatch&& p)",
+        "detailed_html": "inline DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, DynamicPatch&amp;&amp; p)",
+        "detailed_raw": "inline DynamicPatch& patchIfSet(detail::Badge, FieldId id, DynamicPatch&& p)",
+        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+        "original_argsstring_html": "(detail::Badge, FieldId id, DynamicPatch &amp;&amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicUnionPatch::patchIfSet"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicUnionPatch/patchIfSet",
+  "minprot": "public",
+  "displayname_html": "patchIfSet",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnionPatch/patchIfSet",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnionPatch/patchIfSet",
+  "parent_links": [
+    {
+      "text_html": "DynamicUnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicUnionPatch"
+    }
+  ]
+}

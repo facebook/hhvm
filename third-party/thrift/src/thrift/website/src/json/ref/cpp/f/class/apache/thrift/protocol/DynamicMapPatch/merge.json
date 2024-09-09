@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "merge",
+  "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::merge",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ab2ca2101b53e6ebbd6e6bc01fcdc5903",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::merge",
+      "argsstring_html": "(detail::Badge badge, const DynamicMapPatch &amp;other)",
+      "name_html": "merge",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>DynamicMapPatch</code> &amp;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "334",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "334",
+        "bodyend": "336"
+      },
+      "definition": {
+        "simple_html": "void merge(detail::Badge badge, const DynamicMapPatch&amp; other)",
+        "simple_raw": "void merge(detail::Badge badge, const DynamicMapPatch& other)",
+        "detailed_html": "inline void merge(detail::Badge badge, const DynamicMapPatch&amp; other)",
+        "detailed_raw": "inline void merge(detail::Badge badge, const DynamicMapPatch& other)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::merge",
+        "original_argsstring_html": "(detail::Badge badge, const DynamicMapPatch &amp;other)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/merge",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/merge",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::merge"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/merge",
+  "minprot": "public",
+  "displayname_html": "merge",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/merge",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/merge",
+  "parent_links": [
+    {
+      "text_html": "DynamicMapPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+    }
+  ]
+}

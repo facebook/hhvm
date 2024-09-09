@@ -1,0 +1,2258 @@
+{
+  "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+  "kind": "class",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::protocol::DynamicMapPatch",
+  "includes": {
+    "refid": "DynamicPatch_8h",
+    "local": "no",
+    "text_html": "DynamicPatch.h"
+  },
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ac7cb811f3da5460d19d96ea4343c5ea1",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::assign",
+      "argsstring_html": "(detail::Badge, detail::ValueMap v)",
+      "name_html": "assign",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "<code>detail::ValueMap</code>",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "284",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "284",
+        "bodyend": "287"
+      },
+      "definition": {
+        "simple_html": "void assign(detail::Badge, detail::ValueMap v)",
+        "simple_raw": "void assign(detail::Badge, detail::ValueMap v)",
+        "detailed_html": "inline void assign(detail::Badge, detail::ValueMap v)",
+        "detailed_raw": "inline void assign(detail::Badge, detail::ValueMap v)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::assign",
+        "original_argsstring_html": "(detail::Badge, detail::ValueMap v)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/assign"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ab03b9e79eb400e04bb1260388eb147e9",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::clear",
+      "argsstring_html": "(detail::Badge)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "289",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "289",
+        "bodyend": "292"
+      },
+      "definition": {
+        "simple_html": "void clear(detail::Badge)",
+        "simple_raw": "void clear(detail::Badge)",
+        "detailed_html": "inline void clear(detail::Badge)",
+        "detailed_raw": "inline void clear(detail::Badge)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::clear",
+        "original_argsstring_html": "(detail::Badge)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/clear",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/clear"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a7d1cd9ebed3de795f02c0463ccb0474a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::insert_or_assign",
+      "argsstring_html": "(detail::Badge, Value k, Value v)",
+      "name_html": "insert_or_assign",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "Value",
+          "declname_html": "k"
+        },
+        {
+          "type_html": "Value",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "294",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "284",
+        "bodyend": "287"
+      },
+      "definition": {
+        "simple_html": "void insert_or_assign(detail::Badge, Value k, Value v)",
+        "simple_raw": "void insert_or_assign(detail::Badge, Value k, Value v)",
+        "detailed_html": "void insert_or_assign(detail::Badge, Value k, Value v)",
+        "detailed_raw": "void insert_or_assign(detail::Badge, Value k, Value v)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::insert_or_assign",
+        "original_argsstring_html": "(detail::Badge, Value k, Value v)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/insert_or_assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/insert_or_assign"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1af4b19e6996dc2d83eadc5893fafa4dd1",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::erase",
+      "argsstring_html": "(detail::Badge, Value k)",
+      "name_html": "erase",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "Value",
+          "declname_html": "k"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "295",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "289",
+        "bodyend": "292"
+      },
+      "definition": {
+        "simple_html": "void erase(detail::Badge, Value k)",
+        "simple_raw": "void erase(detail::Badge, Value k)",
+        "detailed_html": "void erase(detail::Badge, Value k)",
+        "detailed_raw": "void erase(detail::Badge, Value k)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::erase",
+        "original_argsstring_html": "(detail::Badge, Value k)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/erase",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/erase"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a0d7a20166e0fdd15bd52028d1a0b969f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::add",
+      "argsstring_html": "(detail::Badge, detail::ValueMap v)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "<code>detail::ValueMap</code>",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "297",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "293",
+        "bodyend": "307"
+      },
+      "definition": {
+        "simple_html": "void add(detail::Badge, detail::ValueMap v)",
+        "simple_raw": "void add(detail::Badge, detail::ValueMap v)",
+        "detailed_html": "void add(detail::Badge, detail::ValueMap v)",
+        "detailed_raw": "void add(detail::Badge, detail::ValueMap v)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::add",
+        "original_argsstring_html": "(detail::Badge, detail::ValueMap v)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/add",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/add"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1adcfba6ffbb9b90e59b6c301607093535",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::remove",
+      "argsstring_html": "(detail::Badge badge, const detail::ValueSet &amp;v)",
+      "name_html": "remove",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>detail::ValueSet</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "298",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "298",
+        "bodyend": "302"
+      },
+      "definition": {
+        "simple_html": "void remove(detail::Badge badge, const detail::ValueSet&amp; v)",
+        "simple_raw": "void remove(detail::Badge badge, const detail::ValueSet& v)",
+        "detailed_html": "inline void remove(detail::Badge badge, const detail::ValueSet&amp; v)",
+        "detailed_raw": "inline void remove(detail::Badge badge, const detail::ValueSet& v)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::remove",
+        "original_argsstring_html": "(detail::Badge badge, const detail::ValueSet &amp;v)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/remove",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/remove"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a3e469ad7189ef8d550f7459f9afc025a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::put",
+      "argsstring_html": "(detail::Badge badge, const detail::ValueMap &amp;m)",
+      "name_html": "put",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>detail::ValueMap</code> &amp;",
+          "declname_html": "m"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "303",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "303",
+        "bodyend": "307"
+      },
+      "definition": {
+        "simple_html": "void put(detail::Badge badge, const detail::ValueMap&amp; m)",
+        "simple_raw": "void put(detail::Badge badge, const detail::ValueMap& m)",
+        "detailed_html": "inline void put(detail::Badge badge, const detail::ValueMap&amp; m)",
+        "detailed_raw": "inline void put(detail::Badge badge, const detail::ValueMap& m)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::put",
+        "original_argsstring_html": "(detail::Badge badge, const detail::ValueMap &amp;m)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/put",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/put"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a520e05cff516f8d5cad923a0eefa1c8d",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+      "argsstring_html": "(detail::Badge, Value k, const DynamicPatch &amp;p)",
+      "name_html": "patchByKey",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "Value",
+          "declname_html": "k"
+        },
+        {
+          "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "310",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "310",
+        "bodyend": "312"
+      },
+      "definition": {
+        "simple_html": "DynamicPatch&amp; patchByKey(detail::Badge, Value k, const DynamicPatch&amp; p)",
+        "simple_raw": "DynamicPatch& patchByKey(detail::Badge, Value k, const DynamicPatch& p)",
+        "detailed_html": "inline DynamicPatch&amp; patchByKey(detail::Badge, Value k, const DynamicPatch&amp; p)",
+        "detailed_raw": "inline DynamicPatch& patchByKey(detail::Badge, Value k, const DynamicPatch& p)",
+        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+        "original_argsstring_html": "(detail::Badge, Value k, const DynamicPatch &amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a7336100ee0f0c61b45722885c09ac634",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+      "argsstring_html": "(detail::Badge, Value k, DynamicPatch &amp;&amp;p)",
+      "name_html": "patchByKey",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "Value",
+          "declname_html": "k"
+        },
+        {
+          "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;&amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "313",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "313",
+        "bodyend": "315"
+      },
+      "definition": {
+        "simple_html": "DynamicPatch&amp; patchByKey(detail::Badge, Value k, DynamicPatch&amp;&amp; p)",
+        "simple_raw": "DynamicPatch& patchByKey(detail::Badge, Value k, DynamicPatch&& p)",
+        "detailed_html": "inline DynamicPatch&amp; patchByKey(detail::Badge, Value k, DynamicPatch&amp;&amp; p)",
+        "detailed_raw": "inline DynamicPatch& patchByKey(detail::Badge, Value k, DynamicPatch&& p)",
+        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+        "original_argsstring_html": "(detail::Badge, Value k, DynamicPatch &amp;&amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1aa80683da3331d4510925b83331cf3fef",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "refqual": "rvalue",
+      "virtual": "non-virtual",
+      "type_html": "Object",
+      "definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+      "argsstring_html": "() &amp;&amp;",
+      "name_html": "toObject",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "317",
+        "column": "11",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "208",
+        "bodyend": "245"
+      },
+      "definition": {
+        "simple_html": "Object toObject() &amp;&amp;",
+        "simple_raw": "Object toObject() &&",
+        "detailed_html": "Object toObject() &amp;&amp;",
+        "detailed_raw": "Object toObject() &&",
+        "original_definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+        "original_argsstring_html": "() &amp;&amp;"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/toObject"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ae2369e3703e6097f2f79d90bf2e6a1bc",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "refqual": "lvalue",
+      "virtual": "non-virtual",
+      "type_html": "Object",
+      "definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+      "argsstring_html": "() const &amp;",
+      "name_html": "toObject",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "318",
+        "column": "11",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "246",
+        "bodyend": "248"
+      },
+      "definition": {
+        "simple_html": "Object toObject() const&amp;",
+        "simple_raw": "Object toObject() const&",
+        "detailed_html": "Object toObject() const&amp;",
+        "detailed_raw": "Object toObject() const&",
+        "original_definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+        "original_argsstring_html": "() const &amp;"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/toObject"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a59faa2729068f559043452b780b38100",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::fromObject",
+      "argsstring_html": "(detail::Badge, Object obj)",
+      "name_html": "fromObject",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "Object",
+          "declname_html": "obj"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "319",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "249",
+        "bodyend": "282"
+      },
+      "definition": {
+        "simple_html": "void fromObject(detail::Badge, Object obj)",
+        "simple_raw": "void fromObject(detail::Badge, Object obj)",
+        "detailed_html": "void fromObject(detail::Badge, Object obj)",
+        "detailed_raw": "void fromObject(detail::Badge, Object obj)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::fromObject",
+        "original_argsstring_html": "(detail::Badge, Object obj)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/fromObject",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/fromObject"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a630bc2019f16476701ae2f16ba5030d8",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "std::size_t",
+      "definition_html": "std::size_t apache::thrift::protocol::DynamicMapPatch::patchedElementCount",
+      "argsstring_html": "(detail::Badge) const",
+      "name_html": "patchedElementCount",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "321",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "321",
+        "bodyend": "324"
+      },
+      "definition": {
+        "simple_html": "std::size_t patchedElementCount(detail::Badge) const",
+        "simple_raw": "std::size_t patchedElementCount(detail::Badge) const",
+        "detailed_html": "inline std::size_t patchedElementCount(detail::Badge) const",
+        "detailed_raw": "inline std::size_t patchedElementCount(detail::Badge) const",
+        "original_definition_html": "std::size_t apache::thrift::protocol::DynamicMapPatch::patchedElementCount",
+        "original_argsstring_html": "(detail::Badge) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchedElementCount",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchedElementCount"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a8a8b445bb6d021bf59d46ca0b7e406b4",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::DynamicMapPatch::empty",
+      "argsstring_html": "(detail::Badge) const",
+      "name_html": "empty",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "326",
+        "column": "9",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "326",
+        "bodyend": "329"
+      },
+      "definition": {
+        "simple_html": "bool empty(detail::Badge) const",
+        "simple_raw": "bool empty(detail::Badge) const",
+        "detailed_html": "inline bool empty(detail::Badge) const",
+        "detailed_raw": "inline bool empty(detail::Badge) const",
+        "original_definition_html": "bool apache::thrift::protocol::DynamicMapPatch::empty",
+        "original_argsstring_html": "(detail::Badge) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/empty",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/empty"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a662c58095489bd5957c8b383387e4686",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class Visitor"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::customVisit",
+      "argsstring_html": "(detail::Badge badge, Visitor &amp;&amp;v) const",
+      "name_html": "customVisit",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "Visitor &amp;&amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "332",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "533",
+        "bodyend": "554"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge badge, Visitor&amp;&amp; v) const",
+        "simple_raw": "template <class Visitor>\nvoid customVisit(detail::Badge badge, Visitor&& v) const",
+        "detailed_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge badge, Visitor&amp;&amp; v) const",
+        "detailed_raw": "template <class Visitor>\nvoid customVisit(detail::Badge badge, Visitor&& v) const",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::customVisit",
+        "original_argsstring_html": "(detail::Badge badge, Visitor &amp;&amp;v) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/customVisit",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/customVisit"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1aaabff9cbfbad055ef01c9fc331c59c09",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::apply",
+      "argsstring_html": "(detail::Badge, detail::ValueMap &amp;v) const",
+      "name_html": "apply",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "<code>detail::ValueMap</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "333",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "326",
+        "bodyend": "367"
+      },
+      "definition": {
+        "simple_html": "void apply(detail::Badge, detail::ValueMap&amp; v) const",
+        "simple_raw": "void apply(detail::Badge, detail::ValueMap& v) const",
+        "detailed_html": "void apply(detail::Badge, detail::ValueMap&amp; v) const",
+        "detailed_raw": "void apply(detail::Badge, detail::ValueMap& v) const",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::apply",
+        "original_argsstring_html": "(detail::Badge, detail::ValueMap &amp;v) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/apply",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/apply"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ab2ca2101b53e6ebbd6e6bc01fcdc5903",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::merge",
+      "argsstring_html": "(detail::Badge badge, const DynamicMapPatch &amp;other)",
+      "name_html": "merge",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>DynamicMapPatch</code> &amp;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "334",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "334",
+        "bodyend": "336"
+      },
+      "definition": {
+        "simple_html": "void merge(detail::Badge badge, const DynamicMapPatch&amp; other)",
+        "simple_raw": "void merge(detail::Badge badge, const DynamicMapPatch& other)",
+        "detailed_html": "inline void merge(detail::Badge badge, const DynamicMapPatch&amp; other)",
+        "detailed_raw": "inline void merge(detail::Badge badge, const DynamicMapPatch& other)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::merge",
+        "original_argsstring_html": "(detail::Badge badge, const DynamicMapPatch &amp;other)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/merge",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/merge"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a74e42c02d6dda11a263ab973e36cbd0a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::doNotConvertStringToBinary",
+      "argsstring_html": "(detail::Badge)",
+      "name_html": "doNotConvertStringToBinary",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "338",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "338",
+        "bodyend": "340"
+      },
+      "definition": {
+        "simple_html": "void doNotConvertStringToBinary(detail::Badge)",
+        "simple_raw": "void doNotConvertStringToBinary(detail::Badge)",
+        "detailed_html": "inline void doNotConvertStringToBinary(detail::Badge)",
+        "detailed_raw": "inline void doNotConvertStringToBinary(detail::Badge)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::doNotConvertStringToBinary",
+        "original_argsstring_html": "(detail::Badge)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/doNotConvertStringToBinary",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/doNotConvertStringToBinary"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a246ec82af0c904ab6bbec5cab4a689b6",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::undoChanges",
+      "argsstring_html": "(const Value &amp;k)",
+      "name_html": "undoChanges",
+      "param": [
+        {
+          "type_html": "const Value &amp;",
+          "declname_html": "k"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "343",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "317",
+        "bodyend": "324"
+      },
+      "definition": {
+        "simple_html": "void undoChanges(const Value&amp; k)",
+        "simple_raw": "void undoChanges(const Value& k)",
+        "detailed_html": "private void undoChanges(const Value&amp; k)",
+        "detailed_raw": "private void undoChanges(const Value& k)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::undoChanges",
+        "original_argsstring_html": "(const Value &amp;k)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/undoChanges",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/undoChanges"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ac202cd26de750d182b7656901d879faa",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicMapPatch::ensurePatchable",
+      "argsstring_html": "()",
+      "name_html": "ensurePatchable",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "344",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "309",
+        "bodyend": "315"
+      },
+      "definition": {
+        "simple_html": "void ensurePatchable()",
+        "simple_raw": "void ensurePatchable()",
+        "detailed_html": "private void ensurePatchable()",
+        "detailed_raw": "private void ensurePatchable()",
+        "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::ensurePatchable",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/ensurePatchable",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/ensurePatchable"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1acf5e21513c303d242e7524a1d89f19c0",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class SubPatch"
+        }
+      ],
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+      "argsstring_html": "(Value k, SubPatch &amp;&amp;p)",
+      "name_html": "patchByKeyImpl",
+      "param": [
+        {
+          "type_html": "Value",
+          "declname_html": "k"
+        },
+        {
+          "type_html": "SubPatch &amp;&amp;",
+          "declname_html": "p"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "347",
+        "column": "16",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "196",
+        "bodyend": "207"
+      },
+      "definition": {
+        "simple_html": "template &lt;class SubPatch&gt;\nDynamicPatch&amp; patchByKeyImpl(Value k, SubPatch&amp;&amp; p)",
+        "simple_raw": "template <class SubPatch>\nDynamicPatch& patchByKeyImpl(Value k, SubPatch&& p)",
+        "detailed_html": "template &lt;class SubPatch&gt;\nprivate DynamicPatch&amp; patchByKeyImpl(Value k, SubPatch&amp;&amp; p)",
+        "detailed_raw": "template <class SubPatch>\nprivate DynamicPatch& patchByKeyImpl(Value k, SubPatch&& p)",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+        "original_argsstring_html": "(Value k, SubPatch &amp;&amp;p)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+    "line": "282",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+    "bodystart": "282",
+    "bodyend": "357"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "protocol",
+    "DynamicMapPatch"
+  ],
+  "enums": [],
+  "types": [],
+  "members": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ac39b17863747a5dc3738897a4b11e988",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "std::optional&lt; <code>detail::ValueMap</code> &gt;",
+      "definition_html": "std::optional&lt;detail::ValueMap&gt; apache::thrift::protocol::DynamicMapPatch::assign_",
+      "argsstring_html": "",
+      "name_html": "assign_",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "349",
+        "column": "17",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "349",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a0e25ce1665c2f7b759dd5e216bd0f2dd",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::DynamicMapPatch::clear_",
+      "argsstring_html": "",
+      "name_html": "clear_",
+      "initializer_html": "= false",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "350",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "350",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a98ec344516aa9dc7ff1d59354701e4c7",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "folly::F14VectorMap&lt; Value, <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &gt;",
+      "definition_html": "folly::F14VectorMap&lt;Value, DynamicPatch&gt; apache::thrift::protocol::DynamicMapPatch::patchPrior_",
+      "argsstring_html": "",
+      "name_html": "patchPrior_",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "351",
+        "column": "23",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "351",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a64a7cc02459fd43878c884c48a31eb8a",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "<code>detail::ValueMap</code>",
+      "definition_html": "detail::ValueMap apache::thrift::protocol::DynamicMapPatch::add_",
+      "argsstring_html": "",
+      "name_html": "add_",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "352",
+        "column": "20",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "352",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a96e834ab6ff5226a1e0514067522c6d7",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "folly::F14VectorMap&lt; Value, <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &gt;",
+      "definition_html": "folly::F14VectorMap&lt;Value, DynamicPatch&gt; apache::thrift::protocol::DynamicMapPatch::patchAfter_",
+      "argsstring_html": "",
+      "name_html": "patchAfter_",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "353",
+        "column": "23",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "353",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a0b83297fbf0242184a8f64d38a8fe9b3",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "<code>detail::ValueSet</code>",
+      "definition_html": "detail::ValueSet apache::thrift::protocol::DynamicMapPatch::remove_",
+      "argsstring_html": "",
+      "name_html": "remove_",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "354",
+        "column": "20",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "354",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a3b196ceab50f25c9c896c4b7db68579b",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "<code>detail::ValueMap</code>",
+      "definition_html": "detail::ValueMap apache::thrift::protocol::DynamicMapPatch::put_",
+      "argsstring_html": "",
+      "name_html": "put_",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "355",
+        "column": "20",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "355",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a12b18cb9f854aa769458d33b697c737c",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/detail/DynamicPatchOptions\">detail::DynamicPatchOptions</a>",
+      "definition_html": "detail::DynamicPatchOptions apache::thrift::protocol::DynamicMapPatch::options_",
+      "argsstring_html": "",
+      "name_html": "options_",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "356",
+        "column": "31",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "356",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "friends": [],
+  "declaration_raw": "class DynamicMapPatch;",
+  "declaration_html": "class DynamicMapPatch;",
+  "filepath": "class/apache/thrift/protocol/DynamicMapPatch",
+  "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "assign",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::assign",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ac7cb811f3da5460d19d96ea4343c5ea1",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::assign",
+              "argsstring_html": "(detail::Badge, detail::ValueMap v)",
+              "name_html": "assign",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "<code>detail::ValueMap</code>",
+                  "declname_html": "v"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "284",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "284",
+                "bodyend": "287"
+              },
+              "definition": {
+                "simple_html": "void assign(detail::Badge, detail::ValueMap v)",
+                "simple_raw": "void assign(detail::Badge, detail::ValueMap v)",
+                "detailed_html": "inline void assign(detail::Badge, detail::ValueMap v)",
+                "detailed_raw": "inline void assign(detail::Badge, detail::ValueMap v)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::assign",
+                "original_argsstring_html": "(detail::Badge, detail::ValueMap v)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/assign",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/assign",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::assign"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/assign",
+          "minprot": "public",
+          "displayname_html": "assign",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/assign",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/assign",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "clear",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::clear",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ab03b9e79eb400e04bb1260388eb147e9",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::clear",
+              "argsstring_html": "(detail::Badge)",
+              "name_html": "clear",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "289",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "289",
+                "bodyend": "292"
+              },
+              "definition": {
+                "simple_html": "void clear(detail::Badge)",
+                "simple_raw": "void clear(detail::Badge)",
+                "detailed_html": "inline void clear(detail::Badge)",
+                "detailed_raw": "inline void clear(detail::Badge)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::clear",
+                "original_argsstring_html": "(detail::Badge)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/clear",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/clear",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::clear"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/clear",
+          "minprot": "public",
+          "displayname_html": "clear",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/clear",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/clear",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "insert_or_assign",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::insert_or_assign",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a7d1cd9ebed3de795f02c0463ccb0474a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::insert_or_assign",
+              "argsstring_html": "(detail::Badge, Value k, Value v)",
+              "name_html": "insert_or_assign",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "Value",
+                  "declname_html": "k"
+                },
+                {
+                  "type_html": "Value",
+                  "declname_html": "v"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "294",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "284",
+                "bodyend": "287"
+              },
+              "definition": {
+                "simple_html": "void insert_or_assign(detail::Badge, Value k, Value v)",
+                "simple_raw": "void insert_or_assign(detail::Badge, Value k, Value v)",
+                "detailed_html": "void insert_or_assign(detail::Badge, Value k, Value v)",
+                "detailed_raw": "void insert_or_assign(detail::Badge, Value k, Value v)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::insert_or_assign",
+                "original_argsstring_html": "(detail::Badge, Value k, Value v)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/insert_or_assign",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/insert_or_assign",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::insert_or_assign"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/insert_or_assign",
+          "minprot": "public",
+          "displayname_html": "insert_or_assign",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/insert_or_assign",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/insert_or_assign",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "erase",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::erase",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1af4b19e6996dc2d83eadc5893fafa4dd1",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::erase",
+              "argsstring_html": "(detail::Badge, Value k)",
+              "name_html": "erase",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "Value",
+                  "declname_html": "k"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "295",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "289",
+                "bodyend": "292"
+              },
+              "definition": {
+                "simple_html": "void erase(detail::Badge, Value k)",
+                "simple_raw": "void erase(detail::Badge, Value k)",
+                "detailed_html": "void erase(detail::Badge, Value k)",
+                "detailed_raw": "void erase(detail::Badge, Value k)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::erase",
+                "original_argsstring_html": "(detail::Badge, Value k)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/erase",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/erase",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::erase"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/erase",
+          "minprot": "public",
+          "displayname_html": "erase",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/erase",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/erase",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "add",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::add",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a0d7a20166e0fdd15bd52028d1a0b969f",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::add",
+              "argsstring_html": "(detail::Badge, detail::ValueMap v)",
+              "name_html": "add",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "<code>detail::ValueMap</code>",
+                  "declname_html": "v"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "297",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "293",
+                "bodyend": "307"
+              },
+              "definition": {
+                "simple_html": "void add(detail::Badge, detail::ValueMap v)",
+                "simple_raw": "void add(detail::Badge, detail::ValueMap v)",
+                "detailed_html": "void add(detail::Badge, detail::ValueMap v)",
+                "detailed_raw": "void add(detail::Badge, detail::ValueMap v)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::add",
+                "original_argsstring_html": "(detail::Badge, detail::ValueMap v)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/add",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/add",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::add"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/add",
+          "minprot": "public",
+          "displayname_html": "add",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/add",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/add",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "remove",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::remove",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1adcfba6ffbb9b90e59b6c301607093535",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::remove",
+              "argsstring_html": "(detail::Badge badge, const detail::ValueSet &amp;v)",
+              "name_html": "remove",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>",
+                  "declname_html": "badge"
+                },
+                {
+                  "type_html": "const <code>detail::ValueSet</code> &amp;",
+                  "declname_html": "v"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "298",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "298",
+                "bodyend": "302"
+              },
+              "definition": {
+                "simple_html": "void remove(detail::Badge badge, const detail::ValueSet&amp; v)",
+                "simple_raw": "void remove(detail::Badge badge, const detail::ValueSet& v)",
+                "detailed_html": "inline void remove(detail::Badge badge, const detail::ValueSet&amp; v)",
+                "detailed_raw": "inline void remove(detail::Badge badge, const detail::ValueSet& v)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::remove",
+                "original_argsstring_html": "(detail::Badge badge, const detail::ValueSet &amp;v)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/remove",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/remove",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::remove"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/remove",
+          "minprot": "public",
+          "displayname_html": "remove",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/remove",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/remove",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "put",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::put",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a3e469ad7189ef8d550f7459f9afc025a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::put",
+              "argsstring_html": "(detail::Badge badge, const detail::ValueMap &amp;m)",
+              "name_html": "put",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>",
+                  "declname_html": "badge"
+                },
+                {
+                  "type_html": "const <code>detail::ValueMap</code> &amp;",
+                  "declname_html": "m"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "303",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "303",
+                "bodyend": "307"
+              },
+              "definition": {
+                "simple_html": "void put(detail::Badge badge, const detail::ValueMap&amp; m)",
+                "simple_raw": "void put(detail::Badge badge, const detail::ValueMap& m)",
+                "detailed_html": "inline void put(detail::Badge badge, const detail::ValueMap&amp; m)",
+                "detailed_raw": "inline void put(detail::Badge badge, const detail::ValueMap& m)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::put",
+                "original_argsstring_html": "(detail::Badge badge, const detail::ValueMap &amp;m)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/put",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/put",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::put"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/put",
+          "minprot": "public",
+          "displayname_html": "put",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/put",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/put",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "patchByKey",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKey",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a520e05cff516f8d5cad923a0eefa1c8d",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+              "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+              "argsstring_html": "(detail::Badge, Value k, const DynamicPatch &amp;p)",
+              "name_html": "patchByKey",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "Value",
+                  "declname_html": "k"
+                },
+                {
+                  "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+                  "declname_html": "p"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "310",
+                "column": "16",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "310",
+                "bodyend": "312"
+              },
+              "definition": {
+                "simple_html": "DynamicPatch&amp; patchByKey(detail::Badge, Value k, const DynamicPatch&amp; p)",
+                "simple_raw": "DynamicPatch& patchByKey(detail::Badge, Value k, const DynamicPatch& p)",
+                "detailed_html": "inline DynamicPatch&amp; patchByKey(detail::Badge, Value k, const DynamicPatch&amp; p)",
+                "detailed_raw": "inline DynamicPatch& patchByKey(detail::Badge, Value k, const DynamicPatch& p)",
+                "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+                "original_argsstring_html": "(detail::Badge, Value k, const DynamicPatch &amp;p)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKey"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a7336100ee0f0c61b45722885c09ac634",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+              "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+              "argsstring_html": "(detail::Badge, Value k, DynamicPatch &amp;&amp;p)",
+              "name_html": "patchByKey",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "Value",
+                  "declname_html": "k"
+                },
+                {
+                  "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;&amp;",
+                  "declname_html": "p"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "313",
+                "column": "16",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "313",
+                "bodyend": "315"
+              },
+              "definition": {
+                "simple_html": "DynamicPatch&amp; patchByKey(detail::Badge, Value k, DynamicPatch&amp;&amp; p)",
+                "simple_raw": "DynamicPatch& patchByKey(detail::Badge, Value k, DynamicPatch&& p)",
+                "detailed_html": "inline DynamicPatch&amp; patchByKey(detail::Badge, Value k, DynamicPatch&amp;&amp; p)",
+                "detailed_raw": "inline DynamicPatch& patchByKey(detail::Badge, Value k, DynamicPatch&& p)",
+                "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+                "original_argsstring_html": "(detail::Badge, Value k, DynamicPatch &amp;&amp;p)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKey"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+          "minprot": "public",
+          "displayname_html": "patchByKey",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "toObject",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::toObject",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1aa80683da3331d4510925b83331cf3fef",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "refqual": "rvalue",
+              "virtual": "non-virtual",
+              "type_html": "Object",
+              "definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+              "argsstring_html": "() &amp;&amp;",
+              "name_html": "toObject",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "317",
+                "column": "11",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "208",
+                "bodyend": "245"
+              },
+              "definition": {
+                "simple_html": "Object toObject() &amp;&amp;",
+                "simple_raw": "Object toObject() &&",
+                "detailed_html": "Object toObject() &amp;&amp;",
+                "detailed_raw": "Object toObject() &&",
+                "original_definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+                "original_argsstring_html": "() &amp;&amp;"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::toObject"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ae2369e3703e6097f2f79d90bf2e6a1bc",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "refqual": "lvalue",
+              "virtual": "non-virtual",
+              "type_html": "Object",
+              "definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+              "argsstring_html": "() const &amp;",
+              "name_html": "toObject",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "318",
+                "column": "11",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "246",
+                "bodyend": "248"
+              },
+              "definition": {
+                "simple_html": "Object toObject() const&amp;",
+                "simple_raw": "Object toObject() const&",
+                "detailed_html": "Object toObject() const&amp;",
+                "detailed_raw": "Object toObject() const&",
+                "original_definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
+                "original_argsstring_html": "() const &amp;"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::toObject"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+          "minprot": "public",
+          "displayname_html": "toObject",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/toObject",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "fromObject",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::fromObject",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a59faa2729068f559043452b780b38100",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::fromObject",
+              "argsstring_html": "(detail::Badge, Object obj)",
+              "name_html": "fromObject",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "Object",
+                  "declname_html": "obj"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "319",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "249",
+                "bodyend": "282"
+              },
+              "definition": {
+                "simple_html": "void fromObject(detail::Badge, Object obj)",
+                "simple_raw": "void fromObject(detail::Badge, Object obj)",
+                "detailed_html": "void fromObject(detail::Badge, Object obj)",
+                "detailed_raw": "void fromObject(detail::Badge, Object obj)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::fromObject",
+                "original_argsstring_html": "(detail::Badge, Object obj)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/fromObject",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/fromObject",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::fromObject"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/fromObject",
+          "minprot": "public",
+          "displayname_html": "fromObject",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/fromObject",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/fromObject",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "patchedElementCount",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchedElementCount",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a630bc2019f16476701ae2f16ba5030d8",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "std::size_t",
+              "definition_html": "std::size_t apache::thrift::protocol::DynamicMapPatch::patchedElementCount",
+              "argsstring_html": "(detail::Badge) const",
+              "name_html": "patchedElementCount",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "321",
+                "column": "16",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "321",
+                "bodyend": "324"
+              },
+              "definition": {
+                "simple_html": "std::size_t patchedElementCount(detail::Badge) const",
+                "simple_raw": "std::size_t patchedElementCount(detail::Badge) const",
+                "detailed_html": "inline std::size_t patchedElementCount(detail::Badge) const",
+                "detailed_raw": "inline std::size_t patchedElementCount(detail::Badge) const",
+                "original_definition_html": "std::size_t apache::thrift::protocol::DynamicMapPatch::patchedElementCount",
+                "original_argsstring_html": "(detail::Badge) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchedElementCount",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchedElementCount",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchedElementCount"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/patchedElementCount",
+          "minprot": "public",
+          "displayname_html": "patchedElementCount",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchedElementCount",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchedElementCount",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "empty",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::empty",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a8a8b445bb6d021bf59d46ca0b7e406b4",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::protocol::DynamicMapPatch::empty",
+              "argsstring_html": "(detail::Badge) const",
+              "name_html": "empty",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "326",
+                "column": "9",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "326",
+                "bodyend": "329"
+              },
+              "definition": {
+                "simple_html": "bool empty(detail::Badge) const",
+                "simple_raw": "bool empty(detail::Badge) const",
+                "detailed_html": "inline bool empty(detail::Badge) const",
+                "detailed_raw": "inline bool empty(detail::Badge) const",
+                "original_definition_html": "bool apache::thrift::protocol::DynamicMapPatch::empty",
+                "original_argsstring_html": "(detail::Badge) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/empty",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/empty",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::empty"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/empty",
+          "minprot": "public",
+          "displayname_html": "empty",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/empty",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/empty",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "customVisit",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::customVisit",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a662c58095489bd5957c8b383387e4686",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class Visitor"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::customVisit",
+              "argsstring_html": "(detail::Badge badge, Visitor &amp;&amp;v) const",
+              "name_html": "customVisit",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>",
+                  "declname_html": "badge"
+                },
+                {
+                  "type_html": "Visitor &amp;&amp;",
+                  "declname_html": "v"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "332",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "533",
+                "bodyend": "554"
+              },
+              "definition": {
+                "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge badge, Visitor&amp;&amp; v) const",
+                "simple_raw": "template <class Visitor>\nvoid customVisit(detail::Badge badge, Visitor&& v) const",
+                "detailed_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge badge, Visitor&amp;&amp; v) const",
+                "detailed_raw": "template <class Visitor>\nvoid customVisit(detail::Badge badge, Visitor&& v) const",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::customVisit",
+                "original_argsstring_html": "(detail::Badge badge, Visitor &amp;&amp;v) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/customVisit",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/customVisit",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::customVisit"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/customVisit",
+          "minprot": "public",
+          "displayname_html": "customVisit",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/customVisit",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/customVisit",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "apply",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::apply",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1aaabff9cbfbad055ef01c9fc331c59c09",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::apply",
+              "argsstring_html": "(detail::Badge, detail::ValueMap &amp;v) const",
+              "name_html": "apply",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                },
+                {
+                  "type_html": "<code>detail::ValueMap</code> &amp;",
+                  "declname_html": "v"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "333",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "326",
+                "bodyend": "367"
+              },
+              "definition": {
+                "simple_html": "void apply(detail::Badge, detail::ValueMap&amp; v) const",
+                "simple_raw": "void apply(detail::Badge, detail::ValueMap& v) const",
+                "detailed_html": "void apply(detail::Badge, detail::ValueMap&amp; v) const",
+                "detailed_raw": "void apply(detail::Badge, detail::ValueMap& v) const",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::apply",
+                "original_argsstring_html": "(detail::Badge, detail::ValueMap &amp;v) const"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/apply",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/apply",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::apply"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/apply",
+          "minprot": "public",
+          "displayname_html": "apply",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/apply",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/apply",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "merge",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::merge",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ab2ca2101b53e6ebbd6e6bc01fcdc5903",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::merge",
+              "argsstring_html": "(detail::Badge badge, const DynamicMapPatch &amp;other)",
+              "name_html": "merge",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>",
+                  "declname_html": "badge"
+                },
+                {
+                  "type_html": "const <code>DynamicMapPatch</code> &amp;",
+                  "declname_html": "other"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "334",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "334",
+                "bodyend": "336"
+              },
+              "definition": {
+                "simple_html": "void merge(detail::Badge badge, const DynamicMapPatch&amp; other)",
+                "simple_raw": "void merge(detail::Badge badge, const DynamicMapPatch& other)",
+                "detailed_html": "inline void merge(detail::Badge badge, const DynamicMapPatch&amp; other)",
+                "detailed_raw": "inline void merge(detail::Badge badge, const DynamicMapPatch& other)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::merge",
+                "original_argsstring_html": "(detail::Badge badge, const DynamicMapPatch &amp;other)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/merge",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/merge",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::merge"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/merge",
+          "minprot": "public",
+          "displayname_html": "merge",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/merge",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/merge",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "doNotConvertStringToBinary",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::doNotConvertStringToBinary",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a74e42c02d6dda11a263ab973e36cbd0a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::doNotConvertStringToBinary",
+              "argsstring_html": "(detail::Badge)",
+              "name_html": "doNotConvertStringToBinary",
+              "param": [
+                {
+                  "type_html": "<code>detail::Badge</code>"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "338",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "bodystart": "338",
+                "bodyend": "340"
+              },
+              "definition": {
+                "simple_html": "void doNotConvertStringToBinary(detail::Badge)",
+                "simple_raw": "void doNotConvertStringToBinary(detail::Badge)",
+                "detailed_html": "inline void doNotConvertStringToBinary(detail::Badge)",
+                "detailed_raw": "inline void doNotConvertStringToBinary(detail::Badge)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::doNotConvertStringToBinary",
+                "original_argsstring_html": "(detail::Badge)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/doNotConvertStringToBinary",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/doNotConvertStringToBinary",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::doNotConvertStringToBinary"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/doNotConvertStringToBinary",
+          "minprot": "public",
+          "displayname_html": "doNotConvertStringToBinary",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/doNotConvertStringToBinary",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/doNotConvertStringToBinary",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "undoChanges",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::undoChanges",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a246ec82af0c904ab6bbec5cab4a689b6",
+              "prot": "private",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::undoChanges",
+              "argsstring_html": "(const Value &amp;k)",
+              "name_html": "undoChanges",
+              "param": [
+                {
+                  "type_html": "const Value &amp;",
+                  "declname_html": "k"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "343",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "317",
+                "bodyend": "324"
+              },
+              "definition": {
+                "simple_html": "void undoChanges(const Value&amp; k)",
+                "simple_raw": "void undoChanges(const Value& k)",
+                "detailed_html": "private void undoChanges(const Value&amp; k)",
+                "detailed_raw": "private void undoChanges(const Value& k)",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::undoChanges",
+                "original_argsstring_html": "(const Value &amp;k)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/undoChanges",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/undoChanges",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::undoChanges"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/undoChanges",
+          "minprot": "private",
+          "displayname_html": "undoChanges",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/undoChanges",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/undoChanges",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "ensurePatchable",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::ensurePatchable",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1ac202cd26de750d182b7656901d879faa",
+              "prot": "private",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::protocol::DynamicMapPatch::ensurePatchable",
+              "argsstring_html": "()",
+              "name_html": "ensurePatchable",
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "344",
+                "column": "8",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "309",
+                "bodyend": "315"
+              },
+              "definition": {
+                "simple_html": "void ensurePatchable()",
+                "simple_raw": "void ensurePatchable()",
+                "detailed_html": "private void ensurePatchable()",
+                "detailed_raw": "private void ensurePatchable()",
+                "original_definition_html": "void apache::thrift::protocol::DynamicMapPatch::ensurePatchable",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/ensurePatchable",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/ensurePatchable",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::ensurePatchable"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/ensurePatchable",
+          "minprot": "private",
+          "displayname_html": "ensurePatchable",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/ensurePatchable",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/ensurePatchable",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "patchByKeyImpl",
+          "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1acf5e21513c303d242e7524a1d89f19c0",
+              "prot": "private",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class SubPatch"
+                }
+              ],
+              "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
+              "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+              "argsstring_html": "(Value k, SubPatch &amp;&amp;p)",
+              "name_html": "patchByKeyImpl",
+              "param": [
+                {
+                  "type_html": "Value",
+                  "declname_html": "k"
+                },
+                {
+                  "type_html": "SubPatch &amp;&amp;",
+                  "declname_html": "p"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+                "line": "347",
+                "column": "16",
+                "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+                "bodystart": "196",
+                "bodyend": "207"
+              },
+              "definition": {
+                "simple_html": "template &lt;class SubPatch&gt;\nDynamicPatch&amp; patchByKeyImpl(Value k, SubPatch&amp;&amp; p)",
+                "simple_raw": "template <class SubPatch>\nDynamicPatch& patchByKeyImpl(Value k, SubPatch&& p)",
+                "detailed_html": "template &lt;class SubPatch&gt;\nprivate DynamicPatch&amp; patchByKeyImpl(Value k, SubPatch&amp;&amp; p)",
+                "detailed_raw": "template <class SubPatch>\nprivate DynamicPatch& patchByKeyImpl(Value k, SubPatch&& p)",
+                "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl",
+                "original_argsstring_html": "(Value k, SubPatch &amp;&amp;p)"
+              },
+              "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+              "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+              "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch",
+              "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKeyImpl"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+          "minprot": "private",
+          "displayname_html": "patchByKeyImpl",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+          "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicMapPatch/patchByKeyImpl",
+          "parent_links": [
+            {
+              "text_html": "DynamicMapPatch",
+              "href": "/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

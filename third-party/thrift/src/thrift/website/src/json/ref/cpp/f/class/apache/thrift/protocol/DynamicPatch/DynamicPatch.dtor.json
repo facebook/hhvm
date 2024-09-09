@@ -1,0 +1,50 @@
+{
+  "kind": "overloadset",
+  "name_html": "~DynamicPatch",
+  "compoundname_html": "apache::thrift::protocol::DynamicPatch::~DynamicPatch",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch_1ad8a1c2d516746f401e2343144609175c",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "",
+      "definition_html": "apache::thrift::protocol::DynamicPatch::~DynamicPatch",
+      "argsstring_html": "()",
+      "name_html": "~DynamicPatch",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "452",
+        "column": "3"
+      },
+      "definition": {
+        "simple_html": "~DynamicPatch()",
+        "simple_raw": "~DynamicPatch()",
+        "detailed_html": "~DynamicPatch()",
+        "detailed_raw": "~DynamicPatch()",
+        "original_definition_html": "apache::thrift::protocol::DynamicPatch::~DynamicPatch",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicPatch/DynamicPatch.dtor",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicPatch/DynamicPatch.dtor",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicPatch::~DynamicPatch"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicPatch/DynamicPatch.dtor",
+  "minprot": "public",
+  "displayname_html": "(destructor)",
+  "brief_html": "Destructs the DynamicPatch.",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatch/DynamicPatch.dtor",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicPatch/DynamicPatch.dtor",
+  "parent_links": [
+    {
+      "text_html": "DynamicPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicPatch"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "kind": "overloadset",
+  "name_html": "clear",
+  "compoundname_html": "apache::thrift::protocol::DynamicStructurePatch::clear",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a8d618b44fd2491c20cc4a6ee11936a96",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::clear",
+      "argsstring_html": "(detail::Badge)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "367",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "367",
+        "bodyend": "370"
+      },
+      "definition": {
+        "simple_html": "void clear(detail::Badge)",
+        "simple_raw": "void clear(detail::Badge)",
+        "detailed_html": "inline void clear(detail::Badge)",
+        "detailed_raw": "inline void clear(detail::Badge)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::clear",
+        "original_argsstring_html": "(detail::Badge)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/clear",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicStructurePatch/clear",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicStructurePatch::clear"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicStructurePatch/clear",
+  "minprot": "public",
+  "displayname_html": "clear",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicStructurePatch/clear",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicStructurePatch/clear",
+  "parent_links": [
+    {
+      "text_html": "DynamicStructurePatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicStructurePatch"
+    }
+  ]
+}

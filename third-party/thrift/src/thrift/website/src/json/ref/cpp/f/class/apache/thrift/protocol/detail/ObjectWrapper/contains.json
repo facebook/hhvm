@@ -1,0 +1,59 @@
+{
+  "kind": "overloadset",
+  "name_html": "contains",
+  "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::contains",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ac0c1d09c68f1e3f00822fbb61a623b6c",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::contains",
+      "argsstring_html": "(FieldId i) const",
+      "name_html": "contains",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "declname_html": "i"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "line": "80",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
+        "bodystart": "80",
+        "bodyend": "82"
+      },
+      "definition": {
+        "simple_html": "bool contains(FieldId i) const",
+        "simple_raw": "bool contains(FieldId i) const",
+        "detailed_html": "inline bool contains(FieldId i) const",
+        "detailed_raw": "inline bool contains(FieldId i) const",
+        "original_definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::contains",
+        "original_argsstring_html": "(FieldId i) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
+      "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::contains"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+  "minprot": "public",
+  "displayname_html": "contains",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/detail/ObjectWrapper/contains",
+  "parent_links": [
+    {
+      "text_html": "ObjectWrapper",
+      "href": "/ref/cpp/class/apache/thrift/protocol/detail/ObjectWrapper"
+    }
+  ]
+}

@@ -17,7 +17,8 @@ buck2 run //fbcref/docgen:maker -- \
     'thrift/lib/cpp/protocol/TCompactProtocol.*' \
     'thrift/lib/cpp2/protocol/Patch.h' \
     'thrift/lib/cpp2/FieldRef.h' \
-    'thrift/lib/cpp2/op/.*'
+    'thrift/lib/cpp2/op/.*' \
+    'thrift/lib/thrift/detail/.*'
 
 # Make the table of contents
 toc=$(cat << EOTOC
@@ -52,6 +53,7 @@ Static Patch
   cpp/class/apache/thrift/op/detail/BinaryPatch
   cpp/class/apache/thrift/op/detail/NumberPatch
   cpp/class/apache/thrift/op/detail/BoolPatch
+  cpp/class/apache/thrift/op/detail/AnyPatch
 
 Dynamic Patch
   cpp/file/thrift/lib/cpp2/protocol/Patch.h

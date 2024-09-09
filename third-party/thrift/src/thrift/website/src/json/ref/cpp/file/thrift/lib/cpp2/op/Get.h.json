@@ -214,7 +214,7 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "constexpr FieldId",
+      "type_html": "constexpr <code>FieldId</code>",
       "definition_html": "constexpr FieldId apache::thrift::op::get_field_id_v",
       "argsstring_html": "",
       "name_html": "get_field_id_v",

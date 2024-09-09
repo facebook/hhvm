@@ -1,0 +1,62 @@
+{
+  "kind": "overloadset",
+  "name_html": "apply",
+  "compoundname_html": "apache::thrift::protocol::DynamicListPatch::apply",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch_1ad31b86bbb72c8278e16761cf07018c8f",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicListPatch::apply",
+      "argsstring_html": "(detail::Badge, detail::ValueList &amp;v) const",
+      "name_html": "apply",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "<code>detail::ValueList</code> &amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "208",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "1031",
+        "bodyend": "1046"
+      },
+      "definition": {
+        "simple_html": "void apply(detail::Badge, detail::ValueList&amp; v) const",
+        "simple_raw": "void apply(detail::Badge, detail::ValueList& v) const",
+        "detailed_html": "void apply(detail::Badge, detail::ValueList&amp; v) const",
+        "detailed_raw": "void apply(detail::Badge, detail::ValueList& v) const",
+        "original_definition_html": "void apache::thrift::protocol::DynamicListPatch::apply",
+        "original_argsstring_html": "(detail::Badge, detail::ValueList &amp;v) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicListPatch/apply",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicListPatch/apply",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicListPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicListPatch::apply"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicListPatch/apply",
+  "minprot": "public",
+  "displayname_html": "apply",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicListPatch/apply",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicListPatch/apply",
+  "parent_links": [
+    {
+      "text_html": "DynamicListPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicListPatch"
+    }
+  ]
+}

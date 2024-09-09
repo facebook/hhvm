@@ -1,0 +1,59 @@
+{
+  "kind": "overloadset",
+  "name_html": "fromThrift",
+  "compoundname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a719897acc40313ae99b81c780ca91415",
+      "prot": "public",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "<code>AdaptedType</code>",
+      "definition_html": "auto apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift",
+      "argsstring_html": "(StandardType &amp;&amp;vec)",
+      "name_html": "fromThrift",
+      "param": [
+        {
+          "type_html": "<code>StandardType</code> &amp;&amp;",
+          "declname_html": "vec"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+        "line": "66",
+        "column": "22",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
+        "bodystart": "51",
+        "bodyend": "64"
+      },
+      "definition": {
+        "simple_html": "static AdaptedType fromThrift(StandardType&amp;&amp; vec)",
+        "simple_raw": "static AdaptedType fromThrift(StandardType&& vec)",
+        "detailed_html": "static AdaptedType fromThrift(StandardType&amp;&amp; vec)",
+        "detailed_raw": "static AdaptedType fromThrift(StandardType&& vec)",
+        "original_definition_html": "auto apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift",
+        "original_argsstring_html": "(StandardType &amp;&amp;vec)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/fromThrift",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/fromThrift",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter",
+      "compoundname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/fromThrift",
+  "minprot": "public",
+  "displayname_html": "fromThrift",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/fromThrift",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/fromThrift",
+  "parent_links": [
+    {
+      "text_html": "TypeToPatchMapAdapter",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/TypeToPatchMapAdapter"
+    }
+  ]
+}

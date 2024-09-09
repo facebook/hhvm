@@ -65,7 +65,7 @@
         "to": "/ref/cpp/file/thrift/lib/cpp2/op/Patch.h"
       }
     ],
-    "column": 2
+    "column": 1
   },
   {
     "section": "Static Patch",
@@ -113,9 +113,13 @@
       {
         "label": "BoolPatch",
         "to": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
+      },
+      {
+        "label": "AnyPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/AnyPatch"
       }
     ],
-    "column": 3
+    "column": 2
   },
   {
     "section": "Dynamic Patch",

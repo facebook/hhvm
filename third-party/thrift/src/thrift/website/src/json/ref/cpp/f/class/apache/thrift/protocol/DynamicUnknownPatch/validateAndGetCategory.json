@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "validateAndGetCategory",
+  "compoundname_html": "apache::thrift::protocol::DynamicUnknownPatch::validateAndGetCategory",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnknownPatch_1aac268990878d451fce575474519d5014",
+      "prot": "private",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "Category",
+      "definition_html": "auto apache::thrift::protocol::DynamicUnknownPatch::validateAndGetCategory",
+      "argsstring_html": "() const",
+      "name_html": "validateAndGetCategory",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "166",
+        "column": "12",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "1202",
+        "bodyend": "1249"
+      },
+      "definition": {
+        "simple_html": "Category validateAndGetCategory() const",
+        "simple_raw": "Category validateAndGetCategory() const",
+        "detailed_html": "private Category validateAndGetCategory() const",
+        "detailed_raw": "private Category validateAndGetCategory() const",
+        "original_definition_html": "auto apache::thrift::protocol::DynamicUnknownPatch::validateAndGetCategory",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicUnknownPatch/validateAndGetCategory",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicUnknownPatch/validateAndGetCategory",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicUnknownPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicUnknownPatch::validateAndGetCategory"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicUnknownPatch/validateAndGetCategory",
+  "minprot": "private",
+  "displayname_html": "validateAndGetCategory",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnknownPatch/validateAndGetCategory",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicUnknownPatch/validateAndGetCategory",
+  "parent_links": [
+    {
+      "text_html": "DynamicUnknownPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicUnknownPatch"
+    }
+  ]
+}

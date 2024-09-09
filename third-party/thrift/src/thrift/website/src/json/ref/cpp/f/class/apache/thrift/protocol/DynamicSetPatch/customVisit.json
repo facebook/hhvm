@@ -1,0 +1,68 @@
+{
+  "kind": "overloadset",
+  "name_html": "customVisit",
+  "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::customVisit",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicSetPatch_1a7ca68ebb9f4d632aaa11a554d58669d0",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class Visitor"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicSetPatch::customVisit",
+      "argsstring_html": "(detail::Badge badge, Visitor &amp;&amp;v) const",
+      "name_html": "customVisit",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "Visitor &amp;&amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "257",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "257",
+        "bodyend": "274"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge badge, Visitor&amp;&amp; v) const",
+        "simple_raw": "template <class Visitor>\nvoid customVisit(detail::Badge badge, Visitor&& v) const",
+        "detailed_html": "template &lt;class Visitor&gt;\ninline void customVisit(detail::Badge badge, Visitor&amp;&amp; v) const",
+        "detailed_raw": "template <class Visitor>\ninline void customVisit(detail::Badge badge, Visitor&& v) const",
+        "original_definition_html": "void apache::thrift::protocol::DynamicSetPatch::customVisit",
+        "original_argsstring_html": "(detail::Badge badge, Visitor &amp;&amp;v) const"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicSetPatch/customVisit",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicSetPatch/customVisit",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicSetPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::customVisit"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicSetPatch/customVisit",
+  "minprot": "public",
+  "displayname_html": "customVisit",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicSetPatch/customVisit",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicSetPatch/customVisit",
+  "parent_links": [
+    {
+      "text_html": "DynamicSetPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicSetPatch"
+    }
+  ]
+}

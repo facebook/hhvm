@@ -1,0 +1,59 @@
+{
+  "kind": "overloadset",
+  "name_html": "pushField",
+  "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::pushField",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1aa30dddf099a2e5365319dbf43734cdc0",
+      "prot": "protected",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushField",
+      "argsstring_html": "(FieldId)",
+      "name_html": "pushField",
+      "param": [
+        {
+          "type_html": "FieldId",
+          "defname_html": "id"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "634",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "980",
+        "bodyend": "985"
+      },
+      "definition": {
+        "simple_html": "void pushField(FieldId)",
+        "simple_raw": "void pushField(FieldId)",
+        "detailed_html": "protected void pushField(FieldId)",
+        "detailed_raw": "protected void pushField(FieldId)",
+        "original_definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushField",
+        "original_argsstring_html": "(FieldId)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/pushField",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DiffVisitorBase/pushField",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase",
+      "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::pushField"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DiffVisitorBase/pushField",
+  "minprot": "protected",
+  "displayname_html": "pushField",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/pushField",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/pushField",
+  "parent_links": [
+    {
+      "text_html": "DiffVisitorBase",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DiffVisitorBase"
+    }
+  ]
+}

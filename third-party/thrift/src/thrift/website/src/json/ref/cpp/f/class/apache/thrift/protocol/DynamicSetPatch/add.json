@@ -1,0 +1,63 @@
+{
+  "kind": "overloadset",
+  "name_html": "add",
+  "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::add",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicSetPatch_1ac7d077c42711ad55118196297880cd2a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicSetPatch::add",
+      "argsstring_html": "(detail::Badge badge, const detail::ValueSet &amp;add)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>",
+          "declname_html": "badge"
+        },
+        {
+          "type_html": "const <code>detail::ValueSet</code> &amp;",
+          "declname_html": "add"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "244",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "bodystart": "244",
+        "bodyend": "248"
+      },
+      "definition": {
+        "simple_html": "void add(detail::Badge badge, const detail::ValueSet&amp; add)",
+        "simple_raw": "void add(detail::Badge badge, const detail::ValueSet& add)",
+        "detailed_html": "inline void add(detail::Badge badge, const detail::ValueSet&amp; add)",
+        "detailed_raw": "inline void add(detail::Badge badge, const detail::ValueSet& add)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicSetPatch::add",
+        "original_argsstring_html": "(detail::Badge badge, const detail::ValueSet &amp;add)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicSetPatch/add",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicSetPatch/add",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicSetPatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::add"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicSetPatch/add",
+  "minprot": "public",
+  "displayname_html": "add",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicSetPatch/add",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicSetPatch/add",
+  "parent_links": [
+    {
+      "text_html": "DynamicSetPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicSetPatch"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "kind": "overloadset",
+  "name_html": "fromObject",
+  "compoundname_html": "apache::thrift::protocol::DynamicStructPatch::fromObject",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1aaae1f60508c999430779bfcc535e1997",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::fromObject",
+      "argsstring_html": "(detail::Badge, Object obj)",
+      "name_html": "fromObject",
+      "param": [
+        {
+          "type_html": "<code>detail::Badge</code>"
+        },
+        {
+          "type_html": "Object",
+          "declname_html": "obj"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "398",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "499",
+        "bodyend": "537"
+      },
+      "definition": {
+        "simple_html": "void fromObject(detail::Badge, Object obj)",
+        "simple_raw": "void fromObject(detail::Badge, Object obj)",
+        "detailed_html": "void fromObject(detail::Badge, Object obj)",
+        "detailed_raw": "void fromObject(detail::Badge, Object obj)",
+        "original_definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::fromObject",
+        "original_argsstring_html": "(detail::Badge, Object obj)"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/fromObject",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicStructurePatch/fromObject",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch",
+      "compoundname_html": "apache::thrift::protocol::DynamicStructPatch::fromObject"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DynamicStructPatch/fromObject",
+  "minprot": "public",
+  "displayname_html": "fromObject",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DynamicStructPatch/fromObject",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DynamicStructPatch/fromObject",
+  "parent_links": [
+    {
+      "text_html": "DynamicStructPatch",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DynamicStructPatch"
+    }
+  ]
+}

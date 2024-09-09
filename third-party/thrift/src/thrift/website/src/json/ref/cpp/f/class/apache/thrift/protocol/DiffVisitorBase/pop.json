@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "pop",
+  "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::pop",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1a39cd80e267a3aa203c8e33e6458b213f",
+      "prot": "protected",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pop",
+      "argsstring_html": "()",
+      "name_html": "pop",
+      "location": {
+        "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
+        "line": "637",
+        "column": "8",
+        "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
+        "bodystart": "1026",
+        "bodyend": "1029"
+      },
+      "definition": {
+        "simple_html": "void pop()",
+        "simple_raw": "void pop()",
+        "detailed_html": "protected void pop()",
+        "detailed_raw": "protected void pop()",
+        "original_definition_html": "void apache::thrift::protocol::DiffVisitorBase::pop",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/pop",
+      "href": "/ref/cpp/fns/class/apache/thrift/protocol/DiffVisitorBase/pop",
+      "parentid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase",
+      "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::pop"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/protocol/DiffVisitorBase/pop",
+  "minprot": "protected",
+  "displayname_html": "pop",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/pop",
+  "refid": "/ref/cpp/f/class/apache/thrift/protocol/DiffVisitorBase/pop",
+  "parent_links": [
+    {
+      "text_html": "DiffVisitorBase",
+      "href": "/ref/cpp/class/apache/thrift/protocol/DiffVisitorBase"
+    }
+  ]
+}

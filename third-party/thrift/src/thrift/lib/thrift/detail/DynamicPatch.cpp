@@ -183,7 +183,8 @@ void convertStringToBinary(Value& v) {
 bool DynamicPatch::empty(detail::Badge badge) const {
   return std::visit(
       [&](auto&& v) {
-        if constexpr (requires { v.empty(badge); }) {
+        if constexpr (detail::has_empty_with_badge_v<
+                          folly::remove_cvref_t<decltype(v)>>) {
           return v.empty(badge);
         } else {
           return v.empty();
@@ -1078,7 +1079,7 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
     std::visit(
         [&](auto&& other) {
           *patch_ = detail::createPatchFromObject<
-              std::remove_cvref_t<decltype(other)>>(badge, toObject());
+              folly::remove_cvref_t<decltype(other)>>(badge, toObject());
         },
         *other.patch_);
   }
@@ -1087,7 +1088,7 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
     return std::visit(
         [&](auto&& patch) {
           auto tmp = DynamicPatch{detail::createPatchFromObject<
-              std::remove_cvref_t<decltype(patch)>>(badge, other.toObject())};
+              folly::remove_cvref_t<decltype(patch)>>(badge, other.toObject())};
           return merge(badge, tmp);
         },
         *patch_);
@@ -1114,10 +1115,10 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
 
   std::visit(
       [](auto&& l, auto&& r) {
-        using L = std::remove_cvref_t<decltype(l)>;
-        using R = std::remove_cvref_t<decltype(r)>;
+        using L = folly::remove_cvref_t<decltype(l)>;
+        using R = folly::remove_cvref_t<decltype(r)>;
         if constexpr (std::is_same_v<L, R>) {
-          if constexpr (requires { l.merge(badge, r); }) {
+          if constexpr (detail::has_merge_with_badge_v<L>) {
             l.merge(badge, r);
           } else {
             l.merge(r);

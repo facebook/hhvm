@@ -51,6 +51,20 @@ template <typename T>
 constexpr static bool has_from_object_v =
     folly::is_detected_v<detect_from_object, T>;
 
+template <typename T>
+using detect_empty_with_badge =
+    decltype(std::declval<T>().empty(std::declval<Badge>()));
+template <typename T>
+constexpr static bool has_empty_with_badge_v =
+    folly::is_detected_v<detect_empty_with_badge, T>;
+
+template <typename T>
+using detect_merge_with_badge =
+    decltype(std::declval<T>().merge(std::declval<Badge>(), std::declval<T>()));
+template <typename T>
+constexpr static bool has_merge_with_badge_v =
+    folly::is_detected_v<detect_merge_with_badge, T>;
+
 template <class PatchType>
 PatchType createPatchFromObject(Badge badge, Object obj) {
   PatchType patch;

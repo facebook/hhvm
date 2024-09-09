@@ -2755,6 +2755,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "int"},
+                        "---",
                         "A comment describing b_hover.",
                     ],
                     "range": {
@@ -2818,6 +2819,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "THE_ANSWER"},
+                        "---",
                         "A comment describing THE_ANSWER",
                     ],
                     "range": {
@@ -2882,6 +2884,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "final class CopyrightClass"},
+                        "---",
                         "Testing copyright removal",
                     ],
                     "range": {
@@ -2902,6 +2905,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "final class GeneratedClass"},
+                        "---",
                         "Testing generated text removal",
                     ],
                     "range": {
@@ -2922,6 +2926,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "attribute ?string name"},
+                        "---",
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -2999,6 +3004,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "attribute ?string name"},
+                        "---",
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -3047,6 +3053,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "int"},
+                        "---",
                         "A comment describing b_hover.",
                     ],
                     "range": {
@@ -3094,6 +3101,7 @@ class TestLsp(LspTestBase):
                             "language": "hack",
                             "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
+                        "---",
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
@@ -3135,6 +3143,7 @@ class TestLsp(LspTestBase):
                             "language": "hack",
                             "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
                         },
+                        "---",
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
@@ -4968,6 +4977,7 @@ class BaseClassIncremental {
                 result={
                     "contents": [
                         {"language": "hack", "value": "int"},
+                        "---",
                         "A comment describing b_hover.",
                     ],
                     "range": {
@@ -5010,6 +5020,7 @@ function b_hover(): string {
                 result={
                     "contents": [
                         {"language": "hack", "value": "string"},
+                        "---",
                         "A comment describing b_hover differently.",
                     ],
                     "range": {

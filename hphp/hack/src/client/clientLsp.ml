@@ -2139,8 +2139,14 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
            match hoverInfo with
            | { HoverService.snippet = ""; _ } -> []
            | { HoverService.snippet; addendum; _ } ->
-             MarkedCode ("hack", snippet)
-             :: List.map ~f:(fun s -> MarkedString s) addendum)
+             let addendum = List.map ~f:(fun s -> MarkedString s) addendum in
+             let addendum =
+               if List.is_empty addendum then
+                 addendum
+               else
+                 MarkedString "---" :: addendum
+             in
+             MarkedCode ("hack", snippet) :: addendum)
     |> List.concat
   in
   (* We pull the position from the SymbolOccurrence.t record, so I would be

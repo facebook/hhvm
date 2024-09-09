@@ -38,7 +38,7 @@ class Sha : public fizz::Hasher {
 
   size_t getHashLen() const override;
 
-  inline size_t getBlockSize() const override;
+  size_t getBlockSize() const override;
 
   static void hmac(
       folly::ByteRange key,

@@ -755,7 +755,8 @@ const detail::UnionExtN<1> kMutableUnionExt = {
     /* .initMember */ {nullptr},
 };
 
-const detail::UnionExt* getStructInfoUnionExt(bool isUnion, bool isMutable) {
+const detail::UnionExt* FOLLY_NULLABLE
+getStructInfoUnionExt(bool isUnion, bool isMutable) {
   if (!isUnion) {
     return nullptr;
   }

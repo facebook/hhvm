@@ -56,8 +56,8 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     string_constant,
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestStruct as TestStructMutable,
-    TestStructAdaptedTypes as MutableTestStructAdaptedTypes,
-    TestStructAllThriftContainerTypes as MutableTestStructAllThriftContainerTypes,
+    TestStructAdaptedTypes as TestStructAdaptedTypesMutable,
+    TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
     TestStructCopy as TestStructCopyMutable,
@@ -74,7 +74,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
-    TestStructAdaptedTypes as ImmutableTestStructAdaptedTypes,
+    TestStructAdaptedTypes as TestStructAdaptedTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
@@ -352,7 +352,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         _pickle_round_trip(self, s_default_value)
 
     def test_adapted_types(self) -> None:
-        s = ImmutableTestStructAdaptedTypes()
+        s = TestStructAdaptedTypesImmutable()
         # standard default value for i32 is 0, therefore `fromtimestamp(0)`
         self.assertEqual(
             s.unqualified_adapted_i32_to_datetime, datetime.fromtimestamp(0)
@@ -381,12 +381,12 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
     @parameterized.expand(
         [
             (
-                ImmutableTestStructAdaptedTypes(
+                TestStructAdaptedTypesImmutable(
                     optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400)
                 ),
             ),
             (
-                ImmutableTestStructAdaptedTypes(
+                TestStructAdaptedTypesImmutable(
                     unqualified_adapted_i32_to_datetime=datetime.fromtimestamp(0),
                     optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400),
                 ),
@@ -775,7 +775,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         _pickle_round_trip(self, s_default_value)
 
     def test_create_and_assign_for_list(self) -> None:
-        s = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3])
+        s = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3])
 
         self.assertEqual(3, len(s.unqualified_list_i32))
         self.assertEqual([1, 2, 3], s.unqualified_list_i32)
@@ -854,7 +854,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([11, 12, 13, 14, 15], lst2)
 
     def test_assign_for_list(self) -> None:
-        s1 = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3])
+        s1 = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3])
 
         # It is possible to assign any value that supports `len()` and iteration
         s1.unqualified_list_i32 = [1, 2, 3]
@@ -866,7 +866,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s1.unqualified_list_i32 = []
         self.assertEqual([], s1.unqualified_list_i32)
 
-        s2 = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[])
+        s2 = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[])
         # my_list and s2.unqualified_list_i32 are different lists
         my_list = [1, 2, 3]
         s2.unqualified_list_i32 = my_list
@@ -874,14 +874,14 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         my_list[0] = 11
         self.assertEqual(1, s2.unqualified_list_i32[0])
 
-        s3 = MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3])
+        s3 = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3])
         # Strong exception safety
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
             s3.unqualified_list_i32 = [11, 12, 13, "Not an Integer"]
         self.assertEqual([1, 2, 3], s3.unqualified_list_i32)
 
     def test_assign_for_set(self) -> None:
-        s1 = MutableTestStructAllThriftContainerTypes(
+        s1 = TestStructAllThriftContainerTypesMutable(
             unqualified_set_string=["a", "b", "c"]
         )
 
@@ -899,7 +899,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s1.unqualified_set_string = my_iter
         self.assertEqual({"x", "y", "z"}, s1.unqualified_set_string)
 
-        s2 = MutableTestStructAllThriftContainerTypes(unqualified_set_string=[])
+        s2 = TestStructAllThriftContainerTypesMutable(unqualified_set_string=[])
         # my_set and s2.unqualified_set_string are different sets
         my_set = {"a", "b", "c"}
         s2.unqualified_set_string = my_set
@@ -908,7 +908,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(4, len(my_set))
         self.assertEqual(3, len(s2.unqualified_set_string))
 
-        s3 = MutableTestStructAllThriftContainerTypes(
+        s3 = TestStructAllThriftContainerTypesMutable(
             unqualified_set_string=["a", "b", "c"]
         )
         # Strong exception safety
@@ -917,7 +917,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual({"a", "b", "c"}, s3.unqualified_set_string)
 
     def test_assign_for_map(self) -> None:
-        s1 = MutableTestStructAllThriftContainerTypes(
+        s1 = TestStructAllThriftContainerTypesMutable(
             unqualified_map_string_i32={"a": 1, "b": 2}
         )
 
@@ -932,7 +932,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s1.unqualified_map_string_i32 = MyMapping()
         self.assertEqual({"aa": 11, "bb": 22}, s1.unqualified_map_string_i32)
 
-        s2 = MutableTestStructAllThriftContainerTypes(unqualified_map_string_i32={})
+        s2 = TestStructAllThriftContainerTypesMutable(unqualified_map_string_i32={})
         # my_map and s2.unqualified_map_string_i32 are different maps
         my_map = {"a": 1, "b": 2}
         s2.unqualified_map_string_i32 = my_map
@@ -940,7 +940,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(3, len(my_map))
         self.assertEqual(2, len(s2.unqualified_map_string_i32))
 
-        s3 = MutableTestStructAllThriftContainerTypes(
+        s3 = TestStructAllThriftContainerTypesMutable(
             unqualified_map_string_i32={"a": 1, "b": 2}
         )
         # Strong exception safety
@@ -950,26 +950,26 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
     @parameterized.expand(
         [
-            (MutableTestStructAllThriftContainerTypes(),),
-            (MutableTestStructAllThriftContainerTypes(unqualified_list_i32=[1, 2, 3]),),
-            (MutableTestStructAllThriftContainerTypes(optional_list_i32=[11, 22, 33]),),
+            (TestStructAllThriftContainerTypesMutable(),),
+            (TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3]),),
+            (TestStructAllThriftContainerTypesMutable(optional_list_i32=[11, 22, 33]),),
             (
-                MutableTestStructAllThriftContainerTypes(
+                TestStructAllThriftContainerTypesMutable(
                     unqualified_list_i32=[1, 2], optional_list_i32=[3]
                 ),
             ),
             (
-                MutableTestStructAllThriftContainerTypes(
+                TestStructAllThriftContainerTypesMutable(
                     unqualified_set_string=["1", "2", "3"]
                 ),
             ),
             (
-                MutableTestStructAllThriftContainerTypes(
+                TestStructAllThriftContainerTypesMutable(
                     optional_set_string=["11", "22", "33"]
                 ),
             ),
             (
-                MutableTestStructAllThriftContainerTypes(
+                TestStructAllThriftContainerTypesMutable(
                     unqualified_set_string=["1", "2", "3"],
                     optional_set_string=["11", "22", "33"],
                 ),
@@ -981,7 +981,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         _pickle_round_trip(self, struct)
 
     def test_adapted_types(self) -> None:
-        s = MutableTestStructAdaptedTypes()
+        s = TestStructAdaptedTypesMutable()
         # standard default value for i32 is 0, therefore `fromtimestamp(0)`
         self.assertEqual(
             s.unqualified_adapted_i32_to_datetime, datetime.fromtimestamp(0)
@@ -1006,12 +1006,12 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
     @parameterized.expand(
         [
             (
-                MutableTestStructAdaptedTypes(
+                TestStructAdaptedTypesMutable(
                     optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400)
                 ),
             ),
             (
-                MutableTestStructAdaptedTypes(
+                TestStructAdaptedTypesMutable(
                     unqualified_adapted_i32_to_datetime=datetime.fromtimestamp(0),
                     optional_adapted_i32_to_datetime=datetime.fromtimestamp(86400),
                 ),
@@ -1037,7 +1037,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
     def test_create_and_init_for_set(self) -> None:
         # Initializing the `set` member with an iterable that contains duplicate
         # elements is fine. Thrift removes the duplicates.
-        s = MutableTestStructAllThriftContainerTypes(
+        s = TestStructAllThriftContainerTypesMutable(
             unqualified_set_string=["1", "2", "2", "3", "3"]
         )
         self.assertEqual(3, len(s.unqualified_set_string))
@@ -1048,12 +1048,12 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
-            s = MutableTestStructAllThriftContainerTypes(
+            s = TestStructAllThriftContainerTypesMutable(
                 unqualified_set_string=["1", "2", "2", 9999, "3", "3"]
             )
 
     def test_create_and_assign_for_set(self) -> None:
-        s = MutableTestStructAllThriftContainerTypes(
+        s = TestStructAllThriftContainerTypesMutable(
             unqualified_set_string=["1", "2", "3"]
         )
 
@@ -1139,7 +1139,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertFalse(set1.isdisjoint(["3", "4"]))
         self.assertFalse(set2.isdisjoint({"3", "4"}))
 
-        other = MutableTestStructAllThriftContainerTypes(
+        other = TestStructAllThriftContainerTypesMutable(
             unqualified_set_string=["2", "3", "4"]
         )
         other_set = other.unqualified_set_string
@@ -1197,7 +1197,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(set(), set2)
 
     def test_create_and_assign_for_map(self) -> None:
-        s = MutableTestStructAllThriftContainerTypes(
+        s = TestStructAllThriftContainerTypesMutable(
             unqualified_map_string_i32={"a": 1, "b": 2}
         )
 
@@ -1401,18 +1401,18 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s.unqualified_string = string_constant
         self.assertEqual("June 28, 2017", s.unqualified_string)
 
-        s = MutableTestStructAllThriftContainerTypes()
+        s = TestStructAllThriftContainerTypesMutable()
 
         self.assertEqual([], s.unqualified_list_i32)
         s.unqualified_list_i32.extend(list_constant)
         self.assertEqual([2, 3, 5, 7], s.unqualified_list_i32)
 
-        s = MutableTestStructAllThriftContainerTypes(
+        s = TestStructAllThriftContainerTypesMutable(
             unqualified_set_string=set_constant
         )
         self.assertEqual({"foo", "bar", "baz"}, s.unqualified_set_string)
 
-        s = MutableTestStructAllThriftContainerTypes(
+        s = TestStructAllThriftContainerTypesMutable(
             unqualified_map_string_i32=map_constant
         )
         self.assertEqual({"foo": 1, "bar": 2}, s.unqualified_map_string_i32)

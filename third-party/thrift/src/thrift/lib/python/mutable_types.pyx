@@ -849,6 +849,7 @@ cdef class MutableUnion(MutableStructOrUnion):
     def _fbthrift_create(cls, data):
         cdef MutableUnion inst = cls.__new__(cls)
         inst._fbthrift_data = data
+        inst._fbthrift_update_current_field_attributes()
         return inst
 
     __hash__ = None

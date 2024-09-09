@@ -255,6 +255,27 @@ class StructTestsParameterized(unittest.TestCase):
     def test_recursive_init(self) -> None:
         self.StructuredAnnotation()
 
+    def test_call_replace(self) -> None:
+        x = self.easy(val=1, an_int=self.Integers(small=300), name="foo")
+        y = x(name="bar")
+        self.assertNotEqual(x.name, y.name)
+        z = y(an_int=None, val=4)
+        self.assertNotEqual(x.an_int, z.an_int)
+        self.assertNotEqual(x.val, z.val)
+        self.assertIsNone(
+            z.an_int.value
+            if not self.is_mutable_run
+            # pyre-ignore[16]: no attribute `fbthrift_current_value`
+            else z.an_int.fbthrift_current_value
+        )
+        self.assertEqual(y.val, x.val)
+        self.assertEqual(y.an_int, x.an_int)
+        x = self.easy()
+        self.assertIsNotNone(x.val)
+        self.assertIsNotNone(x.val_list)
+        self.assertIsNone(x.name)
+        self.assertIsNotNone(x.an_int)
+
 
 class StructTestsImmutable(unittest.TestCase):
     """
@@ -283,22 +304,6 @@ class StructTests(unittest.TestCase):
         self.assertEqual(x.val_list, dif_list)
         dif_int = copy.copy(x.an_int)
         self.assertEqual(x.an_int, dif_int)
-
-    def test_call_replace(self) -> None:
-        x = easy(val=1, an_int=Integers(small=300), name="foo")
-        y = x(name="bar")
-        self.assertNotEqual(x.name, y.name)
-        z = y(an_int=None, val=4)
-        self.assertNotEqual(x.an_int, z.an_int)
-        self.assertNotEqual(x.val, z.val)
-        self.assertIsNone(z.an_int.value)
-        self.assertEqual(y.val, x.val)
-        self.assertEqual(y.an_int, x.an_int)
-        x = easy()
-        self.assertIsNotNone(x.val)
-        self.assertIsNotNone(x.val_list)
-        self.assertIsNone(x.name)
-        self.assertIsNotNone(x.an_int)
 
     def test_reserved(self) -> None:
         x = Reserved(

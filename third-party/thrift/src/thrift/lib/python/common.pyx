@@ -211,6 +211,10 @@ cdef class RpcOptions:
         """Set chunkBufferSize"""
         self._cpp_obj.setChunkBufferSize(buffer_size)
 
+    def memory_buffer_size(self, int buffer_size, int initial_chunks, int max_chunks):
+        """Set memoryBufferSize"""
+        self._cpp_obj.setMemoryBufferSize(buffer_size, initial_chunks, max_chunks)
+
     @property
     def read_headers(self):
         # So we don't create a cycle

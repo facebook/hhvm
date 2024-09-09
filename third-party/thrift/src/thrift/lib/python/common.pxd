@@ -73,6 +73,7 @@ cdef extern from "thrift/lib/cpp2/async/RpcOptions.h" namespace "apache::thrift"
         milliseconds getQueueTimeout()
         cRpcOptions& setChunkBufferSize(int32_t chunkBufferSize)
         int32_t getChunkBufferSize()
+        cRpcOptions& setMemoryBufferSize(size_t targetSize, int32_t initialChunks, int32_t maxChunks)
         void setWriteHeader(const string& key, const string value)
         void setReadHeaders(F14NodeMap[string, string]&& map)
         const F14NodeMap[string, string]& getReadHeaders()

@@ -44,10 +44,17 @@ using ValueMap = folly::F14FastMap<Value, Value>;
 struct PatchBadgeFactory;
 using Badge = folly::badge<PatchBadgeFactory>;
 
+template <typename T>
+using detect_from_object = decltype(std::declval<T>().fromObject(
+    std::declval<Badge>(), std::declval<Object>()));
+template <typename T>
+constexpr static bool has_from_object_v =
+    folly::is_detected_v<detect_from_object, T>;
+
 template <class PatchType>
 PatchType createPatchFromObject(Badge badge, Object obj) {
   PatchType patch;
-  if constexpr (requires { patch.fromObject(badge, std::move(obj)); }) {
+  if constexpr (has_from_object_v<PatchType>) {
     patch.fromObject(badge, std::move(obj));
   } else {
     // TODO: schema validation

@@ -5999,6 +5999,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
         EnumDeclaration(c) => {
             let span = p_pos(node, env);
             let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
+                let doc_comment_opt = extract_docblock(n, e);
                 match &n.children {
                     Enumerator(c) => Ok(ast::ClassConst {
                         user_attributes: Default::default(),
@@ -6006,7 +6007,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                         id: pos_name(&c.name, e)?,
                         kind: ast::ClassConstKind::CCConcrete(p_expr(&c.value, e)?),
                         span: span.clone(),
-                        doc_comment: None,
+                        doc_comment: doc_comment_opt,
                     }),
                     _ => missing_syntax("enumerator", n, e),
                 }

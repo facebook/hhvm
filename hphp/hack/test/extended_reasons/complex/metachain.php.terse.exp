@@ -81,7 +81,7 @@ File "metachain.php", line 22, character 17 - line 22, character 22:
 
 [Main] Step 2 of 2 (here is where the error occurred)
 
-The subtype is a union type so next I checked all elements.
+The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this expression
 

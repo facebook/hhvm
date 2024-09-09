@@ -65,7 +65,7 @@ File "union_join_point.php", line 5, character 37 - line 5, character 37:
 
 Step 2 of 2 (here is where the error occurred)
 
-The subtype is a union type so next I checked all elements.
+The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this hint
 

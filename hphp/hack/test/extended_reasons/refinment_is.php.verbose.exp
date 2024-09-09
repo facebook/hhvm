@@ -91,7 +91,7 @@ File "refinment_is.php", line 5, character 7 - line 5, character 7:
 
 Step 2 of 3
 
-The subtype is a union type so next I checked all elements.
+The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this `is` expression
 
@@ -146,7 +146,7 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 Step 3 of 3 (here is where the error occurred)
 
-The subtype is an intersection type so next I checked that at least one element.
+The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 
@@ -300,7 +300,7 @@ File "refinment_is.php", line 5, character 7 - line 5, character 7:
 
 Step 2 of 2 (here is where the error occurred)
 
-The subtype is a union type so next I checked all elements.
+The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this `is` expression
 
@@ -443,7 +443,7 @@ File "refinment_is.php", line 5, character 7 - line 5, character 7:
 
 Step 2 of 3
 
-The subtype is a union type so next I checked all elements.
+The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this `is` expression
 
@@ -497,7 +497,7 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
 
 Step 3 of 3 (here is where the error occurred)
 
-The subtype is an intersection type so next I checked that at least one element.
+The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 

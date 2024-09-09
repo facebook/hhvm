@@ -105,7 +105,7 @@ File "intersection_subtyping_r.php", line 7, character 26 - line 7, character 32
 
 Step 2 of 2 (here is where the error occurred)
 
-The supertype is an intersection type so next I checked all elements.
+The supertype is an intersection type so next I checked the subtype constraint is satsified for all of its elements.
 
 The subtype is the same as before.
 

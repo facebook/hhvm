@@ -38,7 +38,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/qWk3l0GN6F/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/mfsyHOOCGr/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -99,7 +99,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 5
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint (its definition was given in [Step 2])
 
@@ -199,7 +199,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/qWk3l0GN6F/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/mfsyHOOCGr/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -260,7 +260,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint (its definition was given in [Step 2])
 
@@ -340,7 +340,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/qWk3l0GN6F/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/mfsyHOOCGr/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -401,7 +401,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint (its definition was given in [Step 2])
 

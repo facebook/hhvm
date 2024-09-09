@@ -2896,8 +2896,7 @@ module Derivation = struct
       match axiom with
       | Extends ->
         Format.sprintf
-          "The %s extends a class or implements an interface so next I checked that was a %s of the %s."
-          subject
+          "The %s extends or implements the %s class or interface so next I checked that subtype constraint."
           subject
           other
       | Upper_bound ->
@@ -3013,9 +3012,9 @@ module Derivation = struct
     let explain_prj_asymm_sub prj =
       match prj with
       | Prj_asymm_union ->
-        "The subtype is a union type so next I checked all elements."
+        "The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements."
       | Prj_asymm_inter ->
-        "The subtype is an intersection type so next I checked that at least one element."
+        "The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element."
       | Prj_asymm_nullable ->
         "The subtype is a nullable type so next I checked the non-null part."
       | Prj_asymm_neg ->
@@ -3024,9 +3023,9 @@ module Derivation = struct
     let explain_prj_asymm_super prj =
       match prj with
       | Prj_asymm_union ->
-        "The supertype is a union type so next I checked at least one element."
+        "The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element."
       | Prj_asymm_inter ->
-        "The supertype is an intersection type so next I checked all elements."
+        "The supertype is an intersection type so next I checked the subtype constraint is satsified for all of its elements."
       | Prj_asymm_nullable ->
         "The supertype is a nullable type so next I checked the non-null part."
       | Prj_asymm_neg ->

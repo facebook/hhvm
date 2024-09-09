@@ -82,7 +82,7 @@ File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
 Step 3 of 5
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint
 
@@ -226,7 +226,7 @@ File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
 Step 3 of 4
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint
 
@@ -350,7 +350,7 @@ File "workplace_invariant.php", line 15, character 43 - line 15, character 49:
 
 Step 3 of 4
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint
 

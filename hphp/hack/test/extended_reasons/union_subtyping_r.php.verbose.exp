@@ -210,7 +210,7 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 Step 2 of 2 (here is where the error occurred)
 
-The supertype is a union type so next I checked at least one element.
+The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
 The subtype is the same as before.
 
@@ -350,7 +350,7 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 Step 2 of 2 (here is where the error occurred)
 
-The supertype is a union type so next I checked at least one element.
+The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
 The subtype is the same as before.
 

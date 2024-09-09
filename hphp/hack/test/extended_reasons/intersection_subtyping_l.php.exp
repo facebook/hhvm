@@ -211,7 +211,7 @@ File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
 
 Step 2 of 2 (here is where the error occurred)
 
-The subtype is an intersection type so next I checked that at least one element.
+The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 
@@ -349,7 +349,7 @@ File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
 
 Step 2 of 2 (here is where the error occurred)
 
-The subtype is an intersection type so next I checked that at least one element.
+The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 

@@ -38,7 +38,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -63,7 +63,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -108,7 +108,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 5
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint
 
@@ -216,7 +216,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -241,7 +241,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -286,7 +286,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint
 
@@ -374,7 +374,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -399,7 +399,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/zGqHBCS6fl/classname.hhi", line 19, character 42 - line 19, character 52:
+File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -444,7 +444,7 @@ File "workplace_invariant.php", line 3, character 11 - line 3, character 13:
 
 Step 3 of 4
 
-The subtype extends a class or implements an interface so next I checked that was a subtype of the supertype.
+The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
 The subtype comes from this hint
 

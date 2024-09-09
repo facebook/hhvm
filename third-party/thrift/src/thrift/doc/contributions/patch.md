@@ -111,7 +111,7 @@ Patch for [primitive types](../idl/#primitive-types) are defined [here](https://
 
 Thrift Compiler generates multiple patch structures for a given thrift struct. Considering the following thrift struct
 
-```
+```thrift
 struct Foo {
   1: [optional] Type1 field1;
   2: [optional] Type2 field2:
@@ -121,7 +121,7 @@ struct Foo {
 
 Thrift Compiler generates the following structs.
 
-```
+```thrift
 // All fields are optional. Original qualifier will be ignored.
 struct FooEnsureStruct {
   1: optional Type1 field1;
@@ -175,7 +175,7 @@ A Patch **must** satisfy the following restructions, otherwise it’s considered
 
 The following functionality should be provided in the target language.
 
-```
+```cpp
 void apply(const Object& patch, Value& value);
 ```
 
@@ -183,15 +183,16 @@ It applies patch to a thrift value and returns the patched value. Note that this
 
 ### Behavior of each `PatchOp` for each value type
 
-|                                    | Assign                | Clear               | PatchPrior                     | EnsureUnion           | EnsureStruct              | PatchAfter         | Remove          | Add                | Put                              |
-| ---                                | ---                   | ---                 | ---                            | ---                   | ---                       | ---                | ---             | ---                | ---                              |
-| bool                               | Replace the value     | Clear the value     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | N/A                | Invert the value                 |
-| byte, i16, i32, i64, float, double  |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | Increase the value | N/A                              |
-| string/binary                      |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | Prepend the string | Append the string                |
-| list                               |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | N/A                | Append elements                  |
-| set                                |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | Remove elements | Insert elements    | N/A                              |
-| map                                |                       |                     | Patch values in the map        | N/A                   | Insert key/value pairs    | Same as PatchPrior | Remove keys     | N/A                | Insert or assign key/value pairs |
-| struct/union                       |                       |                     | Patch fields in the struct      | Set the active member | Ensure fields              | Same as PatchPrior | Remove fields    | N/A                | N/A                              |
+|                                    | Assign                | Clear               | PatchPrior                     | EnsureUnion           | EnsureStruct              | PatchAfter         | Remove          | Add                | Put                              | PatchIfTypeIsPrior (from V2)           | EnsureAny (from V2)           | PatchIfTypeIsAfter (from V2)           |
+| ---                                | ---                   | ---                 | ---                            | ---                   | ---                       | ---                | ---             | ---                | ---                              | ---                                    | ---                           | ---                                    |
+| bool                               | Replace the value     | Clear the value     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | N/A                | Invert the value                 | N/A                              | N/A                              | N/A                              |
+| byte, i16, i32, i64, float, double  |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | Increase the value | N/A                              | N/A                              | N/A                              | N/A                              |
+| string/binary                      |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | Prepend the string | Append the string                | N/A                              | N/A                              | N/A                              |
+| list                               |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A             | N/A                | Append elements                  | N/A                              | N/A                              | N/A                              |
+| set                                |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | Remove elements  | Insert elements    | N/A                              | N/A                              | N/A                                       | N/A                              |
+| map                                |                       |                     | Patch values in the map        | N/A                   | Insert key/value pairs    | Same as PatchPrior | Remove keys      | N/A                | Insert or assign key/value pairs | N/A                              | N/A                                       | N/A                              |
+| struct/union                       |                       |                     | Patch fields in the struct      | Set the active member | Ensure fields              | Same as PatchPrior | Remove fields     | N/A                | N/A                              | N/A                              | N/A                                       | N/A                              |
+| Thrift Any                         |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A         | N/A                | N/A                              | Patch the value in Thrift Any    | Ensure the type and value in Thrift Any   | Same as PatchIfTypeIsPrior       |
 
 
 [^1]: If Assign PatchOp exists, all other PatchOp are ignored.
@@ -208,15 +209,16 @@ It applies patch to a thrift value and returns the patched value. Note that this
 
 The type of each PatchOps in `Patch` is based on Patch type. e.g., for BoolPatch, the `Assign` PatchOp must be `boolean`. Here is the summary of PatchOp's type based on Patch type.
 
-|                                    | Assign        | Clear  | PatchPrior           | EnsureUnion       | EnsureStruct      | PatchAfter           | Remove                            | Add             | Put             |
-| ---                                | ---           | ---    | ---                  | ---               | ---               | ---                  | ---                               | ---             | ---             |
-| bool                               | Same of value | `Bool` | N/A                  | N/A               | N/A               | N/A                  | N/A                               | N/A             | `Bool`          |
-| byte, i16, i32, i64, float, double |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | Same as value   | N/A             |
-| string/binary                      |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | Same as value   | Same as value   |
-| list                               |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | N/A             | Same as value   |
-| set                                |               |        | N/A                  | N/A               | N/A               | N/A                  | `list<Element>` or `set<Element>` | `list<Element>` | `list<Element>` |
-| map                                |               |        | `map<Key, ValPatch>` | N/A               | Same as value     | `map<Key, ValPatch>` | `list<Key>` or `set<Key>`         | N/A             | Same as value   |
-| struct/union                       |               |        | `FooFieldPatch`      | `FooEnsureStruct` | `FooEnsureStruct` | `FooFieldPatch`      | N/A                               | N/A             | N/A             |
+|                                    | Assign        | Clear  | PatchPrior           | EnsureUnion       | EnsureStruct      | PatchAfter           | Remove                            | Add             | Put             | PatchIfTypeIsPrior (from V2)           | EnsureAny (from V2)           | PatchIfTypeIsAfter (from V2)           |
+| ---                                | ---           | ---    | ---                  | ---               | ---               | ---                  | ---                               | ---             | ---             | ---                                    | ---                           | ---                                    |
+| bool                               | Same of value | `Bool` | N/A                  | N/A               | N/A               | N/A                  | N/A                               | N/A             | `Bool`          | ---                                    | ---                           | ---                                    |
+| byte, i16, i32, i64, float, double |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | Same as value   | N/A             | ---                                    | ---                           | ---                                    |
+| string/binary                      |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | Same as value   | Same as value   | ---                                    | ---                           | ---                                    |
+| list                               |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | N/A             | Same as value   | ---                                    | ---                           | ---                                    |
+| set                                |               |        | N/A                  | N/A               | N/A               | N/A                  | `list<Element>` or `set<Element>` | `list<Element>` | `list<Element>` | ---                                    | ---                           | ---                                    |
+| map                                |               |        | `map<Key, ValPatch>` | N/A               | Same as value     | `map<Key, ValPatch>` | `list<Key>` or `set<Key>`         | N/A             | Same as value   | ---                                    | ---                           | ---                                    |
+| struct/union                       |               |        | `FooFieldPatch`      | `FooEnsureStruct` | `FooEnsureStruct` | `FooFieldPatch`      | N/A                               | N/A             | N/A             | ---                                    | ---                           | ---                                    |
+| Thrift Any                         |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | N/A             | N/A             | `list<TypeToPatchInternalDoNotUse>`    | `any.Any`                     | `list<TypeToPatchInternalDoNotUse>`    |
 
 The corresponding C++ implementation can be found here: [Patch.cpp](https://github.com/facebook/fbthrift/blob/v2023.01.16.00/thrift/lib/cpp2/protocol/Patch.cpp#L126-L164).
 
@@ -234,20 +236,20 @@ O(size of patched fields + size of patch)
 
 The following functionality should be provided in the target language.
 
-```
+```cpp
 Object merge(Object patch1, Object patch2);
 ```
 
 so that
 
-```
+```cpp
 apply(patch1, value)
 apply(patch2, value)
 ```
 
 **must** be equivalent to
 
-```
+```cpp
 apply(merge(patch1, patch2), value)
 ```
 

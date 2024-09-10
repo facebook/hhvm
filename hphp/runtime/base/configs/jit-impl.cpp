@@ -18,6 +18,11 @@
 
 #include <limits>
 
+#if defined (__linux__) && defined (__aarch64__)
+#include <asm/hwcap.h>
+#include <sys/auxv.h>
+#endif
+
 #include "hphp/util/arch.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/configs/jit.h"

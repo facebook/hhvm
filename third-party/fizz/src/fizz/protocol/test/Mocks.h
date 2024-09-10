@@ -328,6 +328,15 @@ class MockFactory : public ::fizz::DefaultFactory {
       ret->setDefaults();
       return ret;
     }));
+    ON_CALL(*this, makeHasher(_))
+        .WillByDefault(InvokeWithoutArgs([]() -> fizz::HasherFactory {
+          auto f = []() -> std::unique_ptr<Hasher> {
+            auto hasher = std::make_unique<NiceMock<MockHasher>>();
+            hasher->setDefaults();
+            return hasher;
+          };
+          return f;
+        }));
     ON_CALL(*this, makeAead(_)).WillByDefault(InvokeWithoutArgs([]() {
       auto ret = std::make_unique<NiceMock<MockAead>>();
       ret->setDefaults();

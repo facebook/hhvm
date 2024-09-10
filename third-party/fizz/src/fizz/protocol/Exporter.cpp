@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/crypto/Hasher.h>
 #include <fizz/protocol/Exporter.h>
 
 namespace fizz {
@@ -20,10 +21,14 @@ Buf Exporter::getExportedKeyingMaterial(
   if (!context) {
     context = folly::IOBuf::create(0);
   }
+
   auto deriver = factory.makeKeyDeriver(cipher);
+
   std::vector<uint8_t> base(deriver->hashLength());
   folly::MutableByteRange hashedContext(base.data(), base.size());
-  deriver->hash(*context, hashedContext);
+  fizz::hash(
+      factory.makeHasher(getHashFunction(cipher)), *context, hashedContext);
+
   auto secret = deriver->deriveSecret(
       exporterMaster, label, deriver->blankHash(), deriver->hashLength());
   return deriver->expandLabel(

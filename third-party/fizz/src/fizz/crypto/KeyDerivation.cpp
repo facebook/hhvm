@@ -12,15 +12,9 @@ namespace fizz {
 
 KeyDerivationImpl::KeyDerivationImpl(
     size_t hashLength,
-    HashFunc hashFunc,
-    HmacFunc hmacFunc,
     HkdfImpl hkdf,
     folly::ByteRange blankHash)
-    : hashLength_(hashLength),
-      hashFunc_(hashFunc),
-      hmacFunc_(hmacFunc),
-      hkdf_(hkdf),
-      blankHash_(blankHash) {}
+    : hashLength_(hashLength), hkdf_(hkdf), blankHash_(blankHash) {}
 
 Buf KeyDerivationImpl::expandLabel(
     folly::ByteRange secret,

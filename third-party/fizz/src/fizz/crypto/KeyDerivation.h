@@ -50,13 +50,6 @@ class KeyDerivation {
       folly::ByteRange salt,
       folly::ByteRange ikm) = 0;
 
-  virtual void hash(const folly::IOBuf& in, folly::MutableByteRange out) = 0;
-
-  virtual void hmac(
-      folly::ByteRange key,
-      const folly::IOBuf& in,
-      folly::MutableByteRange out) = 0;
-
   virtual std::unique_ptr<KeyDerivation> clone() const = 0;
 };
 
@@ -64,24 +57,11 @@ class KeyDerivationImpl : public KeyDerivation {
  public:
   KeyDerivationImpl(
       size_t hashLength,
-      HashFunc hashFunc,
-      HmacFunc hmacFunc,
       HkdfImpl hkdf,
       folly::ByteRange blankHash);
 
   size_t hashLength() const override {
     return hashLength_;
-  }
-
-  void hash(const folly::IOBuf& in, folly::MutableByteRange out) override {
-    hashFunc_(in, out);
-  }
-
-  void hmac(
-      folly::ByteRange key,
-      const folly::IOBuf& in,
-      folly::MutableByteRange out) override {
-    hmacFunc_(key, in, out);
   }
 
   folly::ByteRange blankHash() const override {
@@ -109,14 +89,12 @@ class KeyDerivationImpl : public KeyDerivation {
   }
 
   std::unique_ptr<KeyDerivation> clone() const override {
-    return std::unique_ptr<KeyDerivation>(new KeyDerivationImpl(
-        hashLength_, hashFunc_, hmacFunc_, hkdf_, blankHash_));
+    return std::unique_ptr<KeyDerivation>(
+        new KeyDerivationImpl(hashLength_, hkdf_, blankHash_));
   }
 
  private:
   size_t hashLength_;
-  HashFunc hashFunc_;
-  HmacFunc hmacFunc_;
   HkdfImpl hkdf_;
   folly::ByteRange blankHash_;
 };

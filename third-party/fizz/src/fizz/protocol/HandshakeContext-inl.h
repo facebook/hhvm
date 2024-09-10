@@ -37,8 +37,6 @@ Buf HandshakeContextImpl<Hash>::getFinishedData(
   auto finishedKey =
       KeyDerivationImpl(
           Hash::HashLen,
-          &openssl::Hasher<Hash>::hash,
-          &openssl::Hasher<Hash>::hmac,
           HkdfImpl(Hash::HashLen, openssl::makeHasher<Hash>),
           Hash::BlankHash)
           .expandLabel(

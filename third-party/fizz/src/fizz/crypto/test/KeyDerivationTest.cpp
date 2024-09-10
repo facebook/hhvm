@@ -29,8 +29,6 @@ template <typename Hash>
 inline KeyDerivationImpl createKeyDerivationImpl() {
   return KeyDerivationImpl(
       Hash::HashLen,
-      &openssl::Hasher<Hash>::hash,
-      &openssl::Hasher<Hash>::hmac,
       HkdfImpl(Hash::HashLen, openssl::makeHasher<Hash>),
       Hash::BlankHash);
 }

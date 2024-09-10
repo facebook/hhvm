@@ -89,8 +89,6 @@ template <typename Hash>
 inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr() {
   return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
       Hash::HashLen,
-      &openssl::Hasher<Hash>::hash,
-      &openssl::Hasher<Hash>::hmac,
       HkdfImpl(Hash::HashLen, ::fizz::openssl::makeHasher<Hash>),
       Hash::BlankHash));
 }

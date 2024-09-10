@@ -44,15 +44,27 @@ Payload makePayload(
     const Metadata& metadata, std::unique_ptr<folly::IOBuf> data);
 } // namespace detail
 
-template <typename T>
-size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
-  if (!buffer) {
-    folly::throw_exception<std::runtime_error>("Underflow");
+template <typename T, typename ProtocolType, typename BufferType>
+size_t unpack(T& output, const BufferType& input) {
+  if constexpr (std::is_same_v<BufferType, const folly::IOBuf*>) {
+    if (!input) {
+      throw std::runtime_error("Underflow");
+    }
   }
-  CompactProtocolReader reader;
-  reader.setInput(buffer);
+  ProtocolType reader;
+  reader.setInput(input);
   output.read(&reader);
   return reader.getCursorPosition();
+}
+
+template <typename T, typename BufferType>
+size_t unpackBinary(T& output, const BufferType& input) {
+  return unpack<T, BinaryProtocolReader, BufferType>(output, input);
+}
+
+template <typename T, typename BufferType>
+size_t unpackCompact(T& output, const BufferType& input) {
+  return unpack<T, CompactProtocolReader, BufferType>(output, input);
 }
 
 namespace detail {

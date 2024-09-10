@@ -542,7 +542,7 @@ void encryptClientHelloImpl(
 
   // Get cipher overhead
   size_t dummyPayloadSize = encodedClientHelloInner->computeChainDataLength() +
-      makeCipher(echExtension.cipher_suite.aead_id)->getCipherOverhead();
+      hpke::getCipherOverhead(echExtension.cipher_suite.aead_id);
 
   // Make dummy payload.
   echExtension.payload = folly::IOBuf::create(dummyPayloadSize);

@@ -10,6 +10,7 @@
 
 #include <fizz/crypto/hpke/Types.h>
 
+#include <fizz/crypto/Crypto.h>
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/exchange/KeyExchange.h>
 #include <fizz/crypto/hpke/Hkdf.h>
@@ -209,6 +210,23 @@ AeadId getAeadId(CipherSuite suite);
  * @throws std::runtime_error On invalid code points.
  */
 CipherSuite getCipherSuite(AeadId aeadId);
+
+/**
+ * fizz::hpke::getCipherOverhead returns the number of additional bytes
+ * is required to express the ciphertext of a plaintext of a given
+ * AeadId
+ */
+inline size_t getCipherOverhead(AeadId aeadId) {
+  switch (aeadId) {
+    case AeadId::TLS_AES_128_GCM_SHA256:
+      return AESGCM128::kTagLength;
+    case AeadId::TLS_AES_256_GCM_SHA384:
+      return AESGCM256::kTagLength;
+    case AeadId::TLS_CHACHA20_POLY1305_SHA256:
+      return ChaCha20Poly1305::kTagLength;
+  }
+  throw std::runtime_error("invalid aead");
+}
 
 /**
  * fizz::hpke::makeCipher constructs a `fizz::Aead` instance given an HPKE

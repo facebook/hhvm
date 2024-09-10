@@ -15,6 +15,7 @@
 #include <fizz/crypto/Crypto.h>
 #include <fizz/crypto/hpke/Hpke.h>
 #include <fizz/crypto/hpke/Utils.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/ech/Encryption.h>
 #include <fizz/protocol/ech/test/TestUtil.h>
 #include <fizz/protocol/test/Matchers.h>
@@ -91,7 +92,8 @@ hpke::SetupResult constructSetupResult(
   kex->setPrivateKey(std::move(privateKey));
   EXPECT_CALL(*kex, generateKeyPair()).Times(1);
 
-  return constructHpkeSetupResult(std::move(kex), supportedConfig);
+  return constructHpkeSetupResult(
+      fizz::DefaultFactory(), std::move(kex), supportedConfig);
 }
 
 OuterECHClientHello getTestOuterECHClientHelloWithInner(ClientHello chloInner) {
@@ -267,12 +269,12 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
   auto dhkem = std::make_unique<DHKEM>(
       std::move(kex),
       NamedGroup::secp256r1,
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId));
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId));
 
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      makeCipher(hpke::AeadId::TLS_AES_128_GCM_SHA256),
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId),
+      makeCipher(fizz::DefaultFactory(), hpke::AeadId::TLS_AES_128_GCM_SHA256),
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId),
       std::move(suiteId),
   };
 
@@ -336,6 +338,7 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
   kex->setPrivateKey(std::move(privateKey));
 
   auto context = setupDecryptionContext(
+      fizz::DefaultFactory(),
       getECHConfig(),
       testECH.cipher_suite,
       testECH.enc->clone(),
@@ -395,12 +398,12 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsSuccess) {
   auto dhkem = std::make_unique<DHKEM>(
       std::move(kex),
       NamedGroup::secp256r1,
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId));
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId));
 
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      makeCipher(hpke::AeadId::TLS_AES_128_GCM_SHA256),
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId),
+      makeCipher(fizz::DefaultFactory(), hpke::AeadId::TLS_AES_128_GCM_SHA256),
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId),
       std::move(suiteId),
   };
 
@@ -465,12 +468,12 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
   auto dhkem = std::make_unique<DHKEM>(
       std::move(kex),
       NamedGroup::secp256r1,
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId));
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId));
 
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      makeCipher(hpke::AeadId::TLS_AES_128_GCM_SHA256),
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId),
+      makeCipher(fizz::DefaultFactory(), hpke::AeadId::TLS_AES_128_GCM_SHA256),
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId),
       std::move(suiteId),
   };
 
@@ -527,12 +530,12 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
   auto dhkem = std::make_unique<DHKEM>(
       std::move(kex),
       NamedGroup::secp256r1,
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId));
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId));
 
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      makeCipher(hpke::AeadId::TLS_AES_128_GCM_SHA256),
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId),
+      makeCipher(fizz::DefaultFactory(), hpke::AeadId::TLS_AES_128_GCM_SHA256),
+      hpke::makeHpkeHkdf(fizz::DefaultFactory(), prefix->clone(), kdfId),
       std::move(suiteId),
   };
 

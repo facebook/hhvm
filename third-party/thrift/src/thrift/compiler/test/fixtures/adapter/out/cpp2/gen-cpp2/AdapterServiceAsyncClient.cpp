@@ -152,8 +152,9 @@ folly::SemiFuture<::facebook::thrift::test::CountingStruct> apache::thrift::Clie
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_count(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_count(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::facebook::thrift::test::CountingStruct> apache::thrift::Client<::facebook::thrift::test::AdapterService>::future_count() {
@@ -341,8 +342,9 @@ folly::SemiFuture<::facebook::thrift::test::HeapAllocated> apache::thrift::Clien
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_adaptedTypes(rpcOptions, *header, contextStack, p_arg);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_adaptedTypes(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::facebook::thrift::test::HeapAllocated> apache::thrift::Client<::facebook::thrift::test::AdapterService>::future_adaptedTypes(const ::facebook::thrift::test::HeapAllocated& p_arg) {

@@ -139,8 +139,9 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyServicePrioChild
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_pang(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_pang(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::cpp2::MyServicePrioChild>::future_pang() {

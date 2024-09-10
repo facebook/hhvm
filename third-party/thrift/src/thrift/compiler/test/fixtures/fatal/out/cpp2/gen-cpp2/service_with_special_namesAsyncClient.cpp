@@ -490,8 +490,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_get(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_get(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_get() {
@@ -680,8 +681,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_getter(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_getter(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_getter() {
@@ -870,8 +872,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_lists(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_lists(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_lists() {
@@ -1060,8 +1063,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_maps(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_maps(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_maps() {
@@ -1250,8 +1254,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_name(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_name(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_name() {
@@ -1440,8 +1445,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_name_to_value(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_name_to_value(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_name_to_value() {
@@ -1630,8 +1636,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_names(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_names(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_names() {
@@ -1820,8 +1827,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_prefix_tree(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_prefix_tree(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_prefix_tree() {
@@ -2010,8 +2018,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_sets(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_sets(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_sets() {
@@ -2200,8 +2209,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_setter(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_setter(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_setter() {
@@ -2390,8 +2400,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_str(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_str(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_str() {
@@ -2580,8 +2591,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_strings(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_strings(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_strings() {
@@ -2770,8 +2782,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_type(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_type(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_type() {
@@ -2960,8 +2973,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_value(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_value(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_value() {
@@ -3150,8 +3164,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_value_to_name(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_value_to_name(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_value_to_name() {
@@ -3340,8 +3355,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_values(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_values(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_values() {
@@ -3530,8 +3546,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_id(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_id(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_id() {
@@ -3720,8 +3737,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_ids(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_ids(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_ids() {
@@ -3910,8 +3928,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_descriptor(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_descriptor(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_descriptor() {
@@ -4100,8 +4119,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_descriptors(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_descriptors(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_descriptors() {
@@ -4290,8 +4310,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_key(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_key(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_key() {
@@ -4480,8 +4501,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_keys(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_keys(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_keys() {
@@ -4670,8 +4692,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_annotation(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_annotation(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_annotation() {
@@ -4860,8 +4883,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_annotations(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_annotations(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_annotations() {
@@ -5050,8 +5074,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_member(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_member(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_member() {
@@ -5240,8 +5265,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_members(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_members(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_members() {
@@ -5430,8 +5456,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_field(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_field(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_field() {
@@ -5620,8 +5647,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflec
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_fields(rpcOptions, *header, contextStack);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_fields(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_names>::future_fields() {

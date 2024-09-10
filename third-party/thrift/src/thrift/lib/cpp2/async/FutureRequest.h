@@ -42,6 +42,13 @@ class FutureCallbackHelper {
     std::move(result).error().first.throw_exception();
   }
 
+  static ClientReceiveState&& extractClientReceiveState(PromiseResult& result) {
+    if (result.hasValue()) {
+      return std::move(std::move(result).value().second);
+    }
+    return std::move(result).error().second;
+  }
+
   using CallbackProcessorType = std::conditional_t<
       std::is_same_v<Result, folly::Unit>,
       folly::exception_wrapper(ClientReceiveState&),
@@ -67,7 +74,61 @@ class FutureCallbackHelper {
       folly::exception_wrapper&& ew, ClientReceiveState&& state) {
     return folly::makeUnexpected(std::pair{std::move(ew), std::move(state)});
   }
+
+  // Wraps the given SemiFuture with calls to ClientInterceptor::onRequest
+  // before it
+  static folly::SemiFuture<PromiseResult> executeClientInterceptorsOnRequest(
+      folly::SemiFuture<PromiseResult>&& semi,
+      [[maybe_unused]] apache::thrift::ContextStack* contextStack) {
+#if FOLLY_HAS_COROUTINES
+    const bool shouldProcessClientInterceptors =
+        contextStack && contextStack->shouldProcessClientInterceptors();
+    if (!shouldProcessClientInterceptors) {
+      return std::move(semi);
+    }
+    return contextStack->semifuture_processClientInterceptorsOnRequest().defer(
+        [continuation =
+             std::move(semi)](folly::Try<void>&& onRequestTry) mutable {
+          onRequestTry.throwUnlessValue();
+          return std::move(continuation);
+        });
+#else
+    return std::move(semi);
+#endif // FOLLY_HAS_COROUTINES
+  }
+
+  static folly::SemiFuture<Result> executeClientInterceptorsOnResponse(
+      PromiseResult&& result) {
+#if FOLLY_HAS_COROUTINES
+    auto clientReceiveState = extractClientReceiveState(result);
+    auto* contextStack = clientReceiveState.ctx();
+    const bool shouldProcessClientInterceptors =
+        contextStack && contextStack->shouldProcessClientInterceptors();
+    if (!shouldProcessClientInterceptors) {
+      return extractResult(std::move(result));
+    }
+    return contextStack->semifuture_processClientInterceptorsOnResponse().defer(
+        [result = std::move(result), keepAlive = std::move(clientReceiveState)](
+            folly::Try<void>&& onResponseTry) mutable {
+          onResponseTry.throwUnlessValue();
+          return extractResult(std::move(result));
+        });
+#else
+    return extractResult(std::move(result));
+#endif // FOLLY_HAS_COROUTINES
+  }
 };
+
+// Explicitly instantiate templates for built-in types (which are commonly used)
+extern template class FutureCallbackHelper<folly::Unit>;
+extern template class FutureCallbackHelper<bool>;
+extern template class FutureCallbackHelper<std::int8_t>;
+extern template class FutureCallbackHelper<std::int16_t>;
+extern template class FutureCallbackHelper<std::int32_t>;
+extern template class FutureCallbackHelper<float>;
+extern template class FutureCallbackHelper<double>;
+extern template class FutureCallbackHelper<std::string>;
+extern template class FutureCallbackHelper<std::unique_ptr<folly::IOBuf>>;
 
 } // namespace detail
 

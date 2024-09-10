@@ -153,8 +153,9 @@ folly::SemiFuture<::apache::thrift::fixtures::types::SomeMap> apache::thrift::Cl
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_bounce_map(rpcOptions, *header, contextStack, p_m);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_bounce_map(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::apache::thrift::fixtures::types::SomeMap> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::future_bounce_map(const ::apache::thrift::fixtures::types::SomeMap& p_m) {
@@ -342,8 +343,9 @@ folly::SemiFuture<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_binary_keyed_map(rpcOptions, *header, contextStack, p_r);
+  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_binary_keyed_map(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
 }
 
 folly::Future<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::future_binary_keyed_map(const ::std::vector<::std::int64_t>& p_r) {

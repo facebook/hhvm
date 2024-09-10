@@ -228,17 +228,21 @@ bool isTerseFieldSet(const ThriftValue& value, const FieldInfo& fieldInfo) {
       }
       // struct and exception.
       for (std::int16_t index = 0; index < structInfo.numFields; index++) {
-        const auto& fieldInfo = structInfo.fieldInfos[index];
-        if (!structFieldHasValue(value.object, fieldInfo, structInfo)) {
+        const auto& nestedFieldInfo = structInfo.fieldInfos[index];
+        if (!structFieldHasValue(value.object, nestedFieldInfo, structInfo)) {
           continue;
         }
         OptionalThriftValue fieldValue = getValue(
-            *fieldInfo.typeInfo, getFieldValuePtr(fieldInfo, value.object));
+            *nestedFieldInfo.typeInfo,
+            getFieldValuePtr(nestedFieldInfo, value.object));
         if (!fieldValue) {
           continue;
         }
         if (isFieldNotEmpty(
-                value.object, fieldValue.value(), fieldInfo, structInfo)) {
+                value.object,
+                fieldValue.value(),
+                nestedFieldInfo,
+                structInfo)) {
           return true;
         }
       }

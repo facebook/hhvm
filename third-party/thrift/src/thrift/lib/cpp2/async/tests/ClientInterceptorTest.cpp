@@ -47,7 +47,7 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
       std::move(h2Options), server.getThriftProcessor(), server);
 }
 
-enum class ClientCallbackKind { CORO, SYNC, SEMIFUTURE, FUTURE };
+enum class ClientCallbackKind { CORO, SYNC };
 
 struct TestHandler
     : apache::thrift::ServiceHandler<test::ClientInterceptorTest> {
@@ -106,28 +106,6 @@ class SyncClientInterface : public ClientInterface {
   }
 };
 
-class SemiFutureClientInterface : public ClientInterface {
- public:
-  using ClientInterface::ClientInterface;
-
-  folly::coro::Task<std::string> echo(std::string str) override {
-    co_return co_await client_->semifuture_echo(str);
-  }
-  folly::coro::Task<void> noop() override {
-    co_await client_->semifuture_noop();
-  }
-};
-
-class FutureClientInterface : public ClientInterface {
- public:
-  using ClientInterface::ClientInterface;
-
-  folly::coro::Task<std::string> echo(std::string str) override {
-    co_return co_await client_->future_echo(str);
-  }
-  folly::coro::Task<void> noop() override { co_await client_->future_noop(); }
-};
-
 class ClientInterceptorTestP
     : public ::testing::TestWithParam<
           std::tuple<TransportType, ClientCallbackKind>> {
@@ -171,8 +149,7 @@ class ClientInterceptorTestP
   std::shared_ptr<RequestChannel> makeChannel() {
     return runner
         ->newClient<apache::thrift::Client<test::ClientInterceptorTest>>(
-            folly::getGlobalIOExecutor().get(), // for future_ prefix-ed methods
-            channelFor(transportType()))
+            nullptr, channelFor(transportType()))
         ->getChannelShared();
   }
 
@@ -188,10 +165,6 @@ class ClientInterceptorTestP
         return std::make_unique<CoroClientInterface>(std::move(client));
       case ClientCallbackKind::SYNC:
         return std::make_unique<SyncClientInterface>(std::move(client));
-      case ClientCallbackKind::SEMIFUTURE:
-        return std::make_unique<SemiFutureClientInterface>(std::move(client));
-      case ClientCallbackKind::FUTURE:
-        return std::make_unique<FutureClientInterface>(std::move(client));
       default:
         throw std::logic_error{"Unknown client callback type!"};
     }
@@ -423,11 +396,7 @@ INSTANTIATE_TEST_SUITE_P(
     Combine(
         Values(
             TransportType::HEADER, TransportType::ROCKET, TransportType::HTTP2),
-        Values(
-            ClientCallbackKind::CORO,
-            ClientCallbackKind::SYNC,
-            ClientCallbackKind::SEMIFUTURE,
-            ClientCallbackKind::FUTURE)),
+        Values(ClientCallbackKind::CORO, ClientCallbackKind::SYNC)),
     [](const TestParamInfo<ClientInterceptorTestP::ParamType>& info) {
       const auto transportType = [](TransportType value) -> std::string_view {
         switch (value) {
@@ -448,10 +417,6 @@ INSTANTIATE_TEST_SUITE_P(
             return "CORO";
           case ClientCallbackKind::SYNC:
             return "SYNC";
-          case ClientCallbackKind::SEMIFUTURE:
-            return "SEMIFUTURE";
-          case ClientCallbackKind::FUTURE:
-            return "FUTURE";
           default:
             throw std::logic_error{"Unreachable!"};
         }

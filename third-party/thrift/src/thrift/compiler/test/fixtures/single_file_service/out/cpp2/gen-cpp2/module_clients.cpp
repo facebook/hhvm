@@ -142,9 +142,8 @@ folly::SemiFuture<::cpp2::Foo> apache::thrift::Client<::cpp2::A>::fbthrift_semif
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_foo(rpcOptions, *header, contextStack);
-  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_foo(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
 }
 
 folly::Future<::cpp2::Foo> apache::thrift::Client<::cpp2::A>::future_foo() {
@@ -348,9 +347,8 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::A>::I::fbthrift_se
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_interact(rpcOptions, *header, contextStack);
-  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_interact(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::A>::I::semifuture_interact() {
@@ -567,9 +565,8 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::B>::fbthrift_semif
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_bar(rpcOptions, *header, contextStack, p_foo);
-  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_bar(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::cpp2::B>::future_bar(const ::cpp2::Foo& p_foo) {
@@ -759,9 +756,8 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   apache::thrift::SerializedRequest request = fbthrift_serialize_stream_stuff(rpcOptions, *header, contextStack);
-  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_stream_stuff(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
 }
 
 
@@ -1093,9 +1089,8 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::C>::I::fbthrift_se
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_interact(rpcOptions, *header, contextStack);
-  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_interact(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::C>::I::semifuture_interact() {

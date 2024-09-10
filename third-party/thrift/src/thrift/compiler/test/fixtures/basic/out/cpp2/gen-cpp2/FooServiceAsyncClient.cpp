@@ -139,9 +139,8 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::test::fixtures::basic::F
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   apache::thrift::SerializedRequest request = fbthrift_serialize_simple_rpc(rpcOptions, *header, contextStack);
-  semifuture = CallbackHelper::executeClientInterceptorsOnRequest(std::move(semifuture), contextStack);
   fbthrift_send_simple_rpc(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::executeClientInterceptorsOnResponse);
+  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::test::fixtures::basic::FooService>::future_simple_rpc() {

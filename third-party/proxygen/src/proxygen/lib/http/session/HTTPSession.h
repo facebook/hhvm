@@ -1000,8 +1000,13 @@ class HTTPSession
 
     void runLoopCallback() noexcept override {
       VLOG(4) << *session_ << " shutdown from onEgressMessageFinished";
-      bool shutdownReads =
-          session_->isDownstream() && !session_->ingressUpgraded_;
+      bool shutdownReads = session_->ingressError_;
+      if (session_->isDownstream() && !session_->readsShutdown() &&
+          !shutdownReads) {
+        auto to = session_->getDrainTimeout();
+        VLOG(4) << "Starting drain timer t=" << to.count();
+        session_->resetTimeoutTo(to);
+      }
       auto dg = dg_.release();
       session_->shutdownTransport(shutdownReads, true);
       delete dg;
@@ -1053,6 +1058,7 @@ class HTTPSession
     HTTPSession* session_;
   };
   DrainTimeout drainTimeout_;
+  std::chrono::milliseconds getDrainTimeout() const;
 
   class PingProber : public folly::HHWheelTimer::Callback {
    public:

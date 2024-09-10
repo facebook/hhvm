@@ -259,6 +259,19 @@ HTTPSession::~HTTPSession() {
   runDestroyCallbacks();
 }
 
+std::chrono::milliseconds HTTPSession::getDrainTimeout() const {
+  static constexpr std::chrono::milliseconds kDefaultDrainTimeout{
+      std::chrono::seconds(5)};
+  auto controller = getController();
+  if (controller) {
+    auto controllerTimeout = controller->getGracefulShutdownTimeout();
+    if (controllerTimeout < kDefaultDrainTimeout) {
+      return controllerTimeout;
+    }
+  }
+  return kDefaultDrainTimeout;
+}
+
 void HTTPSession::startNow() {
   CHECK(!started_);
   started_ = true;
@@ -272,11 +285,13 @@ void HTTPSession::startNow() {
   // util we've started and sent SETTINGS.
   if (draining_) {
     codec_->generateGoaway(writeBuf_);
-    auto controller = getController();
-    if (controller && codec_->isWaitingToDrain()) {
-      wheelTimer_.scheduleTimeout(&drainTimeout_,
-                                  controller->getGracefulShutdownTimeout());
-    }
+    if (codec_->isWaitingToDrain()) {
+      wheelTimer_.scheduleTimeout(&drainTimeout_, getDrainTimeout());
+    } else if (isDownstream()) {
+      // transactions must be empty and reads cannot be shutdown
+      VLOG(4) << "Starting drain timer";
+      resetTimeoutTo(getDrainTimeout());
+    } // it's upstream, let the client close it when they want
   }
   scheduleWrite();
   resumeReads();
@@ -355,7 +370,17 @@ void HTTPSession::readTimeoutExpired() noexcept {
 
   DestructorGuard g(this);
   setCloseReason(ConnectionCloseReason::TIMEOUT);
+  if (!codec_->isReusable() && transactions_.empty()) {
+    LOG_IF(DFATAL, readsShutdown()) << "Why did we have a read timer running?";
+    // Shutdown reads (uninstall read callback, etc).  Session will close
+    VLOG(4) << "Shutdown from readTimeoutExpired sess=" << *this;
+    shutdownTransport(true, false);
+  } // otherwise
+  //    1. The codec is re-usable - we will notifyPendingShutdown to start drain
+  //    2. There's an active txn; the FIN timer will start from
+  //         onEgressMessageFinished/ShutdownTransportCallback.
   notifyPendingShutdown();
+  checkForShutdown();
 }
 
 void HTTPSession::writeTimeoutExpired() noexcept {
@@ -1988,8 +2013,12 @@ void HTTPSession::detach(HTTPTransaction* txn) noexcept {
     }
   }
 
-  if (liveTransactions_ == 0 && transactions_.empty() && !isScheduled()) {
+  if (liveTransactions_ == 0 && transactions_.empty() && !isScheduled() &&
+      codec_->isReusable()) {
+    // Start the idle timer again
     resetTimeout();
+    // if transactions empty and codec is not re-usable, fin timeout scheduled
+    // from onEgressMessageFinished/ShutdownTransportCallback
   }
 
   // It's possible that this is the last transaction in the session,
@@ -2386,7 +2415,9 @@ void HTTPSession::shutdownTransport(bool shutdownReads,
         shutdownReads = true;
       } else {
         VLOG(4) << *this << " writes drained, closing";
-        sock_->shutdownWriteNow();
+        if (isUpstream() || !codec_->supportsParallelRequests()) {
+          sock_->shutdownWriteNow();
+        }
       }
       notifyEgressShutdown = true;
     } else if (!writesDraining_) {
@@ -2507,7 +2538,8 @@ void HTTPSession::checkForShutdown() {
   // Two conditions are required to destroy the HTTPSession:
   //   * All writes have been finished.
   //   * There are no transactions remaining on the session.
-  if (writesShutdown() && transactions_.empty() && !isLoopCallbackScheduled()) {
+  if (writesShutdown() && transactions_.empty() && !isLoopCallbackScheduled() &&
+      (isUpstream() || readsShutdown())) {
     VLOG(4) << "destroying " << *this;
     shutdownRead();
     auto asyncSocket = sock_->getUnderlyingTransport<folly::AsyncSocket>();
@@ -2552,11 +2584,18 @@ void HTTPSession::drainImpl() {
     if (codec_->generateGoaway(writeBuf_) > 0) {
       scheduleWrite();
     }
-    auto controller = getController();
-    if (controller && codec_->isWaitingToDrain()) {
-      wheelTimer_.scheduleTimeout(&drainTimeout_,
-                                  controller->getGracefulShutdownTimeout());
-    }
+    if (codec_->isWaitingToDrain()) {
+      // Schedule another goaway
+      wheelTimer_.scheduleTimeout(&drainTimeout_, getDrainTimeout());
+    } else if (transactions_.empty() && isDownstream() && !readsShutdown()) {
+      // Codec is not reusable, but we need to wait for peer FIN
+      VLOG(4) << "Starting drain timer sess=" << *this;
+      resetTimeoutTo(getDrainTimeout());
+    } // else
+    //   1. there's an txn - FIN timeout set from
+    //       onEgressMessageFinished/ShutdownTransportCallback
+    //   2. Client session - let don't need to wait for peer FIN
+    //   3. reads were already shutdown, nothing to wait for
   }
 }
 
@@ -2826,7 +2865,8 @@ void HTTPSession::writeSuccess() noexcept {
       setCloseReason(ConnectionCloseReason::UNKNOWN);
     }
     VLOG(4) << *this << " shutdown from onWriteSuccess";
-    shutdownTransport(true, true);
+    // downstream needs to listen for fin to shutdown reads
+    shutdownTransport(isUpstream(), true);
   }
   numActiveWrites_--;
   if (!inLoopCallback_) {

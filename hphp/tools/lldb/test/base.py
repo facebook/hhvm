@@ -39,9 +39,6 @@ hhvm_test_path = os.environ["HHVM_TEST_DIR"]
 scripts_path = os.environ["HHVM_LLDB_SCRIPTS"]
 
 
-@unittest.skipIf(
-    build_info["build_mode"].startswith("opt"), "Need non-opt build for debugging"
-)
 class LLDBTestBase(BaseFacebookTestCase):
     def setUp(self):
         """Set up a debugger for each test case instance"""

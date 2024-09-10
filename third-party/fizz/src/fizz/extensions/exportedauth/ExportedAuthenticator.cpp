@@ -7,6 +7,8 @@
  */
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/crypto/Hasher.h>
+#include <fizz/crypto/Hmac.h>
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
 #include <fizz/extensions/exportedauth/Util.h>
 #include <fizz/protocol/DefaultFactory.h>
@@ -34,8 +36,10 @@ Buf ExportedAuthenticator::getAuthenticator(
     const SelfCert& cert,
     Buf authenticatorRequest) {
   auto cipher = transport.getCipher();
-  auto deriver = DefaultFactory().makeKeyDeriver(*cipher);
-  auto hashLength = deriver->hashLength();
+  auto hashFunction = getHashFunction(*cipher);
+  auto hashLength = getHashSize(hashFunction);
+  auto makeHasher = ::fizz::DefaultFactory().makeHasher(hashFunction);
+
   auto supportedSchemes = transport.getSupportedSigSchemes();
   Buf handshakeContext;
   Buf finishedMacKey;
@@ -51,7 +55,7 @@ Buf ExportedAuthenticator::getAuthenticator(
         "EXPORTER-server authenticator finished key", nullptr, hashLength);
   }
   return makeAuthenticator(
-      deriver,
+      makeHasher,
       supportedSchemes,
       cert,
       std::move(authenticatorRequest),
@@ -78,8 +82,10 @@ ExportedAuthenticator::validateAuthenticator(
     Buf authenticatorRequest,
     Buf authenticator) {
   auto cipher = transport.getCipher();
-  auto deriver = ::fizz::DefaultFactory().makeKeyDeriver(*cipher);
-  auto hashLength = deriver->hashLength();
+  auto hashFunction = getHashFunction(*cipher);
+  auto hashLength = getHashSize(hashFunction);
+  auto makeHasher = ::fizz::DefaultFactory().makeHasher(hashFunction);
+
   Buf handshakeContext;
   Buf finishedMacKey;
   if (dir == Direction::UPSTREAM) {
@@ -94,7 +100,7 @@ ExportedAuthenticator::validateAuthenticator(
         "EXPORTER-client authenticator finished key", nullptr, hashLength);
   }
   auto certs = validate(
-      deriver,
+      makeHasher,
       std::move(authenticatorRequest),
       std::move(authenticator),
       std::move(handshakeContext),
@@ -104,7 +110,7 @@ ExportedAuthenticator::validateAuthenticator(
 }
 
 Buf ExportedAuthenticator::makeAuthenticator(
-    std::unique_ptr<KeyDerivation>& kderiver,
+    HasherFactory makeHasher,
     std::vector<SignatureScheme> supportedSchemes,
     const SelfCert& cert,
     Buf authenticatorRequest,
@@ -121,7 +127,7 @@ Buf ExportedAuthenticator::makeAuthenticator(
   // authenticator.
   if (!scheme) {
     auto emptyAuth = detail::getEmptyAuthenticator(
-        kderiver,
+        makeHasher,
         std::move(authenticatorRequest),
         std::move(handshakeContext),
         std::move(finishedMacKey));
@@ -134,7 +140,7 @@ Buf ExportedAuthenticator::makeAuthenticator(
   // Compute CertificateVerify.
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
-  auto transcriptHash = detail::computeTranscriptHash(kderiver, transcript);
+  auto transcriptHash = detail::computeTranscriptHash(makeHasher, transcript);
   auto sig = cert.sign(*scheme, context, transcriptHash->coalesce());
   CertificateVerify verify;
   verify.algorithm = *scheme;
@@ -144,9 +150,9 @@ Buf ExportedAuthenticator::makeAuthenticator(
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertificateVerify);
   auto finishedTranscriptHash =
-      detail::computeTranscriptHash(kderiver, finishedTranscript);
-  auto verifyData =
-      detail::getFinishedData(kderiver, finishedMacKey, finishedTranscriptHash);
+      detail::computeTranscriptHash(makeHasher, finishedTranscript);
+  auto verifyData = detail::getFinishedData(
+      makeHasher, finishedMacKey, finishedTranscriptHash);
   Finished finished;
   finished.verify_data = std::move(verifyData);
   auto encodedFinished = encodeHandshake(std::move(finished));
@@ -156,7 +162,7 @@ Buf ExportedAuthenticator::makeAuthenticator(
 }
 
 folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
-    std::unique_ptr<KeyDerivation>& kderiver,
+    HasherFactory makeHasher,
     Buf authenticatorRequest,
     Buf authenticator,
     Buf handshakeContext,
@@ -177,7 +183,7 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   auto finished = param->asFinished();
   if (finished) {
     auto emptyAuth = detail::getEmptyAuthenticator(
-        kderiver,
+        makeHasher,
         std::move(authenticatorRequest),
         std::move(handshakeContext),
         std::move(finishedMacKey));
@@ -209,7 +215,7 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   auto encodedCertMsg = encodeHandshake(std::move(*certMsg));
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
-  auto transcriptHash = detail::computeTranscriptHash(kderiver, transcript);
+  auto transcriptHash = detail::computeTranscriptHash(makeHasher, transcript);
   try {
     peerCert->verify(
         certVerify->algorithm,
@@ -224,9 +230,9 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertVerify);
   auto finishedTranscriptHash =
-      detail::computeTranscriptHash(kderiver, finishedTranscript);
-  auto verifyData =
-      detail::getFinishedData(kderiver, finishedMacKey, finishedTranscriptHash);
+      detail::computeTranscriptHash(makeHasher, finishedTranscript);
+  auto verifyData = detail::getFinishedData(
+      makeHasher, finishedMacKey, finishedTranscriptHash);
 
   if (folly::IOBufEqualTo()(finished->verify_data, verifyData)) {
     certs = std::move(certMsg->certificate_list);
@@ -254,15 +260,17 @@ std::tuple<Buf, std::vector<fizz::Extension>> decodeAuthRequest(
   return std::make_tuple(std::move(certRequestContext), std::move(exts));
 }
 
-Buf computeTranscriptHash(
-    std::unique_ptr<KeyDerivation>& deriver,
-    const Buf& toBeHashed) {
-  auto hashLength = deriver->hashLength();
+Buf computeTranscriptHash(HasherFactory makeHasher, const Buf& toBeHashed) {
+  auto hasher = makeHasher();
+
+  auto hashLength = hasher->getHashLen();
   auto data = folly::IOBuf::create(hashLength);
   data->append(hashLength);
   auto transcriptHash =
       folly::MutableByteRange(data->writableData(), data->length());
-  deriver->hash(*toBeHashed, transcriptHash);
+  hasher->hash_init();
+  hasher->hash_update(*toBeHashed);
+  hasher->hash_final(transcriptHash);
   return data;
 }
 
@@ -300,14 +308,15 @@ Buf computeFinishedTranscript(const Buf& crTranscript, const Buf& certVerify) {
 }
 
 Buf getFinishedData(
-    std::unique_ptr<KeyDerivation>& deriver,
+    HasherFactory makeHasher,
     Buf& finishedMacKey,
     const Buf& finishedTranscript) {
-  auto hashLength = deriver->hashLength();
+  auto hashLength = makeHasher()->getHashLen();
   auto data = folly::IOBuf::create(hashLength);
   data->append(hashLength);
   auto outRange = folly::MutableByteRange(data->writableData(), data->length());
-  deriver->hmac(finishedMacKey->coalesce(), *finishedTranscript, outRange);
+  fizz::hmac(
+      makeHasher, finishedMacKey->coalesce(), *finishedTranscript, outRange);
   return data;
 }
 
@@ -362,7 +371,7 @@ folly::Optional<SignatureScheme> getSignatureScheme(
 }
 
 Buf getEmptyAuthenticator(
-    std::unique_ptr<KeyDerivation>& kderiver,
+    HasherFactory makeHasher,
     Buf authRequest,
     Buf handshakeContext,
     Buf finishedMacKey) {
@@ -373,9 +382,9 @@ Buf getEmptyAuthenticator(
   auto emptyAuthTranscript = detail::computeTranscript(
       handshakeContext, authRequest, encodedEmptyCertMsg);
   auto emptyAuthTranscriptHash =
-      detail::computeTranscriptHash(kderiver, emptyAuthTranscript);
+      detail::computeTranscriptHash(makeHasher, emptyAuthTranscript);
   auto finVerify = detail::getFinishedData(
-      kderiver, finishedMacKey, emptyAuthTranscriptHash);
+      makeHasher, finishedMacKey, emptyAuthTranscriptHash);
   Finished emptyAuth;
   emptyAuth.verify_data = std::move(finVerify);
   auto encodedEmptyAuth = encodeHandshake(std::move(emptyAuth));

@@ -30,6 +30,8 @@ namespace go thrift.lib.thrift.metadata
  */
 include "thrift/annotation/cpp.thrift"
 
+package "facebook.com/thrift/metadata"
+
 enum ThriftPrimitiveType {
   THRIFT_BOOL_TYPE = 1,
   THRIFT_BYTE_TYPE = 2,

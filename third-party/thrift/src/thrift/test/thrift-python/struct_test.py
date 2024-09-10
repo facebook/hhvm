@@ -1598,3 +1598,66 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         immutable = TestStructAllThriftContainerTypesImmutable()
 
         self.assertEqual(repr(mutable), repr(immutable))
+
+    def test_struct_default_value_cache_primitives(self) -> None:
+        # Immutable-types uses a default-value cache and initialize the fields
+        # with the same cached Python object repeatedly. However, this approach
+        # doesn't work well with mutable types when there is no copy-on-write
+        # mechanism in place. The issue is particullarly problematic with the
+        # container types but this test checks it for primitive types.
+        mutable_s1 = TestStructAllThriftPrimitiveTypesMutable()
+        mutable_s2 = TestStructAllThriftPrimitiveTypesMutable()
+
+        # Update the fields from `s1_mutable`. This update should affect only
+        # `s1_mutable` and not the default value cache or any other struct.
+        mutable_s1.unqualified_string = "Hello world!"
+        mutable_s1.unqualified_i32 = 11
+
+        self.assertEqual("Hello world!", mutable_s1.unqualified_string)
+        self.assertEqual(11, mutable_s1.unqualified_i32)
+
+        # Check that changes to `mutable_s1` do not affect `mutable_s2`.
+        self.assertEqual("", mutable_s2.unqualified_string)
+        self.assertEqual(0, mutable_s2.unqualified_i32)
+
+        # Check that a new struct, potentially utilizing the default value
+        # cache, initializes with the correct default value.
+        mutable_s3 = TestStructAllThriftPrimitiveTypesMutable()
+        self.assertEqual("", mutable_s3.unqualified_string)
+        self.assertEqual(0, mutable_s3.unqualified_i32)
+
+        # Check for immutable struct
+        immutable_s1 = TestStructAllThriftPrimitiveTypesImmutable()
+        self.assertEqual("", immutable_s1.unqualified_string)
+        self.assertEqual(0, immutable_s1.unqualified_i32)
+
+    def test_struct_default_value_cache_container(self) -> None:
+        # Immutable types use a default-value cache and initialize the fields
+        # with the same cached Python object repeatedly. However, this approach
+        # doesn't work well with mutable types when there is no copy-on-write
+        # mechanism in place.
+        #
+        # For example: If a cached empty Python list is used to populate a list
+        # field in different structs, but a mutable struct can append to that
+        # list, which will update the value for all other structs as well as
+        # the list object in the default value cache.
+        mutable_s1 = TestStructAllThriftContainerTypesMutable()
+        mutable_s2 = TestStructAllThriftContainerTypesMutable()
+
+        # Update the container from `s1_mutable`. This update should affect only
+        # `s1_mutable` and not the default value cache or any other struct.
+        mutable_s1.unqualified_list_i32.append(1)
+
+        self.assertEqual([1], mutable_s1.unqualified_list_i32)
+
+        # Check that changes to `mutable_s1` do not affect `mutable_s2`.
+        self.assertEqual([], mutable_s2.unqualified_list_i32)
+
+        # Check that a new struct, potentially utilizing the default value
+        # cache, initializes with the correct default value.
+        mutable_s3 = TestStructAllThriftContainerTypesMutable()
+        self.assertEqual([], mutable_s3.unqualified_list_i32)
+
+        # Check for immutable struct
+        immutable_s1 = TestStructAllThriftContainerTypesImmutable()
+        self.assertEqual([], immutable_s1.unqualified_list_i32)

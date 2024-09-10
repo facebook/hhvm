@@ -175,6 +175,11 @@ std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
 std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
     const detail::TypeInfo& typeInfo) {
   UniquePyObjectPtr value = nullptr;
+  // Immutable types use a default-value cache and initialize the fields
+  // with the same cached Python object repeatedly. However, this approach
+  // doesn't work well with mutable types when there is no copy-on-write
+  // mechanism in place. The issue is particularly problematic with container
+  // types and structs/unions
   bool addValueToCache = true;
   switch (typeInfo.type) {
     case protocol::TType::T_BYTE:
@@ -215,14 +220,17 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
       break;
     case protocol::TType::T_LIST:
       value = UniquePyObjectPtr(PyList_New(0));
+      addValueToCache = false;
       break;
     case protocol::TType::T_MAP:
       // For maps, the default value is an empty `dict`.
       value = UniquePyObjectPtr(PyDict_New());
+      addValueToCache = false;
       break;
     case protocol::TType::T_SET:
       // For sets, the default value is an empty `set`.
       value = UniquePyObjectPtr(PySet_New(nullptr));
+      addValueToCache = false;
       break;
     case protocol::TType::T_STRUCT: {
       // For struct and unions, the default value is a (recursively)
@@ -234,6 +242,7 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
               ? createMutableUnionDataHolder()
               : createStructListWithDefaultValues(
                     *structInfo, getStandardMutableDefaultValueForType));
+      addValueToCache = false;
       break;
     }
     default:

@@ -67,8 +67,7 @@ struct TypeToPatchMapAdapter {
   static StandardType toThrift(const AdaptedType& map);
 
   template <typename Tag, typename Protocol>
-  static uint32_t encode(
-      Protocol& prot, const TypeToPatchMapAdapter::AdaptedType& map) {
+  static uint32_t encode(Protocol& prot, const AdaptedType& map) {
     uint32_t s = 0;
     s += prot.writeListBegin(protocol::TType::T_STRUCT, map.size());
     for (const auto& [type, patch] : map) {
@@ -77,10 +76,11 @@ struct TypeToPatchMapAdapter {
       s += prot.writeFieldBegin("type", protocol::TType::T_STRUCT, 1);
       s += op::encode<type::infer_tag<type::Type>>(prot, type);
       s += prot.writeFieldEnd();
-      s += prot.writeFieldBegin("patch", protocol::TType::T_LIST, 2);
+      s += prot.writeFieldBegin("patch", protocol::TType::T_STRUCT, 2);
       s +=
           op::encode<type::struct_t<type::AnyStruct>>(prot, toAny(patch, type));
       s += prot.writeFieldEnd();
+      s += prot.writeFieldStop();
       s += prot.writeStructEnd();
     }
     s += prot.writeListEnd();
@@ -88,11 +88,11 @@ struct TypeToPatchMapAdapter {
   }
 
   template <typename Tag, typename Protocol>
-  static void decode(Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map) {
+  static void decode(Protocol& prot, AdaptedType& map) {
     protocol::TType t;
     uint32_t s;
     prot.readListBegin(t, s);
-    if (t != typeTagToTType<Tag>) {
+    if (t != protocol::TType::T_STRUCT) {
       while (s--) {
         prot.skip(t);
       }

@@ -103,6 +103,8 @@ class ConnectionManager : public folly::DelayedDestruction,
 
   /**
    * Schedule a timeout callback for a connection age callback object.
+   *
+   * If timeout is zero, the callback is not scheduled
    */
   void scheduleTimeout(
       ConnectionAgeTimeout* callback,
@@ -110,8 +112,19 @@ class ConnectionManager : public folly::DelayedDestruction,
 
   /**
    * Schedule a timeout callback for a connection.
+   *
+   * If timeout is zero, the callback is not scheduled
    */
   void scheduleTimeout(
+      ManagedConnection* const connection,
+      std::chrono::milliseconds timeout);
+
+  /**
+   * Schedule a timeout callback for a connection.
+   *
+   * The callback is scheduled even if timeout is 0
+   */
+  void scheduleTimeoutRaw(
       ManagedConnection* const connection,
       std::chrono::milliseconds timeout);
 

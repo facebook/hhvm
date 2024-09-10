@@ -124,6 +124,12 @@ void ConnectionManager::scheduleTimeout(
   }
 }
 
+void ConnectionManager::scheduleTimeoutRaw(
+    ManagedConnection* const connection,
+    std::chrono::milliseconds timeout) {
+  eventBase_->timer().scheduleTimeout(connection, timeout);
+}
+
 void ConnectionManager::scheduleTimeout(
     folly::HHWheelTimer::Callback* callback,
     std::chrono::milliseconds timeout) {

@@ -51,13 +51,10 @@ let rec split_ty_by_tuple
         in
         (env, TyPartition.product (Typing_make_type.tuple ty_reason) sub_splits)
     end
-  (* We cannot precisely reason about negated tuple predicates.
-     Default to spanning *)
-  | (_, Tneg (_, IsTupleOf _)) -> (env, TyPartition.mk_span ty)
   | _ ->
     (* Tuples are vecs at runtime, thus if the type's data type is disjoint from a vec
        we can conclude the type must be in the right partition. Otherwise we do not
-       precisely know the relationship with the [IsTupleOf] prediacte so default to
+       precisely know the relationship with the [IsTupleOf] predicate so default to
        spanning
     *)
     let (env, predicate_datatype) = DataType.(of_ty env Tuple) in
@@ -146,9 +143,6 @@ and split_ty_by_shape
           @@ List.map tys ~f:(fun ty -> { sft_optional = false; sft_ty = ty })
         in
         (env, TyPartition.product mk_shape splits)
-  (* We cannot precisely reason about negated shape predicates.
-     Default to spanning *)
-  | (_, Tneg (_, IsShapeOf _)) -> (env, TyPartition.mk_span ty)
   | _ ->
     (* Shapes are dicts at runtime, thus if the type's data type is disjoint from a dict
        we can conclude the type must be in the right partition. Otherwise we do not
@@ -227,20 +221,13 @@ and split_ty
     | Tshape _ -> partition_f DataType.(of_ty env Shape)
     | Tlabel _ -> partition_f DataType.(of_ty env Label)
     | Tclass ((_, name), _, _) -> partition_f DataType.(of_ty env @@ Class name)
-    | Tneg (_, IsTag tag) ->
-      let (env, dty) = DataType.of_tag env tag in
-      let dty = DataType.complement dty in
-      partition_f (env, dty)
-    | Tneg (_, IsTupleOf _) ->
-      (* We lose precision when using the data type representation here.
-         [split_ty_by_tuple] must specially handle this case *)
-      let (env, dty) = DataType.(of_ty env Tuple) in
-      let dty = DataType.complement dty in
-      partition_f (env, dty)
-    | Tneg (_, IsShapeOf _) ->
-      (* We lose precision when using the data type representation here.
-         [split_ty_by_shape] must specially handle this case *)
-      let (env, dty) = DataType.(of_ty env Shape) in
+    | Tneg (_, predicate) ->
+      let (env, dty) =
+        match predicate with
+        | IsTag tag -> DataType.of_tag env tag
+        | IsTupleOf _ -> DataType.(of_ty env Tuple)
+        | IsShapeOf _ -> DataType.(of_ty env Shape)
+      in
       let dty = DataType.complement dty in
       partition_f (env, dty)
     | Tprim Aast.Tnoreturn -> (env, TyPartition.mk_bottom)

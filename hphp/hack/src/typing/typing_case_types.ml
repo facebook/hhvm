@@ -28,7 +28,9 @@ module Tag = struct
 
   type t =
     | DictData
+    | ShapeData
     | VecData
+    | TupleData
     | KeysetData
     | StringData
     | ResourceData
@@ -51,6 +53,8 @@ module Tag = struct
   let describe = function
     | DictData -> "dicts"
     | VecData -> "vecs"
+    | TupleData -> "tuples"
+    | ShapeData -> "shapes"
     | KeysetData -> "keysets"
     | StringData -> "strings"
     | ResourceData -> "resources"
@@ -70,39 +74,47 @@ module Tag = struct
 
   let relation tag1 ~ctx:env tag2 =
     let open ApproxSet.Set_relation in
-    if equal tag1 tag2 then
-      Equal
-    else
-      match (tag1, tag2) with
-      | (ObjectData, InstanceOf _) -> Superset
-      | (InstanceOf _, ObjectData) -> Subset
-      | ( InstanceOf { name = cls1; kind = kind1 },
-          InstanceOf { name = cls2; kind = kind2 } ) ->
-        let open Option.Let_syntax in
-        let is_instance_of sub sup =
-          let* cls = Decl_entry.to_option (Env.get_class env sub) in
-          return @@ Cls.has_ancestor cls sup
-        in
+    match (tag1, tag2) with
+    (* Shapes are represented imprecisely so do not consider them as equal *)
+    | (ShapeData, ShapeData)
+    | (DictData, ShapeData)
+    | (ShapeData, DictData) ->
+      Unknown
+    (* Tuples are represented imprecisely so do not consider them as equal *)
+    | (TupleData, TupleData)
+    | (VecData, TupleData)
+    | (TupleData, VecData) ->
+      Unknown
+    | (tag1, tag2) when equal tag1 tag2 -> Equal
+    | (ObjectData, InstanceOf _) -> Superset
+    | (InstanceOf _, ObjectData) -> Subset
+    | ( InstanceOf { name = cls1; kind = kind1 },
+        InstanceOf { name = cls2; kind = kind2 } ) ->
+      let open Option.Let_syntax in
+      let is_instance_of sub sup =
+        let* cls = Decl_entry.to_option (Env.get_class env sub) in
+        return @@ Cls.has_ancestor cls sup
+      in
 
-        Option.value ~default:Unknown
-        @@ let* cls1_instance_of_cls2 = is_instance_of cls1 cls2 in
-           if cls1_instance_of_cls2 then
-             return Subset
-           else
-             let* cls2_instance_of_cls1 = is_instance_of cls2 cls1 in
-             if cls2_instance_of_cls1 then
-               return Superset
-             else (
-               match (kind1, kind2) with
-               | (FinalClass, _)
-               | (_, FinalClass) ->
-                 return Disjoint
-               | (Interface, _)
-               | (_, Interface) ->
-                 return Unknown
-               | (Class, Class) -> return Disjoint
-             )
-      | _ -> Disjoint
+      Option.value ~default:Unknown
+      @@ let* cls1_instance_of_cls2 = is_instance_of cls1 cls2 in
+         if cls1_instance_of_cls2 then
+           return Subset
+         else
+           let* cls2_instance_of_cls1 = is_instance_of cls2 cls1 in
+           if cls2_instance_of_cls1 then
+             return Superset
+           else (
+             match (kind1, kind2) with
+             | (FinalClass, _)
+             | (_, FinalClass) ->
+               return Disjoint
+             | (Interface, _)
+             | (_, Interface) ->
+               return Unknown
+             | (Class, Class) -> return Disjoint
+           )
+    | _ -> Disjoint
 
   let all_nonnull_tags =
     [
@@ -330,10 +342,10 @@ module DataType = struct
       Tag.all_nonnull_tags
 
   let tuple_to_datatypes ~trail : t =
-    Set.singleton ~reason:DataTypeReason.(make Tuples trail) Tag.VecData
+    Set.singleton ~reason:DataTypeReason.(make Tuples trail) Tag.TupleData
 
   let shape_to_datatypes ~trail : t =
-    Set.singleton ~reason:DataTypeReason.(make Shapes trail) Tag.DictData
+    Set.singleton ~reason:DataTypeReason.(make Shapes trail) Tag.ShapeData
 
   let label_to_datatypes ~trail : t =
     Set.singleton ~reason:DataTypeReason.(make NoSubreason trail) Tag.LabelData

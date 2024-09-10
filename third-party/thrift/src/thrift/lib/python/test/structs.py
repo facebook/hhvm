@@ -34,6 +34,9 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
+# pyre-ignore[21]: Could not find a name
+from testing.thrift_mutable_types import __Reserved as DoubleUnderscoreReservedMutable
+
 from testing.thrift_types import (
     __Reserved as DoubleUnderscoreReserved,
     Color,
@@ -94,6 +97,12 @@ class StructTestsParameterized(unittest.TestCase):
         )
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
+        )
+        self.DoubleUnderscoreReserved: Type[DoubleUnderscoreReserved] = (
+            DoubleUnderscoreReserved
+            if not self.is_mutable_run
+            # pyre-ignore[16]: no attribute
+            else DoubleUnderscoreReservedMutable
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
@@ -276,6 +285,37 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertIsNone(x.name)
         self.assertIsNotNone(x.an_int)
 
+    def test_reserved(self) -> None:
+        x = self.Reserved(
+            from_="hello",
+            nonlocal_=3,
+            ok="bye",
+            is_cpdef=True,
+            move="Qh4xe1",
+            inst="foo",
+            changes="bar",
+            _Reserved__mangled_str="secret",
+            _Reserved__mangled_int=42,
+        )
+        self.assertEqual(x.from_, "hello")
+        self.assertEqual(x.nonlocal_, 3)
+        self.assertEqual(x.ok, "bye")
+        self.assertEqual(x.is_cpdef, True)
+        self.assertEqual(x.move, "Qh4xe1")
+        self.assertEqual(x.inst, "foo")
+        self.assertEqual(x.changes, "bar")
+        self.assertEqual(x._Reserved__mangled_str, "secret")
+        self.assertEqual(x._Reserved__mangled_int, 42)
+
+        self.assertEqual(x, x)
+
+        y = self.DoubleUnderscoreReserved(
+            _Reserved__mangled_str="secret",
+            _Reserved__mangled_int=42,
+        )
+        self.assertEqual(y._Reserved__mangled_str, "secret")
+        self.assertEqual(y._Reserved__mangled_int, 42)
+
     def test_dir(self) -> None:
         expected = ["__iter__", "an_int", "name", "py3_hidden", "val", "val_list"]
         self.assertEqual(expected, dir(self.easy()))
@@ -316,37 +356,6 @@ class StructTests(unittest.TestCase):
         self.assertEqual(x.val_list, dif_list)
         dif_int = copy.copy(x.an_int)
         self.assertEqual(x.an_int, dif_int)
-
-    def test_reserved(self) -> None:
-        x = Reserved(
-            from_="hello",
-            nonlocal_=3,
-            ok="bye",
-            is_cpdef=True,
-            move="Qh4xe1",
-            inst="foo",
-            changes="bar",
-            _Reserved__mangled_str="secret",
-            _Reserved__mangled_int=42,
-        )
-        self.assertEqual(x.from_, "hello")
-        self.assertEqual(x.nonlocal_, 3)
-        self.assertEqual(x.ok, "bye")
-        self.assertEqual(x.is_cpdef, True)
-        self.assertEqual(x.move, "Qh4xe1")
-        self.assertEqual(x.inst, "foo")
-        self.assertEqual(x.changes, "bar")
-        self.assertEqual(x._Reserved__mangled_str, "secret")
-        self.assertEqual(x._Reserved__mangled_int, 42)
-
-        self.assertEqual(x, x)
-
-        y = DoubleUnderscoreReserved(
-            _Reserved__mangled_str="secret",
-            _Reserved__mangled_int=42,
-        )
-        self.assertEqual(y._Reserved__mangled_str, "secret")
-        self.assertEqual(y._Reserved__mangled_int, 42)
 
     def test_autospec_iterable(self) -> None:
         for _ in mock.create_autospec(easy):

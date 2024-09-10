@@ -247,6 +247,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case EqCls:
   case EqLazyCls:
   case EqFunc:
+  case EqFuncId:
   case EqStrPtr:
   case InstanceOf:
   case InstanceOfIface:
@@ -353,6 +354,12 @@ bool supportsGVN(const IRInstruction* inst) {
     // so its not safe to GVN
     return !opcodeMayRaise(IsTypeStruct) && !inst->src(1)->type().maybe(TRes);
 
+  case LdFuncCached: {
+    // Do not need to reload a function within a translation except if it 
+    // could have been renamed.
+    auto const funcName = inst->extra<FuncNameData>()->name;
+    return !RO::funcIsRenamable(funcName);
+  }
   default:
     return false;
   }

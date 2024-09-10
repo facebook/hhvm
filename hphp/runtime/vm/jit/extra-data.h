@@ -450,6 +450,10 @@ struct FuncData : IRExtraData {
     return func == f.func;
   }
 
+  size_t hash() const {
+    return pointer_hash<Func>()(func);
+  }
+
   size_t stableHash() const {
     return func->stableHash();
   }

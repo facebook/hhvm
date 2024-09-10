@@ -1431,7 +1431,9 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
           if (RO::EvalLogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.func, false));
           }
-          slow();
+          emitModuleBoundaryCheck(env, loadedFunc);
+          prepareAndCallUnknown(env, loadedFunc, fca, nullptr,
+                                false, false, true /* makeExit */);
           return;
         }
       );

@@ -15,3 +15,4 @@
  */
 
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
+#include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>

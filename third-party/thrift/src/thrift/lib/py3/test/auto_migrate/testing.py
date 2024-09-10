@@ -20,7 +20,7 @@ from unittest.mock import Mock, patch
 import thrift.py3  # @manual
 from testing.clients import TestingService
 from testing.types import ListNode
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.testing import mock_client
 
 

@@ -24,7 +24,7 @@ from binary.clients import BinaryService
 from binary.services import BinaryServiceInterface
 from binary.types import Binaries, BinaryUnion
 from folly.iobuf import IOBuf
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.client import get_client
 from thrift.py3.server import ThriftServer
 

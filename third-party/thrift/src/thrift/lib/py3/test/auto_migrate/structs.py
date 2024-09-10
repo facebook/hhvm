@@ -38,7 +38,7 @@ from testing.types import (
     StringBucket,
     UnusedError,
 )
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Struct

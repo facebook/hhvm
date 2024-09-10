@@ -27,7 +27,7 @@ import unittest
 
 from testing.clients import TestingService
 from testing.types import Color, easy, I32List
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )

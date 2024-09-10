@@ -30,7 +30,7 @@ from testing.types import (
     StrList2D,
     Uint32List,
 )
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.types import Container
 
 

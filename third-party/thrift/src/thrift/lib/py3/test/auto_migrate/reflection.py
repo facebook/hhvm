@@ -33,7 +33,7 @@ from testing.types import (
     StrI32ListMap,
     StrStrIntListMapMap,
 )
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.reflection import (
     ArgumentSpec,
     inspect,

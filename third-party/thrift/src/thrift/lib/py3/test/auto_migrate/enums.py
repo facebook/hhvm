@@ -20,7 +20,7 @@ import unittest
 from typing import cast, Type, TypeVar
 
 from testing.types import BadMembers, Color, ColorGroups, File, Kind, Perm
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import BadEnum, Enum, Flag

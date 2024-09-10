@@ -26,7 +26,7 @@ from testing.types import (
     StrStrIntListMapMap,
     StrStrMap,
 )
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.types import Container
 
 

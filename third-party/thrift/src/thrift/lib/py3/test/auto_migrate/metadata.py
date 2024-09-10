@@ -22,7 +22,7 @@ from apache.thrift.metadata.types import ThriftPrimitiveType
 from testing.clients import TestingService, TestingServiceChild
 from testing.services import TestingServiceInterface
 from testing.types import hard, HardError, mixed, Perm
-from thrift.lib.py3.test.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.metadata import gen_metadata, ThriftKind
 
 

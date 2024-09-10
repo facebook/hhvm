@@ -276,6 +276,18 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertIsNone(x.name)
         self.assertIsNotNone(x.an_int)
 
+    def test_dir(self) -> None:
+        expected = ["__iter__", "an_int", "name", "py3_hidden", "val", "val_list"]
+        self.assertEqual(expected, dir(self.easy()))
+        self.assertEqual(expected, dir(self.easy))
+
+    def test_repr(self) -> None:
+        union_empty = "EMPTY" if not self.is_mutable_run else "FBTHRIFT_UNION_EMPTY"
+        self.assertEqual(
+            f"easy(val=42, val_list=i[], name=None, an_int=Integers({union_empty}=None), py3_hidden=0)",
+            repr(self.easy(val=42)),
+        )
+
 
 class StructTestsImmutable(unittest.TestCase):
     """
@@ -336,22 +348,11 @@ class StructTests(unittest.TestCase):
         self.assertEqual(y._Reserved__mangled_str, "secret")
         self.assertEqual(y._Reserved__mangled_int, 42)
 
-    def test_dir(self) -> None:
-        expected = ["__iter__", "an_int", "name", "py3_hidden", "val", "val_list"]
-        self.assertEqual(expected, dir(easy()))
-        self.assertEqual(expected, dir(easy))
-
     def test_autospec_iterable(self) -> None:
         for _ in mock.create_autospec(easy):
             pass
         for _ in mock.create_autospec(easy()):
             pass
-
-    def test_repr(self) -> None:
-        self.assertEqual(
-            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None), py3_hidden=0)",
-            repr(easy(val=42)),
-        )
 
     def test_update_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))

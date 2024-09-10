@@ -350,6 +350,9 @@ cdef class MutableStruct(MutableStructOrUnion):
         for name in info.name_to_index:
             yield name, getattr(self, name)
 
+    def __dir__(self):
+        return dir(type(self))
+
     def __repr__(self):
         fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
         return f"{type(self).__name__}({fields})"
@@ -598,6 +601,11 @@ class MutableStructMeta(type):
         a module.
         """
         (<MutableStructInfo>cls._fbthrift_mutable_struct_info)._initialize_default_values()
+
+    def __dir__(cls):
+        return tuple(name for name, _ in cls) + (
+            "__iter__",
+        )
 
     def __iter__(cls):
         """

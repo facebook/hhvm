@@ -34,7 +34,6 @@
 #include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 
-THRIFT_FLAG_DEFINE_bool(server_header_reject_http, true);
 THRIFT_FLAG_DEFINE_bool(server_header_reject_framed, true);
 THRIFT_FLAG_DEFINE_bool(server_header_reject_unframed, true);
 THRIFT_FLAG_DEFINE_bool(server_header_reject_all, true);
@@ -412,10 +411,9 @@ void Cpp2Connection::requestReceived(
     return;
   }
 
-  if (THRIFT_FLAG(server_header_reject_http) &&
-      (hreq->getHeader()->getClientType() == THRIFT_HTTP_SERVER_TYPE ||
-       hreq->getHeader()->getClientType() == THRIFT_HTTP_CLIENT_TYPE ||
-       hreq->getHeader()->getClientType() == THRIFT_HTTP_GET_CLIENT_TYPE)) {
+  if (hreq->getHeader()->getClientType() == THRIFT_HTTP_SERVER_TYPE ||
+      hreq->getHeader()->getClientType() == THRIFT_HTTP_CLIENT_TYPE ||
+      hreq->getHeader()->getClientType() == THRIFT_HTTP_GET_CLIENT_TYPE) {
     disconnect("Rejecting HTTP connection over Header");
     return;
   }

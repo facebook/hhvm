@@ -21,7 +21,7 @@ package thrift
 type CompositeProcessor interface {
 	Processor
 	Include(processor map[string]ProcessorFunction)
-	ProcessorMap() map[string]ProcessorFunction
+	ProcessorFunctionMap() map[string]ProcessorFunction
 }
 
 // compositeProcessor allows different ComposableProcessor to sit under one
@@ -55,6 +55,6 @@ func (p *compositeProcessor) GetProcessorFunction(name string) ProcessorFunction
 }
 
 // ProcessorMap returns the map that maps method names to Processors
-func (p *compositeProcessor) ProcessorMap() map[string]ProcessorFunction {
+func (p *compositeProcessor) ProcessorFunctionMap() map[string]ProcessorFunction {
 	return p.serviceProcessorMap
 }

@@ -268,7 +268,6 @@ Buf computeTranscriptHash(HasherFactory makeHasher, const Buf& toBeHashed) {
   data->append(hashLength);
   auto transcriptHash =
       folly::MutableByteRange(data->writableData(), data->length());
-  hasher->hash_init();
   hasher->hash_update(*toBeHashed);
   hasher->hash_final(transcriptHash);
   return data;

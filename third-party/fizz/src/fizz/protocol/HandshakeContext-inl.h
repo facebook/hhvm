@@ -11,9 +11,7 @@
 namespace fizz {
 
 template <typename Hash>
-HandshakeContextImpl<Hash>::HandshakeContextImpl() {
-  hashState_.hash_init();
-}
+HandshakeContextImpl<Hash>::HandshakeContextImpl() {}
 
 template <typename Hash>
 void HandshakeContextImpl<Hash>::appendToTranscript(const Buf& data) {

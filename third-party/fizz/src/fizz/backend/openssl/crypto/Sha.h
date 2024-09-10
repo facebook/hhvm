@@ -27,7 +27,9 @@ namespace openssl {
 template <typename T>
 class Sha : public fizz::Hasher {
  public:
-  void hash_init() override;
+  Sha() {
+    digest_.hash_init(T::HashEngine());
+  }
 
   using fizz::Hasher::hash_update;
   void hash_update(folly::ByteRange data) override;

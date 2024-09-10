@@ -14,11 +14,6 @@ namespace fizz {
 namespace openssl {
 
 template <typename T>
-void Sha<T>::hash_init() {
-  digest_.hash_init(T::HashEngine());
-}
-
-template <typename T>
 void Sha<T>::hash_update(folly::ByteRange data) {
   digest_.hash_update(data);
 }

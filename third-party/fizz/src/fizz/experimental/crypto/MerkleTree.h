@@ -347,7 +347,6 @@ class BatchSignatureMerkleTree
 
     std::array<uint8_t, Hash::HashLen> result;
     openssl::Hasher<Hash> hasher;
-    hasher.hash_init();
     constexpr std::array<uint8_t, 1> prefix = {0x01};
     hasher.hash_update(folly::range(prefix));
     hasher.hash_update(leftChild);
@@ -365,7 +364,6 @@ class BatchSignatureMerkleTree
       folly::ByteRange msg) {
     std::array<uint8_t, Hash::HashLen> result;
     openssl::Hasher<Hash> hasher;
-    hasher.hash_init();
     constexpr std::array<uint8_t, 1> prefix = {0x00};
     hasher.hash_update(folly::range(prefix));
     hasher.hash_update(msg);

@@ -40,15 +40,11 @@ void hmac(
   // first hash the key if it's length is greater than B
   if (key.size() > B) {
     auto keyHasher = makeHasher();
-    keyHasher->hash_init();
     keyHasher->hash_update(folly::ByteRange(key.data(), key.size()));
     keyHasher->hash_final(folly::MutableByteRange(finalKey.data(), L));
   } else {
     memcpy(finalKey.data(), key.data(), key.size());
   }
-
-  inner->hash_init();
-  outer->hash_init();
 
   std::array<uint8_t, fizz::kHashMaxBlockSize> buf;
 

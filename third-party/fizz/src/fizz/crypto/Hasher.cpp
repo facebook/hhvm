@@ -18,7 +18,6 @@ void hash(
 
   CHECK_GE(out.size(), hasher->getHashLen());
 
-  hasher->hash_init();
   hasher->hash_update(in);
   hasher->hash_final(out);
 }

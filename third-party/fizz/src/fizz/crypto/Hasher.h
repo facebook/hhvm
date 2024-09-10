@@ -15,9 +15,6 @@ namespace fizz {
 /**
  * `Hasher` implements a message digest.
  *
- *  An instance of `Hasher` should be initialized with `hash_init()`. This may
- *  only be invoked once per Hasher instance.
- *
  *  The message should be fed to the hasher with multiple calls to
  * `hash_update`.
  *
@@ -28,8 +25,6 @@ namespace fizz {
 class Hasher {
  public:
   virtual ~Hasher() = default;
-
-  virtual void hash_init() = 0;
 
   virtual void hash_update(folly::ByteRange data) = 0;
 

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <fizz/backend/openssl/crypto/aead/Ciphers.h>
+#include <fizz/backend/openssl/Properties.h>
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/aead/IOBufUtil.h>
 #include <folly/Conv.h>

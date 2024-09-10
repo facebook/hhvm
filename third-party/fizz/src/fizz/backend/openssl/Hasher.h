@@ -8,10 +8,8 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/Properties.h>
 #include <fizz/backend/openssl/crypto/Sha.h>
-#include <fizz/backend/openssl/crypto/Sha256.h>
-#include <fizz/backend/openssl/crypto/Sha384.h>
-#include <fizz/backend/openssl/crypto/Sha512.h>
 #include <folly/Range.h>
 
 namespace fizz::openssl {

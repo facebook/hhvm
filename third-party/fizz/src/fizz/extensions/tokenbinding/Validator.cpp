@@ -10,6 +10,7 @@
 
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/extensions/tokenbinding/Utils.h>
+#include <fizz/protocol/DefaultFactory.h>
 
 using namespace folly;
 using namespace folly::io;
@@ -79,7 +80,8 @@ void Validator::verify(
     auto ecdsa = constructECDSASig(signature);
 
     std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
-    fizz::openssl::Hasher<fizz::Sha256>::hash(
+    fizz::hash(
+        fizz::DefaultFactory().makeHasher(fizz::HashFunction::Sha256),
         *message,
         folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
     if (ECDSA_do_verify(

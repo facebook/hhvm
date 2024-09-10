@@ -52,7 +52,8 @@ Buf TokenBindingConstructor::signWithEcKey(
     const EcKeyUniquePtr& key,
     const Buf& message) {
   std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
-  fizz::openssl::Hasher<Sha256>::hash(
+  fizz::hash(
+      fizz::openssl::makeHasher<fizz::Sha256>,
       *message,
       folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
 

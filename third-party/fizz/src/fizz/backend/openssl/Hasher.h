@@ -13,20 +13,9 @@
 #include <folly/Range.h>
 
 namespace fizz::openssl {
-template <typename T>
-struct HasherType {
-  static constexpr size_t HashLen = T::HashLen;
-  static constexpr size_t BlockSize = T::BlockSize;
-  static constexpr folly::StringPiece BlankHash = T::BlankHash;
-  static constexpr auto HashEngine = Properties<T>::HashEngine;
-};
-
-template <class T>
-using Hasher = Sha<HasherType<T>>;
-
 template <class T>
 std::unique_ptr<::fizz::Hasher> makeHasher() {
-  return std::make_unique<::fizz::openssl::Hasher<T>>();
+  return std::make_unique<::fizz::openssl::Sha>(Properties<T>::HashEngine());
 }
 
 } // namespace fizz::openssl

@@ -17,21 +17,21 @@ class OpenSSLHmacTest : public ::testing::Test {};
 TEST(OpenSSLHmacTest, TestSha256) {
   fizz::test::runHmacTest(
       fizz::HashFunction::Sha256, []() -> std::unique_ptr<fizz::Hasher> {
-        return std::make_unique<fizz::openssl::Hasher<fizz::Sha256>>();
+        return fizz::openssl::makeHasher<fizz::Sha256>();
       });
 }
 
 TEST(OpenSSLHmacTest, TestSha384) {
   fizz::test::runHmacTest(
       fizz::HashFunction::Sha384, []() -> std::unique_ptr<fizz::Hasher> {
-        return std::make_unique<fizz::openssl::Hasher<fizz::Sha384>>();
+        return fizz::openssl::makeHasher<fizz::Sha384>();
       });
 }
 
 TEST(OpenSSLHmacTest, TestSha512) {
   fizz::test::runHmacTest(
       fizz::HashFunction::Sha512, []() -> std::unique_ptr<fizz::Hasher> {
-        return std::make_unique<fizz::openssl::Hasher<fizz::Sha512>>();
+        return fizz::openssl::makeHasher<fizz::Sha512>();
       });
 }
 

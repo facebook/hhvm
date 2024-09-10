@@ -346,12 +346,12 @@ class BatchSignatureMerkleTree
     DCHECK(rightChild.size() == Hash::HashLen);
 
     std::array<uint8_t, Hash::HashLen> result;
-    openssl::Hasher<Hash> hasher;
+    auto hasher = ::fizz::openssl::makeHasher<Hash>();
     constexpr std::array<uint8_t, 1> prefix = {0x01};
-    hasher.hash_update(folly::range(prefix));
-    hasher.hash_update(leftChild);
-    hasher.hash_update(rightChild);
-    hasher.hash_final(folly::range(result));
+    hasher->hash_update(folly::range(prefix));
+    hasher->hash_update(leftChild);
+    hasher->hash_update(rightChild);
+    hasher->hash_final(folly::range(result));
     return result;
   }
 
@@ -363,11 +363,11 @@ class BatchSignatureMerkleTree
   static std::array<uint8_t, Hash::HashLen> constructLeafNode(
       folly::ByteRange msg) {
     std::array<uint8_t, Hash::HashLen> result;
-    openssl::Hasher<Hash> hasher;
+    auto hasher = ::fizz::openssl::makeHasher<Hash>();
     constexpr std::array<uint8_t, 1> prefix = {0x00};
-    hasher.hash_update(folly::range(prefix));
-    hasher.hash_update(msg);
-    hasher.hash_final(folly::range(result));
+    hasher->hash_update(folly::range(prefix));
+    hasher->hash_update(msg);
+    hasher->hash_final(folly::range(result));
     return result;
   }
 };

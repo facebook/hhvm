@@ -1,4 +1,4 @@
-# @generated SignedSource<<00d484561b8eb9d9f015dd614de24629>>
+# @generated SignedSource<<40c6f40d7a7dd11f2990134b5af6fa45>>
 #
 # This file is generated file from `fizz/facebook/boilerplate.sh`.
 # All manual changes will be lost.
@@ -16,6 +16,7 @@ set(
         backend/liboqs/OQSKeyExchange.cpp
         backend/openssl/certificate/CertUtils.cpp
         backend/openssl/crypto/OpenSSLKeyUtils.cpp
+        backend/openssl/crypto/Sha.cpp
         backend/openssl/crypto/aead/OpenSSLEVPCipher.cpp
         backend/openssl/crypto/exchange/OpenSSLKeyExchange.cpp
         backend/openssl/crypto/signature/Signature.cpp
@@ -116,7 +117,6 @@ set(
         backend/openssl/crypto/ECCurve.h
         backend/openssl/crypto/OpenSSL.h
         backend/openssl/crypto/OpenSSLKeyUtils.h
-        backend/openssl/crypto/Sha-inl.h
         backend/openssl/crypto/Sha.h
         backend/openssl/crypto/aead/OpenSSLEVPCipher-inl.h
         backend/openssl/crypto/aead/OpenSSLEVPCipher.h

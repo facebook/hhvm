@@ -1,4 +1,4 @@
-# @generated SignedSource<<08358972ae98a5ed7abcf1aa35e885c9>>
+# @generated SignedSource<<00d484561b8eb9d9f015dd614de24629>>
 #
 # This file is generated file from `fizz/facebook/boilerplate.sh`.
 # All manual changes will be lost.
@@ -70,6 +70,7 @@ set(
         protocol/Events.cpp
         protocol/Exporter.cpp
         protocol/Factory.cpp
+        protocol/HandshakeContext.cpp
         protocol/KeyScheduler.cpp
         protocol/MultiBackendFactory.cpp
         protocol/Params.cpp
@@ -209,7 +210,6 @@ set(
         protocol/Factory.h
         protocol/FizzBase-inl.h
         protocol/FizzBase.h
-        protocol/HandshakeContext-inl.h
         protocol/HandshakeContext.h
         protocol/KeyScheduler.h
         protocol/MultiBackendFactory.h

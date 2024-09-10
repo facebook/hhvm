@@ -125,18 +125,11 @@ HasherFactory MultiBackendFactory::makeHasher(HashFunction digest) const {
 }
 std::unique_ptr<HandshakeContext> MultiBackendFactory::makeHandshakeContext(
     CipherSuite cipher) const {
-  switch (cipher) {
-    case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-    case CipherSuite::TLS_AES_128_GCM_SHA256:
-    case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-    case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return std::make_unique<HandshakeContextImpl<fizz::Sha256>>();
-    case CipherSuite::TLS_AES_256_GCM_SHA384:
-    case CipherSuite::TLS_AEGIS_256_SHA512:
-      return std::make_unique<HandshakeContextImpl<fizz::Sha384>>();
-    default:
-      throw std::runtime_error("hs: not implemented");
-  }
+  auto hashFunction = getHashFunction(cipher);
+  auto blankHash = getBlankHash(hashFunction);
+  auto hasherFactory = makeHasher(hashFunction);
+
+  return std::make_unique<HandshakeContextImpl>(hasherFactory, blankHash);
 }
 
 std::unique_ptr<PeerCert> MultiBackendFactory::makePeerCert(

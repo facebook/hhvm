@@ -1032,11 +1032,6 @@ func (p *FinderProcessor) AddToProcessorFunctionMap(key string, processorFunctio
     p.processorFunctionMap[key] = processorFunction
 }
 
-// Deprecated: use AddToProcessorFunctionMap() instead.
-func (p *FinderProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
-    p.processorFunctionMap[key] = processorFunction
-}
-
 func (p *FinderProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
@@ -1046,11 +1041,6 @@ func (p *FinderProcessor) GetProcessorFunction(key string) (processor thrift.Pro
 }
 
 func (p *FinderProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
-    return p.processorFunctionMap
-}
-
-// Deprecated: use ProcessorFunctionMap() instead.
-func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorFunctionMap
 }
 

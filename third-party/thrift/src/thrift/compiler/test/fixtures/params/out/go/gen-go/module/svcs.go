@@ -1776,11 +1776,6 @@ func (p *NestedContainersProcessor) AddToProcessorFunctionMap(key string, proces
     p.processorFunctionMap[key] = processorFunction
 }
 
-// Deprecated: use AddToProcessorFunctionMap() instead.
-func (p *NestedContainersProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
-    p.processorFunctionMap[key] = processorFunction
-}
-
 func (p *NestedContainersProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
@@ -1790,11 +1785,6 @@ func (p *NestedContainersProcessor) GetProcessorFunction(key string) (processor 
 }
 
 func (p *NestedContainersProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
-    return p.processorFunctionMap
-}
-
-// Deprecated: use ProcessorFunctionMap() instead.
-func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorFunctionMap
 }
 

@@ -99,11 +99,6 @@ func (p *InteractLocallyProcessor) AddToProcessorFunctionMap(key string, process
     p.processorFunctionMap[key] = processorFunction
 }
 
-// Deprecated: use AddToProcessorFunctionMap() instead.
-func (p *InteractLocallyProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
-    p.processorFunctionMap[key] = processorFunction
-}
-
 func (p *InteractLocallyProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
@@ -113,11 +108,6 @@ func (p *InteractLocallyProcessor) GetProcessorFunction(key string) (processor t
 }
 
 func (p *InteractLocallyProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
-    return p.processorFunctionMap
-}
-
-// Deprecated: use ProcessorFunctionMap() instead.
-func (p *InteractLocallyProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorFunctionMap
 }
 

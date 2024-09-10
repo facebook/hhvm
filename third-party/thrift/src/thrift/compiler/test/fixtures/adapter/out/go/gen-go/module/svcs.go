@@ -539,11 +539,6 @@ func (p *ServiceProcessor) AddToProcessorFunctionMap(key string, processorFuncti
     p.processorFunctionMap[key] = processorFunction
 }
 
-// Deprecated: use AddToProcessorFunctionMap() instead.
-func (p *ServiceProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
-    p.processorFunctionMap[key] = processorFunction
-}
-
 func (p *ServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
@@ -553,11 +548,6 @@ func (p *ServiceProcessor) GetProcessorFunction(key string) (processor thrift.Pr
 }
 
 func (p *ServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
-    return p.processorFunctionMap
-}
-
-// Deprecated: use ProcessorFunctionMap() instead.
-func (p *ServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorFunctionMap
 }
 
@@ -1284,11 +1274,6 @@ func (p *AdapterServiceProcessor) AddToProcessorFunctionMap(key string, processo
     p.processorFunctionMap[key] = processorFunction
 }
 
-// Deprecated: use AddToProcessorFunctionMap() instead.
-func (p *AdapterServiceProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
-    p.processorFunctionMap[key] = processorFunction
-}
-
 func (p *AdapterServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
@@ -1298,11 +1283,6 @@ func (p *AdapterServiceProcessor) GetProcessorFunction(key string) (processor th
 }
 
 func (p *AdapterServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
-    return p.processorFunctionMap
-}
-
-// Deprecated: use ProcessorFunctionMap() instead.
-func (p *AdapterServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorFunctionMap
 }
 

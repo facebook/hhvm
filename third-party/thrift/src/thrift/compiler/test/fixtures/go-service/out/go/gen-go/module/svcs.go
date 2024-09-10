@@ -6644,11 +6644,6 @@ func (p *GetEntityProcessor) AddToProcessorFunctionMap(key string, processorFunc
     p.processorFunctionMap[key] = processorFunction
 }
 
-// Deprecated: use AddToProcessorFunctionMap() instead.
-func (p *GetEntityProcessor) AddToProcessorMap(key string, processorFunction thrift.ProcessorFunction) {
-    p.processorFunctionMap[key] = processorFunction
-}
-
 func (p *GetEntityProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
@@ -6658,11 +6653,6 @@ func (p *GetEntityProcessor) GetProcessorFunction(key string) (processor thrift.
 }
 
 func (p *GetEntityProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
-    return p.processorFunctionMap
-}
-
-// Deprecated: use ProcessorFunctionMap() instead.
-func (p *GetEntityProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
     return p.processorFunctionMap
 }
 

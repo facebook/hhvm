@@ -866,9 +866,9 @@ cdef class EnumTypeInfo(TypeInfoBase):
 
 @cython.final
 cdef class AdaptedTypeInfo(TypeInfoBase):
-    def __cinit__(self, orig_type_info, adapter_info, transitive_annotation_factory):
+    def __cinit__(self, orig_type_info, adapter_class, transitive_annotation_factory):
         self._orig_type_info = orig_type_info
-        self._adapter_info = adapter_info
+        self._adapter_class = adapter_class
         self._transitive_annotation_factory = transitive_annotation_factory
 
     # validate and convert to format serializer may understand
@@ -877,7 +877,7 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
             raise TypeError("Argument 'value' must not be None")
 
         return (<TypeInfoBase>self._orig_type_info).to_internal_data(
-            self._adapter_info.to_thrift(
+            self._adapter_class.to_thrift(
                 value,
                 transitive_annotation=self._transitive_annotation_factory(),
             )
@@ -885,7 +885,7 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
 
     # convert deserialized data to user format
     cpdef to_python_value(self, object value):
-        return self._adapter_info.from_thrift(
+        return self._adapter_class.from_thrift(
             (<TypeInfoBase>self._orig_type_info).to_python_value(value),
             transitive_annotation=self._transitive_annotation_factory(),
         )
@@ -922,10 +922,10 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
         # appear in the comparison.
         # 
         return (self._orig_type_info.same_as(other_typeinfo._orig_type_info) and
-            self._adapter_info == other_typeinfo._adapter_info)
+            self._adapter_class == other_typeinfo._adapter_class)
 
     def __reduce__(self):
-        return (AdaptedTypeInfo, (self._orig_type_info, self._adapter_info, self._transitive_annotation_factory))
+        return (AdaptedTypeInfo, (self._orig_type_info, self._adapter_class, self._transitive_annotation_factory))
 
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:

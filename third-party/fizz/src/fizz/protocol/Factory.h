@@ -11,6 +11,8 @@
 #include <memory>
 #include <string>
 
+#include <fizz/crypto/Crypto.h>
+#include <fizz/crypto/Hasher.h>
 #include <fizz/crypto/KeyDerivation.h>
 #include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/aead/Aead.h>
@@ -80,6 +82,8 @@ class Factory {
   virtual std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,
       KeyExchangeRole role) const = 0;
+
+  virtual HasherFactory makeHasher(HashFunction digest) const = 0;
 
   virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const = 0;
 

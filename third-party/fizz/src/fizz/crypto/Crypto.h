@@ -51,6 +51,19 @@ struct AEGIS256 {
   static const size_t kTagLength{16};
 };
 
+enum class HashFunction { Sha256, Sha384, Sha512 };
+inline folly::StringPiece toString(HashFunction hash) {
+  switch (hash) {
+    case HashFunction::Sha256:
+      return "Sha256";
+    case HashFunction::Sha384:
+      return "Sha384";
+    case HashFunction::Sha512:
+      return "Sha512";
+  }
+  return "Invalid HashFunction";
+}
+
 // Hashing Algorithms
 // Please update HASH_MAX_BLOCK_SIZE if necessary if adding support for more
 // hashes.

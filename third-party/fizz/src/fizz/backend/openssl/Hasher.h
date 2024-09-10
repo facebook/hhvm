@@ -26,4 +26,9 @@ struct HasherType {
 template <class T>
 using Hasher = Sha<HasherType<T>>;
 
+template <class T>
+std::unique_ptr<::fizz::Hasher> makeHasher() {
+  return std::make_unique<::fizz::openssl::Hasher<T>>();
+}
+
 } // namespace fizz::openssl

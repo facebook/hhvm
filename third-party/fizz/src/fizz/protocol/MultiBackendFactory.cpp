@@ -113,6 +113,18 @@ std::unique_ptr<KeyDerivation> MultiBackendFactory::makeKeyDeriver(
   }
 }
 
+HasherFactory MultiBackendFactory::makeHasher(HashFunction digest) const {
+  switch (digest) {
+    case HashFunction::Sha256:
+      return openssl::makeHasher<fizz::Sha256>;
+    case HashFunction::Sha384:
+      return openssl::makeHasher<fizz::Sha384>;
+    case HashFunction::Sha512:
+      return openssl::makeHasher<fizz::Sha512>;
+    default:
+      throw std::runtime_error("makeHasher: not implemented");
+  }
+}
 std::unique_ptr<HandshakeContext> MultiBackendFactory::makeHandshakeContext(
     CipherSuite cipher) const {
   switch (cipher) {

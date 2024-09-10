@@ -266,6 +266,7 @@ class MockFactory : public ::fizz::DefaultFactory {
       makeKeyExchange,
       (NamedGroup group, KeyExchangeRole role),
       (const));
+  MOCK_METHOD(HasherFactory, makeHasher, (HashFunction), (const));
   MOCK_METHOD(std::unique_ptr<Aead>, makeAead, (CipherSuite cipher), (const));
   MOCK_METHOD(Random, makeRandom, (), (const));
   MOCK_METHOD(uint32_t, makeTicketAgeAdd, (), (const));

@@ -40,6 +40,8 @@ class MultiBackendFactory : public Factory {
   std::unique_ptr<KeyDerivation> makeKeyDeriver(
       CipherSuite cipher) const override;
 
+  HasherFactory makeHasher(HashFunction digest) const override;
+
   std::unique_ptr<HandshakeContext> makeHandshakeContext(
       CipherSuite cipher) const override;
 

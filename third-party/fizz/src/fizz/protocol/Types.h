@@ -8,13 +8,11 @@
 
 #pragma once
 
+#include <fizz/crypto/Crypto.h>
 #include <fizz/record/Types.h>
 #include <folly/Range.h>
 
 namespace fizz {
-
-enum class HashFunction { Sha256, Sha384, Sha512 };
-
 enum class PskType {
   NotSupported,
   NotAttempted,
@@ -51,7 +49,6 @@ enum class EarlyDataType { NotAttempted, Attempted, Rejected, Accepted };
 HashFunction getHashFunction(CipherSuite cipher);
 size_t getHashSize(HashFunction hash);
 
-folly::StringPiece toString(HashFunction hash);
 folly::StringPiece toString(PskType pskType);
 folly::StringPiece toString(KeyExchangeType kexType);
 folly::StringPiece toString(EarlyDataType earlyDataType);

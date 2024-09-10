@@ -37,18 +37,6 @@ size_t getHashSize(HashFunction hash) {
   throw std::runtime_error("unknown hash function");
 }
 
-folly::StringPiece toString(HashFunction hash) {
-  switch (hash) {
-    case HashFunction::Sha256:
-      return "Sha256";
-    case HashFunction::Sha384:
-      return "Sha384";
-    case HashFunction::Sha512:
-      return "Sha512";
-  }
-  return "Invalid HashFunction";
-}
-
 folly::StringPiece toString(PskType pskType) {
   switch (pskType) {
     case PskType::NotSupported:

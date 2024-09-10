@@ -9,6 +9,7 @@
 type env = {
   path: string;
   from: string;
+  root: Path.t;
 }
 
 let main (env : env) : Exit_status.t =

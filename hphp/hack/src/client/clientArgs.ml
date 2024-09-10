@@ -1129,7 +1129,8 @@ Decompress a .zhhdg file by running the depgraph decompressor, and write a .hhdg
           " The path on disk to the .zhhdg file" );
       ]
   in
-  let _args = parse_without_command options usage "decompress-zhhdg" in
+  let args = parse_without_command options usage "decompress-zhhdg" in
+  let root = Wwwroot.interpret_command_line_root_parameter args in
   let path =
     match !path with
     | "" ->
@@ -1138,7 +1139,7 @@ Decompress a .zhhdg file by running the depgraph decompressor, and write a .hhdg
     | p -> p
   in
   let from = !from in
-  CDecompressZhhdg { ClientDecompressZhhdg.path; from }
+  CDecompressZhhdg { ClientDecompressZhhdg.path; from; root }
 
 let parse_download_saved_state_args () =
   let usage =
@@ -1219,10 +1220,10 @@ let root = function
   | CStop { ClientStop.root; _ }
   | CRage { ClientRage.root; _ }
   | CSavedStateProjectMetadata { ClientEnv.root; _ }
+  | CDecompressZhhdg { ClientDecompressZhhdg.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
-    Some root
-  | CLsp { ClientLsp.root_from_cli; _ } -> Some root_from_cli
-  | CDecompressZhhdg _ -> None
+    root
+  | CLsp { ClientLsp.root_from_cli; _ } -> root_from_cli
 
 let config = function
   | CCheck { ClientEnv.config; _ }

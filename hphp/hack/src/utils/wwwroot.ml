@@ -33,10 +33,11 @@ let assert_www_directory ?(config = ".hhconfig") (path : Path.t) : unit =
     exit 1
   )
 
+(** Traverse parent directories until we find a directory containing .hhconfig *)
 let rec guess_root config start ~recursion_limit : Path.t option =
   if start = Path.parent start then
+    (* Reached file system root *)
     None
-  (* Reached file system root *)
   else if is_www_directory ~config start then
     Some start
   else if recursion_limit <= 0 then
@@ -48,20 +49,15 @@ let interpret_command_line_root_parameter
     ?(config = ".hhconfig") (paths : string list) : Path.t =
   let path =
     match paths with
-    | [] -> None
-    | [path] -> Some path
+    | [] -> "."
+    | [path] -> path
     | _ ->
       Printf.fprintf
         stderr
         "Error: please provide at most one www directory\n%!";
       exit 1
   in
-  let start_str =
-    match path with
-    | None -> "."
-    | Some s -> s
-  in
-  let start_path = Path.make start_str in
+  let start_path = Path.make path in
   let root =
     match guess_root config start_path ~recursion_limit:50 with
     | None -> start_path

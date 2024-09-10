@@ -38,7 +38,7 @@ let init_event_logger
     ~from
     ~is_interactive:(ClientArgs.is_interactive command)
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
-    (Option.value root ~default:Path.dummy_path);
+    root;
   HackEventLogger.set_hhconfig_version
     (ServerConfig.version config |> Config_file.version_to_string_opt);
   HackEventLogger.set_rollout_group local_config.ServerLocalConfig.rollout_group;
@@ -60,24 +60,18 @@ let set_up_logger ~command_name ~init_id ~root =
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
   Hh_logger.set_id (Printf.sprintf "%s#%s" command_name init_id);
-  begin
-    match root with
-    | None -> ()
-    | Some root ->
-      let client_log_fn = ServerFiles.client_log root in
-      (try
-         (* For irritating reasons T67177821 we might not have permissions
-            to write to the file. Pending a fix, let's only set up Hh_logger
-            to write to the file if we can indeed safely write to it. *)
-         Sys_utils.touch
-           (Sys_utils.Touch_existing_or_create_new
-              { mkdir_if_new = false; perm_if_new = 0o666 })
-           client_log_fn;
-         Hh_logger.set_log client_log_fn
-       with
-      | _ -> ())
-  end;
-  ()
+  let client_log_fn = ServerFiles.client_log root in
+  try
+    (* For irritating reasons T67177821 we might not have permissions
+       to write to the file. Pending a fix, let's only set up Hh_logger
+       to write to the file if we can indeed safely write to it. *)
+    Sys_utils.touch
+      (Sys_utils.Touch_existing_or_create_new
+         { mkdir_if_new = false; perm_if_new = 0o666 })
+      client_log_fn;
+    Hh_logger.set_log client_log_fn
+  with
+  | _ -> ()
 
 let set_up_root root =
   Relative_path.set_path_prefix Relative_path.Root root;
@@ -123,7 +117,7 @@ let () =
 
   (* The global variable Relative_path.root must be initialized for a wide variety of things *)
   let root = ClientArgs.root command in
-  Option.iter root ~f:set_up_root;
+  set_up_root root;
   let from = ClientArgs.from command in
 
   set_up_logger ~command_name ~init_id ~root;

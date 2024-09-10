@@ -8,7 +8,7 @@
 
 val parse_args : from_default:string -> ClientCommand.command
 
-val root : ClientCommand.command -> Path.t option
+val root : ClientCommand.command -> Path.t
 
 val from : ClientCommand.command -> string
 

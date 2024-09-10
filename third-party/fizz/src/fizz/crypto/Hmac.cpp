@@ -11,6 +11,9 @@
 
 namespace fizz {
 
+constexpr uint8_t HMAC_OPAD = 0x5c;
+constexpr uint8_t HMAC_IPAD = 0x36;
+
 // Reference: RFC 2104
 // H(K XOR opad, H(K XOR ipad, text))
 void hmac(

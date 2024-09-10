@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/crypto/Crypto.h>
+#include <fizz/crypto/Hasher.h>
 #include <folly/io/IOBuf.h>
 
 namespace fizz {
@@ -43,16 +44,12 @@ class Hkdf {
 };
 
 /**
- * HKDF implementation using a templated HMAC implementation.
- *
- * The template struct requires the following parameters:
- *   - HashLen: length of the hash digest
- *   - hmac(ByteRange key, const IOBuf& in, MutableByteRange out)
+ * HKDF implementation.
  */
 class HkdfImpl : public Hkdf {
  public:
-  HkdfImpl(size_t hashLength, HmacFunc hmacFunc)
-      : hashLength_(hashLength), hmacFunc_(hmacFunc) {}
+  HkdfImpl(size_t hashLength, HasherFactory makeHasher)
+      : hashLength_(hashLength), makeHasher_(makeHasher) {}
 
   std::vector<uint8_t> extract(folly::ByteRange salt, folly::ByteRange ikm)
       const override;
@@ -74,6 +71,6 @@ class HkdfImpl : public Hkdf {
 
  private:
   size_t hashLength_;
-  HmacFunc hmacFunc_;
+  HasherFactory makeHasher_;
 };
 } // namespace fizz

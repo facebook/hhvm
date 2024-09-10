@@ -65,7 +65,7 @@ DHKEM getDHKEM(std::unique_ptr<KeyExchange> actualKex, NamedGroup group) {
   auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
       folly::IOBuf::copyBuffer(prefix),
       std::make_unique<HkdfImpl>(
-          HkdfImpl(Sha256::HashLen, &openssl::Hasher<Sha256>::hmac)));
+          HkdfImpl(Sha256::HashLen, openssl::makeHasher<Sha256>)));
   return DHKEM(
       std::make_unique<MockKeyExchange>(std::move(actualKex)),
       group,

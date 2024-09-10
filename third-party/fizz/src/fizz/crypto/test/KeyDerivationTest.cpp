@@ -31,7 +31,7 @@ inline KeyDerivationImpl createKeyDerivationImpl() {
       Hash::HashLen,
       &openssl::Hasher<Hash>::hash,
       &openssl::Hasher<Hash>::hmac,
-      HkdfImpl(Hash::HashLen, &openssl::Hasher<Hash>::hmac),
+      HkdfImpl(Hash::HashLen, openssl::makeHasher<Hash>),
       Hash::BlankHash);
 }
 

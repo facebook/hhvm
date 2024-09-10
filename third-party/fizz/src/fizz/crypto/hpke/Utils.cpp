@@ -149,17 +149,17 @@ std::unique_ptr<Hkdf> makeHpkeHkdf(
       return std::make_unique<Hkdf>(
           std::move(prefix),
           std::make_unique<HkdfImpl>(
-              HkdfImpl(Sha256::HashLen, &openssl::Hasher<Sha256>::hmac)));
+              HkdfImpl(Sha256::HashLen, openssl::makeHasher<Sha256>)));
     case KDFId::Sha384:
       return std::make_unique<Hkdf>(
           std::move(prefix),
           std::make_unique<HkdfImpl>(
-              HkdfImpl(Sha384::HashLen, &openssl::Hasher<Sha384>::hmac)));
+              HkdfImpl(Sha384::HashLen, openssl::makeHasher<Sha384>)));
     case KDFId::Sha512:
       return std::make_unique<Hkdf>(
           std::move(prefix),
           std::make_unique<HkdfImpl>(
-              HkdfImpl(Sha512::HashLen, &openssl::Hasher<Sha512>::hmac)));
+              HkdfImpl(Sha512::HashLen, openssl::makeHasher<Sha512>)));
     default:
       throw std::runtime_error("hkdf: not implemented");
   }

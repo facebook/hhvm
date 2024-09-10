@@ -91,7 +91,7 @@ inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr() {
       Hash::HashLen,
       &openssl::Hasher<Hash>::hash,
       &openssl::Hasher<Hash>::hmac,
-      HkdfImpl(Hash::HashLen, &openssl::Hasher<Hash>::hmac),
+      HkdfImpl(Hash::HashLen, ::fizz::openssl::makeHasher<Hash>),
       Hash::BlankHash));
 }
 } // namespace detail

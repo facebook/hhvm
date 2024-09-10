@@ -7,6 +7,7 @@
  */
 
 #include <fizz/crypto/Hkdf.h>
+#include <fizz/crypto/Hmac.h>
 
 namespace fizz {
 
@@ -17,8 +18,11 @@ std::vector<uint8_t> HkdfImpl::extract(
   // Extraction step HMAC-HASH(salt, IKM)
   std::vector<uint8_t> extractedKey(hashLength_);
   salt = salt.empty() ? folly::range(zeros) : salt;
-  hmacFunc_(
-      salt, folly::IOBuf::wrapBufferAsValue(ikm), folly::range(extractedKey));
+  hmac(
+      makeHasher_,
+      salt,
+      folly::IOBuf::wrapBufferAsValue(ikm),
+      folly::range(extractedKey));
   return extractedKey;
 }
 
@@ -46,7 +50,8 @@ std::unique_ptr<folly::IOBuf> HkdfImpl::expand(
     in->prependChain(std::move(roundNum));
 
     size_t outputStartIdx = (round - 1) * hashLength_;
-    hmacFunc_(
+    hmac(
+        makeHasher_,
         folly::range(extractedKey),
         *in,
         {expanded->writableData() + outputStartIdx, hashLength_});

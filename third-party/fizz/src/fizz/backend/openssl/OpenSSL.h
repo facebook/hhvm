@@ -44,7 +44,7 @@ makeOpenSSLECKeyExchange() {
 
 template <typename Hash>
 HkdfImpl createHkdf() {
-  return HkdfImpl(Hash::HashLen, &openssl::Hasher<Hash>::hmac);
+  return HkdfImpl(Hash::HashLen, ::fizz::openssl::makeHasher<Hash>);
 }
 
 } // namespace fizz::openssl

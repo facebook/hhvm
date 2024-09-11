@@ -342,7 +342,8 @@ QueryResult w_query_execute(
             root->config,
             [root](RootMetadata& root_metadata) {
               root->collectRootMetadata(root_metadata);
-            });
+            },
+            query->clientInfo);
         auto savedStateResult = savedStateInterface->getMostRecentSavedState(
             resultClock.scmMergeBase ? resultClock.scmMergeBase->piece()
                                      : w_string_piece{});

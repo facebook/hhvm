@@ -29,6 +29,7 @@ class Command;
 class Root;
 struct Query;
 struct QueryResult;
+struct ClientContext;
 
 class Client : public std::enable_shared_from_this<Client> {
  public:
@@ -40,6 +41,8 @@ class Client : public std::enable_shared_from_this<Client> {
 
   void enqueueResponse(json_ref resp);
   void enqueueResponse(UntypedResponse resp);
+
+  ClientContext getClientInfo() const;
 
   const uint64_t unique_id;
   std::unique_ptr<watchman_stream> stm;

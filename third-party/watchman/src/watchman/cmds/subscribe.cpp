@@ -383,7 +383,8 @@ static UntypedResponse cmd_flush_subscriptions(
     }
   }
 
-  root->syncToNow(std::chrono::milliseconds(sync_timeout));
+  root->syncToNow(
+      std::chrono::milliseconds(sync_timeout), client->getClientInfo());
 
   UntypedResponse resp;
   std::vector<json_ref> synced;

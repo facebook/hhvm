@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "eden/common/utils/ProcessInfoCache.h"
+#include "watchman/ClientContext.h"
 #include "watchman/PerfSample.h"
 #include "watchman/QueryableView.h"
 #include "watchman/root/Root.h"
@@ -18,7 +20,9 @@ folly::SemiFuture<folly::Unit> Root::waitForSettle(
   return view()->waitForSettle(settle_period);
 }
 
-CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
+CookieSync::SyncResult Root::syncToNow(
+    std::chrono::milliseconds timeout,
+    const ClientContext& client_info) {
   PerfSample sample("sync_to_now");
   SyncToNow syncToNow;
   auto root = shared_from_this();
@@ -40,6 +44,11 @@ CookieSync::SyncResult Root::syncToNow(std::chrono::milliseconds timeout) {
         getLogEventCounters(LogEventType::SyncToNowType);
     // Log if override set, or if we have hit the sample rate
     if (sample.will_log || eventCount == samplingRate) {
+      syncToNow.meta.client_pid = client_info.clientPid;
+      syncToNow.meta.client_name = client_info.clientInfo.has_value()
+          ? facebook::eden::ProcessInfoCache::cleanProcessCommandline(
+                std::move(client_info.clientInfo.value().get().name))
+          : "";
       syncToNow.meta.base.root = root_metadata.root_path.string();
       syncToNow.meta.base.event_count =
           eventCount != samplingRate ? 0 : eventCount;

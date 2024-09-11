@@ -33,6 +33,7 @@ struct TriggerCommand;
 class QueryableView;
 struct QueryContext;
 struct RootMetadata;
+struct ClientContext;
 
 enum ClientStateDisposition {
   PendingEnter,
@@ -326,7 +327,9 @@ class Root : public RootConfig, public std::enable_shared_from_this<Root> {
   void performAgeOut(std::chrono::seconds min_age);
   folly::SemiFuture<folly::Unit> waitForSettle(
       std::chrono::milliseconds settle_period);
-  CookieSync::SyncResult syncToNow(std::chrono::milliseconds timeout);
+  CookieSync::SyncResult syncToNow(
+      std::chrono::milliseconds timeout,
+      const ClientContext& client_info);
   void scheduleRecrawl(const char* why);
   void recrawlTriggered(const char* why);
 

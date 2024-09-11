@@ -6,6 +6,7 @@
  */
 
 #include "watchman/Client.h"
+#include "watchman/ClientContext.h"
 #include "watchman/Command.h"
 #include "watchman/CommandRegistry.h"
 #include "watchman/Errors.h"
@@ -84,7 +85,8 @@ static UntypedResponse cmd_clock(Client* client, const json_ref& args) {
   auto root = resolveRoot(client, args);
 
   if (sync_timeout) {
-    root->syncToNow(std::chrono::milliseconds(sync_timeout));
+    root->syncToNow(
+        std::chrono::milliseconds(sync_timeout), client->getClientInfo());
   }
 
   UntypedResponse resp;

@@ -11,6 +11,7 @@
 #include <folly/stop_watch.h>
 
 #include "eden/common/utils/ProcessInfoCache.h"
+#include "watchman/ClientContext.h"
 #include "watchman/Command.h"
 #include "watchman/Errors.h"
 #include "watchman/Logging.h"
@@ -198,6 +199,10 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
     sendErrorResponse(folly::exceptionStr(e));
     return false;
   }
+}
+
+ClientContext Client::getClientInfo() const {
+  return ClientContext{peerPid_, peerInfo_};
 }
 
 std::string ClientStatus::getName() const {

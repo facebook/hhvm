@@ -470,13 +470,13 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       }
     }
 
-    if (*patchAfter<Id>().toThrift().clear()) {
-      // Since we cleared the field in PatchAfter, we should remove any existing
-      // ensured value.
-      op::clear<Id>(*data_.ensure());
-    }
-
     if constexpr (!is_thrift_union_v<T>) {
+      if (*patchAfter<Id>().toThrift().clear()) {
+        // Since we cleared the field in PatchAfter, we should remove any
+        // existing ensured value.
+        op::clear<Id>(*data_.ensure());
+      }
+
       auto removeRef = Base::toThrift().remove();
       auto iter = removeRef->find(op::get_field_id_v<T, Id>);
       if (iter != removeRef->end()) {
@@ -494,6 +494,24 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     if (ensures<Id>()) {
       return false;
     }
+
+    // If the union patch already ensured to a different field, we need to set
+    // clear so that `ensure` becomes logically `assign`.
+    // Why is this necessary? Without this change, consider the following patch
+    //
+    //   UnionPatch{ensure = {field1: 10}}
+    //
+    // Now let's do `unionPatch.ensure<field2>(20)`, if we just change to
+    //
+    //   UnionPatch{ensure = {field2: 20}}
+    //
+    // This is incorrect when patching union like `{field2: 10}` since the
+    // result should be `{field2: 20}` instead of `{field2: 10}`.
+
+    if (is_thrift_union_v<T> && !apache::thrift::empty(*data_.ensure())) {
+      clear();
+    }
+
     // Merge anything (oddly) in patchAfter into patchPrior.
     if (!patchAfter<Id>().empty()) {
       patchPrior<Id>().merge(std::move(patchAfter<Id>()));

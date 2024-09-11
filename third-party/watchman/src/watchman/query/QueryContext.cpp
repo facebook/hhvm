@@ -7,6 +7,8 @@
 
 #include "watchman/query/QueryContext.h"
 
+#include "folly/stop_watch.h"
+
 #include "watchman/query/Query.h"
 #include "watchman/query/eval.h"
 #include "watchman/query/parse.h"
@@ -129,7 +131,9 @@ void QueryContext::fetchEvalBatchNow() {
   if (evalBatch_.empty()) {
     return;
   }
+  folly::stop_watch<std::chrono::microseconds> timer;
   evalBatch_.front()->batchFetchProperties(evalBatch_);
+  edenFilePropertiesDurationUs.fetch_add(timer.elapsed().count());
 
   auto toProcess = std::move(evalBatch_);
 
@@ -171,7 +175,10 @@ bool QueryContext::fetchRenderBatchNow() {
   if (renderBatch_.empty()) {
     return true;
   }
+
+  folly::stop_watch<std::chrono::microseconds> timer;
   renderBatch_.front()->batchFetchProperties(renderBatch_);
+  edenFilePropertiesDurationUs.fetch_add(timer.elapsed().count());
 
   auto toProcess = std::move(renderBatch_);
 

@@ -262,6 +262,12 @@ static void execute_common(
       queryExecute->deduped = ctx->num_deduped;
       queryExecute->results = ctx->resultsArray.size();
       queryExecute->walked = ctx->getNumWalked();
+      queryExecute->eden_glob_files_duration_us =
+          ctx->edenGlobFilesDurationUs.load(std::memory_order_relaxed);
+      queryExecute->eden_changed_files_duration_us =
+          ctx->edenChangedFilesDurationUs.load(std::memory_order_relaxed);
+      queryExecute->eden_file_properties_duration_us =
+          ctx->edenFilePropertiesDurationUs.load(std::memory_order_relaxed);
 
       if (ctx->query->query_spec) {
         queryExecute->query = ctx->query->query_spec->toString();

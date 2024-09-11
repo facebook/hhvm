@@ -191,6 +191,9 @@ struct QueryExecute {
   int64_t results = 0;
   int64_t walked = 0;
   std::string query;
+  int64_t eden_glob_files_duration_us = 0;
+  int64_t eden_changed_files_duration_us = 0;
+  int64_t eden_file_properties_duration_us = 0;
 
   void populate(DynamicEvent& event) const {
     meta.populate(event);
@@ -207,6 +210,17 @@ struct QueryExecute {
     event.addInt("walked", walked);
     if (!query.empty()) {
       event.addString("query", query);
+    }
+    if (eden_glob_files_duration_us != 0) {
+      event.addInt("eden_glob_files_duration_us", eden_glob_files_duration_us);
+    }
+    if (eden_changed_files_duration_us != 0) {
+      event.addInt(
+          "eden_changed_files_duration_us", eden_changed_files_duration_us);
+    }
+    if (eden_file_properties_duration_us != 0) {
+      event.addInt(
+          "eden_file_properties_duration_us", eden_file_properties_duration_us);
     }
   }
 };

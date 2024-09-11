@@ -7,6 +7,7 @@
 
 #include <cpptoml.h>
 #include <fmt/core.h>
+#include <folly/ScopeGuard.h>
 #include <folly/String.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -873,6 +874,7 @@ class EdenView final : public QueryableView {
       listOnlyFiles =
           ctx->query->expr->listOnlyFiles() == QueryExpr::ReturnOnlyFiles::Yes;
     }
+    folly::stop_watch<std::chrono::microseconds> timer;
     auto fileInfo = globNameAndDType(
         client.get(),
         mountPoint_,
@@ -880,6 +882,8 @@ class EdenView final : public QueryableView {
         includeDotfiles,
         splitGlobPattern_,
         listOnlyFiles);
+    ctx->edenGlobFilesDurationUs.store(
+        timer.elapsed().count(), std::memory_order_relaxed);
 
     // Filter out any ignored files
     filterOutPaths(fileInfo, ctx);
@@ -1347,6 +1351,11 @@ class EdenView final : public QueryableView {
       // return a list of all possible matching files.
       return makeFreshInstance(ctx);
     }
+    folly::stop_watch<std::chrono::microseconds> timer;
+    SCOPE_EXIT {
+      ctx->edenChangedFilesDurationUs.store(
+          timer.elapsed().count(), std::memory_order_relaxed);
+    };
 
     try {
       return getAllChangesSinceStreaming(ctx);

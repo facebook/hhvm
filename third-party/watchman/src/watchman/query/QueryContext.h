@@ -43,6 +43,9 @@ struct QueryContext : QueryContextBase {
       std::chrono::milliseconds(0)};
   std::atomic<std::chrono::milliseconds> renderDuration{
       std::chrono::milliseconds(0)};
+  std::atomic<int64_t> edenGlobFilesDurationUs{0};
+  std::atomic<int64_t> edenChangedFilesDurationUs{0};
+  std::atomic<int64_t> edenFilePropertiesDurationUs{0};
 
   void generationStarted() {
     viewLockWaitDuration = stopWatch.lap();

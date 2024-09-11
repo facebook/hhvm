@@ -10,6 +10,8 @@
 #include <fmt/chrono.h>
 #include <folly/ScopeGuard.h>
 
+#include "eden/common/utils/ProcessInfoCache.h"
+#include "watchman/ClientContext.h"
 #include "watchman/CommandRegistry.h"
 #include "watchman/Errors.h"
 #include "watchman/PerfSample.h"
@@ -163,7 +165,8 @@ static void execute_common(
     QueryExecute* queryExecute,
     PerfSample* sample,
     QueryResult* res,
-    QueryGenerator generator) {
+    QueryGenerator generator,
+    const ClientContext& clientInfo) {
   ctx->stopWatch.reset();
 
   if (ctx->query->dedup_results) {
@@ -263,6 +266,11 @@ static void execute_common(
       if (ctx->query->query_spec) {
         queryExecute->query = ctx->query->query_spec->toString();
       }
+      queryExecute->meta.client_pid = clientInfo.clientPid;
+      queryExecute->meta.client_name = clientInfo.clientInfo.has_value()
+          ? facebook::eden::ProcessInfoCache::cleanProcessCommandline(
+                std::move(clientInfo.clientInfo.value().get().name))
+          : "";
 
       getLogger()->logEvent(*queryExecute);
     }
@@ -480,11 +488,12 @@ QueryResult w_query_execute(
       QueryResult r;
       c.clockAtStartOfQuery = ctx.clockAtStartOfQuery;
       c.since = ctx.since;
-      execute_common(&c, nullptr, nullptr, &r, generator);
+      execute_common(&c, nullptr, nullptr, &r, generator, query->clientInfo);
     }
   }
 
-  execute_common(&ctx, &queryExecute, &sample, &res, generator);
+  execute_common(
+      &ctx, &queryExecute, &sample, &res, generator, query->clientInfo);
   return res;
 }
 

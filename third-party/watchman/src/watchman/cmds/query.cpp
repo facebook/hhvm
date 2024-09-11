@@ -7,6 +7,8 @@
 
 #include "watchman/query/Query.h"
 #include "watchman/Client.h"
+#include "watchman/ClientContext.h"
+#include "watchman/ProcessUtil.h"
 #include "watchman/query/eval.h"
 #include "watchman/query/parse.h"
 #include "watchman/saved_state/SavedStateFactory.h"
@@ -24,7 +26,11 @@ static UntypedResponse cmd_query(Client* client, const json_ref& args) {
 
   const auto& query_spec = args.at(2);
   auto query = parseQuery(root, query_spec);
-  query->clientPid = client->stm ? client->stm->getPeerProcessID() : 0;
+  auto clientPid = client->stm ? client->stm->getPeerProcessID() : 0;
+  query->clientInfo.clientPid = clientPid;
+  query->clientInfo.clientInfo = clientPid
+      ? std::make_optional(lookupProcessInfo(clientPid))
+      : std::nullopt;
 
   if (client->client_mode) {
     query->sync_timeout = std::chrono::milliseconds(0);

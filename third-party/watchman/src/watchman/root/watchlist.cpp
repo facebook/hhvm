@@ -219,7 +219,7 @@ RootDebugStatus Root::getStatus() const {
       info.view_lock_wait_duration_milliseconds =
           ctx->viewLockWaitDuration.load().count();
       info.state = queryState;
-      info.client_pid = ctx->query->clientPid;
+      info.client_pid = ctx->query->clientInfo.clientPid;
       info.request_id = ctx->query->request_id;
       info.query = ctx->query->query_spec;
       if (ctx->query->subscriptionName) {

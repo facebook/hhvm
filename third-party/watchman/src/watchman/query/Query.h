@@ -8,6 +8,7 @@
 #pragma once
 
 #include <optional>
+#include "watchman/ClientContext.h"
 #include "watchman/Clock.h"
 #include "watchman/fs/FileSystem.h"
 #include "watchman/thirdparty/jansson/jansson.h"
@@ -96,7 +97,7 @@ struct Query {
 
   std::optional<w_string> request_id;
   std::optional<w_string> subscriptionName;
-  pid_t clientPid{0};
+  ClientContext clientInfo{0, std::nullopt};
 
   bool alwaysIncludeDirectories{false};
 

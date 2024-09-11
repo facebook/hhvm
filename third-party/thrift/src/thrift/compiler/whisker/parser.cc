@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/detail/string.h>
+#include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/lexer.h>
 #include <thrift/compiler/whisker/parser.h>
 
@@ -124,20 +125,14 @@ struct parser_scan_window {
 };
 
 /**
- * A marker struct that indicates that parsing failed (non-fatally).
- */
-struct no_parse_result {};
-
-/**
  * Result of a scan which resulted in a parsed representation of tokens.
  * The (now advanced) parser_scan_window is packaged with the token so the
  * parser can move up its cursor.
  */
 template <typename T>
-struct [[nodiscard]] parse_result {
-  parse_result(T value, const parser_scan_window& advanced)
-      : result_{success{std::move(value), advanced.make_fresh()}} {}
-  /* implicit */ parse_result(no_parse_result) : result_{std::nullopt} {}
+struct parsed_object {
+  parsed_object(T value, const parser_scan_window& advanced)
+      : value_{std::move(value)}, new_head_{advanced.make_fresh()} {}
 
   /**
    * Advances the provided parser_scan_window to the last consumed token as part
@@ -146,20 +141,40 @@ struct [[nodiscard]] parse_result {
    */
   [[nodiscard]] T consume_and_advance(parser_scan_window* scan) && {
     assert(scan);
-    assert(has_value());
-    *scan = std::move(result_->new_head);
-    return std::move(result_->value);
+    *scan = std::move(new_head_);
+    return std::move(value_);
   }
 
-  bool has_value() const { return result_.has_value(); }
-  explicit operator bool() const { return has_value(); }
-
  private:
-  struct success {
-    T value;
-    parser_scan_window new_head;
-  };
-  std::optional<success> result_;
+  T value_;
+  parser_scan_window new_head_;
+};
+
+/**
+ * A marker struct that indicates that parsing failed (non-fatally).
+ */
+struct no_parse_result {};
+
+template <typename T>
+struct [[nodiscard]] parse_result
+    : private expected<parsed_object<T>, no_parse_result> {
+ private:
+  using base = expected<parsed_object<T>, no_parse_result>;
+
+ public:
+  parse_result(T value, const parser_scan_window& advanced)
+      : base(std::in_place, std::move(value), advanced) {}
+  /* implicit */ parse_result(no_parse_result) : base(unexpect) {}
+
+  [[nodiscard]] T consume_and_advance(parser_scan_window* scan) && {
+    assert(this->has_value());
+    return std::move(**this).consume_and_advance(scan);
+  }
+
+  using base::operator bool;
+  using base::has_value;
+  using base::operator*;
+  using base::operator->;
 };
 
 bool try_consume_token(parser_scan_window* scan, tok kind) {
@@ -644,7 +659,7 @@ class parser {
    * Post-condition:
    *   - result.has_value() == true
    */
-  parse_result<ast::bodies> parse_bodies(parser_scan_window scan) {
+  parsed_object<ast::bodies> parse_bodies(parser_scan_window scan) {
     ast::bodies bodies;
     while (parse_result maybe_body = parse_body(scan)) {
       if (auto body = std::move(maybe_body).consume_and_advance(&scan)) {

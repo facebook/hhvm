@@ -20,6 +20,14 @@
 
 namespace apache::thrift::protocol::detail {
 
+void validateTypeIsFull(const type::Type& type) {
+  if (!type.isFull()) {
+    folly::throw_exception<std::runtime_error>(
+        "Type mask requires full type! Attempting to use: " +
+        debugFormatType(type));
+  }
+}
+
 std::string debugFormatType(const type::Type& type) {
   return debugStringViaEncode(type);
 }

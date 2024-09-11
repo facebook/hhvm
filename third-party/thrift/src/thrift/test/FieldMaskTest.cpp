@@ -18,6 +18,7 @@
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/type/UniversalName.h>
 #include <thrift/test/gen-cpp2/FieldMask_types.h>
 
 using apache::thrift::protocol::allMask;
@@ -64,6 +65,31 @@ static Mask allTypeMask = []() {
   m.excludes_type_ref().ensure();
   return m;
 }();
+
+// We don't want to provide an official API for this
+template <typename T>
+T getViaIdenticalType(const type::AnyStruct& any, const type::Type& type) {
+  CHECK(type::identicalType(*any.type(), type));
+
+  T ret;
+  CompactProtocolReader reader;
+  reader.setInput(&any.data().value());
+  op::decode<type::struct_t<Foo>>(reader, ret);
+  return ret;
+}
+
+// Works only for struct types
+void convertToHashedURI(type::Type& type) {
+  auto& typeUriUnion = *type.toThrift().name()->structType_ref();
+
+  auto hashed =
+      type::getUniversalHashPrefix(
+          type::getUniversalHash(
+              type::UniversalHashAlgorithm::Sha2_256, typeUriUnion.get_uri()),
+          type::kDefaultTypeHashBytes)
+          .toString();
+  typeUriUnion.typeHashPrefixSha2_256_ref().ensure() = hashed;
+}
 
 TEST(FieldMaskTest, ExampleFieldMask) {
   // includes{7: excludes{},
@@ -1353,6 +1379,28 @@ TEST(FieldMaskTest, FilterAny) {
           .field1());
 }
 
+TEST(FieldMaskTest, FilterAnyWithHashedURI) {
+  auto fooType = type::Type::create<type::infer_tag<Foo>>();
+  convertToHashedURI(fooType);
+
+  Foo foo;
+  foo.field1() = 1;
+  auto fooAny = type::AnyData::toAny<type::infer_tag<Foo>>(foo).toThrift();
+  fooAny.type() = fooType;
+
+  MaskBuilder<type::AnyStruct> m;
+
+  // type mismatch
+  m.reset_to_none().includes_type<>(type::struct_t<Bar>{}, allMask());
+  type::AnyStruct filtered = applyFilterOnAny(m.toThrift(), fooAny);
+  EXPECT_EQ(filtered, type::AnyStruct{});
+
+  // type match
+  m.reset_to_none().includes_type<>(type::struct_t<Foo>{}, allMask());
+  filtered = applyFilterOnAny(m.toThrift(), fooAny);
+  EXPECT_EQ(getViaIdenticalType<Foo>(filtered, fooType), foo);
+}
+
 TEST(FieldMaskTest, IsCompatibleWithSimple) {
   EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(allMask()));
   EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(noneMask()));
@@ -2035,6 +2083,27 @@ TEST(FieldMaskTest, ClearAnyStruct) {
                          .get<type::infer_tag<type::AnyStruct>>())
            .get<type::infer_tag<Foo>>()
            .field1_ref());
+}
+TEST(FieldMaskTest, ClearAnyStructWithHashedUri) {
+  auto fooType = type::Type::create<type::infer_tag<Foo>>();
+  convertToHashedURI(fooType);
+
+  Foo foo;
+  foo.field1() = 1;
+  auto fooAny = type::AnyData::toAny<type::infer_tag<Foo>>(foo).toThrift();
+  fooAny.type() = fooType;
+
+  MaskBuilder<type::AnyStruct> m;
+
+  // type mismatch
+  m.reset_to_none().includes_type<>(type::struct_t<Bar>{}, allMask());
+  applyClear(m.toThrift(), fooAny);
+  EXPECT_EQ(getViaIdenticalType<Foo>(fooAny, fooType), foo);
+
+  // type match
+  m.reset_to_none().includes_type<>(type::struct_t<Foo>{}, allMask());
+  applyClear(m.toThrift(), fooAny);
+  EXPECT_EQ(getViaIdenticalType<Foo>(fooAny, fooType), Foo{});
 }
 
 void testLogicalOperations(Mask A, Mask B) {
@@ -3535,6 +3604,30 @@ TEST(FieldMaskTest, testDuplicateEntryInTypeMaskList) {
       (protocol::detail::TypeToMaskAdapter<protocol::TypeAndMaskEntry, Mask>::
            fromThrift(std::move(entries))),
       std::runtime_error);
+}
+TEST(FieldMaskTest, testIncompleteType) {
+  Mask m;
+
+  type::Type type;
+
+  // Scoped name
+  type.toThrift().name()->structType_ref().ensure().scopedName_ref() =
+      "foo.Bar";
+  EXPECT_THROW(m.includes_type_ref().ensure()[type], std::runtime_error);
+
+  // typeHash
+  type.toThrift()
+      .name()
+      ->structType_ref()
+      .ensure()
+      .typeHashPrefixSha2_256_ref() = "abcde123";
+  EXPECT_THROW(
+      m.excludes_type_ref().ensure().emplace(type, Mask{}), std::runtime_error);
+
+  type.toThrift().name()->unionType_ref().ensure().definitionKey_ref() =
+      "abcde123";
+  EXPECT_THROW(
+      m.excludes_type_ref().ensure().emplace(type, Mask{}), std::runtime_error);
 }
 
 TEST(FieldMaskTest, FieldMaskLogicalOperatorAllMask) {

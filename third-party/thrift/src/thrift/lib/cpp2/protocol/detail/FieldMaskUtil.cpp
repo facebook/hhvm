@@ -40,7 +40,8 @@ void clear_fields(MaskRef ref, type::AnyStruct& t) {
         "The mask and struct are incompatible");
   }
 
-  auto nested = ref.get(*t.type_ref());
+  // The type of Any could be a hashed-URI so use getViaIdenticalType
+  auto nested = ref.getViaIdenticalType_INTERNAL_DO_NOT_USE(*t.type_ref());
   if (!nested.isNoneMask()) {
     auto val = parseValueFromAny(t);
     nested.clear(val);
@@ -60,7 +61,8 @@ bool filter_fields(
         "The mask and struct are incompatible");
   }
 
-  auto nested = ref.get(*t.type_ref());
+  // The type of Any could be a hashed-URI so use getViaIdenticalType
+  auto nested = ref.getViaIdenticalType_INTERNAL_DO_NOT_USE(*t.type_ref());
   if (nested.isNoneMask()) {
     return false;
   }

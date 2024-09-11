@@ -56,6 +56,9 @@ class MaskRef {
   // be included. Throws a runtime exception if the mask is not a type map mask.
   MaskRef get(const type::Type& type) const;
 
+  // This API is reserved for internal use only.
+  MaskRef getViaIdenticalType_INTERNAL_DO_NOT_USE(const type::Type& type) const;
+
   // Returns whether the ref includes all fields.
   bool isAllMask() const;
 

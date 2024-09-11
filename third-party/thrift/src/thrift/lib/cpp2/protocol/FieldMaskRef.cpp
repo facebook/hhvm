@@ -176,7 +176,7 @@ MaskRef MaskRef::get(const std::string& key) const {
 }
 
 MaskRef MaskRef::get(const type::Type& type) const {
-  if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
+  if (isAllMask() || isNoneMask()) { // All types included or excluded.
     return *this;
   }
   throwIfNotTypeMask();
@@ -186,6 +186,36 @@ MaskRef MaskRef::get(const type::Type& type) const {
   } else {
     return MaskRef{
         getMask(mask.excludes_type_ref().value(), type), !is_exclusion};
+  }
+}
+
+// Uses type::identicalType to look up the nested MaskRef for the given type
+// Use this if type can possibly be a hashed URI
+MaskRef MaskRef::getViaIdenticalType_INTERNAL_DO_NOT_USE(
+    const type::Type& type) const {
+  if (type.isFull()) {
+    // Optimize for the common case of a full type.
+    return get(type);
+  }
+  if (isAllMask() || isNoneMask()) { // All types included or excluded.
+    return *this;
+  }
+  throwIfNotTypeMask();
+  auto findViaIdenticalType = [&](const auto& map) -> const Mask& {
+    for (auto it = map.begin(); it != map.end(); ++it) {
+      if (type::identicalType(it->first, type)) {
+        return it->second;
+      }
+    }
+    return field_mask_constants::noneMask();
+  };
+
+  if (mask.includes_type_ref()) {
+    return MaskRef{
+        findViaIdenticalType(mask.includes_type_ref().value()), is_exclusion};
+  } else {
+    return MaskRef{
+        findViaIdenticalType(mask.excludes_type_ref().value()), !is_exclusion};
   }
 }
 
@@ -272,8 +302,8 @@ void MaskRef::clear(protocol::Object& obj) const {
           "Incompatible mask and data: expected Any for type-mask");
     };
 
-    // get mask for the type in any
-    auto nestedMask = get(any.type());
+    // The type of Any could be a hashed-URI so use getViaIdenticalType
+    auto nestedMask = getViaIdenticalType_INTERNAL_DO_NOT_USE(any.type());
     if (!nestedMask.isNoneMask()) {
       // recurse
       auto value = detail::parseValueFromAny(any);
@@ -328,7 +358,8 @@ protocol::Object MaskRef::filter(const protocol::Object& src) const {
           "Incompatible mask and data: expected Any for type-mask");
     };
 
-    auto nestedMask = get(any.type());
+    // The type of Any could be a hashed-URI so use getViaIdenticalType
+    auto nestedMask = getViaIdenticalType_INTERNAL_DO_NOT_USE(any.type());
     if (nestedMask.isNoneMask()) {
       // Filter failed, return empty object
       return {};

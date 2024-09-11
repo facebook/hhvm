@@ -207,14 +207,18 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return hasAssign() || data_.clear() == true ||
         (getEnsure<Id>(data_) && type::is_optional_or_union_field_v<T, Id>) ||
         !getRawPatch<Id>(data_.patchPrior()).empty() ||
-        !getRawPatch<Id>(data_.patch()).empty();
+        !getRawPatch<Id>(data_.patch()).empty() ||
+        (!data_.remove()->empty() &&
+         data_.remove()->contains(op::get_field_id_v<T, Id>));
   }
 
   template <typename Id, typename... Ids>
   std::enable_if_t<sizeof...(Ids) != 0, bool> modifies() const {
     // If hasAssign() == true, the whole struct (all fields) will be replaced.
     if (hasAssign() || data_.clear() == true ||
-        (getEnsure<Id>(data_) && type::is_optional_or_union_field_v<T, Id>)) {
+        (getEnsure<Id>(data_) && type::is_optional_or_union_field_v<T, Id>) ||
+        (!data_.remove()->empty() &&
+         data_.remove()->contains(op::get_field_id_v<T, Id>))) {
       return true;
     }
 

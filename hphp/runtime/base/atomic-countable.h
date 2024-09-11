@@ -28,10 +28,10 @@ namespace HPHP {
  */
 struct AtomicCountable {
   using RefCount = int32_t;
-  AtomicCountable() : m_count(0) {}
-  RefCount getCount() const { return m_count; }
-  void incAtomicCount() const { ++m_count; }
-  RefCount decAtomicCount() const { return --m_count; }
+  AtomicCountable() noexcept : m_count(0) {}
+  RefCount getCount() const noexcept { return m_count; }
+  void incAtomicCount() const noexcept { ++m_count; }
+  RefCount decAtomicCount() const noexcept { return --m_count; }
  protected:
   mutable std::atomic<RefCount> m_count;
 };

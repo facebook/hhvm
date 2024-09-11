@@ -31,25 +31,28 @@ namespace HPHP {
  */
 template<typename T, bool isLow>
 struct AtomicSharedPtrImpl {
-  explicit AtomicSharedPtrImpl(T* px = nullptr) : m_px(px) {
+  explicit AtomicSharedPtrImpl(T* px = nullptr) noexcept : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
 
   template<class Y>
-  explicit AtomicSharedPtrImpl(Y* px) : m_px(px) {
+  explicit AtomicSharedPtrImpl(Y* px) noexcept : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
 
-  AtomicSharedPtrImpl(const AtomicSharedPtrImpl& src)
+  AtomicSharedPtrImpl(const AtomicSharedPtrImpl& src) noexcept
     : m_px(nullptr) {
     operator=(src.get());
   }
 
   template<class Y>
-  AtomicSharedPtrImpl(const AtomicSharedPtrImpl<Y, isLow>& src)
+  AtomicSharedPtrImpl(const AtomicSharedPtrImpl<Y, isLow>& src) noexcept
     : m_px(nullptr) {
     operator=(src.get());
   }
+
+  AtomicSharedPtrImpl(AtomicSharedPtrImpl&& src) noexcept
+    : m_px(std::exchange(src.m_px, nullptr)) {}
 
   ~AtomicSharedPtrImpl() {
     if (m_px && m_px->decAtomicCount() == 0) {
@@ -61,16 +64,25 @@ struct AtomicSharedPtrImpl {
    * Assignments.
    */
 
-  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl& src) {
+  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl& src) noexcept {
     return operator=(src.m_px);
   }
 
+  AtomicSharedPtrImpl& operator=(AtomicSharedPtrImpl&& src) noexcept {
+    if (m_px && m_px->decAtomicCount() == 0) {
+      m_px->atomicRelease();
+    }
+    m_px = nullptr; // guard against self-assignment!
+    m_px = std::exchange(src.m_px, nullptr);
+    return *this;
+  }
+
   template<class Y>
-  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl<Y, isLow>& src) {
+  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl<Y, isLow>& src) noexcept {
     return operator=(src.get());
   }
 
-  AtomicSharedPtrImpl& operator=(T* px) {
+  AtomicSharedPtrImpl& operator=(T* px) noexcept {
     if (m_px != px) {
       if (m_px && m_px->decAtomicCount() == 0) {
         m_px->atomicRelease();
@@ -84,7 +96,7 @@ struct AtomicSharedPtrImpl {
   }
 
   template<class Y>
-  AtomicSharedPtrImpl& operator=(Y* px) {
+  AtomicSharedPtrImpl& operator=(Y* px) noexcept {
     T* npx = dynamic_cast<T*>(px);
     if (m_px != npx) {
       if (m_px && m_px->decAtomicCount() == 0) {
@@ -101,31 +113,31 @@ struct AtomicSharedPtrImpl {
   /**
    * Safe bool cast.
    */
-  explicit operator bool() const { return m_px != nullptr; }
+  explicit operator bool() const noexcept { return m_px != nullptr; }
 
   /**
    * Magic delegation.
    */
-  T* operator->() const {
+  T* operator->() const noexcept {
     return m_px;
   }
 
   /**
    * Get the raw pointer.
    */
-  T* get() const {
+  T* get() const noexcept {
     return m_px;
   }
 
   /**
    * Reset the raw pointer.
    */
-  void reset(T* p = nullptr) {
+  void reset(T* p = nullptr) noexcept {
     operator=(p);
   }
 
 protected:
-  void overwrite_unsafe(T* ptr) {
+  void overwrite_unsafe(T* ptr) noexcept {
     assertx(!m_px);
     m_px = ptr;
   }

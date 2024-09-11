@@ -365,18 +365,21 @@ class ConnectOperation : public Operation {
       const std::vector<std::string>& sslCertSan,
       const std::vector<std::string>& sslCertIdentities,
       bool isValidated) {
-    impl()->withOptionalConnectionContext([&](auto& ctx) {
-      if (!sslCertCn.empty()) {
-        ctx.sslCertCn = sslCertCn;
-      }
-      if (!sslCertSan.empty()) {
-        ctx.sslCertSan = sslCertSan;
-      }
-      if (!sslCertIdentities.empty()) {
-        ctx.sslCertIdentities = sslCertIdentities;
-      }
-      ctx.isServerCertValidated = isValidated;
-    });
+    // Make sure we have an impl - it is possible to not have one.
+    if (auto* implPtr = impl()) {
+      implPtr->withOptionalConnectionContext([&](auto& ctx) {
+        if (!sslCertCn.empty()) {
+          ctx.sslCertCn = sslCertCn;
+        }
+        if (!sslCertSan.empty()) {
+          ctx.sslCertSan = sslCertSan;
+        }
+        if (!sslCertIdentities.empty()) {
+          ctx.sslCertIdentities = sslCertIdentities;
+        }
+        ctx.isServerCertValidated = isValidated;
+      });
+    }
   }
 
   void mustSucceed() override;

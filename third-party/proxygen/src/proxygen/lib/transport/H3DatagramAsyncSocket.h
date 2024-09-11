@@ -65,6 +65,10 @@ class H3DatagramAsyncSocket
     }
   }
 
+  HTTPTransaction* getTransaction() {
+    return txn_;
+  }
+
   /*
    * AsyncUDPSocket
    */

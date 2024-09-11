@@ -28,7 +28,7 @@ let () = Random.self_init ()
 
 let init_event_logger
     root
-    command
+    (command : ClientCommand.heavy_command)
     ~init_id
     ~from
     (config : ServerConfig.t)
@@ -78,17 +78,26 @@ let set_up_root root =
   Server_progress.set_root root;
   ()
 
-let handle_exn_and_exit exn ~command_name =
+let exit_status_of_exn exn =
   let e = Exception.wrap exn in
+  let es =
+    match exn with
+    | Exit_status.Exit_with es -> es
+    | _ -> Exit_status.Uncaught_exception e
+  in
+  (es, e)
+
+let handle_exn_and_exit exn ~command_name =
+  let (es, e) = exit_status_of_exn exn in
   (* hide the spinner *)
   ClientSpinner.report ~to_stderr:false ~angery_reaccs_only:false None;
   (* We trust that if someone raised Exit_with then they had the decency to print
      out a user-facing message; we will only print out a user-facing message here
      for uncaught exceptions: lvl=Error gets sent to stderr, but lvl=Info doesn't. *)
-  let (es, lvl) =
+  let lvl =
     match exn with
-    | Exit_status.Exit_with es -> (es, Hh_logger.Level.Info)
-    | _ -> (Exit_status.Uncaught_exception e, Hh_logger.Level.Error)
+    | Exit_status.Exit_with _ -> Hh_logger.Level.Info
+    | _ -> Hh_logger.Level.Error
   in
   Hh_logger.log
     ~lvl
@@ -98,22 +107,26 @@ let handle_exn_and_exit exn ~command_name =
   HackEventLogger.client_bad_exit ~command_name es e;
   Exit.exit es
 
-let () =
-  (* no-op, needed at entry-point for Daemon hookup *)
-  Daemon.check_entry_point ();
-  Folly.ensure_folly_init ();
-  set_up_signals ();
+let exec_command_without_config (command : ClientCommand.light_command) =
+  try
+    let exit_status =
+      match command with
+      | ClientCommand.CDecompressZhhdg env -> ClientDecompressZhhdg.main env
+    in
+    Exit.exit exit_status
+  with
+  | exn ->
+    let (es, _e) = exit_status_of_exn exn in
+    Printf.printf
+      "[%s] %s\n"
+      (ClientCommand.name_camel_case_light command)
+      (Exit_status.show_expanded es);
+    Exit.exit es
+
+let exec_command_with_config
+    (command : ClientCommand.heavy_command) ~init_proc_stack =
   let init_id = Random_id.short_string () in
-  let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
-  let command =
-    ClientArgs.parse_args
-      ~from_default:
-        (if Proc.is_likely_from_interactive_shell init_proc_stack then
-          "[sh]"
-        else
-          "")
-  in
-  let command_name = ClientCommand.name_camel_case command in
+  let command_name = ClientCommand.name_camel_case_heavy command in
 
   (* The global variable Relative_path.root must be initialized for a wide variety of things *)
   let root = ClientArgs.root command in
@@ -165,8 +178,26 @@ let () =
       | ClientCommand.CDownloadSavedState env ->
         Lwt_utils.run_main (fun () ->
             ClientDownloadSavedState.main env local_config)
-      | ClientCommand.CDecompressZhhdg env -> ClientDecompressZhhdg.main env
     in
     Exit.exit exit_status
   with
   | exn -> handle_exn_and_exit exn ~command_name
+
+let () =
+  (* no-op, needed at entry-point for Daemon hookup *)
+  Daemon.check_entry_point ();
+  Folly.ensure_folly_init ();
+  set_up_signals ();
+  let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
+  let command =
+    ClientArgs.parse_args
+      ~from_default:
+        (if Proc.is_likely_from_interactive_shell init_proc_stack then
+          "[sh]"
+        else
+          "")
+  in
+  match command with
+  | ClientCommand.Without_config command -> exec_command_without_config command
+  | ClientCommand.With_config command ->
+    exec_command_with_config command ~init_proc_stack

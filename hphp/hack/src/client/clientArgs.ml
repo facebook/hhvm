@@ -921,7 +921,7 @@ let parse_start_env command ~from_default =
     preexisting_warnings = !preexisting_warnings;
   }
 
-let parse_saved_state_project_metadata_args ~from_default : command =
+let parse_saved_state_project_metadata_args ~from_default =
   CSavedStateProjectMetadata
     (parse_check_args CKSavedStateProjectMetadata ~from_default)
 
@@ -1129,8 +1129,7 @@ Decompress a .zhhdg file by running the depgraph decompressor, and write a .hhdg
           " The path on disk to the .zhhdg file" );
       ]
   in
-  let args = parse_without_command options usage "decompress-zhhdg" in
-  let root = Wwwroot.interpret_command_line_root_parameter args in
+  let _args = parse_without_command options usage "decompress-zhhdg" in
   let path =
     match !path with
     | "" ->
@@ -1139,7 +1138,7 @@ Decompress a .zhhdg file by running the depgraph decompressor, and write a .hhdg
     | p -> p
   in
   let from = !from in
-  CDecompressZhhdg { ClientDecompressZhhdg.path; from; root }
+  CDecompressZhhdg { ClientDecompressZhhdg.path; from }
 
 let parse_download_saved_state_args () =
   let usage =
@@ -1202,16 +1201,16 @@ let parse_args ~(from_default : string) : command =
   match parse_command () with
   | CKNone
   | CKCheck ->
-    CCheck (parse_check_args CKCheck ~from_default)
-  | CKStart -> parse_start_args ~from_default
-  | CKStop -> parse_stop_args ~from_default
-  | CKRestart -> parse_restart_args ~from_default
-  | CKLsp -> parse_lsp_args ()
-  | CKRage -> parse_rage_args ()
+    With_config (CCheck (parse_check_args CKCheck ~from_default))
+  | CKStart -> With_config (parse_start_args ~from_default)
+  | CKStop -> With_config (parse_stop_args ~from_default)
+  | CKRestart -> With_config (parse_restart_args ~from_default)
+  | CKLsp -> With_config (parse_lsp_args ())
+  | CKRage -> With_config (parse_rage_args ())
   | CKSavedStateProjectMetadata ->
-    parse_saved_state_project_metadata_args ~from_default
-  | CKDownloadSavedState -> parse_download_saved_state_args ()
-  | CKDecompressZhhdg -> parse_decompress_zhhdg_args ()
+    With_config (parse_saved_state_project_metadata_args ~from_default)
+  | CKDownloadSavedState -> With_config (parse_download_saved_state_args ())
+  | CKDecompressZhhdg -> Without_config (parse_decompress_zhhdg_args ())
 
 let root = function
   | CCheck { ClientEnv.root; _ }
@@ -1220,7 +1219,6 @@ let root = function
   | CStop { ClientStop.root; _ }
   | CRage { ClientRage.root; _ }
   | CSavedStateProjectMetadata { ClientEnv.root; _ }
-  | CDecompressZhhdg { ClientDecompressZhhdg.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     root
   | CLsp { ClientLsp.root_from_cli; _ } -> root_from_cli
@@ -1234,8 +1232,7 @@ let config = function
     Some config
   | CStop _
   | CDownloadSavedState _
-  | CRage _
-  | CDecompressZhhdg _ ->
+  | CRage _ ->
     None
 
 let from = function
@@ -1246,8 +1243,7 @@ let from = function
   | CSavedStateProjectMetadata { ClientEnv.from; _ }
   | CStop { ClientStop.from; _ }
   | CDownloadSavedState { ClientDownloadSavedState.from; _ }
-  | CRage { ClientRage.from; _ }
-  | CDecompressZhhdg { ClientDecompressZhhdg.from; _ } ->
+  | CRage { ClientRage.from; _ } ->
     from
 
 let is_interactive cmd = from cmd |> is_interactive

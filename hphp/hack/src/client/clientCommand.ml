@@ -7,7 +7,9 @@
  *
  *)
 
-type command =
+(** Heavy commands should be run from www and provide a root.
+  They can benefit from logging and config parsing *)
+type heavy_command =
   | CCheck of ClientEnv.client_check_env
   | CStart of ClientStart.env
   | CStop of ClientStop.env
@@ -16,7 +18,16 @@ type command =
   | CSavedStateProjectMetadata of ClientEnv.client_check_env
   | CDownloadSavedState of ClientDownloadSavedState.env
   | CRage of ClientRage.env
-  | CDecompressZhhdg of ClientDecompressZhhdg.env
+
+(** Light commands should not use any of the following
+  - Hh_logger, HackEventLogger
+  - configs
+  - root or relative paths *)
+type light_command = CDecompressZhhdg of ClientDecompressZhhdg.env
+
+type command =
+  | With_config of heavy_command
+  | Without_config of light_command
 
 type command_keyword =
   | CKCheck
@@ -40,8 +51,7 @@ let get_custom_telemetry_data command =
   | CLsp _
   | CSavedStateProjectMetadata _
   | CDownloadSavedState _
-  | CRage _
-  | CDecompressZhhdg _ ->
+  | CRage _ ->
     []
 
 let command_name = function
@@ -56,7 +66,7 @@ let command_name = function
   | CKDecompressZhhdg -> "decompress-zhhdg"
   | CKNone -> ""
 
-let name_camel_case = function
+let name_camel_case_heavy = function
   | CCheck _ -> "Check"
   | CStart _ -> "Start"
   | CStop _ -> "Stop"
@@ -65,4 +75,6 @@ let name_camel_case = function
   | CSavedStateProjectMetadata _ -> "SavedStateProjectMetadata"
   | CDownloadSavedState _ -> "DownloadSavedState"
   | CRage _ -> "Rage"
+
+let name_camel_case_light = function
   | CDecompressZhhdg _ -> "DecompressZhhdg"

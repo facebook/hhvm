@@ -9,7 +9,6 @@
 type env = {
   path: string;
   from: string;
-  root: Path.t;
 }
 
 val main : env -> Exit_status.t

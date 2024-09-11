@@ -159,7 +159,8 @@ oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
     reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> _retVal = reactor.core.publisher.Flux.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
-      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
+      String qualifiedMethodName = "LegacyService." + _name;
+      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, qualifiedMethodName, _payload.getRequestContext());
     } catch (Throwable _t) {
       org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(_t.getMessage());
       com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), null);
@@ -196,7 +197,8 @@ oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
     reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _retVal = reactor.core.publisher.Mono.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
-      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
+      String qualifiedMethodName = "LegacyService." + _name;
+      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, qualifiedMethodName, _payload.getRequestContext());
     } catch (Throwable _t) {
       org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(_t.getMessage());
       com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), null);
@@ -239,7 +241,8 @@ oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
     reactor.core.publisher.Mono<Void> _retVal = reactor.core.publisher.Mono.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
-      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
+      String qualifiedMethodName = "LegacyService." + _name;
+      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, qualifiedMethodName, _payload.getRequestContext());
     } catch (Throwable _t) {
       return reactor.core.publisher.Mono.error(_t);
     }

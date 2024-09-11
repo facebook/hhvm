@@ -17,6 +17,7 @@
 #include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/detail/string.h>
 #include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/lexer.h>
 
 #include <cstdlib>
@@ -103,14 +104,13 @@ void skip_whitespace(detail::lexer_scan_window* scan) {
 }
 
 /**
- * Result of a scan which resulted in a token or failed.
+ * Result of a scan which resulted in a token.
  * The (now advanced) scan_window is packaged with the token so the lexer can
  * move up its cursor.
  */
-struct [[nodiscard]] lex_result {
-  lex_result(token t, const detail::lexer_scan_window& advanced)
-      : result_{success{std::move(t), advanced.make_fresh()}} {}
-  /* implicit */ lex_result(std::nullopt_t) : result_{std::nullopt} {}
+struct lexed_token {
+  lexed_token(token t, const detail::lexer_scan_window& advanced)
+      : value_{std::move(t)}, new_head_{advanced.make_fresh()} {}
 
   /**
    * Advances the provided scan_window to the end of the token, then returns the
@@ -119,20 +119,43 @@ struct [[nodiscard]] lex_result {
    */
   [[nodiscard]] token advance_to_token(detail::lexer_scan_window* scan) && {
     assert(scan);
-    assert(result_);
-    *scan = std::move(result_->new_head);
-    return std::move(result_->value);
+    *scan = std::move(new_head_);
+    return std::move(value_);
   }
 
-  bool has_value() const { return result_.has_value(); }
-  explicit operator bool() const { return has_value(); }
-
  private:
-  struct success {
-    token value;
-    detail::lexer_scan_window new_head;
-  };
-  std::optional<success> result_;
+  token value_;
+  detail::lexer_scan_window new_head_;
+};
+
+/**
+ * Marker struct to indicate that a scan did not result in a token.
+ */
+struct no_lex_result {};
+
+/**
+ * Result of a scan which resulted in a token.
+ * The (now advanced) scan_window is packaged with the token so the lexer can
+ * move up its cursor.
+ */
+struct [[nodiscard]] lex_result : private expected<lexed_token, no_lex_result> {
+ private:
+  using base = expected<lexed_token, no_lex_result>;
+
+ public:
+  lex_result(token t, const detail::lexer_scan_window& advanced)
+      : base(std::in_place, std::move(t), advanced) {}
+  /* implicit */ lex_result(no_lex_result) : base(unexpect) {}
+
+  [[nodiscard]] token advance_to_token(detail::lexer_scan_window* scan) && {
+    assert(has_value());
+    return std::move(**this).advance_to_token(scan);
+  }
+
+  using base::operator bool;
+  using base::has_value;
+  using base::operator*;
+  using base::operator->;
 };
 
 // Returns the skipped scan_window if the comment is escaped "{{--"
@@ -151,7 +174,7 @@ lex_result lex_punctuation(detail::lexer_scan_window scan) {
   if (auto punct = token_detail::to_tok(c); punct != tok::error) {
     return lex_result(token(punct, scan.range()), scan);
   }
-  return std::nullopt;
+  return no_lex_result();
 }
 
 // Looks for identifiers or keywords. This implementation assumes that all
@@ -159,7 +182,7 @@ lex_result lex_punctuation(detail::lexer_scan_window scan) {
 lex_result lex_identifier_or_keyword(detail::lexer_scan_window scan) {
   char c = scan.advance();
   if (!is_identifier_start(c)) {
-    return std::nullopt;
+    return no_lex_result();
   }
   // This implementation assumes that is_identifier_continuation() implies
   // is_identifier_start(). Otherwise, one word (i.e. no whitespace in between)
@@ -182,7 +205,7 @@ lex_result lex_identifier_or_keyword(detail::lexer_scan_window scan) {
 lex_result lex_path_component(detail::lexer_scan_window scan) {
   char c = scan.advance();
   if (!is_path_component_start(c)) {
-    return std::nullopt;
+    return no_lex_result();
   }
   while (scan.can_advance() && is_path_component_continuation(scan.peek())) {
     scan.advance();
@@ -194,7 +217,7 @@ lex_result lex_path_component(detail::lexer_scan_window scan) {
 lex_result lex_path_separator(detail::lexer_scan_window scan) {
   return scan.advance() == '/'
       ? lex_result(token(tok::slash, scan.range()), scan)
-      : std::nullopt;
+      : no_lex_result();
 }
 
 lex_result lex_i64_literal(
@@ -235,7 +258,7 @@ lex_result lex_i64_literal(
       minus_scan.advance();
       return lex_result(diagnoser.unexpected_token(minus_scan), minus_scan);
     }
-    return std::nullopt;
+    return no_lex_result();
   }
 
   char* end = nullptr;
@@ -276,7 +299,7 @@ lex_result lex_string_literal(
     detail::lexer_scan_window scan, lexer::diagnoser diagnoser) {
   char c = scan.advance();
   if (c != '"') {
-    return std::nullopt;
+    return no_lex_result();
   }
   std::string value;
   while (scan.can_advance()) {
@@ -319,7 +342,7 @@ lex_result lex_comment_close(detail::lexer_scan_window scan, bool escaped) {
     // "--"
     for (int i = 0; i < 2; ++i) {
       if (scan.advance() != '-') {
-        return std::nullopt;
+        return no_lex_result();
       }
     }
     // ignore the escape syntax
@@ -328,7 +351,7 @@ lex_result lex_comment_close(detail::lexer_scan_window scan, bool escaped) {
   // "}}"
   for (int i = 0; i < 2; ++i) {
     if (scan.advance() != '}') {
-      return std::nullopt;
+      return no_lex_result();
     }
   }
   return lex_result(token(tok::close, scan.range()), scan);
@@ -340,7 +363,7 @@ lex_result lex_close(detail::lexer_scan_window scan) {
   // "}}"
   for (int i = 0; i < 2; ++i) {
     if (scan.advance() != '}') {
-      return std::nullopt;
+      return no_lex_result();
     }
   }
   return lex_result(token(tok::close, scan.range()), scan);
@@ -361,7 +384,7 @@ lex_result lex_template_part(
   if (lex_result string_literal = lex_string_literal(scan, diagnoser)) {
     return string_literal;
   }
-  return std::nullopt;
+  return no_lex_result();
 }
 
 } // namespace

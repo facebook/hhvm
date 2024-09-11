@@ -16,6 +16,9 @@
 
 package com.facebook.nifty.core;
 
+import com.facebook.thrift.util.NettyNiftyRequestContext;
+import java.util.HashMap;
+
 public class RequestContexts {
   private static ThreadLocal<RequestContext> threadLocalContext = new ThreadLocal<>();
 
@@ -29,6 +32,22 @@ public class RequestContexts {
    */
   public static RequestContext getCurrentContext() {
     RequestContext currentContext = threadLocalContext.get();
+    return currentContext;
+  }
+
+  /**
+   * Gets the thread-local {@link NiftyRequestContext} for the Thrift request that is being
+   * processed on the current thread. If it is not available, creates a new empty context and
+   * returns it. This context will have empty headers map and null conntextion context.
+   *
+   * @return The {@link NiftyRequestContext} of the current request
+   */
+  public static RequestContext getOrCreateCurrentContext() {
+    RequestContext currentContext = threadLocalContext.get();
+    if (currentContext == null) {
+      currentContext = new NettyNiftyRequestContext(new HashMap<>(), null);
+      threadLocalContext.set(currentContext);
+    }
     return currentContext;
   }
 

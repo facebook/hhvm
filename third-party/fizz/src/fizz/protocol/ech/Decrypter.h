@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <fizz/protocol/Factory.h>
 #include <fizz/protocol/ech/Encryption.h>
 #include <fizz/protocol/ech/Types.h>
 
@@ -47,8 +46,6 @@ class Decrypter {
 
 class ECHConfigManager : public Decrypter {
  public:
-  explicit ECHConfigManager(std::shared_ptr<Factory> factory)
-      : factory_(std::move(factory)) {}
   void addDecryptionConfig(DecrypterParams decrypterParams);
   folly::Optional<DecrypterResult> decryptClientHello(
       const ClientHello& chlo) override;
@@ -61,7 +58,6 @@ class ECHConfigManager : public Decrypter {
   std::vector<ech::ECHConfig> getRetryConfigs() const override;
 
  private:
-  std::shared_ptr<Factory> factory_;
   std::vector<DecrypterParams> configs_;
 };
 

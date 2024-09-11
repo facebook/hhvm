@@ -38,7 +38,6 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
     std::vector<hpke::AeadId> supportedAeads);
 
 hpke::SetupResult constructHpkeSetupResult(
-    const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
     const SupportedECHConfig& supportedConfig);
 
@@ -114,7 +113,6 @@ ClientHello decryptECHWithContext(
     std::unique_ptr<hpke::HpkeContext>& context);
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
-    const fizz::Factory& factory,
     const ECHConfig& echConfig,
     HpkeSymmetricCipherSuite cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,

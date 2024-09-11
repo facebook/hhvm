@@ -14,7 +14,6 @@
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/exchange/KeyExchange.h>
 #include <fizz/crypto/hpke/Hkdf.h>
-#include <fizz/protocol/Factory.h>
 #include <fizz/protocol/Types.h>
 
 #include <folly/Optional.h>
@@ -110,16 +109,13 @@ HashFunction getHashFunctionForKEM(KEMId kemId);
  * The constructed `KeyExchange` object does *not* have a keypair associated
  * with it yet.
  *
- * @param  factory  A fizz::Factory instance.
  * @param  kemId    An HPKE KEM code point.
  *
  * @return An instance of a `fizz::KeyExchange` object without an associated
  *         keypair
  * @throws std::runtime_error   On invalid code points.
  */
-std::unique_ptr<KeyExchange> makeKeyExchange(
-    const fizz::Factory& factory,
-    KEMId kemId);
+std::unique_ptr<KeyExchange> makeKeyExchange(KEMId kemId);
 
 /**
  * fizz::hpke::nenc returns the size of the serialized public component (`enc`)
@@ -174,7 +170,6 @@ KDFId getKDFId(HashFunction hash);
  * @throws std::runtime_error  On invalid code points.
  */
 std::unique_ptr<Hkdf> makeHpkeHkdf(
-    const fizz::Factory& factory,
     std::unique_ptr<folly::IOBuf> prefix,
     KDFId kdfId);
 
@@ -239,12 +234,11 @@ inline size_t getCipherOverhead(AeadId aeadId) {
  *
  * The cipher instance does *not* have the keys set.
  *
- * @param factory  A fizz::Factory instance.
  * @param aeadId   An HPKE aead code point.
  *
  * @return An instance of a `fizz::Aead` without keying parameters.
  * @throws std::runtime_error     On invalid aead code point.
  */
-std::unique_ptr<Aead> makeCipher(const fizz::Factory& factory, AeadId aeadId);
+std::unique_ptr<Aead> makeCipher(AeadId aeadId);
 } // namespace hpke
 } // namespace fizz

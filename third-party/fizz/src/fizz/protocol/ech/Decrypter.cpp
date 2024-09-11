@@ -52,7 +52,6 @@ folly::Optional<DecrypterLookupResult> decodeAndGetParam(
 }
 
 folly::Optional<DecrypterResult> tryToDecodeECH(
-    const fizz::Factory& factory,
     const ClientHello& clientHelloOuter,
     const Extension& encodedECHExtension,
     const std::vector<DecrypterParams>& decrypterParams) {
@@ -64,7 +63,6 @@ folly::Optional<DecrypterResult> tryToDecodeECH(
 
   try {
     auto context = setupDecryptionContext(
-        factory,
         configIdResult->matchingParam.echConfig,
         configIdResult->echExtension.cipher_suite,
         configIdResult->echExtension.enc,
@@ -91,7 +89,6 @@ folly::Optional<DecrypterResult> tryToDecodeECH(
 }
 
 ClientHello decodeClientHelloHRR(
-    const fizz::Factory& factory,
     const ClientHello& chlo,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<hpke::HpkeContext>& context,
@@ -124,7 +121,6 @@ ClientHello decodeClientHelloHRR(
           context);
     } else {
       auto recreatedContext = setupDecryptionContext(
-          factory,
           configIdResult->matchingParam.echConfig,
           configIdResult->echExtension.cipher_suite,
           encapsulatedKey,
@@ -160,7 +156,7 @@ folly::Optional<DecrypterResult> ECHConfigManager::decryptClientHello(
   auto it =
       findExtension(chlo.extensions, ExtensionType::encrypted_client_hello);
   if (it != chlo.extensions.end()) {
-    return tryToDecodeECH(*factory_, chlo, *it, configs_);
+    return tryToDecodeECH(chlo, *it, configs_);
   }
 
   return folly::none;
@@ -169,15 +165,14 @@ folly::Optional<DecrypterResult> ECHConfigManager::decryptClientHello(
 ClientHello ECHConfigManager::decryptClientHelloHRR(
     const ClientHello& chlo,
     std::unique_ptr<hpke::HpkeContext>& context) {
-  return decodeClientHelloHRR(*factory_, chlo, nullptr, context, configs_);
+  return decodeClientHelloHRR(chlo, nullptr, context, configs_);
 }
 
 ClientHello ECHConfigManager::decryptClientHelloHRR(
     const ClientHello& chlo,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey) {
   std::unique_ptr<hpke::HpkeContext> dummy;
-  return decodeClientHelloHRR(
-      *factory_, chlo, encapsulatedKey, dummy, configs_);
+  return decodeClientHelloHRR(chlo, encapsulatedKey, dummy, configs_);
 }
 
 std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs() const {

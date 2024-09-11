@@ -11,7 +11,6 @@
 
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/test/TestUtil.h>
-#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/ech/Decrypter.h>
 #include <fizz/protocol/ech/test/TestUtil.h>
 #include <fizz/protocol/test/TestUtil.h>
@@ -37,8 +36,8 @@ ClientHello getChloOuterWithExt(
       echConfigContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
-  auto setupResult = constructHpkeSetupResult(
-      fizz::DefaultFactory(), std::move(kex), supportedECHConfig);
+  auto setupResult =
+      constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
   InnerECHClientHello chloInnerECHExt;
@@ -71,8 +70,8 @@ ClientHello getChloOuterHRRWithExt(
       echConfigContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
-  auto setupResult = constructHpkeSetupResult(
-      fizz::DefaultFactory(), std::move(kex), supportedECHConfig);
+  auto setupResult =
+      constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
   InnerECHClientHello chloInnerECHExt;
@@ -106,7 +105,7 @@ TEST(DecrypterTest, TestDecodeSuccess) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
+  ECHConfigManager decrypter;
   decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
   auto chloOuter = getChloOuterWithExt(kex->clone());
   auto gotChlo = decrypter.decryptClientHello(chloOuter);
@@ -130,7 +129,7 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
+  ECHConfigManager decrypter;
   decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
   Buf enc;
   ClientHello initialChlo;
@@ -153,7 +152,7 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
+  ECHConfigManager decrypter;
   decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
   Buf enc;
   ClientHello initialChlo;
@@ -184,7 +183,7 @@ TEST(DecrypterTest, TestDecodeFailure) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
+  ECHConfigManager decrypter;
   decrypter.addDecryptionConfig(
       DecrypterParams{std::move(echConfig), kex->clone()});
   auto gotChlo = decrypter.decryptClientHello(TestMessages::clientHello());
@@ -197,7 +196,7 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
+  ECHConfigManager decrypter;
   decrypter.addDecryptionConfig(
       DecrypterParams{std::move(echConfig), kex->clone()});
   // Get an encapsulated key to use.
@@ -216,7 +215,7 @@ TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
+  ECHConfigManager decrypter;
   decrypter.addDecryptionConfig(
       DecrypterParams{std::move(echConfig), kex->clone()});
   // Get a context to use.
@@ -240,7 +239,7 @@ TEST(DecrypterTest, TestDecodeMultipleDecrypterParam) {
 
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
+  ECHConfigManager decrypter;
   // Load multiple decrypter params
   decrypter.addDecryptionConfig(DecrypterParams{getECHConfig(), kex->clone()});
   decrypter.addDecryptionConfig(DecrypterParams{targetECHConfig, kex->clone()});

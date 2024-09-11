@@ -8,6 +8,9 @@
 
 #include <fizz/crypto/hpke/Utils.h>
 
+#include <fizz/backend/openssl/OpenSSL.h>
+#include <fizz/crypto/exchange/X25519.h>
+
 namespace fizz {
 namespace hpke {
 
@@ -139,46 +142,39 @@ CipherSuite getCipherSuite(AeadId aeadId) {
 }
 
 std::unique_ptr<Hkdf> makeHpkeHkdf(
-    const fizz::Factory& factory,
     std::unique_ptr<folly::IOBuf> prefix,
     KDFId kdfId) {
   switch (kdfId) {
     case KDFId::Sha256:
       return std::make_unique<Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(HkdfImpl(
-              Sha256::HashLen, factory.makeHasher(HashFunction::Sha256))));
+          std::make_unique<HkdfImpl>(
+              HkdfImpl(Sha256::HashLen, openssl::makeHasher<Sha256>)));
     case KDFId::Sha384:
       return std::make_unique<Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(HkdfImpl(
-              Sha384::HashLen, factory.makeHasher(HashFunction::Sha384))));
+          std::make_unique<HkdfImpl>(
+              HkdfImpl(Sha384::HashLen, openssl::makeHasher<Sha384>)));
     case KDFId::Sha512:
       return std::make_unique<Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(HkdfImpl(
-              Sha512::HashLen, factory.makeHasher(HashFunction::Sha512))));
+          std::make_unique<HkdfImpl>(
+              HkdfImpl(Sha512::HashLen, openssl::makeHasher<Sha512>)));
     default:
       throw std::runtime_error("hkdf: not implemented");
   }
 }
 
-std::unique_ptr<KeyExchange> makeKeyExchange(
-    const fizz::Factory& factory,
-    KEMId kemId) {
-  // TODO: KeyExchangeRole only matters for ML-KEM, which we do not currently
-  // support.
-  constexpr KeyExchangeRole role = KeyExchangeRole::Client;
-
+std::unique_ptr<KeyExchange> makeKeyExchange(KEMId kemId) {
   switch (kemId) {
     case KEMId::secp256r1:
-      return factory.makeKeyExchange(NamedGroup::secp256r1, role);
+      return openssl::makeKeyExchange<fizz::P256>();
     case KEMId::secp384r1:
-      return factory.makeKeyExchange(NamedGroup::secp384r1, role);
+      return openssl::makeKeyExchange<fizz::P384>();
     case KEMId::secp521r1:
-      return factory.makeKeyExchange(NamedGroup::secp521r1, role);
+      return openssl::makeKeyExchange<fizz::P521>();
     case KEMId::x25519:
-      return factory.makeKeyExchange(NamedGroup::x25519, role);
+      return std::make_unique<X25519KeyExchange>();
     default:
       throw std::runtime_error("can't make key exchange: not implemented");
   }
@@ -200,8 +196,17 @@ size_t nenc(KEMId kemId) {
   }
 }
 
-std::unique_ptr<Aead> makeCipher(const fizz::Factory& factory, AeadId aeadId) {
-  return factory.makeAead(getCipherSuite(aeadId));
+std::unique_ptr<Aead> makeCipher(AeadId aeadId) {
+  switch (aeadId) {
+    case AeadId::TLS_CHACHA20_POLY1305_SHA256:
+      return openssl::OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
+    case AeadId::TLS_AES_128_GCM_SHA256:
+      return openssl::OpenSSLEVPCipher::makeCipher<AESGCM128>();
+    case AeadId::TLS_AES_256_GCM_SHA384:
+      return openssl::OpenSSLEVPCipher::makeCipher<AESGCM256>();
+    default:
+      throw std::runtime_error("can't make aead: not implemented");
+  }
 }
 
 } // namespace hpke

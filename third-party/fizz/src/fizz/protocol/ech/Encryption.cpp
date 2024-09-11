@@ -10,7 +10,6 @@
 #include "fizz/record/Types.h"
 
 #include <fizz/crypto/hpke/Utils.h>
-#include <fizz/protocol/Factory.h>
 #include <fizz/protocol/Protocol.h>
 #include <fizz/protocol/ech/ECHExtensions.h>
 #include <fizz/protocol/ech/Types.h>
@@ -188,7 +187,6 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
 }
 
 static hpke::SetupParam getSetupParam(
-    const fizz::Factory& factory,
     std::unique_ptr<DHKEM> dhkem,
     std::unique_ptr<folly::IOBuf> prefix,
     hpke::KEMId kemId,
@@ -199,19 +197,17 @@ static hpke::SetupParam getSetupParam(
   auto suite = getCipherSuite(cipherSuite.aead_id);
   auto suiteId = hpke::generateHpkeSuiteId(group, hash, suite);
 
-  auto hkdf =
-      hpke::makeHpkeHkdf(factory, std::move(prefix), cipherSuite.kdf_id);
+  auto hkdf = hpke::makeHpkeHkdf(std::move(prefix), cipherSuite.kdf_id);
 
   return hpke::SetupParam{
       std::move(dhkem),
-      hpke::makeCipher(factory, cipherSuite.aead_id),
+      makeCipher(cipherSuite.aead_id),
       std::move(hkdf),
       std::move(suiteId),
       0};
 }
 
 hpke::SetupResult constructHpkeSetupResult(
-    const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
     const SupportedECHConfig& supportedConfig) {
   const std::unique_ptr<folly::IOBuf> prefix =
@@ -222,7 +218,7 @@ hpke::SetupResult constructHpkeSetupResult(
   auto cipherSuite = supportedConfig.cipherSuite;
 
   // Get shared secret
-  auto hkdf = hpke::makeHpkeHkdf(factory, prefix->clone(), cipherSuite.kdf_id);
+  auto hkdf = hpke::makeHpkeHkdf(prefix->clone(), cipherSuite.kdf_id);
   std::unique_ptr<DHKEM> dhkem = std::make_unique<DHKEM>(
       std::move(kex), getKexGroup(config.key_config.kem_id), std::move(hkdf));
 
@@ -236,7 +232,6 @@ hpke::SetupResult constructHpkeSetupResult(
       std::move(info),
       folly::none,
       getSetupParam(
-          factory,
           std::move(dhkem),
           prefix->clone(),
           config.key_config.kem_id,
@@ -657,7 +652,6 @@ ClientHello decryptECHWithContext(
 }
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
-    const fizz::Factory& factory,
     const ECHConfig& echConfig,
     HpkeSymmetricCipherSuite cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
@@ -674,17 +668,15 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
   NamedGroup group = hpke::getKexGroup(kemId);
 
   auto dhkem = std::make_unique<DHKEM>(
-      std::move(kex),
-      group,
-      hpke::makeHpkeHkdf(factory, prefix->clone(), kdfId));
+      std::move(kex), group, hpke::makeHpkeHkdf(prefix->clone(), kdfId));
   auto aeadId = cipherSuite.aead_id;
   auto suiteId = hpke::generateHpkeSuiteId(
       group, hpke::getHashFunction(kdfId), hpke::getCipherSuite(aeadId));
 
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      makeCipher(factory, aeadId),
-      hpke::makeHpkeHkdf(factory, prefix->clone(), kdfId),
+      makeCipher(aeadId),
+      hpke::makeHpkeHkdf(prefix->clone(), kdfId),
       std::move(suiteId),
       seqNum};
 

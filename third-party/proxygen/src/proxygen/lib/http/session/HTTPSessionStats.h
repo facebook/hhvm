@@ -46,6 +46,8 @@ class HTTPSessionStats : public TTLBAStats {
   }
   virtual void recordResetsRateLimited() noexcept {
   }
+  virtual void recordReadPerLoopLimitExceeded() noexcept {
+  }
 };
 
 } // namespace proxygen

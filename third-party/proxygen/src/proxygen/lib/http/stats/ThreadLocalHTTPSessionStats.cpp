@@ -87,7 +87,9 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
                        facebook::fb303::AVG,
                        50,
                        99,
-                       100) {
+                       100),
+      readsPerLoopExceeded(prefix + "_reads_per_loop_exceeded_limit",
+                           facebook::fb303::SUM) {
 }
 
 void TLHTTPSessionStats::recordTransactionOpened() noexcept {
@@ -209,6 +211,10 @@ void TLHTTPSessionStats::recordResetsInInterval(int64_t quantity) noexcept {
 
 void TLHTTPSessionStats::recordResetsRateLimited() noexcept {
   resetsRateLimited.add(1);
+}
+
+void TLHTTPSessionStats::recordReadPerLoopLimitExceeded() noexcept {
+  readsPerLoopExceeded.add(1);
 }
 
 } // namespace proxygen

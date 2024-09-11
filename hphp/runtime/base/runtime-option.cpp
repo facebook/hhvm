@@ -1986,31 +1986,17 @@ void RuntimeOption::Load(
                  "Fb303Server.ExposeSensitiveMethods", Fb303ServerExposeSensitiveMethods);
 
     Config::Bind(ServerThreadTuneDebug, ini, config,
-                 "ThreadTuneDebug", ServerThreadTuneDebug);
-    Config::Bind(ServerThreadTuneDebug, ini, config,
                  "Server.ThreadTune.Debug", ServerThreadTuneDebug);
-    Config::Bind(ServerThreadTuneSkipWarmup, ini, config,
-                 "ThreadTuneSkipWarmup", ServerThreadTuneSkipWarmup);
     Config::Bind(ServerThreadTuneSkipWarmup, ini, config,
                  "Server.ThreadTune.SkipWarmup", ServerThreadTuneSkipWarmup);
     Config::Bind(ServerThreadTuneAdjustmentPct, ini, config,
-                 "ThreadTuneAdjustmentPct", ServerThreadTuneAdjustmentPct);
-    Config::Bind(ServerThreadTuneAdjustmentPct, ini, config,
                  "Server.ThreadTune.AdjustmentPct", ServerThreadTuneAdjustmentPct);
-    Config::Bind(ServerThreadTuneAdjustmentDownPct, ini, config,
-                 "ThreadTuneAdjustmentDownPct", ServerThreadTuneAdjustmentDownPct);
     Config::Bind(ServerThreadTuneAdjustmentDownPct, ini, config,
                  "Server.ThreadTune.AdjustmentDownPct", ServerThreadTuneAdjustmentDownPct);
     Config::Bind(ServerThreadTuneStepPct, ini, config,
-                 "ThreadTuneStepPct", ServerThreadTuneStepPct);
-    Config::Bind(ServerThreadTuneStepPct, ini, config,
                  "Server.ThreadTune.StepPct", ServerThreadTuneStepPct);
     Config::Bind(ServerThreadTuneCPUThreshold, ini, config,
-                 "ThreadTuneCPUThreshold", ServerThreadTuneCPUThreshold);
-    Config::Bind(ServerThreadTuneCPUThreshold, ini, config,
                  "Server.ThreadTune.CPUThreshold", ServerThreadTuneCPUThreshold);
-    Config::Bind(ServerThreadTuneThreadUtilizationThreshold, ini, config,
-                 "ThreadTuneThreadUtilizationThreshold", ServerThreadTuneThreadUtilizationThreshold);
     Config::Bind(ServerThreadTuneThreadUtilizationThreshold, ini, config,
                  "Server.ThreadTune.ThreadUtilizationThreshold", ServerThreadTuneThreadUtilizationThreshold);
   }

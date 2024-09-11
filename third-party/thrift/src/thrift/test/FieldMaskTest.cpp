@@ -2067,7 +2067,7 @@ void testLogicalOperations(Mask A, Mask B) {
   EXPECT_EQ(maskSubtractBA, maskUnion - A);
 }
 
-TEST(FIeldMaskTest, LogicalOpSimple) {
+TEST(FieldMaskTest, LogicalOpSimple) {
   // maskA = includes{1: excludes{},
   //                  2: excludes{},
   //                  3: includes{}}
@@ -3535,6 +3535,70 @@ TEST(FieldMaskTest, testDuplicateEntryInTypeMaskList) {
       (protocol::detail::TypeToMaskAdapter<protocol::TypeAndMaskEntry, Mask>::
            fromThrift(std::move(entries))),
       std::runtime_error);
+}
+
+TEST(FieldMaskTest, FieldMaskLogicalOperatorAllMask) {
+  auto checkMask = [](const Mask& mask) {
+    EXPECT_EQ(mask | allMask(), allMask());
+    EXPECT_EQ(allMask() | mask, allMask());
+    EXPECT_EQ(mask & allMask(), mask);
+    EXPECT_EQ(allMask() & mask, mask);
+    EXPECT_EQ(mask - allMask(), noneMask());
+    EXPECT_EQ(allMask() - mask, reverseMask(mask));
+  };
+  {
+    // Field Mask
+    Mask mask;
+    mask.includes_ref().ensure()[1] = allMask();
+    checkMask(mask);
+    checkMask(reverseMask(mask));
+  }
+  {
+    // Map Mask
+    Mask mask;
+    mask.includes_map_ref().ensure()[1] = allMask();
+    checkMask(mask);
+    checkMask(reverseMask(mask));
+  }
+  {
+    // Type Mask
+    Mask mask;
+    mask.includes_type_ref().ensure()[type::infer_tag<Foo>{}] = allMask();
+    checkMask(mask);
+    checkMask(reverseMask(mask));
+  }
+}
+
+TEST(FieldMaskTest, FieldMaskLogicalOperatorNoneMask) {
+  auto checkMask = [](const Mask& mask) {
+    EXPECT_EQ(mask | noneMask(), mask);
+    EXPECT_EQ(noneMask() | mask, mask);
+    EXPECT_EQ(mask & noneMask(), noneMask());
+    EXPECT_EQ(noneMask() & mask, noneMask());
+    EXPECT_EQ(noneMask() - mask, noneMask());
+    EXPECT_EQ(mask - noneMask(), mask);
+  };
+  {
+    // Field Mask
+    Mask mask;
+    mask.includes_ref().ensure()[1] = allMask();
+    checkMask(mask);
+    checkMask(reverseMask(mask));
+  }
+  {
+    // Map Mask
+    Mask mask;
+    mask.includes_map_ref().ensure()[1] = allMask();
+    checkMask(mask);
+    checkMask(reverseMask(mask));
+  }
+  {
+    // Type Mask
+    Mask mask;
+    mask.includes_type_ref().ensure()[type::infer_tag<Foo>{}] = allMask();
+    checkMask(mask);
+    checkMask(reverseMask(mask));
+  }
 }
 
 } // namespace apache::thrift::test

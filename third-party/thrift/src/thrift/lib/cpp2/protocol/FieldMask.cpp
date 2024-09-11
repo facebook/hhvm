@@ -278,6 +278,13 @@ bool isInclusive(const Mask& mask) {
 } // namespace
 
 Mask operator&(const Mask& lhs, const Mask& rhs) {
+  if (detail::isAllMask(lhs) || detail::isNoneMask(rhs)) {
+    return rhs;
+  }
+  if (detail::isNoneMask(lhs) || detail::isAllMask(rhs)) {
+    return lhs;
+  }
+
   if (isInclusive(lhs)) {
     if (isInclusive(rhs)) { // lhs=includes rhs=includes
       return intersectMask(lhs, rhs);
@@ -292,6 +299,13 @@ Mask operator&(const Mask& lhs, const Mask& rhs) {
   return reverseMask(unionMask(lhs, rhs));
 }
 Mask operator|(const Mask& lhs, const Mask& rhs) {
+  if (detail::isAllMask(lhs) || detail::isNoneMask(rhs)) {
+    return lhs;
+  }
+  if (detail::isNoneMask(lhs) || detail::isAllMask(rhs)) {
+    return rhs;
+  }
+
   if (isInclusive(lhs)) {
     if (isInclusive(rhs)) { // lhs=includes rhs=includes
       return unionMask(lhs, rhs);
@@ -306,6 +320,16 @@ Mask operator|(const Mask& lhs, const Mask& rhs) {
   return reverseMask(intersectMask(lhs, rhs));
 }
 Mask operator-(const Mask& lhs, const Mask& rhs) {
+  if (detail::isAllMask(lhs)) {
+    return reverseMask(rhs);
+  }
+  if (detail::isNoneMask(rhs)) {
+    return lhs;
+  }
+  if (detail::isNoneMask(lhs) || detail::isAllMask(rhs)) {
+    return noneMask();
+  }
+
   if (isInclusive(lhs)) {
     if (isInclusive(rhs)) { // lhs=includes rhs=includes
       return subtractMask(lhs, rhs);

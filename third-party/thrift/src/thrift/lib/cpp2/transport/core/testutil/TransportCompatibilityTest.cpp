@@ -51,7 +51,6 @@ DECLARE_string(transport);
 
 DEFINE_string(host, "::1", "host to connect to");
 
-THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
 THRIFT_FLAG_DECLARE_int64(thrift_client_checksum_sampling_rate);
 
 // Timeout used for polling callCompleted_ to make the test more robust.

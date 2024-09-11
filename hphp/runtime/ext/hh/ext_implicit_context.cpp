@@ -85,7 +85,7 @@ int64_t memoKeyForInsert(StringData* key, const Variant& serializedValue) {
 
   auto& existing_m_map = prev_ctx->m_map;
   for (auto const& p : existing_m_map) {
-    if (p.second.second.m_type != KindOfUninit) {
+    if (p.second.second.m_type != KindOfUninit && !p.first->same(key)) {
       vec.push_back(std::make_pair(p.first, p.second.second));
     }
   }

@@ -34,17 +34,19 @@ import (
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
 type headerServer struct {
-	processor Processor
-	listener  net.Listener
-	log       *log.Logger
+	processor   Processor
+	listener    net.Listener
+	log         *log.Logger
+	connContext func(context.Context, net.Conn) context.Context
 }
 
 // newHeaderServer creates a new server that only supports Header Transport.
-func newHeaderServer(processor Processor, listener net.Listener) Server {
+func newHeaderServer(processor Processor, listener net.Listener, options *ServerOptions) Server {
 	return &headerServer{
-		processor: processor,
-		listener:  listener,
-		log:       log.New(os.Stderr, "", log.LstdFlags),
+		processor:   processor,
+		listener:    listener,
+		log:         log.New(os.Stderr, "", log.LstdFlags),
+		connContext: options.connContext,
 	}
 }
 
@@ -77,8 +79,9 @@ func (p *headerServer) acceptLoop(ctx context.Context) error {
 		if conn == nil {
 			continue
 		}
+
 		go func(ctx context.Context, conn net.Conn) {
-			ctx = WithConnInfo(ctx, conn)
+			ctx = p.connContext(ctx, conn)
 			if err := p.processRequests(ctx, conn); err != nil {
 				p.log.Println("thrift: error processing request:", err)
 			}

@@ -35,31 +35,34 @@ type rocketServer struct {
 	transportID   TransportID
 	zstdSupported bool
 	log           *log.Logger
+	connContext   ConnContextFunc
 }
 
-func newRocketServer(proc Processor, listener net.Listener) Server {
+func newRocketServer(proc Processor, listener net.Listener, options *ServerOptions) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
 		transportID:   TransportIDRocket,
 		zstdSupported: true,
 		log:           log.New(os.Stderr, "", log.LstdFlags),
+		connContext:   options.connContext,
 	}
 }
 
-func newUpgradeToRocketServer(proc Processor, listener net.Listener) Server {
+func newUpgradeToRocketServer(proc Processor, listener net.Listener, options *ServerOptions) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
 		transportID:   TransportIDUpgradeToRocket,
 		zstdSupported: true,
 		log:           log.New(os.Stderr, "", log.LstdFlags),
+		connContext:   options.connContext,
 	}
 }
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
-		return newRocketServerTransport(s.listener, s.proc, s.transportID), nil
+		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID), nil
 	}
 	r := rsocket.Receive().Acceptor(s.acceptor).Transport(transporter)
 	return r.Serve(ctx)

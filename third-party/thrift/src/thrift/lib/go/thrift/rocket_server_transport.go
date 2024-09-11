@@ -35,14 +35,16 @@ type rocketServerTransport struct {
 	acceptor    transport.ServerTransportAcceptor
 	transportID TransportID
 	log         *log.Logger
+	connContext ConnContextFunc
 }
 
-func newRocketServerTransport(listener net.Listener, processor Processor, transportID TransportID) transport.ServerTransport {
+func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
 		processor:   processor,
 		log:         log.New(os.Stderr, "", log.LstdFlags),
 		transportID: transportID,
+		connContext: connContext,
 	}
 }
 
@@ -84,7 +86,11 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 		if conn == nil {
 			continue
 		}
-		go r.processRequests(ctx, conn)
+
+		go func(ctx context.Context, conn net.Conn) {
+			ctx = r.connContext(ctx, conn)
+			r.processRequests(ctx, conn)
+		}(ctx, conn)
 	}
 }
 
@@ -93,7 +99,6 @@ func (r *rocketServerTransport) Close() (err error) {
 }
 
 func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Conn) {
-	ctx = WithConnInfo(ctx, conn)
 	switch r.transportID {
 	case TransportIDRocket:
 		r.processRocketRequests(ctx, conn)

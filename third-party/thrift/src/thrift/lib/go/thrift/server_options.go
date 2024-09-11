@@ -16,9 +16,18 @@
 
 package thrift
 
-// Deprecated: use WrapInterceptor
+import (
+	"context"
+	"net"
+)
+
+// ConnContextFunc is the type for connection context modifier functions.
+type ConnContextFunc func(context.Context, net.Conn) context.Context
+
+// ServerOptions is options needed to run a thrift server
 type ServerOptions struct {
 	interceptor Interceptor
+	connContext ConnContextFunc
 }
 
 // Deprecated: use WrapInterceptor
@@ -28,8 +37,21 @@ func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
 	}
 }
 
+// WithConnContext adds connContext option
+// that specifies a function that modifies the context passed to procedures per connection.
+func WithConnContext(connContext ConnContextFunc) func(*ServerOptions) {
+	return func(server *ServerOptions) {
+		server.connContext = func(ctx context.Context, conn net.Conn) context.Context {
+			ctx = WithConnInfo(ctx, conn)
+			return connContext(ctx, conn)
+		}
+	}
+}
+
 func defaultServerOptions() *ServerOptions {
-	return &ServerOptions{}
+	return &ServerOptions{
+		connContext: WithConnInfo,
+	}
 }
 
 func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {

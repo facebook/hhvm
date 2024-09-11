@@ -27,11 +27,11 @@ func NewSimpleServer(processor Processor, listener net.Listener, transportType T
 	processor = WrapInterceptor(serverOptions.interceptor, processor)
 	switch transportType {
 	case TransportIDHeader:
-		return newHeaderServer(processor, listener)
+		return newHeaderServer(processor, listener, serverOptions)
 	case TransportIDRocket:
-		return newRocketServer(processor, listener)
+		return newRocketServer(processor, listener, serverOptions)
 	case TransportIDUpgradeToRocket:
-		return newUpgradeToRocketServer(processor, listener)
+		return newUpgradeToRocketServer(processor, listener, serverOptions)
 	default:
 		panic(fmt.Sprintf("SimpleServer does not support: %v", transportType))
 	}

@@ -3623,7 +3623,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 16, "character": 18},
+                    "position": {"line": 18, "character": 18},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3634,7 +3634,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 16, "character": 19},
+                    "position": {"line": 18, "character": 19},
                 },
                 result={
                     "signatures": [
@@ -3656,7 +3656,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 16, "character": 20},
+                    "position": {"line": 18, "character": 20},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3668,7 +3668,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 20},
+                    "position": {"line": 19, "character": 20},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3680,7 +3680,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 21},
+                    "position": {"line": 19, "character": 21},
                 },
                 result={
                     "signatures": [
@@ -3703,7 +3703,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 22},
+                    "position": {"line": 19, "character": 22},
                 },
                 result={
                     "signatures": [
@@ -3726,7 +3726,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 23},
+                    "position": {"line": 19, "character": 23},
                 },
                 result={
                     "signatures": [
@@ -3749,7 +3749,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 24},
+                    "position": {"line": 19, "character": 24},
                 },
                 result={
                     "signatures": [
@@ -3772,7 +3772,123 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 25},
+                    "position": {"line": 19, "character": 25},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (left of opening paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 19},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (right of opening paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 20},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod<T>"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (left of first comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 21},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod<T>"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (right of first comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 23},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod<T>"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (left of closing paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 23},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod<T>"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (right of closing paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 25},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3784,7 +3900,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 18, "character": 23},
+                    "position": {"line": 21, "character": 23},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3796,7 +3912,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 18, "character": 24},
+                    "position": {"line": 21, "character": 24},
                 },
                 result={
                     "signatures": [
@@ -3819,7 +3935,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 19, "character": 17},
+                    "position": {"line": 22, "character": 17},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3831,7 +3947,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 19, "character": 18},
+                    "position": {"line": 22, "character": 18},
                 },
                 result={
                     "signatures": [
@@ -3854,7 +3970,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 26},
+                    "position": {"line": 23, "character": 26},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3866,7 +3982,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 26},
+                    "position": {"line": 23, "character": 26},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -3878,7 +3994,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 27},
+                    "position": {"line": 23, "character": 27},
                 },
                 result={
                     "signatures": [
@@ -3900,7 +4016,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 28},
+                    "position": {"line": 23, "character": 28},
                 },
                 result={
                     "signatures": [
@@ -3922,7 +4038,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 21, "character": 30},
+                    "position": {"line": 24, "character": 30},
                 },
                 result={
                     "signatures": [
@@ -3950,7 +4066,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 22, "character": 30},
+                    "position": {"line": 25, "character": 30},
                 },
                 result={
                     "signatures": [
@@ -3977,7 +4093,7 @@ class TestLsp(LspTestBase):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 23, "character": 30},
+                    "position": {"line": 26, "character": 30},
                 },
                 result={
                     "signatures": [

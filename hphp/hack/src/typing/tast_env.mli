@@ -33,7 +33,7 @@ val print_hint : env -> Aast.hint -> string
     {!SymbolDefinition.t}. *)
 val print_ty_with_identity :
   env ->
-  Typing_defs.phase_ty ->
+  Typing_defs.locl_ty ->
   'b SymbolOccurrence.t ->
   'b SymbolDefinition.t option ->
   string

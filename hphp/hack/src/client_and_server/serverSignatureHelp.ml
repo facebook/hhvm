@@ -100,47 +100,18 @@ let get_occurrence_info
     (nast : Nast.program)
     (occurrence : Relative_path.t SymbolOccurrence.t) =
   let module SO = SymbolOccurrence in
-  let (ft_opt, full_occurrence) =
-    (* Handle static methods, instance methods, and constructors *)
+  let full_occurrence =
     match occurrence.SO.type_ with
-    | SO.Method (SO.ClassName classname, methodname) ->
-      let classname = Utils.add_ns classname in
-      let ft =
-        Decl_provider.get_class ctx classname
-        |> Decl_entry.to_option
-        |> Option.bind ~f:(fun cls ->
-               if String.equal methodname "__construct" then
-                 Folded_class.construct cls |> fst
-               else
-                 Option.first_some
-                   (Folded_class.get_method cls methodname)
-                   (Folded_class.get_smethod cls methodname))
-        |> Option.map ~f:(fun class_elt ->
-               Lazy.force class_elt.Typing_defs.ce_type)
-      in
-      (ft, occurrence)
-    | _ ->
+    | SO.Function ->
       let fun_name =
         Utils.expand_namespace
           (Provider_context.get_popt ctx).ParserOptions.auto_namespace_map
           occurrence.SO.name
       in
-      let ft =
-        Decl_provider.get_fun ctx fun_name
-        |> Decl_entry.to_option
-        |> Option.map ~f:(fun fun_elt -> fun_elt.Typing_defs.fe_type)
-      in
-      let full_occurrence =
-        match occurrence.SO.type_ with
-        | SO.Function -> { occurrence with SO.name = fun_name }
-        | _ -> occurrence
-      in
-      (ft, full_occurrence)
+      { occurrence with SO.name = fun_name }
+    | _ -> occurrence
   in
-  let def_opt = ServerSymbolDefinition.go ctx (Some nast) full_occurrence in
-  match ft_opt with
-  | None -> None
-  | Some ft -> Some (occurrence, ft, def_opt)
+  ServerSymbolDefinition.go ctx (Some nast) full_occurrence
 
 let go_quarantined
     ~(ctx : Provider_context.t)
@@ -172,22 +143,31 @@ let go_quarantined
     in
     (match List.hd results with
     | None -> None
-    | Some head_result ->
+    | Some occurrence ->
       let ast =
         Ast_provider.compute_ast ~popt:(Provider_context.get_popt ctx) ~entry
       in
-      (match get_occurrence_info ctx ast head_result with
+      let { Tast_provider.Compute_tast.tast; _ } =
+        Tast_provider.compute_tast_quarantined ~ctx ~entry
+      in
+      let tast_info_opt =
+        ServerInferType.human_friendly_type_at_pos
+          ~under_dynamic:false
+          ctx
+          tast
+          symbol_line
+          symbol_char
+      in
+      let def_opt = get_occurrence_info ctx ast occurrence in
+      let open Typing_defs in
+      let open Lsp.SignatureHelp in
+      (match tast_info_opt with
       | None -> None
-      | Some (occurrence, ty, def_opt) ->
-        let open Typing_defs in
-        let open Lsp.SignatureHelp in
-        let tast_env = Tast_env.empty ctx in
+      | Some info ->
+        let ty = ServerInferType.get_type info in
+        let tast_env = ServerInferType.get_env info in
         let siginfo_label =
-          Tast_env.print_ty_with_identity
-            tast_env
-            (DeclTy ty)
-            occurrence
-            def_opt
+          Tast_env.print_ty_with_identity tast_env ty occurrence def_opt
         in
         let siginfo_documentation =
           let base_class_name = SymbolOccurrence.enclosing_class occurrence in
@@ -217,7 +197,7 @@ let go_quarantined
               let parinfo_label =
                 match param.fp_name with
                 | Some s -> s
-                | None -> Tast_env.print_decl_ty tast_env ty
+                | None -> Tast_env.print_ty tast_env ty
               in
               let parinfo_documentation =
                 match param_docs with

@@ -42,16 +42,8 @@ let print_error_ty = Typing_print.error
 let print_hint env hint =
   print_decl_ty env @@ Decl_hint.hint (get_decl_env env) hint
 
-let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
-  match phase_ty with
-  | Typing_defs.DeclTy ty ->
-    let ((env, ty_err_opt), ty) =
-      Typing_phase.localize_no_subst env ~ignore_errors:true ty
-    in
-    Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-    Typing_print.full_with_identity env ty sym_occurrence sym_definition
-  | Typing_defs.LoclTy ty ->
-    Typing_print.full_with_identity env ty sym_occurrence sym_definition
+let print_ty_with_identity env ty sym_occurrence sym_definition =
+  Typing_print.full_with_identity env ty sym_occurrence sym_definition
 
 let ty_to_json env ?show_like_ty ty = Typing_print.to_json env ?show_like_ty ty
 

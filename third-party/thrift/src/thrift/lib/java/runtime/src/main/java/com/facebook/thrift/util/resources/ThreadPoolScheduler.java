@@ -125,7 +125,13 @@ final class ThreadPoolScheduler extends AtomicBoolean implements StatsScheduler 
 
   @Override
   public Disposable schedule(Runnable task) {
-    DisposableExecutionMeasuringRunnable runnable = new DisposableExecutionMeasuringRunnable(task);
+    // If ContextPropagation is enabled, wrap the runnable with ContextPropRunnable
+    Runnable wrappedTask = task;
+    if (ContextPropagationRegistry.isContextPropEnabled()) {
+      wrappedTask = new ContextPropRunnable(task);
+    }
+    DisposableExecutionMeasuringRunnable runnable =
+        new DisposableExecutionMeasuringRunnable(wrappedTask);
     threadPoolExecutor.submit(runnable);
     return runnable;
   }

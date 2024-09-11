@@ -153,7 +153,12 @@ public final class ForkJoinPoolScheduler implements StatsScheduler {
 
   @Override
   public Disposable schedule(Runnable runnable) {
-    return new DisposableForkJoinTask(stats, pool.submit(runnable));
+    // If ContextPropagation is enabled, wrap the runnable with ContextPropRunnable
+    Runnable wrappedTask = runnable;
+    if (ContextPropagationRegistry.isContextPropEnabled()) {
+      wrappedTask = new ContextPropRunnable(runnable);
+    }
+    return new DisposableForkJoinTask(stats, pool.submit(wrappedTask));
   }
 
   @Override

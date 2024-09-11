@@ -31,15 +31,13 @@ using namespace watchman;
 
 namespace watchman {
 
-CaseSensitivity getCaseSensitivityForPath(const char* path) {
+CaseSensitivity getCaseSensitivityForPath([[maybe_unused]] const char* path) {
 #ifdef __APPLE__
   return pathconf(path, _PC_CASE_SENSITIVE) ? CaseSensitivity::CaseSensitive
                                             : CaseSensitivity::CaseInSensitive;
 #elif defined(_WIN32)
-  unused_parameter(path);
   return CaseSensitivity::CaseInSensitive;
 #else
-  unused_parameter(path);
   return CaseSensitivity::CaseSensitive;
 #endif
 }
@@ -122,7 +120,7 @@ w_string w_fstype_detect_macos_nfs(w_string fstype, w_string edenfs_indicator) {
 // need to have a fully comprehensive mapping of the underlying filesystem
 // type codes to names, just the known problematic types
 
-w_string w_fstype(const char* path) {
+w_string w_fstype([[maybe_unused]] const char* path) {
 #ifdef __linux__
   // If possible, we prefer to read the filesystem type names from
   // `/proc/self/mounts`
@@ -213,7 +211,6 @@ w_string w_fstype(const char* path) {
   }
   return w_string("unknown", W_STRING_UNICODE);
 #else
-  unused_parameter(path);
   return w_string("unknown", W_STRING_UNICODE);
 #endif
 }

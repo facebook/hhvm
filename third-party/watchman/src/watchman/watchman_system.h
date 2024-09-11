@@ -204,9 +204,6 @@ char* realpath(const char* filename, char* target);
 #define ignore_result(x) x
 #endif
 
-// self-documenting hint to the compiler that we didn't use it
-#define unused_parameter(x) (void)x
-
 #ifdef __cplusplus
 extern "C" {
 #endif

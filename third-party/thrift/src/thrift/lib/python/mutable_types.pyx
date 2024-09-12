@@ -108,12 +108,18 @@ class _MutableStructField:
         self._field_index = field_id
 
     def __get__(self, obj, objtype):
+        if obj is None:
+            return None
+
         if isinstance(obj, MutableStruct):
             return (<MutableStruct>obj)._fbthrift_get_field_value(self._field_index)
         else:
             return (<MutableGeneratedError>obj)._fbthrift_get_field_value(self._field_index)
 
     def __set__(self, obj, value):
+        if obj is None:
+            return
+
         if isinstance(obj, MutableStruct):
             (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
         else:
@@ -136,12 +142,18 @@ class _MutableStructCachedField:
         self._field_index = field_id
 
     def __get__(self, obj, objtype):
+        if obj is None:
+            return None
+
         if isinstance(obj, MutableStruct):
             return (<MutableStruct>obj)._fbthrift_get_cached_field_value(self._field_index)
         else:
             return (<MutableGeneratedError>obj)._fbthrift_get_cached_field_value(self._field_index)
 
     def __set__(self, obj, value):
+        if obj is None:
+            return
+
         if isinstance(obj, MutableStruct):
             (<MutableStruct>obj)._fbthrift_set_field_value(self._field_index, value)
         else:
@@ -946,6 +958,9 @@ cdef class _MutableUnionFieldDescriptor:
 
         Raises error if this field is not currently set on the given `union_instance`.
         """
+        if union_instance is None:
+            return None
+
         field_info = self._field_info
         cdef int field_id = self._field_info.id
 
@@ -978,6 +993,9 @@ cdef class _MutableUnionFieldDescriptor:
                 `TypeInfoBase`). If this field is adapted, this value should be in the
                 adapted type (as opposed to the underlying Thrift type).
         """
+        if union_instance is None:
+            return
+
         field_info = self._field_info
         cdef int field_id = self._field_info.id
 

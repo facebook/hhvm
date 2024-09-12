@@ -28,13 +28,15 @@ def milner_and_type_check(
     temp_file = os.path.join(out_dir, f"{basename}.{seed}.out")
 
     # Run the generator on the template file and the number
-    result = subprocess.run(
-        [milner_exe, os.path.abspath(template_file), "--seed", str(seed)],
-        stdout=open(temp_file, "w"),
-    )
+    with open(temp_file, "w") as out:
+        result = subprocess.run(
+            [milner_exe, os.path.abspath(template_file), "--seed", str(seed)],
+            stdout=out,
+        )
 
     if result.returncode != 0:
-        contents = open(temp_file).read()
+        with open(temp_file, "r") as out:
+            contents = out.read()
         return Failure(
             temp_file,
             contents,
@@ -48,7 +50,8 @@ def milner_and_type_check(
     # Check if the verifier found any errors
     stdout = result.stdout.decode()
     if "No errors" not in stdout:
-        contents = open(temp_file).read()
+        with open(temp_file, "r") as out:
+            contents = out.read()
         return Failure(
             temp_file,
             contents,

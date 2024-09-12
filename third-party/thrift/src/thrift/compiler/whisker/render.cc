@@ -474,11 +474,11 @@ class render_engine {
         });
   }
 
-  void visit(const ast::if_block& if_block) {
-    const object& condition = lookup_variable(if_block.variable);
+  void visit(const ast::conditional_block& conditional_block) {
+    const object& condition = lookup_variable(conditional_block.variable);
 
     const auto maybe_report_coercion = [&] {
-      maybe_report_boolean_coercion(if_block.variable, condition);
+      maybe_report_boolean_coercion(conditional_block.variable, condition);
     };
 
     const auto do_visit = [&](const object& scope,
@@ -489,10 +489,11 @@ class render_engine {
     };
 
     const auto do_conditional_visit = [&](bool condition) {
-      if (condition) {
-        do_visit(whisker::make::null, if_block.body_elements);
-      } else if (if_block.else_clause.has_value()) {
-        do_visit(whisker::make::null, if_block.else_clause->body_elements);
+      if (condition ^ conditional_block.unless) {
+        do_visit(whisker::make::null, conditional_block.body_elements);
+      } else if (conditional_block.else_clause.has_value()) {
+        do_visit(
+            whisker::make::null, conditional_block.else_clause->body_elements);
       }
     };
 

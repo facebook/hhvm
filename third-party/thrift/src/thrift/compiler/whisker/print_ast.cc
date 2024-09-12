@@ -77,12 +77,17 @@ struct ast_visitor {
       visit(body, scope.open_node());
     }
   }
-  void visit(const ast::if_block& if_block, tree_printer::scope scope) const {
-    scope.println(" if-block {}", location(if_block.loc));
-    visit(if_block.variable, scope.open_property());
-    visit(if_block.body_elements, scope.open_node());
+  void visit(
+      const ast::conditional_block& conditional_block,
+      tree_printer::scope scope) const {
+    scope.println(
+        " {}-block {}",
+        conditional_block.unless ? "unless" : "if",
+        location(conditional_block.loc));
+    visit(conditional_block.variable, scope.open_property());
+    visit(conditional_block.body_elements, scope.open_node());
 
-    if (auto else_clause = if_block.else_clause) {
+    if (auto else_clause = conditional_block.else_clause) {
       auto else_scope = scope.open_property();
       else_scope.println(" else-block {}", location(else_clause->loc));
       visit(else_clause->body_elements, else_scope.open_node());

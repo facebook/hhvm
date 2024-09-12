@@ -29,7 +29,7 @@ struct text;
 struct newline;
 struct comment;
 struct section_block;
-struct if_block;
+struct conditional_block;
 struct partial_apply;
 struct variable;
 
@@ -42,7 +42,7 @@ using body = std::variant<
     comment,
     variable,
     section_block,
-    if_block,
+    conditional_block,
     partial_apply>;
 using bodies = std::vector<body>;
 
@@ -126,8 +126,8 @@ struct variable {
 struct section_block {
   source_range loc;
   /**
-   * {{# ⇒ inverted == true
-   * {{^ ⇒ inverted == false
+   * {{# ⇒ inverted == false
+   * {{^ ⇒ inverted == true
    */
   bool inverted;
   variable_lookup variable;
@@ -135,11 +135,19 @@ struct section_block {
 };
 
 /**
- * A Whisker construct for conditionals. This matches Handlebars:
+ * A Whisker construct for conditionals. A conditional_block represents one of
+ * two (very similar) block types: if-block and unless-block.
+ * This matches Handlebars:
  *   https://handlebarsjs.com/guide/builtin-helpers.html#if
+ *   https://handlebarsjs.com/guide/builtin-helpers.html#unless
  */
-struct if_block {
+struct conditional_block {
   source_range loc;
+  /**
+   * {{#if     ⇒ unless == false
+   * {{#unless ⇒ unless == true
+   */
+  bool unless;
   variable_lookup variable;
   bodies body_elements;
 

@@ -764,7 +764,7 @@ class parser {
   using template_body = std::variant<
       ast::variable,
       ast::section_block,
-      ast::if_block,
+      ast::conditional_block,
       ast::partial_apply>;
   // template → { variable | section-block | partial-apply }
   parse_result<template_body> parse_template(parser_scan_window scan) {
@@ -789,8 +789,8 @@ class parser {
     std::optional<template_body> templ;
     if (parse_result variable = parse_variable(scan)) {
       templ = std::move(variable).consume_and_advance(&scan);
-    } else if (parse_result if_block = parse_if_block(scan)) {
-      templ = std::move(if_block).consume_and_advance(&scan);
+    } else if (parse_result conditional_block = parse_conditional_block(scan)) {
+      templ = std::move(conditional_block).consume_and_advance(&scan);
     } else if (parse_result section_block = parse_section_block(scan)) {
       templ = std::move(section_block).consume_and_advance(&scan);
     } else if (parse_result partial_apply = parse_partial_apply(scan)) {
@@ -973,35 +973,52 @@ class parser {
         scan};
   }
 
-  // if-block → { if-block-open ~ body* ~ else-block? ~ if-block-close }
-  // if-block-open → { "{{" ~ "#" ~ "if" ~ variable-lookup ~ "}}" }
+  // conditional-block →
+  //   { cond-block-open ~ body* ~ else-block? ~ cond-block-close }
+  // cond-block-open →
+  //   { "{{" ~ "#" ~ ("if" | "unless") ~ variable-lookup ~ "}}" }
   // else-block → { "{{" ~ "else" ~ "}}" ~ body* }
-  // if-block-close → { "{{" ~ "/" ~ "if" ~ "}}" }
-  parse_result<ast::if_block> parse_if_block(parser_scan_window scan) {
+  // cond-block-close → { "{{" ~ "/" ~ ("if" | "unless") ~ "}}" }
+  //
+  // NOTE: the "if" or "unless" must match between open and close
+  parse_result<ast::conditional_block> parse_conditional_block(
+      parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
     if (!(try_consume_token(&scan, tok::open) &&
-          try_consume_token(&scan, tok::pound) &&
-          try_consume_token(&scan, tok::kw_if))) {
+          try_consume_token(&scan, tok::pound))) {
+      return no_parse_result();
+    }
+    bool inverted;
+    if (try_consume_token(&scan, tok::kw_if)) {
+      inverted = false;
+    } else if (try_consume_token(&scan, tok::kw_unless)) {
+      inverted = true;
+    } else {
       return no_parse_result();
     }
     scan = scan.make_fresh();
 
+    const std::string_view block_name = inverted ? "unless" : "if";
+
     parse_result lookup = parse_variable_lookup(scan);
     if (!lookup.has_value()) {
-      report_expected(scan, "variable-lookup to open if-block");
+      report_expected(
+          scan, fmt::format("variable-lookup to open {}-block", block_name));
     }
     ast::variable_lookup open = std::move(lookup).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, fmt::format("{} to open if-block", tok::close));
+      report_expected(
+          scan, fmt::format("{} to open {}-block", tok::close, block_name));
     }
     scan = scan.make_fresh();
 
     ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
 
     auto else_ = std::invoke(
-        [this, scan]() mutable -> parse_result<ast::if_block::else_block> {
+        [this,
+         scan]() mutable -> parse_result<ast::conditional_block::else_block> {
           const auto else_scan_start = scan.start;
           if (parse_result e = parse_else_clause(scan)) {
             std::ignore = std::move(e).consume_and_advance(&scan);
@@ -1011,13 +1028,13 @@ class parser {
           scan = scan.make_fresh();
           auto else_bodies = parse_bodies(scan).consume_and_advance(&scan);
           return {
-              ast::if_block::else_block{
+              ast::conditional_block::else_block{
                   scan.with_start(else_scan_start).range(),
                   std::move(else_bodies)},
               scan};
         });
     auto else_block =
-        std::invoke([&]() -> std::optional<ast::if_block::else_block> {
+        std::invoke([&]() -> std::optional<ast::conditional_block::else_block> {
           if (else_.has_value()) {
             return std::move(else_).consume_and_advance(&scan);
           }
@@ -1029,17 +1046,21 @@ class parser {
         report_expected(
             scan,
             fmt::format(
-                "{} to close if-block '{}'", kind, open.chain_string()));
+                "{} to close {}-block '{}'",
+                kind,
+                block_name,
+                open.chain_string()));
       }
     };
     expect_on_close(tok::open);
     expect_on_close(tok::slash);
-    expect_on_close(tok::kw_if);
+    expect_on_close(inverted ? tok::kw_unless : tok::kw_if);
     expect_on_close(tok::close);
 
     return {
-        ast::if_block{
+        ast::conditional_block{
             scan.with_start(scan_start).range(),
+            inverted,
             std::move(open),
             std::move(bodies),
             std::move(else_block),

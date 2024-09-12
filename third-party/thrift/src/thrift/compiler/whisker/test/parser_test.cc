@@ -311,21 +311,21 @@ TEST_F(ParserTest, basic_if_else) {
       "|   |- newline <line:4:24, line:5:1> '\\n'\n");
 }
 
-TEST_F(ParserTest, if_block_repeated_else) {
+TEST_F(ParserTest, unless_block_repeated_else) {
   auto ast = parse_ast(
-      "{{#if news.has-update?}}\n"
+      "{{#unless news.has-update?}}\n"
       "  Stuff is {{foo}} happening!\n"
       "{{else}}\n"
       "  Nothing is happening!\n"
       "{{else}}\n"
       "  Nothing is happening!\n"
-      "{{/if}}");
+      "{{/unless}}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected `/` to close if-block 'news.has-update?' but found `else`",
+          "expected `/` to close unless-block 'news.has-update?' but found `else`",
           path_to_file(1),
           5)));
 }
@@ -419,6 +419,23 @@ TEST_F(ParserTest, if_close_by_itself) {
           "expected text, template, or comment but found `{{`",
           path_to_file(1),
           1)));
+}
+
+TEST_F(ParserTest, conditional_block_mismatched_open_and_close) {
+  auto ast = parse_ast(
+      "{{#unless news.has-update?}}\n"
+      "  Stuff is happening!\n"
+      "{{else}}\n"
+      "  Nothing is happening!\n"
+      "{{/if}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `unless` to close unless-block 'news.has-update?' but found `if`",
+          path_to_file(1),
+          5)));
 }
 
 TEST_F(ParserTest, basic_partial_apply) {

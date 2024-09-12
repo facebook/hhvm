@@ -149,7 +149,9 @@ class AsciiSerializedReply {
       const folly::Optional<folly::IOBuf>& /* key */,
       const struct iovec*& iovOut,
       size_t& niovOut,
-      carbon::OtherThanT<Reply, carbon::GetLike<>> = nullptr) {
+      carbon::OtherThanT<
+          RequestFromReplyType<Reply, RequestReplyPairs>,
+          carbon::GetLike<>> = nullptr) {
     prepareImpl(std::move(reply));
     iovOut = iovs_;
     niovOut = iovsCount_;

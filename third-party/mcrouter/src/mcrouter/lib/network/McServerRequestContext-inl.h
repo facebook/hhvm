@@ -38,31 +38,26 @@ void McServerRequestContext::reply(
 }
 
 template <class Reply, class... Args>
-typename std::enable_if<carbon::GetLike<
-    RequestFromReplyType<Reply, RequestReplyPairs>>::value>::type
-McServerRequestContext::replyImpl(
+void McServerRequestContext::replyImpl(
     McServerRequestContext&& ctx,
     Reply&& reply,
     Args&&... args) {
-  // On error, multi-get parent may assume responsiblity of replying
-  if (ctx.moveReplyToParent(
-          *reply.result_ref(),
-          *reply.appSpecificErrorCode_ref(),
-          std::move(*reply.message_ref()))) {
-    replyImpl2(std::move(ctx), Reply(), std::forward<Args>(args)...);
-  } else {
-    replyImpl2(std::move(ctx), std::move(reply), std::forward<Args>(args)...);
+  if constexpr (!std::is_same_v<
+                    RequestFromReplyType<Reply, RequestReplyPairs>,
+                    void>) {
+    if constexpr (carbon::GetLike<
+                      RequestFromReplyType<Reply, RequestReplyPairs>>::value) {
+      // On error, multi-get parent may assume responsiblity of replying
+      if (ctx.moveReplyToParent(
+              *reply.result_ref(),
+              *reply.appSpecificErrorCode_ref(),
+              std::move(*reply.message_ref()))) {
+        replyImpl2(std::move(ctx), Reply(), std::forward<Args>(args)...);
+        return;
+      }
+    }
   }
-}
 
-template <class Reply, class... Args>
-typename std::enable_if<carbon::OtherThan<
-    RequestFromReplyType<Reply, RequestReplyPairs>,
-    carbon::GetLike<>>::value>::type
-McServerRequestContext::replyImpl(
-    McServerRequestContext&& ctx,
-    Reply&& reply,
-    Args&&... args) {
   replyImpl2(std::move(ctx), std::move(reply), std::forward<Args>(args)...);
 }
 

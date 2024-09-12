@@ -97,14 +97,7 @@ class McServerRequestContext {
   bool noReply(const McLeaseGetReply& r) const;
 
   template <class Reply, class... Args>
-  static typename std::enable_if<carbon::GetLike<
-      RequestFromReplyType<Reply, RequestReplyPairs>>::value>::type
-  replyImpl(McServerRequestContext&& ctx, Reply&& reply, Args&&... args);
-
-  template <class Reply, class... Args>
-  static typename std::enable_if<carbon::OtherThan<
-      RequestFromReplyType<Reply, RequestReplyPairs>,
-      carbon::GetLike<>>::value>::type
+  static void
   replyImpl(McServerRequestContext&& ctx, Reply&& reply, Args&&... args);
 
   template <class Reply, class SessionType = McServerSession>

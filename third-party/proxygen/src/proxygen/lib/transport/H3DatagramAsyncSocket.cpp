@@ -315,8 +315,7 @@ H3DatagramAsyncSocket::createFizzClientContext() {
 
   std::vector<std::string> supportedAlpns = {proxygen::kH3FBCurrentDraft};
   ctx->setSupportedAlpns(supportedAlpns);
-  ctx->setDefaultShares(
-      {fizz::NamedGroup::x25519, fizz::NamedGroup::secp256r1});
+  ctx->setRequireAlpn(true);
   ctx->setSendEarlyData(false);
   return ctx;
 }

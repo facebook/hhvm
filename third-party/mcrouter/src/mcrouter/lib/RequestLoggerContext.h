@@ -118,7 +118,8 @@ struct RequestLoggerContext {
       int64_t afterReqLatencyInjectedUs_ = 0,
       std::optional<size_t> poolIndex_ = std::nullopt,
       std::optional<int64_t> productId_ = std::nullopt,
-      std::optional<int32_t> regionalizationEntity_ = std::nullopt)
+      std::optional<int32_t> regionalizationEntity_ = std::nullopt,
+      std::optional<int64_t> usecaseId_ = std::nullopt)
       : strippedRoutingPrefix(strippedRoutingPrefix_),
         requestClass(requestClass_),
         poolName(poolName_),
@@ -136,7 +137,8 @@ struct RequestLoggerContext {
         afterReqLatencyInjectedUs(afterReqLatencyInjectedUs_),
         poolIndex(poolIndex_),
         productId(productId_),
-        regionalizationEntity(regionalizationEntity_) {}
+        regionalizationEntity(regionalizationEntity_),
+        usecaseId(usecaseId_) {}
 
   RequestLoggerContext(const RequestLoggerContext&) = delete;
   RequestLoggerContext& operator=(const RequestLoggerContext&) = delete;
@@ -159,6 +161,7 @@ struct RequestLoggerContext {
   std::optional<size_t> poolIndex;
   std::optional<int64_t> productId;
   std::optional<int32_t> regionalizationEntity;
+  std::optional<uint64_t> usecaseId;
 };
 
 } // namespace mcrouter

@@ -213,6 +213,25 @@ std::optional<int64_t> getProductId(Message& message) {
 }
 
 template <typename Message, typename = std::enable_if_t<true>>
+class HasUsecaseIdTrait : public std::false_type {};
+template <typename Message>
+class HasUsecaseIdTrait<
+    Message,
+    std::void_t<
+        decltype(std::declval<std::decay_t<Message>>().usecaseId_ref())>>
+    : public std::true_type {};
+
+template <typename Message>
+std::optional<int64_t> getUsecaseId(Message& message) {
+  if constexpr (HasUsecaseIdTrait<Message>::value) {
+    if (message.usecaseId_ref().has_value()) {
+      return {*message.usecaseId_ref()};
+    }
+  }
+  return std::nullopt;
+}
+
+template <typename Message, typename = std::enable_if_t<true>>
 class HasRegionalizationEntityTrait : public std::false_type {};
 template <typename Message>
 class HasRegionalizationEntityTrait<

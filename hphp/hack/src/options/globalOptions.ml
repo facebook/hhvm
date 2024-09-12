@@ -52,6 +52,11 @@ type 'a all_or_some =
   | ASome of 'a list
 [@@deriving eq, show]
 
+type 'a none_or_all_except =
+  | NNone
+  | All_except of 'a list
+[@@deriving eq, show]
+
 let default_saved_state =
   {
     loading = default_saved_state_loading;
@@ -176,7 +181,7 @@ type t = {
   tco_lsp_invalidation: bool;
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
-  hack_warnings: int all_or_some;
+  hack_warnings: int none_or_all_except;
   warnings_default_all: bool;
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
@@ -285,7 +290,7 @@ let default =
     tco_lsp_invalidation = false;
     tco_autocomplete_sort_text = false;
     tco_extended_reasons = None;
-    hack_warnings = All;
+    hack_warnings = All_except [];
     warnings_default_all = false;
     tco_strict_switch = false;
     tco_allowed_files_for_ignore_readonly = [];

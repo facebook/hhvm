@@ -35,6 +35,11 @@ type 'a all_or_some =
   | ASome of 'a list
 [@@deriving eq, show]
 
+type 'a none_or_all_except =
+  | NNone
+  | All_except of 'a list
+[@@deriving eq, show]
+
 val default_saved_state : saved_state
 
 val with_saved_state_manifold_api_key :
@@ -253,7 +258,7 @@ type t = {
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
-  hack_warnings: int all_or_some;  (** turn on hack warnings *)
+  hack_warnings: int none_or_all_except;  (** turn on hack warnings *)
   warnings_default_all: bool;
   tco_strict_switch: bool;
       (** Enable strict case checking in switch statements *)
@@ -371,7 +376,7 @@ val set :
   ?tco_lsp_invalidation:bool ->
   ?tco_autocomplete_sort_text:bool ->
   ?tco_extended_reasons:extended_reasons_config ->
-  ?hack_warnings:int all_or_some ->
+  ?hack_warnings:int none_or_all_except ->
   ?warnings_default_all:bool ->
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->

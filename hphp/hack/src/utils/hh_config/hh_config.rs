@@ -21,6 +21,7 @@ use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::experimental_features;
 use oxidized::global_options::ExtendedReasonsConfig;
 use oxidized::global_options::GlobalOptions;
+use oxidized::global_options::NoneOrAllExcept;
 use oxidized::parser_options::ParserOptions;
 use package::PackageInfo;
 use sha1::Digest;
@@ -432,7 +433,15 @@ impl HhConfig {
                     else { None }
                 }
             }),
-            hack_warnings: hhconfig.get_all_or_some_ints_or("hack_warnings", default.hack_warnings)?,
+            hack_warnings: {
+                let is_on = hh_conf.get_bool_or("hack_warnings", true)?;
+                if is_on {
+                    let disabled_warnings = hhconfig.get_ints_or("disabled_warnings", vec![])?;
+                    NoneOrAllExcept::AllExcept(disabled_warnings)
+                } else {
+                    NoneOrAllExcept::NNone
+                }
+            },
             warnings_default_all: hhconfig.get_bool_or("warnings_default_all", default.warnings_default_all)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
             tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,

@@ -250,8 +250,7 @@ type t = {
       (** POC: @ljw - controls how quarantine invalidates folded decls *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
-  hack_warnings: int GlobalOptions.all_or_some;
-      (** POC: @catg - turn on hack warnings. *)
+  hack_warnings: bool;  (** POC: @catg - turn on hack warnings. *)
   warnings_default_all: bool;
       (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.
         Otherwise, `hh` is equivalent to `hh -Wnone`, i.e. warnings are not shown. *)

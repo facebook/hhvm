@@ -472,7 +472,6 @@ let load_config config options =
       (bool_opt "populate_dead_unsafe_cast_heap" config)
     ?tco_log_exhaustivity_check:(bool_opt "log_exhaustivity_check" config)
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
-    ?hack_warnings:(all_or_some_ints_opt "hack_warnings" config)
     ?warnings_default_all:(bool_opt "warnings_default_all" config)
     ?tco_strict_switch:(bool_opt "strict_switch" config)
     ?tco_allowed_files_for_ignore_readonly:
@@ -605,7 +604,13 @@ let load
         ~tco_sticky_quarantine:local_config.lsp_sticky_quarantine
         ~tco_lsp_invalidation:local_config.lsp_invalidation
         ~tco_autocomplete_sort_text:local_config.autocomplete_sort_text
-        ~hack_warnings:local_config.hack_warnings
+        ~hack_warnings:
+          (if local_config.hack_warnings then
+            GlobalOptions.All_except
+              (int_list_opt "disabled_warnings" config
+              |> Option.value ~default:[])
+          else
+            GlobalOptions.NNone)
         ~warnings_default_all:local_config.warnings_default_all
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries

@@ -438,9 +438,9 @@ let module_of_migrated
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with
-  | GlobalOptions.All -> true
-  | GlobalOptions.ASome codes ->
-    List.mem codes (Codes.to_enum code) ~equal:Int.equal
+  | GlobalOptions.NNone -> false
+  | GlobalOptions.All_except disabled_codes ->
+    not (List.mem disabled_codes (Codes.to_enum code) ~equal:Int.equal)
 
 let add tcopt (type a x) ((pos, kind, warning) : (x, a) Typing_warning.t) : unit
     =

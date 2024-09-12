@@ -118,6 +118,18 @@ impl ConfigFile {
         })
     }
 
+    pub fn get_ints_or(
+        &self,
+        key: &str,
+        default: Vec<isize>,
+    ) -> Result<Vec<isize>, std::num::ParseIntError> {
+        self.map.get(key).map_or(Ok(default), |s| {
+            s.split_terminator(',')
+                .map(|s| s.trim().parse())
+                .collect::<Result<_, _>>()
+        })
+    }
+
     pub fn get_float(&self, key: &str) -> Option<Result<f64, std::num::ParseFloatError>> {
         self.map.get(key).map(|s| s.parse())
     }

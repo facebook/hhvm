@@ -104,7 +104,7 @@ let default =
     lsp_sticky_quarantine = false;
     lsp_invalidation = false;
     autocomplete_sort_text = false;
-    hack_warnings = GlobalOptions.All;
+    hack_warnings = true;
     warnings_default_all = false;
   }
 
@@ -806,7 +806,7 @@ let load_
       config
   in
   let hack_warnings =
-    all_or_some_ints "hack_warnings" ~default:default.hack_warnings config
+    bool_ "hack_warnings" ~default:default.hack_warnings config
   in
   let zstd_decompress_by_file =
     bool_

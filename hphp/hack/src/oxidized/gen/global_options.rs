@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c334712fa5641695c08f3750fe5ce336>>
+// @generated SignedSource<<642754a417b3593b8bcb4cfa09c0f06c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -86,6 +86,29 @@ pub struct SavedState {
 pub enum AllOrSome<A> {
     All,
     ASome(Vec<A>),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum NoneOrAllExcept<A> {
+    NNone,
+    #[rust_to_ocaml(name = "All_except")]
+    AllExcept(Vec<A>),
 }
 
 #[derive(
@@ -221,7 +244,7 @@ pub struct GlobalOptions {
     pub tco_lsp_invalidation: bool,
     pub tco_autocomplete_sort_text: bool,
     pub tco_extended_reasons: Option<ExtendedReasonsConfig>,
-    pub hack_warnings: AllOrSome<isize>,
+    pub hack_warnings: NoneOrAllExcept<isize>,
     pub warnings_default_all: bool,
     pub tco_strict_switch: bool,
     pub tco_allowed_files_for_ignore_readonly: Vec<String>,

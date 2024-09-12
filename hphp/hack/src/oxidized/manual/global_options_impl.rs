@@ -10,7 +10,7 @@ use crate::gen::global_options::SavedStateLoading;
 use crate::gen::package_info::PackageInfo;
 use crate::gen::parser_options::ParserOptions;
 use crate::gen::saved_state_rollouts::SavedStateRollouts;
-use crate::global_options::AllOrSome;
+use crate::global_options::NoneOrAllExcept;
 use crate::i_set;
 use crate::s_map;
 use crate::s_set;
@@ -134,7 +134,7 @@ impl Default for GlobalOptions {
             tco_lsp_invalidation: false,
             tco_autocomplete_sort_text: false,
             tco_extended_reasons: None,
-            hack_warnings: AllOrSome::ASome(vec![]),
+            hack_warnings: NoneOrAllExcept::AllExcept(vec![]),
             warnings_default_all: false,
             tco_strict_switch: false,
             tco_allowed_files_for_ignore_readonly: vec![],

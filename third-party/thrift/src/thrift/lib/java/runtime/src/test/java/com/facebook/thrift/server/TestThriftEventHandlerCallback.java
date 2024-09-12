@@ -78,7 +78,7 @@ public class TestThriftEventHandlerCallback {
       // We need to wait for an asynchronous thread to run TestDoneThriftEventHandler.done()
       do {
         if (testDoneThriftEventHandler.outputString.equals(
-            String.format(EXPECTED_OUTPUT_STRING, "ping", i))) break;
+            String.format(EXPECTED_OUTPUT_STRING, "PingService.ping", i))) break;
 
         Thread.sleep(INTERVAL_WAIT_TIME_MS);
 
@@ -87,7 +87,7 @@ public class TestThriftEventHandlerCallback {
         if (elapsedTime >= MAX_WAIT_TIME_MS)
           throw new TimeoutException(
               "Expected: "
-                  + String.format(EXPECTED_OUTPUT_STRING, "ping", i)
+                  + String.format(EXPECTED_OUTPUT_STRING, "PingService.ping", i)
                   + " but got: "
                   + testDoneThriftEventHandler.outputString);
 
@@ -95,7 +95,7 @@ public class TestThriftEventHandlerCallback {
     }
 
     Assert.assertEquals(
-        String.format(EXPECTED_OUTPUT_STRING, "ping", numIterations - 1),
+        String.format(EXPECTED_OUTPUT_STRING, "PingService.ping", numIterations - 1),
         testDoneThriftEventHandler.getOutputString());
   }
 

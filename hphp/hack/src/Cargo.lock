@@ -2632,6 +2632,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b297dc40733f23a0e52728a58fa9489a5b7638a324932de16b41adc3ef80730"
 dependencies = [
  "console",
+ "futures-core",
  "instant",
  "number_prefix",
  "portable-atomic",

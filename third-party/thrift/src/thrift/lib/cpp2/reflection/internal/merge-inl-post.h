@@ -16,17 +16,30 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/op/Create.h>
+#include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/type/NativeType.h>
+
 namespace apache {
 namespace thrift {
 namespace merge_into_detail {
 
-template <typename T, typename TypeClass>
-struct merge {
-  using impl = merge_impl<TypeClass>;
+template <typename Tag>
+struct merge_impl;
 
-  //  regular
-  static void go(const T& src, T& dst) { impl::template go<T>(src, dst); }
-  static void go(T&& src, T& dst) { impl::template go<T>(std::move(src), dst); }
+template <typename Tag>
+struct merge_field_refs {
+  using T = type::native_type<Tag>;
+
+  template <template <typename> class Ref>
+  static void go(Ref<const T&> src, Ref<T&> dst) {
+    merge_impl<Tag>::go(*src, dst.ensure());
+  }
+
+  template <template <typename> class Ref>
+  static void go(Ref<T&&> src, Ref<T&> dst) {
+    merge_impl<Tag>::go(std::move(*src), dst.ensure());
+  }
 
   static void go(
       optional_boxed_field_ref<const detail::boxed_value_ptr<T>&> src,
@@ -34,7 +47,7 @@ struct merge {
     if (!dst) {
       dst.copy_from(src);
     } else if (src) {
-      go(*src, *dst);
+      merge_impl<Tag>::go(*src, *dst);
     }
   }
 
@@ -44,10 +57,14 @@ struct merge {
     if (!dst) {
       dst.move_from(src);
     } else if (src) {
-      go(std::move(*src), *dst);
+      merge_impl<Tag>::go(std::move(*src), *dst);
       src.reset();
     }
   }
+
+  // The legacy implementation incorrectly failed to merge fields using
+  // cpp.ref, so we are keeping the same behavior for now.
+  // TODO: check callsites for safety and merge recursively.
 
   static void go(const std::unique_ptr<T>& src, std::unique_ptr<T>& dst) {
     dst = !src ? nullptr : std::make_unique<T>(*src);
@@ -73,8 +90,10 @@ struct merge {
   }
 };
 
-template <typename TypeClass>
+template <typename Tag>
 struct merge_impl {
+  static_assert(
+      type::is_a_v<Tag, type::primitive_c> || type::is_a_v<Tag, type::union_c>);
   template <typename T>
   static void go(const T& src, T& dst) {
     dst = src;
@@ -85,59 +104,40 @@ struct merge_impl {
   }
 };
 
-template <>
-struct merge_impl<type_class::structure> {
-  template <typename T>
-  struct deref {
-    using type = T;
-  };
-  template <typename T>
-  struct deref<optional_boxed_field_ref<T>>
-      : deref<typename folly::remove_cvref_t<T>::element_type> {};
-  template <typename T, typename D>
-  struct deref<std::unique_ptr<T, D>> : deref<T> {};
-  template <typename T>
-  struct deref<std::shared_ptr<T>> : deref<T> {};
-  template <typename T>
-  struct deref<std::shared_ptr<const T>> : deref<T> {};
-
-  template <bool Move>
+template <typename T>
+struct merge_impl<type::struct_t<T>> {
+  template <typename Src>
   struct visitor {
-    template <typename T>
-    using Src = fatal::conditional<Move, T, const T>;
-    template <typename MemberInfo, std::size_t Index, typename T>
-    void operator()(
-        fatal::indexed<MemberInfo, Index>, Src<T>& src, T& dst) const {
-      using mgetter = typename MemberInfo::getter;
-      using mclass = typename MemberInfo::type_class;
-      using msrc = fatal::conditional<Move, Src<T>&&, const Src<T>&>;
-      using mtype =
-          folly::remove_cvref_t<decltype(mgetter{}(static_cast<msrc>(src)))>;
-      using merge_field = merge<typename deref<mtype>::type, mclass>;
-      using mref = fatal::conditional<Move, mtype&&, const mtype&>;
-      if (MemberInfo::optional::value == optionality::optional &&
-          !MemberInfo::is_set(src)) {
-        return;
+    template <typename Fid>
+    void operator()(Fid) {
+      if constexpr (detail::is_optional_or_union_field_ref_v<
+                        op::get_field_ref<T, Fid>>) {
+        if (!op::get<Fid>(src).has_value()) {
+          return;
+        }
       }
-      MemberInfo::mark_set(dst, true);
-      merge_field::go(
-          static_cast<mref>(mgetter{}(static_cast<msrc>(src))), mgetter{}(dst));
+
+      using merge_field = merge_field_refs<op::get_type_tag<T, Fid>>;
+      merge_field::go(op::get<Fid>(std::forward<Src>(src)), op::get<Fid>(dst));
     }
+
+    Src src;
+    T& dst;
+    visitor(Src src, T& dst) : src(std::forward<Src>(src)), dst(dst) {}
   };
-  template <typename T>
   static void go(const T& src, T& dst) {
-    using members = typename reflect_struct<T>::members;
-    fatal::foreach<members>(visitor<false>(), src, dst);
+    op::for_each_field_id<T>(visitor<const T&>(src, dst));
   }
-  template <typename T>
   static void go(T&& src, T& dst) {
-    using members = typename reflect_struct<T>::members;
-    fatal::foreach<members>(visitor<true>(), src, dst);
+    op::for_each_field_id<T>(visitor<T&&>(std::move(src), dst));
   }
 };
+template <typename T>
+struct merge_impl<type::exception_t<T>> : merge_impl<type::struct_t<T>> {};
+// Note: unions are handled alongside primitives!
 
-template <typename ValueTypeClass>
-struct merge_impl<type_class::list<ValueTypeClass>> {
+template <typename ValueTag>
+struct merge_impl<type::list<ValueTag>> {
   template <typename T>
   static void go(const T& src, T& dst) {
     dst.reserve(dst.size() + src.size());
@@ -150,8 +150,8 @@ struct merge_impl<type_class::list<ValueTypeClass>> {
   }
 };
 
-template <typename ValueTypeClass>
-struct merge_impl<type_class::set<ValueTypeClass>> {
+template <typename ValueTag>
+struct merge_impl<type::set<ValueTag>> {
   template <typename T>
   static void go(const T& src, T& dst) {
     std::copy(src.cbegin(), src.cend(), std::inserter(dst, dst.end()));
@@ -162,23 +162,24 @@ struct merge_impl<type_class::set<ValueTypeClass>> {
   }
 };
 
-template <typename KeyTypeClass, typename MappedTypeClass>
-struct merge_impl<type_class::map<KeyTypeClass, MappedTypeClass>> {
+template <typename KeyTag, typename MappedTag>
+struct merge_impl<type::map<KeyTag, MappedTag>> {
   template <typename T>
   static void go(const T& src, T& dst) {
-    using M = typename T::mapped_type;
     for (const auto& kv : src) {
-      merge<M, MappedTypeClass>::go(kv.second, dst[kv.first]);
+      merge_impl<MappedTag>::go(kv.second, dst[kv.first]);
     }
   }
   template <typename T>
   static void go(T&& src, T& dst) {
-    using M = typename T::mapped_type;
     for (auto& kv : src) {
-      merge<M, MappedTypeClass>::go(std::move(kv.second), dst[kv.first]);
+      merge_impl<MappedTag>::go(std::move(kv.second), dst[kv.first]);
     }
   }
 };
+
+template <typename T, typename Tag>
+struct merge_impl<type::cpp_type<T, Tag>> : merge_impl<Tag> {};
 
 } // namespace merge_into_detail
 } // namespace thrift
@@ -188,14 +189,11 @@ namespace apache {
 namespace thrift {
 
 template <typename T>
-void merge_into(T&& src, merge_into_detail::remove_const_reference<T>& dst) {
-  constexpr auto c = std::is_const<T>::value;
-  constexpr auto r = std::is_rvalue_reference<T&&>::value;
-  using D = typename merge_into_detail::remove_const_reference<T>;
-  using W = fatal::conditional<!c && r, T&&, const D&>;
-  using TC = type_class_of_thrift_class_t<folly::remove_cvref_t<T>>;
-  static_assert(!std::is_void_v<TC>, "merge_into: not a structure type");
-  merge_into_detail::merge<D, TC>::go(static_cast<W>(src), dst);
+void merge_into(T&& src, folly::remove_cvref_t<T>& dst) {
+  using D = typename folly::remove_cvref_t<T>;
+  static_assert(is_thrift_class_v<D>, "merge_into: not a structured type");
+  using Tag = type::infer_tag<D>;
+  merge_into_detail::merge_impl<Tag>::go(std::forward<T>(src), dst);
 }
 
 } // namespace thrift

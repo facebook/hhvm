@@ -206,13 +206,21 @@ void ThriftRocketServerHandler::handleSetupFrame(
   RequestSetupMetadata meta;
   try {
     if (frame.encodeMetadataUsingBinary()) {
-      if (unpackBinary(meta, cursor) != frame.payload().metadataSize()) {
+      BinaryProtocolReader reader;
+      reader.setInput(cursor);
+      // Throws on read error
+      meta.read(&reader);
+      if (reader.getCursorPosition() != frame.payload().metadataSize()) {
         return connection.close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID_SETUP,
             "Error deserializing SETUP payload: underflow"));
       }
     } else {
-      if (unpackCompact(meta, cursor) != frame.payload().metadataSize()) {
+      CompactProtocolReader reader;
+      reader.setInput(cursor);
+      // Throws on read error
+      meta.read(&reader);
+      if (reader.getCursorPosition() != frame.payload().metadataSize()) {
         return connection.close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID_SETUP,
             "Error deserializing SETUP payload: underflow"));
@@ -314,7 +322,11 @@ void ThriftRocketServerHandler::handleSetupFrame(
     serverMeta.set_setupResponse();
     serverMeta.setupResponse_ref()->version_ref() = version_;
     serverMeta.setupResponse_ref()->zstdSupported_ref() = true;
-    connection.sendMetadataPush(packCompact(std::move(serverMeta)));
+    CompactProtocolWriter compactProtocolWriter;
+    folly::IOBufQueue queue;
+    compactProtocolWriter.setOutput(&queue);
+    serverMeta.write(&compactProtocolWriter);
+    connection.sendMetadataPush(std::move(queue).move());
 
   } catch (const std::exception& e) {
     return connection.close(folly::make_exception_wrapper<RocketException>(

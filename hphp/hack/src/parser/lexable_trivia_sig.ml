@@ -23,6 +23,8 @@ module type LexableTrivia_S = sig
 
   val make_fix_me : SourceText.t -> int -> int -> t
 
+  val make_ignore : SourceText.t -> int -> int -> t
+
   val make_ignore_error : SourceText.t -> int -> int -> t
 
   val make_extra_token_error : SourceText.t -> int -> int -> t

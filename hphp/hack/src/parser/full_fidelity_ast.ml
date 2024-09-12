@@ -82,6 +82,7 @@ let process_scour_comments (env : env) (sc : Scoured_comments.t) =
   List.iter sc.sc_bad_ignore_pos ~f:(fun pos ->
       Errors.add_error Parsing_error.(to_user_error @@ Hh_ignore_comment pos));
   Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
+  Fixme_provider.provide_ignores env.file sc.sc_ignores;
   if env.quick_mode then
     Fixme_provider.provide_decl_hh_fixmes env.file sc.sc_fixmes
   else

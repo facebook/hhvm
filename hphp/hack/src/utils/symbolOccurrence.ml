@@ -111,6 +111,7 @@ type kind =
      we can easily find a concrete receiver (e.g. no complex generics). *)
   | BestEffortArgument of receiver * int
   | HhFixme
+  | HhIgnore
   | Module
 [@@deriving ord, eq, show]
 
@@ -143,6 +144,7 @@ let kind_to_string = function
   | PureFunctionContext -> "context_braces"
   | BestEffortArgument _ -> "argument"
   | HhFixme -> "hh_fixme"
+  | HhIgnore -> "hh_ignore"
   | Module -> "module"
 
 let enclosing_class occurrence =

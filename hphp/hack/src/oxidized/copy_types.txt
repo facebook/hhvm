@@ -65,8 +65,10 @@ error_codes::Naming
 error_codes::NastCheck
 error_codes::Parsing
 error_codes::Typing
+error_codes::Warning
 error_codes::GlobalAccessCheck
 errors::ErrorCode
+errors::FixmeIssue
 errors::Format
 errors::NameContext
 errors::Phase

@@ -111,7 +111,7 @@ end = struct
 
   let pass_code codes code = Warning_set.mem code codes
 
-  (* Silence warning about Not_found below being deprecated. *)
+  (* suppress warning about Not_found below being deprecated. *)
   [@@@ocaml.warning "-3"]
 
   let match_regexp (path : path) (regexp : Str.regexp) =

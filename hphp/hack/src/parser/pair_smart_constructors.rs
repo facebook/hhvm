@@ -341,6 +341,13 @@ where
         )
     }
     #[inline]
+    fn make_ignore(offset: usize, width: usize) -> Self::Trivium {
+        PairTrivium(
+            T0::make_ignore(offset, width),
+            T1::make_ignore(offset, width),
+        )
+    }
+    #[inline]
     fn make_ignore_error(offset: usize, width: usize) -> Self::Trivium {
         PairTrivium(
             T0::make_ignore_error(offset, width),
@@ -399,6 +406,12 @@ where
         Self(
             T0::make_fix_me(offset, width),
             T1::make_fix_me(offset, width),
+        )
+    }
+    fn make_ignore(offset: usize, width: usize) -> Self {
+        Self(
+            T0::make_ignore(offset, width),
+            T1::make_ignore(offset, width),
         )
     }
     fn make_ignore_error(offset: usize, width: usize) -> Self {

@@ -303,22 +303,22 @@ where
     }
 
     fn is_decimal_digit(ch: char) -> bool {
-        ('0'..='9').contains(&ch)
+        ch.is_ascii_digit()
     }
 
     fn is_hexadecimal_digit(c: char) -> bool {
-        ('0'..='9').contains(&c) || ('a'..='f').contains(&c) || ('A'..='F').contains(&c)
+        c.is_ascii_digit() || ('a'..='f').contains(&c) || ('A'..='F').contains(&c)
     }
 
     fn is_name_nondigit(c: char) -> bool {
-        (c == '_') || ('a'..='z').contains(&c) || ('A'..='Z').contains(&c) || ('\x7f' <= c)
+        (c == '_') || c.is_ascii_lowercase() || c.is_ascii_uppercase() || ('\x7f' <= c)
     }
 
     fn is_name_letter(c: char) -> bool {
         (c == '_')
-            || ('0'..='9').contains(&c)
-            || ('a'..='z').contains(&c)
-            || ('A'..='Z').contains(&c)
+            || c.is_ascii_digit()
+            || c.is_ascii_lowercase()
+            || c.is_ascii_uppercase()
             || ('\x7f' <= c)
     }
 
@@ -510,7 +510,7 @@ where
             {
                 self.scan_exponent_with_underscores()
             }
-            _ if ('0'..='9').contains(&ch) => {
+            _ if ch.is_ascii_digit() => {
                 // 05
                 let mut lexer_oct = self.clone();
                 lexer_oct.scan_octal_digits_with_underscores();
@@ -684,7 +684,7 @@ where
     fn skip_uninteresting_double_quote_like_string_characters(&mut self) {
         let is_uninteresting = |ch| match ch {
             INVALID | '\\' | '$' | '{' | '[' | ']' | '-' => false,
-            ch if ('0'..='9').contains(&ch) => false,
+            ch if ch.is_ascii_digit() => false,
             ch => ch != '"' && !Self::is_name_nondigit(ch),
         };
         self.skip_while(is_uninteresting);
@@ -918,7 +918,7 @@ where
                         TokenKind::StringLiteralBody
                     }
                 }
-                ch if ('0'..='9').contains(&ch) => {
+                ch if ch.is_ascii_digit() => {
                     let mut lexer1 = self.clone();
                     let literal = lexer1.scan_integer_literal_in_string();
 
@@ -1382,7 +1382,7 @@ where
                     self.advance(2);
                     TokenKind::DotEqual
                 }
-                ch if ('0'..='9').contains(&ch) => self.scan_after_decimal_point_with_underscores(),
+                ch if ch.is_ascii_digit() => self.scan_after_decimal_point_with_underscores(),
                 '.' => {
                     if (self.peek_char(2)) == '.' {
                         self.advance(3);
@@ -1817,6 +1817,8 @@ where
             Trivia::<TF>::make_fix_me(self.start, w)
         } else if lexer_ws.match_string(b"HH_IGNORE_ERROR") {
             Trivia::<TF>::make_ignore_error(self.start, w)
+        } else if lexer_ws.match_string(b"HH_IGNORE") {
+            Trivia::<TF>::make_ignore(self.start, w)
         } else {
             Trivia::<TF>::make_delimited_comment(self.start, w)
         }
@@ -1979,7 +1981,7 @@ where
                         acc.push(t);
                         return acc;
                     }
-                    TriviaKind::FixMe | TriviaKind::IgnoreError => {
+                    TriviaKind::FixMe | TriviaKind::Ignore | TriviaKind::IgnoreError => {
                         return acc;
                     }
                     _ => {

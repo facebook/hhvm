@@ -12,6 +12,8 @@
       "trivia_type_name" : "single_line_comment" },
     { "trivia_kind_name" : "FixMe",
       "trivia_type_name" : "fix_me" },
+    { "trivia_kind_name" : "Ignore",
+      "trivia_type_name" : "ignore" },
     { "trivia_kind_name" : "IgnoreError",
       "trivia_type_name" : "ignore_error" },
     { "trivia_kind_name" : "FallThrough",

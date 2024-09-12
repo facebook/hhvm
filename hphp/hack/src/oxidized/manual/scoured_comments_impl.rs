@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::errors::ErrorCode;
 use crate::i_map::IMap;
 use crate::pos::Pos;
 use crate::scoured_comments::Fixmes;
@@ -14,15 +13,11 @@ impl ScouredComments {
         ScouredComments {
             comments: vec![],
             fixmes: IMap::new(),
+            ignores: IMap::new(),
             misuses: IMap::new(),
             error_pos: vec![],
             bad_ignore_pos: vec![],
         }
-    }
-
-    pub fn get_fixme(&self, pos: &Pos, code: ErrorCode) -> Option<&Pos> {
-        let line = pos.info_pos().0 as isize;
-        self.fixmes.get(&line).and_then(|m| m.get(&code))
     }
 
     pub fn add_to_fixmes(&mut self, line: isize, code: isize, pos: Pos) {
@@ -31,6 +26,10 @@ impl ScouredComments {
 
     pub fn add_to_misuses(&mut self, line: isize, code: isize, pos: Pos) {
         Self::add(&mut self.misuses, line, code, pos)
+    }
+
+    pub fn add_to_ignores(&mut self, line: isize, code: isize, pos: Pos) {
+        Self::add(&mut self.ignores, line, code, pos)
     }
 
     pub fn add_format_error(&mut self, pos: Pos) {

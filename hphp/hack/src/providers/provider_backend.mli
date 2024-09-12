@@ -127,6 +127,7 @@ module Fixmes : sig
     hh_fixmes: Fixme_store.t;
     decl_hh_fixmes: Fixme_store.t;
     disallowed_fixmes: Fixme_store.t;
+    ignores: Fixme_store.t;
   }
 
   val get_telemetry : key:string -> t -> Telemetry.t -> Telemetry.t

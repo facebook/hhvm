@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<98cb541120104e7c867811a0cf1a9895>>
+// @generated SignedSource<<70135d15e4310ed98b7162026838b67b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -67,3 +67,24 @@ pub type PerFileErrors = Vec<Error>;
 
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type Errors = relative_path::map::Map<Vec<Error>>;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum SuppressionKind {
+    Fixme { forbidden_decl_fixme: bool },
+    Ignore,
+}

@@ -40,6 +40,9 @@ let make_fallthrough source_text offset width =
 let make_fix_me source_text offset width =
   { kind = TriviaKind.FixMe; source_text; offset; width }
 
+let make_ignore source_text offset width =
+  { kind = TriviaKind.Ignore; source_text; offset; width }
+
 let make_whitespace source_text offset width =
   { kind = TriviaKind.WhiteSpace; source_text; offset; width }
 

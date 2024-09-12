@@ -29,6 +29,7 @@ let symbol_in_call_hierarchy (sym_occ : Relative_path.t SymbolOccurrence.t) :
   | PureFunctionContext -> false
   | BestEffortArgument _ -> false
   | HhFixme -> false
+  | HhIgnore -> false
   | Module -> true
 
 let is_target target_line target_char (occ : Relative_path.t SymbolOccurrence.t)

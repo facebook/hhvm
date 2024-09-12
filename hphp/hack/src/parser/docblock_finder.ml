@@ -182,6 +182,7 @@ let get_single_lines_docblock (node : Syntax.t) : string option =
         else
           aux tail acc true
       | TriviaKind.FixMe
+      | TriviaKind.Ignore
       | TriviaKind.IgnoreError ->
         (* Step over HH_FIXME comments. *)
         aux tail acc false
@@ -219,6 +220,7 @@ let get_delimited_docblock (node : Syntax.t) : string option =
       | TriviaKind.WhiteSpace
       | TriviaKind.EndOfLine
       | TriviaKind.FixMe
+      | TriviaKind.Ignore
       | TriviaKind.IgnoreError ->
         (* Step over whitespace and HH_FIXME comments. *)
         aux tail

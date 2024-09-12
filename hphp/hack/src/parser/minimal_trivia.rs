@@ -83,6 +83,13 @@ impl LexableTrivium for MinimalTrivium {
         }
     }
 
+    fn make_ignore(_offset: usize, width: usize) -> Self {
+        Self {
+            kind: TriviaKind::Ignore,
+            width,
+        }
+    }
+
     fn make_ignore_error(_offset: usize, width: usize) -> Self {
         Self {
             kind: TriviaKind::IgnoreError,

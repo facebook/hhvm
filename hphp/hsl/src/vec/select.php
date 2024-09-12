@@ -29,11 +29,11 @@ function diff<Tv1 as arraykey, Tv2 as arraykey>(
   Traversable<Tv2> $second,
   Container<Tv2> ...$rest
 )[]: vec<Tv1> {
-  /* HH_FIXME[12006] Silence sketchy null check */
+  /* HH_IGNORE[12006] suppress sketchy null check */
   if (!$first) {
     return vec[];
   }
-  /* HH_FIXME[12006] Silence sketchy null check */
+  /* HH_IGNORE[12006] suppress sketchy null check */
   if (!$second && !$rest) {
     return cast_clear_legacy_array_mark($first);
   }
@@ -58,11 +58,11 @@ function diff_by<Tv, Ts as arraykey>(
   Traversable<Tv> $second,
   (function(Tv)[_]: Ts) $scalar_func,
 )[ctx $scalar_func]: vec<Tv> {
-  /* HH_FIXME[12006] Silence sketchy null check */
+  /* HH_IGNORE[12006] suppress sketchy null check */
   if (!$first) {
     return vec[];
   }
-  /* HH_FIXME[12006] Silence sketchy null check */
+  /* HH_IGNORE[12006] suppress sketchy null check */
   if (!$second) {
     return cast_clear_legacy_array_mark($first);
   }

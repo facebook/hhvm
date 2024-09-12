@@ -56,6 +56,7 @@ where
                         || (self.include_line_comments
                             && t.has_trivia_kind(TriviaKind::SingleLineComment))
                         || (t.has_trivia_kind(TriviaKind::FixMe)
+                            || t.has_trivia_kind(TriviaKind::Ignore)
                             || (t.has_trivia_kind(TriviaKind::IgnoreError)
                                 && self.disable_hh_ignore_error <= 1))
                     {
@@ -109,10 +110,11 @@ where
                     acc.comments.push((p, Comment::CmtLine(text)));
                 }
             }
-            FixMe | IgnoreError => {
+            FixMe | Ignore | IgnoreError => {
                 lazy_static! {
                     static ref IGNORE_ERROR: Regex =
-                        Regex::new(r#"HH_(?:FIXME|IGNORE_ERROR)[ \t\n]*\[([0-9]+)\]"#).unwrap();
+                        Regex::new(r#"HH_(?:FIXME|IGNORE_ERROR|IGNORE)[ \t\n]*\[([0-9]+)\]"#)
+                            .unwrap();
                 }
 
                 let text = t.text_raw(self.source_text());
@@ -128,12 +130,27 @@ where
                         let code = std::str::from_utf8(code).unwrap();
                         let code: isize = std::str::FromStr::from_str(code).unwrap();
                         let in_hhi = pos.filename().prefix() == Prefix::Hhi;
-                        if !(in_block || in_hhi || self.allowed_decl_fixme_codes.contains(&code)) {
-                            acc.add_to_misuses(line, code, p);
-                        } else if self.disable_hh_ignore_error == 1 && t.kind() == IgnoreError {
-                            acc.add_disallowed_ignore(p);
-                        } else {
-                            acc.add_to_fixmes(line, code, p);
+                        match t.kind() {
+                            Ignore => {
+                                acc.add_to_ignores(line, code, p);
+                            }
+                            FixMe | IgnoreError => {
+                                if !(in_block
+                                    || in_hhi
+                                    || self.allowed_decl_fixme_codes.contains(&code))
+                                {
+                                    acc.add_to_misuses(line, code, p);
+                                } else if self.disable_hh_ignore_error == 1
+                                    && t.kind() == IgnoreError
+                                {
+                                    acc.add_disallowed_ignore(p);
+                                } else {
+                                    acc.add_to_fixmes(line, code, p);
+                                }
+                            }
+                            _ => {
+                                // unreachable!
+                            }
                         }
                     }
                     None => {

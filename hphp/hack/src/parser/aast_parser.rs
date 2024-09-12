@@ -150,7 +150,7 @@ impl<'src> AastParser {
         let err = SyntaxError::make(offset, offset + 1, "Invalid utf8 sequence".into(), vec![]);
         Some(ParserResult {
             file_mode: Mode::Mstrict,
-            scoured_comments: default_scoured_comments(),
+            scoured_comments: Default::default(),
             aast: Default::default(),
             lowerer_parsing_errors: Default::default(),
             syntax_errors: vec![err],
@@ -358,17 +358,7 @@ impl<'src> AastParser {
                 };
             Ok(scourer.scour_comments(script))
         } else {
-            Ok(default_scoured_comments())
+            Ok(Default::default())
         }
-    }
-}
-
-fn default_scoured_comments() -> ScouredComments {
-    ScouredComments {
-        comments: Default::default(),
-        fixmes: Default::default(),
-        misuses: Default::default(),
-        error_pos: Default::default(),
-        bad_ignore_pos: Default::default(),
     }
 }

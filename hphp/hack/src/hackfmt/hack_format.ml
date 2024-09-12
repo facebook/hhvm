@@ -3719,7 +3719,7 @@ and transform_node_if_ignored node =
     let (node, trailing_trivia) = remove_trailing_trivia node in
     let is_fixme =
       match Trivia.kind (List.hd_exn leading_including_and_after) with
-      | TriviaKind.(FixMe | IgnoreError) -> true
+      | TriviaKind.(FixMe | Ignore | IgnoreError) -> true
       | _ -> false
     in
     Some
@@ -3828,6 +3828,7 @@ and transform_trivia ~is_leading trivia =
       match Trivia.kind triv with
       | TriviaKind.ExtraTokenError
       | TriviaKind.FixMe
+      | TriviaKind.Ignore
       | TriviaKind.IgnoreError
       | TriviaKind.DelimitedComment ->
         let preceded_by_whitespace =
@@ -3878,6 +3879,7 @@ and transform_trivia ~is_leading trivia =
         let should_break =
           match Trivia.kind triv with
           | TriviaKind.FixMe
+          | TriviaKind.Ignore
           | TriviaKind.IgnoreError ->
             false
           | _ -> !currently_leading

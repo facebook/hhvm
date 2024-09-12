@@ -130,6 +130,7 @@ let sym_occ_kind_to_lsp_sym_info_kind (sym_occ_kind : SymbolOccurrence.kind) :
   | PureFunctionContext -> Null
   | BestEffortArgument _ -> Null
   | HhFixme -> Null
+  | HhIgnore -> Null
   | Module -> Module
 
 let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :

@@ -50,7 +50,7 @@ let add_fixme_ranges fixmes trivia =
   in
   let add_fixme_range fixmes trivium =
     match Trivia.kind trivium with
-    | Full_fidelity_trivia_kind.(FixMe | IgnoreError) ->
+    | Full_fidelity_trivia_kind.(FixMe | Ignore | IgnoreError) ->
       trivium_range trivium :: fixmes
     | Full_fidelity_trivia_kind.(DelimitedComment | SingleLineComment)
       when is_lint_ignore (Trivia.text trivium) ->

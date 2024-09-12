@@ -102,6 +102,14 @@ impl LexableTrivium for PositionedTrivium {
         }
     }
 
+    fn make_ignore(offset: usize, width: usize) -> Self {
+        Self {
+            kind: TriviaKind::Ignore,
+            offset,
+            width,
+        }
+    }
+
     fn make_ignore_error(offset: usize, width: usize) -> Self {
         Self {
             kind: TriviaKind::IgnoreError,

@@ -121,6 +121,7 @@ let resolve ctx SO.{ name; type_; _ } =
   | SO.LocalVar -> None
   | SO.TypeVar -> None
   | SO.HhFixme -> None
+  | SO.HhIgnore -> None
   | SO.Method (SO.UnknownClass, _) -> None
   | SO.Keyword _ -> None
   | SO.PureFunctionContext -> None

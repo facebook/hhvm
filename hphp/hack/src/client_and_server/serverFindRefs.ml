@@ -369,6 +369,7 @@ let get_action symbol (filename, file_content, line, char) =
   | SO.BuiltInType _
   | SO.BestEffortArgument _
   | SO.HhFixme
+  | SO.HhIgnore
   | SO.Method (SO.UnknownClass, _)
   | SO.Property (SO.UnknownClass, _)
   | SO.ClassConst (SO.UnknownClass, _)

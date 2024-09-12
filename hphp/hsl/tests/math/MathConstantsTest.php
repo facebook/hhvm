@@ -17,7 +17,7 @@ final class MathConstantsTest extends HackTest {
   public function testInt64Min(): void {
     expect(Math\INT64_MIN)->toBeLessThan(0);
     $less = Math\INT64_MIN - 1;
-    /* HH_FIXME[12010] Silence warning about `is float` being always false */
+    /* HH_IGNORE[12010] suppress warning about `is float` being always false */
     expect($less === Math\INT64_MAX || $less is float)->toBeTrue();
   }
   public function testPi(): void {
@@ -28,7 +28,7 @@ final class MathConstantsTest extends HackTest {
   }
 
   public function testNAN(): void {
-    /* HH_FIXME[12009] Silence warning about `is float` being always true */
+    /* HH_IGNORE[12009] suppress warning about `is float` being always true */
     expect(Math\NAN is float)->toBeTrue('NAN should be a float');
     expect(Math\NAN)->toNotEqual(Math\NAN); // IEEE behavior
     expect(Math\is_nan(Math\NAN))->toBeTrue('is_nan(NAN) should be true');

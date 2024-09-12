@@ -869,6 +869,9 @@ let fixme_elt (t : Full_fidelity_positioned_trivia.t) : Result_set.elt option =
   | Full_fidelity_trivia_kind.FixMe ->
     let pos = trivia_pos t in
     Some { name = "HH_FIXME"; type_ = HhFixme; is_declaration = false; pos }
+  | Full_fidelity_trivia_kind.Ignore ->
+    let pos = trivia_pos t in
+    Some { name = "HH_IGNORE"; type_ = HhIgnore; is_declaration = false; pos }
   | _ -> None
 
 let fixmes (tree : Full_fidelity_positioned_syntax.t) : Result_set.elt list =

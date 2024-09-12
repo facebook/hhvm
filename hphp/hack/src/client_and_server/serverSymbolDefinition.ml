@@ -193,6 +193,7 @@ let go ctx ast result =
     | None -> None
     | Some ast -> ServerFindTypeVar.go ast result.SO.pos result.SO.name)
   | SO.HhFixme -> None
+  | SO.HhIgnore -> None
   | SO.Module ->
     get_module_def_by_name ctx result.SO.name >>= fun md ->
     Some (FileOutline.summarize_module_def md)

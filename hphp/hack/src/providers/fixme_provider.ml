@@ -35,6 +35,18 @@ module HH_FIXMES =
       let capacity = 1000
     end)
 
+module IGNORES =
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
+    (struct
+      type t = fixme_map
+
+      let description = "Fixme_IGNORES"
+    end)
+    (struct
+      let capacity = 1000
+    end)
+
 module DECL_HH_FIXMES =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
@@ -103,6 +115,16 @@ let get_disallowed_fixmes filename =
   | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
     Fixme_store.get fixmes.disallowed_fixmes filename
 
+let get_ignores filename =
+  match Provider_backend.get () with
+  | Provider_backend.Analysis
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
+  | Provider_backend.Shared_memory ->
+    IGNORES.get filename
+  | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
+    Fixme_store.get fixmes.ignores filename
+
 let provide_hh_fixmes filename fixme_map =
   if not (IMap.is_empty fixme_map) then
     match Provider_backend.get () with
@@ -136,6 +158,17 @@ let provide_disallowed_fixmes filename fixme_map =
     | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
       Fixme_store.add fixmes.disallowed_fixmes filename fixme_map
 
+let provide_ignores filename fixme_map =
+  if not (IMap.is_empty fixme_map) then
+    match Provider_backend.get () with
+    | Provider_backend.Analysis
+    | Provider_backend.Rust_provider_backend _
+    | Provider_backend.Pessimised_shared_memory _
+    | Provider_backend.Shared_memory ->
+      IGNORES.add filename fixme_map
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
+      Fixme_store.add fixmes.ignores filename fixme_map
+
 let remove_batch paths =
   match Provider_backend.get () with
   | Provider_backend.Analysis
@@ -144,21 +177,29 @@ let remove_batch paths =
   | Provider_backend.Shared_memory ->
     HH_FIXMES.remove_batch paths;
     DECL_HH_FIXMES.remove_batch paths;
-    DISALLOWED_FIXMES.remove_batch paths
+    DISALLOWED_FIXMES.remove_batch paths;
+    IGNORES.remove_batch paths;
+    ()
   | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
     Fixme_store.remove_batch fixmes.hh_fixmes paths;
     Fixme_store.remove_batch fixmes.decl_hh_fixmes paths;
-    Fixme_store.remove_batch fixmes.disallowed_fixmes paths
+    Fixme_store.remove_batch fixmes.disallowed_fixmes paths;
+    Fixme_store.remove_batch fixmes.ignores paths;
+    ()
 
 let local_changes_push_sharedmem_stack () =
   HH_FIXMES.LocalChanges.push_stack ();
   DECL_HH_FIXMES.LocalChanges.push_stack ();
-  DISALLOWED_FIXMES.LocalChanges.push_stack ()
+  DISALLOWED_FIXMES.LocalChanges.push_stack ();
+  IGNORES.LocalChanges.push_stack ();
+  ()
 
 let local_changes_pop_sharedmem_stack () =
   HH_FIXMES.LocalChanges.pop_stack ();
   DECL_HH_FIXMES.LocalChanges.pop_stack ();
-  DISALLOWED_FIXMES.LocalChanges.pop_stack ()
+  DISALLOWED_FIXMES.LocalChanges.pop_stack ();
+  IGNORES.LocalChanges.pop_stack ();
+  ()
 
 let fixme_was_applied applied_fixmes fn err_line err_code =
   match Relative_path.Map.find_opt applied_fixmes fn with
@@ -230,35 +271,25 @@ let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info =
  * that code won't be able to add errors.
  *)
 (*****************************************************************************)
-let get_fixmes_for_pos pos =
+
+let get_entries get_map pos =
   let filename = Pos.filename pos in
   let (line, _, _) = Pos.info_pos pos in
-  get_fixmes filename
+  get_map filename
   |> Option.value ~default:IMap.empty
   |> IMap.find_opt line
   |> Option.value ~default:IMap.empty
+
+let get_fixmes_for_pos pos = get_entries get_fixmes pos
 
 let get_fixme_codes_for_pos pos =
   get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list
 
-let is_disallowed pos code =
-  let filename = Pos.filename pos in
-  let (line, _, _) = Pos.info_pos pos in
-  let fixme_map_opt =
-    match Provider_backend.get () with
-    | Provider_backend.Analysis
-    | Provider_backend.Rust_provider_backend _
-    | Provider_backend.Pessimised_shared_memory _
-    | Provider_backend.Shared_memory ->
-      DISALLOWED_FIXMES.get filename
-    | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
-      Fixme_store.get fixmes.disallowed_fixmes filename
-  in
-  fixme_map_opt
-  |> Option.value ~default:IMap.empty
-  |> IMap.find_opt line
-  |> Option.value ~default:IMap.empty
-  |> IMap.find_opt code
+let get_entry get_map pos code = get_entries get_map pos |> IMap.find_opt code
+
+let get_disallowed_fixme_pos pos code = get_entry get_disallowed_fixmes pos code
+
+let get_ignore_pos pos code = get_entry get_ignores pos code
 
 let inf_err_codes = [4110; 4323]
 
@@ -291,8 +322,6 @@ let () =
          match IMap.find_opt err_code imap with
          | None when is_inf_err_code err_code -> any_inf_err_code imap
          | x -> x);
-  (Errors.is_hh_fixme :=
-     fun err_pos err_code ->
-       Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code));
-  Errors.is_hh_fixme_disallowed :=
-    (fun err_pos err_code -> Option.is_some (is_disallowed err_pos err_code))
+  Errors.get_disallowed_fixme_pos := get_disallowed_fixme_pos;
+  Errors.get_ignore_pos := get_ignore_pos;
+  ()

@@ -37,6 +37,10 @@ pub trait LexableTrivia: Clone + Debug {
         Self::Trivium::make_fix_me(offset, width)
     }
     #[inline]
+    fn make_ignore(offset: usize, width: usize) -> Self::Trivium {
+        Self::Trivium::make_ignore(offset, width)
+    }
+    #[inline]
     fn make_ignore_error(offset: usize, width: usize) -> Self::Trivium {
         Self::Trivium::make_ignore_error(offset, width)
     }
@@ -56,6 +60,7 @@ pub trait LexableTrivium: Clone + PartialEq + Debug {
     fn make_single_line_comment(offset: usize, width: usize) -> Self;
     fn make_fallthrough(offset: usize, width: usize) -> Self;
     fn make_fix_me(offset: usize, width: usize) -> Self;
+    fn make_ignore(offset: usize, width: usize) -> Self;
     fn make_ignore_error(offset: usize, width: usize) -> Self;
     fn make_extra_token_error(offset: usize, width: usize) -> Self;
     fn make_delimited_comment(offset: usize, width: usize) -> Self;

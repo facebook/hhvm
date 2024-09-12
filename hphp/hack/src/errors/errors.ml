@@ -109,6 +109,15 @@ end
 
 module FinalizedErrorSet = Stdlib.Set.Make (FinalizedError)
 
+let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
+  ref (fun _ _ -> None)
+
+let (get_disallowed_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
+  ref (fun _ _ -> None)
+
+let (get_ignore_pos : (Pos.t -> error_code -> Pos.t option) ref) =
+  ref (fun _ _ -> None)
+
 let drop_fixmed_errors (errs : ('a, 'b) User_error.t list) :
     ('a, 'b) User_error.t list =
   List.filter errs ~f:(fun e -> not e.User_error.is_fixmed)
@@ -144,8 +153,6 @@ let accumulate_errors = ref false
    during the course of the typecheck, rather than all upfront). *)
 let in_lazy_decl = ref false
 
-let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
-
 let badpos_message =
   Printf.sprintf
     "Incomplete position information! Your type error is in this file, but we could only find related positions in another file. %s"
@@ -159,8 +166,8 @@ let badpos_message_2 =
 let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
   let error_map_copy = !error_map in
   let accumulate_errors_copy = !accumulate_errors in
-  let is_hh_fixme_copy = !is_hh_fixme in
-  (is_hh_fixme := (fun _ _ -> false));
+  let get_hh_fixme_pos_copy = !get_hh_fixme_pos in
+  (get_hh_fixme_pos := (fun _ _ -> None));
   error_map := Relative_path.Map.empty;
   accumulate_errors := true;
   let (result, errors) =
@@ -176,7 +183,7 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
           fun () ->
             error_map := error_map_copy;
             accumulate_errors := accumulate_errors_copy;
-            is_hh_fixme := is_hh_fixme_copy
+            get_hh_fixme_pos := get_hh_fixme_pos_copy
         end
   in
   match get_last errors with
@@ -218,8 +225,8 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
 let try_with_result_pure ~fail f g =
   let error_map_copy = !error_map in
   let accumulate_errors_copy = !accumulate_errors in
-  let is_hh_fixme_copy = !is_hh_fixme in
-  (is_hh_fixme := (fun _ _ -> false));
+  let get_hh_fixme_pos_copy = !get_hh_fixme_pos in
+  (get_hh_fixme_pos := (fun _ _ -> None));
   error_map := Relative_path.Map.empty;
   accumulate_errors := true;
   let (result, errors) =
@@ -235,7 +242,7 @@ let try_with_result_pure ~fail f g =
           fun () ->
             error_map := error_map_copy;
             accumulate_errors := accumulate_errors_copy;
-            is_hh_fixme := is_hh_fixme_copy
+            get_hh_fixme_pos := get_hh_fixme_pos_copy
         end
   in
   match get_last errors with
@@ -249,8 +256,8 @@ let do_ ?(apply_fixmes = true) ?(drop_fixmed = true) f =
   let accumulate_errors_copy = !accumulate_errors in
   error_map := Relative_path.Map.empty;
   accumulate_errors := true;
-  let is_hh_fixme_copy = !is_hh_fixme in
-  (if not apply_fixmes then is_hh_fixme := (fun _ _ -> false));
+  let get_hh_fixme_pos_copy = !get_hh_fixme_pos in
+  (if not apply_fixmes then get_hh_fixme_pos := (fun _ _ -> None));
   let (result, out_errors) =
     Utils.try_finally
       ~f:
@@ -264,7 +271,7 @@ let do_ ?(apply_fixmes = true) ?(drop_fixmed = true) f =
           fun () ->
             error_map := error_map_copy;
             accumulate_errors := accumulate_errors_copy;
-            is_hh_fixme := is_hh_fixme_copy
+            get_hh_fixme_pos := get_hh_fixme_pos_copy
         end
   in
   let out_errors = files_t_map ~f:List.rev out_errors in
@@ -652,13 +659,6 @@ let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
 let is_allowed_code_strict (code : error_code) =
   ISet.mem code !allowed_fixme_codes_strict
-  || Error_codes.Warning.of_enum code |> Option.is_some
-
-let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
-  ref (fun _ _ -> None)
-
-let (is_hh_fixme_disallowed : (Pos.t -> error_code -> bool) ref) =
-  ref (fun _ _ -> false)
 
 let code_agnostic_fixme = ref false
 
@@ -713,12 +713,12 @@ let check_pos_msg :
       (claim_as_reason claim)
       reasons
 
-let add_error_with_fixme_error error explanation =
+let add_error_with_fixme_error error explanation ~fixme_pos =
   let User_error.
         {
           severity;
           code;
-          claim;
+          claim = _;
           reasons = _;
           quickfixes;
           custom_msgs;
@@ -727,14 +727,12 @@ let add_error_with_fixme_error error explanation =
         } =
     error
   in
-  let (pos, _) = claim in
-  let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
   add_error_impl error;
   add_error_impl
   @@ User_error.make
        severity
        code
-       (pos, explanation)
+       (fixme_pos, explanation)
        []
        ~quickfixes
        ~custom_msgs
@@ -744,8 +742,22 @@ let add_applied_fixme error =
   let error = { error with User_error.is_fixmed = true } in
   add_error_impl error
 
-let fixme_present (pos : Pos.t) code =
-  !is_hh_fixme pos code || !is_hh_fixme_disallowed pos code
+type suppression_kind =
+  | Fixme of { forbidden_decl_fixme: bool }
+  | Ignore
+
+let get_fixme (pos : Pos.t) code : (Pos.t * suppression_kind) option =
+  match !get_hh_fixme_pos pos code with
+  | Some pos -> Some (pos, Fixme { forbidden_decl_fixme = false })
+  | None ->
+    (match !get_ignore_pos pos code with
+    | Some pos -> Some (pos, Ignore)
+    | None ->
+      (match !get_disallowed_fixme_pos pos code with
+      | Some pos -> Some (pos, Fixme { forbidden_decl_fixme = true })
+      | None -> None))
+
+let fixme_present pos code = get_fixme pos code |> Option.is_some
 
 let add_error (error : error) =
   let User_error.
@@ -768,42 +780,77 @@ let add_error (error : error) =
 
   let pos = fst claim in
 
-  if not (fixme_present pos code) then
+  match get_fixme pos code with
+  | None ->
     (* Fixmes and banned decl fixmes are separated by the parser because Errors can't recover
      * the position information after the fact. This is the default case, where an HH_FIXME
      * comment is not present. Therefore, the remaining cases are variations on behavior when
      * a fixme is present *)
     add_error_impl error
-  else if ISet.mem code hard_banned_codes then
-    let explanation =
-      Printf.sprintf
-        "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
-        code
+  | Some (fixme_pos, fixme_kind) ->
+    let severity_based_on_code =
+      (* We use severity based on code for warning-to-error migration scenarios.
+         Sometimes we want to introduce an new error as a warning first. In that case,
+         to avoid having to codemod any HH_IGNORE along with their codes when the
+         warnings become errors, we'll first make the errors have a non-warning code
+         but have warning severity at first, and we'll force suppression using HH_FIXME instead of HH_IGNORE. *)
+      match Error_codes.Warning.of_enum code with
+      | Some _ -> User_error.Warning
+      | None -> User_error.Err
     in
-    add_error_with_fixme_error error explanation
-  else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
-    add_applied_fixme error
-  else if !report_pos_from_reason && Pos.get_from_reason pos then
-    let explanation =
-      "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information"
-    in
-    add_error_with_fixme_error error explanation
-  else if !is_hh_fixme_disallowed pos code then
-    let explanation =
-      Printf.sprintf
-        "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d in declarations"
-        code
-    in
-    add_error_with_fixme_error error explanation
-  else if is_allowed_code_strict code then
-    add_applied_fixme error
-  else
-    let explanation =
-      Printf.sprintf
-        "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d"
-        code
-    in
-    add_error_with_fixme_error error explanation
+    (match (severity_based_on_code, fixme_kind) with
+    | (User_error.Err, Fixme { forbidden_decl_fixme }) ->
+      if ISet.mem code hard_banned_codes then
+        let explanation =
+          Printf.sprintf
+            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
+            code
+        in
+        add_error_with_fixme_error error explanation ~fixme_pos
+      else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
+        add_applied_fixme error
+      else if !report_pos_from_reason && Pos.get_from_reason pos then
+        let explanation =
+          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information"
+        in
+        add_error_with_fixme_error error explanation ~fixme_pos
+      else if forbidden_decl_fixme then
+        let explanation =
+          Printf.sprintf
+            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d in declarations"
+            code
+        in
+        add_error_with_fixme_error error explanation ~fixme_pos
+      else if is_allowed_code_strict code then
+        add_applied_fixme error
+      else
+        let explanation =
+          Printf.sprintf
+            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d"
+            code
+        in
+        add_error_with_fixme_error error explanation ~fixme_pos
+    | (User_error.Warning, Fixme _) ->
+      let explanation =
+        Printf.sprintf
+          "You cannot use `HH_FIXME` comments to suppress warnings. Use `HH_IGNORE[%d]` instead."
+          code
+      in
+      add_error_with_fixme_error error explanation ~fixme_pos
+    | (User_error.Warning, Ignore) -> add_applied_fixme error
+    | (User_error.Err, Ignore) ->
+      let explanation =
+        match severity with
+        | User_error.Err ->
+          Printf.sprintf
+            "You cannot use `HH_IGNORE` to suppress non-warning code %d. Hack errors should not be suppressed. You should try your best to fix the code causing the error, or incidents will happen."
+            code
+        | User_error.Warning ->
+          Printf.sprintf
+            "This warning code %d will soon be migrated to be an error. Try your best to fix it, or if not possible, suppress it with `HH_FIXME` instead of `HH_IGNORE` and report your case to us."
+            code
+      in
+      add_error_with_fixme_error error explanation ~fixme_pos)
 
 let merge err' err =
   let append _ x y =
@@ -1349,14 +1396,13 @@ let filter (errors : t) ~(f : Relative_path.t -> error -> bool) : t =
 
 let count_errors_and_warnings (error_list : (_, _) User_error.t list) :
     int * int =
-  List.fold error_list ~init:(0, 0) ~f:(fun (err_count, warn_count) err ->
-      let is_warning err =
-        Option.is_some @@ Error_codes.Warning.of_enum @@ User_error.get_code err
-      in
-      if is_warning err then
-        (err_count, warn_count + 1)
-      else
-        (err_count + 1, warn_count))
+  List.fold
+    error_list
+    ~init:(0, 0)
+    ~f:(fun (err_count, warn_count) { User_error.severity; _ } ->
+      match severity with
+      | User_error.Warning -> (err_count, warn_count + 1)
+      | User_error.Err -> (err_count + 1, warn_count))
 
 let filter_out_mergebase_warnings
     (mergebase_warning_hashes : Warnings_saved_state.t option) (errors : t) : t

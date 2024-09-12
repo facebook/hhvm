@@ -155,6 +155,7 @@ module Fixmes = struct
     hh_fixmes: Fixme_store.t;
     decl_hh_fixmes: Fixme_store.t;
     disallowed_fixmes: Fixme_store.t;
+    ignores: Fixme_store.t;
   }
 
   let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
@@ -184,6 +185,7 @@ let empty_fixmes =
       hh_fixmes = Fixme_store.empty ();
       decl_hh_fixmes = Fixme_store.empty ();
       disallowed_fixmes = Fixme_store.empty ();
+      ignores = Fixme_store.empty ();
     }
 
 module Reverse_naming_table_delta = struct

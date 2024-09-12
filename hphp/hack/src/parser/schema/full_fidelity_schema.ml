@@ -160,6 +160,7 @@ let trivia_kinds =
       ["DelimitedComment"; "delimited_comment"];
       ["SingleLineComment"; "single_line_comment"];
       ["FixMe"; "fix_me"];
+      ["Ignore"; "ignore"];
       ["IgnoreError"; "ignore_error"];
       ["FallThrough"; "fall_through"];
       ["ExtraTokenError"; "extra_token_error"];

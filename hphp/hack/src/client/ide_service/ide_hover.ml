@@ -238,6 +238,13 @@ will be less scary.
 See also `HH\\FIXME\\UNSAFE_CAST()`, which is still bad, but much more
 precise."
 
+let hh_ignore_info =
+  "`HH_IGNORE[N]` silences type checker warning N on the next line. It does
+not change runtime behavior.
+
+Note that `HH_IGNORE` applies to all occurrences of the warning on the
+next line."
+
 let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
   let await_explanation =
     "\n\nThis does not give you threads. Only one function is running at any point in time."
@@ -461,18 +468,19 @@ let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
         ^ under_dynamic_result
     in
     let addendum =
-      match occurrence with
-      | { name; type_ = Attribute _; _ } ->
+      let { name; type_; is_declaration = _; pos = _ } = occurrence in
+      match type_ with
+      | Attribute _ ->
         List.concat
           [
             make_hover_attr_docs name;
             make_hover_doc_block ctx entry occurrence def_opt;
           ]
-      | { type_ = Keyword info; _ } -> [keyword_info info]
-      | { type_ = HhFixme; _ } -> [hh_fixme_info]
-      | { type_ = PureFunctionContext; _ } -> [pure_context_info]
-      | { type_ = BuiltInType bt; _ } ->
-        [SymbolOccurrence.built_in_type_hover bt]
+      | Keyword info -> [keyword_info info]
+      | HhFixme -> [hh_fixme_info]
+      | HhIgnore -> [hh_ignore_info]
+      | PureFunctionContext -> [pure_context_info]
+      | BuiltInType bt -> [SymbolOccurrence.built_in_type_hover bt]
       | _ -> make_hover_doc_block ctx entry occurrence def_opt
     in
     HoverService.

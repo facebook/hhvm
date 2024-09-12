@@ -787,7 +787,7 @@ module Warning = struct
     | CastNonPrimitive [@value 12005]
     | TruthinessTest [@value 12006]
     | EqualityCheck [@value 12007]
-    | Duplicate_properties [@value 12008]
+    | DuplicateProperties [@value 12008]
     | IsIsAlwaysTrue [@value 12009]
     | IsIsAlwaysFalse [@value 12010]
     | AsAlwaysSucceeds [@value 12011]

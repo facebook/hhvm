@@ -118,6 +118,7 @@ type kind =
   | PureFunctionContext
   | BestEffortArgument of receiver * int
   | HhFixme
+  | HhIgnore
   | Module
 [@@deriving eq, show]
 

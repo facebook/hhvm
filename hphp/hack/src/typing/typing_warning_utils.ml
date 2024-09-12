@@ -359,7 +359,7 @@ module DuplicatedProperties = struct
 
   type t = Typing_warning.DuplicateProperties.t
 
-  let code = Codes.Duplicate_properties
+  let code = Codes.DuplicateProperties
 
   let codes = [code]
 

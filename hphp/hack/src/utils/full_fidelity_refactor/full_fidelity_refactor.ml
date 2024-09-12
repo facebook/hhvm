@@ -18,6 +18,7 @@ let find_width_hh_fixme token =
     | sde :: sd ->
       (match Trivia.kind sde with
       | TriviaKind.FixMe
+      | TriviaKind.Ignore
       | TriviaKind.IgnoreError ->
         let new_width = Trivia.width sde + acc in
         find_width_hh_fixme_rec new_width new_width sd

@@ -149,7 +149,7 @@ let test_compute_tast_counting () =
     Tast_provider.compute_tast_and_errors_unquarantined
       ~ctx
       ~entry
-      ~warnings_saved_state:None
+      ~error_filter:Tast_provider.ErrorFilter.default
   in
 
   Asserter.Int_asserter.assert_equals
@@ -190,7 +190,7 @@ let test_compute_tast_counting_local_mem () =
         Tast_provider.compute_tast_and_errors_unquarantined
           ~ctx
           ~entry
-          ~warnings_saved_state:None
+          ~error_filter:Tast_provider.ErrorFilter.default
       in
       Asserter.Int_asserter.assert_equals
         expected_decling_count

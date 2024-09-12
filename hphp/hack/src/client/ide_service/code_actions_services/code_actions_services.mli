@@ -8,14 +8,14 @@
 
 val go :
   ctx:Provider_context.t ->
-  warnings_saved_state:Warnings_saved_state.t option ->
+  error_filter:Tast_provider.ErrorFilter.t ->
   entry:Provider_context.entry ->
   range:Ide_api_types.range ->
   Lsp.CodeAction.result
 
 val resolve :
   ctx:Provider_context.t ->
-  warnings_saved_state:Warnings_saved_state.t option ->
+  error_filter:Tast_provider.ErrorFilter.t ->
   entry:Provider_context.entry ->
   range:Ide_api_types.range ->
   resolve_title:string ->

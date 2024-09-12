@@ -162,7 +162,7 @@ type istate = {
       have changed since sqlite. When a file is changed on disk, we need this to
       know which shallow decls to invalidate. Note: while the forward-naming-table
       is stored here, the reverse-naming-table is instead stored in ctx. *)
-  warnings_saved_state: Warnings_saved_state.t option; [@opaque]
+  error_filter: Tast_provider.ErrorFilter.t; [@opaque]
   sienv: SearchUtils.si_env; [@opaque]
       (** sienv provides autocomplete and find-symbols. It is constructed during
       initialize and updated during process_changed_files. It stores a few
@@ -416,6 +416,7 @@ state. *)
 let initialize2
     (out_fd : Lwt_unix.file_descr)
     (dstate : dstate)
+    ~error_filter
     (init_result :
       (ClientIdeInit.init_result, ClientIdeMessage.rich_error) result) :
     state Lwt.t =
@@ -443,7 +444,8 @@ let initialize2
     let istate =
       {
         naming_table;
-        warnings_saved_state;
+        error_filter =
+          { Tast_provider.ErrorFilter.warnings_saved_state; error_filter };
         sienv;
         icommon = dstate.dcommon;
         iopen_files = dstate.dopen_files;
@@ -569,9 +571,8 @@ let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
 
 (** We avoid showing typing errors if there are parsing errors. *)
 let get_user_facing_errors
-    ~(ctx : Provider_context.t)
-    ~warnings_saved_state
-    ~(entry : Provider_context.entry) : Errors.t =
+    ~(ctx : Provider_context.t) ~error_filter ~(entry : Provider_context.entry)
+    : Errors.t =
   let (_, ast_errors) =
     Ast_provider.compute_parser_return_and_ast_errors
       ~popt:(Provider_context.get_popt ctx)
@@ -582,7 +583,7 @@ let get_user_facing_errors
       Tast_provider.compute_tast_and_errors_quarantined
         ~ctx
         ~entry
-        ~warnings_saved_state
+        ~error_filter
     in
     all_errors
   else
@@ -631,10 +632,7 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
     (* Here we'll get either cached errors from the cached entry, or will recompute errors
        from the partially cached entry, or will compute errors from the file on disk. *)
     let ctx = make_singleton_ctx istate.icommon entry in
-    get_user_facing_errors
-      ~ctx
-      ~warnings_saved_state:istate.warnings_saved_state
-      ~entry
+    get_user_facing_errors ~ctx ~error_filter:istate.error_filter ~entry
 
 (** handle_request invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
@@ -719,8 +717,8 @@ let handle_request
     in
     (During_init { dstate with changed_files_to_process }, Ok ())
   | ( Initialized
-        ({ icommon; naming_table; sienv; iopen_files; warnings_saved_state = _ }
-        as istate),
+        ({ icommon; naming_table; sienv; iopen_files; error_filter = _ } as
+        istate),
       Did_change_watched_files changes ) ->
     let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches
@@ -772,10 +770,7 @@ let handle_request
       update_file_ctx istate document
     in
     let errors =
-      get_user_facing_errors
-        ~ctx
-        ~warnings_saved_state:istate.warnings_saved_state
-        ~entry
+      get_user_facing_errors ~ctx ~error_filter:istate.error_filter ~entry
     in
     published_errors_ref := Some errors;
     let errors = Errors.sort_and_finalize errors in
@@ -1183,7 +1178,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           Code_actions_services.go
             ~ctx
-            ~warnings_saved_state:istate.warnings_saved_state
+            ~error_filter:istate.error_filter
             ~entry
             ~range)
     in
@@ -1195,10 +1190,7 @@ let handle_request
        everywhere, and also because codeAction is called so frequently (e.g. upon changing
        tabs) that it's the best opportunity we have. *)
     let errors =
-      get_user_facing_errors
-        ~ctx
-        ~warnings_saved_state:istate.warnings_saved_state
-        ~entry
+      get_user_facing_errors ~ctx ~error_filter:istate.error_filter ~entry
     in
     let errors_opt =
       match !published_errors_ref with
@@ -1235,7 +1227,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           Code_actions_services.resolve
             ~ctx
-            ~warnings_saved_state:istate.warnings_saved_state
+            ~error_filter:istate.error_filter
             ~entry
             ~range
             ~resolve_title
@@ -1275,7 +1267,8 @@ let handle_request
 let handle_one_message_exn
     ~(out_fd : Lwt_unix.file_descr)
     ~(message_queue : message_queue)
-    ~(state : state) : state option Lwt.t =
+    ~(state : state)
+    ~error_filter : state option Lwt.t =
   dbg_set_activity ~key:"handle" "popping";
   let%lwt message = Lwt_message_queue.pop message_queue in
   dbg_set_activity
@@ -1290,7 +1283,9 @@ let handle_one_message_exn
   | (_, None) ->
     Lwt.return_none (* exit loop if message_queue has been closed *)
   | (During_init dstate, Some (GotNamingTable naming_table_result)) ->
-    let%lwt state = initialize2 out_fd dstate naming_table_result in
+    let%lwt state =
+      initialize2 out_fd dstate naming_table_result ~error_filter
+    in
     Lwt.return_some state
   | (_, Some (GotNamingTable _)) ->
     failwith ("Unexpected GotNamingTable in " ^ state_to_log_string state)
@@ -1333,8 +1328,9 @@ let handle_one_message_exn
     dbg_set_activity ~key:"handle" "written_response";
     Lwt.return_some state
 
-let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
-    unit Lwt.t =
+let serve
+    ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) ~error_filter
+    : unit Lwt.t =
   let rec flush_event_logger () : unit Lwt.t =
     dbg_set_activity ~key:"flush" "sleep";
     let%lwt () = Lwt_unix.sleep 0.5 in
@@ -1387,7 +1383,9 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     dbg_set_activity ~key:"handle" "loop";
     let%lwt next_state_opt =
       try%lwt
-        let%lwt state = handle_one_message_exn ~out_fd ~message_queue ~state in
+        let%lwt state =
+          handle_one_message_exn ~out_fd ~message_queue ~state ~error_filter
+        in
         dbg_set_activity ~key:"handle" "done";
         Lwt.return state
       with
@@ -1430,7 +1428,15 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     Lwt.return_unit
 
 let daemon_main
-    (args : ClientIdeMessage.daemon_args)
+    ({
+       ClientIdeMessage.init_id;
+       verbose_to_file;
+       verbose_to_stderr;
+       shm_handle;
+       error_filter;
+       client_lsp_log_fn = _;
+     } :
+      ClientIdeMessage.daemon_args)
     (channels : ('a, 'b) Daemon.channel_pair) : unit =
   Folly.ensure_folly_init ();
   Printexc.record_backtrace true;
@@ -1439,26 +1445,23 @@ let daemon_main
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
   let daemon_init_id =
-    Printf.sprintf
-      "%s.%s"
-      args.ClientIdeMessage.init_id
-      (Random_id.short_string ())
+    Printf.sprintf "%s.%s" init_id (Random_id.short_string ())
   in
   HackEventLogger.serverless_ide_init ~init_id:daemon_init_id;
 
   Typing_log.out_channel := stderr;
   (* where 'hh_show' goes *)
-  if args.ClientIdeMessage.verbose_to_stderr then
+  if verbose_to_stderr then
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug
   else
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
-  if args.ClientIdeMessage.verbose_to_file then
+  if verbose_to_file then
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
   else
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
 
   (* in hh_shared.c, worker_id=0 is used for main process, and _id=1 for the first worker. *)
-  SharedMem.connect args.ClientIdeMessage.shm_handle ~worker_id:1;
+  SharedMem.connect shm_handle ~worker_id:1;
 
   Stdlib.at_exit (fun () ->
       try
@@ -1471,7 +1474,7 @@ let daemon_main
     dbg_set_activity ~key:"main" "run_main";
     ( Lwt_utils.run_main @@ fun () ->
       (* MAIN ACTION HERE *)
-      serve ~in_fd ~out_fd );
+      serve ~in_fd ~out_fd ~error_filter );
     dbg_set_activity ~key:"main" "done";
     Hh_logger.log "SERVERLESS_IDE_DONE(ok)";
     HackEventLogger.serverless_ide_done None
@@ -1524,7 +1527,7 @@ module Test = struct
     in
     {
       naming_table;
-      warnings_saved_state = None;
+      error_filter = Tast_provider.ErrorFilter.default;
       sienv;
       icommon = { hhi_root = Path.make "/"; config; local_config; local_memory };
       iopen_files = Relative_path.Map.empty;

@@ -35,7 +35,7 @@ type find_quickfix =
   entry:Provider_context.entry ->
   Pos.t ->
   Provider_context.t ->
-  warnings_saved_state:Warnings_saved_state.t option ->
+  error_filter:Tast_provider.ErrorFilter.t ->
   quickfix list
 
 module Type_string = struct

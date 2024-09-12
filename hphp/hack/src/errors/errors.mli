@@ -38,7 +38,7 @@ module ErrorSet : Stdlib.Set.S with type elt := error
 
 module FinalizedErrorSet : Stdlib.Set.S with type elt := finalized_error
 
-(** [t] is an efficient for use inside hh_server or other places that compute errors,
+(** [t] is efficient for use inside hh_server or other places that compute errors,
 which also supports incremental updates based on file.
 But it should not be transferred to other processes such as [hh_client] since they
 for instance won't know the Hhi path that was used, and hence can't print errors.

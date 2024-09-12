@@ -37,7 +37,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     Tast_provider.compute_tast_and_errors_unquarantined
       ~ctx
       ~entry
-      ~warnings_saved_state:None
+      ~error_filter:Tast_provider.ErrorFilter.default
   in
   Asserter.Int_asserter.assert_equals
     1
@@ -69,7 +69,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     Tast_provider.compute_tast_and_errors_unquarantined
       ~ctx
       ~entry
-      ~warnings_saved_state:None
+      ~error_filter:Tast_provider.ErrorFilter.default
   in
   Asserter.Int_asserter.assert_equals
     0
@@ -99,7 +99,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     Tast_provider.compute_tast_and_errors_unquarantined
       ~ctx
       ~entry
-      ~warnings_saved_state:None
+      ~error_filter:Tast_provider.ErrorFilter.default
   in
   Asserter.Int_asserter.assert_equals
     1

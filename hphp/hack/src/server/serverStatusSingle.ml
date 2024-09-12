@@ -9,7 +9,7 @@
 open Hh_prelude
 open ServerCommandTypes
 
-let go file_inputs ctx warnings_saved_state :
+let go file_inputs ctx ~error_filter :
     Errors.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
   let collect (errors_acc, tasts) file_input =
     match file_input with
@@ -21,7 +21,7 @@ let go file_inputs ctx warnings_saved_state :
         Tast_provider.compute_tast_and_errors_unquarantined
           ~ctx
           ~entry
-          ~warnings_saved_state
+          ~error_filter
       in
       let errors_acc = Errors.merge errors errors_acc in
       let tasts = Relative_path.Map.add tasts ~key:path ~data:tast in
@@ -41,7 +41,7 @@ let go file_inputs ctx warnings_saved_state :
             Tast_provider.compute_tast_and_errors_unquarantined
               ~ctx
               ~entry
-              ~warnings_saved_state)
+              ~error_filter)
       in
       let errors_acc = Errors.merge errors errors_acc in
       let tasts =

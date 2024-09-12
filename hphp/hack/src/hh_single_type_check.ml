@@ -1971,7 +1971,7 @@ let handle_mode
     let range = find_ide_range_exn src in
     Code_actions_cli_lib.run
       ctx
-      ~warnings_saved_state:None
+      ~error_filter:Tast_provider.ErrorFilter.default
       entry
       range
       ~title_prefix

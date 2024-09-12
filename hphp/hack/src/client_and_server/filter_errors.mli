@@ -30,3 +30,5 @@ end
 
 val filter :
   Filter.t -> Errors.finalized_error list -> Errors.finalized_error list
+
+val filter_rel : Filter.t -> Errors.t -> Errors.t

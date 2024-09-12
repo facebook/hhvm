@@ -141,3 +141,7 @@ let filter filter (error_list : Errors.finalized_error list) =
       Filter.pass
         filter
         (User_error.get_code error, User_error.get_pos error |> Pos.filename))
+
+let filter_rel filter (errors : Errors.t) =
+  Errors.filter errors ~f:(fun path error ->
+      Filter.pass filter (User_error.get_code error, Relative_path.suffix path))

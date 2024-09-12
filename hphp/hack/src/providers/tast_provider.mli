@@ -21,6 +21,15 @@ module Compute_tast_and_errors : sig
   }
 end
 
+module ErrorFilter : sig
+  type t = {
+    error_filter: Filter_errors.Filter.t;
+    warnings_saved_state: Warnings_saved_state.t option;
+  }
+
+  val default : t
+end
+
 (** Computes TAST and error-list (other than "name already
 bound" errors) by taking the AST in a context entry,
 and typechecking it, and memoizing the result (caching the results in the
@@ -29,7 +38,7 @@ is inappropriate for IDE scenarios. *)
 val compute_tast_and_errors_unquarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  warnings_saved_state:Warnings_saved_state.t option ->
+  error_filter:ErrorFilter.t ->
   Compute_tast_and_errors.t
 
 (** Same as [compute_tast_and_errors_unquarantined], but skips computing the
@@ -46,7 +55,7 @@ appropriate for IDE scenarios. *)
 val compute_tast_and_errors_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  warnings_saved_state:Warnings_saved_state.t option ->
+  error_filter:ErrorFilter.t ->
   Compute_tast_and_errors.t
 
 (** Same as [compute_tast_and_errors_quarantined], but skips computing the full

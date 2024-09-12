@@ -4829,6 +4829,12 @@ let main
 
   env := { args; hhconfig_version_and_switch; root; local_config };
 
+  let error_filter =
+    Filter_errors.Filter.make
+      ~default_all:local_config.ServerLocalConfig.warnings_default_all
+      ~generated_files:(ServerConfig.warnings_generated_files config)
+      []
+  in
   let ide_service =
     ref
       (ClientIdeService.make
@@ -4838,6 +4844,7 @@ let main
            verbose_to_file = args.verbose;
            shm_handle;
            client_lsp_log_fn = log_filename;
+           error_filter;
          })
   in
   background_status_refresher ide_service;
@@ -4846,12 +4853,6 @@ let main
   let state = ref Pre_init in
   let ref_event = ref None in
   let ref_unblocked_time = ref (Unix.gettimeofday ()) in
-  let error_filter =
-    Filter_errors.Filter.make
-      ~default_all:local_config.ServerLocalConfig.warnings_default_all
-      ~generated_files:(ServerConfig.warnings_generated_files config)
-      []
-  in
   (* `ref_unblocked_time` is the time at which we're no longer blocked on either
    * clientLsp message-loop or hh_server, and can start actually handling.
    * Everything that blocks will update this variable. *)

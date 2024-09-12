@@ -96,15 +96,16 @@ let handle :
       ServerStatusSingle.go
         file_names
         ctx
-        (ServerEnv.(env.init_env.mergebase_warning_hashes)
-        >>= Option.some_if (not preexisting_warnings))
+        ~error_filter:
+          {
+            Tast_provider.ErrorFilter.error_filter;
+            warnings_saved_state =
+              ServerEnv.(env.init_env.mergebase_warning_hashes)
+              >>= Option.some_if (not preexisting_warnings);
+          }
     in
     let errors =
-      errors
-      |> Errors.get_sorted_error_list
-      |> List.map ~f:User_error.to_absolute
-      |> Filter_errors.filter error_filter
-      |> take_max_errors max_errors
+      errors |> Errors.sort_and_finalize |> take_max_errors max_errors
     in
     (* Unforced lazy values are closures which make serialization over RPC fail. *)
     let tasts =

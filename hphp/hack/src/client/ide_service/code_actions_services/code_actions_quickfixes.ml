@@ -90,8 +90,7 @@ let errors_to_quickfixes
   in
   standard_quickfixes @ quickfixes_from_refactors
 
-let find ~entry pos ctx ~warnings_saved_state : Code_action_types.quickfix list
-    =
+let find ~entry pos ctx ~error_filter : Code_action_types.quickfix list =
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
 
@@ -103,10 +102,7 @@ let find ~entry pos ctx ~warnings_saved_state : Code_action_types.quickfix list
   in
 
   let { Tast_provider.Compute_tast_and_errors.errors; _ } =
-    Tast_provider.compute_tast_and_errors_quarantined
-      ~ctx
-      ~entry
-      ~warnings_saved_state
+    Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry ~error_filter
   in
   let path = entry.Provider_context.path in
   errors_to_quickfixes ctx entry errors path classish_positions pos

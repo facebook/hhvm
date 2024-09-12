@@ -17,7 +17,7 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/Try.h>
 
 #include <thrift/lib/cpp/SerializedMessage.h>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
@@ -100,8 +100,8 @@ class ContextStack {
 
   void resetClientRequestContextHeader();
 
-  void processClientInterceptorsOnRequest();
-  void processClientInterceptorsOnResponse();
+  [[nodiscard]] folly::Try<void> processClientInterceptorsOnRequest() noexcept;
+  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse() noexcept;
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>

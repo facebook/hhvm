@@ -125,7 +125,7 @@ void apache::thrift::Client<::cpp2::C>::sync_f(apache::thrift::RpcOptions& rpcOp
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest();
+    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -133,7 +133,7 @@ void apache::thrift::Client<::cpp2::C>::sync_f(apache::thrift::RpcOptions& rpcOp
       fbthrift_serialize_and_send_f(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse();
+    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -312,7 +312,7 @@ apache::thrift::ClientBufferedStream<::cpp2::number> apache::thrift::Client<::cp
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest();
+    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -320,7 +320,7 @@ apache::thrift::ClientBufferedStream<::cpp2::number> apache::thrift::Client<::cp
       fbthrift_serialize_and_send_numbers(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse();
+    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -490,7 +490,7 @@ void apache::thrift::Client<::cpp2::C>::sync_thing(apache::thrift::RpcOptions& r
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest();
+    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -498,7 +498,7 @@ void apache::thrift::Client<::cpp2::C>::sync_thing(apache::thrift::RpcOptions& r
       fbthrift_serialize_and_send_thing(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_a, p_b, p_c);
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse();
+    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();

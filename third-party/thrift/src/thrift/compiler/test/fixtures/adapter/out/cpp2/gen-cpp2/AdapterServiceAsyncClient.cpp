@@ -109,7 +109,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_coun
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest();
+    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -117,7 +117,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_coun
       fbthrift_serialize_and_send_count(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse();
+    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -294,7 +294,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_adap
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest();
+    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -302,7 +302,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_adap
       fbthrift_serialize_and_send_adaptedTypes(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg);
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse();
+    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();

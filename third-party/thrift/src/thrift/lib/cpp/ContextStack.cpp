@@ -324,9 +324,9 @@ void ContextStack::resetClientRequestContextHeader() {
   connectionContext->resetRequestHeader();
 }
 
-void ContextStack::processClientInterceptorsOnRequest() {
+folly::Try<void> ContextStack::processClientInterceptorsOnRequest() noexcept {
   if (clientInterceptors_ == nullptr) {
-    return;
+    return {};
   }
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
   for (std::size_t i = 0; i < clientInterceptors_->size(); ++i) {
@@ -343,15 +343,17 @@ void ContextStack::processClientInterceptorsOnRequest() {
   }
 
   if (!exceptions.empty()) {
-    throw ClientInterceptorException(
-        ClientInterceptorException::CallbackKind::ON_REQUEST,
-        std::move(exceptions));
+    return folly::Try<void>(
+        folly::make_exception_wrapper<ClientInterceptorException>(
+            ClientInterceptorException::CallbackKind::ON_REQUEST,
+            std::move(exceptions)));
   }
+  return {};
 }
 
-void ContextStack::processClientInterceptorsOnResponse() {
+folly::Try<void> ContextStack::processClientInterceptorsOnResponse() noexcept {
   if (clientInterceptors_ == nullptr) {
-    return;
+    return {};
   }
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
   for (auto i = std::ptrdiff_t(clientInterceptors_->size()) - 1; i >= 0; --i) {
@@ -368,10 +370,12 @@ void ContextStack::processClientInterceptorsOnResponse() {
   }
 
   if (!exceptions.empty()) {
-    throw ClientInterceptorException(
-        ClientInterceptorException::CallbackKind::ON_RESPONSE,
-        std::move(exceptions));
+    return folly::Try<void>(
+        folly::make_exception_wrapper<ClientInterceptorException>(
+            ClientInterceptorException::CallbackKind::ON_RESPONSE,
+            std::move(exceptions)));
   }
+  return {};
 }
 
 void*& ContextStack::contextAt(size_t i) {

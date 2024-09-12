@@ -98,7 +98,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_frobnicate(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -112,7 +112,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -202,7 +202,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_ping(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -216,7 +216,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -289,7 +289,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_truthify(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -303,7 +303,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -425,7 +425,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_frobnicate(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -439,7 +439,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -529,7 +529,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_ping(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -543,7 +543,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -616,7 +616,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_truthify(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -630,7 +630,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -752,7 +752,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_frobnicate(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -766,7 +766,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -868,7 +868,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_foo(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -882,7 +882,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

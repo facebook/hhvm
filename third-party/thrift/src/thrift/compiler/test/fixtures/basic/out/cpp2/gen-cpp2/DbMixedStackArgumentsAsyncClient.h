@@ -94,7 +94,7 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_getDataByKey0(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
@@ -108,7 +108,7 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -213,7 +213,7 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_getDataByKey1(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_key);
@@ -227,7 +227,7 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
       co_await callback.co_waitUntilDone();
     }
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse().throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

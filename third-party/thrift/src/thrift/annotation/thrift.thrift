@@ -250,8 +250,3 @@ struct AllowReservedIdentifier {}
 
 @scope.Program
 struct AllowReservedFilename {}
-
-// Remove this annotation once the above changes have propagated where necessary.
-@scope.Program
-@scope.Definition
-struct AllowReservedIdentifierName {}

@@ -154,9 +154,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("thrift.AllowReservedFilename").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
-    SetName("thrift.AllowReservedIdentifierName").
-    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

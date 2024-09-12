@@ -55,9 +55,6 @@ inline constexpr auto kAllowReservedIdentifierUri =
     "facebook.com/thrift/annotation/AllowReservedIdentifier";
 inline constexpr auto kAllowReservedFilenameUri =
     "facebook.com/thrift/annotation/AllowReservedFilename";
-// Remove this constant once the above changes have successfully propagated.
-inline constexpr auto kAllowReservedIdentifierNameUri =
-    "facebook.com/thrift/annotation/AllowReservedIdentifierName";
 
 // scope
 inline constexpr auto kScopeProgramUri =

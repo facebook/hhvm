@@ -161,13 +161,6 @@ inline void reset_field<::facebook::thrift::annotation::AllowReservedFilename>(
 }
 
 template<>
-inline void reset_field<::facebook::thrift::annotation::AllowReservedIdentifierName>(
-    ::facebook::thrift::annotation::AllowReservedIdentifierName& obj, uint16_t index) {
-  switch (index) {
-  }
-}
-
-template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::Experimental>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -320,16 +313,6 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::AllowReservedFilename>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::annotation::AllowReservedIdentifierName>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

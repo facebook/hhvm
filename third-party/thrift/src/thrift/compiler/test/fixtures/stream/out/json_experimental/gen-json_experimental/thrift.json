@@ -462,30 +462,6 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 251
-      },
-      "AllowReservedIdentifierName" : {
-        "name" : "AllowReservedIdentifierName",
-        "structured_annotations": {
-          "scope.Program" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Program",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "scope.Definition" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Definition",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 255
       }
       },
   "source_path" : "thrift/annotation/thrift",

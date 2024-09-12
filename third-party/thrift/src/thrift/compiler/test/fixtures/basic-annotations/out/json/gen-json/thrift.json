@@ -459,28 +459,6 @@
           "column" : 32
         }
       }
-    },
-    "AllowReservedIdentifierName" : {
-      "lineno" : 255,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Program" : {  },
-        "scope.Definition" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 255,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 257,
-          "column" : 38
-        }
-      }
     }
   }
 }

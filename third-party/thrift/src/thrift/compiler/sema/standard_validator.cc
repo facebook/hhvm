@@ -337,10 +337,7 @@ void validate_identifier_is_not_reserved(
   //  2. @thrift.AllowedReservedIdentifier is present.
   if (node.generated() ||
       node.find_structured_annotation_or_null(kAllowReservedIdentifierUri) !=
-          nullptr ||
-      // Remove this check once the above changes have successfully propagated.
-      node.find_structured_annotation_or_null(
-          kAllowReservedIdentifierNameUri) != nullptr) {
+          nullptr) {
     return;
   }
   ctx.check(
@@ -355,10 +352,7 @@ void validate_filename_is_not_reserved(sema_context& ctx, const t_named& node) {
   //  2. @thrift.AllowReservedFilename is present.
   if (node.generated() ||
       node.find_structured_annotation_or_null(kAllowReservedFilenameUri) !=
-          nullptr ||
-      // Remove this check once the above changes have successfully propagated.
-      node.find_structured_annotation_or_null(
-          kAllowReservedIdentifierNameUri) != nullptr) {
+          nullptr) {
     return;
   }
   ctx.check(

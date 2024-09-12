@@ -157,17 +157,17 @@ void apache::thrift::Client<::cpp2::MyService>::sync_foo(apache::thrift::RpcOpti
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = fooCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_foo(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -339,17 +339,17 @@ apache::thrift::Client<::cpp2::MyService>::MyInteraction apache::thrift::Client<
   auto ctxAndHeader = interactCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   MyInteraction handle(channel_, "MyInteraction");
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_interact(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), handle, p_arg);
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -518,17 +518,17 @@ std::pair<apache::thrift::Client<::cpp2::MyService>::MyInteractionFast, ::std::i
   auto ctxAndHeader = interactFastCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   MyInteractionFast handle(channel_, "MyInteractionFast");
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_interactFast(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), handle);
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -703,17 +703,17 @@ std::pair<apache::thrift::Client<::cpp2::MyService>::SerialInteraction, apache::
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
   SerialInteraction handle(channel_, "SerialInteraction");
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_serialize(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), handle);
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -962,17 +962,17 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = frobnicateCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_frobnicate(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -1118,17 +1118,17 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteraction::sync_ping(apache:
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = pingCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_ping(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -1233,17 +1233,17 @@ apache::thrift::ClientBufferedStream<bool> apache::thrift::Client<::cpp2::MyServ
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_truthify(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -1585,17 +1585,17 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = frobnicateCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_frobnicate(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -1741,17 +1741,17 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteractionFast::sync_ping(apa
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = pingCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_ping(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -1856,17 +1856,17 @@ apache::thrift::ClientBufferedStream<bool> apache::thrift::Client<::cpp2::MyServ
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_truthify(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -2151,17 +2151,17 @@ void apache::thrift::Client<::cpp2::MyService>::SerialInteraction::sync_frobnica
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = frobnicateCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_frobnicate(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();

@@ -100,9 +100,6 @@ class ContextStack {
 
   void resetClientRequestContextHeader();
 
-  bool shouldProcessClientInterceptors() const noexcept {
-    return clientInterceptors_ != nullptr && !clientInterceptors_->empty();
-  }
   void processClientInterceptorsOnRequest();
   void processClientInterceptorsOnResponse();
 

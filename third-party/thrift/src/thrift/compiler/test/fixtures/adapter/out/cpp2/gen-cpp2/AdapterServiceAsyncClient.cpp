@@ -107,17 +107,17 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_coun
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = countCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_count(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -292,17 +292,17 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_adap
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = adaptedTypesCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-  const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnRequest();
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnRequest();
   }
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_adaptedTypes(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg);
     });
-  if (shouldProcessClientInterceptors) {
-    ctxAndHeader.first->processClientInterceptorsOnResponse();
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();

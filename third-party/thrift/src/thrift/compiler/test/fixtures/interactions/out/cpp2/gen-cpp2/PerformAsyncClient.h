@@ -97,8 +97,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -112,7 +111,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -202,8 +201,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -217,7 +215,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -290,8 +288,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -305,7 +302,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -427,8 +424,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -442,7 +438,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -532,8 +528,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -547,7 +542,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -620,8 +615,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -635,7 +629,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -757,8 +751,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -772,7 +765,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -874,8 +867,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -889,7 +881,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {

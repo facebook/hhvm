@@ -325,8 +325,9 @@ void ContextStack::resetClientRequestContextHeader() {
 }
 
 void ContextStack::processClientInterceptorsOnRequest() {
-  DCHECK(shouldProcessClientInterceptors());
-
+  if (clientInterceptors_ == nullptr) {
+    return;
+  }
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
   for (std::size_t i = 0; i < clientInterceptors_->size(); ++i) {
     const auto& clientInterceptor = (*clientInterceptors_)[i];
@@ -349,8 +350,9 @@ void ContextStack::processClientInterceptorsOnRequest() {
 }
 
 void ContextStack::processClientInterceptorsOnResponse() {
-  DCHECK(shouldProcessClientInterceptors());
-
+  if (clientInterceptors_ == nullptr) {
+    return;
+  }
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
   for (auto i = std::ptrdiff_t(clientInterceptors_->size()) - 1; i >= 0; --i) {
     const auto& clientInterceptor = (*clientInterceptors_)[i];

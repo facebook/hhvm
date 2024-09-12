@@ -138,8 +138,7 @@
   {{#function:creates_interaction?}}
     {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
   {{/function:creates_interaction?}}
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -153,7 +152,7 @@
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {

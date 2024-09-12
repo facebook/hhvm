@@ -88,8 +88,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -103,7 +102,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -204,8 +203,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -219,7 +217,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -320,8 +318,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -335,7 +332,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -436,8 +433,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -451,7 +447,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -552,8 +548,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -567,7 +562,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -668,8 +663,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -683,7 +677,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -784,8 +778,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -799,7 +792,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -900,8 +893,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -915,7 +907,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
@@ -1016,8 +1008,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
@@ -1031,7 +1022,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (shouldProcessClientInterceptors) {
+    if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {

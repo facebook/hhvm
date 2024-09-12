@@ -602,7 +602,7 @@ dynamic getAnnotation(const Annotations& annotations) {
 
 dynamic getTransRec(const TransRec* tRec,
                     const PerfEventsMap<TransID>& transPerfEvents) {
-  auto const guards = dynamic(tRec->guards.begin(), tRec->guards.end());
+  auto const guards = dynamic::array_range(tRec->guards);
 
   auto const sk = tRec->src;
   auto const resumeMode = [&] {

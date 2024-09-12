@@ -635,7 +635,7 @@ class ConfigPreprocessor::BuiltIns {
   static dynamic keysMacro(Context&& ctx) {
     const auto& dictionary = ctx.at("dictionary");
     checkLogic(dictionary.isObject(), "Keys: dictionary is not object");
-    return dynamic(dictionary.keys().begin(), dictionary.keys().end());
+    return dynamic::array_range(dictionary.keys());
   }
 
   /**
@@ -645,7 +645,7 @@ class ConfigPreprocessor::BuiltIns {
   static dynamic valuesMacro(Context&& ctx) {
     const auto& dictionary = ctx.at("dictionary");
     checkLogic(dictionary.isObject(), "Values: dictionary is not object");
-    return dynamic(dictionary.values().begin(), dictionary.values().end());
+    return dynamic::array_range(dictionary.values());
   }
 
   /**
@@ -853,7 +853,7 @@ class ConfigPreprocessor::BuiltIns {
 
     std::vector<StringPiece> result;
     folly::split(delim, dict, result);
-    return folly::dynamic(result.begin(), result.end());
+    return folly::dynamic::array_range(result);
   }
 
   /**

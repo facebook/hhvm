@@ -12,7 +12,7 @@ namespace fizz {
 
 KeyDerivationImpl::KeyDerivationImpl(
     size_t hashLength,
-    HkdfImpl hkdf,
+    Hkdf hkdf,
     folly::ByteRange blankHash)
     : hashLength_(hashLength), hkdf_(hkdf), blankHash_(blankHash) {}
 

@@ -23,49 +23,24 @@ namespace fizz {
  */
 class Hkdf {
  public:
-  virtual ~Hkdf() = default;
-
-  virtual std::vector<uint8_t> extract(
-      folly::ByteRange salt,
-      folly::ByteRange ikm) const = 0;
-
-  virtual std::unique_ptr<folly::IOBuf> expand(
-      folly::ByteRange extractedKey,
-      const folly::IOBuf& info,
-      size_t outputBytes) const = 0;
-
-  virtual std::unique_ptr<folly::IOBuf> hkdf(
-      folly::ByteRange ikm,
-      folly::ByteRange salt,
-      const folly::IOBuf& info,
-      size_t outputBytes) const = 0;
-
-  virtual size_t hashLength() const = 0;
-};
-
-/**
- * HKDF implementation.
- */
-class HkdfImpl : public Hkdf {
- public:
-  HkdfImpl(size_t hashLength, HasherFactory makeHasher)
+  Hkdf(size_t hashLength, HasherFactory makeHasher)
       : hashLength_(hashLength), makeHasher_(makeHasher) {}
 
   std::vector<uint8_t> extract(folly::ByteRange salt, folly::ByteRange ikm)
-      const override;
+      const;
 
   std::unique_ptr<folly::IOBuf> expand(
       folly::ByteRange extractedKey,
       const folly::IOBuf& info,
-      size_t outputBytes) const override;
+      size_t outputBytes) const;
 
   std::unique_ptr<folly::IOBuf> hkdf(
       folly::ByteRange ikm,
       folly::ByteRange salt,
       const folly::IOBuf& info,
-      size_t outputBytes) const override;
+      size_t outputBytes) const;
 
-  size_t hashLength() const override {
+  size_t hashLength() const {
     return hashLength_;
   }
 

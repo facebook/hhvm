@@ -55,10 +55,7 @@ class KeyDerivation {
 
 class KeyDerivationImpl : public KeyDerivation {
  public:
-  KeyDerivationImpl(
-      size_t hashLength,
-      HkdfImpl hkdf,
-      folly::ByteRange blankHash);
+  KeyDerivationImpl(size_t hashLength, Hkdf hkdf, folly::ByteRange blankHash);
 
   size_t hashLength() const override {
     return hashLength_;
@@ -95,7 +92,7 @@ class KeyDerivationImpl : public KeyDerivation {
 
  private:
   size_t hashLength_;
-  HkdfImpl hkdf_;
+  Hkdf hkdf_;
   folly::ByteRange blankHash_;
 };
 } // namespace fizz

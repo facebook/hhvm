@@ -141,25 +141,25 @@ CipherSuite getCipherSuite(AeadId aeadId) {
   }
 }
 
-std::unique_ptr<Hkdf> makeHpkeHkdf(
+std::unique_ptr<::fizz::hpke::Hkdf> makeHpkeHkdf(
     std::unique_ptr<folly::IOBuf> prefix,
     KDFId kdfId) {
   switch (kdfId) {
     case KDFId::Sha256:
-      return std::make_unique<Hkdf>(
+      return std::make_unique<::fizz::hpke::Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(
-              HkdfImpl(Sha256::HashLen, openssl::makeHasher<Sha256>)));
+          std::make_unique<::fizz::Hkdf>(
+              Sha256::HashLen, openssl::makeHasher<Sha256>));
     case KDFId::Sha384:
-      return std::make_unique<Hkdf>(
+      return std::make_unique<::fizz::hpke::Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(
-              HkdfImpl(Sha384::HashLen, openssl::makeHasher<Sha384>)));
+          std::make_unique<::fizz::Hkdf>(
+              Sha384::HashLen, openssl::makeHasher<Sha384>));
     case KDFId::Sha512:
-      return std::make_unique<Hkdf>(
+      return std::make_unique<::fizz::hpke::Hkdf>(
           std::move(prefix),
-          std::make_unique<HkdfImpl>(
-              HkdfImpl(Sha512::HashLen, openssl::makeHasher<Sha512>)));
+          std::make_unique<::fizz::Hkdf>(
+              Sha512::HashLen, openssl::makeHasher<Sha512>));
     default:
       throw std::runtime_error("hkdf: not implemented");
   }

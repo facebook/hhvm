@@ -29,7 +29,7 @@ template <typename Hash>
 inline KeyDerivationImpl createKeyDerivationImpl() {
   return KeyDerivationImpl(
       Hash::HashLen,
-      HkdfImpl(Hash::HashLen, openssl::makeHasher<Hash>),
+      Hkdf(Hash::HashLen, openssl::makeHasher<Hash>),
       Hash::BlankHash);
 }
 

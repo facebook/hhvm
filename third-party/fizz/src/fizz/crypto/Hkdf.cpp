@@ -11,9 +11,8 @@
 
 namespace fizz {
 
-std::vector<uint8_t> HkdfImpl::extract(
-    folly::ByteRange salt,
-    folly::ByteRange ikm) const {
+std::vector<uint8_t> Hkdf::extract(folly::ByteRange salt, folly::ByteRange ikm)
+    const {
   auto zeros = std::vector<uint8_t>(hashLength_, 0);
   // Extraction step HMAC-HASH(salt, IKM)
   std::vector<uint8_t> extractedKey(hashLength_);
@@ -26,7 +25,7 @@ std::vector<uint8_t> HkdfImpl::extract(
   return extractedKey;
 }
 
-std::unique_ptr<folly::IOBuf> HkdfImpl::expand(
+std::unique_ptr<folly::IOBuf> Hkdf::expand(
     folly::ByteRange extractedKey,
     const folly::IOBuf& info,
     size_t outputBytes) const {
@@ -64,7 +63,7 @@ std::unique_ptr<folly::IOBuf> HkdfImpl::expand(
   return expanded;
 }
 
-std::unique_ptr<folly::IOBuf> HkdfImpl::hkdf(
+std::unique_ptr<folly::IOBuf> Hkdf::hkdf(
     folly::ByteRange ikm,
     folly::ByteRange salt,
     const folly::IOBuf& info,

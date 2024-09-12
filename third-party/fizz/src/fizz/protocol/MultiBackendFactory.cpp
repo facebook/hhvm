@@ -89,7 +89,7 @@ template <typename Hash>
 inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr() {
   return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
       Hash::HashLen,
-      HkdfImpl(Hash::HashLen, ::fizz::openssl::makeHasher<Hash>),
+      Hkdf(Hash::HashLen, ::fizz::openssl::makeHasher<Hash>),
       Hash::BlankHash));
 }
 } // namespace detail

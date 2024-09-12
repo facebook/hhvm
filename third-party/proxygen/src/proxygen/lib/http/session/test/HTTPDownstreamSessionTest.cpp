@@ -557,7 +557,6 @@ TEST_F(HTTP2DownstreamSessionEarlyShutdownTest, EarlyShutdown) {
   httpSession_->startNow();
   eventBase_.loop();
   parseOutput(*clientCodec_);
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionEarlyShutdownTest, EarlyShutdownDoubleGoaway) {
@@ -574,7 +573,6 @@ TEST_F(HTTP2DownstreamSessionEarlyShutdownTest, EarlyShutdownDoubleGoaway) {
   httpSession_->startNow();
   eventBase_.loop();
   parseOutput(*clientCodec_);
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, ShutdownDoubleGoaway) {
@@ -590,7 +588,6 @@ TEST_F(HTTP2DownstreamSessionTest, ShutdownDoubleGoaway) {
   httpSession_->notifyPendingShutdown();
   eventBase_.loop();
   parseOutput(*clientCodec_);
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTPDownstreamSessionTest, ImmediateEof) {
@@ -1474,7 +1471,6 @@ TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingConnError) {
   eventBase_.loop();
   expectDetachSession();
   handler1->txn_->decrementPendingByteEvents();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestPing) {
@@ -2179,16 +2175,17 @@ TEST_F(HTTPDownstreamSessionTest, HttpDrain) {
 // 3) wait for session read timeout -> should be ignored
 // 4) response completed
 TEST_F(HTTPDownstreamSessionTest, HttpDrainLongRunning) {
-  EXPECT_CALL(mockController_, getGracefulShutdownTimeout())
-      .WillRepeatedly(Return(std::chrono::milliseconds(100)));
   InSequence enforceSequence;
 
-  auto connMan =
-      wangle::ConnectionManager::makeUnique(&eventBase_, milliseconds(125));
-  connMan->addConnection(httpSession_);
   auto handler = addSimpleStrictHandler();
   handler->expectHeaders([this, &handler] {
     httpSession_->notifyPendingShutdown();
+    eventBase_.tryRunAfterDelay(
+        [this] {
+          // simulate read timeout
+          httpSession_->timeoutExpired();
+        },
+        100);
     eventBase_.tryRunAfterDelay(
         [&handler] { handler->sendReplyWithBody(200, 100); }, 200);
   });
@@ -2872,7 +2869,6 @@ TEST_F(HTTPDownstreamSessionTest, HttpUpgradeGoawayDrain) {
   eventBase_.loop();
   expectResponse(200, ErrorCode::NO_ERROR, false, true);
   expectDetachSession();
-  httpSession_->timeoutExpired();
 }
 
 template <class C>
@@ -3110,8 +3106,6 @@ TYPED_TEST_P(HTTPDownstreamTest, TestMaxTxns) {
   }
   this->expectDetachSession();
   this->eventBase_.loop();
-  // how did the session detach before?
-  this->httpSession_->timeoutExpired();
 }
 
 // Set max streams=1
@@ -3145,51 +3139,6 @@ TEST_F(HTTP2DownstreamSessionTest, H2MaxConcurrentStreams) {
 
   expectDetachSession();
 
-  flushRequestsAndLoop();
-}
-
-TEST_F(HTTP2DownstreamSessionTest, SlowDrainWithoutFIN) {
-  auto connMan =
-      wangle::ConnectionManager::makeUnique(&eventBase_, milliseconds(500));
-  connMan->addConnection(httpSession_);
-  httpSession_->enableDoubleGoawayDrain();
-  EXPECT_CALL(mockController_, getGracefulShutdownTimeout())
-      .WillRepeatedly(Return(std::chrono::milliseconds(100)));
-  HTTPMessage req = getGetRequest();
-  req.setHTTPVersion(1, 1);
-  req.setWantsKeepalive(true);
-  auto id = sendRequest(req);
-  // open session flow control window so it's not in the way
-  clientCodec_->generateWindowUpdate(requests_, 0, 10000);
-
-  InSequence handlerSequence;
-  auto handler = addSimpleStrictHandler();
-  handler->expectHeaders();
-  handler->expectEOM([&] {
-    // Send first goaway, schedule timeout for second goaway
-    httpSession_->notifyPendingShutdown();
-  });
-  eventBase_.runAfterDelay(
-      [&] {
-        // second GOAWAY has been sent
-        // send a response that exceeds the flow control window
-        handler->expectEgressPaused();
-        handler->sendReplyWithBody(200, 70000);
-        eventBase_.runAfterDelay(
-            [&] {
-              // The timeout should have fired but the transaction is still
-              // there, timeout gets reset open stream flow control window to
-              // allow response to finish
-              handler->expectDetachTransaction();
-              clientCodec_->generateWindowUpdate(requests_, id, 10000);
-              transport_->addReadEvent(requests_, milliseconds(0));
-              EXPECT_CALL(mockController_, detachSession(testing::_));
-            },
-            150);
-      },
-      600);
-
-  // should timeout FIN
   flushRequestsAndLoop();
 }
 
@@ -3397,7 +3346,6 @@ TEST_F(HTTP2DownstreamSessionTest, PaddingFlowControl) {
   EXPECT_CALL(callbacks_, onWindowUpdate(1, _));
   parseOutput(*clientCodec_);
   expectDetachSession();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, GracefulDrainOnTimeout) {
@@ -3431,7 +3379,6 @@ TEST_F(HTTP2DownstreamSessionTest, GracefulDrainOnTimeout) {
   EXPECT_CALL(callbacks_, onGoaway(0, ErrorCode::NO_ERROR, _));
   parseOutput(*clientCodec_);
   expectDetachSession();
-  httpSession_->timeoutExpired();
 }
 
 /*
@@ -3509,7 +3456,6 @@ TEST_F(HTTP2DownstreamSessionTest, ServerPush) {
 
   parseOutput(*clientCodec_);
   expectDetachSession();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, ServerPushAbortPaused) {
@@ -3584,7 +3530,6 @@ TEST_F(HTTP2DownstreamSessionTest, ServerPushAbortPaused) {
   parseOutput(*clientCodec_);
 
   EXPECT_EQ(httpSession_->getNumOutgoingStreams(), 0);
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, ServerPushAfterWriteTimeout) {
@@ -3692,7 +3637,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityWeightsTinyRatio) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   eventBase_.loop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestPriorityDependentTransactions) {
@@ -3726,7 +3670,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityDependentTransactions) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   eventBase_.loop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestDisablePriorities) {
@@ -3759,7 +3702,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestDisablePriorities) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   eventBase_.loop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestPriorityWeights) {
@@ -3835,7 +3777,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityWeights) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   this->eventBase_.loop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
@@ -3903,7 +3844,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   this->eventBase_.loop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
@@ -3928,7 +3868,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
   }
   expectDetachSession();
   flushRequestsAndLoopN(2);
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestControlMsgRateLimitExceeded) {
@@ -4004,7 +3943,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   this->eventBase_.loop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
@@ -4115,7 +4053,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityWeightsTinyWindow) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   this->eventBase_.loop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestShortContentLength) {
@@ -4302,7 +4239,6 @@ TEST_F(HTTP2DownstreamSessionTest, TestSessionStallByFlowControl) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   flushRequestsAndLoop();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestTransactionStallByFlowControl) {
@@ -4496,7 +4432,6 @@ TEST_F(HTTP2DownstreamSessionTest, PingProbes) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   flushRequestsAndLoopN(1);
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, PingProbeTimeout) {
@@ -4589,7 +4524,6 @@ TEST_F(HTTP2DownstreamSessionTest, CancelPingProbesOnRequest) {
   // Session idle times out
   EXPECT_EQ(httpSession_->getConnectionCloseReason(),
             ConnectionCloseReason::TIMEOUT);
-  httpSession_->timeoutExpired(); // FIN timeout
 }
 
 TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy) {
@@ -4785,7 +4719,6 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_PingReply) {
   httpSession_->closeWhenIdle();
   expectDetachSession();
   flushRequestsAndLoopN(1);
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, Observer_PreWrite) {

@@ -660,7 +660,6 @@ TEST_F(MockCodecDownstreamTest, ReadTimeout) {
   handler1.sendReplyWithBody(200, 100);
   EXPECT_CALL(*codec_,
               generateBody(_, 1, PtrBufHasLen(uint64_t(100)), _, true));
-  EXPECT_CALL(*codec_, isBusy()).WillRepeatedly(Return(false));
   EXPECT_CALL(mockController_, detachSession(_));
   eventBase_.loop();
 }
@@ -1278,8 +1277,8 @@ void MockCodecDownstreamTest::testGoaway(bool doubleGoaway,
           .WillOnce(Invoke(this, &MockCodecDownstreamTest::onWriteChain));
     }
   }
-  if (!dropConnection) {
-    // drop connection doesn't get onIngressEOF
+  if (doubleGoaway || !dropConnection) {
+    // single goaway, drop connection doesn't get onIngressEOF
     EXPECT_CALL(*codec_, onIngressEOF());
   }
   eventBase_.loopOnce();
@@ -1299,7 +1298,6 @@ void MockCodecDownstreamTest::testGoaway(bool doubleGoaway,
     EXPECT_CALL(*codec_, isBusy());
     httpSession_->closeWhenIdle();
     cb->writeSuccess();
-    httpSession_->timeoutExpired();
   }
   EXPECT_FALSE(drainPending_);
   EXPECT_FALSE(reusable_);
@@ -1361,7 +1359,6 @@ TEST_F(MockCodecDownstreamTest, ShutdownThenError) {
     // Creates and adds a txn to the session
     codecCallback_->onMessageBegin(1, &req);
 
-    EXPECT_CALL(*codec_, onIngressEOF());
     httpSession_->closeWhenIdle();
 
     codecCallback_->onError(1, err, false);
@@ -1369,7 +1366,6 @@ TEST_F(MockCodecDownstreamTest, ShutdownThenError) {
   // flush the shutdown callback
   EXPECT_CALL(mockController_, detachSession(_));
   eventBase_.loopOnce();
-  httpSession_->timeoutExpired();
 }
 
 TEST_F(MockCodecDownstreamTest, PingDuringShutdown) {

@@ -67,9 +67,10 @@ class ServiceInterceptor : public ServiceInterceptorBase {
       ConnectionInfo connectionInfo, RequestInfo requestInfo) final {
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
+    auto* storage = requestInfo.storage;
     if (auto value =
             co_await onRequest(connectionState, std::move(requestInfo))) {
-      requestInfo.storage->emplace<RequestState>(std::move(*value));
+      storage->emplace<RequestState>(std::move(*value));
     }
   }
 

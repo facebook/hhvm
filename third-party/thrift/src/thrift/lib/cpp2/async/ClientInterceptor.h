@@ -42,8 +42,9 @@ class ClientInterceptor : public ClientInterceptorBase {
 
  private:
   void internal_onRequest(RequestInfo requestInfo) final {
+    auto* storage = requestInfo.storage;
     if (auto value = onRequest(std::move(requestInfo))) {
-      requestInfo.storage->emplace<RequestState>(std::move(*value));
+      storage->emplace<RequestState>(std::move(*value));
     }
   }
 

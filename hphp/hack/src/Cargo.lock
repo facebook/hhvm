@@ -1560,7 +1560,7 @@ dependencies = [
 name = "emit_opcodes"
 version = "0.0.0"
 dependencies = [
- "convert_case 0.4.0",
+ "convert_case 0.6.0",
  "hhbc-gen",
  "macro_test_util",
  "opcode_test_data",
@@ -3909,7 +3909,7 @@ dependencies = [
 name = "print_opcode_impl"
 version = "0.0.0"
 dependencies = [
- "convert_case 0.4.0",
+ "convert_case 0.6.0",
  "hash",
  "hhbc-gen",
  "macro_test_util",

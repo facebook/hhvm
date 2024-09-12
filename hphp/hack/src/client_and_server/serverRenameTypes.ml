@@ -97,7 +97,7 @@ let write_patches_to_buffer buf original_content patch_list =
       ()
     else
       let size = j - !i in
-      let size = min (- !i + len) size in
+      let size = min (max 0 (- !i + len)) size in
       let str_to_write = String.sub original_content ~pos:!i ~len:size in
       Buffer.add_string buf str_to_write;
       i := !i + size

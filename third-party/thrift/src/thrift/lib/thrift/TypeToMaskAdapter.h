@@ -74,6 +74,16 @@ class ValidatingTypeMap {
     return map_[key];
   }
 
+  mapped_type& at(const key_type& key) {
+    validateTypeIsFull(key);
+    return map_.at(key);
+  }
+
+  const mapped_type& at(const key_type& key) const {
+    validateTypeIsFull(key);
+    return map_.at(key);
+  }
+
   size_t size() const { return map_.size(); }
 
   bool operator==(const ValidatingTypeMap& rhs) const {

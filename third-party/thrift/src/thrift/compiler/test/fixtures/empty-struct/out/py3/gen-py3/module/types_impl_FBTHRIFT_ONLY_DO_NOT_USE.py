@@ -9,3 +9,16 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
+
+
+
+
+
+class __NadaType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    EMPTY = 0
+
+    __slots__ = ()
+

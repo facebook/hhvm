@@ -9,3 +9,76 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
+
+
+
+
+
+class __ComplexUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    intValue = 1
+    stringValue = 5
+    intListValue = 2
+    stringListValue = 3
+    typedefValue = 9
+    stringRef = 14
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __ListUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    intListValue = 2
+    stringListValue = 3
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __DataUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    binaryData = 1
+    stringData = 2
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __ValUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    v1 = 1
+    v2 = 2
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __VirtualComplexUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    thingOne = 1
+    thingTwo = 2
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __NonCopyableUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    s = 1
+    EMPTY = 0
+
+    __slots__ = ()
+

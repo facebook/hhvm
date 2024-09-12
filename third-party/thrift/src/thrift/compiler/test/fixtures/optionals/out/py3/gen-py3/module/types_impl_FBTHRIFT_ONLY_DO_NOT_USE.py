@@ -9,3 +9,41 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
+
+
+
+
+class Animal(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    DOG = 1
+    CAT = 2
+    TARANTULA = 3
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return module.thrift_metadata.gen_metadata_enum_Animal()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Animal"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return python_types.Animal(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+

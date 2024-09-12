@@ -9,3 +9,156 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.enumstrict.module.thrift_metadata
+
+
+
+
+class EmptyEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return test.fixtures.enumstrict.module.thrift_metadata.gen_metadata_enum_EmptyEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.EmptyEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "test.fixtures.enumstrict.module.thrift_types"
+        )
+        return python_types.EmptyEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class MyEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    ONE = 1
+    TWO = 2
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return test.fixtures.enumstrict.module.thrift_metadata.gen_metadata_enum_MyEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "test.fixtures.enumstrict.module.thrift_types"
+        )
+        return python_types.MyEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class MyUseIntrinsicDefaultEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    ZERO = 0
+    ONE = 1
+    TWO = 2
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return test.fixtures.enumstrict.module.thrift_metadata.gen_metadata_enum_MyUseIntrinsicDefaultEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyUseIntrinsicDefaultEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "test.fixtures.enumstrict.module.thrift_types"
+        )
+        return python_types.MyUseIntrinsicDefaultEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class MyBigEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    UNKNOWN = 0
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    ELEVEN = 11
+    TWELVE = 12
+    THIRTEEN = 13
+    FOURTEEN = 14
+    FIFTEEN = 15
+    SIXTEEN = 16
+    SEVENTEEN = 17
+    EIGHTEEN = 18
+    NINETEEN = 19
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return test.fixtures.enumstrict.module.thrift_metadata.gen_metadata_enum_MyBigEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyBigEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "test.fixtures.enumstrict.module.thrift_types"
+        )
+        return python_types.MyBigEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+

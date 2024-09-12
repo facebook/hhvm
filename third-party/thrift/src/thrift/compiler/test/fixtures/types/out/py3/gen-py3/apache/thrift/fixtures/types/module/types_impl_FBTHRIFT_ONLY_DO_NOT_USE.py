@@ -9,3 +9,109 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import apache.thrift.fixtures.types.module.thrift_metadata
+
+
+
+
+class has_bitwise_ops(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    none = 0
+    zero = 1
+    one = 2
+    two = 4
+    three = 8
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return apache.thrift.fixtures.types.module.thrift_metadata.gen_metadata_enum_has_bitwise_ops()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.has_bitwise_ops"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "apache.thrift.fixtures.types.module.thrift_types"
+        )
+        return python_types.has_bitwise_ops(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class is_unscoped(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    hello = 0
+    world = 1
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return apache.thrift.fixtures.types.module.thrift_metadata.gen_metadata_enum_is_unscoped()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.is_unscoped"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "apache.thrift.fixtures.types.module.thrift_types"
+        )
+        return python_types.is_unscoped(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class MyForwardRefEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    ZERO = 0
+    NONZERO = 12
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return apache.thrift.fixtures.types.module.thrift_metadata.gen_metadata_enum_MyForwardRefEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyForwardRefEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "apache.thrift.fixtures.types.module.thrift_types"
+        )
+        return python_types.MyForwardRefEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+

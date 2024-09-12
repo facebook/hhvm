@@ -9,3 +9,94 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
+
+
+
+
+class MyEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    Zero = 0
+    One = 1
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return module.thrift_metadata.gen_metadata_enum_MyEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return python_types.MyEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class TypedEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    VAL1 = 0
+    VAL2 = 1
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return module.thrift_metadata.gen_metadata_enum_TypedEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.TypedEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return python_types.TypedEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+
+class __MyUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    anInteger = 1
+    aString = 2
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __NonTriviallyDestructibleUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    int_field = 1
+    EMPTY = 0
+
+    __slots__ = ()
+

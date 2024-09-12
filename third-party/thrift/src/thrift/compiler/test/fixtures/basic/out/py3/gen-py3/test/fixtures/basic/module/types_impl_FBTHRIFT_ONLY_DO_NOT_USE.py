@@ -9,3 +9,96 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.basic.module.thrift_metadata
+
+
+
+
+class MyEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    MyValue1 = 0
+    MyValue2 = 1
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_MyEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "test.fixtures.basic.module.thrift_types"
+        )
+        return python_types.MyEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class HackEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    Value1 = 0
+    Value2 = 1
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_HackEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.HackEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "test.fixtures.basic.module.thrift_types"
+        )
+        return python_types.HackEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+
+class __MyUnionType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    myEnum = 1
+    myStruct = 2
+    myDataItem = 3
+    floatSet = 4
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __UnionToBeRenamedType(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    reserved_field = 1
+    EMPTY = 0
+
+    __slots__ = ()
+

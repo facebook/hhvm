@@ -9,3 +9,41 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module1.thrift_metadata
+
+
+
+
+class Enum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    ONE = 1
+    TWO = 2
+    THREE = 3
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return module1.thrift_metadata.gen_metadata_enum_Enum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module1.Enum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "module1.thrift_types"
+        )
+        return python_types.Enum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+

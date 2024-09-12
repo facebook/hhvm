@@ -16,18 +16,26 @@
 
 }}{{!
 
-This file holds pure python implementations of thrift types that
-are re-exported via types.pyx
+This is a template for creating compiled Enum and Flag pyx information
 
 }}
-{{> common/auto_generated_py}}
 
+{{#program:filtered_structs}}
+{{#struct:union?}}
 
-from thrift.python.types import EnumMeta as __EnumMeta
-import thrift.py3.types
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_metadata
+class __{{struct:name}}Type(
+    thrift.py3.types.CompiledEnum,
+    {{! TODO: int, }}
+    metaclass=__EnumMeta,
+):
+    {{#struct:fields}}
+    {{field:py_name}} = {{field:key}}
+    {{/struct:fields}}
+    {{! put EMPTY = 0 arm last to overwrite any other arms}}
+    EMPTY = 0
 
+    {{! prevent accidental treatment as py-deprecated }}
+    __slots__ = ()
 
-{{> types/enum_py }}
-
-{{> types/union_type_enum_py }}
+{{/struct:union?}}
+{{/program:filtered_structs}}

@@ -9,3 +9,132 @@
 from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
+
+
+
+
+class EmptyEnum(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return module.thrift_metadata.gen_metadata_enum_EmptyEnum()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.EmptyEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return python_types.EmptyEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class City(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    NYC = 0
+    MPK = 1
+    SEA = 2
+    LON = 3
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return module.thrift_metadata.gen_metadata_enum_City()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.City"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return python_types.City(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+class Company(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    FACEBOOK = 0
+    WHATSAPP = 1
+    OCULUS = 2
+    INSTAGRAM = 3
+
+    __slots__ = ()
+
+    @staticmethod
+    def __get_metadata__():
+        return module.thrift_metadata.gen_metadata_enum_Company()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Company"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return python_types.Company(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+
+
+
+class __union1Type(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    i = 1
+    d = 2
+    EMPTY = 0
+
+    __slots__ = ()
+
+
+class __union2Type(
+    thrift.py3.types.CompiledEnum,
+    metaclass=__EnumMeta,
+):
+    i = 1
+    d = 2
+    s = 3
+    u = 4
+    EMPTY = 0
+
+    __slots__ = ()
+

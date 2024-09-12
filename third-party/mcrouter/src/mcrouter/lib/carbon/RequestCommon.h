@@ -83,6 +83,14 @@ class RequestCommon : public MessageCommon {
     return cryptoAuthToken_;
   }
 
+  const std::string& getClientIdentifier() const noexcept {
+    return clientIdentifier_;
+  }
+
+  void setClientIdentifier(folly::StringPiece clientIdentifier) noexcept {
+    clientIdentifier_ = clientIdentifier.str();
+  }
+
  protected:
   void markBufferAsDirty() {
     serializedBuffer_ = nullptr;
@@ -92,6 +100,8 @@ class RequestCommon : public MessageCommon {
   const folly::IOBuf* serializedBuffer_{nullptr};
   // cat token(s) in string serialzed format
   std::optional<std::string> cryptoAuthToken_;
+  // Hash string of primary (non-host) tls client identities
+  std::string clientIdentifier_;
 };
 
 } // namespace carbon

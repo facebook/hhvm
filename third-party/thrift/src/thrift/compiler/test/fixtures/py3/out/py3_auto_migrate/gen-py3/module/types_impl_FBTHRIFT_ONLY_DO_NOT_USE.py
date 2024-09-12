@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
+_fbthrift__module_name__ = "module.types"
 
 
 
@@ -23,6 +24,7 @@ class AnEnum(
     THREE = 3
     FOUR = 4
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -57,6 +59,7 @@ class AnEnumRenamed(
     value_ = 1
     renamed_ = 2
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -92,6 +95,7 @@ class Flags(
     flag_C = 4
     flag_D = 8
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -126,5 +130,6 @@ class __BinaryUnionType(
     iobuf_val = 1
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 

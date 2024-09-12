@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
+_fbthrift__module_name__ = "module.types"
 
 
 
@@ -21,6 +22,7 @@ class MyEnumA(
     fieldB = 2
     fieldC = 4
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -55,6 +57,7 @@ class AnnotatedEnum(
     FIELDB = 4
     FIELDC = 9
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -89,6 +92,7 @@ class AnnotatedEnum2(
     FIELDB = 4
     FIELDC = 9
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -121,6 +125,7 @@ class MyEnumB(
 ):
     AField = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -156,6 +161,7 @@ class __SimpleUnionType(
     stringValue = 2
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -193,6 +199,7 @@ class __ComplexUnionType(
     MyCustomField = 27
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -204,5 +211,6 @@ class __FloatUnionType(
     doubleSide = 2
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 

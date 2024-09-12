@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
+_fbthrift__module_name__ = "module.types"
 
 
 
@@ -26,6 +27,7 @@ class __ComplexUnionType(
     stringRef = 14
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -37,6 +39,7 @@ class __ListUnionType(
     stringListValue = 3
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -48,6 +51,7 @@ class __DataUnionType(
     stringData = 2
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -59,6 +63,7 @@ class __ValUnionType(
     v2 = 2
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -70,6 +75,7 @@ class __VirtualComplexUnionType(
     thingTwo = 2
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -80,5 +86,6 @@ class __NonCopyableUnionType(
     s = 1
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 

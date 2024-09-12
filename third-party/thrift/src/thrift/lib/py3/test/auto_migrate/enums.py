@@ -19,8 +19,11 @@ import pickle
 import unittest
 from typing import cast, Type, TypeVar
 
-from testing.types import BadMembers, Color, ColorGroups, File, Kind, Perm
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+from testing.types import BadMembers, Color, ColorGroups, Complex, File, Kind, Perm
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import BadEnum, Enum, Flag
@@ -222,6 +225,18 @@ class EnumTests(unittest.TestCase):
             self.assertEqual(str(e), "Color." + color)
             self.assertEqual(int(e), i)
             self.assertEqual(repr(e), f"<Color.{color}: {i}>")
+
+    def test_enum_module(self) -> None:
+        module = "thrift_types" if is_auto_migrated() else "types"
+        self.assertEqual(Color.__module__, f"testing.{module}")
+
+    def test_enum_print(self) -> None:
+        for i, color in enumerate("red blue green".split(), 0):
+            e = Color(i)
+            # should have a test where repr called before str
+            self.assertEqual(repr(e), f"<Color.{color}: {i}>")
+            self.assertEqual(str(e), "Color." + color)
+            self.assertEqual(f"{e=}", f"e=<Color.{color}: {i}>")
 
     @brokenInAutoMigrate()
     def test_insinstance_Enum(self) -> None:

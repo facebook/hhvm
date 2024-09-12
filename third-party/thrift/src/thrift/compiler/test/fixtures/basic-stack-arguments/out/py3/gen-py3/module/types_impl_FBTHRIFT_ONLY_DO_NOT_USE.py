@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
+_fbthrift__module_name__ = "module.types"
 
 
 
@@ -20,6 +21,7 @@ class MyEnum(
     MyValue1 = 0
     MyValue2 = 1
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod

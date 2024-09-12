@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.enums.module.thrift_metadata
 
+_fbthrift__module_name__ = "test.fixtures.enums.module.types"
 
 
 
@@ -22,6 +23,7 @@ class Metasyntactic(
     BAZ = 3
     BAX = 4
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -59,6 +61,7 @@ class MyEnum1(
     ME1_5 = 5
     ME1_6 = 6
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -93,6 +96,7 @@ class MyEnum2(
     ME2_1 = 1
     ME2_2 = 2
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -130,6 +134,7 @@ class MyEnum3(
     ME3_9 = 9
     ME3_10 = 10
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -165,6 +170,7 @@ class MyEnum4(
     ME4_C = 2147483647
     ME4_D = -2147483648
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -199,6 +205,7 @@ class MyBitmaskEnum1(
     TWO = 2
     FOUR = 4
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -233,6 +240,7 @@ class MyBitmaskEnum2(
     TWO = 2
     FOUR = 4
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod

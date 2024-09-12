@@ -34,6 +34,7 @@ class __{{struct:name}}Type(
     {{! put EMPTY = 0 arm last to overwrite any other arms}}
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     {{! prevent accidental treatment as py-deprecated }}
     __slots__ = ()
 

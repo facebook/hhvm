@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
+_fbthrift__module_name__ = "module.types"
 
 
 
@@ -18,6 +19,7 @@ class EmptyEnum(
     metaclass=__EnumMeta,
 ):
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -53,6 +55,7 @@ class City(
     SEA = 2
     LON = 3
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -88,6 +91,7 @@ class Company(
     OCULUS = 2
     INSTAGRAM = 3
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -123,6 +127,7 @@ class __union1Type(
     d = 2
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -136,5 +141,6 @@ class __union2Type(
     u = 4
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 

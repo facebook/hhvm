@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import apache.thrift.fixtures.types.module.thrift_metadata
 
+_fbthrift__module_name__ = "apache.thrift.fixtures.types.module.types"
 
 
 
@@ -23,6 +24,7 @@ class has_bitwise_ops(
     two = 4
     three = 8
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -56,6 +58,7 @@ class is_unscoped(
     hello = 0
     world = 1
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -89,6 +92,7 @@ class MyForwardRefEnum(
     ZERO = 0
     NONZERO = 12
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod

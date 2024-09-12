@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
+_fbthrift__module_name__ = "module.types"
 
 
 
@@ -20,6 +21,7 @@ class MyEnum(
     Zero = 0
     One = 1
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -53,6 +55,7 @@ class TypedEnum(
     VAL1 = 0
     VAL2 = 1
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -88,6 +91,7 @@ class __MyUnionType(
     aString = 2
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
 
@@ -98,5 +102,6 @@ class __NonTriviallyDestructibleUnionType(
     int_field = 1
     EMPTY = 0
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 

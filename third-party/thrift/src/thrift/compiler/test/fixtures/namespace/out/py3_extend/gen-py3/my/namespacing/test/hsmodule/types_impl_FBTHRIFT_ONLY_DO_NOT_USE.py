@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import my.namespacing.test.hsmodule.thrift_metadata
 
+_fbthrift__module_name__ = "my.namespacing.test.hsmodule.types"
 
 
 

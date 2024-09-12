@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.interactions.module.thrift_metadata
 
+_fbthrift__module_name__ = "test.fixtures.interactions.module.types"
 
 
 

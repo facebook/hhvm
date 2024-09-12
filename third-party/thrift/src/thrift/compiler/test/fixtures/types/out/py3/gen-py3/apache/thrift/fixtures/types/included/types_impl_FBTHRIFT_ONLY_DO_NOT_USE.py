@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import apache.thrift.fixtures.types.included.thrift_metadata
 
+_fbthrift__module_name__ = "apache.thrift.fixtures.types.included.types"
 
 
 

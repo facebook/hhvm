@@ -10,6 +10,7 @@ from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.enumstrict.module.thrift_metadata
 
+_fbthrift__module_name__ = "test.fixtures.enumstrict.module.types"
 
 
 
@@ -18,6 +19,7 @@ class EmptyEnum(
     metaclass=__EnumMeta,
 ):
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -51,6 +53,7 @@ class MyEnum(
     ONE = 1
     TWO = 2
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -85,6 +88,7 @@ class MyUseIntrinsicDefaultEnum(
     ONE = 1
     TWO = 2
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod
@@ -136,6 +140,7 @@ class MyBigEnum(
     EIGHTEEN = 18
     NINETEEN = 19
 
+    __module__ = _fbthrift__module_name__
     __slots__ = ()
 
     @staticmethod

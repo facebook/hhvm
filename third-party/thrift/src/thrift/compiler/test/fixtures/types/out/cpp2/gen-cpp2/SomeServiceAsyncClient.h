@@ -96,7 +96,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_bounce_map(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_m);
@@ -110,7 +110,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -216,7 +216,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_binary_keyed_map(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_r);
@@ -230,7 +230,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

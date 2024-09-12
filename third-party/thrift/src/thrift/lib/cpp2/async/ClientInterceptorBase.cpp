@@ -16,9 +16,9 @@
 
 #include <thrift/lib/cpp2/async/ClientInterceptorBase.h>
 
-#include <fmt/core.h>
+#include <folly/lang/SafeAssert.h>
 
-#if FOLLY_HAS_COROUTINES
+#include <fmt/core.h>
 
 namespace apache::thrift {
 
@@ -27,7 +27,8 @@ std::string makeExceptionDescription(
     ClientInterceptorException::CallbackKind callbackKind,
     const std::vector<ClientInterceptorException::SingleExceptionInfo>&
         causes) {
-  CHECK(!causes.empty());
+  FOLLY_SAFE_CHECK(
+      !causes.empty(), "no exceptions should be thrown without cause");
   std::string message = fmt::format(
       "ClientInterceptor::{} threw exceptions:\n[{}] {}\n",
       callbackKind == ClientInterceptorException::CallbackKind::ON_REQUEST
@@ -51,5 +52,3 @@ ClientInterceptorException::ClientInterceptorException(
       causes_(std::move(causes)) {}
 
 } // namespace apache::thrift
-
-#endif // FOLLY_HAS_COROUTINES

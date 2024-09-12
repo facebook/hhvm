@@ -95,7 +95,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_ping(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -109,7 +109,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -213,7 +213,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_getRandomData(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -227,7 +227,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -333,7 +333,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_sink(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_sink);
@@ -347,7 +347,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -451,7 +451,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_putDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
@@ -465,7 +465,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -569,7 +569,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_hasDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
@@ -583,7 +583,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -689,7 +689,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_getDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
@@ -703,7 +703,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -809,7 +809,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_deleteDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id);
@@ -823,7 +823,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -926,7 +926,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_lobDataById(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_id, p_data);
@@ -940,7 +940,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1021,7 +1021,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_invalid_return_for_hack(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -1035,7 +1035,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1141,7 +1141,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     const bool shouldProcessClientInterceptors = ctx && ctx->shouldProcessClientInterceptors();
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnRequest();
+      ctx->processClientInterceptorsOnRequest();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_rpc_skipped_codegen(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -1155,7 +1155,7 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
       co_await callback.co_waitUntilDone();
     }
     if (shouldProcessClientInterceptors) {
-      co_await ctx->processClientInterceptorsOnResponse();
+      ctx->processClientInterceptorsOnResponse();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));

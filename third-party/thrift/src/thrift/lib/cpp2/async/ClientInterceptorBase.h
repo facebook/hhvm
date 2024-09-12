@@ -20,15 +20,10 @@
 #include <vector>
 
 #include <folly/ExceptionWrapper.h>
-#include <folly/experimental/coro/Task.h>
 
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 
 namespace apache::thrift {
-
-class ClientInterceptorBase;
-
-#if FOLLY_HAS_COROUTINES
 
 class ClientInterceptorBase {
  public:
@@ -39,12 +34,12 @@ class ClientInterceptorBase {
   struct RequestInfo {
     detail::ClientInterceptorOnRequestStorage* storage = nullptr;
   };
-  virtual folly::coro::Task<void> internal_onRequest(RequestInfo) = 0;
+  virtual void internal_onRequest(RequestInfo) = 0;
 
   struct ResponseInfo {
     detail::ClientInterceptorOnRequestStorage* storage = nullptr;
   };
-  virtual folly::coro::Task<void> internal_onResponse(ResponseInfo) = 0;
+  virtual void internal_onResponse(ResponseInfo) = 0;
 };
 
 class ClientInterceptorException : public std::runtime_error {
@@ -68,7 +63,5 @@ class ClientInterceptorException : public std::runtime_error {
  private:
   std::vector<SingleExceptionInfo> causes_;
 };
-
-#endif // FOLLY_HAS_COROUTINES
 
 } // namespace apache::thrift

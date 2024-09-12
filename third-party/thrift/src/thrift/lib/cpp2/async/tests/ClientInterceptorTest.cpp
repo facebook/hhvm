@@ -197,16 +197,13 @@ class ClientInterceptorCountWithRequestState
 
   using NamedClientInterceptor::NamedClientInterceptor;
 
-  folly::coro::Task<std::optional<RequestState>> onRequest(
-      RequestInfo) override {
+  std::optional<RequestState> onRequest(RequestInfo) override {
     onRequestCount++;
-    co_return 1;
+    return 1;
   }
 
-  folly::coro::Task<void> onResponse(
-      RequestState* requestState, ResponseInfo) override {
+  void onResponse(RequestState* requestState, ResponseInfo) override {
     onResponseCount += *requestState;
-    co_return;
   }
 
   int onRequestCount = 0;
@@ -219,10 +216,8 @@ class ClientInterceptorThatThrowsOnRequest
   using ClientInterceptorCountWithRequestState::
       ClientInterceptorCountWithRequestState;
 
-  folly::coro::Task<std::optional<RequestState>> onRequest(
-      RequestInfo requestInfo) override {
-    co_await ClientInterceptorCountWithRequestState::onRequest(
-        std::move(requestInfo));
+  std::optional<RequestState> onRequest(RequestInfo requestInfo) override {
+    ClientInterceptorCountWithRequestState::onRequest(std::move(requestInfo));
     throw std::runtime_error("Oh no!");
   }
 };
@@ -233,9 +228,9 @@ class ClientInterceptorThatThrowsOnResponse
   using ClientInterceptorCountWithRequestState::
       ClientInterceptorCountWithRequestState;
 
-  folly::coro::Task<void> onResponse(
+  void onResponse(
       RequestState* requestState, ResponseInfo responseInfo) override {
-    co_await ClientInterceptorCountWithRequestState::onResponse(
+    ClientInterceptorCountWithRequestState::onResponse(
         requestState, std::move(responseInfo));
     throw std::runtime_error("Oh no!");
   }
@@ -302,15 +297,13 @@ CO_TEST_P(ClientInterceptorTestP, IterationOrder) {
     ClientInterceptorRecordingExecutionSequence(std::string name, int& seq)
         : NamedClientInterceptor(std::move(name)), seq_(seq) {}
 
-    folly::coro::Task<std::optional<RequestState>> onRequest(
-        RequestInfo) override {
+    std::optional<RequestState> onRequest(RequestInfo) override {
       onRequestSeq = seq_++;
-      co_return std::nullopt;
+      return std::nullopt;
     }
 
-    folly::coro::Task<void> onResponse(RequestState*, ResponseInfo) override {
+    void onResponse(RequestState*, ResponseInfo) override {
       onResponseSeq = seq_++;
-      co_return;
     }
 
     int onRequestSeq = 0;

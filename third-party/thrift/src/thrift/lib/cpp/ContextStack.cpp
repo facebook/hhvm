@@ -324,8 +324,7 @@ void ContextStack::resetClientRequestContextHeader() {
   connectionContext->resetRequestHeader();
 }
 
-#if FOLLY_HAS_COROUTINES
-folly::coro::Task<void> ContextStack::processClientInterceptorsOnRequest() {
+void ContextStack::processClientInterceptorsOnRequest() {
   DCHECK(shouldProcessClientInterceptors());
 
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
@@ -334,7 +333,7 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnRequest() {
     ClientInterceptorBase::RequestInfo requestInfo{
         getStorageForClientInterceptorOnRequestByIndex(i)};
     try {
-      co_await clientInterceptor->internal_onRequest(std::move(requestInfo));
+      clientInterceptor->internal_onRequest(std::move(requestInfo));
     } catch (...) {
       exceptions.emplace_back(ClientInterceptorException::SingleExceptionInfo{
           clientInterceptor->getName(),
@@ -343,13 +342,13 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnRequest() {
   }
 
   if (!exceptions.empty()) {
-    co_yield folly::coro::co_error(ClientInterceptorException(
+    throw ClientInterceptorException(
         ClientInterceptorException::CallbackKind::ON_REQUEST,
-        std::move(exceptions)));
+        std::move(exceptions));
   }
 }
 
-folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
+void ContextStack::processClientInterceptorsOnResponse() {
   DCHECK(shouldProcessClientInterceptors());
 
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
@@ -358,7 +357,7 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
     ClientInterceptorBase::ResponseInfo responseInfo{
         getStorageForClientInterceptorOnRequestByIndex(i)};
     try {
-      co_await clientInterceptor->internal_onResponse(std::move(responseInfo));
+      clientInterceptor->internal_onResponse(std::move(responseInfo));
     } catch (...) {
       exceptions.emplace_back(ClientInterceptorException::SingleExceptionInfo{
           clientInterceptor->getName(),
@@ -367,12 +366,11 @@ folly::coro::Task<void> ContextStack::processClientInterceptorsOnResponse() {
   }
 
   if (!exceptions.empty()) {
-    co_yield folly::coro::co_error(ClientInterceptorException(
+    throw ClientInterceptorException(
         ClientInterceptorException::CallbackKind::ON_RESPONSE,
-        std::move(exceptions)));
+        std::move(exceptions));
   }
 }
-#endif // FOLLY_HAS_COROUTINES
 
 void*& ContextStack::contextAt(size_t i) {
   return serviceContexts_[i];

@@ -100,13 +100,11 @@ class ContextStack {
 
   void resetClientRequestContextHeader();
 
-#if FOLLY_HAS_COROUTINES
   bool shouldProcessClientInterceptors() const noexcept {
     return clientInterceptors_ != nullptr && !clientInterceptors_->empty();
   }
-  folly::coro::Task<void> processClientInterceptorsOnRequest();
-  folly::coro::Task<void> processClientInterceptorsOnResponse();
-#endif // FOLLY_HAS_COROUTINES
+  void processClientInterceptorsOnRequest();
+  void processClientInterceptorsOnResponse();
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>

@@ -146,22 +146,18 @@ void apache::thrift::Client<::cpp2::MyService>::sync_ping(apache::thrift::RpcOpt
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = pingCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-#if FOLLY_HAS_COROUTINES
   const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+    ctxAndHeader.first->processClientInterceptorsOnRequest();
   }
-#endif
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_ping(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-#if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+    ctxAndHeader.first->processClientInterceptorsOnResponse();
   }
-#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -334,22 +330,18 @@ void apache::thrift::Client<::cpp2::MyService>::sync_getRandomData(apache::thrif
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getRandomDataCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-#if FOLLY_HAS_COROUTINES
   const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+    ctxAndHeader.first->processClientInterceptorsOnRequest();
   }
-#endif
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_getRandomData(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-#if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+    ctxAndHeader.first->processClientInterceptorsOnResponse();
   }
-#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -523,22 +515,18 @@ bool apache::thrift::Client<::cpp2::MyService>::sync_hasDataById(apache::thrift:
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = hasDataByIdCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-#if FOLLY_HAS_COROUTINES
   const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+    ctxAndHeader.first->processClientInterceptorsOnRequest();
   }
-#endif
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_hasDataById(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_id);
     });
-#if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+    ctxAndHeader.first->processClientInterceptorsOnResponse();
   }
-#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -714,22 +702,18 @@ void apache::thrift::Client<::cpp2::MyService>::sync_getDataById(apache::thrift:
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getDataByIdCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-#if FOLLY_HAS_COROUTINES
   const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+    ctxAndHeader.first->processClientInterceptorsOnRequest();
   }
-#endif
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_getDataById(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_id);
     });
-#if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+    ctxAndHeader.first->processClientInterceptorsOnResponse();
   }
-#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }
@@ -904,22 +888,18 @@ void apache::thrift::Client<::cpp2::MyService>::sync_putDataById(apache::thrift:
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = putDataByIdCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-#if FOLLY_HAS_COROUTINES
   const bool shouldProcessClientInterceptors = ctxAndHeader.first && ctxAndHeader.first->shouldProcessClientInterceptors();
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnRequest());
+    ctxAndHeader.first->processClientInterceptorsOnRequest();
   }
-#endif
   callback.waitUntilDone(
     evb,
     [&] {
       fbthrift_serialize_and_send_putDataById(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_id, p_data);
     });
-#if FOLLY_HAS_COROUTINES
   if (shouldProcessClientInterceptors) {
-    folly::coro::blockingWait(ctxAndHeader.first->processClientInterceptorsOnResponse());
+    ctxAndHeader.first->processClientInterceptorsOnResponse();
   }
-#endif
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

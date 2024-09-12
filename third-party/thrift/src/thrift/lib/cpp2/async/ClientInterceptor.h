@@ -19,6 +19,8 @@
 #include <thrift/lib/cpp2/async/ClientInterceptorBase.h>
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 
+#include <optional>
+
 namespace apache::thrift {
 
 template <class RequestState>
@@ -33,24 +35,21 @@ class ClientInterceptor : public ClientInterceptorBase {
   }
 
  public:
-  virtual folly::coro::Task<std::optional<RequestState>> onRequest(
-      RequestInfo) {
-    co_return std::nullopt;
+  virtual std::optional<RequestState> onRequest(RequestInfo) {
+    return std::nullopt;
   }
-  virtual folly::coro::Task<void> onResponse(RequestState*, ResponseInfo) {
-    co_return;
-  }
+  virtual void onResponse(RequestState*, ResponseInfo) {}
 
  private:
-  folly::coro::Task<void> internal_onRequest(RequestInfo requestInfo) final {
-    if (auto value = co_await onRequest(std::move(requestInfo))) {
+  void internal_onRequest(RequestInfo requestInfo) final {
+    if (auto value = onRequest(std::move(requestInfo))) {
       requestInfo.storage->emplace<RequestState>(std::move(*value));
     }
   }
 
-  folly::coro::Task<void> internal_onResponse(ResponseInfo responseInfo) final {
+  void internal_onResponse(ResponseInfo responseInfo) final {
     auto* requestState = getValueAsType<RequestState>(*responseInfo.storage);
-    co_await onResponse(requestState, std::move(responseInfo));
+    onResponse(requestState, std::move(responseInfo));
   }
 };
 

@@ -63,22 +63,14 @@ def milner_and_type_check(
 
 
 def verify_well_typed(
-    test_dir: str, out_dir: str, milner_exe: str, hhstc_exe: str
+    template_file: str, out_dir: str, milner_exe: str, hhstc_exe: str
 ) -> int:
-    # Find all template files in the test directory
-    template_files = [
-        os.path.join(test_dir, f)
-        for f in os.listdir(test_dir)
-        if f.endswith(".template")
-    ]
-
-    # Iterate over each template file, in parallel generate programs with seeds
+    # In parallel generate programs with seeds
     # (1...100) with milner and verify that they are well-typed with
     # hh_single_type_check
-    product = itertools.product(template_files, range(1, 101))
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
-        for template_file, seed in product:
+        for seed in range(1, 101):
             futures.append(
                 executor.submit(
                     milner_and_type_check,
@@ -120,7 +112,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Verify well-typed templates")
-    parser.add_argument("root", help="Directory to search for templates")
+    parser.add_argument("--template", help="Directory to search for templates")
     parser.add_argument("--milner-exe", required=True, help="Path to milner executable")
     parser.add_argument(
         "--hhstc-exe", required=True, help="Path to hh_single_type_check executable"
@@ -131,7 +123,7 @@ def main() -> None:
     # Temporary directory to store generated programs
     out_dir = tempfile.TemporaryDirectory()
     exit_code = verify_well_typed(
-        args.root, out_dir.name, args.milner_exe, args.hhstc_exe
+        args.template, out_dir.name, args.milner_exe, args.hhstc_exe
     )
     out_dir.cleanup()
 

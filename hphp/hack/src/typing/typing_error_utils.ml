@@ -7130,8 +7130,7 @@ end = struct
     @@ apply_help ?code ?claim ?reasons ?flags ?quickfixes t ~env ~current_span
 end
 
-let is_suppressed User_error.{ claim; code; _ } =
-  Errors.fixme_present Message.(get_message_pos claim) code
+let is_suppressed error = Errors.is_suppressed error
 
 let add_typing_error err ~env =
   Eval_result.iter ~f:Errors.add_error

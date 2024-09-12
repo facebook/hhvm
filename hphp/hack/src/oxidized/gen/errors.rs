@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<70135d15e4310ed98b7162026838b67b>>
+// @generated SignedSource<<cc1c2ddec1549a4f37a2998c153153a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -87,4 +87,47 @@ pub type Errors = relative_path::map::Map<Vec<Error>>;
 pub enum SuppressionKind {
     Fixme { forbidden_decl_fixme: bool },
     Ignore,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct FixmeError {
+    pub explanation: String,
+    pub fixme_pos: pos::Pos,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum FixmeOutcome {
+    #[rust_to_ocaml(name = "Not_fixmed")]
+    NotFixmed(Option<FixmeError>),
+    Fixmed,
 }

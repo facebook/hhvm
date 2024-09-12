@@ -76,7 +76,7 @@ val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
 
 val get_current_span : unit -> Pos.t
 
-val fixme_present : Pos.t -> int -> bool
+val is_suppressed : (Pos.t, 'a) User_error.t -> bool
 
 val code_agnostic_fixme : bool ref
 

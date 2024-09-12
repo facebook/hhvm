@@ -757,7 +757,93 @@ let get_fixme (pos : Pos.t) code : (Pos.t * suppression_kind) option =
       | Some pos -> Some (pos, Fixme { forbidden_decl_fixme = true })
       | None -> None))
 
-let fixme_present pos code = get_fixme pos code |> Option.is_some
+type fixme_error = {
+  explanation: string;
+  fixme_pos: Pos.t;
+}
+
+type fixme_outcome =
+  | Not_fixmed of fixme_error option
+  | Fixmed
+
+let try_apply_fixme pos code severity : fixme_outcome =
+  match get_fixme pos code with
+  | None ->
+    (* Fixmes and banned decl fixmes are separated by the parser because Errors can't recover
+     * the position information after the fact. This is the default case, where an HH_FIXME
+     * comment is not present. Therefore, the remaining cases are variations on behavior when
+     * a fixme is present *)
+    Not_fixmed None
+  | Some (fixme_pos, fixme_kind) ->
+    let severity_based_on_code =
+      (* We use severity based on code for warning-to-error migration scenarios.
+         Sometimes we want to introduce an new error as a warning first. In that case,
+         to avoid having to codemod any HH_IGNORE along with their codes when the
+         warnings become errors, we'll first make the errors have a non-warning code
+         but have warning severity at first, and we'll force suppression using HH_FIXME instead of HH_IGNORE. *)
+      match Error_codes.Warning.of_enum code with
+      | Some _ -> User_error.Warning
+      | None -> User_error.Err
+    in
+    (match (severity_based_on_code, fixme_kind) with
+    | (User_error.Err, Fixme { forbidden_decl_fixme }) ->
+      if ISet.mem code hard_banned_codes then
+        let explanation =
+          Printf.sprintf
+            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
+            code
+        in
+        Not_fixmed (Some { explanation; fixme_pos })
+      else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
+        Fixmed
+      else if !report_pos_from_reason && Pos.get_from_reason pos then
+        let explanation =
+          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information"
+        in
+        Not_fixmed (Some { explanation; fixme_pos })
+      else if forbidden_decl_fixme then
+        let explanation =
+          Printf.sprintf
+            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d in declarations"
+            code
+        in
+        Not_fixmed (Some { explanation; fixme_pos })
+      else if is_allowed_code_strict code then
+        Fixmed
+      else
+        let explanation =
+          Printf.sprintf
+            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d"
+            code
+        in
+        Not_fixmed (Some { explanation; fixme_pos })
+    | (User_error.Warning, Fixme _) ->
+      let explanation =
+        Printf.sprintf
+          "You cannot use `HH_FIXME` comments to suppress warnings. Use `HH_IGNORE[%d]` instead."
+          code
+      in
+      Not_fixmed (Some { explanation; fixme_pos })
+    | (User_error.Warning, Ignore) -> Fixmed
+    | (User_error.Err, Ignore) ->
+      let explanation =
+        match severity with
+        | User_error.Err ->
+          Printf.sprintf
+            "You cannot use `HH_IGNORE` to suppress non-warning code %d. Hack errors should not be suppressed. You should try your best to fix the code causing the error, or incidents will happen."
+            code
+        | User_error.Warning ->
+          Printf.sprintf
+            "This warning code %d will soon be migrated to be an error. Try your best to fix it, or if not possible, suppress it with `HH_FIXME` instead of `HH_IGNORE` and report your case to us."
+            code
+      in
+      Not_fixmed (Some { explanation; fixme_pos }))
+
+let is_suppressed error =
+  let User_error.{ severity; code; claim = (pos, _); _ } = error in
+  match try_apply_fixme pos code severity with
+  | Fixmed -> true
+  | Not_fixmed _ -> false
 
 let add_error (error : error) =
   let User_error.
@@ -780,77 +866,11 @@ let add_error (error : error) =
 
   let pos = fst claim in
 
-  match get_fixme pos code with
-  | None ->
-    (* Fixmes and banned decl fixmes are separated by the parser because Errors can't recover
-     * the position information after the fact. This is the default case, where an HH_FIXME
-     * comment is not present. Therefore, the remaining cases are variations on behavior when
-     * a fixme is present *)
-    add_error_impl error
-  | Some (fixme_pos, fixme_kind) ->
-    let severity_based_on_code =
-      (* We use severity based on code for warning-to-error migration scenarios.
-         Sometimes we want to introduce an new error as a warning first. In that case,
-         to avoid having to codemod any HH_IGNORE along with their codes when the
-         warnings become errors, we'll first make the errors have a non-warning code
-         but have warning severity at first, and we'll force suppression using HH_FIXME instead of HH_IGNORE. *)
-      match Error_codes.Warning.of_enum code with
-      | Some _ -> User_error.Warning
-      | None -> User_error.Err
-    in
-    (match (severity_based_on_code, fixme_kind) with
-    | (User_error.Err, Fixme { forbidden_decl_fixme }) ->
-      if ISet.mem code hard_banned_codes then
-        let explanation =
-          Printf.sprintf
-            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
-            code
-        in
-        add_error_with_fixme_error error explanation ~fixme_pos
-      else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
-        add_applied_fixme error
-      else if !report_pos_from_reason && Pos.get_from_reason pos then
-        let explanation =
-          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information"
-        in
-        add_error_with_fixme_error error explanation ~fixme_pos
-      else if forbidden_decl_fixme then
-        let explanation =
-          Printf.sprintf
-            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d in declarations"
-            code
-        in
-        add_error_with_fixme_error error explanation ~fixme_pos
-      else if is_allowed_code_strict code then
-        add_applied_fixme error
-      else
-        let explanation =
-          Printf.sprintf
-            "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d"
-            code
-        in
-        add_error_with_fixme_error error explanation ~fixme_pos
-    | (User_error.Warning, Fixme _) ->
-      let explanation =
-        Printf.sprintf
-          "You cannot use `HH_FIXME` comments to suppress warnings. Use `HH_IGNORE[%d]` instead."
-          code
-      in
-      add_error_with_fixme_error error explanation ~fixme_pos
-    | (User_error.Warning, Ignore) -> add_applied_fixme error
-    | (User_error.Err, Ignore) ->
-      let explanation =
-        match severity with
-        | User_error.Err ->
-          Printf.sprintf
-            "You cannot use `HH_IGNORE` to suppress non-warning code %d. Hack errors should not be suppressed. You should try your best to fix the code causing the error, or incidents will happen."
-            code
-        | User_error.Warning ->
-          Printf.sprintf
-            "This warning code %d will soon be migrated to be an error. Try your best to fix it, or if not possible, suppress it with `HH_FIXME` instead of `HH_IGNORE` and report your case to us."
-            code
-      in
-      add_error_with_fixme_error error explanation ~fixme_pos)
+  match try_apply_fixme pos code severity with
+  | Not_fixmed None -> add_error_impl error
+  | Not_fixmed (Some { explanation; fixme_pos }) ->
+    add_error_with_fixme_error error explanation ~fixme_pos
+  | Fixmed -> add_applied_fixme error
 
 let merge err' err =
   let append _ x y =

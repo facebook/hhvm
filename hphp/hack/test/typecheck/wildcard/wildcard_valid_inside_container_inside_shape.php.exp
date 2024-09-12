@@ -1,1 +1,2 @@
-No errors
+WARN: File "wildcard_valid_inside_container_inside_shape.php", line 11, characters 3-32:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `shape('x' => nothing)` which is a subtype of `shape('x' => dict<Tk#1, Tv#1>)`. (Warn[12011])

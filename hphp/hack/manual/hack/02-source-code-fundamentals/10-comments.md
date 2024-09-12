@@ -39,3 +39,4 @@ A number of special comments are recognized; they are:
   [headers](/hack/source-code-fundamentals/program-structure)
 - `/* HH_FIXME[1234] */` or `/* HH_IGNORE_ERROR[1234] */`, which suppresses
   typechecker error reporting for error 1234.
+- `/* HH_FIXME[12001] */`, which suppresses warning for code 12001

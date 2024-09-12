@@ -1,0 +1,2 @@
+WARN: File "10-object-collections-08.hack", line 47, characters 3-21:
+This `is` check is always `true`. The expression on the left has type `Map<int, int>` which is a subtype of `Map<int, int>`. (Warn[12009])

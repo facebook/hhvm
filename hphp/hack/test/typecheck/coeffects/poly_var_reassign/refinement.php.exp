@@ -1,1 +1,4 @@
-No errors
+WARN: File "refinement.php", line 7, characters 7-15:
+This `is` check is always `false`. The expression on the left has type `V` which shares no values with `int`. (Warn[12010])
+WARN: File "refinement.php", line 8, characters 3-14:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `V` which shares no values with `string`. (Warn[12012])

@@ -8,4 +8,13 @@ two_pos_embedded_in_larger_pos.php:4:10
 [1,2,3] 4 |   return "5" === 5;
         5 | }
 
-1 error found
+warning: Warn[12007] Invalid comparison: This expression will always return false.
+A value of type string can never be equal to a value of type int [1]
+
+two_pos_embedded_in_larger_pos.php:4:10
+    2 | 
+    3 | function f(): bool {
+[1] 4 |   return "5" === 5;
+    5 | }
+
+2 errors found

@@ -117,4 +117,13 @@ PACKAGES.toml:14:11
 15 | includes = ["pkg2"]
 16 |
 
-6 errors found
+warning: Warn[12009] This is check is always true. The expression on the left has type bool which is a subtype of bool. [1]
+
+cross_package_with_package_syntax_invalid_conds.php--pkg3.php:8:11
+6 |         pkg1_call(); // error; comparison binops don't register package info
+7 |       }
+[1] 8 |       if (package pkg1 is bool) {
+9 |         pkg1_call(); // error; type ops don't register package info
+10 |       }
+
+7 errors found

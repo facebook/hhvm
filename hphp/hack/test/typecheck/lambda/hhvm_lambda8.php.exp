@@ -1,1 +1,2 @@
-No errors
+WARN: File "hhvm_lambda8.php", line 35, characters 12-24:
+This `is` check is always `false`. The expression on the left has type `(function(string $x, (function(int): bool) $f, optional Vector<Vector<int>> $v): Vector<Vector<int>>)` which shares no values with `Closure`. (Warn[12010])

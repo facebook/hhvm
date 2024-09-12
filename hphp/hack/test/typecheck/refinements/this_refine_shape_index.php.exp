@@ -1,1 +1,2 @@
-No errors
+WARN: File "this_refine_shape_index.php", line 18, characters 9-18:
+This `is` check is always `false`. The expression on the left has type `this` which shares no values with `F`. (Warn[12010])

@@ -1,1 +1,12 @@
-No errors
+WARN: File "trivial_compare_string_arraykey_enum_good.php", line 8, characters 10-20:
+Invalid comparison: This expression will always return `false`.
+A value of type `A` can never be equal to a value of type `int` (Warn[12007])
+WARN: File "trivial_compare_string_arraykey_enum_good.php", line 12, characters 10-20:
+Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `A` (Warn[12007])
+WARN: File "trivial_compare_string_arraykey_enum_good.php", line 24, characters 10-20:
+Invalid comparison: This expression will always return `true`.
+A value of type `A` can never be equal to a value of type `int` (Warn[12007])
+WARN: File "trivial_compare_string_arraykey_enum_good.php", line 28, characters 10-20:
+Invalid comparison: This expression will always return `true`.
+A value of type `int` can never be equal to a value of type `A` (Warn[12007])

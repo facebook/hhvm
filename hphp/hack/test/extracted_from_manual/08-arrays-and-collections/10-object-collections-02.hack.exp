@@ -1,0 +1,2 @@
+WARN: File "10-object-collections-02.hack", line 42, characters 3-21:
+This `is` check is always `true`. The expression on the left has type `Vector<string>` which is a subtype of `Vector<string>`. (Warn[12009])

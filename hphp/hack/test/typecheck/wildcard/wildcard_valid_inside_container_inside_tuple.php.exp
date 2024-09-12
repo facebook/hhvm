@@ -1,1 +1,2 @@
-No errors
+WARN: File "wildcard_valid_inside_container_inside_tuple.php", line 12, characters 3-25:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `(int, (vec<T#1> & ((T#1 & vec<T#2>), (T#1 & string))))` which shares no values with `(int, dict<Tk#1, Tv#1>)`. (Warn[12012])

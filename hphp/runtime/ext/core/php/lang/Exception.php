@@ -26,6 +26,7 @@ class Exception implements Throwable {
   private static int $traceOpts = 0;
 
   final public static function getTraceOptions()[read_globals]: int {
+    /* HH_IGNORE[12011] Hack thinks we're casting an int to an int, but we're casting a readonly int. */
     return (readonly self::$traceOpts) as int;
   }
 

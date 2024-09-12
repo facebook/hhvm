@@ -427,7 +427,7 @@ namespace __SystemLib {
       \DOMElement $el,
       ?varray<mixed> $children,
     ): void {
-      if ($children) {
+      if ($children is nonnull) {
         foreach ($children as $v) {
           if ($v === null) {
           } else if ($v is \DOMElement) {
@@ -458,7 +458,7 @@ namespace __SystemLib {
       $el = HH\FIXME\UNSAFE_CAST<mixed, \DOMElement>(
         $this->xml->createElement($tag)
       );
-      if ($attr) {
+      if ($attr is nonnull) {
         foreach ($attr as $k => $v) {
           $el->setAttribute($k, $v);
         }

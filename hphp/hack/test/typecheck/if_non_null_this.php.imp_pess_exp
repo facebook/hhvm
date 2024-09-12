@@ -1,0 +1,8 @@
+WARN: File "if_non_null_this.php", line 15, characters 11-12:
+This is a sketchy null check on an expression of type ?(int | string).
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "if_non_null_this.php", line 15, characters 11-12:
+`$x` is a sketchy condition: testing the truthiness of a string may not behave as expected.
+The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty($x)`. (Warn[12006])

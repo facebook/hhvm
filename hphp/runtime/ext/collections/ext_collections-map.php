@@ -606,6 +606,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
 
     $res = dict[];
     foreach ($iterable as $pair) {
+      /* HH_IGNORE[12009] $pair is already of type Pair */
       if ($pair is Pair<_, _>) {
         $res[$pair[0]] = $pair[1];
       } else {
@@ -1058,6 +1059,7 @@ final class ImmMap<Tk as arraykey, Tv> implements \ConstMap<Tk, Tv> {
 
     $res = dict[];
     foreach ($iterable as $pair) {
+      /* HH_IGNORE[12009] $pair is already of type Pair */
       if ($pair is Pair<_, _>) {
         $res[$pair[0]] = $pair[1];
       } else {

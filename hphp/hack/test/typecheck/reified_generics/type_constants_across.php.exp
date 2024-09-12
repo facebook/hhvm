@@ -12,3 +12,9 @@ Invalid type hint (Typing[4352])
   An abstract type constant is not allowed in this position.
   File "type_constants_across.php", line 17, characters 23-24:
   `Tx` is abstract here.
+WARN: File "type_constants_across.php", line 10, characters 5-17:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A::Tx`. (Warn[12012])
+WARN: File "type_constants_across.php", line 11, characters 5-17:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
+WARN: File "type_constants_across.php", line 12, characters 5-18:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `YY<int>`. (Warn[12012])

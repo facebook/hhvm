@@ -1,1 +1,4 @@
-No errors
+WARN: File "xcont.php", line 59, characters 12-38:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<this::TE>` which is a subtype of `nonnull`. (Warn[12011])
+WARN: File "xcont.php", line 67, characters 12-38:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<this::TE>` which is a subtype of `nonnull`. (Warn[12011])

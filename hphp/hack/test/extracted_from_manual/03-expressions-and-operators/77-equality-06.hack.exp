@@ -1,0 +1,9 @@
+WARN: File "77-equality-06.hack", line 4, characters 3-10:
+Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `float` (Warn[12007])
+WARN: File "77-equality-06.hack", line 5, characters 3-11:
+Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `null` (Warn[12007])
+WARN: File "77-equality-06.hack", line 6, characters 3-9:
+Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `int` (Warn[12007])

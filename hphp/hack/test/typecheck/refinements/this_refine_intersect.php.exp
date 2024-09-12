@@ -1,1 +1,6 @@
-No errors
+WARN: File "this_refine_intersect.php", line 17, characters 9-18:
+This `is` check is always `false`. The expression on the left has type `this` which shares no values with `A`. (Warn[12010])
+WARN: File "this_refine_intersect.php", line 24, characters 9-15:
+This `is` check is always `false`. The expression on the left has type `this` which shares no values with `A`. (Warn[12010])
+WARN: File "this_refine_intersect.php", line 31, characters 9-15:
+This `is` check is always `false`. The expression on the left has type `Tthis` which shares no values with `A`. (Warn[12010])

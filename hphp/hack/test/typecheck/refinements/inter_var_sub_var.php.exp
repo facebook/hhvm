@@ -1,1 +1,2 @@
-No errors
+WARN: File "inter_var_sub_var.php", line 13, characters 11-17:
+This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. (Warn[12010])

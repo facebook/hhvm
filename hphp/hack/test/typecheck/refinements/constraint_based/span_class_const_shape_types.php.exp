@@ -4,4 +4,5 @@ File "span_class_const_shape_types.php", line 21, characters 5-15:
   (shape(HasConst::A => int) & not shape('a' => int))
 File "span_class_const_shape_types.php", line 30, characters 5-15:
   (shape('a' => int) & not shape(HasConst::A => int))
-No errors
+WARN: File "span_class_const_shape_types.php", line 8, characters 7-37:
+This `is` check is always `true`. The expression on the left has type `shape(HasConst::A => int)` which is a subtype of `shape(HasConst::A => int)`. (Warn[12009])

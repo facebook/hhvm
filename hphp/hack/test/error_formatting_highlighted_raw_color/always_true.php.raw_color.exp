@@ -1,1 +1,11 @@
-No errors
+[33;1mwarning[0m: [33;1mWarn[12007][0m [0;1mInvalid comparison: This expression will always return [0m[0;1;4mtrue[0m[0;1m.
+A value of type [0m[0;1;4mnull[0m[0;1m can never be equal to a value of type [0m[0;1;4mvec<int>[0m [0;2m[[0m[33m1[0m[0;2m][0m
+
+always_true.php[0;2m:4:7[0m
+    [0;2m2[0m[0;2m |[0m 
+    [0;2m3[0m[0;2m |[0m function foo(varray<int> $arg): void {
+[0;2m[[0m[33m1[0m[0;2m][0m [0;2m4[0m[0;2m |[0m   if ([33mn[0m[33mu[0m[33ml[0m[33ml[0m[33m [0m[33m![0m[33m=[0m[33m=[0m[33m [0m[33m$[0m[33ma[0m[33mr[0m[33mg[0m) {
+    [0;2m5[0m[0;2m |[0m   }
+    [0;2m6[0m[0;2m |[0m }
+
+1 error found

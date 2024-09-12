@@ -1,1 +1,2 @@
-No errors
+WARN: File "as_expression_mutable_prim.php", line 5, characters 12-26:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])

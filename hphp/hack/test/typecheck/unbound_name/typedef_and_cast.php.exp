@@ -1,1 +1,2 @@
-No errors
+WARN: File "typedef_and_cast.php", line 6, characters 3-31:
+Casting (function(dynamic $amount): int) to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])

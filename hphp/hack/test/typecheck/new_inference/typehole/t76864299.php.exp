@@ -4,3 +4,5 @@ Invalid return type (Typing[4110])
   Expected `T`
   File "t76864299.php", line 6, characters 23-23:
   But got `J`
+WARN: File "t76864299.php", line 9, characters 8-14:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(T & J)` which is a subtype of `J`. (Warn[12011])

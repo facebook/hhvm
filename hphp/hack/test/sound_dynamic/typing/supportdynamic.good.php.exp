@@ -1,1 +1,13 @@
-No errors
+warning: Warn[12003] This is a sketchy null check on an expression of type supportdyn<nonnull>.
+It detects nulls, but it will also detect many other falsy values, including false, 0, 0.0, "", "0", empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for null, use $sd is nonnull instead [1]
+
+supportdynamic.good.php:8:7
+    6 | 
+    7 | function stmt(supportdyn<nonnull> $sd): void {
+[1] 8 |   if ($sd) {}
+    9 |   switch ($sd) {
+   10 |     case 42:
+
+1 error found

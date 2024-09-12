@@ -1,0 +1,2 @@
+WARN: File "03-using-a-trait-03.hack", line 20, characters 7-7:
+Duplicated property `x` in `C` (defined in `T1` and `T2`): all instances will be aliased at runtime (Warn[12008])

@@ -458,7 +458,7 @@ function get_options(
 
       if (!$found) {
         $msg = sprintf("Invalid argument: '%s'\nSee %s --help", $arg, $argv[0]);
-        error($msg as string);
+        error($msg);
       }
     } else {
       $files[] = $arg;
@@ -600,6 +600,7 @@ function exec_find(vec<string> $files, string $extra): vec<string> {
   $results = vec[];
   foreach (array_chunk($files, 500) as $chunk) {
     $efa = implode(' ', array_map(
+      /* HH_IGNORE[12012] $line is an int so the `as` always fails */
       $line ==> escapeshellarg($line as string),
       $chunk as dict<_, _>,
     ));
@@ -1307,7 +1308,7 @@ function exec_with_timeout(string $cmd,
   $exit_code = $status['exitcode'];
   proc_close($proc);
 
-  if (!$timedout && C\contains($success_codes, $exit_code) && !$stderr) {
+  if (!$timedout && C\contains($success_codes, $exit_code) && Str\is_empty($stderr)) {
     return tuple($stdout, true);
   }
 
@@ -1318,7 +1319,7 @@ function exec_with_timeout(string $cmd,
   } else {
     $error .= " (exit-code $exit_code)";
   }
-  if ($stderr) $error .= ' (wrote to stderr)';
+  if (!Str\is_empty($stderr)) $error .= ' (wrote to stderr)';
 
   list($before_dump, $dump) = split_stack_trace_from_output($stdout);
 
@@ -1331,7 +1332,7 @@ function exec_with_timeout(string $cmd,
   if ($stack) {
     $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
     $error .= "\nContents of $stack_file:\n$stack";
-  } else if ($dump) {
+  } else if (!Str\is_empty($dump)) {
     $error .= "\nstdout:\n$dump\nstderr:\n$stderr";
   } else {
     $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
@@ -1943,18 +1944,13 @@ final class Status {
 
           case Status::MODE_VERBOSE:
             Status::sayColor($message->test." ", Status::YELLOW, "skipped");
-
-            if ($reason is nonnull) {
-              Status::sayColor(" - reason: $reason");
-            }
+            Status::sayColor(" - reason: $reason");
             Status::sayColor(sprintf(" (%.2fs)\n", $message->time));
             break;
 
           case Status::MODE_TESTPILOT:
             $skip_msg = $message->test." skipped (by run.php)";
-            if ($reason is nonnull) {
-              $skip_msg .= " - reason: $reason";
-            }
+            $skip_msg .= " - reason: $reason";
             Status::sayTestpilot(
               $message->test,
               'not_relevant',
@@ -2092,7 +2088,7 @@ final class Status {
       return false;
     }
     $stty = self::getSTTY();
-    if (!$stty) {
+    if (Str\is_empty($stty)) {
       return false;
     }
     // emacs hack-mode really doesn't like <undef> inside a string...
@@ -2408,7 +2404,7 @@ function runif_should_skip_test(
   string $test,
 ): RunifResult {
   $runif_path = find_test_ext($test, 'runif');
-  if (!$runif_path) return shape('valid' => true, 'match' => true);
+  if ($runif_path is null) return shape('valid' => true, 'match' => true);
 
   $file_empty = true;
   $contents = file($runif_path, FILE_IGNORE_NEW_LINES);
@@ -2497,7 +2493,7 @@ function should_skip_test_simple(
         file_exists(dirname($test).'/'.$no_multireq_tag)) {
       return 'skip-multi-req';
     }
-    if (find_debug_config($test, 'hphpd.ini')) {
+    if (!Str\is_empty(find_debug_config($test, 'hphpd.ini'))) {
       return 'skip-debugger';
     }
   }
@@ -2528,7 +2524,7 @@ function should_skip_test_simple(
   if ($options->repo) {
     if (file_exists($test.'.norepo')) return 'skip-norepo';
     if (file_exists($test.'.verify')) return 'skip-verify';
-    if (find_debug_config($test, 'hphpd.ini')) return 'skip-debugger';
+    if (!Str\is_empty(find_debug_config($test, 'hphpd.ini'))) return 'skip-debugger';
   }
 
   if ($options->only_remote_executable &&
@@ -2546,7 +2542,7 @@ function should_skip_test_simple(
   }
 
   if ($options->record || $options->replay) {
-    if (find_debug_config($test, 'hphpd.ini')) return 'skip-debugger';
+    if (!Str\is_empty(find_debug_config($test, 'hphpd.ini'))) return 'skip-debugger';
     if (file_exists("$test.norecord")) return 'skip-record';
     if (file_exists("$test.verify")) return 'skip-verify';
   }
@@ -2559,7 +2555,7 @@ function skipif_should_skip_test(
   string $test,
 ): RunifResult {
   $skipif_test = find_test_ext($test, 'skipif');
-  if (!$skipif_test) {
+  if ($skipif_test is null) {
     return shape('valid' => true, 'match' => true);
   }
 
@@ -3237,7 +3233,7 @@ function can_run_server_test(string $test, Options $options): bool {
   }
 
   // has its own config
-  if (find_test_ext($test, 'opts') || is_file("$test.ini") ||
+  if (find_test_ext($test, 'opts') is nonnull || is_file("$test.ini") ||
       is_file("$test.use.for.ini.migration.testing.only.hdf")) {
     return false;
   }
@@ -3374,7 +3370,7 @@ function run_config_post(
   $wanted = trim(file_get_contents($file));
 
   if ($type === 'expect') {
-    if ($options->ignore_oids || $options->repo) {
+    if ($options->ignore_oids is nonnull || $options->repo) {
       $split = array_map($s ==> replace_object_resource_ids($s, 'n'), $split);
       $wanted = replace_object_resource_ids($wanted, 'n');
     }
@@ -3390,7 +3386,7 @@ function run_config_post(
     }
     return true;
   } else if ($type === 'expectf') {
-    if ($options->ignore_oids || $options->repo) {
+    if ($options->ignore_oids is nonnull || $options->repo) {
       $wanted = replace_object_resource_ids($wanted, '%d');
     }
 
@@ -4177,7 +4173,7 @@ function main(vec<string> $argv): int {
     $configs = keyset[];
     foreach ($tests as $test) {
       $config = find_file_for_dir(dirname($test), 'config.ini');
-      if (!$config) {
+      if ($config is null) {
         error("Couldn't find config file for $test");
       }
       if (array_key_exists($config, $configs)) continue;

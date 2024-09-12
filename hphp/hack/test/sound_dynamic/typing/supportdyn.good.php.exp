@@ -1,1 +1,13 @@
-No errors
+warning: Warn[12003] This is a sketchy null check on an expression of type supportdyn<mixed>.
+It detects nulls, but it will also detect many other falsy values, including false, 0, 0.0, "", "0", empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for null, use $sd is nonnull instead [1]
+
+supportdyn.good.php:27:7
+    25 | 
+    26 | function stmt(\HH\supportdyn<mixed> $sd): void {
+[1] 27 |   if ($sd) {}
+    28 |   switch ($sd) {
+    29 |     case 42:
+
+1 error found

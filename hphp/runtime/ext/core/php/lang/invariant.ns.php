@@ -82,6 +82,7 @@ function invariant(
   mixed $format_str,
   mixed... $args
 )[]: void {
+  /* HH_IGNORE[12003] sketchy null check on $test */
   if (!$test) {
     \HH\invariant_violation(
       HH\FIXME\UNSAFE_CAST<mixed, string>($format_str),

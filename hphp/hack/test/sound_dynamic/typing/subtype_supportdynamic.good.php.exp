@@ -1,1 +1,10 @@
-No errors
+warning: Warn[12010] This is check is always false. The expression on the left has type int which shares no values with E. [1]
+
+subtype_supportdynamic.good.php:94:7
+    92 | 
+    93 | function test_inter(int $i, bool $b): void {
+[1] 94 |   if ($i is E) {
+    95 |     e($i);
+    96 |   }
+
+1 error found

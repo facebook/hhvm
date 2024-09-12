@@ -243,6 +243,7 @@ void RocketStreamClientCallback::resumeStream() {
 }
 
 void RocketStreamClientCallback::onStreamCancel() {
+  CHECK(serverCallbackReady()) << serverCallbackOrCancelled_;
   streamMetricCallback_.onStreamCancel(rpcMethodName_);
   serverCallback()->onStreamCancel();
 }

@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include <exception>
+#include <initializer_list>
 #include <optional>
 #include <type_traits>
 #include <utility>
@@ -96,36 +97,75 @@ class bad_expected_access : public bad_expected_access<void> {
   const E& error() const& noexcept { return error_; }
   E& error() & noexcept { return error_; }
   E&& error() && noexcept { return std::move(error_); }
+  const E&& error() const&& noexcept { return static_cast<const E&&>(error_); }
 
  private:
   E error_;
 };
 
 namespace detail {
+
 // std::remove_cvref_t was added in C++20
 template <typename T>
 using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename T, template <typename...> typename Template>
+constexpr inline bool is_specialization = false;
+template <template <typename...> typename Template, typename... Types>
+constexpr inline bool is_specialization<Template<Types...>, Template> = true;
+
+// https://en.cppreference.com/w/cpp/utility/expected/unexpected#Template_parameters
+template <typename E>
+struct check_valid_error_type : std::true_type {
+  static_assert(std::is_object_v<E>);
+  static_assert(!std::is_array_v<E>);
+  static_assert(!std::is_const_v<E>);
+  static_assert(!std::is_volatile_v<E>);
+  static_assert(!is_specialization<E, unexpected>);
+};
+
 } // namespace detail
 
 template <typename E>
 class unexpected {
+  static_assert(detail::check_valid_error_type<E>::value);
+
  public:
   unexpected(const unexpected&) = default;
   unexpected(unexpected&&) = default;
 
+  // https://en.cppreference.com/w/cpp/utility/expected/unexpected#ctor
   template <
-      typename G = E,
+      typename Err = E,
       WHISKER_EXPECTED_REQUIRES(
-          (!std::is_same_v<detail::remove_cvref_t<G>, unexpected> &&
-           !std::is_same_v<detail::remove_cvref_t<G>, std::in_place_t>)),
-      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, G>)>
-  explicit unexpected(G&& e) : error_(std::forward<G>(e)) {}
+          !std::is_same_v<detail::remove_cvref_t<Err>, unexpected>),
+      WHISKER_EXPECTED_REQUIRES(
+          !std::is_same_v<detail::remove_cvref_t<Err>, std::in_place_t>),
+      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, Err>)>
+  explicit unexpected(Err&& e) noexcept(std::is_nothrow_constructible_v<E, Err>)
+      : error_(std::forward<Err>(e)) {}
 
   template <
       typename... Args,
       WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, Args...>)>
-  explicit unexpected(std::in_place_t, Args&&... args)
+  explicit unexpected(std::in_place_t, Args&&... args) noexcept(
+      std::is_nothrow_constructible_v<E, Args...>)
       : error_(std::forward<Args>(args)...) {}
+
+  template <
+      typename U,
+      typename... Args,
+      WHISKER_EXPECTED_REQUIRES(
+          std::is_constructible_v<E, std::initializer_list<U>&, Args...>)>
+  explicit unexpected(
+      std::in_place_t,
+      std::initializer_list<U> ilist,
+      Args&&... args) noexcept(std::
+                                   is_nothrow_constructible_v<
+                                       E,
+                                       std::initializer_list<U>&,
+                                       Args...>)
+      : error_(ilist, std::forward<Args>(args)...) {}
 
   unexpected& operator=(const unexpected&) = default;
   unexpected& operator=(unexpected&&) = default;
@@ -133,10 +173,16 @@ class unexpected {
   const E& error() const& noexcept { return error_; }
   E& error() & noexcept { return error_; }
   E&& error() && noexcept { return std::move(error_); }
+  const E&& error() const&& noexcept { return static_cast<const E&&>(error_); }
 
-  void swap(unexpected& other) {
+  void swap(unexpected& other) noexcept(std::is_nothrow_swappable_v<E>) {
     using std::swap;
     swap(error_, other.error_);
+  }
+
+  friend void swap(unexpected& lhs, unexpected& rhs) noexcept(
+      noexcept(lhs.swap(rhs))) {
+    lhs.swap(rhs);
   }
 
   template <typename G>
@@ -161,8 +207,7 @@ class expected {
   static_assert(std::is_nothrow_move_constructible_v<T>);
   static_assert(std::is_nothrow_move_assignable_v<T>);
 
-  static_assert(!std::is_reference_v<E>);
-  static_assert(!std::is_void_v<E>);
+  static_assert(detail::check_valid_error_type<E>::value);
   static_assert(std::is_nothrow_move_constructible_v<E>);
   static_assert(std::is_nothrow_move_assignable_v<E>);
 

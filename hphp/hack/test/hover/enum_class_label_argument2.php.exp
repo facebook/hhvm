@@ -1,0 +1,4 @@
+function app<Ta, Tr>(
+  HH\EnumClass\Label<Funcs, Func<(int, int), nothing>> $l,
+  (int, int) $arg
+): nothing

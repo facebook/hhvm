@@ -109,6 +109,9 @@ val fully_expand : env -> Tast.ty -> Tast.ty
 (** Strip ~ from type *)
 val strip_dynamic : env -> Tast.ty -> Tast.ty
 
+(** Strip supportdyn from type, return whether it was there or not *)
+val strip_supportdyn : env -> Tast.ty -> bool * Tast.ty
+
 (** Types that can have methods called on them. Usually a class but
     also includes dynamic types *)
 type receiver_identifier =

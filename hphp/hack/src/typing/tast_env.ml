@@ -91,6 +91,10 @@ let expand_type = Typing_env.expand_type
 
 let strip_dynamic env ty = snd (Typing_dynamic_utils.strip_dynamic env ty)
 
+let strip_supportdyn env ty =
+  let (sd, _, ty) = Typing_utils.strip_supportdyn env ty in
+  (sd, ty)
+
 let set_static = Typing_env.set_static
 
 let set_val_kind = Typing_env.set_val_kind

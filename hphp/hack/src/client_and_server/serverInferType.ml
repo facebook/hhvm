@@ -163,13 +163,13 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
       List.map2_exn lhss rhss ~f:merge_opt
 
     method! on_expr env ((ty, pos, expr_) as expr) =
-      (* For new expressions such as new C(x,y) when hovering over
-       * the C we would like to see the constructor's function signature,
-       * not the type of the created instance. Easiest way to arrange this is
-       * to patch the type before recursing.
-       *)
       let expr =
         match expr_ with
+        (* For new expressions such as new C(x,y) when hovering over
+         * the C we would like to see the constructor's function signature,
+         * not the type of the created instance. Easiest way to arrange this is
+         * to patch the type before recursing.
+         *)
         | Aast.New ((_, pos_cid, _cid), targs, el, e, ctor_ty) ->
           (ty, pos, Aast.New ((ctor_ty, pos_cid, _cid), targs, el, e, ctor_ty))
         | _ -> expr
@@ -211,7 +211,51 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
         let res = self#select_pos pos env ty in
         self#plus res (super#on_class_id env cid)
 
-    method! on_Call env (Aast.{ func = (ty, pos, _); targs; _ } as call) =
+    method! on_Call env (Aast.{ func = (ty, pos, _); targs; args; _ } as call) =
+      let (sd, ty) = Tast_env.strip_supportdyn env ty in
+      let ty =
+        match Typing_defs.deref ty with
+        (* Intercept function type for call with a literal label argument #Lab
+         * or a value of literal type #Lab when parameter is of type EnumClass\Label.
+         * Replace parameter type by type #Lab to improve the developer experience when
+         * hovering over calls to label-based functions.
+         *)
+        | (r, Typing_defs.(Tfun ({ ft_params; _ } as ft))) ->
+          let rec replace_label_params args ft_params =
+            match (args, ft_params) with
+            | (arg :: args, fp :: ft_params) ->
+              let { Typing_defs.fp_type; _ } = fp in
+              let (_, (arg_type, p, expr_)) = arg in
+              let fp =
+                match (expr_, Typing_defs.get_node arg_type) with
+                | (Aast.EnumClassLabel (None, label), _)
+                | (_, Typing_defs.Tlabel label) ->
+                  let label_ty =
+                    Typing_defs.(mk (Reason.witness p, Tlabel label))
+                  in
+                  (* If function supports dynamic then allow a like-type *)
+                  let fp_type =
+                    if sd then
+                      Typing_make_type.locl_like r fp_type
+                    else
+                      fp_type
+                  in
+                  if Tast_env.is_sub_type env label_ty fp_type then
+                    Typing_defs.{ fp with fp_type = label_ty }
+                  else
+                    fp
+                | _ -> fp
+              in
+              fp :: replace_label_params args ft_params
+            | _ -> ft_params
+          in
+          Typing_defs.(
+            mk
+              ( r,
+                Tfun { ft with ft_params = replace_label_params args ft_params }
+              ))
+        | _ -> ty
+      in
       let res =
         if under_dynamic then
           self#select_pos pos env ty

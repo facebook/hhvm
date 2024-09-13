@@ -51,11 +51,10 @@ class EnumTests(unittest.TestCase):
         self.assertIn(x.type, Kind)
         self.assertEqual(int(x.type), 4)
 
-    @brokenInAutoMigrate()
     def test_normal_enum_not_int(self) -> None:
         x = File(name="/etc", type=Kind.DIR)
+        self.assertEqual(x.type, 4, "Enums now compare to Ints")
         # in thrift-python they are int
-        self.assertNotEqual(x.type, 4, "Enums are not Ints")
         self.assertNotIsInstance(4, Kind, "Enums are not Ints")
 
     def test_enum_value_rename(self) -> None:
@@ -207,7 +206,6 @@ class EnumTests(unittest.TestCase):
     def test_enum_value(self) -> None:
         self.assertEqual(Color.red.value, 0)
 
-    @brokenInAutoMigrate()
     def test_enum(self) -> None:
         lst = list(Color)
         self.assertEqual(len(lst), len(Color))
@@ -217,7 +215,7 @@ class EnumTests(unittest.TestCase):
             e = Color(i)
             self.assertEqual(e, getattr(Color, color))
             self.assertEqual(e.value, i)
-            self.assertNotEqual(e, i)
+            self.assertEqual(e, i)
             self.assertEqual(e.name, color)
             self.assertIn(e, Color)
             self.assertIs(type(e), Color)

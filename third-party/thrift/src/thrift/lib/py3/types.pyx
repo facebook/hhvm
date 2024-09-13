@@ -715,10 +715,18 @@ cdef class CompiledEnum:
         return type(self), (self.value,)
 
     def __eq__(self, other):
-        if type(other) is not type(self):
-            warnings.warn(f"comparison not supported between instances of { type(self) } and {type(other)}", RuntimeWarning, stacklevel=2)
-            return False
-        return self is other
+        if isinstance(other, CompiledEnum):
+            return self is other
+        # in thrift-python this warning will disappear
+        warnings.warn(
+            f"type-unsafe-comparison between instances of { type(self) } and {type(other)}",
+            RuntimeWarning,
+            stacklevel=1
+        )
+        return self.value == other
+        # historically, we returned False if other is not type(self)
+        # but this was inconsistent with thrift-py and thrift-python
+        # and caused unexpected behavior 
 
     @staticmethod
     def __get_metadata__():

@@ -555,6 +555,17 @@ class expected {
     return storage_.template emplace<T>(std::forward<Args>(args)...);
   }
 
+  template <
+      typename U,
+      typename... Args,
+      WHISKER_EXPECTED_REQUIRES(std::is_nothrow_constructible_v<
+                                T,
+                                std::initializer_list<U>&,
+                                Args...>)>
+  T& emplace(std::initializer_list<U> ilist, Args&&... args) noexcept {
+    return storage_.template emplace<T>(ilist, std::forward<Args>(args)...);
+  }
+
   void swap(expected& other) {
     using std::swap;
     swap(storage_, other.storage_);

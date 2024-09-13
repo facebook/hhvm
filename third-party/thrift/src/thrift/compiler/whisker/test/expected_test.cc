@@ -116,6 +116,18 @@ TEST(ExpectedTest, emplace) {
   EXPECT_EQ(std::move(e).value(), 1);
 }
 
+TEST(ExpectedTest, emplace_initializer_list) {
+  struct vec_wrapper {
+    explicit vec_wrapper(std::initializer_list<int> ilist) noexcept
+        : wrapped(ilist) {}
+    std::vector<int> wrapped;
+  };
+  expected<vec_wrapper, int> e = unexpected(1);
+  e.emplace({0, 1, 2});
+  EXPECT_TRUE(e.has_value());
+  EXPECT_THAT(std::move(e).value().wrapped, testing::ElementsAre(0, 1, 2));
+}
+
 TEST(ExpectedTest, swap) {
   expected<int, int> e1 = 1;
   expected<int, int> e2 = unexpected(2);

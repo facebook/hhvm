@@ -1757,7 +1757,7 @@ void RuntimeOption::Load(
     Config::Bind(CodeCache::ABytecodeSize, ini, config,
                  "Eval.JitABytecodeSize", 0);
     Config::Bind(CodeCache::GlobalDataSize, ini, config,
-                 "Eval.JitGlobalDataSize", CodeCache::ASize >> 2);
+                 "Eval.JitGlobalDataSize", CodeCache::ASize / 64);
 
     Config::Bind(CodeCache::MapTCHuge, ini, config, "Eval.MapTCHuge",
                  hugePagesSoundNice());

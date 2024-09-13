@@ -148,9 +148,14 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
   auto header = std::move(ctxAndHeader.second);
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  if (contextStack != nullptr) {
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+      return folly::makeSemiFuture<::std::string>(std::move(exTry).exception());
+    }
+  }
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey0(rpcOptions, *header, contextStack, p_key);
   fbthrift_send_getDataByKey0(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey0(const ::std::string& p_key) {
@@ -333,9 +338,14 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
   auto header = std::move(ctxAndHeader.second);
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  if (contextStack != nullptr) {
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+      return folly::makeSemiFuture<::std::string>(std::move(exTry).exception());
+    }
+  }
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey1(rpcOptions, *header, contextStack, p_key);
   fbthrift_send_getDataByKey1(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey1(const ::std::string& p_key) {

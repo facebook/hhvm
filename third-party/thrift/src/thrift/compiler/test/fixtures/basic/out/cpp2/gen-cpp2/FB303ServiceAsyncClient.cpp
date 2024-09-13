@@ -135,9 +135,14 @@ folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> apache::thrift::Clie
   auto header = std::move(ctxAndHeader.second);
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  if (contextStack != nullptr) {
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+      return folly::makeSemiFuture<::test::fixtures::basic::ReservedKeyword>(std::move(exTry).exception());
+    }
+  }
   apache::thrift::SerializedRequest request = fbthrift_serialize_simple_rpc(rpcOptions, *header, contextStack, p_int_parameter);
   fbthrift_send_simple_rpc(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
 folly::Future<::test::fixtures::basic::ReservedKeyword> apache::thrift::Client<::test::fixtures::basic::FB303Service>::future_simple_rpc(::std::int32_t p_int_parameter) {

@@ -42,6 +42,13 @@ class FutureCallbackHelper {
     std::move(result).error().first.throw_exception();
   }
 
+  static ClientReceiveState&& extractClientReceiveState(PromiseResult& result) {
+    if (result.hasValue()) {
+      return std::move(std::move(result).value().second);
+    }
+    return std::move(result).error().second;
+  }
+
   using CallbackProcessorType = std::conditional_t<
       std::is_same_v<Result, folly::Unit>,
       folly::exception_wrapper(ClientReceiveState&),
@@ -66,6 +73,20 @@ class FutureCallbackHelper {
   static folly::Unexpected<folly::ExpectedErrorType<PromiseResult>> makeError(
       folly::exception_wrapper&& ew, ClientReceiveState&& state) {
     return folly::makeUnexpected(std::pair{std::move(ew), std::move(state)});
+  }
+
+  static folly::Try<Result> processClientInterceptorsAndExtractResult(
+      PromiseResult&& result) {
+    apache::thrift::ClientReceiveState clientReceiveState =
+        extractClientReceiveState(result);
+    auto* contextStack = clientReceiveState.ctx();
+    if (contextStack != nullptr) {
+      if (auto exTry = contextStack->processClientInterceptorsOnResponse();
+          exTry.hasException()) {
+        return folly::Try<Result>(std::move(exTry).exception());
+      }
+    }
+    return folly::Try<Result>(extractResult(std::move(result)));
   }
 };
 

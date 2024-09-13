@@ -147,9 +147,14 @@ folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inli
   auto header = std::move(ctxAndHeader.second);
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  if (contextStack != nullptr) {
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+      return folly::makeSemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string>(std::move(exTry).exception());
+    }
+  }
   apache::thrift::SerializedRequest request = fbthrift_serialize_first(rpcOptions, *header, contextStack);
   fbthrift_send_first(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
 folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_first() {
@@ -332,9 +337,14 @@ folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structure
   auto header = std::move(ctxAndHeader.second);
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  if (contextStack != nullptr) {
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+      return folly::makeSemiFuture<bool>(std::move(exTry).exception());
+    }
+  }
   apache::thrift::SerializedRequest request = fbthrift_serialize_second(rpcOptions, *header, contextStack, p_count);
   fbthrift_send_second(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
 folly::Future<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_second(::std::int64_t p_count) {

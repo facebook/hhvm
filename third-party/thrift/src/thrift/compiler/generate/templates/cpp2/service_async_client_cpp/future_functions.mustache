@@ -41,10 +41,17 @@ folly::SemiFuture<{{ > types/return_type_client_lift_unit}}> {{ > service_common
 {{#function:creates_interaction?}}
   {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}");
 {{/function:creates_interaction?}}
+{{^function:creates_interaction?}}
+  if (contextStack != nullptr) {
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+      return folly::makeSemiFuture<{{ > types/return_type_client_no_handle_lift_unit}}>(std::move(exTry).exception());
+    }
+  }
+{{/function:creates_interaction?}}
   apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function:comma}}{{ > service_common/param_list}});
   fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}});
 {{^function:creates_interaction?}}
-  return std::move(semifuture).deferValue(CallbackHelper::extractResult);
+  return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 {{/function:creates_interaction?}}
 {{#function:creates_interaction?}}
   return std::move(semifuture)

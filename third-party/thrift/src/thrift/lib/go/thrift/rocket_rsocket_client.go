@@ -109,9 +109,7 @@ func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string,
 	if err != nil {
 		return nil, nil, err
 	}
-	mono := r.client.RequestResponse(request)
-	val, err := mono.Block(ctx)
-	val = payload.Clone(val)
+	val, err := rsocketBlock(ctx, r.client, request)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -120,6 +118,13 @@ func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string,
 		return response.Headers(), response.Data(), err
 	}
 	return nil, nil, err
+}
+
+var rsocketBlock func(ctx context.Context, client rsocket.Client, request payload.Payload) (payload.Payload, error) = func(ctx context.Context, client rsocket.Client, request payload.Payload) (payload.Payload, error) {
+	mono := client.RequestResponse(request)
+	val, err := mono.Block(ctx)
+	val = payload.Clone(val)
+	return val, err
 }
 
 func (r *rsocketClient) FireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {

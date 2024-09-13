@@ -45,8 +45,6 @@ namespace whisker {
  *   - whisker::expected does not support void value types (use std::monostate).
  *   - whisker::expected does not have the triviality guarantees of
  *     std::expected. whisker::expected<T, E> is never trivially constructible.
- *   - whisker::expected does not have the same noexcept guarantees as
- *     std::expected.
  *   - whisker::expected does not support value_or / error_or.
  *   - whisker::expected does not support monadic operations:
  *     - and_then
@@ -261,13 +259,28 @@ class expected {
         std::is_constructible_v<unexpected<E>, const expected<U, G>&> ||
         std::is_constructible_v<unexpected<E>, const expected<U, G>>);
 
+  // Restrictions on operator= (3)
   template <typename U>
   static constexpr inline bool is_forward_assignable_from =
       std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
       // operator=(const expected&) has own overload
       !std::is_same_v<detail::remove_cvref_t<U>, expected> &&
-      // operator=(const unexpected_type&) has own overload
-      !std::is_same_v<detail::remove_cvref_t<U>, unexpected<E>>;
+      // operator=(const unexpected<G>&) has own overload
+      !detail::is_specialization<detail::remove_cvref_t<U>, unexpected> &&
+      std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
+      // re-init rollback possible in case of exception
+      (std::is_nothrow_constructible_v<T, U> ||
+       std::is_nothrow_move_constructible_v<T> ||
+       std::is_nothrow_move_constructible_v<E>);
+
+  // Restrictions on operator= (4) and (5)
+  template <typename G>
+  static constexpr inline bool is_forward_assignable_from_unexpected =
+      std::is_constructible_v<E, G> && std::is_assignable_v<E&, G> &&
+      // re-init rollback possible in case of exception
+      (std::is_nothrow_constructible_v<E, G> ||
+       std::is_nothrow_move_constructible_v<T> ||
+       std::is_nothrow_move_constructible_v<E>);
 
  public:
   using value_type = T;
@@ -284,11 +297,13 @@ class expected {
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_2
   expected(const expected& other) noexcept(
       std::is_nothrow_copy_constructible_v<T> &&
-      std::is_nothrow_copy_constructible_v<E>) = default;
+      std::is_nothrow_copy_constructible_v<E>)
+      : storage_(from_other(other.storage_)) {}
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_3
   expected(expected&& other) noexcept(
       std::is_nothrow_move_constructible_v<T> &&
-      std::is_nothrow_move_constructible_v<E>) = default;
+      std::is_nothrow_move_constructible_v<E>)
+      : storage_(from_other(std::move(other.storage_))) {}
 
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_4
   // (implicit)
@@ -466,24 +481,93 @@ class expected {
             ilist,
             std::forward<Args>(args)...) {}
 
-  expected& operator=(const expected& other) = default;
-  expected& operator=(expected&& other) noexcept = default;
+  expected& operator=(const expected& other) {
+    // To properly SFINAE this, we need to move operator= to a base class
+    static_assert(
+        std::is_copy_assignable_v<T> && std::is_copy_constructible_v<T> &&
+        std::is_copy_assignable_v<E> && std::is_copy_constructible_v<E>);
+    static_assert(
+        std::is_nothrow_move_constructible_v<T> ||
+        std::is_nothrow_move_constructible_v<E>);
+    if (other.has_value()) {
+      if (has_value()) {
+        **this = *other;
+      } else {
+        reinit<T>(*other);
+      }
+    } else {
+      if (has_value()) {
+        reinit<unexpected<E>>(other.error());
+      } else {
+        error() = other.error();
+      }
+    }
+    return *this;
+  }
+
+  expected& operator=(expected&& other) noexcept(
+      std::is_nothrow_move_constructible_v<T> &&
+      std::is_nothrow_move_assignable_v<T> &&
+      std::is_nothrow_move_constructible_v<E> &&
+      std::is_nothrow_move_assignable_v<E>) {
+    // To properly SFINAE this, we need to move operator= to a base class
+    static_assert(
+        std::is_move_assignable_v<T> && std::is_move_constructible_v<T> &&
+        std::is_move_assignable_v<E> && std::is_move_constructible_v<E>);
+    static_assert(
+        std::is_nothrow_move_constructible_v<T> ||
+        std::is_nothrow_move_constructible_v<E>);
+
+    if (other.has_value()) {
+      if (has_value()) {
+        **this = *std::move(other);
+      } else {
+        reinit<T>(*std::move(other));
+      }
+    } else {
+      if (has_value()) {
+        reinit<unexpected<E>>(std::move(other).error());
+      } else {
+        error() = std::move(other).error();
+      }
+    }
+    return *this;
+  }
 
   template <
       typename U = T,
       WHISKER_EXPECTED_REQUIRES(is_forward_assignable_from<U>)>
   expected& operator=(U&& value) {
-    storage_.template emplace<T>(std::forward<U>(value));
+    if (has_value()) {
+      **this = std::forward<U>(value);
+    } else {
+      reinit<T>(std::forward<U>(value));
+    }
     return *this;
   }
 
-  expected& operator=(const unexpected<E>& error) {
-    storage_.template emplace<unexpected<E>>(error);
+  template <
+      typename G,
+      WHISKER_EXPECTED_REQUIRES(
+          is_forward_assignable_from_unexpected<const G&>)>
+  expected& operator=(const unexpected<G>& e) {
+    if (has_value()) {
+      reinit<unexpected<E>>(e.error());
+    } else {
+      error() = e.error();
+    }
     return *this;
   }
 
-  expected& operator=(unexpected<E>&& error) {
-    storage_.template emplace<unexpected<E>>(std::move(error));
+  template <
+      typename G,
+      WHISKER_EXPECTED_REQUIRES(is_forward_assignable_from_unexpected<G>)>
+  expected& operator=(unexpected<G>&& e) {
+    if (has_value()) {
+      reinit<unexpected<E>>(std::move(e).error());
+    } else {
+      error() = std::move(e).error();
+    }
     return *this;
   }
 
@@ -629,6 +713,35 @@ class expected {
         [](std::remove_reference_t<G>&& g) -> result {
           return unexpected<E>(std::move(g).error());
         });
+  }
+
+  // https://en.cppreference.com/w/cpp/utility/expected/operator%3D#Helper_function_template
+  template <typename New, typename Current, typename... Args>
+  void reinit_impl(Args&&... args) {
+    assert(!storage_.valueless_by_exception());
+    if constexpr (std::is_nothrow_constructible_v<New, Args...>) {
+      storage_.template emplace<New>(std::forward<Args>(args)...);
+    } else if constexpr (std::is_nothrow_move_constructible_v<New>) {
+      New tmp(std::forward<Args>(args)...);
+      storage_.template emplace<New>(std::move(tmp));
+    } else {
+      static_assert(std::is_nothrow_move_constructible_v<Current>);
+      Current tmp(*std::move(*this));
+      try {
+        storage_.template emplace<New>(std::forward<Args>(args)...);
+      } catch (...) {
+        storage_.template emplace<Current>(std::move(tmp));
+        throw;
+      }
+    }
+  }
+
+  template <typename New, typename... Args>
+  void reinit(Args&&... args) {
+    using active_alternative =
+        std::conditional_t<std::is_same_v<New, T>, unexpected<E>, T>;
+    assert(std::holds_alternative<active_alternative>(storage_));
+    reinit_impl<New, active_alternative>(std::forward<Args>(args)...);
   }
 
   std::variant<T, unexpected<E>> storage_;

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/compiler/whisker/expected.h>
 
 #include <memory>
 #include <tuple>
+#include <vector>
 
 namespace whisker {
 
@@ -93,6 +95,18 @@ TEST(ExpectedTest, construct_error_unexpect) {
   expected<int, int> e(unexpect, 1);
   EXPECT_FALSE(e.has_value());
   EXPECT_EQ(e.error(), 1);
+}
+
+TEST(ExpectedTest, construct_initializer_list) {
+  expected<std::vector<int>, int> e(std::in_place, {0, 1, 2});
+  EXPECT_TRUE(e.has_value());
+  EXPECT_THAT(e.value(), testing::ElementsAre(0, 1, 2));
+}
+
+TEST(ExpectedTest, construct_error_initializer_list) {
+  expected<int, std::vector<int>> e(unexpect, {0, 1, 2});
+  EXPECT_FALSE(e.has_value());
+  EXPECT_THAT(e.error(), testing::ElementsAre(0, 1, 2));
 }
 
 TEST(ExpectedTest, emplace) {

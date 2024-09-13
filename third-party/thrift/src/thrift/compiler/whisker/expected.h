@@ -47,7 +47,6 @@ namespace whisker {
  *     std::expected. whisker::expected<T, E> is never trivially constructible.
  *   - whisker::expected does not have the same noexcept guarantees as
  *     std::expected.
- *   - whisker::expected does not support std::initializer_list constructors.
  *   - whisker::expected does not support value_or / error_or.
  *   - whisker::expected does not support monadic operations:
  *     - and_then
@@ -420,6 +419,22 @@ class expected {
       std::is_nothrow_constructible_v<T, Args...>)
       : storage_(std::in_place_type<T>, std::forward<Args>(args)...) {}
 
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_10
+  template <
+      typename U,
+      typename... Args,
+      WHISKER_EXPECTED_REQUIRES(
+          std::is_constructible_v<T, std::initializer_list<U>&, Args...>)>
+  explicit expected(
+      std::in_place_t,
+      std::initializer_list<U> ilist,
+      Args&&... args) noexcept(std::
+                                   is_nothrow_constructible_v<
+                                       T,
+                                       std::initializer_list<U>&,
+                                       Args...>)
+      : storage_(std::in_place_type<T>, ilist, std::forward<Args>(args)...) {}
+
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_11
   template <
       typename... Args,
@@ -429,6 +444,26 @@ class expected {
       : storage_(
             std::in_place_type<unexpected<E>>,
             std::in_place,
+            std::forward<Args>(args)...) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_12
+  template <
+      typename U,
+      typename... Args,
+      WHISKER_EXPECTED_REQUIRES(
+          std::is_constructible_v<E, std::initializer_list<U>&, Args...>)>
+  explicit expected(
+      unexpect_t,
+      std::initializer_list<U> ilist,
+      Args&&... args) noexcept(std::
+                                   is_nothrow_constructible_v<
+                                       E,
+                                       std::initializer_list<U>&,
+                                       Args...>)
+      : storage_(
+            std::in_place_type<unexpected<E>>,
+            std::in_place,
+            ilist,
             std::forward<Args>(args)...) {}
 
   expected& operator=(const expected& other) = default;

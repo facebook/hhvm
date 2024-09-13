@@ -47,10 +47,6 @@ namespace whisker {
  *     std::expected. whisker::expected<T, E> is never trivially constructible.
  *   - whisker::expected does not have the same noexcept guarantees as
  *     std::expected.
- *   - whisker::expected does not perform implicit conversions when constructing
- *     or assigning from convertible types. std::expected<T1, E> can be
- *     converted to std::expected<T2, E> if T1 is convertible to T2.
- *     whisker::expected does not support such conversions.
  *   - whisker::expected does not support std::initializer_list constructors.
  *   - whisker::expected does not support value_or / error_or.
  *   - whisker::expected does not support monadic operations:
@@ -369,6 +365,46 @@ class expected {
       WHISKER_EXPECTED_REQUIRES(is_forward_constructible_from<U>)>
   explicit expected(U&& value) noexcept(std::is_nothrow_constructible_v<T, U>)
       : expected(std::in_place, std::forward<U>(value)) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_7
+  // (implicit)
+  template <
+      typename G,
+      WHISKER_EXPECTED_REQUIRES(std::is_convertible_v<const G&, E>),
+      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, const G&>)>
+  /* implicit */ expected(const unexpected<G>& error) noexcept(
+      std::is_nothrow_constructible_v<E, const G&>)
+      : storage_(std::in_place_type<unexpected<E>>, error.error()) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_7
+  // (explicit)
+  template <
+      typename G,
+      WHISKER_EXPECTED_REQUIRES(!std::is_convertible_v<const G&, E>),
+      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, const G&>)>
+  explicit expected(const unexpected<G>& error) noexcept(
+      std::is_nothrow_constructible_v<E, const G&>)
+      : storage_(std::in_place_type<unexpected<E>>, error.error()) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_8
+  // (implicit)
+  template <
+      typename G,
+      WHISKER_EXPECTED_REQUIRES(std::is_convertible_v<G, E>),
+      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, G>)>
+  /* implicit */ expected(unexpected<G>&& error) noexcept(
+      std::is_nothrow_constructible_v<E, G>)
+      : storage_(std::in_place_type<unexpected<E>>, std::move(error).error()) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_8
+  // (explicit)
+  template <
+      typename G,
+      WHISKER_EXPECTED_REQUIRES(!std::is_convertible_v<G, E>),
+      WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, G>)>
+  explicit expected(unexpected<G>&& error) noexcept(
+      std::is_nothrow_constructible_v<E, G>)
+      : storage_(std::in_place_type<unexpected<E>>, std::move(error).error()) {}
 
   /* implicit */ expected(const unexpected<E>& error)
       : storage_(std::in_place_type<unexpected<E>>, error) {}

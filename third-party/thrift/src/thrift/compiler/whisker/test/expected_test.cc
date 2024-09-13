@@ -49,6 +49,46 @@ TEST(ExpectedTest, construct_error) {
   EXPECT_EQ(e.error(), 1);
 }
 
+TEST(ExpectedTest, copy_construct_from_unexpected) {
+  // implicit
+  {
+    unexpected<int> u(1);
+    expected<long, long> e = u;
+    EXPECT_FALSE(e.has_value());
+    EXPECT_EQ(e.error(), 1);
+  }
+  // explicit
+  {
+    struct S {
+      explicit S(int i) : value(i) {}
+      int value;
+    };
+    unexpected<int> u{42};
+    expected<int, S> e{u};
+    EXPECT_FALSE(e.has_value());
+    EXPECT_EQ(e.error().value, 42);
+  }
+}
+
+TEST(ExpectedTest, move_construct_from_unexpected) {
+  // implicit
+  {
+    expected<long, long> e = unexpected<int>(1);
+    EXPECT_FALSE(e.has_value());
+    EXPECT_EQ(e.error(), 1);
+  }
+  // explicit
+  {
+    struct S {
+      explicit S(int i) : value(i) {}
+      int value;
+    };
+    expected<int, S> e{unexpected<int>(42)};
+    EXPECT_FALSE(e.has_value());
+    EXPECT_EQ(e.error().value, 42);
+  }
+}
+
 TEST(ExpectedTest, construct_error_unexpect) {
   expected<int, int> e(unexpect, 1);
   EXPECT_FALSE(e.has_value());

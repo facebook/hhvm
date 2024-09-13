@@ -1,1 +1,1 @@
-function app<Ta, Tr>(#Mul $l, (int, int) $arg): ~int
+function app(#Mul $l, (int, int) $arg): ~int

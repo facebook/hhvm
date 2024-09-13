@@ -252,8 +252,13 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
           Typing_defs.(
             mk
               ( r,
-                Tfun { ft with ft_params = replace_label_params args ft_params }
-              ))
+                (* This is an instantiated signature, it makes no sense to include generic parameters *)
+                Tfun
+                  {
+                    ft with
+                    ft_params = replace_label_params args ft_params;
+                    ft_tparams = [];
+                  } ))
         | _ -> ty
       in
       let res =

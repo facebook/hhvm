@@ -575,7 +575,7 @@ let special_cases_cases =
       [
         {
           snippet =
-            "function idx<Tk as arraykey, Tv>(
+            "function idx(
   ?KeyedContainer<int, int> $collection,
   ?int $index
 )[]: ?int";

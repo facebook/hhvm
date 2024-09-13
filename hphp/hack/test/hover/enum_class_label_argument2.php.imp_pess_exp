@@ -1,4 +1,4 @@
-function app<Ta, Tr>(
+function app(
   HH\EnumClass\Label<Funcs, Func<(int, int), nothing>> $l,
   (int, int) $arg
 ): ~nothing

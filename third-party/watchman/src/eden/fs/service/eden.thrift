@@ -1730,6 +1730,7 @@ struct GetBlockedFaultsResponse {
 
 struct CheckoutProgressInfo {
   1: i64 updatedInodes;
+  2: i64 totalInodes;
 }
 
 struct CheckoutNotInProgress {}

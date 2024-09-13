@@ -92,7 +92,6 @@ class bad_expected_access : public bad_expected_access<void> {
   const E& error() const& noexcept { return error_; }
   E& error() & noexcept { return error_; }
   E&& error() && noexcept { return std::move(error_); }
-  const E&& error() const&& noexcept { return static_cast<const E&&>(error_); }
 
  private:
   E error_;
@@ -189,7 +188,6 @@ class unexpected {
   const E& error() const& noexcept { return error_; }
   E& error() & noexcept { return error_; }
   E&& error() && noexcept { return std::move(error_); }
-  const E&& error() const&& noexcept { return static_cast<const E&&>(error_); }
 
   void swap(unexpected& other) noexcept(std::is_nothrow_swappable_v<E>) {
     using std::swap;

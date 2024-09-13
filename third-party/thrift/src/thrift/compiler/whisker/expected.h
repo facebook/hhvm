@@ -648,12 +648,19 @@ class expected {
     return storage_.template emplace<T>(ilist, std::forward<Args>(args)...);
   }
 
-  void swap(expected& other) {
+  void swap(expected& other) noexcept(
+      std::is_nothrow_move_constructible_v<T> &&
+      std::is_nothrow_swappable_v<T> &&
+      std::is_nothrow_move_constructible_v<E> &&
+      std::is_nothrow_swappable_v<E>) {
     using std::swap;
     swap(storage_, other.storage_);
   }
 
-  friend void swap(expected& lhs, expected& rhs) { lhs.swap(rhs); }
+  friend void swap(expected& lhs, expected& rhs) noexcept(
+      noexcept(lhs.swap(rhs))) {
+    lhs.swap(rhs);
+  }
 
   template <
       typename U,

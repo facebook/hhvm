@@ -4800,6 +4800,9 @@ end = struct
           valid env
         else
           invalid ~fail env
+      (* Functions can be instances of the Closure class *)
+      | (_, Tfun _) when String.equal SN.Classes.cClosure c_super ->
+        invalid ~fail env
       (* All of these are definitely disjoint from class types *)
       | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
       | _ ->
@@ -8778,6 +8781,11 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
   | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
   | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
     when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
+    false
+  (* A function type can be an instance of a Closure *)
+  | (Tfun _, Tclass ((_, closure), _, _))
+  | (Tclass ((_, closure), _, _), Tfun _)
+    when String.equal SN.Classes.cClosure closure ->
     false
   | (Tprim _, (Tfun _ | Tclass _))
   | ((Tfun _ | Tclass _), Tprim _) ->

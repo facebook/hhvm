@@ -75,6 +75,18 @@ module Tag = struct
   let relation tag1 ~ctx:env tag2 =
     let open ApproxSet.Set_relation in
     match (tag1, tag2) with
+    (* Built-in data can be any value made exclusively by the runtime.
+       It includes some tags that aren't able to be tested for within the surface language.
+       Since this can include multiple data types at runtime, we should consider their,
+       relationship to each other to be unknown *)
+    | (BuiltInData, BuiltInData)
+    (* Built-in data includes objects that are used as part of certain features that aren't
+       exposed to the surface language. An example of this is MethCallerHelper, which is a
+       the instance produce for calls to meth_caller(). This means there is some overlap
+       between the set of values that are built-in and objects *)
+    | (BuiltInData, ObjectData)
+    | (ObjectData, BuiltInData) ->
+      Unknown
     (* Shapes are represented imprecisely so do not consider them as equal *)
     | (ShapeData, ShapeData)
     | (DictData, ShapeData)
@@ -95,6 +107,7 @@ module Tag = struct
         let* cls = Decl_entry.to_option (Env.get_class env sub) in
         return @@ Cls.has_ancestor cls sup
       in
+      let is_instance_of_closure cls = String.equal cls SN.Classes.cClosure in
 
       Option.value ~default:Unknown
       @@ let* cls1_instance_of_cls2 = is_instance_of cls1 cls2 in
@@ -111,7 +124,13 @@ module Tag = struct
                return Disjoint
              | (Interface, _)
              | (_, Interface) ->
-               return Unknown
+               (* Closures cannot be implemented in user-land so we assume
+                  it is disjoint from any user specified interface *)
+               if is_instance_of_closure cls1 || is_instance_of_closure cls2
+               then
+                 return Disjoint
+               else
+                 return Unknown
              | (Class, Class) -> return Disjoint
            )
     | _ -> Disjoint
@@ -145,7 +164,6 @@ module DataTypeReason = struct
     | NoSubreason
     | Shapes
     | Tuples
-    | Functions
     | Nullable
     | Nums
     | Arraykeys
@@ -245,7 +263,6 @@ module TagWithReason = struct
       | NoSubreason -> ""
       | Shapes -> " because shapes are dicts at runtime"
       | Tuples -> " because tuples are vecs at runtime"
-      | Functions -> " because a function could be any value at runtime"
       | Nullable -> " because it is a nullable type"
       | Nums -> " because nums are ints or floats"
       | Arraykeys -> " because arraykeys are ints or strings"
@@ -333,8 +350,23 @@ module DataType = struct
         [IntData; StringData]
     | Tnoreturn -> Set.empty
 
+  (** There are three ways values that are compatible with a function type can
+      be introduce:
+        1. Via a lambda expression (i.e. `() ==> {}` or `function () {}`)
+        2. Via a meth_caller() expression
+        3. Via a function reference expression (i.e. `f<>` or `Cls:meth<>`)
+      Each can produce values of the following kind:
+        1. Lambdas will be an instance of the special `Closure` class
+        2. meth_caller() will be an instance of MethCallerHelper
+        3. Function references have a dedicated datatype at runtime
+      Out of these three possible kinds of value only `Closure` is denotable
+      in the surface language, so the remaining two we represent as
+      [Tag.BuiltinData]. *)
   let fun_to_datatypes ~trail : t =
-    mixed ~reason:DataTypeReason.(make Functions trail)
+    let open Tag in
+    Set.of_list
+      ~reason:DataTypeReason.(make NoSubreason trail)
+      [BuiltInData; InstanceOf { name = SN.Classes.cClosure; kind = Class }]
 
   let nonnull_to_datatypes ~trail : t =
     Set.of_list

@@ -38,6 +38,9 @@ module Classes = struct
 
   let cHH_BuiltinAbstractEnumClass = "\\HH\\BuiltinAbstractEnumClass"
 
+  (** The base class for all lambda values *)
+  let cClosure = "\\Closure"
+
   let cThrowable = "\\Throwable"
 
   let cStdClass = "\\stdClass"

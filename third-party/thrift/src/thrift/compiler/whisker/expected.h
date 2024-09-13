@@ -116,19 +116,40 @@ constexpr inline bool is_specialization<Template<Types...>, Template> = true;
 
 // https://en.cppreference.com/w/cpp/utility/expected/unexpected#Template_parameters
 template <typename E>
-struct check_valid_error_type : std::true_type {
+constexpr bool check_valid_error_type() {
   static_assert(std::is_object_v<E>);
   static_assert(!std::is_array_v<E>);
   static_assert(!std::is_const_v<E>);
   static_assert(!std::is_volatile_v<E>);
   static_assert(!is_specialization<E, unexpected>);
-};
+  return true;
+}
+
+// These are types whose main purpose is to select a specific constructor for
+// expected<T, E>
+template <typename T>
+constexpr inline bool is_disambiguator_type =
+    std::is_same_v<std::remove_cv_t<T>, std::in_place_t> ||
+    std::is_same_v<std::remove_cv_t<T>, unexpect_t> ||
+    is_specialization<std::remove_cv_t<T>, unexpected>;
+
+// https://en.cppreference.com/w/cpp/utility/expected#Template_parameters
+template <typename T>
+constexpr bool check_valid_value_type() {
+  // Destructible
+  static_assert(!std::is_reference_v<T>);
+  static_assert(!std::is_function_v<T>);
+  static_assert(!std::is_array_v<T>);
+
+  static_assert(!is_disambiguator_type<T>);
+  return true;
+}
 
 } // namespace detail
 
 template <typename E>
 class unexpected {
-  static_assert(detail::check_valid_error_type<E>::value);
+  static_assert(detail::check_valid_error_type<E>());
 
  public:
   unexpected(const unexpected&) = default;
@@ -199,30 +220,32 @@ unexpected(E) -> unexpected<E>;
 
 template <typename T, typename E>
 class expected {
-  static_assert(!std::is_reference_v<T>);
-  static_assert(!std::is_same_v<T, std::remove_cv_t<std::in_place_t>>);
-  static_assert(!std::is_same_v<T, std::remove_cv_t<unexpect_t>>);
-  static_assert(!std::is_same_v<T, std::remove_cv_t<unexpected<E>>>);
+  static_assert(detail::check_valid_value_type<T>());
   static_assert(!std::is_void_v<T>, "Use std::monostate instead.");
   static_assert(std::is_nothrow_move_constructible_v<T>);
   static_assert(std::is_nothrow_move_assignable_v<T>);
 
-  static_assert(detail::check_valid_error_type<E>::value);
+  static_assert(detail::check_valid_error_type<E>());
   static_assert(std::is_nothrow_move_constructible_v<E>);
   static_assert(std::is_nothrow_move_assignable_v<E>);
 
+  // Restrictions on constructor (6):
+  //   https://en.cppreference.com/w/cpp/utility/expected/expected#Version_6
   template <typename U>
   static constexpr inline bool is_forward_constructible_from =
-      std::is_constructible_v<T, U> &&
-      !std::is_same_v<detail::remove_cvref_t<U>, std::in_place_t> &&
-      !std::is_same_v<detail::remove_cvref_t<U>, unexpect_t> &&
+      std::is_constructible_v<T, U> && !detail::is_disambiguator_type<T> &&
+      // copy constructor has its own overload
       !std::is_same_v<detail::remove_cvref_t<U>, expected> &&
-      !std::is_same_v<detail::remove_cvref_t<U>, unexpected<E>>;
+      // LWG-3836
+      (!std::is_same_v<detail::remove_cvref_t<T>, bool> ||
+       !detail::is_specialization<detail::remove_cvref_t<U>, expected>);
 
   template <typename U>
   static constexpr inline bool is_forward_assignable_from =
       std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
+      // operator=(const expected&) has own overload
       !std::is_same_v<detail::remove_cvref_t<U>, expected> &&
+      // operator=(const unexpected_type&) has own overload
       !std::is_same_v<detail::remove_cvref_t<U>, unexpected<E>>;
 
  public:
@@ -230,27 +253,40 @@ class expected {
   using error_type = E;
   using unexpected_type = unexpected<E>;
 
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_1
   template <
       typename U = T,
       WHISKER_EXPECTED_REQUIRES(std::is_default_constructible_v<U>)>
-  expected() : storage_() {}
+  expected() noexcept(std::is_nothrow_default_constructible_v<T>)
+      : storage_() {}
 
-  expected(const expected& other) = default;
-  expected(expected&& other) noexcept = default;
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_2
+  expected(const expected& other) noexcept(
+      std::is_nothrow_copy_constructible_v<T> &&
+      std::is_nothrow_copy_constructible_v<E>) = default;
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_3
+  expected(expected&& other) noexcept(
+      std::is_nothrow_move_constructible_v<T> &&
+      std::is_nothrow_move_constructible_v<E>) = default;
 
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_6
+  // (implicit)
   template <
       typename U,
       WHISKER_EXPECTED_REQUIRES(std::is_convertible_v<U, T>),
       WHISKER_EXPECTED_REQUIRES(is_forward_constructible_from<U>)>
-  /* implicit */ expected(U&& value)
-      : storage_(std::in_place_type<T>, std::forward<U>(value)) {}
+  /* implicit */ expected(U&& value) noexcept(
+      std::is_nothrow_constructible_v<T, U>)
+      : expected(std::in_place, std::forward<U>(value)) {}
 
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_6
+  // (explicit)
   template <
       typename U = T,
       WHISKER_EXPECTED_REQUIRES(!std::is_convertible_v<U, T>),
       WHISKER_EXPECTED_REQUIRES(is_forward_constructible_from<U>)>
-  explicit expected(U&& value)
-      : storage_(std::in_place_type<T>, std::forward<U>(value)) {}
+  explicit expected(U&& value) noexcept(std::is_nothrow_constructible_v<T, U>)
+      : expected(std::in_place, std::forward<U>(value)) {}
 
   /* implicit */ expected(const unexpected<E>& error)
       : storage_(std::in_place_type<unexpected<E>>, error) {}
@@ -258,16 +294,20 @@ class expected {
   /* implicit */ expected(unexpected<E>&& error)
       : storage_(std::in_place_type<unexpected<E>>, std::move(error)) {}
 
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_9
   template <
       typename... Args,
       WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<T, Args...>)>
-  explicit expected(std::in_place_t, Args&&... args)
+  explicit expected(std::in_place_t, Args&&... args) noexcept(
+      std::is_nothrow_constructible_v<T, Args...>)
       : storage_(std::in_place_type<T>, std::forward<Args>(args)...) {}
 
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_11
   template <
       typename... Args,
       WHISKER_EXPECTED_REQUIRES(std::is_constructible_v<E, Args...>)>
-  explicit expected(unexpect_t, Args&&... args)
+  explicit expected(unexpect_t, Args&&... args) noexcept(
+      std::is_nothrow_constructible_v<E, Args...>)
       : storage_(
             std::in_place_type<unexpected<E>>,
             std::in_place,

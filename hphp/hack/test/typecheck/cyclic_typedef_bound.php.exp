@@ -1,0 +1,6 @@
+ERROR: File "cyclic_typedef_bound.php--uses.php", line 6, characters 17-18:
+Invalid argument (Typing[4110])
+  File "cyclic_typedef_bound.php--uses.php", line 3, characters 24-29:
+  Expected `string`
+  File "cyclic_typedef_bound.php--defines.php", line 3, characters 14-14:
+  But got `mixed`

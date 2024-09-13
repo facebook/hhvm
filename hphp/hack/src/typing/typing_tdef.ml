@@ -55,7 +55,14 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
   with
   | Error cycle ->
     let (env, ty) =
-      Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos pos)
+      match td_as_constraint with
+      | Some ty ->
+        (match get_node ty with
+        | Tapply ((_pos, sdt), [_]) when String.equal sdt SN.Classes.cSupportDyn
+          ->
+          Typing_utils.make_supportdyn r env (MakeType.mixed r)
+        | _ -> (env, MakeType.mixed r))
+      | _ -> (env, MakeType.mixed r)
     in
     ((env, None, [cycle]), (ety_env, ty))
   | Ok ety_env ->

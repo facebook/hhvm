@@ -16,10 +16,6 @@ function callable_from_policied()[zoned]: void {
 
 class MyP {}
 
-function callable_from_policied_of()[zoned_with<\MyP>]: void {
-  callee();
-}
-
 function uncallable_from_write_props_and_globals()[
   write_props, globals
 ]: void {

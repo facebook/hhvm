@@ -102,7 +102,6 @@ impl Coeffects {
                 c::RX => Some(Ctx::Rx),
                 c::WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
                 c::WRITE_PROPS => Some(Ctx::WriteProps),
-                c::ZONED_WITH => Some(Ctx::ZonedWith),
                 c::ZONED_LOCAL => Some(Ctx::ZonedLocal),
                 c::ZONED_SHALLOW => Some(Ctx::ZonedShallow),
                 c::ZONED => Some(Ctx::Zoned),

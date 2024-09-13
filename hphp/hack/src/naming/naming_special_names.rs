@@ -851,8 +851,6 @@ pub mod coeffects {
 
     pub const ZONED: &str = "zoned";
 
-    pub const ZONED_WITH: &str = "zoned_with";
-
     pub const PURE: &str = "pure";
 
     pub const READ_GLOBALS: &str = "read_globals";
@@ -871,8 +869,7 @@ pub mod coeffects {
 
     pub fn is_any_zoned(x: &str) -> bool {
         lazy_static! {
-            static ref ZONED_SET: HashSet<&'static str> =
-                vec![ZONED, ZONED_WITH].into_iter().collect();
+            static ref ZONED_SET: HashSet<&'static str> = vec![ZONED].into_iter().collect();
         }
         ZONED_SET.contains(x)
     }
@@ -880,7 +877,7 @@ pub mod coeffects {
     pub fn is_any_zoned_or_defaults(x: &str) -> bool {
         lazy_static! {
             static ref ZONED_SET: HashSet<&'static str> =
-                vec![ZONED, ZONED_WITH, ZONED_LOCAL, ZONED_SHALLOW, DEFAULTS]
+                vec![ZONED, ZONED_LOCAL, ZONED_SHALLOW, DEFAULTS]
                     .into_iter()
                     .collect();
         }
@@ -913,7 +910,6 @@ pub mod coeffects {
         Rx,
 
         // Zoned hierarchy
-        ZonedWith,
         ZonedLocal,
         ZonedShallow,
         Zoned,
@@ -940,7 +936,6 @@ pub mod coeffects {
                 Rx => write!(f, "{}", RX),
                 WriteThisProps => write!(f, "{}", WRITE_THIS_PROPS),
                 WriteProps => write!(f, "{}", WRITE_PROPS),
-                ZonedWith => write!(f, "{}", ZONED_WITH),
                 ZonedLocal => write!(f, "{}", ZONED_LOCAL),
                 ZonedShallow => write!(f, "{}", ZONED_SHALLOW),
                 Zoned => write!(f, "{}", ZONED),
@@ -964,7 +959,6 @@ pub mod coeffects {
             RX => Some(Ctx::Rx),
             WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
             WRITE_PROPS => Some(Ctx::WriteProps),
-            ZONED_WITH => Some(Ctx::ZonedWith),
             ZONED_LOCAL => Some(Ctx::ZonedLocal),
             ZONED_SHALLOW => Some(Ctx::ZonedShallow),
             ZONED => Some(Ctx::Zoned),
@@ -996,9 +990,7 @@ pub mod coeffects {
             Ctx::LeakSafe | Ctx::LeakSafeLocal | Ctx::LeakSafeShallow => {
                 self::capability_in_controlled_ctx(c)
             }
-            Ctx::Zoned | Ctx::ZonedLocal | Ctx::ZonedShallow | Ctx::ZonedWith => {
-                self::capability_in_policied_ctx(c)
-            }
+            Ctx::Zoned | Ctx::ZonedLocal | Ctx::ZonedShallow => self::capability_in_policied_ctx(c),
             // By definition, granular capabilities are not contexts and cannot
             // contain other capabilities. Also included in the fall through here
             // are pure, namespaced, polymorphic, and encapsulated contexts; oldrx related

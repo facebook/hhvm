@@ -68,9 +68,6 @@ namespace HH\Contexts {
    *
    * `defaults` functions may call into `zoned` functions, but not the
    * other way around.
-   *
-   * `defaults` also excludes the capabilities required to call (or be called
-   * from) `zoned_with` functions.
    */
   type defaults = (
     \HH\Capabilities\WriteProperty &
@@ -130,8 +127,7 @@ namespace HH\Contexts {
    * as `leak_safe` for internal operations (e.g. no mutating static
    * variables). They are also allowed to call `leak_safe_local` or
    * `leak_safe_shallow` functions and their leak-safe counterparts,
-   * and even `defaults` functions.  However, they cannot call
-   * functions with the `zoned_with` context nor its shallow/local variant.
+   * and even `defaults` functions.
    */
   type leak_safe_local = (
     \HH\Capabilities\WriteProperty &
@@ -143,9 +139,8 @@ namespace HH\Contexts {
    * `zoned` includes all the capabilities of `leak_safe`, but also allows
    * accessing the current zone policy.
    *
-   * `zoned` functions may be called from either `defaults` functions or
-   * `zoned_with` functions. `zoned` is more restrictive, so it cannot call
-   * into `defaults` or `zoned_with` functions.
+   * `zoned` functions may be called from `defaults` functions.
+   * `zoned` is more restrictive, so it cannot call into `defaults` functions.
    */
   type zoned = (
     \HH\Capabilities\WriteProperty &
@@ -180,31 +175,13 @@ namespace HH\Contexts {
    * as `zoned` for internal operations (e.g. no mutating static
    * variables). They are also allowed to call `zoned_local` or
    * `zoned_shallow` functions and their leak-safe counterparts,
-   * and even `defaults` functions.  Notably, they cannot call
-   * functions with the `zoned_with` context nor its shallow/local variant.
+   * and even `defaults` functions.
    */
   type zoned_local = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyLocal &
     \HH\Capabilities\SystemLocal &
-  );
-
-  /**
-   * The `zoned_with<Foo>` context allows your function to be used with
-   * other `zoned_with<Foo>` functions.
-   *
-   * This is similar to `zoned`, but allows you define multiple distinct
-   * zones.
-   *
-   * `zoned_with` functions require a special entry point, and cannot be
-   * called from `defaults` functions.
-   */
-  type zoned_with<T> = (
-    \HH\Capabilities\WriteProperty &
-    \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\ImplicitPolicyOf<T> &
-    \HH\Capabilities\System &
   );
 
   /**

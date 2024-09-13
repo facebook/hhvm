@@ -235,48 +235,4 @@ namespace HH\Coeffects {
     return await $result;
   }
 
-  namespace _Private {
-
-  /**
-   * The internal entry point for zoned_with functions
-   */
-  <<__Native>>
-  function enter_zoned_with<Tout, Tpolicy>(
-    (function()[zoned_with<Tpolicy>]: Tout) $f
-  )[zoned]: mixed /* Tout */;
-
-  } // namespace _Private
-
-  /**
-   * The public entry point for zoned_with functions
-   */
-  function enter_zoned_with<Tout, Tcontext as ImplicitContext, Tval>(
-    classname<Tcontext> $cls,
-    Tval $value,
-    (function()[zoned_with<Tval>]: Tout) $f,
-  )[zoned]: Tout where Tval = Tcontext::T {
-    return $cls::set(
-      $value,
-      ()[zoned] ==> _Private\enter_zoned_with($f)
-    );
-  }
-
-  /**
-   * The public entry point for async zoned_with functions
-   */
-  async function enter_zoned_with_async<
-    Tout,
-    Tcontext as ImplicitContext,
-    Tval
-  >(
-    classname<Tcontext> $cls,
-    Tval $value,
-    (function()[zoned_with<Tval>]: Awaitable<Tout>) $f,
-  )[zoned]: Awaitable<Tout> where Tval = Tcontext::T {
-    return await $cls::setAsync(
-      $value,
-      ()[zoned] ==> _Private\enter_zoned_with($f)
-    );
-  }
-
 } // namespace HH\Coeffects

@@ -58,7 +58,6 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(rx)
 
 #define ZONED_COEFFECTS \
-  X(zoned_with)         \
   X(zoned_local)        \
   X(zoned_shallow)      \
   X(zoned)              \
@@ -179,14 +178,13 @@ void initCapabilityGraphs() {
                     addEdges(createNode(Cap::s_globals),
                              read_globals),
                     zoned),
-           addEdges(createNode(Cap::s_zoned_with, true),
-                    addEdges(zoned,
-                             addEdges(createNode(Cap::s_leak_safe, true),
-                                      addEdges(createNode(Cap::s_write_props),
-                                               addEdges(createNode(Cap::s_write_this_props),
-                                                        zoned_maybe)),
-                                      addEdges(read_globals,
-                                               zoned_maybe)))));
+                  addEdges(zoned,
+                            addEdges(createNode(Cap::s_leak_safe, true),
+                                    addEdges(createNode(Cap::s_write_props),
+                                              addEdges(createNode(Cap::s_write_this_props),
+                                                      zoned_maybe)),
+                                    addEdges(read_globals,
+                                              zoned_maybe))));
 }
 
 } //namespace
@@ -412,7 +410,6 @@ std::string CoeffectsConfig::fromHackCCtx(const hackc::hhbc::Ctx& ctx) {
     case hackc::hhbc::Ctx::RxLocal:        return C::s_rx_local;
     case hackc::hhbc::Ctx::RxShallow:      return C::s_rx_shallow;
     case hackc::hhbc::Ctx::Rx:             return C::s_rx;
-    case hackc::hhbc::Ctx::ZonedWith:      return C::s_zoned_with;
     case hackc::hhbc::Ctx::ZonedLocal:     return C::s_zoned_local;
     case hackc::hhbc::Ctx::ZonedShallow:   return C::s_zoned_shallow;
     case hackc::hhbc::Ctx::Zoned:          return C::s_zoned;

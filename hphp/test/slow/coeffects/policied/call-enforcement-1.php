@@ -16,10 +16,6 @@ function zoned($fn)[zoned] :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned_with($fn)[zoned_with] :mixed{
-  if ($fn) $fn(null);
-}
-
 function leak_safe_local($fn)[leak_safe_local] :mixed{
   if ($fn) $fn(null);
 }
@@ -53,13 +49,12 @@ function pure($fn)[] :mixed{
 }
 
 <<__EntryPoint>>
-function main()[zoned_with, defaults] :mixed{
+function main()[defaults] :mixed{
   $functions = vec[
     'non_zoned',
     'zoned_local',
     'zoned_shallow',
     'zoned',
-    'zoned_with',
     'leak_safe_local',
     'leak_safe_shallow',
     'leak_safe',

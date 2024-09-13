@@ -45,7 +45,7 @@ function some_recursive_callee_of_do_stuff()[zoned]: void {
 
 In order to prevent poisoning memoization caches (fetching the cached results computed under one IC value when executing under a different IC value), we designed the IC feature to be coupled with the coeffects feature which applies static recursive restrictions. We required that:
 
-* You can only set an IC for the execution of functions requiring at most `[zoned]` (or `[zoned_with<T>]` but we ignore this context in this document)
+* You can only set an IC for the execution of functions requiring at most `[zoned]` but we ignore this context in this document)
 * Memoized functions that are callable from a `[zoned]` function must either:
     * shard the memoization cache based on the IC value (iff the context of the function is `[zoned]`)
     * guarantee that the IC is not used by having a context without the `ImplicitPolicy` capability which is required to access the IC (e.g. `[leak_safe]`)

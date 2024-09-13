@@ -59,7 +59,6 @@ RuntimeCoeffects RuntimeCoeffects::globals_leak_safe() {
 
 #define COEFFECTS      \
   X(pure)              \
-  X(zoned_with)        \
   X(zoned)             \
   X(leak_safe_shallow) \
   X(write_this_props)  \

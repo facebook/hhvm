@@ -39,7 +39,6 @@ namespace HH\Contexts\Unsafe {
   type zoned_shallow =
     (\HH\Capabilities\ImplicitPolicyLocal & \HH\Capabilities\SystemLocal &);
   type zoned_local = \HH\Contexts\defaults;
-  type zoned_with<T> = mixed;
 
   type rx = \HH\Contexts\defaults;
   type rx_shallow = \HH\Contexts\defaults;

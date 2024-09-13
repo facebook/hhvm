@@ -1,6 +1,0 @@
-Setting context to 5
-
-Warning: Call to HH\ImplicitContext::runWithAsync() requires [zoned_with] coeffects but IntContext::setAsync() provided [zoned] in %s on line %d
-int(10)
-Setting context to 5
-int(10)

@@ -41,7 +41,6 @@ struct RuntimeCoeffects {
 
   static RuntimeCoeffects defaults();
   static RuntimeCoeffects pure();
-  static RuntimeCoeffects zoned_with();
   static RuntimeCoeffects zoned();
   static RuntimeCoeffects write_this_props();
   static RuntimeCoeffects write_props();

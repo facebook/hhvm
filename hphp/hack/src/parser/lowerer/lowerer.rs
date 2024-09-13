@@ -5517,7 +5517,7 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    // memoized functions with zoned or zoned_with must be #KeyedByIC
+    // memoized functions with zoned must be #KeyedByIC
     if has_any_policied_context(contexts) {
         if let Some(u) = user_attributes
             .iter()

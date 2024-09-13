@@ -3,7 +3,7 @@
 class C {
   const ctx C1 = [];
   const ctx C2 = [write_props];
-  const ctx C3 = [defaults, cipp];
+  const ctx C3 = [defaults];
 
   public function f(): void {
     3 as this::C1;

@@ -14,6 +14,4 @@ async function main()[] :Awaitable<mixed>{
   HH\Coeffects\backdoor(defaults<>);
   await defaults_async();
   HH\Coeffects\backdoor(defaults_async<>);
-
-  HH\Coeffects\backdoor(()[zoned_with] ==> { echo "in zoned_with\n"; });
 }

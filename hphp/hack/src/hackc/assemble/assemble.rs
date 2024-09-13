@@ -383,9 +383,9 @@ fn assemble_class(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc::
 /// Defined in 'hack/src/naming/naming_special_names.rs`
 fn is_enforced_static_coeffect(d: &str) -> bool {
     match d {
-        "pure" | "defaults" | "rx" | "zoned" | "write_props" | "rx_local" | "zoned_with"
-        | "zoned_local" | "zoned_shallow" | "leak_safe_local" | "leak_safe_shallow"
-        | "leak_safe" | "read_globals" | "globals" | "write_this_props" | "rx_shallow" => true,
+        "pure" | "defaults" | "rx" | "zoned" | "write_props" | "rx_local" | "zoned_local"
+        | "zoned_shallow" | "leak_safe_local" | "leak_safe_shallow" | "leak_safe"
+        | "read_globals" | "globals" | "write_this_props" | "rx_shallow" => true,
         _ => false,
     }
 }
@@ -1533,7 +1533,6 @@ fn assemble_static_coeffects(
             b"zoned" => scs.push(Ctx::Zoned),
             b"write_props" => scs.push(Ctx::WriteProps),
             b"rx_local" => scs.push(Ctx::RxLocal),
-            b"zoned_with" => scs.push(Ctx::ZonedWith),
             b"zoned_local" => scs.push(Ctx::ZonedLocal),
             b"zoned_shallow" => scs.push(Ctx::ZonedShallow),
             b"leak_safe_local" => scs.push(Ctx::LeakSafeLocal),

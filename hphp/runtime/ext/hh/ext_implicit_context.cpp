@@ -337,11 +337,6 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
 
 } // namespace
 
-Variant HHVM_FUNCTION(enter_zoned_with, const Variant& function) {
-  return coeffects_call_helper(function,
-                               "HH\\Coeffects\\_Private\\enter_zoned_with",
-                               RuntimeCoeffects::zoned_with(), false);
-}
 
 static struct HHImplicitContext final : Extension {
   HHImplicitContext(): Extension("implicit_context", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
@@ -365,8 +360,6 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(has_key));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_debug_info,
                   HHVM_FN(get_implicit_context_debug_info));
-    HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,
-                  HHVM_FN(enter_zoned_with));
 
   }
 } s_hh_implicit_context;

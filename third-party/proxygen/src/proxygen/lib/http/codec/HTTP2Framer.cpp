@@ -270,8 +270,8 @@ ErrorCode skipPadding(Cursor& cursor, uint8_t length, bool verify) {
   if (verify) {
     while (length > 0) {
       auto cur = cursor.peek();
-      uint8_t toCmp = std::min<size_t>(cur.second, length);
-      if (memcmp(cur.first, kZeroPad, toCmp)) {
+      uint8_t toCmp = std::min<size_t>(cur.size(), length);
+      if (memcmp(cur.data(), kZeroPad, toCmp) != 0) {
         return ErrorCode::PROTOCOL_ERROR;
       }
       cursor.skip(toCmp);

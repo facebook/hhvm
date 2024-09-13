@@ -136,7 +136,7 @@ bool KVParser::parseKeyValueLength(Cursor& cursor,
     return false;
   }
   auto peeked = cursor.peek();
-  if (*peeked.first & 0x80) { // highest bit is set
+  if (*peeked.data() & 0x80) { // highest bit is set
     if (available < sizeof(uint32_t)) {
       return false;
     }

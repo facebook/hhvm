@@ -323,7 +323,7 @@ struct QIFReader : public Reader {
         case LINESTART: {
           seenR = false;
           auto p = c.peek();
-          switch (p.first[0]) {
+          switch (p[0]) {
             case '#':
               state_ = COMMENT;
               break;
@@ -348,12 +348,12 @@ struct QIFReader : public Reader {
           break;
         case EOL: {
           auto p = c.peek();
-          if (p.first[0] == '\n') {
+          if (p[0] == '\n') {
             c.skip(1);
             state_ = LINESTART;
           } else if (seenR) { // \r followed by anything but \n -> mac newline
             state_ = LINESTART;
-          } else if (p.first[0] == '\r') {
+          } else if (p[0] == '\r') {
             c.skip(1);
             seenR = true;
           }

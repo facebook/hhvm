@@ -410,6 +410,59 @@ CO_TEST_P(
   EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
+CO_TEST_P(ClientInterceptorTestP, NonTrivialRequestState) {
+  struct Counts {
+    int construct = 0;
+    int destruct = 0;
+  } counts;
+
+  struct RequestState {
+    explicit RequestState(Counts& counts) : counts_(&counts) {
+      counts_->construct++;
+    }
+    RequestState(RequestState&& other) noexcept
+        : counts_(std::exchange(other.counts_, nullptr)) {}
+    RequestState& operator=(RequestState&& other) noexcept {
+      counts_ = std::exchange(other.counts_, nullptr);
+      return *this;
+    }
+    ~RequestState() {
+      if (counts_) {
+        counts_->destruct++;
+      }
+    }
+
+   private:
+    Counts* counts_;
+  };
+
+  struct ClientInterceptorNonTrivialRequestState
+      : public NamedClientInterceptor<RequestState> {
+   public:
+    ClientInterceptorNonTrivialRequestState(std::string name, Counts& counts)
+        : NamedClientInterceptor(std::move(name)), counts_(counts) {}
+
+    std::optional<RequestState> onRequest(RequestInfo) override {
+      return RequestState(counts_);
+    }
+    void onResponse(RequestState*, ResponseInfo) override {}
+
+   private:
+    Counts& counts_;
+  };
+
+  auto interceptor1 = std::make_shared<ClientInterceptorNonTrivialRequestState>(
+      "Interceptor1", counts);
+  auto interceptor2 = std::make_shared<ClientInterceptorNonTrivialRequestState>(
+      "Interceptor2", counts);
+  auto client = makeClient(makeInterceptorsList(interceptor1, interceptor2));
+
+  co_await client->noop();
+
+  EXPECT_EQ(counts.construct, 2);
+  EXPECT_EQ(counts.destruct, 2);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     ClientInterceptorTestP,
     ClientInterceptorTestP,

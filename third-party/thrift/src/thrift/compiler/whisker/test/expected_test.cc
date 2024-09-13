@@ -228,4 +228,41 @@ TEST(ExpectedTest, LWG_3836) {
   EXPECT_EQ(e2.value(), false);
 }
 
+TEST(ExpectedTest, visit_variant) {
+  expected<int, std::variant<std::string, long>> o =
+      unexpected<std::string>("yikes!");
+  EXPECT_EQ(
+      visit(
+          o,
+          [](int) { return 0; },
+          [](const std::string& str) { return int(str.length()); },
+          [](long) { return 2; }),
+      std::string("yikes!").length());
+
+  EXPECT_EQ(
+      visit(
+          std::move(o),
+          [](int) -> std::string { return ""; },
+          [](std::string&& str) -> std::string { return std::move(str); },
+          [](long) -> std::string { return ""; }),
+      "yikes!");
+}
+
+TEST(ExpectedTest, visit_nonvariant) {
+  expected<int, std::string> o = unexpected<std::string>("yikes!");
+  EXPECT_EQ(
+      visit(
+          o,
+          [](int) { return 0; },
+          [](const std::string& str) { return int(str.length()); }),
+      std::string("yikes!").length());
+
+  EXPECT_EQ(
+      visit(
+          std::move(o),
+          [](int) -> std::string { return ""; },
+          [](std::string&& str) -> std::string { return std::move(str); }),
+      "yikes!");
+}
+
 } // namespace whisker

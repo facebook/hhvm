@@ -752,6 +752,74 @@ class expected {
   std::variant<T, unexpected<E>> storage_;
 };
 
+/**
+ * Returns true if the contained value is an error with precisely the given
+ * type.
+ */
+template <typename E, typename T, typename... Errors>
+[[nodiscard]] bool has_error(const expected<T, std::variant<Errors...>>& e) {
+  return !e.has_value() && std::holds_alternative<E>(e.error());
+}
+
+/**
+ * Returns the error of precisely the given type, if such error is the
+ * contained.
+ *
+ * Pre-conditions:
+ *   - has_error<E>(e) == true
+ */
+template <typename E, typename T, typename... Errors>
+[[nodiscard]] const E& get_error(
+    const expected<T, std::variant<Errors...>>& e) {
+  return std::get<E>(e.error());
+}
+template <typename E, typename T, typename... Errors>
+[[nodiscard]] E&& get_error(expected<T, std::variant<Errors...>>&& e) {
+  return std::get<E>(std::move(e).error());
+}
+
+/**
+ * Visits either the contained value or error.
+ */
+template <typename T, typename E, typename... Visitors>
+decltype(auto) visit(const expected<T, E>& e, Visitors&&... visitors) {
+  auto overloaded = detail::overload(std::forward<Visitors>(visitors)...);
+  if (e.has_value()) {
+    return overloaded(*e);
+  }
+  return overloaded(e.error());
+}
+template <typename T, typename E, typename... Visitors>
+decltype(auto) visit(expected<T, E>&& e, Visitors&&... visitors) {
+  auto overloaded = detail::overload(std::forward<Visitors>(visitors)...);
+  if (e.has_value()) {
+    return overloaded(*std::move(e));
+  }
+  return overloaded(std::move(e).error());
+}
+
+/**
+ * Visits either the contained value or one of the error types.
+ */
+template <typename T, typename... Errors, typename... Visitors>
+decltype(auto) visit(
+    const expected<T, std::variant<Errors...>>& e, Visitors&&... visitors) {
+  auto overloaded = detail::overload(std::forward<Visitors>(visitors)...);
+  if (e.has_value()) {
+    return overloaded(*e);
+  }
+  return std::visit(overloaded, e.error());
+}
+template <typename T, typename... Errors, typename... Visitors>
+decltype(auto) visit(
+    expected<T, std::variant<Errors...>>&& e, Visitors&&... visitors) {
+  auto overloaded = detail::overload(std::forward<Visitors>(visitors)...);
+  if (e.has_value()) {
+    return overloaded(*std::move(e));
+  }
+  return std::visit(overloaded, std::move(e).error());
+}
+
 #undef WHISKER_EXPECTED_REQUIRES
 
 } // namespace whisker

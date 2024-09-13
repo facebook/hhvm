@@ -15,11 +15,10 @@
   limitations under the License.
 
 }}{{!
-Generated Python typestubs for mutable thrift-python types
-
-}}{{> common/auto_generated_py}}
-
-# EXPERIMENTAL - DO NOT USE !!!
-# See `experimental_generate_mutable_types` documentation in thrift compiler
-
-{{> types/types_pyi }}
+This is the base class for Thrift struct
+}}{{#program:generate_mutable_types}}{{!
+}}_fbthrift_python_mutable_types.MutableStruct{{!
+}}{{/program:generate_mutable_types}}{{!
+}}{{^program:generate_mutable_types}}{{!
+}}_fbthrift_python_types.Struct{{!
+}}{{/program:generate_mutable_types}}

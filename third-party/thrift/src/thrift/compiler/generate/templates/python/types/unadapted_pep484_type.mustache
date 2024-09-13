@@ -34,13 +34,13 @@ thrift-python specific container types.
     }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
   }}{{struct:py_name}}{{!
 }}{{/type:struct}}{{!
-}}{{#type:list?}}_typing.Sequence[{{!
+}}{{#type:list?}}{{> types/sequence }}[{{!
     }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!
 }}]{{/type:list?}}{{!
-}}{{#type:set?}}_typing.AbstractSet[{{!
+}}{{#type:set?}}{{> types/set }}[{{!
     }}{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}{{!
 }}]{{/type:set?}}{{!
-}}{{#type:map?}}_typing.Mapping[{{!
+}}{{#type:map?}}{{> types/mapping }}[{{!
     }}{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!
     }}{{#type:value_type}}{{> types/pep484_type}}{{/type:value_type}}{{!
 }}]{{/type:map?}}{{!

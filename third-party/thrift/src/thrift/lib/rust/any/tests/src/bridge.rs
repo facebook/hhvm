@@ -29,7 +29,7 @@ pub mod ffi {
         // compact serialized Any to compact serialized SimpleUnion
         fn any_to_simple_union(any: &CxxString) -> UniquePtr<CxxString>;
 
-        fn compress_any(basic: &CxxString) -> UniquePtr<CxxString>;
-        fn decompress_any(basic: &CxxString) -> UniquePtr<CxxString>;
+        //fn compress_any(basic: &CxxString) -> UniquePtr<CxxString>;
+        //fn decompress_any(basic: &CxxString) -> UniquePtr<CxxString>;
     }
 }

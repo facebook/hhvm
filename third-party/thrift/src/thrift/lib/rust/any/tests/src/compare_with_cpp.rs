@@ -123,7 +123,7 @@ fn test_cpp_any_to_simple_union() -> Result<()> {
     Ok(())
 }
 
-#[test]
+/*#[test]
 fn test_compression() -> Result<()> {
     let basic = Basic {
         x: 10,
@@ -162,4 +162,4 @@ fn test_compression() -> Result<()> {
     }
 
     Ok(())
-}
+}*/

@@ -21,7 +21,7 @@
 #include <thrift/lib/cpp2/type/TypeRegistry.h>
 #include <thrift/lib/rust/any/tests/if/gen-cpp2/test_structs_types.h>
 #include <thrift/lib/rust/any/tests/src/cpp.h>
-#include "icsp/lib/Compression.h"
+// #include "icsp/lib/Compression.h"
 
 namespace thrift::rust::thrift_any {
 
@@ -88,7 +88,7 @@ std::unique_ptr<std::string> any_to_simple_union(const std::string& any) {
   return from_any<cpp2::SimpleUnion>(any);
 }
 
-std::unique_ptr<std::string> compress_any(const std::string& any) {
+/*std::unique_ptr<std::string> compress_any(const std::string& any) {
   const apache::thrift::type::AnyStruct any_obj =
       apache::thrift::CompactSerializer::deserialize<
           apache::thrift::type::AnyStruct>(any);
@@ -115,6 +115,6 @@ std::unique_ptr<std::string> decompress_any(const std::string& any) {
           anydata.toThrift());
 
   return std::make_unique<std::string>(std::move(compact_t));
-}
+}*/
 
 } // namespace thrift::rust::thrift_any

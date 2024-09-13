@@ -8,6 +8,7 @@
 #include "watchman/fs/FSDetect.h"
 #include <folly/FileUtil.h>
 #include <folly/String.h>
+#include "eden/common/utils/FSDetect.h"
 #include "watchman/fs/FileDescriptor.h"
 #include "watchman/watchman_system.h"
 
@@ -84,7 +85,7 @@ std::optional<w_string> find_fstype_in_linux_proc_mounts(
             // device name. In general, we don't want watchman to be used
             // over nfs, so in all cases except eden we still use "nfs"
             // as the type.
-            if (is_edenfs_fs_type(device)) {
+            if (facebook::eden::is_edenfs_fs_type(device)) {
               bestVfsType = device;
             } else {
               bestVfsType = vfstype;
@@ -108,7 +109,8 @@ std::optional<w_string> find_fstype_in_linux_proc_mounts(
 }
 
 w_string w_fstype_detect_macos_nfs(w_string fstype, w_string edenfs_indicator) {
-  if (fstype == "nfs" && is_edenfs_fs_type(edenfs_indicator)) {
+  if (fstype == "nfs" &&
+      facebook::eden::is_edenfs_fs_type(edenfs_indicator.string())) {
     return edenfs_indicator;
   }
   return fstype;

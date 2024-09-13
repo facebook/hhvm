@@ -23,6 +23,7 @@
 #include <chrono>
 #include <iterator>
 #include <thread>
+#include "eden/common/utils/FSDetect.h"
 #include "eden/fs/service/gen-cpp2/StreamingEdenService.h"
 #include "watchman/ChildProcess.h"
 #include "watchman/Errors.h"
@@ -1478,7 +1479,7 @@ std::shared_ptr<QueryableView> detectEden(
   }
 
 #else
-  if (!is_edenfs_fs_type(fstype) && fstype != "fuse" &&
+  if (!facebook::eden::is_edenfs_fs_type(fstype.string()) && fstype != "fuse" &&
       fstype != "osxfuse_eden" && fstype != "macfuse_eden" &&
       fstype != "edenfs_eden" && fstype != "fuse.edenfs") {
     // Not an active EdenFS mount.  Perhaps it isn't mounted yet?

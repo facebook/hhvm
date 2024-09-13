@@ -25,7 +25,3 @@ w_string w_fstype(const char* path);
 std::optional<w_string> find_fstype_in_linux_proc_mounts(
     std::string_view path,
     std::string_view procMountsData);
-
-inline bool is_edenfs_fs_type(w_string_piece fs_type) {
-  return fs_type == "edenfs" || fs_type.startsWith("edenfs:");
-}

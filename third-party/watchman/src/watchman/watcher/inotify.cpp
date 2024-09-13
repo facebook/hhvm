@@ -8,6 +8,7 @@
 #include <folly/String.h>
 #include <folly/Synchronized.h>
 #include <atomic>
+#include "eden/common/utils/FSDetect.h"
 #include "watchman/Constants.h"
 #include "watchman/Errors.h"
 #include "watchman/FlagMap.h"
@@ -513,7 +514,7 @@ std::shared_ptr<QueryableView> detectInotify(
     const w_string& root_path,
     const w_string& fstype,
     const Configuration& config) {
-  if (is_edenfs_fs_type(fstype)) {
+  if (facebook::eden::is_edenfs_fs_type(fstype.string())) {
     // inotify is effectively O(repo) and we know that that access
     // pattern is undesirable when running on top of EdenFS
     throw std::runtime_error("cannot watch EdenFS file systems with inotify");

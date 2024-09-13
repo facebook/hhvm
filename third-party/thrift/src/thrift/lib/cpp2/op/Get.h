@@ -129,7 +129,7 @@ template <typename T, typename Id>
 using get_native_type = type::native_type<get_field_tag<T, Id>>;
 
 FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wglobal-constructors")
+FOLLY_CLANG_DISABLE_WARNING("-Wglobal-constructors")
 
 /// Gets the thrift field name, for example:
 ///

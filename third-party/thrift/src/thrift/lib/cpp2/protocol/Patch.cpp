@@ -45,6 +45,8 @@ namespace protocol {
 namespace detail {
 namespace {
 
+constexpr std::string_view kPatchUriSuffix = "Patch";
+
 using op::PatchOp;
 
 template <typename Tag>
@@ -911,11 +913,11 @@ type::Type toPatchType(type::Type input) {
       continue;
     }
     if (auto p = t->uri_ref()) {
-      *p += "Patch";
+      *p = toPatchUri(*p);
       return input;
     }
     if (auto p = t->scopedName_ref()) {
-      *p += "Patch";
+      *p = toPatchUri(*p);
       return input;
     }
     folly::throw_exception<std::runtime_error>(fmt::format(
@@ -1043,6 +1045,22 @@ Object toSafePatch(const protocol::Object& patch) {
   safePatch[detail::kSafePatchDataId].emplace_binary(
       *serializeObject<CompactProtocolWriter>(patch));
   return safePatch;
+}
+
+std::string toPatchUri(std::string s) {
+  s += detail::kPatchUriSuffix;
+  return s;
+}
+
+std::string fromPatchUri(std::string s) {
+  auto newSize = s.size() - detail::kPatchUriSuffix.size();
+  if (s.size() <= detail::kPatchUriSuffix.size() ||
+      s.substr(newSize) != detail::kPatchUriSuffix) {
+    folly::throw_exception<std::invalid_argument>(
+        fmt::format("Uri {} is not a Patch.", s));
+  }
+  s.resize(newSize);
+  return s;
 }
 
 } // namespace protocol

@@ -128,6 +128,10 @@ Object fromSafePatch(const protocol::Object& safePatch);
  */
 Object toSafePatch(const protocol::Object& patch);
 
+// Convert a normal struct uri to patch uri
+std::string toPatchUri(std::string s);
+std::string fromPatchUri(std::string s);
+
 } // namespace protocol
 } // namespace thrift
 } // namespace apache

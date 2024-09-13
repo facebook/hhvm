@@ -255,7 +255,7 @@ val is_full_check_needed : full_check_status -> bool
 
 val is_full_check_started : full_check_status -> bool
 
-val list_files : env -> string list
+val list_files_with_errors : env -> string list
 
 val add_changed_files : env -> Relative_path.Set.t -> env
 

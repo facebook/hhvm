@@ -400,7 +400,8 @@ let handle :
     (ServerPrecheckedFiles.expand_all env, ())
   | ServerCommandTypes.FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.ServerEnv.workers positions env)
-  | ServerCommandTypes.LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)
+  | ServerCommandTypes.LIST_FILES_WITH_ERRORS ->
+    (env, ServerEnv.list_files_with_errors env)
   | ServerCommandTypes.FILE_DEPENDENTS filenames ->
     let files = ServerFileDependents.go genv env filenames in
     (env, files)

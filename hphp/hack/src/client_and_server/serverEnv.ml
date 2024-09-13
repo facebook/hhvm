@@ -352,14 +352,16 @@ type env = {
 }
 [@@deriving show]
 
-let list_files env =
+let list_files_with_errors env =
   let acc =
     List.fold_right
       ~f:
         begin
-          fun error (acc : SSet.t) ->
-            let pos = User_error.get_pos error in
-            SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
+          fun { User_error.claim = (pos, _); severity; _ } (acc : SSet.t) ->
+            match severity with
+            | User_error.Err ->
+              SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
+            | User_error.Warning -> acc
         end
       ~init:SSet.empty
       (Errors.get_error_list env.errorl)

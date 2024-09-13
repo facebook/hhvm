@@ -24,7 +24,6 @@
 #include <exception>
 #include <string>
 
-using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TestBase {
@@ -44,10 +43,10 @@ struct TestBase {
   bool CountSkip();
 
   bool VerifySame(const char *exp1, const char *exp2,
-                  const Variant& v1, const Variant& v2);
+                  const HPHP::Variant& v1, const HPHP::Variant& v2);
   bool VerifyClose(const char *exp1, const char *exp2,
                    double v1, double v2);
-  bool array_value_exists(const Variant& var, const Variant& value);
+  bool array_value_exists(const HPHP::Variant& var, const HPHP::Variant& value);
 
   template<class T>
   bool runTestImpl(T test, const std::string& which, const std::string& name) {
@@ -105,19 +104,19 @@ inline bool toBoolean(int     v) { return v;}
 inline bool toBoolean(int64_t v) { return v;}
 inline bool toBoolean(double  v) { return v;}
 inline bool toBoolean(const char* v) = delete;
-inline bool toBoolean(const StringData *v) {
+inline bool toBoolean(const HPHP::StringData *v) {
   return v ? v->toBoolean() : false;
 }
-inline bool toBoolean(const String& v) { return toBoolean(v.get());}
-inline bool toBoolean(const ArrayData *v) {
+inline bool toBoolean(const HPHP::String& v) { return toBoolean(v.get());}
+inline bool toBoolean(const HPHP::ArrayData *v) {
   return v && !v->empty();
 }
-inline bool toBoolean(const Array& v) { return toBoolean(v.get());}
-inline bool toBoolean(const ObjectData *v) {
+inline bool toBoolean(const HPHP::Array& v) { return toBoolean(v.get());}
+inline bool toBoolean(const HPHP::ObjectData *v) {
   return v ? v->toBoolean() : false;
 }
-inline bool toBoolean(const Object& v) { return toBoolean(v.get());}
-inline bool toBoolean(const Variant& v) { return v.toBoolean();}
+inline bool toBoolean(const HPHP::Object& v) { return toBoolean(v.get());}
+inline bool toBoolean(const HPHP::Variant& v) { return v.toBoolean();}
 
 }
 

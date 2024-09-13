@@ -28,6 +28,8 @@
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/system/systemlib.h"
 
+using namespace HPHP;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TestCppBase::TestCppBase() {

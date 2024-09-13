@@ -28,6 +28,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using namespace HPHP;
+
 bool TestExtServer::RunTests(const std::string &which) {
   bool ret = true;
 

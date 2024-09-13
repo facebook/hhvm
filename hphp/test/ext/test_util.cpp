@@ -27,6 +27,8 @@
     return Count(false);                                                \
   }                                                                     \
 
+using namespace HPHP;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TestUtil::TestUtil() {

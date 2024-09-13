@@ -30,6 +30,8 @@
 #define PORT_MIN 7100
 #define PORT_MAX 7120
 
+using namespace HPHP;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TestCurlRequestHandler final : HPHP::RequestHandler {

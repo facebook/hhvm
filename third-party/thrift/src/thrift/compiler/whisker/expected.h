@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <thrift/compiler/whisker/detail/overload.h>
+
 #include <cassert>
 #include <exception>
 #include <initializer_list>
@@ -240,6 +242,30 @@ class expected {
       (!std::is_same_v<detail::remove_cvref_t<T>, bool> ||
        !detail::is_specialization<detail::remove_cvref_t<U>, expected>);
 
+  // Restrictions on constructors (4) and (5):
+  template <
+      typename U,
+      typename G,
+      typename UWithQualifiers, // const U& or U&&
+      typename GWithQualifiers> // const G& or G&&
+  static constexpr inline bool is_constructible_from_other =
+      std::is_constructible_v<T, UWithQualifiers> &&
+      std::is_constructible_v<E, GWithQualifiers> &&
+      // LWG-3836
+      (std::is_same_v<std::remove_cv_t<T>, bool> ||
+       !(std::is_constructible_v<T, expected<U, G>&> ||
+         std::is_constructible_v<T, expected<U, G>> ||
+         std::is_constructible_v<T, const expected<U, G>&> ||
+         std::is_constructible_v<T, const expected<U, G>> ||
+         std::is_convertible_v<expected<U, G>&, T> ||
+         std::is_convertible_v<expected<U, G>&&, T> ||
+         std::is_convertible_v<const expected<U, G>&, T> ||
+         std::is_convertible_v<const expected<U, G>&&, T>)) &&
+      !(std::is_constructible_v<unexpected<E>, expected<U, G>&> ||
+        std::is_constructible_v<unexpected<E>, expected<U, G>> ||
+        std::is_constructible_v<unexpected<E>, const expected<U, G>&> ||
+        std::is_constructible_v<unexpected<E>, const expected<U, G>>);
+
   template <typename U>
   static constexpr inline bool is_forward_assignable_from =
       std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
@@ -268,6 +294,62 @@ class expected {
   expected(expected&& other) noexcept(
       std::is_nothrow_move_constructible_v<T> &&
       std::is_nothrow_move_constructible_v<E>) = default;
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_4
+  // (implicit)
+  template <
+      class U,
+      class G,
+      WHISKER_EXPECTED_REQUIRES(
+          (std::is_convertible_v<const U&, T> &&
+           std::is_convertible_v<const G&, E>)),
+      WHISKER_EXPECTED_REQUIRES(
+          is_constructible_from_other<U, G, const U&, const G&>)>
+  /* implicit */ expected(const expected<U, G>& other) noexcept(
+      std::is_nothrow_constructible_v<T, const U&> &&
+      std::is_nothrow_constructible_v<E, const G&>)
+      : storage_(from_other(other.storage_)) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_4
+  // (explicit)
+  template <
+      class U,
+      class G,
+      WHISKER_EXPECTED_REQUIRES(
+          !(std::is_convertible_v<const U&, T> &&
+            std::is_convertible_v<const G&, E>)),
+      WHISKER_EXPECTED_REQUIRES(
+          is_constructible_from_other<U, G, const U&, const G&>)>
+  explicit expected(const expected<U, G>& other) noexcept(
+      std::is_nothrow_constructible_v<T, const U&> &&
+      std::is_nothrow_constructible_v<E, const G&>)
+      : storage_(from_other(other.storage_)) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_5
+  // (implicit)
+  template <
+      class U,
+      class G,
+      WHISKER_EXPECTED_REQUIRES(
+          (std::is_convertible_v<U, T> && std::is_convertible_v<G, E>)),
+      WHISKER_EXPECTED_REQUIRES(is_constructible_from_other<U, G, U, G>)>
+  /* implicit */ expected(expected<U, G>&& other) noexcept(
+      std::is_nothrow_constructible_v<T, U> &&
+      std::is_nothrow_constructible_v<E, G>)
+      : storage_(from_other(std::move(other.storage_))) {}
+
+  // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_5
+  // (explicit)
+  template <
+      class U,
+      class G,
+      WHISKER_EXPECTED_REQUIRES(
+          !(std::is_convertible_v<U, T> && std::is_convertible_v<G, E>)),
+      WHISKER_EXPECTED_REQUIRES(is_constructible_from_other<U, G, U, G>)>
+  explicit expected(expected<U, G>&& other) noexcept(
+      std::is_nothrow_constructible_v<T, U> &&
+      std::is_nothrow_constructible_v<E, G>)
+      : storage_(from_other(std::move(other.storage_))) {}
 
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_6
   // (implicit)
@@ -441,6 +523,32 @@ class expected {
   }
 
  private:
+  template <typename U, typename G>
+  friend class expected;
+
+  template <typename U, typename G>
+  static std::variant<T, unexpected<E>> from_other(
+      const std::variant<U, G>& other) {
+    using result = std::variant<T, unexpected<E>>;
+    return detail::variant_match(
+        other,
+        [](const U& u) -> result { return T(u); },
+        [](const G& g) -> result { return unexpected<E>(g.error()); });
+  }
+
+  template <typename U, typename G>
+  static std::variant<T, unexpected<E>> from_other(std::variant<U, G>&& other) {
+    using result = std::variant<T, unexpected<E>>;
+    return detail::variant_match(
+        std::move(other),
+        [](std::remove_reference_t<U>&& u) -> result {
+          return T(std::move(u));
+        },
+        [](std::remove_reference_t<G>&& g) -> result {
+          return unexpected<E>(std::move(g).error());
+        });
+  }
+
   std::variant<T, unexpected<E>> storage_;
 };
 

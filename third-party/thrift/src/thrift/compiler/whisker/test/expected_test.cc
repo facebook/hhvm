@@ -152,4 +152,14 @@ TEST(ExpectedTest, comparison) {
   EXPECT_EQ(e3, unexpected(42));
 }
 
+TEST(ExpectedTest, LWG_3836) {
+  struct BaseError {};
+  struct DerivedError : BaseError {};
+
+  expected<bool, DerivedError> e1(false);
+  expected<bool, BaseError> e2(e1);
+  // should not convert using operator bool()
+  EXPECT_EQ(e2.value(), false);
+}
+
 } // namespace whisker

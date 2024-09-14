@@ -77,8 +77,8 @@ This `as` assertion will always succeed and hence is redundant. The expression o
 WARN: File "as.php", line 10, characters 5-17:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `HH\Capabilities\WriteProperty`. (Warn[12012])
 WARN: File "as.php", line 11, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `HH\Contexts\cipp`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(HH\Capabilities\ImplicitPolicyLocal & HH\Capabilities\RxLocal & HH\Capabilities\WriteProperty & HH\Capabilities\AccessGlobals & HH\Capabilities\SystemLocal & HH\Capabilities\IO)`. (Warn[12012])
 WARN: File "as.php", line 23, characters 3-12:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `HH\Capabilities\WriteProperty`. (Warn[12012])
 WARN: File "as.php", line 24, characters 3-12:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `HH\Contexts\cipp`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(HH\Capabilities\ImplicitPolicyLocal & HH\Capabilities\RxLocal & HH\Capabilities\WriteProperty & HH\Capabilities\AccessGlobals & HH\Capabilities\SystemLocal & HH\Capabilities\IO)`. (Warn[12012])

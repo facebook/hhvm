@@ -1,4 +1,0 @@
-// Defined in FooParent
-public function bar(): void
--------------
-function bar(): void

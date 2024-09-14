@@ -1,2 +1,2 @@
 // Defined in Foo
-public supportdyn<mixed> $x
+public mixed $x

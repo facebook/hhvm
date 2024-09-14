@@ -1,7 +1,0 @@
-async ~(readonly function(ExampleContext $_): Awaitable<
-  ~ExprTree<
-    ExampleDsl,
-    string,
-    (function(ExampleString): ~ExampleInt)
-  >
->)

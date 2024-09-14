@@ -1,1 +1,1 @@
-I::TSndWins as int
+I::TSndWins as int (dynamic when called dynamically)

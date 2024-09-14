@@ -1,1 +1,0 @@
-(function((ExampleString, ExampleInt) $_...): ~ExampleKeyedCollection<ExampleString, ExampleInt>)

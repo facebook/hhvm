@@ -205,11 +205,5 @@ val method_occ :
 val indexerInputsHash :
   string -> Md5.t list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
-val type_info :
-  ty:string ->
-  (XRefTarget.t * Pretty.pos list) list ->
-  Fact_acc.t ->
-  Fact_id.t * Fact_acc.t
-
 val hack_to_thrift :
   Declaration.t -> Fbthrift.Declaration.t -> Fact_acc.t -> Fact_acc.t

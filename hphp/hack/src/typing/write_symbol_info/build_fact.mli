@@ -26,14 +26,11 @@ val attributes :
    and an option type_xref fact *)
 val signature :
   Full_fidelity_source_text.t ->
-  (('a, 'b) Aast.fun_param * Fact_id.t option * string option) list ->
+  (('a, 'b) Aast.fun_param * TypeInfo.t option * Type.t option) list ->
   Aast.contexts option ->
-  ret_ty:string option ->
-  return_info:Fact_id.t option ->
+  returns:Type.t option ->
+  returns_type_info:TypeInfo.t option ->
   Signature.t
-
-val type_param :
-  Full_fidelity_source_text.t -> ('a, 'b) Aast.tparam -> TypeParameter.t
 
 val xrefs : (XRefTarget.t * Pos.t list) Fact_id.Map.t -> XRef.t list
 

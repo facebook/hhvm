@@ -38,27 +38,22 @@ let call_arguments arguments =
   in
   List.fold arguments ~init:([], 0) ~f |> fst |> List.rev
 
-let constraint_ (kind, hint) =
-  let type_string = Pretty.hint_to_string ~is_ctx:false hint in
-  Constraint.
-    {
-      constraint_kind = Util.make_constraint_kind kind;
-      type_ = Type.Key type_string;
-    }
-
 let signature
-    source_text params (ctxs_hints : Aast.contexts option) ~ret_ty ~return_info
-    =
+    source_text
+    params
+    (ctxs_hints : Aast.contexts option)
+    ~returns
+    ~returns_type_info =
   let hint_to_ctx hint =
     Context_.Key (Pretty.hint_to_string ~is_ctx:true hint)
   in
   let f (_pos, hint) = List.map ~f:hint_to_ctx hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
-  let param (p, type_xref, ty) =
+  let param (p, type_xref, type_) =
     Parameter.
       {
         name = Util.make_name p.param_name;
-        type_ = Option.map ~f:(fun x -> Type.Key x) ty;
+        type_;
         default_value =
           Option.map
             (Aast_utils.get_param_default p)
@@ -69,33 +64,14 @@ let signature
           | Pnormal -> false);
         is_variadic = Aast_utils.is_param_variadic p;
         attributes = attributes source_text p.param_user_attributes;
-        type_info = Option.map ~f:(fun x -> TypeInfo.Id x) type_xref;
+        type_info = type_xref;
         readonly =
           Option.map ~f:(fun _ -> ReadonlyKind.Readonly) p.param_readonly;
       }
   in
   let parameters = List.map params ~f:param in
   Signature.(
-    Key
-      {
-        returns = Option.map ~f:(fun x -> Type.Key x) ret_ty;
-        parameters;
-        contexts = ctxs_hints;
-        returns_type_info = Option.map ~f:(fun x -> TypeInfo.Id x) return_info;
-      })
-
-let type_param source_text tp =
-  let (_, name) = tp.tp_name in
-  let name = Util.make_name name in
-  let constraints = List.map tp.tp_constraints ~f:constraint_ in
-  TypeParameter.
-    {
-      name;
-      variance = Util.make_variance tp.tp_variance;
-      reify_kind = Util.make_reify_kind tp.tp_reified;
-      constraints;
-      attributes = attributes source_text tp.tp_user_attributes;
-    }
+    Key { returns; parameters; contexts = ctxs_hints; returns_type_info })
 
 let generic_xrefs (sym_pos : (XRefTarget.t * Pretty.pos list) Seq.t) =
   let xrefs =

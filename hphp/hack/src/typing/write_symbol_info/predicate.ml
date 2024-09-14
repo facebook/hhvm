@@ -130,10 +130,10 @@ let ordered_all =
     Hack Enumerator;
     Hack FunctionDeclaration;
     Hack TypeConstDeclaration;
-    Hack TypeInfo;
     Hack PropertyDeclaration;
     Hack ClassConstDeclaration;
     Hack MethodDeclaration;
+    Hack TypeInfo;
     Hack DeclarationSpan;
     Hack DeclarationLocation;
     Hack DeclarationComment;

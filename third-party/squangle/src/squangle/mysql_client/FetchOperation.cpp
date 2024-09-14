@@ -483,7 +483,8 @@ void FetchOperationImpl::specializedCompleteOperation() {
         readResponseAttributes(),
         getMaxThreadBlockTime(),
         getTotalThreadBlockTime(),
-        was_slow_);
+        was_slow_,
+        current_warnings_count_);
     client().logQuerySuccess(logging_data, conn());
   } else {
     db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
@@ -507,7 +508,8 @@ void FetchOperationImpl::specializedCompleteOperation() {
             readResponseAttributes(),
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime(),
-            was_slow_),
+            was_slow_,
+            current_warnings_count_),
         reason,
         mysql_errno(),
         mysql_error(),

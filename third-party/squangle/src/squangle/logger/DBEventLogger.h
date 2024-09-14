@@ -168,7 +168,8 @@ struct QueryLoggingData : CommonLoggingData {
       AttributeMap responseAttributes = AttributeMap(),
       Duration maxThreadBlockTime = Duration(0),
       Duration totalThreadBlockTime = Duration(0),
-      bool wasSlow = false)
+      bool wasSlow = false,
+      unsigned int warningsCount = 0)
       : CommonLoggingData(
             op,
             duration,
@@ -183,7 +184,8 @@ struct QueryLoggingData : CommonLoggingData {
         use_checksum(useChecksum),
         query_attributes(queryAttributes),
         response_attributes(std::move(responseAttributes)),
-        was_slow(wasSlow) {}
+        was_slow(wasSlow),
+        warnings_count(warningsCount) {}
   int queries_executed;
   std::shared_ptr<folly::fbstring> query;
   int rows_received;
@@ -193,6 +195,7 @@ struct QueryLoggingData : CommonLoggingData {
   AttributeMap query_attributes;
   AttributeMap response_attributes;
   bool was_slow;
+  unsigned int warnings_count;
 };
 
 // Base class for logging events of db client apis. This should be used as an

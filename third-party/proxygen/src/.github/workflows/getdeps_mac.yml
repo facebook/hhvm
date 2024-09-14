@@ -30,6 +30,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests boost
     - name: Fetch double-conversion
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests double-conversion
+    - name: Fetch fast_float
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fast_float
     - name: Fetch fmt
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fmt
     - name: Fetch gflags
@@ -48,6 +50,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests snappy
     - name: Fetch libevent
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libevent
+    - name: Fetch liboqs
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests liboqs
     - name: Fetch autoconf
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests autoconf
     - name: Fetch automake
@@ -80,6 +84,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests boost
     - name: Build double-conversion
       run: python3 build/fbcode_builder/getdeps.py build --no-tests double-conversion
+    - name: Build fast_float
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests fast_float
     - name: Build fmt
       run: python3 build/fbcode_builder/getdeps.py build --no-tests fmt
     - name: Build gflags
@@ -98,6 +104,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests snappy
     - name: Build libevent
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libevent
+    - name: Build liboqs
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests liboqs
     - name: Build autoconf
       run: python3 build/fbcode_builder/getdeps.py build --no-tests autoconf
     - name: Build automake
@@ -122,7 +130,7 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --src-dir=. proxygen  --project-install-prefix proxygen:/usr/local
     - name: Copy artifacts
       run: python3 build/fbcode_builder/getdeps.py fixup-dyn-deps --src-dir=. proxygen _artifacts/mac  --project-install-prefix proxygen:/usr/local --final-install-prefix /usr/local
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: proxygen
         path: _artifacts

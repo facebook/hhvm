@@ -40,6 +40,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests boost
     - name: Fetch double-conversion
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests double-conversion
+    - name: Fetch fast_float
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests fast_float
     - name: Fetch gflags
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests gflags
     - name: Fetch glog
@@ -58,6 +60,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests python-six
     - name: Fetch libevent
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests libevent
+    - name: Fetch liboqs
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests liboqs
     - name: Fetch autoconf
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests autoconf
     - name: Fetch automake
@@ -90,6 +94,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests boost
     - name: Build double-conversion
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests double-conversion
+    - name: Build fast_float
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests fast_float
     - name: Build gflags
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests gflags
     - name: Build glog
@@ -108,6 +114,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests python-six
     - name: Build libevent
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libevent
+    - name: Build liboqs
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests liboqs
     - name: Build autoconf
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests autoconf
     - name: Build automake
@@ -130,7 +138,7 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --src-dir=. fbthrift  --project-install-prefix fbthrift:/usr/local
     - name: Copy artifacts
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fixup-dyn-deps --src-dir=. fbthrift _artifacts/mac  --project-install-prefix fbthrift:/usr/local --final-install-prefix /usr/local
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: fbthrift
         path: _artifacts

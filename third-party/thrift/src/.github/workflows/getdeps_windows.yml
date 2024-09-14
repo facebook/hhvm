@@ -41,6 +41,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests boost
     - name: Fetch double-conversion
       run: python build/fbcode_builder/getdeps.py fetch --no-tests double-conversion
+    - name: Fetch fast_float
+      run: python build/fbcode_builder/getdeps.py fetch --no-tests fast_float
     - name: Fetch gflags
       run: python build/fbcode_builder/getdeps.py fetch --no-tests gflags
     - name: Fetch glog
@@ -63,6 +65,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests libevent
     - name: Fetch folly
       run: python build/fbcode_builder/getdeps.py fetch --no-tests folly
+    - name: Fetch liboqs
+      run: python build/fbcode_builder/getdeps.py fetch --no-tests liboqs
     - name: Fetch fizz
       run: python build/fbcode_builder/getdeps.py fetch --no-tests fizz
     - name: Fetch mvfst
@@ -85,6 +89,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests boost
     - name: Build double-conversion
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests double-conversion
+    - name: Build fast_float
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests fast_float
     - name: Build gflags
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests gflags
     - name: Build glog
@@ -107,6 +113,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests libevent
     - name: Build folly
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests folly
+    - name: Build liboqs
+      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests liboqs
     - name: Build fizz
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests fizz
     - name: Build mvfst
@@ -117,7 +125,7 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --src-dir=. fbthrift 
     - name: Copy artifacts
       run: python build/fbcode_builder/getdeps.py fixup-dyn-deps --src-dir=. fbthrift _artifacts/windows  --final-install-prefix /usr/local
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: fbthrift
         path: _artifacts

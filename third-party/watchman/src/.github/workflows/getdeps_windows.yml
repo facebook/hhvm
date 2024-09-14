@@ -51,6 +51,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests zstd
     - name: Fetch double-conversion
       run: python build/fbcode_builder/getdeps.py fetch --no-tests double-conversion
+    - name: Fetch fast_float
+      run: python build/fbcode_builder/getdeps.py fetch --no-tests fast_float
     - name: Fetch libdwarf
       run: python build/fbcode_builder/getdeps.py fetch --no-tests libdwarf
     - name: Fetch lz4
@@ -71,6 +73,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests libevent
     - name: Fetch folly
       run: python build/fbcode_builder/getdeps.py fetch --no-tests folly
+    - name: Fetch liboqs
+      run: python build/fbcode_builder/getdeps.py fetch --no-tests liboqs
     - name: Fetch fizz
       run: python build/fbcode_builder/getdeps.py fetch --no-tests fizz
     - name: Fetch mvfst
@@ -107,6 +111,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --no-tests zstd
     - name: Build double-conversion
       run: python build/fbcode_builder/getdeps.py build --no-tests double-conversion
+    - name: Build fast_float
+      run: python build/fbcode_builder/getdeps.py build --no-tests fast_float
     - name: Build libdwarf
       run: python build/fbcode_builder/getdeps.py build --no-tests libdwarf
     - name: Build lz4
@@ -127,6 +133,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --no-tests libevent
     - name: Build folly
       run: python build/fbcode_builder/getdeps.py build --no-tests folly
+    - name: Build liboqs
+      run: python build/fbcode_builder/getdeps.py build --no-tests liboqs
     - name: Build fizz
       run: python build/fbcode_builder/getdeps.py build --no-tests fizz
     - name: Build mvfst
@@ -143,7 +151,7 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --src-dir=. watchman 
     - name: Copy artifacts
       run: python build/fbcode_builder/getdeps.py fixup-dyn-deps --src-dir=. watchman _artifacts/windows  --final-install-prefix /usr/local
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: watchman
         path: _artifacts

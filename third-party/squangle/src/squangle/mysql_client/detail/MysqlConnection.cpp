@@ -82,7 +82,7 @@ std::string MysqlConnection::getTlsVersion() const {
   return "";
 }
 
-int MysqlConnection::warningCount() const {
+unsigned int MysqlConnection::warningCount() const {
   return mysql_warning_count(mysql_);
 }
 

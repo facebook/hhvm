@@ -110,6 +110,7 @@ class FetchOperationImpl : public OperationImpl {
   uint64_t currentAffectedRows() const;
   const std::string& currentRecvGtid() const;
   const RespAttrs& currentRespAttrs() const;
+  unsigned int currentWarningsCount() const;
 
   RowStream* rowStream();
 
@@ -184,6 +185,7 @@ class FetchOperationImpl : public OperationImpl {
 
   uint64_t current_affected_rows_ = 0;
   uint64_t current_last_insert_id_ = 0;
+  unsigned int current_warnings_count_ = 0;
   std::string current_recv_gtid_;
   RespAttrs current_resp_attrs_;
 
@@ -242,6 +244,9 @@ class FetchOperation : public Operation {
   }
   const RespAttrs& currentRespAttrs() const {
     return impl_->currentRespAttrs();
+  }
+  unsigned int currentWarningsCount() const {
+    return impl_->currentWarningsCount();
   }
 
   bool noIndexUsed() const noexcept {

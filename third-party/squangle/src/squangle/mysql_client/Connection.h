@@ -268,7 +268,7 @@ class Connection {
 
   // Returns the number of errors, warnings, and notes generated during
   // execution of the previous SQL statement
-  int warningCount() const {
+  unsigned int warningCount() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->warningCount();
   }

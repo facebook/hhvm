@@ -101,7 +101,7 @@ class InternalConnection {
 
   virtual std::string getTlsVersion() const = 0;
 
-  virtual int warningCount() const = 0;
+  virtual unsigned int warningCount() const = 0;
 
   virtual std::string escapeString(std::string_view unescaped) const = 0;
 

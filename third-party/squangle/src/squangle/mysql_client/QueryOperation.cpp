@@ -56,6 +56,7 @@ void QueryOperation::notifyQuerySuccess(bool more_results) {
   query_result_->setRecvGtid(FetchOperation::currentRecvGtid());
   query_result_->setWasSlow(FetchOperation::wasSlow());
   query_result_->setResponseAttributes(FetchOperation::currentRespAttrs());
+  query_result_->setWarningsCount(FetchOperation::currentWarningsCount());
 
   query_result_->setPartial(false);
 

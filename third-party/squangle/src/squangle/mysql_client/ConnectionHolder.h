@@ -155,7 +155,7 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->getTlsVersion();
   }
 
-  [[nodiscard]] int warningCount() const override {
+  [[nodiscard]] unsigned int warningCount() const override {
     return internalConn_->warningCount();
   }
 

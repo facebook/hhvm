@@ -57,6 +57,8 @@ void MultiQueryOperation::notifyQuerySuccess(bool) {
   current_query_result_->setRecvGtid(FetchOperation::currentRecvGtid());
   current_query_result_->setResponseAttributes(
       FetchOperation::currentRespAttrs());
+  current_query_result_->setWarningsCount(
+      FetchOperation::currentWarningsCount());
 
   // Notify the callback before moving the result into the operation. This is
   // because the callback can't access the result out of the operation.

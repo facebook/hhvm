@@ -348,6 +348,14 @@ class QueryResult {
     resp_attrs_ = std::move(resp_attrs);
   }
 
+  unsigned int warningsCount() const {
+    return warnings_count_;
+  }
+
+  void setWarningsCount(unsigned int warnings_count) {
+    warnings_count_ = warnings_count;
+  }
+
   // This can be called for complete or partial results. It's going to return
   // the total of rows stored in the QueryResult.
   size_t numRows() const {
@@ -453,6 +461,7 @@ class QueryResult {
   uint64_t last_insert_id_;
   std::string recv_gtid_;
   RespAttrs resp_attrs_;
+  unsigned int warnings_count_;
 
   OperationResult operation_result_;
 
@@ -490,6 +499,12 @@ class StreamedQueryResult {
     // Will throw exception if there was an error
     checkAccessToResult();
     return resp_attrs_;
+  }
+
+  unsigned int warningsCount() {
+    // Will throw exception if there was an error
+    checkAccessToResult();
+    return warnings_count_;
   }
 
   class Iterator;
@@ -550,7 +565,8 @@ class StreamedQueryResult {
       int64_t affected_rows,
       int64_t last_insert_id,
       const std::string& recv_gtid,
-      const RespAttrs& resp_attrs);
+      const RespAttrs& resp_attrs,
+      unsigned int warnings_count);
   void setException(folly::exception_wrapper ex);
   void freeHandler();
 
@@ -571,6 +587,7 @@ class StreamedQueryResult {
   int64_t last_insert_id_ = 0;
   std::string recv_gtid_;
   RespAttrs resp_attrs_;
+  unsigned int warnings_count_ = 0;
 
   folly::exception_wrapper exception_wrapper_;
 };

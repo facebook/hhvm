@@ -79,7 +79,7 @@ class MysqlConnection : public InternalConnection {
 
   [[nodiscard]] std::string getTlsVersion() const override;
 
-  [[nodiscard]] int warningCount() const override;
+  [[nodiscard]] unsigned int warningCount() const override;
 
   [[nodiscard]] std::string escapeString(
       std::string_view unescaped) const override;

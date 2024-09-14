@@ -211,11 +211,13 @@ void StreamedQueryResult::setResult(
     int64_t affected_rows,
     int64_t last_insert_id,
     const std::string& recv_gtid,
-    const RespAttrs& resp_attrs) {
+    const RespAttrs& resp_attrs,
+    unsigned int warnings_count) {
   num_affected_rows_ = affected_rows;
   last_insert_id_ = last_insert_id;
   recv_gtid_ = recv_gtid;
   resp_attrs_ = resp_attrs;
+  warnings_count_ = warnings_count;
 }
 
 void StreamedQueryResult::setException(folly::exception_wrapper ex) {
@@ -363,7 +365,8 @@ void MultiQueryStreamHandler::handleQueryEnded(StreamedQueryResult* result) {
       operation_->currentAffectedRows(),
       operation_->currentLastInsertId(),
       operation_->currentRecvGtid(),
-      operation_->currentRespAttrs());
+      operation_->currentRespAttrs(),
+      operation_->currentWarningsCount());
   result->freeHandler();
   resumeOperation();
 }

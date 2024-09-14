@@ -151,6 +151,11 @@ const AttributeMap& FetchOperationImpl::currentRespAttrs() const {
   return current_resp_attrs_;
 }
 
+unsigned int FetchOperationImpl::currentWarningsCount() const {
+  CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
+  return current_warnings_count_;
+}
+
 RowStream* FetchOperationImpl::rowStream() {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_row_stream_.get_pointer();
@@ -215,6 +220,7 @@ void FetchOperationImpl::actionable() {
 
       current_last_insert_id_ = 0;
       current_affected_rows_ = 0;
+      current_warnings_count_ = 0;
       current_recv_gtid_ = std::string();
       query_executed_ = true;
       if (status == ERROR) {
@@ -311,6 +317,7 @@ void FetchOperationImpl::actionable() {
       } else {
         current_last_insert_id_ = conn().getLastInsertId();
         current_affected_rows_ = conn().getAffectedRows();
+        current_warnings_count_ = conn().warningCount();
         if (auto optGtid = conn().getRecvGtid()) {
           current_recv_gtid_ = *optGtid;
         }

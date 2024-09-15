@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import enum
+import types
 import typing
 import unittest
 from datetime import datetime
@@ -42,8 +45,8 @@ from thrift.test.thrift_python.union_test.thrift_types import (
 
 
 def _thrift_serialization_round_trip(
-    test,
-    serializer_module,
+    test: unittest.TestCase,
+    serializer_module: types.ModuleType,
     thrift_object: typing.Union[MutableStructOrUnion, ImmutableStructOrUnion],
 ) -> None:
     for proto in serializer_module.Protocol:
@@ -96,6 +99,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
                 r"\(field_does_not_exist\)."
             ),
         ):
+            # pyre-ignore[28]: Intentional for test
             TestUnionImmutable(field_does_not_exist=123)
 
         # Attempts to initialize an instance with more than one (valid, non-None)
@@ -118,6 +122,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
                 "is not a <class 'int'>, is actually of type <class 'str'>"
             ),
         ):
+            # pyre-ignore[6]: Intentional for test
             TestUnionImmutable(int_field="hello!")
 
         self.assertEqual(TestUnionImmutable(int_field=None), TestUnionImmutable())
@@ -132,6 +137,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
                 r"\(field_does_not_exist\)."
             ),
         ):
+            # pyre-ignore[28]: Intentional for test
             TestUnionImmutable(field_does_not_exist=None)
 
         # Initialization with multiple keywords arguments, only one of which is not None
@@ -152,6 +158,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
                 r"\(field_does_not_exist\)."
             ),
         ):
+            # pyre-ignore[28]: Intentional for test
             TestUnionImmutable(string_field="hello", field_does_not_exist=None)
 
         with self.assertRaisesRegex(
@@ -161,6 +168,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
                 r"\(field_does_not_exist\)."
             ),
         ):
+            # pyre-ignore[28]: Intentional for test
             TestUnionImmutable(field_does_not_exist=None, string_field="hello")
 
     def test_class_field_enum(self) -> None:
@@ -287,11 +295,13 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # By setting class type `Type` attr after field attrs, we get the desired behavior
         self.assertEqual(
             TestUnionAmbiguousTypeFieldNameImmutable().type,
+            # pyre-ignore[16]: There are 2 `Type`s
             TestUnionAmbiguousTypeFieldNameImmutable().Type.EMPTY,
         )
 
         self.assertEqual(
             TestUnionAmbiguousTypeFieldNameImmutable(Type=3).type,
+            # pyre-ignore[16]: There are 2 `Type`s
             TestUnionAmbiguousTypeFieldNameImmutable.Type.Type,
         )
         self.assertIsInstance(
@@ -301,6 +311,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "object attribute 'Type' is read-only"
         ):
+            # pyre-ignore[41]: Intentional for test
             type_union.Type = 1
         _thrift_serialization_round_trip(self, immutable_serializer, type_union)
 
@@ -360,6 +371,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
                 "'int' object has no attribute 'timestamp'"
             ),
         ):
+            # pyre-ignore[6]: Intentional for test
             TestUnionAdaptedTypesImmutable(adapted_i32_to_datetime=123)
 
         u2 = TestUnionAdaptedTypesImmutable(
@@ -391,6 +403,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # instead of setting one of the other fields.
         self.assertEqual(
             TestUnionAdaptedTypesImmutable.fromValue(
+                # pyre-ignore[6]: Intentional for test
                 datetime.fromtimestamp(1718728839)
             ),
             u2,
@@ -426,6 +439,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "object has no attribute 'non_existent_field'"
         ):
+            # pyre-ignore[16]: Intentional for test
             u.non_existent_field = 999
 
 
@@ -480,6 +494,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
                 r"\(field_does_not_exist\)."
             ),
         ):
+            # pyre-ignore[28]: Intentional for test
             TestUnionMutable(field_does_not_exist=123)
 
         # Attempts to initialize an instance with more than one (valid, non-None)
@@ -498,6 +513,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             TestUnionMutable(int_field="hello!")
 
         self.assertEqual(TestUnionMutable(int_field=None), TestUnionMutable())
@@ -506,6 +522,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         )
 
         with self.assertRaises(TypeError):
+            # pyre-ignore[28]: Intentional for test
             TestUnionMutable(field_does_not_exist=None)
 
         # Initialization with multiple keywords arguments, only one of which is not None
@@ -527,9 +544,11 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertEqual(u7.int_field, 42)
 
         with self.assertRaises(TypeError):
+            # pyre-ignore[28]: Intentional for test
             TestUnionMutable(string_field="hello", field_does_not_exist=None)
 
         with self.assertRaises(TypeError):
+            # pyre-ignore[28]: Intentional for test
             TestUnionMutable(field_does_not_exist=None, string_field="hello")
 
     def test_class_field_enum(self) -> None:
@@ -582,6 +601,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "'int' object has no attribute 'timestamp'"
         ):
+            # pyre-ignore[6]: Intentional for test
             TestUnionAdaptedTypesMutable(adapted_i32_to_datetime=123)
 
         u2 = TestUnionAdaptedTypesMutable(
@@ -693,6 +713,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "object has no attribute 'non_existent_field'"
         ):
+            # pyre-ignore[16]: Intentional for test
             u.non_existent_field = 999
 
     def test_del_field(self) -> None:

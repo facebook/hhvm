@@ -109,7 +109,7 @@ class {{> structs/unadapted_name}}({{!
         EMPTY: {{> structs/unadapted_name}}.Type = ...
 {{/program:generate_mutable_types}}
 {{#program:generate_mutable_types}}
-    class Type(enum.Enum):
+    class FbThriftUnionFieldEnum(enum.Enum):
         FBTHRIFT_UNION_EMPTY: {{> structs/unadapted_name}}.FbThriftUnionFieldEnum = ...
 {{/program:generate_mutable_types}}
     {{#struct:fields_ordered_by_id}}

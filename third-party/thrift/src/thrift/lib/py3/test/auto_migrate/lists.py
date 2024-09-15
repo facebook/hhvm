@@ -18,7 +18,6 @@
 import itertools
 import unittest
 
-from python_test.testing_utils import Untruthy
 from testing.types import (
     Color,
     ColorGroups,
@@ -31,6 +30,8 @@ from testing.types import (
     Uint32List,
 )
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+
+from thrift.lib.python.test.testing_utils import Untruthy
 from thrift.py3.types import Container
 
 

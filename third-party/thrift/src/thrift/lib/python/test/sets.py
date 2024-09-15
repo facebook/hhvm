@@ -40,7 +40,7 @@ from python_test.sets.thrift_types import (
     SetI32Lists,
     SetSetI32Lists,
 )
-from python_test.testing_utils import Untruthy
+from thrift.lib.python.test.testing_utils import Untruthy
 
 
 @parameterized_class(

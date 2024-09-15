@@ -19,9 +19,10 @@ import copy
 import unittest
 from typing import AbstractSet, Sequence, Tuple
 
-from python_test.testing_utils import Untruthy
 from testing.types import SetI32, SetI32Lists, SetSetI32Lists, SetTypes
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+
+from thrift.lib.python.test.testing_utils import Untruthy
 from thrift.py3.types import Container
 
 

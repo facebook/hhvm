@@ -41,7 +41,7 @@ from python_test.lists.thrift_types import (
     StringList,
     StrList2D,
 )
-from python_test.testing_utils import Untruthy
+from thrift.lib.python.test.testing_utils import Untruthy
 
 
 class ImmutableListTests(unittest.TestCase):

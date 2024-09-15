@@ -663,17 +663,20 @@ class expected {
   }
 
   template <
-      typename U,
-      typename G,
-      WHISKER_EXPECTED_REQUIRES(!std::is_void_v<U>)>
-  friend bool operator==(const expected<T, E>& lhs, const expected<U, G>& rhs) {
-    return lhs.storage_ == rhs.storage_;
+      typename T2,
+      typename E2,
+      WHISKER_EXPECTED_REQUIRES(!std::is_void_v<T2>)>
+  friend bool operator==(
+      const expected<T, E>& lhs, const expected<T2, E2>& rhs) {
+    return lhs.has_value() ? (rhs.has_value() && *lhs == *rhs)
+                           : (!rhs.has_value() && lhs.error() == rhs.error());
   }
-  template <typename U>
-  friend bool operator==(const expected<T, E>& lhs, U&& rhs) {
-    return lhs.has_value() && *lhs == std::forward<U>(rhs);
+  template <typename T2>
+  friend bool operator==(const expected<T, E>& lhs, const T2& rhs) {
+    return lhs.has_value() && *lhs == rhs;
   }
-  friend bool operator==(const expected<T, E>& lhs, const unexpected<E>& rhs) {
+  template <typename E2>
+  friend bool operator==(const expected<T, E>& lhs, const unexpected<E2>& rhs) {
     return !lhs.has_value() && lhs.error() == rhs.error();
   }
 
@@ -685,11 +688,12 @@ class expected {
   friend bool operator!=(const expected<T, E>& lhs, const expected<U, G>& rhs) {
     return !(lhs == rhs);
   }
-  template <typename U>
-  friend bool operator!=(const expected<T, E>& lhs, U&& rhs) {
-    return !(lhs == std::forward<U>(rhs));
+  template <typename T2>
+  friend bool operator!=(const expected<T, E>& lhs, const T2& rhs) {
+    return !(lhs == rhs);
   }
-  friend bool operator!=(const expected<T, E>& lhs, const unexpected<E>& rhs) {
+  template <typename E2>
+  friend bool operator!=(const expected<T, E>& lhs, const unexpected<E2>& rhs) {
     return !(lhs == rhs);
   }
 

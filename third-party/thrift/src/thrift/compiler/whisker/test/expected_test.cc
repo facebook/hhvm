@@ -209,13 +209,17 @@ TEST(ExpectedTest, comparison) {
   expected<int, int> e1 = 42;
   expected<int, int> e2 = 42;
   expected<int, int> e3 = unexpected(42);
+  expected<short, short> e4 = unexpected(42);
 
   EXPECT_EQ(e1, e2);
   EXPECT_EQ(e1, 42);
+  EXPECT_EQ(e1, short(42));
   EXPECT_NE(e1, e3);
   EXPECT_NE(e3, e2);
   EXPECT_NE(e3, 42);
   EXPECT_EQ(e3, unexpected(42));
+  EXPECT_EQ(e3, unexpected(short(42)));
+  EXPECT_EQ(e3, e4);
 }
 
 TEST(ExpectedTest, LWG_3836) {

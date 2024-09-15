@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import dataclasses
-import importlib
+# pyre-strict
+
 import pickle
 import types
 import typing
@@ -81,14 +81,18 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
 )
 
-max_byte = 2**7 - 1
-max_i16 = 2**15 - 1
-max_i32 = 2**31 - 1
-max_i64 = 2**63 - 1
+max_byte: int = 2**7 - 1
+max_i16: int = 2**15 - 1
+max_i32: int = 2**31 - 1
+max_i64: int = 2**63 - 1
 
 
 def _thrift_serialization_round_trip(
-    test, module, control: typing.Union[MutableStructOrUnion, ImmutableStructOrUnion]
+    test: unittest.TestCase,
+    module: types.ModuleType,
+    control: typing.Union[
+        MutableStructOrUnion, ImmutableStructOrUnion, MutableGeneratedError
+    ],
 ) -> None:
     for proto in module.Protocol:
         encoded = module.serialize(control, protocol=proto)
@@ -100,7 +104,8 @@ def _thrift_serialization_round_trip(
 
 
 def _pickle_round_trip(
-    test, control: typing.Union[MutableStructOrUnion, ImmutableStructOrUnion]
+    test: unittest.TestCase,
+    control: typing.Union[MutableStructOrUnion, ImmutableStructOrUnion],
 ) -> None:
     pickled = pickle.dumps(control, protocol=pickle.HIGHEST_PROTOCOL)
     unpickled = pickle.loads(pickled)
@@ -157,6 +162,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
                 "<class 'int'>."
             ),
         ):
+            # pyre-ignore[6]: Intentional for test
             w(unqualified_string=42)
 
     def test_call_with_None(self) -> None:
@@ -214,6 +220,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
                 "got: <class 'int'>"
             ),
         ):
+            # pyre-ignore[6]: Intentional for test
             TestStructImmutable(unqualified_string=42)
 
     def test_equality_and_hashability(self) -> None:
@@ -270,6 +277,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
     def test_iteration(self) -> None:
         # Iterating over the class yields tuples of (field_name, None).
         self.assertSetEqual(
+            # pyre-ignore[6]: Fixme: type error to be addressed later
             set(TestStructImmutable),
             {("unqualified_string", None), ("optional_string", None)},
         )
@@ -374,6 +382,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         ):
             # Thrift simply passes the value to the adapter class. All type
             # checking is performed within the adapter class.
+            # pyre-ignore[6]: Intentional for test
             s = s(unqualified_adapted_i32_to_datetime=123)
 
         s = s(unqualified_adapted_string_to_i32=999)
@@ -394,7 +403,7 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             ),
         ]
     )
-    def test_adapter_serialization_round_trip(self, struct) -> None:
+    def test_adapter_serialization_round_trip(self, struct: ImmutableStruct) -> None:
         _thrift_serialization_round_trip(self, immutable_serializer, struct)
         _pickle_round_trip(self, struct)
 
@@ -520,6 +529,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
     def test_iteration(self) -> None:
         # Iterating over the class yields tuples of (field_name, None).
         self.assertSetEqual(
+            # pyre-ignore[6]: Fixme: type error to be addressed later
             set(TestStructMutable),
             {("unqualified_string", None), ("optional_string", None)},
         )
@@ -583,13 +593,13 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
     def _assert_field_behavior(
         self,
-        struct,
+        struct: MutableStruct,
         field_name: str,
-        expected_default_value,
-        value,
-        invalid_value,
-        overflow_value=None,
-    ):
+        expected_default_value: object,
+        value: object,
+        invalid_value: object,
+        overflow_value: typing.Optional[object] = None,
+    ) -> None:
         """
         This function is a helper function used to assert the behavior of a
         specific field in a structure.
@@ -616,6 +626,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(value, getattr(struct, field_name))
         self.assertTrue(mutable_isset(struct)[field_name])
 
+        # pyre-ignore[16]: internal, could be remove/replaced later
         struct._fbthrift_internal_resetFieldToStandardDefault(field_name)
         if expected_default_value is not None:
             self.assertIsNotNone(getattr(struct, field_name))
@@ -664,8 +675,13 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         ]
     )
     def test_create_and_assign_for_all_primitive_types(
-        self, field_name, expected_default_value, value, invalid_value, overflow_value
-    ):
+        self,
+        field_name: str,
+        expected_default_value: object,
+        value: object,
+        invalid_value: object,
+        overflow_value: object,
+    ) -> None:
         s = TestStructAllThriftPrimitiveTypesMutable()
         self._assert_field_behavior(
             s,
@@ -691,8 +707,13 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         ]
     )
     def test_create_and_assign_for_all_primitive_types_with_default_values(
-        self, field_name, expected_default_value, value, invalid_value, overflow_value
-    ):
+        self,
+        field_name: str,
+        expected_default_value: object,
+        value: object,
+        invalid_value: object,
+        overflow_value: object,
+    ) -> None:
         s = TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable()
         self._assert_field_behavior(
             s,
@@ -722,10 +743,12 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # Assigning `None` raises a `TypeError`
         with self.assertRaises(TypeError):
+            # pyre-ignore[8]: Intentional for test
             s.unqualified_i32 = None
 
         # Assigning a value of the wrong type raises a `TypeError`
         with self.assertRaises(TypeError):
+            # pyre-ignore[8]: Intentional for test
             s.unqualified_i32 = "This is not an integer"
 
         # Boundary check for integral types
@@ -748,10 +771,12 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # Assigning `None` raises a `TypeError`
         with self.assertRaises(TypeError):
+            # pyre-ignore[8]: Intentional for test
             s.unqualified_i32 = None
 
         # Assigning a value of the wrong type raises a `TypeError`
         with self.assertRaises(TypeError):
+            # pyre-ignore[8]: Intentional for test
             s.unqualified_i32 = "This is not an integer"
 
         # Boundary check for integral types
@@ -797,6 +822,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             s.unqualified_list_i32[4] = 2
 
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_list_i32[4] = "Not integer"
 
         self.assertEqual([2, 2, 3], s.unqualified_list_i32)
@@ -847,6 +873,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([11, 12, 13], lst2)
 
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[6]: Intentional for test
             lst2.extend([14, 15, "16", 17])
 
         # basic exception safety
@@ -860,8 +887,10 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # It is possible to assign any value that supports `len()` and iteration
         s1.unqualified_list_i32 = [1, 2, 3]
         self.assertEqual([1, 2, 3], s1.unqualified_list_i32)
+        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_list_i32 = {11, 12, 13}
         self.assertEqual([11, 12, 13], s1.unqualified_list_i32)
+        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_list_i32 = (21, 22, 23)
         self.assertEqual([21, 22, 23], s1.unqualified_list_i32)
         s1.unqualified_list_i32 = []
@@ -878,28 +907,34 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s3 = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3])
         # Strong exception safety
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[8]: Intentional for test
             s3.unqualified_list_i32 = [11, 12, 13, "Not an Integer"]
         self.assertEqual([1, 2, 3], s3.unqualified_list_i32)
 
     def test_assign_for_set(self) -> None:
         s1 = TestStructAllThriftContainerTypesMutable(
+            # pyre-ignore[6]: Intentional for test
             unqualified_set_string=["a", "b", "c"]
         )
 
         # It is possible to assign any value that supports iteration
+        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_set_string = ["a", "b", "c"]
         self.assertEqual({"a", "b", "c"}, s1.unqualified_set_string)
         s1.unqualified_set_string = {"aa", "bb", "cc"}
         self.assertEqual({"aa", "bb", "cc"}, s1.unqualified_set_string)
+        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_set_string = ("aaa", "bbb", "ccc")
         self.assertEqual({"aaa", "bbb", "ccc"}, s1.unqualified_set_string)
 
         # even from iterator, this is not possible for list field because of
         # `len()` requirement
         my_iter = iter(["x", "y", "z"])
+        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_set_string = my_iter
         self.assertEqual({"x", "y", "z"}, s1.unqualified_set_string)
 
+        # pyre-ignore[6]: Fixme: type error to be addressed later
         s2 = TestStructAllThriftContainerTypesMutable(unqualified_set_string=[])
         # my_set and s2.unqualified_set_string are different sets
         my_set = {"a", "b", "c"}
@@ -910,10 +945,12 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(3, len(s2.unqualified_set_string))
 
         s3 = TestStructAllThriftContainerTypesMutable(
+            # pyre-ignore[6]: Fixme: type error to be addressed later
             unqualified_set_string=["a", "b", "c"]
         )
         # Strong exception safety
         with self.assertRaisesRegex(TypeError, "Expected type <class 'str'>"):
+            # pyre-ignore[8]: Fixme: type error to be addressed later
             s3.unqualified_set_string = ["aa", "bb", "cc", 999]
         self.assertEqual({"a", "b", "c"}, s3.unqualified_set_string)
 
@@ -930,6 +967,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             def items(self):
                 return (("aa", 11), ("bb", 22))
 
+        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_map_string_i32 = MyMapping()
         self.assertEqual({"aa": 11, "bb": 22}, s1.unqualified_map_string_i32)
 
@@ -946,6 +984,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         )
         # Strong exception safety
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[8]: Intentional for test
             s3.unqualified_map_string_i32 = {"x": 1, "y": "Not an Integer"}
         self.assertEqual({"a": 1, "b": 2}, s3.unqualified_map_string_i32)
 
@@ -961,23 +1000,27 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             ),
             (
                 TestStructAllThriftContainerTypesMutable(
+                    # pyre-ignore[6]: Fixme: type error to be addressed later
                     unqualified_set_string=["1", "2", "3"]
                 ),
             ),
             (
                 TestStructAllThriftContainerTypesMutable(
+                    # pyre-ignore[6]: Fixme: type error to be addressed later
                     optional_set_string=["11", "22", "33"]
                 ),
             ),
             (
                 TestStructAllThriftContainerTypesMutable(
+                    # pyre-ignore[6]: Fixme: type error to be addressed later
                     unqualified_set_string=["1", "2", "3"],
+                    # pyre-ignore[6]: Fixme: type error to be addressed later
                     optional_set_string=["11", "22", "33"],
                 ),
             ),
         ]
     )
-    def test_container_serialization_round_trip(self, struct) -> None:
+    def test_container_serialization_round_trip(self, struct: MutableStruct) -> None:
         _thrift_serialization_round_trip(self, mutable_serializer, struct)
         _pickle_round_trip(self, struct)
 
@@ -999,6 +1042,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "'int' object has no attribute 'timestamp'"
         ):
+            # pyre-ignore[8]: Intentional for test
             s.unqualified_adapted_i32_to_datetime = 123
 
         s.unqualified_adapted_string_to_i32 = 999
@@ -1019,7 +1063,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             ),
         ]
     )
-    def test_adapter_serialization_round_trip(self, struct) -> None:
+    def test_adapter_serialization_round_trip(self, struct: MutableStruct) -> None:
         _thrift_serialization_round_trip(self, mutable_serializer, struct)
         _pickle_round_trip(self, struct)
 
@@ -1039,6 +1083,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Initializing the `set` member with an iterable that contains duplicate
         # elements is fine. Thrift removes the duplicates.
         s = TestStructAllThriftContainerTypesMutable(
+            # pyre-ignore[6]: Fixme: type error to be addressed later
             unqualified_set_string=["1", "2", "2", "3", "3"]
         )
         self.assertEqual(3, len(s.unqualified_set_string))
@@ -1050,11 +1095,13 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
             s = TestStructAllThriftContainerTypesMutable(
+                # pyre-ignore[6]: Fixme: type error to be addressed later
                 unqualified_set_string=["1", "2", "2", 9999, "3", "3"]
             )
 
     def test_create_and_assign_for_set(self) -> None:
         s = TestStructAllThriftContainerTypesMutable(
+            # pyre-ignore[6]: Fixme: type error to be addressed later
             unqualified_set_string=["1", "2", "3"]
         )
 
@@ -1090,6 +1137,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_set_string.add(999)
 
         # `remove()`
@@ -1099,6 +1147,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_set_string.remove(111)
 
         # `remove()` raises a `KeyError` if key is absent
@@ -1111,6 +1160,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # `discard()` does not raises a `KeyError` or `TypeError`
         s.unqualified_set_string.discard("111")
+        # pyre-ignore[6]: Intentional for test
         s.unqualified_set_string.discard(111)
 
         set1 = s.unqualified_set_string
@@ -1141,6 +1191,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertFalse(set2.isdisjoint({"3", "4"}))
 
         other = TestStructAllThriftContainerTypesMutable(
+            # pyre-ignore[6]: Fixme: type error to be addressed later
             unqualified_set_string=["2", "3", "4"]
         )
         other_set = other.unqualified_set_string
@@ -1280,11 +1331,13 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32["a"] = "Not an integer"
 
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32[999] = 11
 
         # `__iter__()`
@@ -1503,7 +1556,9 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             ),
         ]
     )
-    def test_exception_serialization_round_trip(self, struct_or_exception) -> None:
+    def test_exception_serialization_round_trip(
+        self, struct_or_exception: typing.Union[MutableStruct, MutableGeneratedError]
+    ) -> None:
         _thrift_serialization_round_trip(self, mutable_serializer, struct_or_exception)
 
     def test_call_as_deepcopy(self) -> None:

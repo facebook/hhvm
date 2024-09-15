@@ -27,6 +27,7 @@ class Fiery(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_wit
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Fiery": ...  # type: ignore
     def _to_py3(self) -> "module.types.Fiery": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
 
@@ -44,6 +45,7 @@ class Serious(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_w
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Serious": ...  # type: ignore
     def _to_py3(self) -> "module.types.Serious": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
 
@@ -63,6 +65,7 @@ class ComplexFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_co
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexFieldNames": ...  # type: ignore
     def _to_py3(self) -> "module.types.ComplexFieldNames": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
 
@@ -82,6 +85,7 @@ class CustomFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_com
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomFieldNames": ...  # type: ignore
     def _to_py3(self) -> "module.types.CustomFieldNames": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
 
@@ -101,6 +105,7 @@ class ExceptionWithPrimitiveField(_fbthrift_python_exceptions.GeneratedError, _f
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithPrimitiveField": ...  # type: ignore
     def _to_py3(self) -> "module.types.ExceptionWithPrimitiveField": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
 
@@ -120,6 +125,7 @@ class ExceptionWithStructuredAnnotation(_fbthrift_python_exceptions.GeneratedErr
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithStructuredAnnotation": ...  # type: ignore
     def _to_py3(self) -> "module.types.ExceptionWithStructuredAnnotation": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
 
@@ -135,6 +141,7 @@ class Banal(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_wit
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Banal": ...  # type: ignore
     def _to_py3(self) -> "module.types.Banal": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Banal": ...  # type: ignore
 

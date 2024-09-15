@@ -120,17 +120,21 @@ const object& eval_context::global_scope() const {
   return global_scope_;
 }
 
-void eval_context::bind_local(std::string name, object value) {
+expected<std::monostate, eval_name_already_bound_error>
+eval_context::bind_local(std::string name, object value) {
   assert(!stack_.empty());
   if (auto [_, inserted] =
           stack_.back().locals().insert(std::pair{name, std::move(value)});
       !inserted) {
-    throw eval_name_already_bound_error(std::move(name));
+    return unexpected(eval_name_already_bound_error(std::move(name)));
   }
+  return {};
 }
 
-const object& eval_context::lookup_object(
-    const std::vector<std::string>& path) {
+expected<
+    std::reference_wrapper<const object>,
+    std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
+eval_context::lookup_object(const std::vector<std::string>& path) {
   assert(!stack_.empty());
 
   if (path.empty()) {
@@ -158,17 +162,18 @@ const object& eval_context::lookup_object(
         stack_.rend(),
         std::back_inserter(searched_scopes),
         [](const auto& scope) { return scope.this_ref(); });
-    throw eval_scope_lookup_error(path.front(), std::move(searched_scopes));
+    return unexpected(
+        eval_scope_lookup_error(path.front(), std::move(searched_scopes)));
   }
 
   for (auto component = std::next(path.begin()); component != path.end();
        ++component) {
     const object* next = find_property(*current, *component);
     if (next == nullptr) {
-      throw eval_property_lookup_error(
+      return unexpected(eval_property_lookup_error(
           *current, /* missing_from */
           std::vector<std::string>(path.begin(), component), /* success_path */
-          *component /* missing_name */);
+          *component /* missing_name */));
     }
     current = next;
   }
@@ -176,24 +181,5 @@ const object& eval_context::lookup_object(
   assert(current != nullptr);
   return *current;
 }
-
-eval_scope_lookup_error::eval_scope_lookup_error(
-    std::string property_name, std::vector<object> searched_scopes)
-    : eval_error(fmt::format("name '{}' not found", property_name)),
-      property_name_(std::move(property_name)),
-      searched_scopes_(std::move(searched_scopes)) {}
-
-eval_property_lookup_error::eval_property_lookup_error(
-    object missing_from,
-    std::vector<std::string> success_path,
-    std::string property_name)
-    : eval_error(fmt::format("name '{}' not found", property_name)),
-      missing_from_(std::move(missing_from)),
-      success_path_(std::move(success_path)),
-      property_name_(std::move(property_name)) {}
-
-eval_name_already_bound_error::eval_name_already_bound_error(std::string name)
-    : eval_error(fmt::format("name '{}' is already bound", name)),
-      name_(std::move(name)) {}
 
 } // namespace whisker

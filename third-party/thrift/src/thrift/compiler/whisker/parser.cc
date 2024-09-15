@@ -655,9 +655,6 @@ class parser {
   /**
    * Parses the grammar for "body*". If there are no bodies present, returns an
    * empty vector.
-   *
-   * Post-condition:
-   *   - result.has_value() == true
    */
   parsed_object<ast::bodies> parse_bodies(parser_scan_window scan) {
     ast::bodies bodies;

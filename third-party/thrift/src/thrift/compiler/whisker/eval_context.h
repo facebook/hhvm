@@ -16,17 +16,110 @@
 
 #pragma once
 
+#include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/object.h>
 
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
 
 namespace whisker {
+
+/**
+ * Error reported when a name spelled in a template is not found in the current
+ * eval_context's lexical scope.
+ *
+ * This error only applies to top-level identifiers. That is, if there is a
+ * lookup for `foo.bar.abc`, then this error is only reported if `foo` is not
+ * found in the eval_context. The reason is that after the initial lookup in the
+ * language scope, name resolution no longer pertains to the templating language
+ * scope — it's a matter of the Whisker object model afterwards
+ * (whisker::object).
+ */
+class eval_scope_lookup_error {
+ public:
+  explicit eval_scope_lookup_error(
+      std::string property_name, std::vector<object> searched_scopes)
+      : property_name_(std::move(property_name)),
+        searched_scopes_(std::move(searched_scopes)) {}
+
+  /**
+   * The name of the property that was missing.
+   */
+  const std::string& property_name() const { return property_name_; }
+  /**
+   * The stack of objects that were searched for the property from the current
+   * eval_context.
+   *
+   * The order of objects on the stack is the order of search (most to least
+   * local).
+   */
+  const std::vector<object>& searched_scopes() const {
+    return searched_scopes_;
+  }
+
+ private:
+  std::string property_name_;
+  std::vector<object> searched_scopes_;
+};
+
+/**
+ * Error reported when a property name on a whisker::object is missing.
+ *
+ * This error is reported when a non-top-level property is accessed. That is, if
+ * there is a lookup for `foo.bar.abc`, then this error is only reported if
+ * `bar` is not found on the object `foo`, or `abc` is not found on the object
+ * `foo.bar`.
+ */
+class eval_property_lookup_error {
+ public:
+  explicit eval_property_lookup_error(
+      object missing_from,
+      std::vector<std::string> success_path,
+      std::string property_name)
+      : missing_from_(std::move(missing_from)),
+        success_path_(std::move(success_path)),
+        property_name_(std::move(property_name)) {}
+
+  /**
+   * The object on which the property named by property_name() was missing.
+   */
+  const object& missing_from() const { return missing_from_; }
+  /**
+   * The path of property lookups that succeeded before the failure.
+   */
+  const std::vector<std::string>& success_path() const { return success_path_; }
+  /**
+   * The name of the property that was missing.
+   */
+  const std::string& property_name() const { return property_name_; }
+
+ private:
+  object missing_from_;
+  std::vector<std::string> success_path_;
+  std::string property_name_;
+};
+
+/**
+ * Error reported when a name is bound more than once in the same scope.
+ *
+ * While names can shadow each other in the same eval_context, the shadowed
+ * names must be in a different lexical scope.
+ */
+class eval_name_already_bound_error {
+ public:
+  explicit eval_name_already_bound_error(std::string name)
+      : name_(std::move(name)) {}
+
+  const std::string& name() const { return name_; }
+
+ private:
+  std::string name_;
+};
 
 /**
  * An eval_context is responsible for name resolution within Whisker templates
@@ -91,11 +184,12 @@ class eval_context {
    * which means that pop_scope() will unbound this name. Locals shadow names in
    * the current scope as well as parent scopes.
    *
-   * Throws:
+   * Errors:
    *   - eval_name_already_bound_error if the name already exists as a local in
    *     the current scope.
    */
-  void bind_local(std::string name, object value);
+  expected<std::monostate, eval_name_already_bound_error> bind_local(
+      std::string name, object value);
 
   /**
    * Performs a lexical search for an object by name (chain of properties)
@@ -107,13 +201,16 @@ class eval_context {
    * Preconditions:
    *   - The provided path is a series of valid Whisker identifier
    *
-   * Throws:
+   * Errors:
    *   - eval_scope_lookup_error if the first identifier of the path is not
    *     found in the current scope.
    *   - eval_property_lookup_error if any subsequent identifier is not found in
    *     the chain of resolved whisker::objects.
    */
-  const object& lookup_object(const std::vector<std::string>& path);
+  expected<
+      std::reference_wrapper<const object>,
+      std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
+  lookup_object(const std::vector<std::string>& path);
 
  private:
   /**
@@ -170,100 +267,6 @@ class eval_context {
   // push_scope() / pop_scope() are called. This is because there may be
   // manaed_object's passed around with references into those scope objects.
   std::deque<lexical_scope> stack_;
-};
-
-/**
- * Base class for all exceptions thrown by the Whisker evaluation engine.
- */
-class eval_error : public std::runtime_error {
- public:
-  using std::runtime_error::runtime_error;
-};
-
-/**
- * Error thrown when a name spelled in a template is not found in the current
- * eval_context's lexical scope.
- *
- * This error only applies to top-level identifiers. That is, if there is a
- * lookup for `foo.bar.abc`, then this error is only thrown if `foo` is not
- * found in the eval_context. The reason is that after the initial lookup in the
- * language scope, name resolution no longer pertains to the templating language
- * scope — it's a matter of the Whisker object model afterwards
- * (whisker::object).
- */
-class eval_scope_lookup_error : public eval_error {
- public:
-  explicit eval_scope_lookup_error(
-      std::string property_name, std::vector<object> searched_scopes);
-
-  /**
-   * The name of the property that was missing.
-   */
-  const std::string& property_name() const { return property_name_; }
-  /**
-   * The stack of objects that were searched for the property from the current
-   * eval_context.
-   *
-   * The order of objects on the stack is the order of search (most to least
-   * local).
-   */
-  const std::vector<object>& searched_scopes() const {
-    return searched_scopes_;
-  }
-
- private:
-  std::string property_name_;
-  std::vector<object> searched_scopes_;
-};
-
-/**
- * Error thrown when a property name on a whisker::object is missing.
- *
- * This error is thrown when a non-top-level property is accessed. That is, if
- * there is a lookup for `foo.bar.abc`, then this error is only thrown if `bar`
- * is not found on the object `foo`, or `abc` is not found on the object
- * `foo.bar`.
- */
-class eval_property_lookup_error : public eval_error {
- public:
-  explicit eval_property_lookup_error(
-      object missing_from,
-      std::vector<std::string> success_path,
-      std::string property_name);
-
-  /**
-   * The object on which the property named by property_name() was missing.
-   */
-  const object& missing_from() const { return missing_from_; }
-  /**
-   * The path of property lookups that succeeded before the failure.
-   */
-  const std::vector<std::string>& success_path() const { return success_path_; }
-  /**
-   * The name of the property that was missing.
-   */
-  const std::string& property_name() const { return property_name_; }
-
- private:
-  object missing_from_;
-  std::vector<std::string> success_path_;
-  std::string property_name_;
-};
-
-/**
- * Error thrown when a name is bound more than once in the same scope.
- *
- * While names can shadow each other in the same eval_context, the shadowed
- * names must be in a different lexical scope.
- */
-class eval_name_already_bound_error : public eval_error {
- public:
-  explicit eval_name_already_bound_error(std::string name);
-
-  const std::string& name() const { return name_; }
-
- private:
-  std::string name_;
 };
 
 } // namespace whisker

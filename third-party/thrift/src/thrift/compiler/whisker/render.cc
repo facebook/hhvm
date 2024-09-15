@@ -20,6 +20,7 @@
 #include <thrift/compiler/whisker/render.h>
 
 #include <cmath>
+#include <exception>
 #include <functional>
 #include <ostream>
 #include <string>
@@ -194,6 +195,15 @@ bool coerce_to_boolean(const map&) {
   return true;
 }
 
+/**
+ * A fatal error that aborts rendering but contains no messaging. Diagnostics
+ * should be attached to the diagnostics_engine.
+ *
+ * This is only used within the render_engine implementation to abruptly
+ * terminate rendering.
+ */
+struct abort_rendering : std::exception {};
+
 class render_engine {
  public:
   explicit render_engine(
@@ -211,19 +221,13 @@ class render_engine {
       auto flush_guard = out_.make_flush_guard();
       visit(root.body_elements);
       return true;
-    } catch (const eval_error&) {
+    } catch (const abort_rendering&) {
       // errors should have been reported through diagnostics_engine
       return false;
     }
   }
 
  private:
-  // A fatal error that aborts rendering but contains no messaging. Diagnostics
-  // should be attached to the diagnostics_engine.
-  struct abort_rendering : eval_error {
-    abort_rendering() : eval_error("rendering aborted") {}
-  };
-
   // Reports a diagnostic but avoids generating the diagnostic message unless
   // the diagnostic is actually reported. This can avoid expensive computation
   // which is then thrown away without being used.
@@ -279,56 +283,59 @@ class render_engine {
         });
 
     auto undefined_diag_level = opts_.strict_undefined_variables;
-    try {
-      return eval_context_.lookup_object(path);
-    } catch (const eval_scope_lookup_error& ex) {
-      std::vector<std::string> scope_trace;
-      scope_trace.reserve(ex.searched_scopes().size());
-      for (std::size_t i = 0; i < ex.searched_scopes().size(); ++i) {
-        object_print_options print_opts;
-        print_opts.max_depth = 1;
-        scope_trace.push_back(fmt::format(
-            "#{} {}",
-            i,
-            to_string(ex.searched_scopes()[i], std::move(print_opts))));
-      }
 
-      maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
-        return fmt::format(
-            "Name '{}' was not found in the current scope. Tried to search through the following scopes:\n{}",
-            ex.property_name(),
-            fmt::join(scope_trace, "\n"));
-      });
-      if (undefined_diag_level == diagnostic_level::error) {
-        // Fail rendering in strict mode
-        throw;
-      }
-    } catch (const eval_property_lookup_error& ex) {
-      auto src_range = detail::variant_match(
-          variable_lookup.chain,
-          [&](ast::variable_lookup::this_ref) -> source_range {
-            return variable_lookup.loc;
-          },
-          [&](const std::vector<ast::identifier>& chain) -> source_range {
-            // Move to the start of the identifier that failed to resolve
-            return chain[ex.success_path().size()].loc;
+    return whisker::visit(
+        eval_context_.lookup_object(path),
+        [](const object& value) -> const object& { return value; },
+        [&](const eval_scope_lookup_error& err) -> const object& {
+          std::vector<std::string> scope_trace;
+          scope_trace.reserve(err.searched_scopes().size());
+          for (std::size_t i = 0; i < err.searched_scopes().size(); ++i) {
+            object_print_options print_opts;
+            print_opts.max_depth = 1;
+            scope_trace.push_back(fmt::format(
+                "#{} {}",
+                i,
+                to_string(err.searched_scopes()[i], std::move(print_opts))));
+          }
+
+          maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
+            return fmt::format(
+                "Name '{}' was not found in the current scope. Tried to search through the following scopes:\n{}",
+                err.property_name(),
+                fmt::join(scope_trace, "\n"));
           });
-      maybe_report(std::move(src_range), undefined_diag_level, [&] {
-        object_print_options print_opts;
-        print_opts.max_depth = 1;
-        return fmt::format(
-            "Object '{}' has no property named '{}'. The object with the missing property is:\n{}",
-            fmt::join(ex.success_path(), "."),
-            ex.property_name(),
-            to_string(ex.missing_from(), std::move(print_opts)));
-      });
-      if (undefined_diag_level == diagnostic_level::error) {
-        // Fail rendering in strict mode
-        throw;
-      }
-    }
-    // If we get here, we are in non-strict mode.
-    return whisker::make::null;
+          if (undefined_diag_level == diagnostic_level::error) {
+            // Fail rendering in strict mode
+            throw abort_rendering();
+          }
+          return whisker::make::null;
+        },
+        [&](const eval_property_lookup_error& err) -> const object& {
+          auto src_range = detail::variant_match(
+              variable_lookup.chain,
+              [&](ast::variable_lookup::this_ref) -> source_range {
+                return variable_lookup.loc;
+              },
+              [&](const std::vector<ast::identifier>& chain) -> source_range {
+                // Move to the start of the identifier that failed to resolve
+                return chain[err.success_path().size()].loc;
+              });
+          maybe_report(std::move(src_range), undefined_diag_level, [&] {
+            object_print_options print_opts;
+            print_opts.max_depth = 1;
+            return fmt::format(
+                "Object '{}' has no property named '{}'. The object with the missing property is:\n{}",
+                fmt::join(err.success_path(), "."),
+                err.property_name(),
+                to_string(err.missing_from(), std::move(print_opts)));
+          });
+          if (undefined_diag_level == diagnostic_level::error) {
+            // Fail rendering in strict mode
+            throw abort_rendering();
+          }
+          return whisker::make::null;
+        });
   }
 
   void visit(const ast::variable& variable) {

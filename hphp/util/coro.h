@@ -22,12 +22,12 @@
 #include <folly/Try.h>
 #include <folly/Unit.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/coro/AsyncScope.h>
-#include <folly/experimental/coro/Baton.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncScope.h>
+#include <folly/coro/Baton.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Collect.h>
+#include <folly/coro/Sleep.h>
+#include <folly/coro/Task.h>
 
 #include <cstddef>
 #include <chrono>

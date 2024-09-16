@@ -551,9 +551,7 @@ void DynamicStructurePatch<IsUnion>::apply(detail::Badge, Object& obj) const {
       }
     }
     void remove(detail::Badge, FieldId id) { obj.erase(id); }
-    void ensure(detail::Badge, FieldId id, Value v) {
-      detail::convertStringToBinary(v);
-
+    void ensure(detail::Badge, FieldId id, const Value& v) {
       if (obj.contains(id)) {
         return;
       }
@@ -562,7 +560,9 @@ void DynamicStructurePatch<IsUnion>::apply(detail::Badge, Object& obj) const {
         obj.members()->clear();
       }
 
-      obj[id] = std::move(v);
+      auto copied = folly::copy(v);
+      detail::convertStringToBinary(copied);
+      obj[id] = std::move(copied);
     }
     Object& obj;
   };

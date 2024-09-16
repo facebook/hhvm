@@ -65,7 +65,8 @@ void setRecordBucketDataContext(
   auto cb = [&pairs](
                 std::string key,
                 const uint64_t bucket,
-                const std::string_view /*poolRecorded*/) {
+                const std::string_view /* poolRecorded */,
+                std::optional<int64_t> /* usecaseId */) {
     pairs.push_back({key, folly::to<std::string>(bucket)});
   };
   auto ctx = ProxyRequestContextWithInfo<RouterInfo>::createRecording(

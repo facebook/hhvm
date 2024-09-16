@@ -101,7 +101,8 @@ class McBucketRoute {
       ctx->recordBucketizationData(
           req.key_ref()->keyWithoutRoute().str(),
           bucketId,
-          bucketizationKeyspace_);
+          bucketizationKeyspace_,
+          req);
     }
     return fiber_local<RouterInfo>::runWithLocals([this, &req, &t, bucketId]() {
       fiber_local<RouterInfo>::setBucketId(bucketId);
@@ -120,7 +121,8 @@ class McBucketRoute {
       ctx->recordBucketizationData(
           req.key_ref()->keyWithoutRoute().str(),
           bucketId,
-          bucketizationKeyspace_);
+          bucketizationKeyspace_,
+          req);
       return createReply<Request>(DefaultReply, req);
     }
     return routeImpl(req, bucketId);

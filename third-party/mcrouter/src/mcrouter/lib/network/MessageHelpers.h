@@ -217,8 +217,7 @@ class HasUsecaseIdTrait : public std::false_type {};
 template <typename Message>
 class HasUsecaseIdTrait<
     Message,
-    std::void_t<
-        decltype(std::declval<std::decay_t<Message>>().usecaseId_ref())>>
+    std::void_t<decltype(std::declval<Message>().usecaseId_ref())>>
     : public std::true_type {};
 
 template <typename Message>

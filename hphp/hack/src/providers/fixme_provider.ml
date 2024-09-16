@@ -252,8 +252,11 @@ module UnusedFixmes = struct
        && (code < 5000 || Error_codes.Warning.of_enum code |> Option.is_some)
 
   let get_unused_fixmes_in_file
-      codes (applied_fixmes : FileToLineToCodesMap.t) (fn : Relative_path.t) acc
-      =
+      get_fixmes
+      codes
+      (applied_fixmes : FileToLineToCodesMap.t)
+      (fn : Relative_path.t)
+      acc =
     match get_fixmes fn with
     | None -> acc
     | Some fixme_map ->
@@ -277,7 +280,9 @@ module UnusedFixmes = struct
       ~(files : 'files) : Pos.t list =
     let applied_fixmes = FileToLineToCodesMap.make applied_fixmes in
     fold files ~init:[] ~f:(fun fn _ acc ->
-        get_unused_fixmes_in_file codes applied_fixmes fn acc)
+        acc
+        |> get_unused_fixmes_in_file get_fixmes codes applied_fixmes fn
+        |> get_unused_fixmes_in_file get_ignores codes applied_fixmes fn)
 end
 
 (*****************************************************************************)

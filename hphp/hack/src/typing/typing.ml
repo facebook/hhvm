@@ -952,27 +952,6 @@ let xhp_attribute_decl_ty env sid obj attr =
     @@ merge e1 e2 ~f:Typing_error.both);
   (env, declty, ty_mismatch_opt)
 
-let closure_check_param env param =
-  match hint_of_type_hint param.param_type_hint with
-  | None -> env
-  | Some hty ->
-    let hint_pos = fst hty in
-    let ((env, ty_err_opt1), hty) = Phase.localize_hint_for_lambda env hty in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-    let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
-    let (env, ty_err_opt2) =
-      Typing_coercion.coerce_type
-        hint_pos
-        Reason.URhint
-        env
-        paramty.Typing_local_types.ty
-        hty
-        Unenforced
-        Typing_error.Callback.unify_error
-    in
-    Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
-    env
-
 let stash_conts_for_closure
     env
     p
@@ -8821,9 +8800,6 @@ end = struct
         (List.map non_variadic_ft_params ~f:(fun x -> x.fp_type))
     in
     let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
-    let env =
-      List.fold_left ~f:closure_check_param ~init:env non_variadic_params
-    in
     let env =
       match el with
       | None -> env

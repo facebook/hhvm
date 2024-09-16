@@ -1156,7 +1156,11 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 // self::foo() - Static call to the method in the current class.
                 let mi = state.expect_method_info();
                 let is_static = mi.is_static;
-                let target = if in_trait {
+                // constants (and the constinit and cinit methods) defined in a trait should live in the
+                // trait's own class object, whereas mutable fields/properties live in the class object of the
+                // *using* class (accessed via self). This makes a difference if a constant is directly referenced
+                // from the trait, as in TMyTrait::MYCONST, as we won't know what self is at that point
+                let target = if in_trait && !method.is_86constinit() && !method.is_86cinit() {
                     let base = ClassName::intern("__self__");
                     mangle::FunctionName::method(base, is_static, method)
                 } else {

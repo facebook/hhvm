@@ -405,6 +405,21 @@ trait T3 {
   public function g(): void {}
 }
 
+
+// TEST-CHECK-BAL: define T4$static._86constinit
+// CHECK: define T4$static._86constinit($this: .notnull *T4$static, self: *HackMixed) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))
+// CHECK:   n1 = $builtins.hhbc_class_get_c($builtins.hack_string("T4"))
+// CHECK:   n2 = $builtins.hack_set_static_prop($builtins.hack_string("T4"), $builtins.hack_string("MY_CONSTANT"), $builtins.hack_int(42))
+// CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("T4"), $builtins.hack_string("T"), n0)
+// CHECK:   ret null
+// CHECK: }
+trait T4 {
+  const int MY_CONSTANT = 42;
+  const type T = int;
+}
+
 // TEST-CHECK-BAL: define $root.dynamic_const
 // CHECK: define $root.dynamic_const($this: *void, $c: *C) : *void {
 // CHECK: #b0:

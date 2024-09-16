@@ -43,6 +43,7 @@ class ProxyStatus {
   ProxyStatus& setClientError(const bool isProxyError);
   ProxyStatus& setServerError(const bool isProxyError);
   ProxyStatus& setClientAddress(const std::string& clientAddr);
+  ProxyStatus& setDetails(const std::string& details);
   virtual ProxyStatus& setProxyStatusParameter(folly::StringPiece name,
                                                const std::string& text);
 

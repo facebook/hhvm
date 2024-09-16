@@ -772,7 +772,9 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     } else {
       cert = openssl::CertUtils::makeSelfCert(certData, keyData);
     }
-    clientContext->setClientCertificate(std::move(cert));
+    auto certMgr = std::make_shared<fizz::client::CertManager>();
+    certMgr->addCert(std::move(cert));
+    clientContext->setClientCertManager(std::move(certMgr));
   }
 
   std::shared_ptr<ClientExtensions> extensions;

@@ -42,6 +42,9 @@ void CertManager::addCertAndOverride(std::shared_ptr<SelfCert> cert) {
 void CertManager::addCert(
     std::shared_ptr<SelfCert> cert,
     bool overrideExistingEntry) {
+  if (cert == nullptr) {
+    return;
+  }
   auto sigSchemes = cert->getSigSchemes();
   for (auto sigScheme : sigSchemes) {
     if (certs_.find(sigScheme) == certs_.end() || overrideExistingEntry) {

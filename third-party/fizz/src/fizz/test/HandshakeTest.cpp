@@ -397,7 +397,8 @@ TEST_F(HandshakeTest, CertRequestPskPreservesIdentity) {
 
 TEST_F(HandshakeTest, CertRequestNoCert) {
   serverContext_->setClientAuthMode(ClientAuthMode::Required);
-  clientContext_->setClientCertificate(nullptr);
+  auto certMgr = std::make_shared<fizz::client::CertManager>();
+  clientContext_->setClientCertManager(std::move(certMgr));
   expectServerError(
       "alert: certificate_required", "certificate requested but none received");
   doHandshake();
@@ -405,7 +406,8 @@ TEST_F(HandshakeTest, CertRequestNoCert) {
 
 TEST_F(HandshakeTest, CertRequestPermitNoCert) {
   serverContext_->setClientAuthMode(ClientAuthMode::Optional);
-  clientContext_->setClientCertificate(nullptr);
+  auto certMgr = std::make_shared<fizz::client::CertManager>();
+  clientContext_->setClientCertManager(std::move(certMgr));
   expectSuccess();
   doHandshake();
   verifyParameters();
@@ -417,9 +419,11 @@ TEST_F(HandshakeTest, CertRequestBadCert) {
   auto badCert = createCert("foo", false, nullptr);
   std::vector<folly::ssl::X509UniquePtr> certVec;
   certVec.emplace_back(std::move(badCert.cert));
-  clientContext_->setClientCertificate(
+  auto certMgr = std::make_shared<fizz::client::CertManager>();
+  certMgr->addCert(
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
           std::move(badCert.key), std::move(certVec)));
+  clientContext_->setClientCertManager(std::move(certMgr));
   expectServerError("alert: bad_certificate", "client certificate failure");
   doHandshake();
 }

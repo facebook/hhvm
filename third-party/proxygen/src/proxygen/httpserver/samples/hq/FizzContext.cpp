@@ -201,7 +201,9 @@ FizzClientContextPtr createFizzClientContext(const HQBaseParams& params,
     folly::readFile(params.keyFilePath.c_str(), keyData);
   }
   auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
-  ctx->setClientCertificate(std::move(cert));
+  auto certMgr = std::make_shared<fizz::client::CertManager>();
+  certMgr->addCert(std::move(cert));
+  ctx->setClientCertManager(std::move(certMgr));
   ctx->setSupportedAlpns(params.supportedAlpns);
   ctx->setDefaultShares(
       {fizz::NamedGroup::x25519, fizz::NamedGroup::secp256r1});

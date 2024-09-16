@@ -123,26 +123,6 @@ class FizzClientContext {
     return echOuterExtensionTypes_;
   }
 
-  /**
-   * This is a legacy api, prefer setClientCertManager.
-   * Sets the certificate to use if the server requests client authentication.
-   * This api is meant to be used when you expect
-   * to only be presenting one possible cert. This will overwrite any
-   * pre-existing configuration.
-   */
-  [[deprecated("Use FizzClientContext::setClientCertManager")]]
-  void setClientCertificate(std::shared_ptr<SelfCert> cert) {
-    // Blow away any existing certs on the context.
-    if (cert != nullptr) {
-      auto certMgr = std::make_shared<CertManager>();
-      clientCert_ = cert;
-      certMgr->addCertAndOverride(std::move(cert));
-      certManager_ = std::move(certMgr);
-    } else {
-      certManager_ = nullptr;
-    }
-  }
-
   /*
    * Sets the certificate manager to select a cert if the server requests client
    * auth

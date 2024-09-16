@@ -45,7 +45,9 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
   if (!certData.empty() && !keyData.empty()) {
     auto cert = fizz::openssl::CertUtils::makeSelfCert(
         std::move(certData), std::move(keyData));
-    ctx->setClientCertificate(std::move(cert));
+    auto certMgr = std::make_shared<fizz::client::CertManager>();
+    certMgr->addCert(std::move(cert));
+    ctx->setClientCertManager(std::move(certMgr));
   }
   std::shared_ptr<fizz::DefaultCertificateVerifier> verifier;
   if (!pemCaPath.empty()) {

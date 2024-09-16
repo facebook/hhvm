@@ -94,7 +94,9 @@ std::shared_ptr<fizz::client::FizzClientContext> getFizzContext(
       folly::readFile(cfg.certPath.c_str(), cert);
       folly::readFile(cfg.keyPath.c_str(), key);
       auto selfCert = fizz::openssl::CertUtils::makeSelfCert(cert, key);
-      ctx->setClientCertificate(std::move(selfCert));
+      auto certMgr = std::make_shared<fizz::client::CertManager>();
+      certMgr->addCert(std::move(selfCert));
+      ctx->setClientCertManager(std::move(certMgr));
     }
     return ctx;
   }();

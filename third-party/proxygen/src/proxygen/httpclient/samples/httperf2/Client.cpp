@@ -154,7 +154,9 @@ void Client::setupFizzContext(std::shared_ptr<fizz::client::PskCache> pskCache,
       folly::readFile(key.c_str(), keyData);
     }
     auto selfCert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
-    fizzContext_->setClientCertificate(std::move(selfCert));
+    auto certMgr = std::make_shared<fizz::client::CertManager>();
+    certMgr->addCert(std::move(selfCert));
+    fizzContext_->setClientCertManager(std::move(certMgr));
   }
 }
 

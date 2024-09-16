@@ -214,7 +214,9 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
   void setupExpectingCertificateRequest() {
     setMockRecord();
     setMockContextAndScheduler();
-    context_->setClientCertificate(mockClientCert_);
+    auto certMgr = std::make_shared<fizz::client::CertManager>();
+    certMgr->addCert(mockClientCert_);
+    context_->setClientCertManager(std::move(certMgr));
     state_.context() = context_;
     state_.state() = StateEnum::ExpectingCertificate;
     state_.handshakeTime() =

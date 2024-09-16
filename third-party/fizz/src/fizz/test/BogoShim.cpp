@@ -351,7 +351,9 @@ int clientTest() {
   clientContext->setCompatibilityMode(true);
 
   if (!FLAGS_cert_file.empty()) {
-    clientContext->setClientCertificate(readSelfCert());
+    auto certMgr = std::make_shared<fizz::client::CertManager>();
+    certMgr->addCert(readSelfCert());
+    clientContext->setClientCertManager(std::move(certMgr));
   }
 
   EventBase evb;

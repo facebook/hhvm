@@ -107,7 +107,9 @@ class HandshakeTest : public Test {
     auto clientSelfCert =
         std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
             std::move(clientKey), std::move(certVec));
-    clientContext_->setClientCertificate(std::move(clientSelfCert));
+    auto certMgr = std::make_shared<fizz::client::CertManager>();
+    certMgr->addCert(std::move(clientSelfCert));
+    clientContext_->setClientCertManager(std::move(certMgr));
 
     auto ticketCipher = std::make_shared<AES128TicketCipher>(
         serverContext_->getFactoryPtr(), std::move(certManager));

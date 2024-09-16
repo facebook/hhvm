@@ -302,7 +302,7 @@ class FetchOperation : public Operation {
   // store fetched data, initialize data).
   virtual void notifyInitQuery() = 0;
   virtual void notifyRowsReady() = 0;
-  virtual void notifyQuerySuccess(bool more_results) = 0;
+  virtual bool notifyQuerySuccess(bool more_results) = 0;
   virtual void notifyFailure(OperationResult result) = 0;
   virtual void notifyOperationCompleted(OperationResult result) = 0;
 

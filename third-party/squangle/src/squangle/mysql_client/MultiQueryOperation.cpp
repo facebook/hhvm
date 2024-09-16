@@ -47,7 +47,7 @@ void MultiQueryOperation::notifyFailure(OperationResult result) {
   current_query_result_->setOperationResult(result);
 }
 
-void MultiQueryOperation::notifyQuerySuccess(bool) {
+bool MultiQueryOperation::notifyQuerySuccess(bool) {
   current_query_result_->setPartial(false);
 
   current_query_result_->setOperationResult(OperationResult::Succeeded);
@@ -70,6 +70,7 @@ void MultiQueryOperation::notifyQuerySuccess(bool) {
   query_results_.emplace_back(std::move(*current_query_result_.get()));
   current_query_result_ =
       std::make_unique<QueryResult>(current_query_result_->queryNum() + 1);
+  return true;
 }
 
 void MultiQueryOperation::notifyOperationCompleted(OperationResult result) {

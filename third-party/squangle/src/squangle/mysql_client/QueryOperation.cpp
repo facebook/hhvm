@@ -44,10 +44,16 @@ void QueryOperation::notifyRowsReady() {
   }
 }
 
-void QueryOperation::notifyQuerySuccess(bool more_results) {
+bool QueryOperation::notifyQuerySuccess(bool more_results) {
   if (more_results) {
-    // Bad usage of QueryOperation, we are going to cancel the query
+    // This is the single-query API; we can't support multi-queries here, so if
+    // we have more results we need to generate an error and cancel.
+    setAsyncClientError(
+        (unsigned int)SquangleErrno::SQ_INVALID_API_USAGE,
+        "Multi-queries are not supported in this API - "
+        "use the multi-query API instead");
     cancel();
+    return false;
   }
 
   query_result_->setOperationResult(OperationResult::Succeeded);
@@ -62,6 +68,8 @@ void QueryOperation::notifyQuerySuccess(bool more_results) {
 
   // We are not going to make callback to user now since this only one query,
   // we make when we finish the operation
+
+  return true;
 }
 
 void QueryOperation::notifyFailure(OperationResult result) {

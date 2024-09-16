@@ -339,7 +339,11 @@ void FetchOperationImpl::actionable() {
         ++num_queries_executed_;
         no_index_used_ |= conn().getNoIndexUsed();
         was_slow_ |= conn().wasSlow();
-        op.notifyQuerySuccess(more_results);
+        if (!op.notifyQuerySuccess(more_results)) {
+          // This usually means a multi-query was passed to the single query API
+          active_fetch_action_ = FetchAction::CompleteOperation;
+          return;
+        }
       }
       current_row_stream_.reset();
     }

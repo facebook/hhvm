@@ -101,7 +101,7 @@ class QueryOperation : public FetchOperation {
  protected:
   void notifyInitQuery() override;
   void notifyRowsReady() override;
-  void notifyQuerySuccess(bool more_results) override;
+  bool notifyQuerySuccess(bool more_results) override;
   void notifyFailure(OperationResult result) override;
   void notifyOperationCompleted(OperationResult result) override;
 

@@ -25,7 +25,6 @@
 
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/reflection/debug.h>
 #include <thrift/lib/cpp2/reflection/folly_dynamic.h>
 #include <thrift/lib/cpp2/reflection/helpers.h>
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>

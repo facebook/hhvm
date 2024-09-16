@@ -80,7 +80,6 @@ let is_whitespace (c : char) =
 
 let write_patches_to_buffer buf original_content patch_list =
   let len = String.length original_content in
-  let trim_leading_whitespace = ref false in
   let rec advance_skip_whitespaces (i : int) : int =
     if i < len && is_whitespace original_content.[i] then
       advance_skip_whitespaces (i + 1)
@@ -91,12 +90,6 @@ let write_patches_to_buffer buf original_content patch_list =
      and add it to the `buf` buffer.
      Advance cursor `i` to `j`. *)
   let add_original_content ~start:i ~end_:j : int =
-    let i =
-      if !trim_leading_whitespace then
-        advance_skip_whitespaces i
-      else
-        i
-    in
     if j <= i then
       i
     else
@@ -111,7 +104,6 @@ let write_patches_to_buffer buf original_content patch_list =
         let pos = get_pos patch in
         let (char_start, char_end) = Pos.info_raw pos in
         let i = add_original_content ~start:i ~end_:char_start in
-        trim_leading_whitespace := false;
         match patch with
         | Insert { text; pos = _ } ->
           Buffer.add_string buf text;
@@ -120,8 +112,8 @@ let write_patches_to_buffer buf original_content patch_list =
           Buffer.add_string buf text;
           char_end
         | Remove _pos ->
-          trim_leading_whitespace := true;
-          char_end)
+          let i = char_end in
+          advance_skip_whitespaces i)
   in
   let _i = add_original_content ~start:i ~end_:len in
   ()

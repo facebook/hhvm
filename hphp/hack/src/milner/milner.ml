@@ -34,7 +34,9 @@ let init_table contents placeholder =
 (* Generate types and conforming expressions for all placeholders in the
    template *)
 let generate_tables template =
-  let mk_type () = Gen.Type.mk ~for_alias:false ~depth:None in
+  let mk_type () =
+    Gen.Type.mk ~for_reified:false ~for_alias:false ~depth:None
+  in
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
   let ty_table = Hashtbl.map ty_table ~f:mk_type in
@@ -64,7 +66,10 @@ let generate_tables template =
 let fill_in_template ty_table expr_table template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
-      Pcre.replace ~pat:(placeholder prefix key) ~templ:data contents
+      String.substr_replace_all
+        ~pattern:(placeholder prefix key)
+        ~with_:data
+        contents
     in
     Hashtbl.fold table ~init:contents ~f:replace
   in

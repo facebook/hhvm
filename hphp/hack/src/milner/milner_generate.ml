@@ -94,9 +94,10 @@ module Kind = struct
     | Tuple
     | Shape
     | Awaitable
+    | Function
   [@@deriving enum, eq]
 
-  let pick ~for_alias =
+  let pick ~for_reified ~for_alias =
     let kinds =
       List.range ~start:`inclusive ~stop:`inclusive min max
       |> List.map ~f:(fun i -> of_enum i |> Option.value_exn)
@@ -104,6 +105,12 @@ module Kind = struct
     let kinds =
       if for_alias then
         List.filter ~f:(fun k -> not @@ equal k TypeConst) kinds
+      else
+        kinds
+    in
+    let kinds =
+      if for_reified then
+        List.filter ~f:(fun k -> not @@ equal k Function) kinds
       else
         kinds
     in
@@ -233,7 +240,11 @@ and Type : sig
 
   val inhabitant_of : t -> string
 
-  val mk : for_alias:bool -> depth:int option -> t * Definition.t list
+  val mk :
+    for_reified:bool ->
+    for_alias:bool ->
+    depth:int option ->
+    t * Definition.t list
 end = struct
   type field = {
     key: string;
@@ -288,6 +299,11 @@ end = struct
         fields: field list;
         open_: bool;
       }
+    | Function of {
+        parameters: t list;
+        variadic: t option;
+        return_: t;
+      }
   [@@deriving eq, ord]
 
   let rec is_immediately_inhabited = function
@@ -321,6 +337,8 @@ end = struct
     | Shape { fields; open_ = _ } ->
       List.for_all fields ~f:(fun field -> is_immediately_inhabited field.ty)
     | Awaitable ty -> is_immediately_inhabited ty
+    | Function { parameters = _; variadic = _; return_ } ->
+      is_immediately_inhabited return_
     | Mixed
     | Option _
     | Alias _
@@ -428,7 +446,16 @@ end = struct
            else
              [false]
          in
-         Shape { fields; open_ })
+         Shape { fields; open_ }
+       | Function { parameters; variadic; return_ } ->
+         let open List.Let_syntax in
+         let* return_ = subtypes_of return_ in
+         let+ variadic =
+           match variadic with
+           | None -> None :: List.map ~f:(fun ty -> Some ty) (subtypes_of Mixed)
+           | Some ty -> [Some ty]
+         in
+         Function { parameters; variadic; return_ })
 
   let rec show_field { key; ty; optional } =
     let optional =
@@ -495,6 +522,21 @@ end = struct
           ""
       in
       Format.sprintf "shape(%s%s)" fields open_
+    | Function { parameters; variadic; return_ } ->
+      let variadic =
+        match variadic with
+        | Some ty ->
+          (if List.is_empty parameters then
+            ""
+          else
+            ", ")
+          ^ show ty
+          ^ "..."
+        | None -> ""
+      in
+      let parameters = List.map ~f:show parameters |> String.concat ~sep:", " in
+      let return_ = show return_ in
+      Format.sprintf "(function(%s%s): %s)" parameters variadic return_
 
   let are_disjoint ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
@@ -540,6 +582,16 @@ end = struct
         [
           Shape { fields = []; open_ = true };
           Dict { key = Primitive Primitive.Arraykey; value = Mixed };
+        ]
+      | Function _ ->
+        [
+          Classish
+            {
+              kind = Kind.Class;
+              name = "Closure";
+              children = [];
+              generic = None;
+            };
         ]
       | Mixed
       | Primitive _
@@ -622,6 +674,31 @@ end = struct
       let open Option.Let_syntax in
       let+ expr = expr_of ty in
       Format.sprintf "async { return %s; }" expr
+    | Function { parameters; variadic; return_ } ->
+      let variadic =
+        match variadic with
+        | Some ty ->
+          (if List.is_empty parameters then
+            ""
+          else
+            ", ")
+          ^ show ty
+          ^ " ...$_"
+        | None -> ""
+      in
+      let parameters =
+        List.map ~f:(fun param -> show param ^ " $_") parameters
+        |> String.concat ~sep:", "
+      in
+      let open Option.Let_syntax in
+      let+ return_expr = expr_of return_ in
+      let return_ = Type.show return_ in
+      Format.sprintf
+        "(%s%s): %s ==> { return %s; }"
+        parameters
+        variadic
+        return_
+        return_expr
     | Mixed
     | Option _
     | Alias _
@@ -644,6 +721,7 @@ end = struct
     subtypes_of ~pick:true (Primitive Primitive.Arraykey) |> List.hd_exn
 
   let rec mk_classish
+      ~for_reified
       ~(parent : (Kind.classish * string * generic option) option)
       ~(depth : int) =
     let kind =
@@ -658,7 +736,8 @@ end = struct
           Kind.pick_classish ()
     in
     let gen_children ~parent n =
-      List.init n ~f:(fun _ -> mk_classish ~parent ~depth:(depth + 1))
+      List.init n ~f:(fun _ ->
+          mk_classish ~for_reified ~parent ~depth:(depth + 1))
       |> map_and_collect ~f:Fn.id
     in
     let (name, num_of_children) =
@@ -687,9 +766,14 @@ end = struct
     in
     let (generic, generic_defs) =
       if depth <= max_hierarchy_depth && Random.bool () then
-        let (instantiation, defs) = mk ~for_alias:false ~depth:(Some depth) in
         let is_reified =
           (not Kind.(equal_classish kind Interface)) && Random.bool ()
+        in
+        let (instantiation, defs) =
+          mk
+            ~for_reified:(is_reified || for_reified)
+            ~for_alias:false
+            ~depth:(Some depth)
         in
         (Some { instantiation; is_reified }, defs)
       else
@@ -701,10 +785,12 @@ end = struct
     let def = Definition.classish kind ~name ~parent ~generic ~members:[] in
     (Classish { name; kind; children; generic }, def :: (generic_defs @ defs))
 
-  and mk ~for_alias ~(depth : int option) =
+  and mk ~for_reified ~for_alias ~(depth : int option) =
     let depth = Option.value ~default:0 depth in
-    let mk ?(for_alias = false) () = mk ~for_alias ~depth:(Some depth) in
-    match Kind.pick ~for_alias with
+    let mk ?(for_alias = false) () =
+      mk ~for_reified ~for_alias ~depth:(Some depth)
+    in
+    match Kind.pick ~for_alias ~for_reified with
     | Kind.Mixed -> (Mixed, [])
     | Kind.Primitive -> (Primitive (Primitive.pick ()), [])
     | Kind.Option ->
@@ -721,7 +807,7 @@ end = struct
     | Kind.Awaitable ->
       let (ty, defs) = mk () in
       (Awaitable ty, defs)
-    | Kind.Classish -> mk_classish ~parent:None ~depth
+    | Kind.Classish -> mk_classish ~for_reified ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
       let (aliased, defs) = mk ~for_alias:true () in
@@ -807,4 +893,19 @@ end = struct
       let (fields, defs) = map_and_collect ~f:mk_field keys in
       let open_ = Random.bool () in
       (Shape { fields; open_ }, defs)
+    | Kind.Function ->
+      let (parameters, parameter_defs) =
+        List.init (geometric_between 0 3) ~f:(fun _ -> ())
+        |> map_and_collect ~f:mk
+      in
+      let (return_, return_defs) = mk () in
+      let (variadic, variadic_defs) =
+        if Random.bool () then
+          (None, [])
+        else
+          let (ty, defs) = mk () in
+          (Some ty, defs)
+      in
+      ( Function { parameters; variadic; return_ },
+        return_defs @ variadic_defs @ parameter_defs )
 end

@@ -157,7 +157,7 @@ module rec Definition : sig
 
   val case_type : name:string -> Type.t list -> t
 
-  val enum : name:string -> Type.t -> value:string -> t
+  val enum : name:string -> bound:Type.t option -> Type.t -> value:string -> t
 end = struct
   type t = string
 
@@ -237,8 +237,16 @@ end = struct
     let rhs = String.concat ~sep:" | " (List.map ~f:Type.show disjuncts) in
     Format.sprintf "case type %s = %s;" name rhs
 
-  let enum ~name ty ~value =
-    Format.sprintf "enum %s: %s { A = %s; }" name (Type.show ty) value
+  let enum ~name ~bound ty ~value =
+    match bound with
+    | Some bound ->
+      Format.sprintf
+        "enum %s: %s as %s { A = %s; }"
+        name
+        (Type.show ty)
+        (Type.show bound)
+        value
+    | None -> Format.sprintf "enum %s: %s { A = %s; }" name (Type.show ty) value
 end
 
 and Type : sig
@@ -879,11 +887,17 @@ end = struct
       (Case { name; disjuncts }, case_type_def :: defs)
     | Kind.Enum ->
       let name = fresh "E" in
-      let underlying_ty =
-        select Primitive.[Primitive Arraykey; Primitive String; Primitive Int]
+      let (bound, underlying_ty) =
+        if Random.bool () then
+          let bound = mk_arraykey () in
+          let underlying_ty = subtypes_of bound ~pick:true |> List.hd_exn in
+          (Some bound, underlying_ty)
+        else
+          let underlying_ty = mk_arraykey () in
+          (None, underlying_ty)
       in
       let value = inhabitant_of underlying_ty in
-      let enum_def = Definition.enum ~name underlying_ty ~value in
+      let enum_def = Definition.enum ~name ~bound underlying_ty ~value in
       (Enum { name }, [enum_def])
     | Kind.Container -> begin
       match Container.pick () with

@@ -15073,6 +15073,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     assertx(tp.empty());
   }
 
+#ifdef HPHP_TRACE
   if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
     for (size_t round = 0; round < out.buckets.size(); ++round) {
       size_t nc = 0;
@@ -15118,6 +15119,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       );
     }
   }
+#endif
 
   return out;
 }

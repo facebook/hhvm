@@ -6925,14 +6925,14 @@ exif_process_SOFn(unsigned char* Data, int /*marker*/, jpeg_sof_info* result) {
 
 /* Parse the marker stream until SOS or EOI is seen; */
 static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
-  int section, sn;
+  int sn;
   int marker = 0, last_marker = M_PSEUDO, comment_correction=1;
   int ll, lh;
   unsigned char *Data;
   size_t fpos, size, got, itemlen;
   jpeg_sof_info  sof_info;
 
-  for(section=0;;section++) {
+  while(true) {
     // get marker byte, swallowing possible padding
     // some software does not count the length bytes of COM section
     // one company doing so is very much envolved in JPEG...

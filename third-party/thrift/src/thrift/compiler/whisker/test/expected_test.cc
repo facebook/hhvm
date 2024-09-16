@@ -20,15 +20,88 @@
 #include <thrift/compiler/whisker/expected.h>
 
 #include <memory>
+#include <stdexcept>
+#include <string>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
+// std::experimental::is_detected
+//   https://en.cppreference.com/w/cpp/experimental/is_detected
+namespace {
+namespace detail {
+struct nonesuch {
+  ~nonesuch() = delete;
+  nonesuch(nonesuch const&) = delete;
+  void operator=(nonesuch const&) = delete;
+};
+template <
+    typename Default,
+    typename AlwaysVoid,
+    template <typename...>
+    typename Op,
+    typename... Args>
+struct detector {
+  using value_t = std::false_type;
+  using type = Default;
+};
+template <
+    typename Default,
+    template <typename...>
+    typename Op,
+    typename... Args>
+struct detector<Default, std::void_t<Op<Args...>>, Op, Args...> {
+  using value_t = std::true_type;
+  using type = Op<Args...>;
+};
+template <template <typename...> typename Op, typename... Args>
+using is_detected = typename detector<nonesuch, void, Op, Args...>::value_t;
+template <template <typename...> typename Op, typename... Args>
+using detected_t = typename detector<nonesuch, void, Op, Args...>::type;
+template <
+    typename Default,
+    template <typename...>
+    typename Op,
+    typename... Args>
+using detected_or = detector<Default, void, Op, Args...>;
+template <template <typename...> typename Detector, typename = void>
+struct is_valid_expression : std::false_type {};
+} // namespace detail
+template <template <typename...> typename Op, typename... Args>
+constexpr inline bool is_detected_v = detail::is_detected<Op, Args...>::value;
+} // namespace
+
 namespace whisker {
+
+namespace {
+
+template <typename T, typename... Args>
+using call_emplace =
+    decltype(std::declval<T>().emplace(std::declval<Args>()...));
+
+struct move_only {
+  move_only() = default;
+  move_only(move_only&&) noexcept = default;
+  move_only& operator=(move_only&&) noexcept = default;
+};
+
+} // namespace
 
 TEST(ExpectedTest, construct_default) {
   expected<int, int> e;
   EXPECT_TRUE(e.has_value());
   EXPECT_EQ(e, 0);
+}
+
+TEST(ExpectedTest, construct_no_default) {
+  struct not_default_constructible {
+    not_default_constructible() = delete;
+  };
+  EXPECT_FALSE((std::is_default_constructible_v<
+                expected<not_default_constructible, int>>));
+  // error type need not be default constructible
+  EXPECT_TRUE((std::is_default_constructible_v<
+               expected<int, not_default_constructible>>));
 }
 
 TEST(ExpectedTest, construct_inplace) {
@@ -45,8 +118,34 @@ TEST(ExpectedTest, construct_inplace) {
   }
 }
 
+TEST(ExpectedTest, construct_implicit_conversion) {
+  expected<int, int> e = 42;
+  EXPECT_EQ(e.value(), 42);
+}
+
+TEST(ExpectedTest, construct_copy_init) {
+  expected<std::string, int> e = {};
+  EXPECT_EQ(e.value(), "");
+}
+
+TEST(ExpectedTest, construct_move_only) {
+  expected<move_only, int> e1;
+  expected<move_only, int> e2 = std::move(e1);
+  EXPECT_TRUE(e2.has_value());
+}
+
 TEST(ExpectedTest, construct_error) {
   expected<int, int> e = unexpected(1);
+  EXPECT_FALSE(e.has_value());
+  EXPECT_EQ(e.error(), 1);
+}
+
+TEST(ExpectedTest, construct_implicit_conversion_from_error) {
+  EXPECT_FALSE((std::is_convertible_v<expected<std::string, int>, int>));
+}
+
+TEST(ExpectedTest, construct_error_unexpect) {
+  expected<int, int> e(unexpect, 1);
   EXPECT_FALSE(e.has_value());
   EXPECT_EQ(e.error(), 1);
 }
@@ -91,12 +190,6 @@ TEST(ExpectedTest, move_construct_from_unexpected) {
   }
 }
 
-TEST(ExpectedTest, construct_error_unexpect) {
-  expected<int, int> e(unexpect, 1);
-  EXPECT_FALSE(e.has_value());
-  EXPECT_EQ(e.error(), 1);
-}
-
 TEST(ExpectedTest, construct_initializer_list) {
   expected<std::vector<int>, int> e(std::in_place, {0, 1, 2});
   EXPECT_TRUE(e.has_value());
@@ -116,6 +209,27 @@ TEST(ExpectedTest, emplace) {
   EXPECT_EQ(std::move(e).value(), 1);
 }
 
+TEST(ExpectedTest, emplace_move_only) {
+  expected<move_only, int> e = unexpected(1);
+  e.emplace();
+  EXPECT_TRUE(e.has_value());
+}
+
+TEST(ExpectedTest, emplace_never_empty) {
+  class throw_on_construct {
+   public:
+    [[noreturn]] throw_on_construct() noexcept(false) {
+      throw std::runtime_error("throw_on_construct");
+    }
+  };
+  EXPECT_THROW((expected<throw_on_construct, int>()), std::runtime_error);
+  expected<throw_on_construct, int> e = unexpected(1);
+  EXPECT_EQ(e.error(), 1);
+
+  // Requires nothrow constructible
+  EXPECT_FALSE((is_detected_v<call_emplace, decltype(e)>));
+}
+
 TEST(ExpectedTest, emplace_initializer_list) {
   struct vec_wrapper {
     explicit vec_wrapper(std::initializer_list<int> ilist) noexcept
@@ -126,6 +240,20 @@ TEST(ExpectedTest, emplace_initializer_list) {
   e.emplace({0, 1, 2});
   EXPECT_TRUE(e.has_value());
   EXPECT_THAT(std::move(e).value().wrapped, testing::ElementsAre(0, 1, 2));
+}
+
+TEST(ExpectedTest, bad_access) {
+  expected<int, int> e1 = unexpected(42);
+  EXPECT_THROW(
+      {
+        try {
+          std::ignore = e1.value();
+        } catch (const bad_expected_access<int>& ex) {
+          EXPECT_EQ(ex.error(), 42);
+          throw;
+        }
+      },
+      bad_expected_access<int>);
 }
 
 TEST(ExpectedTest, swap) {
@@ -203,6 +331,13 @@ TEST(ExpectedTest, assign) {
   e4 = e1;
   EXPECT_TRUE(e4);
   EXPECT_EQ(*e4, 21);
+}
+
+TEST(ExpectedTest, assign_move_only) {
+  expected<move_only, int> e1 = unexpected(1);
+  expected<move_only, int> e2;
+  e1 = std::move(e2);
+  EXPECT_TRUE(e1.has_value());
 }
 
 TEST(ExpectedTest, comparison) {

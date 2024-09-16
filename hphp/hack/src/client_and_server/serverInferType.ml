@@ -211,15 +211,20 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
         let res = self#select_pos pos env ty in
         self#plus res (super#on_class_id env cid)
 
-    method! on_Call env (Aast.{ func = (ty, pos, _); targs; args; _ } as call) =
+    method! on_Call
+        env
+        (Aast.{ func = (ty, pos, expr_); targs; args; unpacked_arg } as call) =
       let (sd, ty) = Tast_env.strip_supportdyn env ty in
-      let ty =
+      (* Intercept function type for call with a literal label argument #Lab
+       * or a value of literal type #Lab when parameter is of type EnumClass\Label.
+       * Replace parameter type by type #Lab to improve the developer experience when
+       * hovering over calls to label-based functions.
+       *
+       * If the call is through an instance method, replace the type on the inner obj->meth
+       * expression so that it gets picked up by the call to super#on_Call.
+       *)
+      let (call, ty) =
         match Typing_defs.deref ty with
-        (* Intercept function type for call with a literal label argument #Lab
-         * or a value of literal type #Lab when parameter is of type EnumClass\Label.
-         * Replace parameter type by type #Lab to improve the developer experience when
-         * hovering over calls to label-based functions.
-         *)
         | (r, Typing_defs.(Tfun ({ ft_params; _ } as ft))) ->
           let rec replace_label_params args ft_params =
             match (args, ft_params) with
@@ -249,17 +254,29 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
               fp :: replace_label_params args ft_params
             | _ -> ft_params
           in
-          Typing_defs.(
-            mk
-              ( r,
-                (* This is an instantiated signature, it makes no sense to include generic parameters *)
-                Tfun
-                  {
-                    ft with
-                    ft_params = replace_label_params args ft_params;
-                    ft_tparams = [];
-                  } ))
-        | _ -> ty
+          let ty =
+            Typing_defs.(
+              mk
+                ( r,
+                  (* This is an instantiated signature, it makes no sense to include generic parameters *)
+                  Tfun
+                    {
+                      ft with
+                      ft_params = replace_label_params args ft_params;
+                      ft_tparams = [];
+                    } ))
+          in
+          let expr_ =
+            match expr_ with
+            | Aast.Obj_get (t_lhs, (_, pos, t_rhs_), nf, is_prop) ->
+              Aast.Obj_get (t_lhs, (ty, pos, t_rhs_), nf, is_prop)
+            | _ -> expr_
+          in
+          let call =
+            Aast.{ func = (ty, pos, expr_); targs; args; unpacked_arg }
+          in
+          (call, ty)
+        | _ -> (call, ty)
       in
       let res =
         if under_dynamic then

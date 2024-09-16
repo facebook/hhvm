@@ -1,0 +1,2 @@
+// Defined in CL
+public function app(#Mul $l, (int, int) $arg): ~int

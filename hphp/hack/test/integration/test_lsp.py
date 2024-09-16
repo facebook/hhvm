@@ -3801,7 +3801,7 @@ class TestLsp(LspTestBase):
                 result={
                     "signatures": [
                         {
-                            "label": "public function genericMethod<T>"
+                            "label": "public function genericMethod"
                             "(int $x1, int $x2): void",
                             "documentation": "Generic instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],
@@ -3824,7 +3824,7 @@ class TestLsp(LspTestBase):
                 result={
                     "signatures": [
                         {
-                            "label": "public function genericMethod<T>"
+                            "label": "public function genericMethod"
                             "(int $x1, int $x2): void",
                             "documentation": "Generic instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],
@@ -3847,7 +3847,7 @@ class TestLsp(LspTestBase):
                 result={
                     "signatures": [
                         {
-                            "label": "public function genericMethod<T>"
+                            "label": "public function genericMethod"
                             "(int $x1, int $x2): void",
                             "documentation": "Generic instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],
@@ -3870,7 +3870,7 @@ class TestLsp(LspTestBase):
                 result={
                     "signatures": [
                         {
-                            "label": "public function genericMethod<T>"
+                            "label": "public function genericMethod"
                             "(int $x1, int $x2): void",
                             "documentation": "Generic instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],

@@ -74,36 +74,6 @@ cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h" n
         pass
 
 
-
-
-
-cdef class Metasyntactic(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class MyEnum1(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class MyEnum2(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class MyEnum3(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class MyEnum4(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
-    pass
-
 cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

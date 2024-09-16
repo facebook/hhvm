@@ -48,5 +48,5 @@ citem.
 }}{{/type:list?}}{{/type:enum?}}{{/type:base?}}{{!
 }}{{#type:list?}}{{> types/container_from_cpp }}(citem){{/type:list?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
-    }}{{> types/cython_python_type}}, <int> citem){{/type:enum}}{{!
+    }}{{> types/python_type }}, <int> citem){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

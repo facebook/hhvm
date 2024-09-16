@@ -56,12 +56,6 @@ cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types.
         pass
 
 
-
-
-
-cdef class Animal(thrift.py3.types.CompiledEnum):
-    pass
-
 cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

@@ -59,16 +59,6 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h" n
         pass
 
 
-
-
-
-cdef class MyEnum(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class HackEnum(thrift.py3.types.CompiledEnum):
-    pass
-
 cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
@@ -269,7 +259,7 @@ cdef class MyUnion(thrift.py3.types.Union):
     @staticmethod
     cdef unique_ptr[cMyUnion] _make_instance(
         cMyUnion* base_instance,
-        MyEnum myEnum,
+        object myEnum,
         MyStruct myStruct,
         MyDataItem myDataItem,
         object floatSet

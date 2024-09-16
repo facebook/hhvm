@@ -53,5 +53,3 @@ cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-py3/s/types.
 
 
 
-
-

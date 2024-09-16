@@ -1362,7 +1362,7 @@ cdef class ParamService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def void_ret_enum_param(
             ParamService self,
-            _module_types.MyEnumA param1 not None,
+            object param1 not None,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1823,7 +1823,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def enum_ret_double_enum_param(
             ParamService self,
             double param1,
-            _module_types.MyEnumA param2 not None,
+            object param2 not None,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

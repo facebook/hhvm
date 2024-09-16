@@ -37,6 +37,8 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(permEnum.elements[4], "read")
         self.assertEqual(len(permEnum.elements), 3)
         self.assertEqual(permEnum, gen_metadata(Perm))
+        self.assertEqual(Perm(1), Perm.execute)
+        self.assertFalse(hasattr(Perm(1), "getThriftModuleMetadata"))
         self.assertEqual(permEnum, gen_metadata(Perm(1)))
 
     def test_metadata_structs(self) -> None:

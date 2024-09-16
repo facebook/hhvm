@@ -44,8 +44,5 @@ in the client or server source rather than the type definition source.
   }}{{type:flat_name}}{{!
 }}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:void?}}object{{/type:void?}}{{!
-}}{{#type:enum}}{{!
-  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
-  }}{{enum:name}}{{!
-}}{{/type:enum}}{{!
+}}{{#type:enum}}object{{/type:enum}}{{!
 }}{{/type:iobufWrapper?}}

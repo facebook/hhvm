@@ -70,7 +70,7 @@ else:
 }}{{/type:binary?}}{{!
 }}{{#type:enum}}{{!
   }}self.value = translate_cpp_enum_to_python({{!
-    }}{{> types/cython_python_type}}, {{!
+    }}{{> types/python_type}}, {{!
     }}<int>deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()){{!
 }}{{/type:enum}}{{!
 }}{{#type:struct?}}{{!
@@ -140,7 +140,7 @@ else:
 }}{{/type:binary?}}{{!
 }}{{#type:enum}}{{!
   }}self.value = translate_cpp_enum_to_python({{!
-    }}{{> types/cython_python_type}}, {{!
+    }}{{> types/python_type}}, {{!
     }}<int>deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()){{!
 }}{{/type:enum}}{{!
 }}{{#type:struct?}}{{!

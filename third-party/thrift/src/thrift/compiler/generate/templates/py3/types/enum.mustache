@@ -21,12 +21,6 @@ This is a template for creating compiled Enum and Flag pyx information
 }}
 {{#program:enums}}
 
-{{#enum:flags?}}
-cdef __EnumFlagsData __{{enum:name}}_enum_data  = __EnumFlagsData._fbthrift_create(thrift.py3.types.createEnumFlagsData[c{{enum:name}}](), {{enum:name}})
-{{/enum:flags?}}{{^enum:flags?}}
-cdef __EnumData __{{enum:name}}_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[c{{enum:name}}](), {{enum:name}})
-{{/enum:flags?}}
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -46,10 +40,9 @@ cdef class __{{enum:name}}Meta(thrift.py3.types.EnumMeta):
         return __{{enum:name}}_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}CompiledEnum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}):
-    cdef get_by_name(self, str name):
+class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}CompiledEnum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __{{enum:name}}_enum_data.get_by_name(name)
 
     {{#enum:flags?}}
@@ -84,5 +77,12 @@ cdef class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}CompiledEnum{{/enum:fl
 
 
 __SetMetaClass(<PyTypeObject*> {{enum:name}}, <PyTypeObject*> __{{enum:name}}Meta)
+
+{{#enum:flags?}}
+cdef __EnumFlagsData __{{enum:name}}_enum_data  = __EnumFlagsData._fbthrift_create(thrift.py3.types.createEnumFlagsData[c{{enum:name}}](), {{enum:name}})
+{{/enum:flags?}}{{^enum:flags?}}
+cdef __EnumData __{{enum:name}}_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[c{{enum:name}}](), {{enum:name}})
+{{/enum:flags?}}
+
 
 {{/program:enums}}

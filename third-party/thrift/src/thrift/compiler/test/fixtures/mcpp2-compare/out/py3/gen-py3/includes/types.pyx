@@ -64,8 +64,6 @@ import importlib
 
 
 
-cdef __EnumData __AnEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnEnum](), AnEnum)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -85,10 +83,9 @@ cdef class __AnEnumMeta(thrift.py3.types.EnumMeta):
         return __AnEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class AnEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class AnEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __AnEnum_enum_data.get_by_name(name)
 
 
@@ -117,6 +114,9 @@ cdef class AnEnum(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> AnEnum, <PyTypeObject*> __AnEnumMeta)
+
+cdef __EnumData __AnEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnEnum](), AnEnum)
+
 
 
 

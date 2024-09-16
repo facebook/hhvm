@@ -64,8 +64,6 @@ import importlib
 
 
 
-cdef __EnumData __Metasyntactic_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMetasyntactic](), Metasyntactic)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -85,10 +83,9 @@ cdef class __MetasyntacticMeta(thrift.py3.types.EnumMeta):
         return __Metasyntactic_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class Metasyntactic(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class Metasyntactic(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __Metasyntactic_enum_data.get_by_name(name)
 
 
@@ -118,8 +115,9 @@ cdef class Metasyntactic(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> Metasyntactic, <PyTypeObject*> __MetasyntacticMeta)
 
+cdef __EnumData __Metasyntactic_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMetasyntactic](), Metasyntactic)
 
-cdef __EnumData __MyEnum1_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum1](), MyEnum1)
+
 
 
 @__cython.internal
@@ -140,10 +138,9 @@ cdef class __MyEnum1Meta(thrift.py3.types.EnumMeta):
         return __MyEnum1_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum1(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum1(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum1_enum_data.get_by_name(name)
 
 
@@ -173,8 +170,9 @@ cdef class MyEnum1(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnum1, <PyTypeObject*> __MyEnum1Meta)
 
+cdef __EnumData __MyEnum1_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum1](), MyEnum1)
 
-cdef __EnumData __MyEnum2_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum2](), MyEnum2)
+
 
 
 @__cython.internal
@@ -195,10 +193,9 @@ cdef class __MyEnum2Meta(thrift.py3.types.EnumMeta):
         return __MyEnum2_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum2(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum2(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum2_enum_data.get_by_name(name)
 
 
@@ -228,8 +225,9 @@ cdef class MyEnum2(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnum2, <PyTypeObject*> __MyEnum2Meta)
 
+cdef __EnumData __MyEnum2_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum2](), MyEnum2)
 
-cdef __EnumData __MyEnum3_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum3](), MyEnum3)
+
 
 
 @__cython.internal
@@ -250,10 +248,9 @@ cdef class __MyEnum3Meta(thrift.py3.types.EnumMeta):
         return __MyEnum3_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum3(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum3(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum3_enum_data.get_by_name(name)
 
 
@@ -283,8 +280,9 @@ cdef class MyEnum3(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnum3, <PyTypeObject*> __MyEnum3Meta)
 
+cdef __EnumData __MyEnum3_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum3](), MyEnum3)
 
-cdef __EnumData __MyEnum4_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum4](), MyEnum4)
+
 
 
 @__cython.internal
@@ -305,10 +303,9 @@ cdef class __MyEnum4Meta(thrift.py3.types.EnumMeta):
         return __MyEnum4_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum4(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum4(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum4_enum_data.get_by_name(name)
 
 
@@ -338,8 +335,9 @@ cdef class MyEnum4(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnum4, <PyTypeObject*> __MyEnum4Meta)
 
+cdef __EnumData __MyEnum4_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum4](), MyEnum4)
 
-cdef __EnumData __MyBitmaskEnum1_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyBitmaskEnum1](), MyBitmaskEnum1)
+
 
 
 @__cython.internal
@@ -360,10 +358,9 @@ cdef class __MyBitmaskEnum1Meta(thrift.py3.types.EnumMeta):
         return __MyBitmaskEnum1_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyBitmaskEnum1_enum_data.get_by_name(name)
 
 
@@ -393,8 +390,9 @@ cdef class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyBitmaskEnum1, <PyTypeObject*> __MyBitmaskEnum1Meta)
 
+cdef __EnumData __MyBitmaskEnum1_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyBitmaskEnum1](), MyBitmaskEnum1)
 
-cdef __EnumData __MyBitmaskEnum2_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyBitmaskEnum2](), MyBitmaskEnum2)
+
 
 
 @__cython.internal
@@ -415,10 +413,9 @@ cdef class __MyBitmaskEnum2Meta(thrift.py3.types.EnumMeta):
         return __MyBitmaskEnum2_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyBitmaskEnum2_enum_data.get_by_name(name)
 
 
@@ -447,6 +444,9 @@ cdef class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> MyBitmaskEnum2, <PyTypeObject*> __MyBitmaskEnum2Meta)
+
+cdef __EnumData __MyBitmaskEnum2_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyBitmaskEnum2](), MyBitmaskEnum2)
+
 
 
 

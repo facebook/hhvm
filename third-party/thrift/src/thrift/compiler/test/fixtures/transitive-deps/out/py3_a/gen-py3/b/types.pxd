@@ -51,8 +51,6 @@ cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-py3/b/types.
 
 
 
-
-
 cdef vector[_c_types.cC] List__c_C__make_instance(object items) except *
 cdef object List__c_C__from_cpp(const vector[_c_types.cC]&) except *
 

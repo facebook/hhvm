@@ -71,8 +71,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __EnumData __EmptyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEmptyEnum](), EmptyEnum)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -92,10 +90,9 @@ cdef class __EmptyEnumMeta(thrift.py3.types.EnumMeta):
         return __EmptyEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class EmptyEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class EmptyEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __EmptyEnum_enum_data.get_by_name(name)
 
 
@@ -125,8 +122,9 @@ cdef class EmptyEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> EmptyEnum, <PyTypeObject*> __EmptyEnumMeta)
 
+cdef __EnumData __EmptyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEmptyEnum](), EmptyEnum)
 
-cdef __EnumData __City_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cCity](), City)
+
 
 
 @__cython.internal
@@ -147,10 +145,9 @@ cdef class __CityMeta(thrift.py3.types.EnumMeta):
         return __City_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class City(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class City(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __City_enum_data.get_by_name(name)
 
 
@@ -180,8 +177,9 @@ cdef class City(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> City, <PyTypeObject*> __CityMeta)
 
+cdef __EnumData __City_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cCity](), City)
 
-cdef __EnumData __Company_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cCompany](), Company)
+
 
 
 @__cython.internal
@@ -202,10 +200,9 @@ cdef class __CompanyMeta(thrift.py3.types.EnumMeta):
         return __Company_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class Company(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class Company(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __Company_enum_data.get_by_name(name)
 
 
@@ -234,6 +231,9 @@ cdef class Company(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> Company, <PyTypeObject*> __CompanyMeta)
+
+cdef __EnumData __Company_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cCompany](), Company)
+
 
 
 
@@ -264,7 +264,7 @@ cdef class __union1_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __union1Type(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __union1_union_type_enum_data.get_by_name(name)
 
 
@@ -298,7 +298,7 @@ cdef class __union2_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __union2Type(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __union2_union_type_enum_data.get_by_name(name)
 
 

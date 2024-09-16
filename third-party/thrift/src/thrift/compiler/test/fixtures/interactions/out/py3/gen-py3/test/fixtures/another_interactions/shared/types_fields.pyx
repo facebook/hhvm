@@ -26,6 +26,9 @@ from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 
 
+import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+
+
 @__cython.auto_pickle(False)
 cdef class __DoSomethingResult_FieldsSetter(__StructFieldsSetter):
 

@@ -67,8 +67,6 @@ from test.fixtures.basic.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -88,10 +86,9 @@ cdef class __MyEnumMeta(thrift.py3.types.EnumMeta):
         return __MyEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum_enum_data.get_by_name(name)
 
 
@@ -121,8 +118,9 @@ cdef class MyEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnum, <PyTypeObject*> __MyEnumMeta)
 
+cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
 
-cdef __EnumData __HackEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cHackEnum](), HackEnum)
+
 
 
 @__cython.internal
@@ -143,10 +141,9 @@ cdef class __HackEnumMeta(thrift.py3.types.EnumMeta):
         return __HackEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class HackEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class HackEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __HackEnum_enum_data.get_by_name(name)
 
 
@@ -175,6 +172,9 @@ cdef class HackEnum(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> HackEnum, <PyTypeObject*> __HackEnumMeta)
+
+cdef __EnumData __HackEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cHackEnum](), HackEnum)
+
 
 
 
@@ -205,7 +205,7 @@ cdef class __MyUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __MyUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -239,7 +239,7 @@ cdef class __UnionToBeRenamed_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __UnionToBeRenamed_union_type_enum_data.get_by_name(name)
 
 
@@ -697,7 +697,7 @@ cdef class MyUnion(thrift.py3.types.Union):
 
     def __init__(
         self, *,
-        MyEnum myEnum=None,
+        object myEnum=None,
         MyStruct myStruct=None,
         MyDataItem myDataItem=None,
         floatSet=None
@@ -728,7 +728,7 @@ cdef class MyUnion(thrift.py3.types.Union):
     @staticmethod
     cdef unique_ptr[cMyUnion] _make_instance(
         cMyUnion* base_instance,
-        MyEnum myEnum,
+        object myEnum,
         MyStruct myStruct,
         MyDataItem myDataItem,
         object floatSet

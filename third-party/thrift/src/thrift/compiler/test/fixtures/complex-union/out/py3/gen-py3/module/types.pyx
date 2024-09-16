@@ -96,7 +96,7 @@ cdef class __ComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __ComplexUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __ComplexUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -130,7 +130,7 @@ cdef class __ListUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __ListUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __ListUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -164,7 +164,7 @@ cdef class __DataUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __DataUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __DataUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -198,7 +198,7 @@ cdef class __ValUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __ValUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __ValUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -232,7 +232,7 @@ cdef class __VirtualComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __VirtualComplexUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -266,7 +266,7 @@ cdef class __NonCopyableUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __NonCopyableUnion_union_type_enum_data.get_by_name(name)
 
 

@@ -23,3 +23,7 @@ from thrift.py3.types cimport (
 )
 
 
+import c.types as _c_types
+
+import b.types as _b_types
+

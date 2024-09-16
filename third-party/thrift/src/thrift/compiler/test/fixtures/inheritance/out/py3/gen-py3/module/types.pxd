@@ -51,5 +51,3 @@ cdef extern from "thrift/compiler/test/fixtures/inheritance/gen-py3/module/types
 
 
 
-
-

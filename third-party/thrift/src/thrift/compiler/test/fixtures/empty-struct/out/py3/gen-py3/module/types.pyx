@@ -92,7 +92,7 @@ cdef class __Nada_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __NadaType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __Nada_union_type_enum_data.get_by_name(name)
 
 

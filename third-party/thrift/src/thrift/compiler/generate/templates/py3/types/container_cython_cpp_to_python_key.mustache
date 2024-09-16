@@ -38,5 +38,5 @@ ckey.
 }}{{/type:list?}}{{/type:enum?}}{{/type:base?}}{{!
 }}{{#type:list?}}{{> types/container_from_cpp }}(ckey){{/type:list?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
-    }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{enum:name}}, {{!
-    }}<int> ckey){{/type:enum}}
+    }}{{> types/python_type }}, <int> ckey){{!
+}}{{/type:enum}}

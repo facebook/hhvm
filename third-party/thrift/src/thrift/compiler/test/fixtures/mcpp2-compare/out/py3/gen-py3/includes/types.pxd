@@ -58,12 +58,6 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_
         pass
 
 
-
-
-
-cdef class AnEnum(thrift.py3.types.CompiledEnum):
-    pass
-
 cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

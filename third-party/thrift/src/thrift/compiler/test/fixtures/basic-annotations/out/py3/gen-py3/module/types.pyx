@@ -67,8 +67,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -88,10 +86,9 @@ cdef class __MyEnumMeta(thrift.py3.types.EnumMeta):
         return __MyEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum_enum_data.get_by_name(name)
 
 
@@ -120,6 +117,9 @@ cdef class MyEnum(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> MyEnum, <PyTypeObject*> __MyEnumMeta)
+
+cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
+
 
 
 

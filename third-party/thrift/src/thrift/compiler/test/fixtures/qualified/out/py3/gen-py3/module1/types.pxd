@@ -56,12 +56,6 @@ cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_types
         pass
 
 
-
-
-
-cdef class Enum(thrift.py3.types.CompiledEnum):
-    pass
-
 cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

@@ -48,8 +48,6 @@ cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_m
 
 
 
-
-
 cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

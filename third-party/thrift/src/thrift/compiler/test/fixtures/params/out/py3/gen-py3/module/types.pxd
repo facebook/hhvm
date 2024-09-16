@@ -50,8 +50,6 @@ cdef extern from "thrift/compiler/test/fixtures/params/gen-py3/module/types.h":
 
 
 
-
-
 cdef vector[cint32_t] List__i32__make_instance(object items) except *
 cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
 

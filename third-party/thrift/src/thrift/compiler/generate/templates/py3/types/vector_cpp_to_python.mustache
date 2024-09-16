@@ -49,5 +49,5 @@ citem.
 }}{{/type:list?}}{{/type:enum?}}{{/type:base?}}{{!
 }}{{#type:list?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:list?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
-    }}{{> types/cython_python_type}}, <int> c_vec[idx]){{/type:enum}}{{!
+    }}{{> types/python_type}}, <int> c_vec[idx]){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

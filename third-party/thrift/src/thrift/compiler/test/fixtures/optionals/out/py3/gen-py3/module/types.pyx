@@ -67,8 +67,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __EnumData __Animal_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnimal](), Animal)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -88,10 +86,9 @@ cdef class __AnimalMeta(thrift.py3.types.EnumMeta):
         return __Animal_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class Animal(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class Animal(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __Animal_enum_data.get_by_name(name)
 
 
@@ -120,6 +117,9 @@ cdef class Animal(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> Animal, <PyTypeObject*> __AnimalMeta)
+
+cdef __EnumData __Animal_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnimal](), Animal)
+
 
 
 

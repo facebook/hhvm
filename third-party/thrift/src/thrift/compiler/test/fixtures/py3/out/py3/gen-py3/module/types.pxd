@@ -64,20 +64,6 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h" n
         pass
 
 
-
-
-
-cdef class AnEnum(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class AnEnumRenamed(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class Flags(thrift.py3.types.Flag):
-    pass
-
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

@@ -46,5 +46,5 @@ to be converted from unicode to binary representation.
   }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}__to_shared_ptr(cmove({{field:py_name}}))){{!
 }}{{/type:list?}}{{/type:container?}}{{!
-}}{{#type:enum?}}{{> types/cython_python_type}}(<int> {{field:py_name}}){{/type:enum?}}{{!
+}}{{#type:enum?}}{{> types/python_type}}(<int> {{field:py_name}}){{/type:enum?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

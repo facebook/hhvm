@@ -23,3 +23,6 @@ from thrift.py3.types cimport (
 )
 
 
+
+import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+

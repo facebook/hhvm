@@ -42,6 +42,6 @@ in the client or server source rather than the type definition source.
   }}{{type:flat_name}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:enum}}{{!
-  }}{{> types/cython_python_type}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{enum:name}}{{!
 }}{{/type:enum}}{{!
 }}{{#type:void?}}object{{/type:void?}}

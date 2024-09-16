@@ -23,3 +23,6 @@ from thrift.py3.types cimport (
 )
 
 
+
+import module.types as _module_types
+

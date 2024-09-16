@@ -80,8 +80,6 @@ from apache.thrift.fixtures.types.module.containers_FBTHRIFT_ONLY_DO_NOT_USE imp
 
 
 
-cdef __EnumData __has_bitwise_ops_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[chas_bitwise_ops](), has_bitwise_ops)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -101,10 +99,9 @@ cdef class __has_bitwise_opsMeta(thrift.py3.types.EnumMeta):
         return __has_bitwise_ops_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class has_bitwise_ops(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class has_bitwise_ops(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __has_bitwise_ops_enum_data.get_by_name(name)
 
 
@@ -134,8 +131,9 @@ cdef class has_bitwise_ops(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> has_bitwise_ops, <PyTypeObject*> __has_bitwise_opsMeta)
 
+cdef __EnumData __has_bitwise_ops_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[chas_bitwise_ops](), has_bitwise_ops)
 
-cdef __EnumData __is_unscoped_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cis_unscoped](), is_unscoped)
+
 
 
 @__cython.internal
@@ -156,10 +154,9 @@ cdef class __is_unscopedMeta(thrift.py3.types.EnumMeta):
         return __is_unscoped_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class is_unscoped(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class is_unscoped(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __is_unscoped_enum_data.get_by_name(name)
 
 
@@ -189,8 +186,9 @@ cdef class is_unscoped(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> is_unscoped, <PyTypeObject*> __is_unscopedMeta)
 
+cdef __EnumData __is_unscoped_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cis_unscoped](), is_unscoped)
 
-cdef __EnumData __MyForwardRefEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyForwardRefEnum](), MyForwardRefEnum)
+
 
 
 @__cython.internal
@@ -211,10 +209,9 @@ cdef class __MyForwardRefEnumMeta(thrift.py3.types.EnumMeta):
         return __MyForwardRefEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyForwardRefEnum_enum_data.get_by_name(name)
 
 
@@ -243,6 +240,9 @@ cdef class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> MyForwardRefEnum, <PyTypeObject*> __MyForwardRefEnumMeta)
+
+cdef __EnumData __MyForwardRefEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyForwardRefEnum](), MyForwardRefEnum)
+
 
 
 

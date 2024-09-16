@@ -67,11 +67,10 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{^type:base?}}{{!
 }}if self.__fbthrift_cached_{{field:py_name}} is None:
     self.__fbthrift_cached_{{field:py_name}} = {{!
-      }}{{#type:enum?}}translate_cpp_enum_to_python({{!
-        }}{{> types/cython_python_type}}, {{!
-        }}<int>({{!
+      }}{{#type:enum}}translate_cpp_enum_to_python({{!
+        }}{{> types/python_type }}, <int>({{!
         }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}{{!
-      }})){{/type:enum?}}{{!
+      }})){{/type:enum}}{{!
       }}{{#type:list?}}{{> types/container_from_cpp }}({{!
         }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_ref}}){{!
       }}{{/type:list?}}{{!

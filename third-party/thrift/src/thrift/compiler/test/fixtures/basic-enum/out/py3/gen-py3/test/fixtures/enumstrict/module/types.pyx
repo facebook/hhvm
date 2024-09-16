@@ -64,8 +64,6 @@ import importlib
 
 
 
-cdef __EnumData __EmptyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEmptyEnum](), EmptyEnum)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -85,10 +83,9 @@ cdef class __EmptyEnumMeta(thrift.py3.types.EnumMeta):
         return __EmptyEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class EmptyEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class EmptyEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __EmptyEnum_enum_data.get_by_name(name)
 
 
@@ -118,8 +115,9 @@ cdef class EmptyEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> EmptyEnum, <PyTypeObject*> __EmptyEnumMeta)
 
+cdef __EnumData __EmptyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cEmptyEnum](), EmptyEnum)
 
-cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
+
 
 
 @__cython.internal
@@ -140,10 +138,9 @@ cdef class __MyEnumMeta(thrift.py3.types.EnumMeta):
         return __MyEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum_enum_data.get_by_name(name)
 
 
@@ -173,8 +170,9 @@ cdef class MyEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnum, <PyTypeObject*> __MyEnumMeta)
 
+cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
 
-cdef __EnumData __MyUseIntrinsicDefaultEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyUseIntrinsicDefaultEnum](), MyUseIntrinsicDefaultEnum)
+
 
 
 @__cython.internal
@@ -195,10 +193,9 @@ cdef class __MyUseIntrinsicDefaultEnumMeta(thrift.py3.types.EnumMeta):
         return __MyUseIntrinsicDefaultEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyUseIntrinsicDefaultEnum_enum_data.get_by_name(name)
 
 
@@ -228,8 +225,9 @@ cdef class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyUseIntrinsicDefaultEnum, <PyTypeObject*> __MyUseIntrinsicDefaultEnumMeta)
 
+cdef __EnumData __MyUseIntrinsicDefaultEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyUseIntrinsicDefaultEnum](), MyUseIntrinsicDefaultEnum)
 
-cdef __EnumData __MyBigEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyBigEnum](), MyBigEnum)
+
 
 
 @__cython.internal
@@ -250,10 +248,9 @@ cdef class __MyBigEnumMeta(thrift.py3.types.EnumMeta):
         return __MyBigEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyBigEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyBigEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyBigEnum_enum_data.get_by_name(name)
 
 
@@ -282,6 +279,9 @@ cdef class MyBigEnum(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> MyBigEnum, <PyTypeObject*> __MyBigEnumMeta)
+
+cdef __EnumData __MyBigEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyBigEnum](), MyBigEnum)
+
 
 
 

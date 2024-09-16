@@ -80,8 +80,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __EnumData __AnEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnEnum](), AnEnum)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -101,10 +99,9 @@ cdef class __AnEnumMeta(thrift.py3.types.EnumMeta):
         return __AnEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class AnEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class AnEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __AnEnum_enum_data.get_by_name(name)
 
 
@@ -134,8 +131,9 @@ cdef class AnEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> AnEnum, <PyTypeObject*> __AnEnumMeta)
 
+cdef __EnumData __AnEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnEnum](), AnEnum)
 
-cdef __EnumData __AnEnumRenamed_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnEnumRenamed](), AnEnumRenamed)
+
 
 
 @__cython.internal
@@ -156,10 +154,9 @@ cdef class __AnEnumRenamedMeta(thrift.py3.types.EnumMeta):
         return __AnEnumRenamed_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class AnEnumRenamed(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class AnEnumRenamed(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __AnEnumRenamed_enum_data.get_by_name(name)
 
 
@@ -189,8 +186,9 @@ cdef class AnEnumRenamed(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> AnEnumRenamed, <PyTypeObject*> __AnEnumRenamedMeta)
 
+cdef __EnumData __AnEnumRenamed_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnEnumRenamed](), AnEnumRenamed)
 
-cdef __EnumFlagsData __Flags_enum_data  = __EnumFlagsData._fbthrift_create(thrift.py3.types.createEnumFlagsData[cFlags](), Flags)
+
 
 
 @__cython.internal
@@ -211,10 +209,9 @@ cdef class __FlagsMeta(thrift.py3.types.EnumMeta):
         return __Flags_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class Flags(thrift.py3.types.Flag):
-    cdef get_by_name(self, str name):
+class Flags(thrift.py3.types.Flag):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __Flags_enum_data.get_by_name(name)
 
 
@@ -247,6 +244,9 @@ cdef class Flags(thrift.py3.types.Flag):
 
 __SetMetaClass(<PyTypeObject*> Flags, <PyTypeObject*> __FlagsMeta)
 
+cdef __EnumFlagsData __Flags_enum_data  = __EnumFlagsData._fbthrift_create(thrift.py3.types.createEnumFlagsData[cFlags](), Flags)
+
+
 
 
 cdef __UnionTypeEnumData __BinaryUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
@@ -276,7 +276,7 @@ cdef class __BinaryUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __BinaryUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __BinaryUnion_union_type_enum_data.get_by_name(name)
 
 

@@ -51,5 +51,3 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/empty/types.h":
 
 
 
-
-

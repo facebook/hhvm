@@ -91,8 +91,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __EnumData __MyEnumA_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumA](), MyEnumA)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -112,10 +110,9 @@ cdef class __MyEnumAMeta(thrift.py3.types.EnumMeta):
         return __MyEnumA_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnumA(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnumA(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnumA_enum_data.get_by_name(name)
 
 
@@ -145,8 +142,9 @@ cdef class MyEnumA(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnumA, <PyTypeObject*> __MyEnumAMeta)
 
+cdef __EnumData __MyEnumA_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumA](), MyEnumA)
 
-cdef __EnumData __AnnotatedEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnnotatedEnum](), AnnotatedEnum)
+
 
 
 @__cython.internal
@@ -167,10 +165,9 @@ cdef class __AnnotatedEnumMeta(thrift.py3.types.EnumMeta):
         return __AnnotatedEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class AnnotatedEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class AnnotatedEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __AnnotatedEnum_enum_data.get_by_name(name)
 
 
@@ -200,8 +197,9 @@ cdef class AnnotatedEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> AnnotatedEnum, <PyTypeObject*> __AnnotatedEnumMeta)
 
+cdef __EnumData __AnnotatedEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnnotatedEnum](), AnnotatedEnum)
 
-cdef __EnumData __AnnotatedEnum2_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnnotatedEnum2](), AnnotatedEnum2)
+
 
 
 @__cython.internal
@@ -222,10 +220,9 @@ cdef class __AnnotatedEnum2Meta(thrift.py3.types.EnumMeta):
         return __AnnotatedEnum2_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __AnnotatedEnum2_enum_data.get_by_name(name)
 
 
@@ -255,8 +252,9 @@ cdef class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> AnnotatedEnum2, <PyTypeObject*> __AnnotatedEnum2Meta)
 
+cdef __EnumData __AnnotatedEnum2_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnnotatedEnum2](), AnnotatedEnum2)
 
-cdef __EnumData __MyEnumB_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumB](), MyEnumB)
+
 
 
 @__cython.internal
@@ -277,10 +275,9 @@ cdef class __MyEnumBMeta(thrift.py3.types.EnumMeta):
         return __MyEnumB_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnumB(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnumB(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnumB_enum_data.get_by_name(name)
 
 
@@ -309,6 +306,9 @@ cdef class MyEnumB(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> MyEnumB, <PyTypeObject*> __MyEnumBMeta)
+
+cdef __EnumData __MyEnumB_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumB](), MyEnumB)
+
 
 
 
@@ -339,7 +339,7 @@ cdef class __SimpleUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __SimpleUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __SimpleUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -373,7 +373,7 @@ cdef class __ComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __ComplexUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __ComplexUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -407,7 +407,7 @@ cdef class __FloatUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __FloatUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __FloatUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -1158,7 +1158,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         union_set=None,
         union_map=None,
         opt_union_map=None,
-        MyEnumA enum_field=None,
+        object enum_field=None,
         enum_container=None,
         MyStruct a_struct=None,
         a_set_struct=None,
@@ -1339,7 +1339,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         object union_set,
         object union_map,
         object opt_union_map,
-        MyEnumA enum_field,
+        object enum_field,
         object enum_container,
         MyStruct a_struct,
         object a_set_struct,

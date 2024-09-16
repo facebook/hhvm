@@ -50,8 +50,6 @@ cdef extern from "thrift/compiler/test/fixtures/list/gen-py3/module/types.h":
 
 
 
-
-
 cdef vector[string] List__string__make_instance(object items) except *
 cdef object List__string__from_cpp(const vector[string]&) except *
 

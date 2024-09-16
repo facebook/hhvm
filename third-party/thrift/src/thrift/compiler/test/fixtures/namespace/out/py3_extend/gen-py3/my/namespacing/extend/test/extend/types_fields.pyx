@@ -23,3 +23,7 @@ from thrift.py3.types cimport (
 )
 
 
+import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+
+import my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
+

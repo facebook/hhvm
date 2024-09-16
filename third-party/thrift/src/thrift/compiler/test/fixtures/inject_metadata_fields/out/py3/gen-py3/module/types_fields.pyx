@@ -25,6 +25,10 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 
+import foo.types as _foo_types
+
+import module.types as _module_types
+
 
 @__cython.auto_pickle(False)
 cdef class __Fields_FieldsSetter(__StructFieldsSetter):

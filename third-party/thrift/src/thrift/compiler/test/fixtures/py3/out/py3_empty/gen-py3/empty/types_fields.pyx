@@ -23,3 +23,6 @@ from thrift.py3.types cimport (
 )
 
 
+
+import empty.types as _empty_types
+

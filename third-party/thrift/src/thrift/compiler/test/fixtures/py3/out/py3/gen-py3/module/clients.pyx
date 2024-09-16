@@ -1302,7 +1302,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def set_enum(
             SimpleService self,
-            _module_types.AnEnum in_enum not None,
+            object in_enum not None,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

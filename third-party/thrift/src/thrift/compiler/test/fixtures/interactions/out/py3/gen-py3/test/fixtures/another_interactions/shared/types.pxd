@@ -48,8 +48,6 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/shared/type
 
 
 
-
-
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

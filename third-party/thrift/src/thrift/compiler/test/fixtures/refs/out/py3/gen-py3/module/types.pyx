@@ -69,8 +69,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
-
 
 @__cython.internal
 @__cython.auto_pickle(False)
@@ -90,10 +88,9 @@ cdef class __MyEnumMeta(thrift.py3.types.EnumMeta):
         return __MyEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class MyEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __MyEnum_enum_data.get_by_name(name)
 
 
@@ -123,8 +120,9 @@ cdef class MyEnum(thrift.py3.types.CompiledEnum):
 
 __SetMetaClass(<PyTypeObject*> MyEnum, <PyTypeObject*> __MyEnumMeta)
 
+cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
 
-cdef __EnumData __TypedEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cTypedEnum](), TypedEnum)
+
 
 
 @__cython.internal
@@ -145,10 +143,9 @@ cdef class __TypedEnumMeta(thrift.py3.types.EnumMeta):
         return __TypedEnum_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class TypedEnum(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+class TypedEnum(thrift.py3.types.CompiledEnum):
+    __slots__ = ()
+    def get_by_name(self, str name):
         return __TypedEnum_enum_data.get_by_name(name)
 
 
@@ -177,6 +174,9 @@ cdef class TypedEnum(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> TypedEnum, <PyTypeObject*> __TypedEnumMeta)
+
+cdef __EnumData __TypedEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cTypedEnum](), TypedEnum)
+
 
 
 
@@ -207,7 +207,7 @@ cdef class __MyUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __MyUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -241,7 +241,7 @@ cdef class __NonTriviallyDestructibleUnion_Union_TypeMeta(thrift.py3.types.EnumM
 @__cython.final
 @__cython.auto_pickle(False)
 cdef class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
+    def get_by_name(self, str name):
         return __NonTriviallyDestructibleUnion_union_type_enum_data.get_by_name(name)
 
 
@@ -643,7 +643,7 @@ cdef class MyField(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_enum_value is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_enum_value_ref():
                 return None
-            self.__fbthrift_cached_opt_enum_value = MyEnum._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_enum_value_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_opt_enum_value = object._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_enum_value_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_opt_enum_value
 
     @property
@@ -655,7 +655,7 @@ cdef class MyField(thrift.py3.types.Struct):
         if self.__fbthrift_cached_enum_value is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).enum_value_ref():
                 return None
-            self.__fbthrift_cached_enum_value = MyEnum._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).enum_value_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_enum_value = object._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).enum_value_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_enum_value
 
     @property
@@ -667,7 +667,7 @@ cdef class MyField(thrift.py3.types.Struct):
         if self.__fbthrift_cached_req_enum_value is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_enum_value_ref():
                 return None
-            self.__fbthrift_cached_req_enum_value = MyEnum._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_enum_value_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_req_enum_value = object._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_enum_value_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_req_enum_value
 
     @property

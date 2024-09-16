@@ -50,8 +50,6 @@ cdef extern from "thrift/compiler/test/fixtures/qualified/gen-py3/module2/types.
 
 
 
-
-
 cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

@@ -52,5 +52,3 @@ cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/extend/types.h
 
 
 
-
-

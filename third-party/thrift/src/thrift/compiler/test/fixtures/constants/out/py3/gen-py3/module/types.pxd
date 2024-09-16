@@ -62,20 +62,6 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_types.
         pass
 
 
-
-
-
-cdef class EmptyEnum(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class City(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class Company(thrift.py3.types.CompiledEnum):
-    pass
-
 cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod

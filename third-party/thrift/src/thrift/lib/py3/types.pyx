@@ -666,6 +666,12 @@ cdef class EnumMeta(type):
     def __len__(cls):
         return NotImplemented
 
+    def __setattr__(cls, name, _):
+        raise AttributeError(f"'{cls.__qualname__}' has no attribute '{name}'")
+
+    def __delattr__(cls, name):
+        raise AttributeError(f"{cls.__name__}: cannot delete Enum member.")
+
     @property
     def __members__(cls):
         return MappingProxyType({inst.name: inst for inst in cls.__iter__()})
@@ -688,11 +694,10 @@ cdef class CompiledEnum:
         self.__str = f"{type(self).__name__}.{name}"
         self.__repr = f"<{self.__str}: {value}>"
 
-    cdef get_by_name(self, str name):
-        return NotImplemented
-
     def __getattribute__(self, str name not None):
-        if name.startswith("__") or name in ("name", "value", "_to_python", "_to_py3", "_to_py_deprecated"):
+        if name.startswith("__") or name in (
+            "name", "value", "get_by_name", "_to_python", "_to_py3", "_to_py_deprecated",
+        ):
             return super().__getattribute__(name)
         return self.get_by_name(name)
 

@@ -114,7 +114,7 @@ cdef extern from "thrift/lib/py3/enums.h" namespace "::thrift::py3" nogil:
 
 cdef class EnumData:
     cdef unique_ptr[cEnumData] _cpp_obj
-    cdef type _py_type
+    cdef object _py_type
     cdef get_by_name(self, str name)
     cdef get_by_value(self, int value)
     cdef PyObject* _add_to_cache(self, str name, int value) except *
@@ -184,7 +184,6 @@ cdef class CompiledEnum:
     cdef object _fbthrift_hash
     cdef object __str
     cdef object __repr
-    cdef get_by_name(self, str name)
 
 
 cdef class Flag(CompiledEnum):

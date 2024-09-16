@@ -24,6 +24,8 @@ import thrift.python.mutable_serializer as mutable_serializer
 
 import thrift.python.serializer as immutable_serializer
 
+from folly.iobuf import IOBuf
+
 from parameterized import parameterized
 from thrift.python.exceptions import Error
 from thrift.python.mutable_containers import MutableList, MutableMap, MutableSet
@@ -1575,6 +1577,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
           7: map<string, i32> unqualified_map_string_i32;
 
           8: optional TestStructCopy recursive_struct;
+          @cpp.Type{name = "folly::IOBuf"}
+          9: binary unqualified_binary;
         }
         """
         s = TestStructCopyMutable(
@@ -1585,6 +1589,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             unqualified_list_i32=[1, 2, 3],
             unqualified_set_string={"1", "2", "3"},
             unqualified_map_string_i32={"a": 1, "b": 2, "c": 3},
+            unqualified_binary=IOBuf(b"abc"),
         )
         s_clone = s()
 
@@ -1614,6 +1619,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertNotEqual(
             s.unqualified_map_string_i32, s_clone.unqualified_map_string_i32
         )
+        self.assertEqual(b"abc", bytes(s_clone.unqualified_binary))
+        self.assertIs(s.unqualified_binary, s_clone.unqualified_binary)
 
     def test_call_reset_field_to_standard_default(self) -> None:
         s1 = TestStructCopyMutable(

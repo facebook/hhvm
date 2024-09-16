@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/test/thrift-python/included.thrift"
 
@@ -207,4 +208,6 @@ struct TestStructCopy {
   7: map<string, i32> unqualified_map_string_i32;
 
   8: optional TestStructCopy recursive_struct;
+  @cpp.Type{name = "folly::IOBuf"}
+  9: binary unqualified_binary;
 }

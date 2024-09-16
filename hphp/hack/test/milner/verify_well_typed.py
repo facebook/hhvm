@@ -4,6 +4,7 @@ import concurrent.futures
 import os
 import subprocess
 import tempfile
+from concurrent.futures import as_completed
 from dataclasses import dataclass
 from typing import Optional
 
@@ -14,6 +15,23 @@ class Failure:
     contents: str
     stdout: bytes
     stderr: bytes
+
+
+def bad_exit(res: Failure) -> None:
+    print("***")
+    print(f"* Error in {res.path}:")
+    print("***")
+    print("* File contents:")
+    print("***")
+    print(res.contents)
+    print("***")
+    print("* hh_single_type_check STDOUT:")
+    print("***")
+    print(res.stdout.decode() if res.stdout is not None else "N/A")
+    print("***")
+    print("* hh_single_type_check STDERR:")
+    print("***")
+    print(res.stderr.decode() if res.stderr is not None else "N/A")
 
 
 def milner_and_type_check(
@@ -80,31 +98,25 @@ def verify_well_typed(
                     seed,
                 )
             )
-        concurrent.futures.wait(futures)
 
         # If there were any errors, display the first failure and fail
-        for future in futures:
+        exit_code = 0
+        smallest_res = None
+        for future in as_completed(futures):
             res: Failure = future.result()
             if res is not None:
-                print("***")
-                print(f"* Error in {res.path}:")
-                print("***")
-                print("* File contents:")
-                print("***")
-                print(res.contents)
-                print("***")
-                print("* hh_single_type_check STDOUT:")
-                print("***")
-                print(res.stdout.decode() if res.stdout is not None else "N/A")
-                print("***")
-                print("* hh_single_type_check STDERR:")
-                print("***")
-                print(res.stderr.decode() if res.stderr is not None else "N/A")
-                return 1
+                exit_code = 1
+                if smallest_res is None or len(res.contents) < len(
+                    smallest_res.contents
+                ):
+                    smallest_res = res
+                bad_exit(res)
 
-    # If we made it here, then all templates only generated well-typed programs
-    print("All templates passed verification!")
-    return 0
+    if smallest_res is not None:
+        print("*** Failure with the smallest program: ***")
+        bad_exit(smallest_res)
+
+    return exit_code
 
 
 def main() -> None:

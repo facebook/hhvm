@@ -81,15 +81,14 @@ class outputter {
   auto make_flush_guard() {
     class flush_guard {
      public:
-      explicit flush_guard(outputter& out) : out_(&out) {}
-
-      ~flush_guard() { out_->flush(); }
+      explicit flush_guard(outputter& out) : out_(out) {}
+      ~flush_guard() { out_.flush(); }
 
       flush_guard(flush_guard&& other) = delete;
       flush_guard& operator=(flush_guard&& other) = delete;
 
      private:
-      outputter* out_;
+      outputter& out_;
     };
     return flush_guard(*this);
   }
@@ -110,28 +109,23 @@ class outputter {
     // for the stack.
     class indent_guard {
      public:
-      explicit indent_guard(
-          outputter& out, const std::optional<std::string>& indent)
-          : out_(&out), is_empty_(!indent.has_value()) {
-        if (!is_empty_) {
-          out_->next_indent_.emplace_back(*indent);
-        }
+      explicit indent_guard(outputter& out, const std::string& indent)
+          : out_(out) {
+        out_.next_indent_.emplace_back(indent);
       }
-
-      ~indent_guard() {
-        if (!is_empty_) {
-          out_->next_indent_.pop_back();
-        }
-      }
+      ~indent_guard() { out_.next_indent_.pop_back(); }
 
       indent_guard(indent_guard&& other) = delete;
       indent_guard& operator=(indent_guard&& other) = delete;
 
      private:
-      outputter* out_;
-      bool is_empty_;
+      outputter& out_;
     };
-    return indent_guard(*this, indent);
+    using result = std::optional<indent_guard>;
+    if (!indent.has_value()) {
+      return result();
+    }
+    return result(std::in_place, *this, *indent);
   }
 
  private:

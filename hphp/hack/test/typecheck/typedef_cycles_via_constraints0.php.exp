@@ -1,0 +1,2 @@
+ERROR: File "typedef_cycles_via_constraints0.php", line 21, characters 14-17:
+Cannot use `this` outside of a class (Naming[2045])

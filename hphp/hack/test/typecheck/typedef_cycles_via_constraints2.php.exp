@@ -1,0 +1,12 @@
+ERROR: File "typedef_cycles_via_constraints2.php--uses.php", line 6, characters 17-18:
+Invalid argument (Typing[4110])
+  File "typedef_cycles_via_constraints2.php--uses.php", line 3, characters 24-29:
+  Expected `string`
+  File "typedef_cycles_via_constraints2.php--defs.php", line 7, characters 14-14:
+  But got `mixed`
+ERROR: File "typedef_cycles_via_constraints2.php--uses.php", line 7, characters 17-18:
+Invalid argument (Typing[4110])
+  File "typedef_cycles_via_constraints2.php--uses.php", line 3, characters 24-29:
+  Expected `string`
+  File "typedef_cycles_via_constraints2.php--defs.php", line 5, characters 14-14:
+  But got `mixed`

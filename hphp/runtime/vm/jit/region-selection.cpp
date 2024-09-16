@@ -1132,10 +1132,8 @@ bool check(const RegionDesc& region, std::string& error) {
   auto& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
     auto bid = blocks[i]->id();
-    DEBUG_ONLY unsigned nAllPreds = region.preds(bid).size();
     unsigned nVisited = 0;
     if (auto prevRetrans = region.prevRetrans(bid)) {
-      nAllPreds++;
       nVisited += visited.count(prevRetrans.value());
     }
     for (auto pred : region.preds(bid)) {

@@ -396,8 +396,10 @@ struct dynamic_converter_impl<apache::thrift::type::field<
   }
 };
 
-template <typename Adapter, typename Tag>
-struct dynamic_converter_impl<apache::thrift::type::adapted<Adapter, Tag>> {
+template <typename Adapter, typename Tag, typename Sfinae>
+struct dynamic_converter_impl<
+    apache::thrift::type::adapted<Adapter, Tag>,
+    Sfinae> {
   template <typename T>
   static void to(folly::dynamic& out, T const& input, dynamic_format format) {
     dynamic_converter_impl<Tag>::to(out, Adapter::toThrift(input), format);

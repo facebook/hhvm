@@ -20,7 +20,7 @@ namespace facebook {
 namespace thrift {
 namespace detail {
 
-template <typename>
+template <typename, typename = void>
 struct dynamic_converter_impl;
 
 } // namespace detail

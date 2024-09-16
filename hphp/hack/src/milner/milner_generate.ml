@@ -147,7 +147,7 @@ module rec Definition : sig
 
   val alias : name:string -> Type.t -> t
 
-  val newtype : name:string -> Type.t -> t
+  val newtype : name:string -> bound:Type.t option -> Type.t -> t
 
   val case_type : name:string -> Type.t list -> t
 
@@ -217,8 +217,15 @@ end = struct
   let alias ~name aliased =
     Format.sprintf "type %s = %s;" name (Type.show aliased)
 
-  let newtype ~name aliased =
-    Format.sprintf "newtype %s = %s;" name (Type.show aliased)
+  let newtype ~name ~bound aliased =
+    match bound with
+    | Some bound ->
+      Format.sprintf
+        "newtype %s as %s = %s;"
+        name
+        (Type.show bound)
+        (Type.show aliased)
+    | None -> Format.sprintf "newtype %s = %s;" name (Type.show aliased)
 
   let case_type ~name disjuncts =
     let rhs = String.concat ~sep:" | " (List.map ~f:Type.show disjuncts) in
@@ -814,9 +821,17 @@ end = struct
       (Alias { name; aliased }, Definition.alias ~name aliased :: defs)
     | Kind.Newtype ->
       let name = fresh "N" in
-      let (aliased, defs) = mk ~for_alias:true () in
       let producer = fresh ("mk" ^ name) in
-      let newtype_def = Definition.newtype ~name aliased in
+      let (aliased, bound, defs) =
+        if Random.bool () then
+          let (bound, defs) = mk ~for_alias:true () in
+          let aliased = subtypes_of ~pick:true bound |> List.hd_exn in
+          (aliased, Some bound, defs)
+        else
+          let (aliased, defs) = mk ~for_alias:true () in
+          (aliased, None, defs)
+      in
+      let newtype_def = Definition.newtype ~name ~bound aliased in
       let aliased_expr = inhabitant_of aliased in
       let ty = Newtype { name; producer } in
       let newtype_producer_def =

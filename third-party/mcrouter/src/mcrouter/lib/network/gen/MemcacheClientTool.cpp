@@ -18,6 +18,7 @@
 #include <mcrouter/lib/carbon/JsonClient.h>
 
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 
 using carbon::JsonClient;
 using carbon::tools::CmdLineClient;

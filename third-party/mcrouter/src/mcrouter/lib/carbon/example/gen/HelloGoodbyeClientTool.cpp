@@ -18,6 +18,7 @@
 #include <mcrouter/lib/carbon/JsonClient.h>
 
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeMessages.h"
+#include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterInfo.h"
 
 using carbon::JsonClient;
 using carbon::tools::CmdLineClient;

@@ -30,14 +30,12 @@ import {{program:base_library_package}}.mutable_exceptions as _fbthrift_python_m
 import {{program:base_library_package}}.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 {{/program:generate_mutable_types}}
 
-{{^program:generate_mutable_types}}
 {{#program:include_namespaces}}
 {{#has_types?}}
 
-import {{included_module_path}}.thrift_types
+import {{included_module_path}}.{{> types/types_import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
-{{/program:generate_mutable_types}}
 {{#program:adapter_modules}}
 import {{module_path}}
 {{/program:adapter_modules}}

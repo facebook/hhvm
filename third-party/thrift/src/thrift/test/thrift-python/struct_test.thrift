@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/python.thrift"
+include "thrift/test/thrift-python/included.thrift"
 
 namespace py3 thrift.test.thrift_python
 
@@ -160,6 +161,7 @@ union TestUnion {
 struct TestStructWithUnionField {
   1: i32 i32_field;
   2: TestUnion union_field;
+  3: included.TestUnion union_field_from_included;
 }
 
 exception TestExceptionAllThriftPrimitiveTypes {

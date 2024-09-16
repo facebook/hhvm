@@ -18,6 +18,14 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
+import apache.thrift.type.id.thrift_mutable_types
+
+import apache.thrift.type.schema.thrift_mutable_types
+
+import test.fixtures.python_capi.serialized_dep.thrift_mutable_types
+
+import test.fixtures.python_capi.thrift_dep.thrift_mutable_types
+
 
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (

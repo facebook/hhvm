@@ -125,7 +125,8 @@
 (library
  (name typing_class_types)
  (wrapped false)
- (modules typing_class_types)
+ (modules
+  typing_class_types)
  (libraries
   collections
   decl_defs
@@ -139,7 +140,8 @@
 (library
  (name folded_class)
  (wrapped false)
- (modules folded_class)
+ (modules
+  folded_class)
  (libraries
   core_kernel
   decl
@@ -168,7 +170,10 @@
 (library
  (name nast_visitor)
  (wrapped false)
- (modules nast_check_env nast_visitor stateful_aast_visitor )
+ (modules
+  nast_check_env
+  nast_visitor
+  stateful_aast_visitor)
  (libraries nast provider_context naming_attributes_params)
  (preprocess
   (pps ppx_deriving.std)))
@@ -208,22 +213,25 @@
 (library
  (name tast_type_collector)
  (wrapped false)
- (modules tast_type_collector)
+ (modules
+  tast_type_collector)
  (libraries core_kernel full_fidelity tast_env)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
-  (name typing_modules)
-  (wrapped false)
-  (modules typing_modules)
-  (libraries typing_env typing_env_types decl_provider))
+ (name typing_modules)
+ (wrapped false)
+ (modules
+  typing_modules)
+ (libraries typing_env typing_env_types decl_provider))
 
 (library
-  (name typing_packages)
-  (wrapped false)
-  (modules typing_packages)
-  (libraries typing_env typing_env_types))
+ (name typing_packages)
+ (wrapped false)
+ (modules
+  typing_packages)
+ (libraries typing_env typing_env_types))
 
 (library
  (name typing)
@@ -278,7 +286,8 @@
 (library
  (name typing_skeleton)
  (wrapped false)
- (modules typing_skeleton)
+ (modules
+  typing_skeleton)
  (libraries typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
@@ -308,23 +317,37 @@
   typing_requirements
   typing_subtype_method
   typing_type_wellformedness)
- (libraries typing_algebra typing_common typing_modules typing_packages typing_skeleton)
+ (libraries
+  typing_algebra
+  typing_common
+  typing_modules
+  typing_packages
+  typing_skeleton)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name type_mapper_generic)
  (wrapped false)
- (modules type_mapper_generic)
- (libraries common core_kernel typing_defs)
+ (modules
+  type_mapper_generic)
+ (libraries
+  common
+  core_kernel
+  typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name type_mapper_forget)
  (wrapped false)
- (modules type_mapper_forget)
- (libraries common core_kernel type_mapper_generic typing_defs)
+ (modules
+  type_mapper_forget)
+ (libraries
+  common
+  core_kernel
+  type_mapper_generic
+  typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -377,15 +400,20 @@
 (library
  (name typing_visibility)
  (wrapped false)
- (modules typing_visibility)
- (libraries typing_modules typing_packages typing_utils)
+ (modules
+  typing_visibility)
+ (libraries
+  typing_modules
+  typing_packages
+  typing_utils)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name typing_disposable)
  (wrapped false)
- (modules typing_disposable)
+ (modules
+  typing_disposable)
  (libraries typing_utils typing_error_utils)
  (preprocess
   (pps ppx_deriving.std)))
@@ -393,7 +421,8 @@
 (library
  (name typing_dependent_type)
  (wrapped false)
- (modules typing_dependent_type)
+ (modules
+  typing_dependent_type)
  (libraries typing_utils)
  (preprocess
   (pps ppx_deriving.std)))
@@ -409,7 +438,8 @@
 (library
  (name type_mapper)
  (wrapped false)
- (modules type_mapper)
+ (modules
+  type_mapper)
  (libraries typing_env)
  (preprocess
   (pps ppx_deriving.std)))
@@ -417,7 +447,8 @@
 (library
  (name typing_print)
  (wrapped false)
- (modules typing_print)
+ (modules
+  typing_print)
  (libraries decl_provider hackfmt typing_logic typing_env_types)
  (preprocess
   (pps ppx_deriving.std)))
@@ -425,7 +456,8 @@
 (library
  (name typing_log)
  (wrapped false)
- (modules typing_log )
+ (modules
+  typing_log)
  (libraries decl_provider hackfmt typing_logic typing_env_types typing_print)
  (preprocess
   (pps ppx_deriving.std)))
@@ -490,7 +522,8 @@
 (library
  (name typing_check_job)
  (wrapped false)
- (modules typing_check_job)
+ (modules
+  typing_check_job)
  (libraries
   core_kernel
   deferred_decl
@@ -507,7 +540,8 @@
 (library
  (name typing_check)
  (wrapped false)
- (modules typing_check_service)
+ (modules
+  typing_check_service)
  (libraries
   biglist
   cgroupprofiler
@@ -541,7 +575,8 @@
 (library
  (name hh_distc_types)
  (wrapped false)
- (modules hh_distc_types)
+ (modules
+  hh_distc_types)
  (libraries errors)
  (preprocess
   (pps ppx_deriving.std)))

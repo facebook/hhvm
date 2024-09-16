@@ -258,7 +258,6 @@
   serverCommandTypes
   serverCommandTypesUtils
   serverFormatTypes
-  serverGlobalInferenceTypes
   serverLintTypes
   serverRageTypes
   serverRenameTypes

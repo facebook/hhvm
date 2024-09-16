@@ -9,15 +9,15 @@
 
 open Hh_prelude
 
+type insert_patch = {
+  pos: Pos.absolute;
+  text: string;
+}
+
 type patch =
   | Insert of insert_patch
   | Remove of Pos.absolute
   | Replace of insert_patch
-
-and insert_patch = {
-  pos: Pos.absolute;
-  text: string;
-}
 
 type action =
   | ClassRename of string * string (* old_name * new_name *)
@@ -39,12 +39,17 @@ type action =
       char: int;
       new_name: string;
     }
-[@@deriving show]
 
 type deprecated_wrapper_function_ref =
   | DeprecatedStaticMethodRef
   | DeprecatedNonStaticMethodRef
   | DeprecatedFunctionRef
+
+let get_pos = function
+  | Insert patch
+  | Replace patch ->
+    patch.pos
+  | Remove p -> p
 
 let compare_pos pos1 pos2 =
   let (char_start1, char_end1) = Pos.info_raw pos1 in
@@ -56,12 +61,6 @@ let compare_pos pos1 pos2 =
   else
     0
 
-let get_pos = function
-  | Insert patch
-  | Replace patch ->
-    patch.pos
-  | Remove p -> p
-
 let compare_result res1 res2 = compare_pos (get_pos res1) (get_pos res2)
 
 let write_string_to_file fn str =
@@ -69,71 +68,76 @@ let write_string_to_file fn str =
   Out_channel.output_string oc str;
   Out_channel.close oc
 
-let write_patches_to_buffer buf original_content patch_list =
-  let i = ref 0 in
-  let trim_leading_whitespace = ref false in
-  let len = String.length original_content in
-  let is_whitespace c =
-    match c with
-    | '\n'
-    | ' '
-    | '\012'
-    | '\r'
-    | '\t' ->
-      true
-    | _ -> false
-  in
-  (* advances to requested character and adds the original content
-     from the current position to that point to the buffer *)
-  let add_original_content j =
-    while
-      !trim_leading_whitespace
-      && !i < len
-      && is_whitespace original_content.[!i]
-    do
-      i := !i + 1
-    done;
-    if j <= !i then
-      ()
-    else
-      let size = j - !i in
-      let size = min (max 0 (- !i + len)) size in
-      let str_to_write = String.sub original_content ~pos:!i ~len:size in
-      Buffer.add_string buf str_to_write;
-      i := !i + size
-  in
-  List.iter patch_list ~f:(fun res ->
-      let pos = get_pos res in
-      let (char_start, char_end) = Pos.info_raw pos in
-      add_original_content char_start;
-      trim_leading_whitespace := false;
-      match res with
-      | Insert patch -> Buffer.add_string buf patch.text
-      | Replace patch ->
-        Buffer.add_string buf patch.text;
-        i := char_end
-      | Remove _ ->
-        i := char_end;
-        trim_leading_whitespace := true);
-  add_original_content len
+let is_whitespace (c : char) =
+  match c with
+  | '\n'
+  | ' '
+  | '\012'
+  | '\r'
+  | '\t' ->
+    true
+  | _ -> false
 
-let map_patches_to_filename acc res =
-  let pos = get_pos res in
+let write_patches_to_buffer buf original_content patch_list =
+  let len = String.length original_content in
+  let trim_leading_whitespace = ref false in
+  let rec advance_skip_whitespaces (i : int) : int =
+    if i < len && is_whitespace original_content.[i] then
+      advance_skip_whitespaces (i + 1)
+    else
+      i
+  in
+  (* Takes the substring of original_content between `i` and `j`
+     and add it to the `buf` buffer.
+     Advance cursor `i` to `j`. *)
+  let add_original_content ~start:i ~end_:j : int =
+    let i =
+      if !trim_leading_whitespace then
+        advance_skip_whitespaces i
+      else
+        i
+    in
+    if j <= i then
+      i
+    else
+      let size = j - i in
+      let size = min (max 0 (max (len - i) 0)) size in
+      let str_to_write = String.sub original_content ~pos:i ~len:size in
+      Buffer.add_string buf str_to_write;
+      i + size
+  in
+  let i =
+    List.fold patch_list ~init:0 ~f:(fun i patch ->
+        let pos = get_pos patch in
+        let (char_start, char_end) = Pos.info_raw pos in
+        let i = add_original_content ~start:i ~end_:char_start in
+        trim_leading_whitespace := false;
+        match patch with
+        | Insert { text; pos = _ } ->
+          Buffer.add_string buf text;
+          i
+        | Replace { text; pos = _ } ->
+          Buffer.add_string buf text;
+          char_end
+        | Remove _pos ->
+          trim_leading_whitespace := true;
+          char_end)
+  in
+  let _i = add_original_content ~start:i ~end_:len in
+  ()
+
+let map_patches_to_filename acc patch =
+  let pos = get_pos patch in
   let fn = Pos.filename pos in
   match SMap.find_opt fn acc with
-  | Some lst -> SMap.add fn (res :: lst) acc
-  | None -> SMap.add fn [res] acc
+  | Some lst -> SMap.add fn (patch :: lst) acc
+  | None -> SMap.add fn [patch] acc
 
 let apply_patches_to_string old_content patch_list =
   let buf = Buffer.create (String.length old_content) in
   let patch_list = List.sort ~compare:compare_result patch_list in
   write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
-
-let apply_patches_to_file fn patch_list =
-  let old_content = Sys_utils.cat fn in
-  let new_file_contents = apply_patches_to_string old_content patch_list in
-  write_string_to_file fn new_file_contents
 
 let list_to_file_map =
   List.fold_left ~f:map_patches_to_filename ~init:SMap.empty

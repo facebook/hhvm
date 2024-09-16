@@ -3372,7 +3372,9 @@ end = struct
           let (env, ty) = Env.fresh_type_error env pos in
           make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty))
     | FunctionPointer (FP_class_const (cid, meth), targs) ->
-      let (env, _, ce, cty) = Class_id.class_expr env [] cid in
+      let (env, _, ce, cty) =
+        Class_id.class_expr ~is_function_pointer:true env [] cid
+      in
       let (env, (fpty, tal)) =
         Class_get_expr.class_get
           ~is_method:true
@@ -9329,6 +9331,7 @@ and Class_id : sig
     ?inside_nameof:bool ->
     ?is_const:bool ->
     ?is_attribute:bool ->
+    ?is_function_pointer:bool ->
     env ->
     Nast.targ list ->
     Nast.class_id ->
@@ -9400,6 +9403,7 @@ end = struct
       ?(inside_nameof = false)
       ?(is_const = false)
       ?(is_attribute = false)
+      ?(is_function_pointer = false)
       (env : env)
       (tal : Nast.targ list)
       ((_, p, cid_) : Nast.class_id) :
@@ -9516,6 +9520,7 @@ end = struct
               Env.package_v2 env
               && (inside_nameof
                  || is_attribute
+                 || is_function_pointer
                  || Env.package_v2_bypass_package_check_for_class_const env
                     && is_const)
             in
@@ -9530,6 +9535,7 @@ end = struct
                  (Cls.internal class_)
                  (Cls.get_module class_)
                  (Cls.get_package_override class_)));
+
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =
             if Cls.final class_ then

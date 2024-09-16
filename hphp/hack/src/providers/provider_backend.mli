@@ -91,11 +91,15 @@ end
 
 module Folded_class_cache : module type of Cache (Folded_class_cache_entry)
 
-(** A `fixme_map` associates:
+module FixmeMap : sig
+  (** A map associating:
     line number guarded by HH_FIXME =>
-    error_node_number =>
+    error code =>
     position of HH_FIXME comment *)
-type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
+  type t = Pos.t IMap.t IMap.t [@@deriving show]
+
+  val fold : t -> init:'acc -> f:('acc -> int -> int -> Pos.t -> 'acc) -> 'acc
+end
 
 module Fixme_store : sig
   (** a mutable store *)
@@ -103,9 +107,9 @@ module Fixme_store : sig
 
   val empty : unit -> t
 
-  val get : t -> Relative_path.t -> fixme_map option
+  val get : t -> Relative_path.t -> FixmeMap.t option
 
-  val add : t -> Relative_path.t -> fixme_map -> unit
+  val add : t -> Relative_path.t -> FixmeMap.t -> unit
 
   val remove : t -> Relative_path.t -> unit
 

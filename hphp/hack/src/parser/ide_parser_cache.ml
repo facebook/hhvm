@@ -45,7 +45,7 @@ module IdeAstCache =
   SharedMem.FreqCache
     (StringKey)
     (struct
-      type t = Parser_return.t * Fixme_provider.fixme_map * Errors.t
+      type t = Parser_return.t * Fixme_provider.FixmeMap.t * Errors.t
 
       let description = "IdeAstCache"
     end)

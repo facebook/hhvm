@@ -24,11 +24,11 @@ let get_fixme_patches codes (env : env) =
     |> List.map ~f:(fun e -> (User_error.get_pos e, User_error.get_code e))
   in
   let poslist =
-    Fixme_provider.get_unused_fixmes
+    Fixme_provider.UnusedFixmes.get
       ~codes
       ~applied_fixmes:fixmelist
       ~fold:(Naming_table.fold ~warn_on_naming_costly_iter:true)
-      ~files_info:env.naming_table
+      ~files:env.naming_table
   in
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 

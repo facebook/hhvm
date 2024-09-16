@@ -130,10 +130,23 @@ end
 
 module Folded_class_cache = Cache (Folded_class_cache_entry)
 
-type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
+module FixmeMap = struct
+  (** A map associating:
+    line number guarded by HH_FIXME =>
+    error code =>
+    position of HH_FIXME comment *)
+  type t = Pos.t IMap.t IMap.t [@@deriving show]
+
+  let fold (m : t) ~(init : 'acc) ~(f : 'acc -> int -> int -> Pos.t -> 'acc) =
+    IMap.fold
+      (fun line m acc ->
+        IMap.fold (fun code pos acc -> f acc line code pos) m acc)
+      m
+      init
+end
 
 module Fixme_store = struct
-  type t = fixme_map Relative_path.Map.t ref
+  type t = FixmeMap.t Relative_path.Map.t ref
 
   let empty () = ref Relative_path.Map.empty
 

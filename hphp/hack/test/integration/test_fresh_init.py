@@ -80,10 +80,12 @@ class TestFreshInit(common_tests.CommonTests):
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
                 """<?hh // strict
+                function expect_int(int $_): void {}
                 function foo(?string $s): void {
-                  /* HH_FIXME[4010] We can delete this one */
-                  /* HH_FIXME[4089] We need to keep this one */
+                  /* HH_FIXME[4089] We can delete this one */
+                  /* HH_FIXME[4110] We need to keep this one */
                   /* HH_FIXME[4099] We can delete this one */
+                  expect_int($s);
                   if (/* HH_FIXME[4011] We can delete this one */   $s) {
                     print "hello";
                   } else if ($s /* HH_FIXME[4011] We can delete this one */) {
@@ -108,7 +110,10 @@ class TestFreshInit(common_tests.CommonTests):
             self.assertEqual(
                 out,
                 """<?hh // strict
+                function expect_int(int $_): void {}
                 function foo(?string $s): void {
+                  /* HH_FIXME[4110] We need to keep this one */
+                  expect_int($s);
                   if ($s) {
                     print "hello";
                   } else if ($s ) {

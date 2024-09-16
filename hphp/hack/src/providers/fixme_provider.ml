@@ -21,13 +21,13 @@ open Provider_backend.Fixmes
  *)
 (*****************************************************************************)
 
-type fixme_map = Provider_backend.fixme_map
+module FixmeMap = Provider_backend.FixmeMap
 
 module HH_FIXMES =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
-      type t = fixme_map
+      type t = FixmeMap.t
 
       let description = "Fixme_HH_FIXMES"
     end)
@@ -39,7 +39,7 @@ module IGNORES =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
-      type t = fixme_map
+      type t = FixmeMap.t
 
       let description = "Fixme_IGNORES"
     end)
@@ -51,7 +51,7 @@ module DECL_HH_FIXMES =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
-      type t = fixme_map
+      type t = FixmeMap.t
 
       let description = "Fixme_DECL_HH_FIXMES"
     end)
@@ -63,7 +63,7 @@ module DISALLOWED_FIXMES =
   SharedMem.HeapWithLocalCache
     (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
-      type t = fixme_map
+      type t = FixmeMap.t
 
       let description = "Fixme_DISALLOWED_FIXMES"
     end)
@@ -201,66 +201,84 @@ let local_changes_pop_sharedmem_stack () =
   IGNORES.LocalChanges.pop_stack ();
   ()
 
-let fixme_was_applied applied_fixmes fn err_line err_code =
-  match Relative_path.Map.find_opt applied_fixmes fn with
-  | None -> false
-  | Some r ->
-    (match IMap.find_opt err_line r with
-    | None -> false
-    | Some code_set -> ISet.mem err_code code_set)
+module UnusedFixmes = struct
+  module LineToCodesMap = struct
+    (** Mapping error lines to sets of codes *)
+    type t = ISet.t IMap.t
 
-let add_applied_fixme_file m err_code err_line =
-  let line_value =
-    match IMap.find_opt err_line m with
-    | None -> ISet.empty
-    | Some x -> x
-  in
-  IMap.add err_line (ISet.add err_code line_value) m
+    let find_or_default line m =
+      IMap.find_opt line m |> Option.value ~default:ISet.empty
 
-let add_applied_fixme applied_fixmes err_code fn err_line =
-  let file_value =
-    match Relative_path.Map.find_opt applied_fixmes fn with
-    | None -> IMap.empty
-    | Some x -> x
-  in
-  Relative_path.Map.add
-    applied_fixmes
-    ~key:fn
-    ~data:(add_applied_fixme_file file_value err_code err_line)
+    let add (line : int) (code : int) (m : t) =
+      IMap.add line (ISet.add code (find_or_default line m)) m
+  end
 
-let get_unused_fixmes_for codes applied_fixme_map fn acc =
-  match get_fixmes fn with
-  | None -> acc
-  | Some fixme_map ->
-    IMap.fold
-      (fun line code_map acc ->
-        IMap.fold
-          (fun code fixme_pos acc ->
-            if
-              (List.mem codes code ~equal:( = )
-              || (List.is_empty codes && code < 5000))
-              && not (fixme_was_applied applied_fixme_map fn line code)
-            then
-              fixme_pos :: acc
-            else
-              acc)
-          code_map
-          acc)
-      fixme_map
-      acc
+  module FileToLineToCodesMap = struct
+    type t = LineToCodesMap.t Relative_path.Map.t
 
-let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info =
-  let applied_fixme_map =
-    List.fold_left
-      applied_fixmes
-      ~init:Relative_path.Map.empty
-      ~f:(fun acc (pos, code) ->
-        let fn = Pos.filename pos in
-        let (line, _, _) = Pos.info_pos pos in
-        add_applied_fixme acc code fn line)
-  in
-  fold files_info ~init:[] ~f:(fun fn _ acc ->
-      get_unused_fixmes_for codes applied_fixme_map fn acc)
+    let find_or_default fn m =
+      Relative_path.Map.find_opt m fn |> Option.value ~default:IMap.empty
+
+    let mem fn line code m =
+      match Relative_path.Map.find_opt m fn with
+      | None -> false
+      | Some m ->
+        (match IMap.find_opt line m with
+        | None -> false
+        | Some s -> ISet.mem code s)
+
+    let add (fn : Relative_path.t) (line : int) (code : int) (m : t) =
+      Relative_path.Map.add
+        m
+        ~key:fn
+        ~data:(LineToCodesMap.add line code (find_or_default fn m))
+
+    let empty : t = Relative_path.Map.empty
+
+    let make (pos_codes : (Pos.t * int) list) =
+      List.fold pos_codes ~init:empty ~f:(fun acc (pos, code) ->
+          let fn = Pos.filename pos in
+          let (line, _, _) = Pos.info_pos pos in
+          add fn line code acc)
+  end
+
+  let fixme_was_applied
+      (applied_fixmes : FileToLineToCodesMap.t) fn err_line err_code =
+    FileToLineToCodesMap.mem fn err_line err_code applied_fixmes
+
+  let code_is_concerned codes code =
+    List.mem codes code ~equal:Int.equal
+    || List.is_empty codes
+       && (code < 5000 || Error_codes.Warning.of_enum code |> Option.is_some)
+
+  let get_unused_fixmes_in_file
+      codes (applied_fixmes : FileToLineToCodesMap.t) (fn : Relative_path.t) acc
+      =
+    match get_fixmes fn with
+    | None -> acc
+    | Some fixme_map ->
+      FixmeMap.fold fixme_map ~init:acc ~f:(fun acc err_line code fixme_pos ->
+          if
+            code_is_concerned codes code
+            && not (fixme_was_applied applied_fixmes fn err_line code)
+          then
+            fixme_pos :: acc
+          else
+            acc)
+
+  let get
+      ~(codes : int list)
+      ~(applied_fixmes : (Pos.t * int) list)
+      ~(fold :
+         'files ->
+         init:Pos.t list ->
+         f:(Relative_path.t -> 'unused -> Pos.t list -> Pos.t list) ->
+         Pos.t list)
+      ~(files : 'files) : Pos.t list =
+    let applied_fixmes = FileToLineToCodesMap.make applied_fixmes in
+    fold files ~init:[] ~f:(fun fn _ acc ->
+        get_unused_fixmes_in_file codes applied_fixmes fn acc)
+end
 
 (*****************************************************************************)
 (* We register the function that can look up a position and determine if

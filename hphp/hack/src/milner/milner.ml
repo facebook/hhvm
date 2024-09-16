@@ -35,7 +35,11 @@ let init_table contents placeholder =
    template *)
 let generate_tables template =
   let mk_type () =
-    Gen.Type.mk ~for_reified:false ~for_alias:false ~depth:None
+    Gen.Type.mk
+      ~for_option:false
+      ~for_reified:false
+      ~for_alias:false
+      ~depth:None
   in
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in

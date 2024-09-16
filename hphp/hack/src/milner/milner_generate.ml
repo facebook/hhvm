@@ -97,7 +97,7 @@ module Kind = struct
     | Function
   [@@deriving enum, eq]
 
-  let pick ~for_reified ~for_alias =
+  let pick ~for_option ~for_reified ~for_alias =
     let kinds =
       List.range ~start:`inclusive ~stop:`inclusive min max
       |> List.map ~f:(fun i -> of_enum i |> Option.value_exn)
@@ -111,6 +111,12 @@ module Kind = struct
     let kinds =
       if for_reified then
         List.filter ~f:(fun k -> not @@ equal k Function) kinds
+      else
+        kinds
+    in
+    let kinds =
+      if for_option then
+        List.filter ~f:(fun k -> not @@ equal k Case) kinds
       else
         kinds
     in
@@ -248,6 +254,7 @@ and Type : sig
   val inhabitant_of : t -> string
 
   val mk :
+    for_option:bool ->
     for_reified:bool ->
     for_alias:bool ->
     depth:int option ->
@@ -778,6 +785,7 @@ end = struct
         in
         let (instantiation, defs) =
           mk
+            ~for_option:false
             ~for_reified:(is_reified || for_reified)
             ~for_alias:false
             ~depth:(Some depth)
@@ -792,17 +800,17 @@ end = struct
     let def = Definition.classish kind ~name ~parent ~generic ~members:[] in
     (Classish { name; kind; children; generic }, def :: (generic_defs @ defs))
 
-  and mk ~for_reified ~for_alias ~(depth : int option) =
+  and mk ~for_option ~for_reified ~for_alias ~(depth : int option) =
     let depth = Option.value ~default:0 depth in
-    let mk ?(for_alias = false) () =
-      mk ~for_reified ~for_alias ~depth:(Some depth)
+    let mk ~for_option ?(for_alias = false) () =
+      mk ~for_option ~for_reified ~for_alias ~depth:(Some depth)
     in
-    match Kind.pick ~for_alias ~for_reified with
+    match Kind.pick ~for_option ~for_alias ~for_reified with
     | Kind.Mixed -> (Mixed, [])
     | Kind.Primitive -> (Primitive (Primitive.pick ()), [])
     | Kind.Option ->
       let rec candidate () =
-        match mk () with
+        match mk ~for_option:true () with
         | (Mixed, _) -> candidate ()
         | (Option _, _) as res ->
           res
@@ -812,23 +820,23 @@ end = struct
       in
       candidate ()
     | Kind.Awaitable ->
-      let (ty, defs) = mk () in
+      let (ty, defs) = mk ~for_option:false () in
       (Awaitable ty, defs)
     | Kind.Classish -> mk_classish ~for_reified ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
-      let (aliased, defs) = mk ~for_alias:true () in
+      let (aliased, defs) = mk ~for_option ~for_alias:true () in
       (Alias { name; aliased }, Definition.alias ~name aliased :: defs)
     | Kind.Newtype ->
       let name = fresh "N" in
       let producer = fresh ("mk" ^ name) in
       let (aliased, bound, defs) =
         if Random.bool () then
-          let (bound, defs) = mk ~for_alias:true () in
+          let (bound, defs) = mk ~for_option ~for_alias:true () in
           let aliased = subtypes_of ~pick:true bound |> List.hd_exn in
           (aliased, Some bound, defs)
         else
-          let (aliased, defs) = mk ~for_alias:true () in
+          let (aliased, defs) = mk ~for_option ~for_alias:true () in
           (aliased, None, defs)
       in
       let newtype_def = Definition.newtype ~name ~bound aliased in
@@ -840,7 +848,7 @@ end = struct
       (ty, newtype_def :: newtype_producer_def :: defs)
     | Kind.TypeConst ->
       let tc_name = fresh "TC" in
-      let (aliased, defs) = mk () in
+      let (aliased, defs) = mk ~for_option () in
       let typeconst_def = Definition.typeconst ~name:tc_name aliased in
       let class_name = fresh "CTC" in
       let class_def =
@@ -857,7 +865,7 @@ end = struct
       let name = fresh "CT" in
       let rec add_disjuncts (disjuncts, defs) =
         if Random.bool () then
-          let (disjunct, defs') = mk ~for_alias:true () in
+          let (disjunct, defs') = mk ~for_option ~for_alias:true () in
           if List.for_all disjuncts ~f:(are_disjoint disjunct) then
             add_disjuncts @@ (disjunct :: disjuncts, defs' @ defs)
           else
@@ -865,7 +873,7 @@ end = struct
         else
           (disjuncts, defs)
       in
-      let (ty, defs) = mk ~for_alias:true () in
+      let (ty, defs) = mk ~for_option ~for_alias:true () in
       let (disjuncts, defs) = add_disjuncts ([ty], defs) in
       let case_type_def = Definition.case_type ~name disjuncts in
       (Case { name; disjuncts }, case_type_def :: defs)
@@ -880,11 +888,11 @@ end = struct
     | Kind.Container -> begin
       match Container.pick () with
       | Container.Vec ->
-        let (ty, defs) = mk () in
+        let (ty, defs) = mk ~for_option:false () in
         (Vec ty, defs)
       | Container.Dict ->
         let key = mk_arraykey () in
-        let (value, defs) = mk () in
+        let (value, defs) = mk ~for_option:false () in
         (Dict { key; value }, defs)
       | Container.Keyset ->
         let ty = mk_arraykey () in
@@ -895,13 +903,14 @@ end = struct
          there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
       let (conjuncts, defs) =
-        List.init n ~f:(fun _ -> mk ()) |> map_and_collect ~f:Fn.id
+        List.init n ~f:(fun _ -> mk ~for_option:false ())
+        |> map_and_collect ~f:Fn.id
       in
       (Tuple { conjuncts; open_ = false }, defs)
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
       let mk_field key =
-        let (ty, defs) = mk () in
+        let (ty, defs) = mk ~for_option:false () in
         let optional = Random.bool () in
         ({ key; optional; ty }, defs)
       in
@@ -911,14 +920,14 @@ end = struct
     | Kind.Function ->
       let (parameters, parameter_defs) =
         List.init (geometric_between 0 3) ~f:(fun _ -> ())
-        |> map_and_collect ~f:mk
+        |> map_and_collect ~f:(mk ~for_option:false)
       in
-      let (return_, return_defs) = mk () in
+      let (return_, return_defs) = mk ~for_option:false () in
       let (variadic, variadic_defs) =
         if Random.bool () then
           (None, [])
         else
-          let (ty, defs) = mk () in
+          let (ty, defs) = mk ~for_option:false () in
           (Some ty, defs)
       in
       ( Function { parameters; variadic; return_ },

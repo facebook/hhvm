@@ -20,6 +20,7 @@ module Type : sig
   val show : t -> string
 
   val mk :
+    for_option:bool ->
     for_reified:bool ->
     for_alias:bool ->
     depth:int option ->

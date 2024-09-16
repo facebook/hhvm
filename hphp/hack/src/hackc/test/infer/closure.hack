@@ -43,3 +43,32 @@ function closure1(string $x): mixed {
   $y = () ==> print($x);
   return $y;
 }
+
+class C {
+
+  public static function main(int $x): void {
+    $f = (int $y) ==> self::closure($x, $y);
+  }
+
+  public static function closure(int $i, int $j): int {
+    return $i + $j;
+  }
+}
+// TEST-CHECK-BAL: define Closure$C::main.__invoke
+// CHECK: define Closure$C::main.__invoke($this: .notnull *Closure$C::main, $y: .notnull *HackInt) : *HackMixed {
+// CHECK: local $x: *void
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$this
+// CHECK:   n1: *HackMixed = load n0.?.x
+// CHECK:   store &$x <- n1: *HackMixed
+// CHECK:   n2: *HackMixed = load &$this
+// CHECK:   n3: *HackMixed = load n2.?.this
+// CHECK:   store &$this <- n3: *HackMixed
+// CHECK:   n4: *HackMixed = load &$x
+// CHECK:   n5: *HackMixed = load &$y
+// CHECK:   n6: *Closure$C::main = load &$this
+// CHECK:   n7 = Closure$C::main.closure(n6, n4, n5)
+// CHECK:   ret n7
+// CHECK: }
+
+// // Closure$C::main.closure ==> this is wrong! It should be C$static::closure

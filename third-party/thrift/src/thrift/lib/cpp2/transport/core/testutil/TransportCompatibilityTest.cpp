@@ -568,12 +568,12 @@ void TransportCompatibilityTest::TestRequestResponse_Header() {
     { // Callback
       apache::thrift::RpcOptions rpcOptions;
       rpcOptions.setWriteHeader("header_from_client", "2");
-      folly::Promise<folly::Unit> executed;
-      auto future = executed.getFuture();
+      auto executed = std::make_shared<folly::Promise<folly::Unit>>();
+      auto future = executed->getFuture();
       client->headers(
           rpcOptions,
-          std::unique_ptr<RequestCallback>(
-              new FunctionReplyCallback([&](ClientReceiveState&& state) {
+          std::make_unique<FunctionReplyCallback>(
+              [executed](ClientReceiveState&& state) {
                 auto keyValue = state.header()->getHeaders();
                 EXPECT_NE(keyValue.end(), keyValue.find("header_from_server"));
                 EXPECT_STREQ(
@@ -581,8 +581,8 @@ void TransportCompatibilityTest::TestRequestResponse_Header() {
 
                 auto exw = TestServiceAsyncClient::recv_wrapped_headers(state);
                 EXPECT_FALSE(exw);
-                executed.setValue();
-              })));
+                executed->setValue();
+              }));
       auto& waited = future.wait(folly::Duration(100));
       EXPECT_TRUE(waited.isReady());
     }
@@ -630,18 +630,18 @@ void TransportCompatibilityTest::
       apache::thrift::RpcOptions rpcOptions;
       rpcOptions.setWriteHeader("header_from_client", "2");
       rpcOptions.setWriteHeader("expected_exception", "1");
-      folly::Promise<folly::Unit> executed;
-      auto future = executed.getFuture();
+      auto executed = std::make_shared<folly::Promise<folly::Unit>>();
+      auto future = executed->getFuture();
       client->headers(
           rpcOptions,
-          std::unique_ptr<RequestCallback>(
-              new FunctionReplyCallback([&](ClientReceiveState&& state) {
+          std::make_unique<FunctionReplyCallback>(
+              [executed](ClientReceiveState&& state) {
                 auto exw = TestServiceAsyncClient::recv_wrapped_headers(state);
                 EXPECT_TRUE(exw.get_exception());
                 EXPECT_THAT(
                     exw.what().c_str(), HasSubstr("TestServiceException"));
-                executed.setValue();
-              })));
+                executed->setValue();
+              }));
       auto& waited = future.wait(folly::Duration(100));
       ASSERT_TRUE(waited.isReady());
     }
@@ -664,18 +664,18 @@ void TransportCompatibilityTest::
       apache::thrift::RpcOptions rpcOptions;
       rpcOptions.setWriteHeader("header_from_client", "2");
       rpcOptions.setWriteHeader("unexpected_exception", "1");
-      folly::Promise<folly::Unit> executed;
-      auto future = executed.getFuture();
+      auto executed = std::make_shared<folly::Promise<folly::Unit>>();
+      auto future = executed->getFuture();
       client->headers(
           rpcOptions,
-          std::unique_ptr<RequestCallback>(
-              new FunctionReplyCallback([&](ClientReceiveState&& state) {
+          std::make_unique<FunctionReplyCallback>(
+              [executed](ClientReceiveState&& state) {
                 auto exw = TestServiceAsyncClient::recv_wrapped_headers(state);
                 EXPECT_TRUE(exw.get_exception());
                 EXPECT_THAT(
                     exw.what().c_str(), HasSubstr("TApplicationException"));
-                executed.setValue();
-              })));
+                executed->setValue();
+              }));
       auto& waited = future.wait(folly::Duration(100));
       EXPECT_TRUE(waited.isReady());
     }

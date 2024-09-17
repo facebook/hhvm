@@ -14,6 +14,7 @@
 
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence, Set as pySet
+import warnings
 from types import MappingProxyType
 
 from folly.iobuf cimport cIOBuf, IOBuf, from_unique_ptr
@@ -34,6 +35,7 @@ import functools
 import itertools
 import threading
 
+from folly cimport cFollyIsDebug
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.serializer cimport cserialize, cdeserialize
 
@@ -2240,7 +2242,7 @@ class EnumMeta(type):
     def __delattr__(cls, name):
         raise AttributeError(f"{cls.__name__}: cannot delete Enum member.")
 
-    def __call__(cls, value, /):
+    def __call__(cls, value):
         if isinstance(value, cls):
             return value
         try:
@@ -2293,11 +2295,23 @@ class Enum(metaclass=EnumMeta):
     def __eq__(self, other):
         if isinstance(other, Enum):
             return self is other
+        if cFollyIsDebug and isinstance(other, (bool, float)):
+            warnings.warn(
+                f"Did you really mean to compare {type(self)} and {type(other)}?",
+                RuntimeWarning,
+                stacklevel=1
+            )
         return self._fbthrift_value_ == other
 
     def __ne__(self, other):
         if isinstance(other, Enum):
             return self is not other
+        if cFollyIsDebug and isinstance(other, (bool, float)):
+            warnings.warn(
+                f"Did you really mean to compare {type(self)} and {type(other)}?",
+                RuntimeWarning,
+                stacklevel=1
+            )
         return self._fbthrift_value_ != other
 
     def __hash__(self):

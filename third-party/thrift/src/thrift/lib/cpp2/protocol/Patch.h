@@ -56,6 +56,8 @@ struct ApplyPatch {
   void operator()(Object&& patch, Object& value) const;
 };
 
+type::Type toPatchType(type::Type input);
+
 /**
  * Returns the minimum version of Thrift Patch library required to safely decode
  * and apply the given Thrift Dynamic Patch.

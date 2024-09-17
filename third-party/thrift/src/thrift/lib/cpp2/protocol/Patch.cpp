@@ -905,6 +905,31 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   return masks;
 }
 
+type::Type toPatchType(type::Type input) {
+  for (auto t :
+       {input.toThrift().name()->structType_ref(),
+        input.toThrift().name()->unionType_ref()}) {
+    if (!t) {
+      continue;
+    }
+    if (auto p = t->uri_ref()) {
+      *p = toPatchUri(*p);
+      return input;
+    }
+    if (auto p = t->scopedName_ref()) {
+      *p = toPatchUri(*p);
+      return input;
+    }
+    folly::throw_exception<std::runtime_error>(fmt::format(
+        "Unsupported Uri: {}",
+        apache::thrift::util::enumNameSafe(t->getType())));
+  }
+
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Unsupported type: {}",
+      apache::thrift::util::enumNameSafe(input.toThrift().name()->getType())));
+}
+
 int32_t calculateMinSafePatchVersion(const protocol::Object& patch) {
   int32_t version = 1;
   for (const auto& [fieldId, patch] : *patch.members()) {

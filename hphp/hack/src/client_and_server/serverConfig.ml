@@ -487,6 +487,11 @@ let load_config config options =
       (int_opt "hh_distc_exponential_backoff_num_retries" config)
     ?tco_enable_abstract_method_optional_parameters:
       (bool_opt "enable_abstract_method_optional_parameters" config)
+    ?hack_warnings:
+      (bool_opt "hack_warnings" config
+      |> Option.map ~f:(function
+             | true -> GlobalOptions.All_except []
+             | false -> GlobalOptions.NNone))
     options
 
 let load

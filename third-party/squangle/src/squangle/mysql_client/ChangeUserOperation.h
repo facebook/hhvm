@@ -20,7 +20,7 @@ class ChangeUserOperation : public SpecialOperation {
       : SpecialOperation(std::move(impl)), key_(key) {}
 
  private:
-  MysqlHandler::Status callMysqlHandler() override;
+  InternalConnection::Status runSpecialOperation() override;
 
   db::OperationType getOperationType() const override {
     return db::OperationType::ChangeUser;

@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "squangle/mysql_client/MysqlHandler.h"
 #include "squangle/mysql_client/Operation.h"
 
 namespace facebook::common::mysql_client {
@@ -19,29 +18,25 @@ class SpecialOperation;
 using SpecialOperationCallback =
     std::function<void(SpecialOperation&, OperationResult)>;
 
-// SpecialOperation means operations like COM_RESET_CONNECTION,
-// COM_CHANGE_USER, etc.
-class SpecialOperationImpl : public OperationImpl {
+class SpecialOperationImpl : virtual public OperationBase {
  public:
-  explicit SpecialOperationImpl(std::unique_ptr<ConnectionProxy> conn)
-      : OperationImpl(std::move(conn)) {}
+  // SpecialOperationImpl() : OperationBase(nullptr) {}
+  virtual ~SpecialOperationImpl() override = default;
 
   void setCallback(SpecialOperationCallback callback) {
     callback_ = std::move(callback);
   }
 
- protected:
-  void actionable() override;
-  void specializedCompleteOperation() override;
-  void specializedTimeoutTriggered() override;
-  void specializedRun() override;
+  InternalConnection::Status runSpecialOperation();
 
- private:
-  SpecialOperation& getOp() const;
+ protected:
+  [[nodiscard]] SpecialOperation& getOp() const;
 
   SpecialOperationCallback callback_{nullptr};
 };
 
+// SpecialOperation means operations like COM_RESET_CONNECTION,
+// COM_CHANGE_USER, etc.
 class SpecialOperation : public Operation {
  public:
   void setCallback(SpecialOperationCallback callback) {
@@ -60,7 +55,7 @@ class SpecialOperation : public Operation {
 
   void mustSucceed() override;
 
-  virtual MysqlHandler::Status callMysqlHandler() = 0;
+  virtual InternalConnection::Status runSpecialOperation() = 0;
   friend SpecialOperationImpl;
 
  private:

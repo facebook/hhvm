@@ -27,6 +27,10 @@
 #include "squangle/mysql_client/SpecialOperation.h"
 
 namespace facebook::common::mysql_client {
+namespace mysql_protocol {
+template <typename C>
+class MysqlConnectPoolOperationImpl;
+}
 
 class ConnectionKey;
 template <typename Client>
@@ -399,7 +403,7 @@ class ConnectionPool
 
   std::shared_ptr<ConnectOperation> beginConnection(
       std::shared_ptr<const ConnectionKey> conn_key) {
-    auto impl = std::make_unique<ConnectPoolOperationImpl<Client>>(
+    auto impl = createConnectPoolOperationImpl(
         getSelfWeakPointer(), mysql_client_, std::move(conn_key));
     auto ret = std::make_shared<ConnectPoolOperation<Client>>(std::move(impl));
     if (isShuttingDown()) {
@@ -696,7 +700,10 @@ class ConnectionPool
   PoolStorage<Client> conn_storage_;
 
  private:
-  friend class ConnectPoolOperationImpl<Client>;
+  template <typename C>
+  friend class ConnectPoolOperationImpl;
+  template <typename C>
+  friend class mysql_protocol::MysqlConnectPoolOperationImpl;
 
   void recycleMysqlConnection(std::unique_ptr<ConnectionHolder> mysql_conn) {
     // this method can run by any thread where the Connection is dying
@@ -794,5 +801,12 @@ class ConnectionPool
       std::shared_ptr<const ConnectionKey> conn_key,
       std::unique_ptr<MysqlPooledHolder<Client>> mysqlConn) = 0;
 };
+
+template <typename Client>
+std::unique_ptr<ConnectPoolOperationImpl<Client>>
+createConnectPoolOperationImpl(
+    std::weak_ptr<ConnectionPool<Client>> pool,
+    std::shared_ptr<Client> client,
+    std::shared_ptr<const ConnectionKey> conn_key);
 
 } // namespace facebook::common::mysql_client

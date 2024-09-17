@@ -11,9 +11,8 @@
 
 namespace facebook::common::mysql_client {
 
-MysqlHandler::Status ResetOperation::callMysqlHandler() {
-  auto& handler = conn().client().getMysqlHandler();
-  return handler.resetConn(conn().getInternalConnection());
+InternalConnection::Status ResetOperation::runSpecialOperation() {
+  return conn().getInternalConnection().resetConn();
 }
 
 } // namespace facebook::common::mysql_client

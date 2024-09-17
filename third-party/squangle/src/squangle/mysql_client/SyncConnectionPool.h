@@ -13,11 +13,13 @@
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/ConnectionPool.h"
 #include "squangle/mysql_client/SyncMysqlClient.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnectPoolOperationImpl.h"
 
 namespace facebook::common::mysql_client {
 
 using SyncConnectPoolOperation = ConnectPoolOperation<SyncMysqlClient>;
-using SyncConnectPoolOperationImpl = ConnectPoolOperationImpl<SyncMysqlClient>;
+using SyncConnectPoolOperationImpl =
+    mysql_protocol::MysqlConnectPoolOperationImpl<SyncMysqlClient>;
 
 class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
  public:

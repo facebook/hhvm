@@ -9,7 +9,6 @@
 #pragma once
 
 #include <folly/io/async/EventBase.h>
-#include <mysql.h>
 
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/logger/DBEventLogger.h"
@@ -23,7 +22,6 @@ class ConnectOperationImpl;
 template <typename Client>
 class ConnectPoolOperationImpl;
 class FetchOperationImpl;
-class MysqlHandler;
 class SpecialOperationImpl;
 
 class MysqlClientBase {
@@ -109,7 +107,10 @@ class MysqlClientBase {
       std::unique_ptr<db::DBCounterBase> db_stats =
           std::make_unique<db::SimpleDbCounter>());
 
-  virtual bool runInThread(folly::Cob&& fn, bool wait = false) = 0;
+  virtual bool runInThread(std::function<void()>&& fn, bool /*wait*/ = false) {
+    fn();
+    return true;
+  }
 
   virtual uint32_t numStartedAndOpenConnections() {
     return 0;
@@ -126,11 +127,11 @@ class MysqlClientBase {
 
   virtual std::unique_ptr<ConnectOperationImpl> createConnectOperationImpl(
       MysqlClientBase* client,
-      std::shared_ptr<const ConnectionKey> conn_key) const;
-  std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
-      std::unique_ptr<OperationImpl::ConnectionProxy> conn) const;
-  std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
-      std::unique_ptr<OperationImpl::ConnectionProxy> conn) const;
+      std::shared_ptr<const ConnectionKey> conn_key) const = 0;
+  virtual std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn) const = 0;
+  virtual std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn) const = 0;
 
   // Helper versions of the above that take a Connection instead of a
   // ConnectionProxy
@@ -139,8 +140,14 @@ class MysqlClientBase {
   std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
       std::unique_ptr<Connection> conn) const;
 
+  virtual void activeConnectionAdded(
+      std::shared_ptr<const ConnectionKey> /*key*/) {}
+  virtual void activeConnectionRemoved(
+      std::shared_ptr<const ConnectionKey> /*key*/) {}
+
  protected:
   friend class Connection;
+  friend class OperationBase;
   friend class OperationImpl;
   friend class ConnectOperationImpl;
   template <typename Class>
@@ -156,16 +163,12 @@ class MysqlClientBase {
   friend class SyncConnection;
   virtual db::SquangleLoggingData makeSquangleLoggingData(
       std::shared_ptr<const ConnectionKey> connKey,
-      const db::ConnectionContextBase* connContext) = 0;
+      const db::ConnectionContextBase* connContext) {
+    return db::SquangleLoggingData(connKey, connContext);
+  }
 
-  virtual void activeConnectionAdded(
-      std::shared_ptr<const ConnectionKey> key) = 0;
-  virtual void activeConnectionRemoved(
-      std::shared_ptr<const ConnectionKey> key) = 0;
-  virtual void addOperation(std::shared_ptr<Operation> op) = 0;
-  virtual void deferRemoveOperation(Operation* op) = 0;
-
-  virtual MysqlHandler& getMysqlHandler() = 0;
+  virtual void addOperation(std::shared_ptr<Operation> /*op*/) {}
+  virtual void deferRemoveOperation(Operation* /*op*/) {}
 
   // Using unique pointer due inheritance virtual calls
   std::unique_ptr<db::SquangleLoggerBase> db_logger_;

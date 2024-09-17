@@ -8,10 +8,11 @@
 
 #pragma once
 
+#include <functional>
 #include <vector>
 
-#include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/mysql_client/Operation.h"
+#include "squangle/mysql_client/MultiQueryOperation.h"
+#include "squangle/mysql_client/QueryOperation.h"
 
 namespace facebook::common::mysql_client {
 
@@ -19,11 +20,10 @@ namespace facebook::common::mysql_client {
 // operation (Success or Failure).
 // The Appender callbacks will only be called for `Success` and `Failure`
 // and pass the whole result of the query or multi query.
-typedef std::function<void(QueryOperation&, QueryResult, QueryCallbackReason)>
-    QueryAppenderCallback;
-typedef std::function<
-    void(MultiQueryOperation&, std::vector<QueryResult>, QueryCallbackReason)>
-    MultiQueryAppenderCallback;
+using QueryAppenderCallback =
+    std::function<void(QueryOperation&, QueryResult, QueryCallbackReason)>;
+using MultiQueryAppenderCallback = std::function<
+    void(MultiQueryOperation&, std::vector<QueryResult>, QueryCallbackReason)>;
 
 QueryCallback resultAppender(QueryAppenderCallback&& callback);
 

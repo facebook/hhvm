@@ -151,17 +151,8 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->sslSessionReused();
   }
 
-  [[nodiscard]] std::string getTlsVersion() const override {
-    return internalConn_->getTlsVersion();
-  }
-
   [[nodiscard]] unsigned int warningCount() const override {
     return internalConn_->warningCount();
-  }
-
-  [[nodiscard]] std::string escapeString(
-      std::string_view unescaped) const override {
-    return internalConn_->escapeString(unescaped);
   }
 
   [[nodiscard]] size_t escapeString(char* out, const char* src, size_t length)
@@ -173,11 +164,6 @@ class ConnectionHolder : public InternalConnection {
     // We shouldn't be calling this version
     DCHECK(false);
     return nullptr;
-  }
-
-  [[nodiscard]] folly::EventHandler::EventFlags getReadWriteState()
-      const override {
-    return internalConn_->getReadWriteState();
   }
 
   [[nodiscard]] unsigned int getErrno() const override {
@@ -205,33 +191,6 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->getResponseAttributes();
   }
 
-  void setCompression(CompressionAlgorithm algo) override {
-    internalConn_->setCompression(algo);
-  }
-
-  [[nodiscard]] bool setSSLOptionsProvider(
-      SSLOptionsProviderBase& provider) override {
-    return internalConn_->setSSLOptionsProvider(provider);
-  }
-
-  [[nodiscard]] std::optional<std::string> getSniServerName() const override {
-    return internalConn_->getSniServerName();
-  }
-
-  void setSniServerName(const std::string& name) override {
-    internalConn_->setSniServerName(name);
-  }
-
-  [[nodiscard]] bool setDscp(uint8_t dscp) override {
-    return internalConn_->setDscp(dscp);
-  }
-
-  void setCertValidatorCallback(
-      const MysqlCertValidatorCallback& cb,
-      void* context) override {
-    internalConn_->setCertValidatorCallback(cb, context);
-  }
-
   void setConnectTimeout(Millis timeout) const override {
     internalConn_->setConnectTimeout(timeout);
   }
@@ -248,20 +207,8 @@ class ConnectionHolder : public InternalConnection {
     return *internalConn_;
   }
 
-  [[nodiscard]] int getSocketDescriptor() const override {
-    return internalConn_->getSocketDescriptor();
-  }
-
-  [[nodiscard]] bool isDoneWithTcpHandShake() const override {
-    return internalConn_->isDoneWithTcpHandShake();
-  }
-
-  [[nodiscard]] std::string getConnectStageName() const override {
-    return internalConn_->getConnectStageName();
-  }
-
-  [[nodiscard]] bool storeSession(SSLOptionsProviderBase& provider) override {
-    return internalConn_->storeSession(provider);
+  [[nodiscard]] InternalConnection& getInternalConnection() {
+    return *internalConn_;
   }
 
   [[nodiscard]] uint64_t getLastInsertId() const override {
@@ -296,17 +243,6 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->getAutocommit();
   }
 
-  [[nodiscard]] Status tryConnect(
-      const ConnectionOptions& opts,
-      std::shared_ptr<const ConnectionKey> conn_key,
-      int flags) const override {
-    return internalConn_->tryConnect(opts, std::move(conn_key), flags);
-  }
-
-  [[nodiscard]] Status runQuery(std::string_view query) const override {
-    return internalConn_->runQuery(query);
-  }
-
   [[nodiscard]] Status resetConn() const override {
     return internalConn_->resetConn();
   }
@@ -314,18 +250,6 @@ class ConnectionHolder : public InternalConnection {
   [[nodiscard]] Status changeUser(
       std::shared_ptr<const ConnectionKey> conn_key) const override {
     return internalConn_->changeUser(std::move(conn_key));
-  }
-
-  [[nodiscard]] Status nextResult() const override {
-    return internalConn_->nextResult();
-  }
-
-  [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override {
-    return internalConn_->getResult();
-  }
-
-  [[nodiscard]] size_t getFieldCount() const override {
-    return internalConn_->getFieldCount();
   }
 
   [[nodiscard]] bool dumpDebugInfo() const override {

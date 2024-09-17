@@ -10,9 +10,7 @@
 
 #include <ostream>
 
-#include <folly/ScopeGuard.h>
-
-#include "squangle/mysql_client/AsyncMysqlClient.h"
+#include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/Operation.h"
 
 namespace facebook::common::mysql_client {
@@ -306,11 +304,11 @@ void MultiQueryStreamHandler::streamCallback(
         op.result(),
         op.mysql_errno(),
         op.mysql_error(),
-        op.conn().getKey(),
+        op.connection()->getKey(),
         op.opElapsed());
     state_ = State::OperationFailed;
   }
-  op.conn().notify();
+  op.connection()->notify();
 }
 
 folly::Optional<EphemeralRow> MultiQueryStreamHandler::fetchOneRow(
@@ -442,7 +440,7 @@ MultiQueryStreamHandler::~MultiQueryStreamHandler() {
 }
 
 Connection& MultiQueryStreamHandler::connection() const {
-  return operation_->conn();
+  return *operation_->connection();
 }
 
 EphemeralRowFields* StreamedQueryResult::getRowFields() const {

@@ -118,36 +118,18 @@ std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
   return ret;
 }
 
-std::unique_ptr<ConnectOperationImpl>
-MysqlClientBase::createConnectOperationImpl(
-    MysqlClientBase* client,
-    std::shared_ptr<const ConnectionKey> conn_key) const {
-  return ConnectOperationImpl::create(client, std::move(conn_key));
-}
-
-std::unique_ptr<FetchOperationImpl> MysqlClientBase::createFetchOperationImpl(
-    std::unique_ptr<OperationImpl::ConnectionProxy> conn) const {
-  return std::make_unique<FetchOperationImpl>(std::move(conn));
-}
-
-std::unique_ptr<SpecialOperationImpl>
-MysqlClientBase::createSpecialOperationImpl(
-    std::unique_ptr<OperationImpl::ConnectionProxy> conn) const {
-  return std::make_unique<SpecialOperationImpl>(std::move(conn));
-}
-
 // Helper versions of the above that take a Connection instead of a
 // ConnectionProxy
 std::unique_ptr<FetchOperationImpl> MysqlClientBase::createFetchOperationImpl(
     std::unique_ptr<Connection> conn) const {
   return createFetchOperationImpl(
-      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)));
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)));
 }
 std::unique_ptr<SpecialOperationImpl>
 MysqlClientBase::createSpecialOperationImpl(
     std::unique_ptr<Connection> conn) const {
   return createSpecialOperationImpl(
-      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)));
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)));
 }
 
 } // namespace facebook::common::mysql_client

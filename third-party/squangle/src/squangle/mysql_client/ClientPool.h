@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "squangle/mysql_client/AsyncMysqlClient.h"
-
 #include <folly/Random.h>
 #include <folly/Singleton.h>
 #include <folly/hash/Hash.h>

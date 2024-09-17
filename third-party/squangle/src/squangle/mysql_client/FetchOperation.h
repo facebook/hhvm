@@ -28,15 +28,36 @@ class RowStream {
  public:
   RowStream(
       std::unique_ptr<InternalResult> mysql_query_result,
-      std::unique_ptr<InternalRowMetadata> metadata,
-      MysqlHandler* handler);
+      std::unique_ptr<InternalRowMetadata> metadata);
 
   EphemeralRow consumeRow();
 
   bool hasNext();
 
-  EphemeralRowFields* getEphemeralRowFields() {
+  EphemeralRowFields* getEphemeralRowFields() noexcept {
     return &*row_fields_;
+  }
+
+  const folly::Optional<EphemeralRow>& getCurrentRow() noexcept {
+    return current_row_;
+  }
+
+  uint64_t numRowsSeen() const noexcept {
+    return num_rows_seen_;
+  }
+
+  uint64_t queryResultSize() const noexcept {
+    return query_result_size_;
+  }
+
+  void close() {
+    if (mysql_query_result_) {
+      mysql_query_result_->close();
+    }
+  }
+
+  size_t numRows() const {
+    return mysql_query_result_ ? mysql_query_result_->numRows() : 0;
   }
 
   ~RowStream() = default;
@@ -50,9 +71,6 @@ class RowStream {
   bool hasQueryFinished() {
     return query_finished_;
   }
-  uint64_t numRowsSeen() const {
-    return num_rows_seen_;
-  }
 
   bool query_finished_ = false;
   uint64_t num_rows_seen_ = 0;
@@ -62,17 +80,14 @@ class RowStream {
   std::unique_ptr<InternalResult> mysql_query_result_;
   folly::Optional<EphemeralRow> current_row_;
   std::shared_ptr<EphemeralRowFields> row_fields_;
-  MysqlHandler* handler_ = nullptr;
 };
 
-class FetchOperationImpl : public OperationImpl {
+class FetchOperationImpl : virtual public OperationBase {
  public:
   using RespAttrs = AttributeMap;
 
-  // Number of queries that succeed to execute
-  explicit FetchOperationImpl(
-      std::unique_ptr<OperationImpl::ConnectionProxy> conn)
-      : OperationImpl(std::move(conn)) {}
+  // FetchOperationImpl() : OperationBase(nullptr) {}
+  virtual ~FetchOperationImpl() override = default;
 
   std::shared_ptr<folly::fbstring> getRenderedQuery() const noexcept {
     return rendered_query_;
@@ -114,24 +129,11 @@ class FetchOperationImpl : public OperationImpl {
 
   RowStream* rowStream();
 
-  void pauseForConsumer();
-  bool isPaused() const;
-  void resume();
+  virtual void pauseForConsumer() = 0;
+  virtual void resume() = 0;
+  virtual bool isPaused() const = 0;
 
  protected:
-  void specializedRunImpl();
-  void specializedRun() override;
-
-  // In actionable it is analyzed the action that is required to continue the
-  // operation. For example, if the fetch action is StartQuery, it runs query or
-  // requests more results depending if it had already ran or not the query. The
-  // same process happens for the other FetchActions. The action member can be
-  // changed in other member functions called in actionable to keep the fetching
-  // flow running.
-  void actionable() override;
-  void specializedTimeoutTriggered() override;
-  void specializedCompleteOperation() override;
-
   enum class FetchAction {
     StartQuery,
     InitFetch,
@@ -144,24 +146,23 @@ class FetchOperationImpl : public OperationImpl {
   void setFetchAction(FetchAction action);
   static folly::StringPiece toString(FetchAction action);
 
-  void cancel() {
-    cancel_ = true;
-    setFetchAction(FetchAction::CompleteQuery);
-  }
-
- private:
   FetchOperation& getOp() const;
-
-  void resumeImpl();
-  // Checks if the current thread has access to stream, or result data.
-  bool isStreamAccessAllowed() const;
-
-  // Asynchronously kill a currently running query, returns
-  // before the query is killed
-  void killRunningQuery();
 
   // Read the response attributes
   RespAttrs readResponseAttributes();
+
+  virtual bool isStreamAccessAllowed() const = 0;
+
+  [[nodiscard]] const MultiQuery& queries() const;
+  [[nodiscard]] bool slurp() {
+    return current_row_stream_->slurp();
+  }
+  [[nodiscard]] bool hasQueryFinished() {
+    return current_row_stream_->hasQueryFinished();
+  }
+
+  // Functions to deal with the connection
+  [[nodiscard]] const InternalConnection& getInternalConnection() const;
 
   std::shared_ptr<folly::fbstring> rendered_query_;
 
@@ -188,8 +189,6 @@ class FetchOperationImpl : public OperationImpl {
   unsigned int current_warnings_count_ = 0;
   std::string current_recv_gtid_;
   RespAttrs current_resp_attrs_;
-
-  bool cancel_ = false;
 
   // When the Fetch gets paused, active fetch action moves to
   // `WaitForConsumer` and the action that got paused gets saved so tat
@@ -281,6 +280,15 @@ class FetchOperation : public Operation {
     return impl_->isPaused();
   }
 
+  // Overridden in child classes and invoked when the Query fetching
+  // has done specific actions that might be needed for report (callbacks,
+  // store fetched data, initialize data).
+  virtual void notifyInitQuery() = 0;
+  virtual void notifyRowsReady() = 0;
+  virtual bool notifyQuerySuccess(bool more_results) = 0;
+  virtual void notifyFailure(OperationResult result) = 0;
+  virtual void notifyOperationCompleted(OperationResult result) = 0;
+
  protected:
   friend FetchOperationImpl;
 
@@ -297,18 +305,7 @@ class FetchOperation : public Operation {
       std::unique_ptr<FetchOperationImpl> impl,
       MultiQuery&& multi_query);
 
-  // Overridden in child classes and invoked when the Query fetching
-  // has done specific actions that might be needed for report (callbacks,
-  // store fetched data, initialize data).
-  virtual void notifyInitQuery() = 0;
-  virtual void notifyRowsReady() = 0;
-  virtual bool notifyQuerySuccess(bool more_results) = 0;
-  virtual void notifyFailure(OperationResult result) = 0;
-  virtual void notifyOperationCompleted(OperationResult result) = 0;
-
  private:
-  friend class MultiQueryStreamHandler;
-
   OperationBase* impl() override {
     return (OperationBase*)impl_.get();
   }

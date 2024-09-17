@@ -8,8 +8,9 @@
 
 #pragma once
 
-#include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/mysql_client/detail/MysqlConnection.h"
+#include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
 
 namespace facebook::common::mysql_client {
 
@@ -32,12 +33,6 @@ class SyncMysqlClient : public MysqlClientBase {
       logger->setLoggingPrefix("cpp_sync");
     }
     return logger;
-  }
-
-  db::SquangleLoggingData makeSquangleLoggingData(
-      std::shared_ptr<const ConnectionKey> connKey,
-      const db::ConnectionContextBase* connContext) override {
-    return db::SquangleLoggingData(std::move(connKey), connContext);
   }
 
   // Factory method
@@ -63,58 +58,15 @@ class SyncMysqlClient : public MysqlClientBase {
   template <typename Client>
   friend class ConnectionPool;
 
-  bool runInThread(folly::Cob&& fn, bool /*wait*/) override {
-    fn();
-    return true;
-  }
+  std::unique_ptr<ConnectOperationImpl> createConnectOperationImpl(
+      MysqlClientBase* client,
+      std::shared_ptr<const ConnectionKey> conn_key) const override;
 
-  // These functions matter more to Async client, which keeps track of
-  // existing operations.
-  void activeConnectionAdded(std::shared_ptr<const ConnectionKey>) override {}
-  void activeConnectionRemoved(std::shared_ptr<const ConnectionKey>) override {}
-  void addOperation(std::shared_ptr<Operation>) override {}
-  void deferRemoveOperation(Operation*) override {}
+  std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
 
- private:
-  MysqlHandler& getMysqlHandler() override {
-    return mysql_handler_;
-  }
-
-  // Sync implementation of mysql handler interface
-  class SyncMysqlHandler : public MysqlHandler {
-    Status tryConnect(
-        const InternalConnection& conn,
-        const ConnectionOptions& opts,
-        std::shared_ptr<const ConnectionKey> key,
-        int flags) override;
-
-    Status runQuery(const InternalConnection& conn, std::string_view queryStmt)
-        override {
-      return conn.runQuery(queryStmt);
-    }
-    Status nextResult(const InternalConnection& conn) override {
-      return conn.nextResult();
-    }
-    size_t getFieldCount(const InternalConnection& conn) override {
-      return conn.getFieldCount();
-    }
-    InternalResult::FetchRowRet fetchRow(InternalResult& result) override {
-      return result.fetchRow();
-    }
-    std::unique_ptr<InternalResult> getResult(
-        const InternalConnection& conn) override {
-      return conn.getResult();
-    }
-
-    Status resetConn(const InternalConnection& conn) override {
-      return conn.resetConn();
-    }
-    Status changeUser(
-        const InternalConnection& conn,
-        std::shared_ptr<const ConnectionKey> conn_key) override {
-      return conn.changeUser(std::move(conn_key));
-    }
-  } mysql_handler_;
+  std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
 };
 
 // SyncConnection is a specialization of Connection to handle inline loops.
@@ -130,28 +82,8 @@ class SyncConnection : public Connection {
 
   ~SyncConnection();
 
-  // Operations call these methods as the operation becomes unblocked, as
-  // callers want to wait for completion, etc.
-  void notify() override {
-    // Nop
-  }
-
-  void wait() const override {
-    // Nop
-  }
-
-  // Called when a new operation is being started.
-  void resetActionable() override {
-    // Nop
-  }
-
-  bool runInThread(folly::Cob&& fn) override {
-    fn();
-    return true;
-  }
-
   std::shared_ptr<MultiQueryStreamOperation> createOperation(
-      std::unique_ptr<OperationImpl::ConnectionProxy> proxy,
+      std::unique_ptr<OperationBase::ConnectionProxy> proxy,
       MultiQuery&& multi_query) override {
     auto impl = client().createFetchOperationImpl(std::move(proxy));
     return MultiQueryStreamOperation::create(
@@ -160,7 +92,7 @@ class SyncConnection : public Connection {
 
  protected:
   std::unique_ptr<InternalConnection> createInternalConnection() override {
-    return std::make_unique<detail::SyncMysqlConnection>();
+    return std::make_unique<mysql_protocol::SyncMysqlConnection>();
   }
 };
 

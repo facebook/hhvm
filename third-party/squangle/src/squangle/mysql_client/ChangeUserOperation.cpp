@@ -11,9 +11,8 @@
 
 namespace facebook::common::mysql_client {
 
-MysqlHandler::Status ChangeUserOperation::callMysqlHandler() {
-  auto& handler = conn().client().getMysqlHandler();
-  return handler.changeUser(conn().getInternalConnection(), key_);
+InternalConnection::Status ChangeUserOperation::runSpecialOperation() {
+  return conn().getInternalConnection().changeUser(key_);
 }
 
 } // namespace facebook::common::mysql_client

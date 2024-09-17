@@ -22,7 +22,6 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 #include <glog/logging.h>
-#include <mysql.h>
 #include <chrono>
 
 #include <re2/re2.h>

@@ -6,14 +6,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/Exception.h>
 #include <mysql_async.h>
 #include <memory>
 #include <string>
 
-#include "squangle/mysql_client/detail/MysqlConnection.h"
-#include "squangle/mysql_client/detail/MysqlResult.h"
+#include "squangle/base/ExceptionUtil.h"
+#include "squangle/mysql_client/ConnectionOptions.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlResult.h"
 
-namespace facebook::common::mysql_client::detail {
+namespace facebook::common::mysql_client::mysql_protocol {
 
 MysqlConnection::MysqlConnection(MYSQL* mysql) : mysql_(mysql) {}
 
@@ -43,6 +46,8 @@ std::function<void()> MysqlConnection::getCloseFunction() {
 }
 
 std::string MysqlConnection::serverInfo() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_get_server_info(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_server_info({}) returned {}", (void*)mysql_, ret);
@@ -50,12 +55,16 @@ std::string MysqlConnection::serverInfo() const {
 }
 
 long MysqlConnection::threadId() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_thread_id(mysql_);
   VLOG(4) << fmt::format("mysql_thread_id({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
 void MysqlConnection::disableSSL() {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   enum mysql_ssl_mode ssl_mode = SSL_MODE_DISABLED;
   auto ret = mysql_options(mysql_, MYSQL_OPT_SSL_MODE, &ssl_mode);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_SSL_MODE", ssl_mode, ret);
@@ -63,6 +72,8 @@ void MysqlConnection::disableSSL() {
 };
 
 bool MysqlConnection::sslSessionReused() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_get_ssl_session_reused(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_ssl_session_reused({}) returned {}", (void*)mysql_, ret);
@@ -70,6 +81,8 @@ bool MysqlConnection::sslSessionReused() const {
 }
 
 std::string MysqlConnection::getTlsVersion() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto version = mysql_get_ssl_version(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_ssl_version({}) returned {}",
@@ -83,19 +96,15 @@ std::string MysqlConnection::getTlsVersion() const {
 }
 
 unsigned int MysqlConnection::warningCount() const {
-  return mysql_warning_count(mysql_);
-}
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
 
-std::string MysqlConnection::escapeString(std::string_view unescaped) const {
-  std::string escaped;
-  escaped.resize((2 * unescaped.size()) + 1);
-  auto size = escapeString(escaped.data(), unescaped.data(), unescaped.size());
-  escaped.resize(size);
-  return escaped;
+  return mysql_warning_count(mysql_);
 }
 
 size_t MysqlConnection::escapeString(char* ptr, const char* src, size_t length)
     const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_real_escape_string(mysql_, ptr, src, length);
   VLOG(4) << fmt::format(
       "mysql_real_escape_string({}, {}, {:.60} ({}), {}) returned {}",
@@ -109,6 +118,8 @@ size_t MysqlConnection::escapeString(char* ptr, const char* src, size_t length)
 }
 
 folly::EventHandler::EventFlags MysqlConnection::getReadWriteState() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   NET_ASYNC* net_async = NET_ASYNC_DATA(&mysql_->net);
   // net_async can be null during some stages of connecting
   auto async_blocking_state =
@@ -127,18 +138,24 @@ folly::EventHandler::EventFlags MysqlConnection::getReadWriteState() const {
 }
 
 unsigned int MysqlConnection::getErrno() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_errno(mysql_);
   VLOG(4) << fmt::format("mysql_errno({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
 std::string MysqlConnection::getErrorMessage() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_error(mysql_);
   VLOG(4) << fmt::format("mysql_error({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
 void MysqlConnection::setConnectAttributes(const AttributeMap& attributes) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   // reset all connection attributes on the MYSQL connection
   auto ret = mysql_options(mysql_, MYSQL_OPT_CONNECT_ATTR_RESET, nullptr);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_CONNECT_ATTR_RESET", nullptr, ret);
@@ -154,6 +171,8 @@ void MysqlConnection::setConnectAttributes(const AttributeMap& attributes) {
 }
 
 int MysqlConnection::setQueryAttributes(const AttributeMap& attributes) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   // reset all connection attributes on the MYSQL connection
   auto ret = mysql_options(mysql_, MYSQL_OPT_QUERY_ATTR_RESET, nullptr);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_QUERY_ATTR_RESET", nullptr, ret);
@@ -174,6 +193,8 @@ int MysqlConnection::setQueryAttributes(const AttributeMap& attributes) {
 int MysqlConnection::setQueryAttribute(
     const std::string& key,
     const std::string& value) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_options4(
       mysql_, MYSQL_OPT_QUERY_ATTR_ADD, key.c_str(), value.c_str());
   VLOG(4) << logMysqlOptions4("MYSQL_OPT_QUERY_ATTR_ADD", key, value, ret);
@@ -253,6 +274,8 @@ readNextResponseAtribute(MYSQL* mysql) {
 } // namespace
 
 AttributeMap MysqlConnection::getResponseAttributes() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   AttributeMap attrs;
 
   for (auto attr = readFirstResponseAtribute(mysql_); attr;
@@ -264,6 +287,8 @@ AttributeMap MysqlConnection::getResponseAttributes() const {
 }
 
 void MysqlConnection::setCompression(CompressionAlgorithm algo) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_options(mysql_, MYSQL_OPT_COMPRESS, nullptr);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_COMPRESS", nullptr, ret);
   DCHECK_EQ(ret, 0); // should always succeed
@@ -272,10 +297,14 @@ void MysqlConnection::setCompression(CompressionAlgorithm algo) {
 }
 
 bool MysqlConnection::setSSLOptionsProvider(SSLOptionsProviderBase& provider) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   return provider.setMysqlSSLOptions(mysql_);
 }
 
 std::optional<std::string> MysqlConnection::getSniServerName() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   const char* opt_val = nullptr;
   auto ret = mysql_get_option(mysql_, MYSQL_OPT_TLS_SNI_SERVERNAME, &opt_val);
   VLOG(4) << fmt::format(
@@ -292,12 +321,16 @@ std::optional<std::string> MysqlConnection::getSniServerName() const {
 }
 
 void MysqlConnection::setSniServerName(const std::string& name) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_options(mysql_, MYSQL_OPT_TLS_SNI_SERVERNAME, name.c_str());
   VLOG(4) << logMysqlOptions("MYSQL_OPT_COMPRESS", name, ret);
   DCHECK_EQ(ret, 0); // should always succeed
 }
 
 bool MysqlConnection::setDscp(uint8_t dscp) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   // DS field (QOS/TOS level) is 8 bits with DSCP packed into the most
   // significant 6 bits.
   uint dsf = dscp << 2;
@@ -309,6 +342,8 @@ bool MysqlConnection::setDscp(uint8_t dscp) {
 void MysqlConnection::setCertValidatorCallback(
     const MysqlCertValidatorCallback& cb,
     void* context) {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_options(mysql_, MYSQL_OPT_TLS_CERT_CALLBACK, &cb);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_TLS_CERT_CALLBACK", &cb, ret);
   DCHECK_EQ(ret, 0); // should always succeed
@@ -320,6 +355,8 @@ void MysqlConnection::setCertValidatorCallback(
 }
 
 void MysqlConnection::setConnectTimeout(Millis timeout) const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_CONNECT_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_CONNECT_TIMEOUT_MS", timeoutInMs, ret);
@@ -327,6 +364,8 @@ void MysqlConnection::setConnectTimeout(Millis timeout) const {
 }
 
 void MysqlConnection::setReadTimeout(Millis timeout) const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_READ_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_READ_TIMEOUT_MS", timeoutInMs, ret);
@@ -334,6 +373,8 @@ void MysqlConnection::setReadTimeout(Millis timeout) const {
 }
 
 void MysqlConnection::setWriteTimeout(Millis timeout) const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   uint timeoutInMs = timeout.count();
   auto ret = mysql_options(mysql_, MYSQL_OPT_WRITE_TIMEOUT_MS, &timeoutInMs);
   VLOG(4) << logMysqlOptions("MYSQL_OPT_WRITE_TIMEOUT_MS", timeoutInMs, ret);
@@ -341,6 +382,8 @@ void MysqlConnection::setWriteTimeout(Millis timeout) const {
 }
 
 int MysqlConnection::getSocketDescriptor() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_get_socket_descriptor(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_socket_descriptor({}) returned {}", (void*)mysql_, ret);
@@ -389,12 +432,16 @@ int MysqlConnection::getSocketDescriptor() const {
 }
 
 uint64_t MysqlConnection::getLastInsertId() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_insert_id(mysql_);
   VLOG(4) << fmt::format("mysql_insert_id({}) returned {}", (void*)mysql_, ret);
   return ret;
 }
 
 uint64_t MysqlConnection::getAffectedRows() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_affected_rows(mysql_);
   VLOG(4) << fmt::format(
       "mysql_affected_rows({}) returned {}", (void*)mysql_, ret);
@@ -411,6 +458,8 @@ std::string MysqlConnection::getConnectStageName() const {
 }
 
 std::optional<std::string> MysqlConnection::getRecvGtid() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   const char* data;
   size_t length;
   auto ret = mysql_session_track_get_first(
@@ -430,6 +479,8 @@ std::optional<std::string> MysqlConnection::getRecvGtid() const {
 }
 
 std::optional<std::string> MysqlConnection::getSchemaChanged() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   const char* data;
   size_t length;
   auto ret = mysql_session_track_get_first(
@@ -449,6 +500,8 @@ std::optional<std::string> MysqlConnection::getSchemaChanged() const {
 }
 
 bool MysqlConnection::hasMoreResults() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_more_results(mysql_);
   VLOG(4) << fmt::format(
       "mysql_more_results({}) returned {}", (void*)mysql_, ret);
@@ -456,13 +509,23 @@ bool MysqlConnection::hasMoreResults() const {
 }
 
 InternalConnection::Status SyncMysqlConnection::tryConnect(
-    const ConnectionOptions& /*opts*/,
+    const ConnectionOptions& opts,
     std::shared_ptr<const ConnectionKey> conn_key,
-    int flags) const {
+    int flags) {
   static std::string kEmptyString;
+
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto mysqlConnKey =
       std::dynamic_pointer_cast<const MysqlConnectionKey>(conn_key);
   DCHECK(mysqlConnKey);
+
+  auto qtmo = std::chrono::duration_cast<Millis>(opts.getQueryTimeout());
+  auto ctmo = std::chrono::duration_cast<Millis>(opts.getTimeout());
+
+  setConnectTimeout(ctmo);
+  setReadTimeout(qtmo);
+  setWriteTimeout(qtmo);
 
   const auto& unixSocket = mysqlConnKey->unixSocketPath();
   const auto usingUnixSocket = !unixSocket.empty();
@@ -500,8 +563,11 @@ InternalConnection::Status SyncMysqlConnection::tryConnect(
 InternalConnection::Status AsyncMysqlConnection::tryConnect(
     const ConnectionOptions& /*opts*/,
     std::shared_ptr<const ConnectionKey> conn_key,
-    int flags) const {
+    int flags) {
   static std::string kEmptyString;
+
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto mysqlConnKey =
       std::dynamic_pointer_cast<const MysqlConnectionKey>(conn_key);
   DCHECK(mysqlConnKey);
@@ -541,6 +607,8 @@ InternalConnection::Status AsyncMysqlConnection::tryConnect(
 
 InternalConnection::Status SyncMysqlConnection::runQuery(
     std::string_view query) const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_real_query(mysql_, query.data(), query.size());
   VLOG(4) << fmt::format(
       "mysql_real_query({}, {:60}, {}) returned {}",
@@ -553,6 +621,8 @@ InternalConnection::Status SyncMysqlConnection::runQuery(
 
 InternalConnection::Status AsyncMysqlConnection::runQuery(
     std::string_view query) const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_real_query_nonblocking(mysql_, query.data(), query.size());
   VLOG(4) << fmt::format(
       "mysql_real_query_nonblocking({}, {:60}, {}) returned {}",
@@ -564,6 +634,8 @@ InternalConnection::Status AsyncMysqlConnection::runQuery(
 }
 
 InternalConnection::Status SyncMysqlConnection::resetConn() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_reset_connection(mysql_);
   VLOG(4) << fmt::format(
       "mysql_reset_connection({}) returned {}", (void*)mysql_, ret);
@@ -571,6 +643,8 @@ InternalConnection::Status SyncMysqlConnection::resetConn() const {
 }
 
 InternalConnection::Status AsyncMysqlConnection::resetConn() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_reset_connection_nonblocking(mysql_);
   VLOG(4) << fmt::format(
       "mysql_reset_connection_nonblocking({}) returned {}", (void*)mysql_, ret);
@@ -579,6 +653,8 @@ InternalConnection::Status AsyncMysqlConnection::resetConn() const {
 
 InternalConnection::Status SyncMysqlConnection::changeUser(
     std::shared_ptr<const ConnectionKey> connKey) const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto mysqlConnKey =
       std::dynamic_pointer_cast<const MysqlConnectionKey>(connKey);
   DCHECK(mysqlConnKey);
@@ -599,6 +675,8 @@ InternalConnection::Status SyncMysqlConnection::changeUser(
 
 InternalConnection::Status AsyncMysqlConnection::changeUser(
     std::shared_ptr<const ConnectionKey> connKey) const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto mysqlConnKey =
       std::dynamic_pointer_cast<const MysqlConnectionKey>(connKey);
   DCHECK(mysqlConnKey);
@@ -618,6 +696,8 @@ InternalConnection::Status AsyncMysqlConnection::changeUser(
 }
 
 InternalConnection::Status SyncMysqlConnection::nextResult() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_next_result(mysql_);
   VLOG(4) << fmt::format(
       "mysql_next_result({}) returned {}", (void*)mysql_, ret);
@@ -625,6 +705,8 @@ InternalConnection::Status SyncMysqlConnection::nextResult() const {
 }
 
 InternalConnection::Status AsyncMysqlConnection::nextResult() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_next_result_nonblocking(mysql_);
   VLOG(4) << fmt::format(
       "mysql_next_result_nonblocking({}) returned {}", (void*)mysql_, ret);
@@ -632,6 +714,8 @@ InternalConnection::Status AsyncMysqlConnection::nextResult() const {
 }
 
 std::unique_ptr<InternalResult> SyncMysqlConnection::getResult() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   MYSQL_RES* res = mysql_store_result(mysql_);
   VLOG(4) << fmt::format(
       "mysql_store_result({}) returned {}", (void*)mysql_, (void*)res);
@@ -639,6 +723,8 @@ std::unique_ptr<InternalResult> SyncMysqlConnection::getResult() const {
 }
 
 std::unique_ptr<InternalResult> AsyncMysqlConnection::getResult() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   MYSQL_RES* res = mysql_use_result(mysql_);
   VLOG(4) << fmt::format(
       "mysql_use_result({}) returned {}", (void*)mysql_, (void*)res);
@@ -646,6 +732,8 @@ std::unique_ptr<InternalResult> AsyncMysqlConnection::getResult() const {
 }
 
 size_t MysqlConnection::getFieldCount() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_field_count(mysql_);
   VLOG(4) << fmt::format(
       "mysql_field_count({}) returned {}", (void*)mysql_, ret);
@@ -653,6 +741,8 @@ size_t MysqlConnection::getFieldCount() const {
 }
 
 bool MysqlConnection::dumpDebugInfo() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_dump_debug_info(mysql_);
   VLOG(4) << fmt::format(
       "mysql_dump_debug_info({}) returned {}", (void*)mysql_, ret);
@@ -660,6 +750,8 @@ bool MysqlConnection::dumpDebugInfo() const {
 }
 
 bool MysqlConnection::ping() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_ping(mysql_);
   VLOG(4) << fmt::format("mysql_ping({}) returned {}", (void*)mysql_, ret);
   return ret == 0;
@@ -667,6 +759,8 @@ bool MysqlConnection::ping() const {
 
 MysqlConnection::MySqlConnectStage MysqlConnection::getMySqlConnectStage()
     const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
   auto ret = mysql_get_connect_stage(mysql_);
   VLOG(4) << fmt::format(
       "mysql_get_connect_stage({}) returned {}", (void*)mysql_, ret);
@@ -725,4 +819,4 @@ std::string MysqlConnection::logMysqlOptions4Impl(
       ret);
 }
 
-} // namespace facebook::common::mysql_client::detail
+} // namespace facebook::common::mysql_client::mysql_protocol

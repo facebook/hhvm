@@ -15,7 +15,7 @@
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/InternalConnection.h"
 
-namespace facebook::common::mysql_client::detail {
+namespace facebook::common::mysql_client::mysql_protocol {
 
 class AsyncConnectionPool;
 class MysqlResult;
@@ -77,20 +77,14 @@ class MysqlConnection : public InternalConnection {
 
   [[nodiscard]] bool sslSessionReused() const override;
 
-  [[nodiscard]] std::string getTlsVersion() const override;
+  [[nodiscard]] std::string getTlsVersion() const;
 
   [[nodiscard]] unsigned int warningCount() const override;
-
-  [[nodiscard]] std::string escapeString(
-      std::string_view unescaped) const override;
 
   [[nodiscard]] size_t escapeString(char* out, const char* src, size_t length)
       const override;
 
   std::function<void()> getCloseFunction() override;
-
-  [[nodiscard]] folly::EventHandler::EventFlags getReadWriteState()
-      const override;
 
   [[nodiscard]] unsigned int getErrno() const override;
 
@@ -105,41 +99,11 @@ class MysqlConnection : public InternalConnection {
 
   [[nodiscard]] AttributeMap getResponseAttributes() const override;
 
-  void setCompression(CompressionAlgorithm algo) override;
-
-  [[nodiscard]] bool setSSLOptionsProvider(
-      SSLOptionsProviderBase& provider) override;
-
-  [[nodiscard]] std::optional<std::string> getSniServerName() const override;
-
-  void setSniServerName(const std::string& name) override;
-
-  [[nodiscard]] bool setDscp(uint8_t dscp) override;
-
-  void setCertValidatorCallback(
-      const MysqlCertValidatorCallback& cb,
-      void* context) override;
-
   void setConnectTimeout(Millis timeout) const override;
 
   void setReadTimeout(Millis timeout) const override;
 
   void setWriteTimeout(Millis timeout) const override;
-
-  [[nodiscard]] int getSocketDescriptor() const override;
-
-  [[nodiscard]] bool isDoneWithTcpHandShake() const override {
-    return getMySqlConnectStage() > tcpCompletionStage_;
-  }
-
-  [[nodiscard]] std::string getConnectStageName() const override;
-
-  [[nodiscard]] static std::optional<std::string> findConnectStageName(
-      connect_stage stage);
-
-  bool storeSession(SSLOptionsProviderBase& provider) override {
-    return provider.storeMysqlSSLSession(mysql_);
-  }
 
   [[nodiscard]] uint64_t getLastInsertId() const override;
 
@@ -163,11 +127,50 @@ class MysqlConnection : public InternalConnection {
     return mysql_->server_status & SERVER_STATUS_AUTOCOMMIT;
   }
 
-  [[nodiscard]] size_t getFieldCount() const override;
-
   [[nodiscard]] bool dumpDebugInfo() const override;
 
   [[nodiscard]] bool ping() const override;
+
+  // MySQL protocol specfic methods
+
+  void setCompression(CompressionAlgorithm algo);
+
+  void setSniServerName(const std::string& name);
+
+  void setCertValidatorCallback(
+      const MysqlCertValidatorCallback& cb,
+      void* context);
+
+  bool storeSession(SSLOptionsProviderBase& provider) {
+    return provider.storeMysqlSSLSession(mysql_);
+  }
+
+  [[nodiscard]] bool setSSLOptionsProvider(SSLOptionsProviderBase& provider);
+
+  [[nodiscard]] std::optional<std::string> getSniServerName() const;
+
+  [[nodiscard]] bool setDscp(uint8_t dscp);
+
+  [[nodiscard]] int getSocketDescriptor() const;
+
+  [[nodiscard]] bool isDoneWithTcpHandShake() const {
+    return getMySqlConnectStage() > tcpCompletionStage_;
+  }
+
+  [[nodiscard]] std::string getConnectStageName() const;
+
+  [[nodiscard]] static std::optional<std::string> findConnectStageName(
+      connect_stage stage);
+
+  [[nodiscard]] size_t getFieldCount() const;
+
+  [[nodiscard]] virtual Status runQuery(std::string_view query) const = 0;
+  [[nodiscard]] virtual Status changeUser(
+      std::shared_ptr<const ConnectionKey> conn_key) const override = 0;
+
+  [[nodiscard]] virtual Status nextResult() const = 0;
+
+  [[nodiscard]] virtual std::unique_ptr<InternalResult> getResult() const = 0;
 
   static inline Status toHandlerStatus(net_async_status status) {
     if (status == NET_ASYNC_ERROR) {
@@ -179,13 +182,22 @@ class MysqlConnection : public InternalConnection {
     }
   }
 
+  [[nodiscard]] virtual Status tryConnect(
+      const ConnectionOptions& opts,
+      std::shared_ptr<const ConnectionKey> conn_key,
+      int flags) = 0;
+
  protected:
+  friend class MysqlOperationImpl;
+
   // Our MYSQL handle.
   MYSQL* mysql_;
   std::optional<std::string> current_schema_;
   bool closeFdOnDestroy_ = true;
   bool needResetBeforeReuse_ = false;
   bool canReuse_ = true;
+
+  [[nodiscard]] folly::EventHandler::EventFlags getReadWriteState() const;
 
   // Simple name for mysql internal connect stage enum
   using MySqlConnectStage = enum connect_stage;
@@ -250,7 +262,7 @@ class AsyncMysqlConnection : public MysqlConnection {
   [[nodiscard]] Status tryConnect(
       const ConnectionOptions& opts,
       std::shared_ptr<const ConnectionKey> conn_key,
-      int flags) const override;
+      int flags) override;
 
   [[nodiscard]] Status runQuery(std::string_view query) const override;
 
@@ -268,7 +280,7 @@ class SyncMysqlConnection : public MysqlConnection {
   [[nodiscard]] Status tryConnect(
       const ConnectionOptions& opts,
       std::shared_ptr<const ConnectionKey> conn_key,
-      int flags) const override;
+      int flags) override;
 
   [[nodiscard]] Status runQuery(std::string_view query) const override;
 
@@ -282,4 +294,4 @@ class SyncMysqlConnection : public MysqlConnection {
   [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override;
 };
 
-} // namespace facebook::common::mysql_client::detail
+} // namespace facebook::common::mysql_client::mysql_protocol

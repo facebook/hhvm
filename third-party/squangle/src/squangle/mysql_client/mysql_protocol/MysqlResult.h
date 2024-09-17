@@ -10,7 +10,7 @@
 
 #include "squangle/mysql_client/InternalConnection.h"
 
-namespace facebook::common::mysql_client::detail {
+namespace facebook::common::mysql_client::mysql_protocol {
 
 class MysqlResult : public InternalResult {
  public:
@@ -51,4 +51,4 @@ class SyncMysqlResult : public MysqlResult {
   [[nodiscard]] FetchRowRet fetchRow() const override;
 };
 
-} // namespace facebook::common::mysql_client::detail
+} // namespace facebook::common::mysql_client::mysql_protocol

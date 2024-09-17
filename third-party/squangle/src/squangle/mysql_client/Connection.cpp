@@ -104,7 +104,7 @@ std::shared_ptr<QueryOperation> Connection::beginQuery(
     std::unique_ptr<Connection> conn,
     Query&& query) {
   return beginAnyQuery<QueryOperation>(
-      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
       std::move(query));
 }
 
@@ -114,7 +114,7 @@ std::shared_ptr<MultiQueryOperation> Connection::beginMultiQuery(
     std::vector<Query>&& queries) {
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryOperation>(
-      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -131,7 +131,7 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
     std::vector<Query>&& queries) {
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryStreamOperation>(
-      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -144,7 +144,7 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
 
 template <typename QueryType, typename QueryArg>
 std::shared_ptr<QueryType> Connection::beginAnyQuery(
-    std::unique_ptr<OperationImpl::ConnectionProxy> conn_proxy,
+    std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
     QueryArg&& query) {
   CHECK_THROW(conn_proxy.get(), db::InvalidConnectionException);
   CHECK_THROW(conn_proxy->get()->ok(), db::InvalidConnectionException);
@@ -272,7 +272,7 @@ DbQueryResult Connection::internalQuery(
     QueryCallback&& cb,
     QueryOptions&& options) {
   auto op = beginAnyQuery<QueryOperation>(
-      std::make_unique<OperationImpl::ReferencedConnection>(*this),
+      std::make_unique<OperationBase::ReferencedConnection>(*this),
       std::move(query));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -382,7 +382,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
   auto op = beginAnyQuery<MultiQueryOperation>(
-      std::make_unique<OperationImpl::ReferencedConnection>(*this),
+      std::make_unique<OperationBase::ReferencedConnection>(*this),
       std::move(queries));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -539,7 +539,7 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   // To accomplish that, ~MultiQueryStreamHandler waits until
   // `postOperationEnded` is called.
   auto operation = beginAnyQuery<MultiQueryStreamOperation>(
-      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn)),
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (attributes.size() > 0) {
     operation->setAttributes(attributes);
@@ -552,7 +552,7 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
     MultiQuery&& multi_query,
     const AttributeMap& attributes) {
   auto proxy =
-      std::make_unique<OperationImpl::OwnedConnection>(std::move(conn));
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn));
   auto* connP = proxy->get();
   auto ret = connP->createOperation(std::move(proxy), std::move(multi_query));
   if (attributes.size() > 0) {

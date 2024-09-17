@@ -22,6 +22,9 @@
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlFetchOperationImpl.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlSpecialOperationImpl.h"
 
 namespace facebook::common::mysql_client {
 
@@ -61,7 +64,7 @@ void AsyncMysqlClient::init() {
   eventBase->waitUntilRunning();
 }
 
-bool AsyncMysqlClient::runInThread(folly::Cob&& fn, bool wait) {
+bool AsyncMysqlClient::runInThread(std::function<void()>&& fn, bool wait) {
   auto scheduleTime = std::chrono::steady_clock::now();
   auto func = [fn = std::move(fn), scheduleTime, this]() mutable {
     auto delay = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -150,6 +153,27 @@ db::SquangleLoggingData AsyncMysqlClient::makeSquangleLoggingData(
       std::move(connKey), connContext, collectPerfStats());
 }
 
+std::unique_ptr<ConnectOperationImpl>
+AsyncMysqlClient::createConnectOperationImpl(
+    MysqlClientBase* client_base,
+    std::shared_ptr<const ConnectionKey> conn_key) const {
+  return std::make_unique<mysql_protocol::MysqlConnectOperationImpl>(
+      client_base, std::move(conn_key));
+}
+
+std::unique_ptr<FetchOperationImpl> AsyncMysqlClient::createFetchOperationImpl(
+    std::unique_ptr<OperationBase::ConnectionProxy> conn) const {
+  return std::make_unique<mysql_protocol::MysqlFetchOperationImpl>(
+      std::move(conn));
+}
+
+std::unique_ptr<SpecialOperationImpl>
+AsyncMysqlClient::createSpecialOperationImpl(
+    std::unique_ptr<OperationBase::ConnectionProxy> conn) const {
+  return std::make_unique<mysql_protocol::MysqlSpecialOperationImpl>(
+      std::move(conn));
+}
+
 void AsyncMysqlClient::cleanupCompletedOperations() {
   pending_.withWLock([](auto& pending) {
     size_t num_erased = 0, before = pending.operations.size();
@@ -199,21 +223,6 @@ std::unique_ptr<Connection> AsyncMysqlClient::connect(
 std::unique_ptr<Connection> AsyncMysqlClient::createConnection(
     std::shared_ptr<const ConnectionKey> conn_key) {
   return std::make_unique<AsyncConnection>(*this, std::move(conn_key), nullptr);
-}
-
-MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
-    const InternalConnection& conn,
-    const ConnectionOptions& opts,
-    std::shared_ptr<const ConnectionKey> conn_key,
-    int flags) {
-  return conn.tryConnect(opts, std::move(conn_key), flags);
-}
-
-InternalResult::FetchRowRet AsyncMysqlClient::AsyncMysqlHandler::fetchRow(
-    InternalResult& result) {
-  auto res = result.fetchRow();
-  DCHECK_NE(res.first, InternalConnection::Status::ERROR);
-  return res;
 }
 
 AsyncConnection::~AsyncConnection() {

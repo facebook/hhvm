@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/io/async/EventHandler.h>
+#include <optional>
 
 #include "squangle/base/Base.h"
 #include "squangle/mysql_client/Compression.h"
@@ -75,42 +76,50 @@ class InternalConnection {
 
   virtual ~InternalConnection() = default;
 
-  virtual void setReusable(bool reusable) = 0;
+  virtual void setReusable(bool /*reusable*/) {}
 
-  virtual bool isReusable() const = 0;
+  virtual bool isReusable() const {
+    return false;
+  }
 
-  virtual void disableCloseOnDestroy() = 0;
+  virtual void disableCloseOnDestroy() {}
 
-  virtual bool isSSL() const = 0;
+  virtual bool isSSL() const {
+    return true;
+  }
 
   virtual bool inTransaction() const = 0;
 
-  virtual void setNeedResetBeforeReuse() = 0;
+  virtual void setNeedResetBeforeReuse() {}
 
-  virtual bool needResetBeforeReuse() = 0;
+  virtual bool needResetBeforeReuse() {
+    return true;
+  }
 
   virtual std::string serverInfo() const = 0;
 
-  virtual long threadId() const = 0;
+  virtual long threadId() const {
+    return 0;
+  }
 
-  virtual void disableLocalFiles() = 0;
+  virtual void disableLocalFiles() {}
 
-  virtual void disableSSL() = 0;
+  virtual void disableSSL() {}
 
-  virtual bool sslSessionReused() const = 0;
-
-  virtual std::string getTlsVersion() const = 0;
+  virtual bool sslSessionReused() const {
+    return false;
+  }
 
   virtual unsigned int warningCount() const = 0;
 
-  virtual std::string escapeString(std::string_view unescaped) const = 0;
+  std::string escapeString(std::string_view unescaped) const;
 
   virtual size_t escapeString(char* out, const char* src, size_t length)
       const = 0;
 
-  virtual std::function<void()> getCloseFunction() = 0;
-
-  virtual folly::EventHandler::EventFlags getReadWriteState() const = 0;
+  virtual std::function<void()> getCloseFunction() {
+    return nullptr;
+  }
 
   virtual unsigned int getErrno() const = 0;
 
@@ -126,33 +135,11 @@ class InternalConnection {
 
   virtual AttributeMap getResponseAttributes() const = 0;
 
-  virtual void setCompression(CompressionAlgorithm algo) = 0;
-
-  virtual bool setSSLOptionsProvider(SSLOptionsProviderBase& provider) = 0;
-
-  virtual std::optional<std::string> getSniServerName() const = 0;
-
-  virtual void setSniServerName(const std::string& name) = 0;
-
-  virtual bool setDscp(uint8_t dscp) = 0;
-
-  virtual void setCertValidatorCallback(
-      const MysqlCertValidatorCallback& cb,
-      void* context) = 0;
-
   virtual void setConnectTimeout(Millis timeout) const = 0;
 
   virtual void setReadTimeout(Millis timeout) const = 0;
 
   virtual void setWriteTimeout(Millis timeout) const = 0;
-
-  virtual int getSocketDescriptor() const = 0;
-
-  virtual bool isDoneWithTcpHandShake() const = 0;
-
-  virtual std::string getConnectStageName() const = 0;
-
-  virtual bool storeSession(SSLOptionsProviderBase& provider) = 0;
 
   virtual uint64_t getLastInsertId() const = 0;
 
@@ -172,23 +159,10 @@ class InternalConnection {
 
   virtual bool ping() const = 0;
 
-  virtual Status tryConnect(
-      const ConnectionOptions& opts,
-      std::shared_ptr<const ConnectionKey> conn_key,
-      int flags) const = 0;
-
-  virtual Status runQuery(std::string_view query) const = 0;
-
   virtual Status resetConn() const = 0;
 
   virtual Status changeUser(
       std::shared_ptr<const ConnectionKey> conn_key) const = 0;
-
-  virtual Status nextResult() const = 0;
-
-  virtual std::unique_ptr<InternalResult> getResult() const = 0;
-
-  virtual size_t getFieldCount() const = 0;
 
   virtual bool dumpDebugInfo() const = 0;
 };

@@ -10,7 +10,7 @@
 
 #include "squangle/mysql_client/InternalConnection.h"
 
-namespace facebook::common::mysql_client {
+namespace facebook::common::mysql_client::mysql_protocol {
 
 class MysqlRow : public InternalRow {
  public:
@@ -43,4 +43,4 @@ class MysqlRow : public InternalRow {
   unsigned long* lengths_;
 };
 
-} // namespace facebook::common::mysql_client
+} // namespace facebook::common::mysql_client::mysql_protocol

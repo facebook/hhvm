@@ -51,11 +51,10 @@
 #include "squangle/mysql_client/ConnectionHolder.h"
 #include "squangle/mysql_client/DbResult.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
-#include "squangle/mysql_client/MysqlHandler.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/Row.h"
-#include "squangle/mysql_client/detail/MysqlConnection.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
 
 #include <atomic>
 #include <chrono>
@@ -189,7 +188,7 @@ class AsyncMysqlClient : public MysqlClientBase {
       std::unique_ptr<db::SquangleLoggerBase> db_logger,
       std::unique_ptr<db::DBCounterBase> db_stats);
 
-  bool runInThread(folly::Cob&& fn, bool wait = false) override;
+  bool runInThread(std::function<void()>&& fn, bool wait = false) override;
 
   db::SquangleLoggingData makeSquangleLoggingData(
       std::shared_ptr<const ConnectionKey> connKey,
@@ -254,50 +253,17 @@ class AsyncMysqlClient : public MysqlClientBase {
     });
   }
 
+  std::unique_ptr<ConnectOperationImpl> createConnectOperationImpl(
+      MysqlClientBase* client,
+      std::shared_ptr<const ConnectionKey> conn_key) const override;
+
+  std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
+
+  std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
+
  private:
-  MysqlHandler& getMysqlHandler() override {
-    return mysql_handler_;
-  }
-
-  // implementation of MysqlHandler interface
-  class AsyncMysqlHandler : public MysqlHandler {
-    Status tryConnect(
-        const InternalConnection& conn,
-        const ConnectionOptions& /*opts*/,
-        std::shared_ptr<const ConnectionKey> conn_key,
-        int flags) override;
-
-    Status runQuery(const InternalConnection& conn, std::string_view query)
-        override {
-      return conn.runQuery(query);
-    }
-
-    Status nextResult(const InternalConnection& conn) override {
-      return conn.nextResult();
-    }
-
-    size_t getFieldCount(const InternalConnection& conn) override {
-      return conn.getFieldCount();
-    }
-
-    InternalResult::FetchRowRet fetchRow(InternalResult& res) override;
-
-    Status resetConn(const InternalConnection& conn) override {
-      return conn.resetConn();
-    }
-
-    Status changeUser(
-        const InternalConnection& conn,
-        std::shared_ptr<const ConnectionKey> conn_key) override {
-      return conn.changeUser(std::move(conn_key));
-    }
-
-    std::unique_ptr<InternalResult> getResult(
-        const InternalConnection& conn) override {
-      return conn.getResult();
-    }
-  } mysql_handler_;
-
   // Private methods, primarily used by Operations and its subclasses.
   friend class AsyncConnectionPool;
   template <typename Client>
@@ -423,7 +389,7 @@ class AsyncConnection : public Connection {
 
  protected:
   std::unique_ptr<InternalConnection> createInternalConnection() override {
-    return std::make_unique<detail::AsyncMysqlConnection>();
+    return std::make_unique<mysql_protocol::AsyncMysqlConnection>();
   }
 
  private:

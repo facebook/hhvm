@@ -137,16 +137,6 @@ enum class StreamState { InitQuery, RowsReady, QueryEnded, Failure, Success };
 std::ostream& operator<<(std::ostream& os, StreamState state);
 
 class OperationBase {
- protected:
-  class ConnectionProxy;
-
-  explicit OperationBase(std::unique_ptr<ConnectionProxy> safe_conn)
-      : conn_proxy_(std::move(safe_conn)) {
-    timeout_ = Duration(FLAGS_async_mysql_timeout_micros);
-    request_context_.store(
-        folly::RequestContext::saveContext(), std::memory_order_relaxed);
-  }
-
  public:
   virtual ~OperationBase() = default;
 
@@ -172,8 +162,9 @@ class OperationBase {
     return state() == OperationState::Completed;
   }
 
-  virtual unsigned int mysql_errno() const = 0;
-  virtual const std::string& mysql_error() const = 0;
+  // Information about why this operation failed.
+  unsigned int mysql_errno() const;
+  const std::string& mysql_error() const;
 
   OperationResult result() const {
     return result_;
@@ -183,10 +174,22 @@ class OperationBase {
     return state_;
   }
 
-  virtual void setObserverCallback(ObserverCallback obs_cb) = 0;
+  void setObserverCallback(ObserverCallback obs_cb);
 
-  virtual void setPreQueryCallback(AsyncPreQueryCallback&& callback) = 0;
-  virtual void setPostQueryCallback(AsyncPostQueryCallback&& callback) = 0;
+  /**
+   * Set callbacks that are invoked asynchronously before/after query operations
+   * (if using asynchronous query APIs). They do not execute on operations that
+   * have failed, and if they fail the operation will fail too.
+   *
+   * PreQueryCallbacks execute after a query operation is initialized and before
+   * it has been run. They are allowed to modify the operation by reference.
+   *
+   * PostQueryCallbacks execute after a query operation returns results. They
+   * are allowed to do post-processing on the results received and returned via
+   * rvalue reference.
+   */
+  void setPreQueryCallback(AsyncPreQueryCallback&& callback);
+  void setPostQueryCallback(AsyncPostQueryCallback&& callback);
 
   void setAttributes(const AttributeMap& attributes);
   void setAttributes(AttributeMap&& attributes);
@@ -208,11 +211,32 @@ class OperationBase {
     return std::chrono::duration_cast<Millis>(timeout_);
   }
 
-  virtual void setConnectionContext(
-      std::shared_ptr<db::ConnectionContextBase> context) = 0;
-  virtual std::shared_ptr<db::ConnectionContextBase>
-  copyConnectionContextPtr() = 0;
-  virtual db::ConnectionContextBase* getConnectionContext() const = 0;
+  void setConnectionContext(
+      std::shared_ptr<db::ConnectionContextBase> context) {
+    CHECK_THROW(
+        state_ == OperationState::Unstarted, db::OperationStateException);
+    connection_context_ = std::move(context);
+  }
+
+  // Set's the connection context into the connection.  Needed here because
+  // derived classes don't have access to the connection's
+  // setConnectionContext()
+  void setConnConnectionContext(
+      std::shared_ptr<db::ConnectionContextBase> context);
+
+  // Access to connection context
+  std::shared_ptr<db::ConnectionContextBase> copyConnectionContextPtr() {
+    return connection_context_;
+  }
+  db::ConnectionContextBase* getConnectionContext() const {
+    return connection_context_.get();
+  }
+  void withOptionalConnectionContext(
+      std::function<void(db::ConnectionContextBase&)> func) {
+    if (connection_context_) {
+      func(*connection_context_);
+    }
+  }
 
   // Connections are transferred across operations.  At any one time,
   // there is one unique owner of the connection.
@@ -277,9 +301,6 @@ class OperationBase {
     op_ = &op;
   }
 
- protected:
-  friend class Operation;
-
   class ConnectionProxy {
    public:
     virtual ~ConnectionProxy() = default;
@@ -290,6 +311,11 @@ class OperationBase {
       return nullptr;
     }
   };
+
+ protected:
+  friend class Operation;
+
+  explicit OperationBase(std::unique_ptr<ConnectionProxy> safe_conn);
 
   // An owned connection is one where the operation fully owns the connection.
   // This occurs when a query is started via a semi-future and the connection is
@@ -355,6 +381,8 @@ class OperationBase {
       ChainedCallback orgCallback,
       ChainedCallback newCallback);
 
+  MysqlClientBase& client_;
+
   // Our Connection object.  Created by ConnectOperation and moved
   // into QueryOperations.
   std::unique_ptr<ConnectionProxy> conn_proxy_;
@@ -375,12 +403,11 @@ class OperationBase {
 
   Callbacks callbacks_;
 
-  virtual std::optional<folly::SemiFuture<folly::Unit>> callPreQueryCallback(
-      FetchOperation& op) const = 0;
-  virtual DbQueryResult callPostQueryCallback(DbQueryResult result) const = 0;
-  virtual DbMultiQueryResult callPostQueryCallback(
-      DbMultiQueryResult result) const = 0;
-  virtual AsyncPostQueryCallback stealPostQueryCallback() = 0;
+  std::optional<folly::SemiFuture<folly::Unit>> callPreQueryCallback(
+      FetchOperation& op) const;
+  DbQueryResult callPostQueryCallback(DbQueryResult result) const;
+  DbMultiQueryResult callPostQueryCallback(DbMultiQueryResult result) const;
+  AsyncPostQueryCallback stealPostQueryCallback();
 
   Operation* op_;
 
@@ -388,6 +415,15 @@ class OperationBase {
   virtual void protocolCompleteOperation(OperationResult result) = 0;
 
  protected:
+  // Helper functions to set query callbacks
+  static AsyncPreQueryCallback appendCallback(
+      AsyncPreQueryCallback&& callback1,
+      AsyncPreQueryCallback&& callback2);
+
+  static AsyncPostQueryCallback appendCallback(
+      AsyncPostQueryCallback&& callback1,
+      AsyncPostQueryCallback&& callback2);
+
   Connection& conn() {
     auto* conn = connection();
     CHECK(conn);
@@ -399,9 +435,21 @@ class OperationBase {
     return *conn;
   }
 
+  [[nodiscard]] const InternalConnection& getInternalConnection() const;
+  [[nodiscard]] InternalConnection& getInternalConnection();
+
+  void deferRemoveOperation(Operation* op) const;
+
   virtual void timeoutTriggered() = 0;
 
+  ObserverCallback observer_callback_;
+
+  std::shared_ptr<db::ConnectionContextBase> connection_context_;
+
  private:
+  friend class Connection;
+  friend class SyncConnection;
+
   // Data members; subclasses freely interact with these.
   OperationState state_{OperationState::Unstarted};
   OperationResult result_{OperationResult::Unknown};
@@ -426,177 +474,6 @@ class OperationBase {
   folly::atomic_shared_ptr<folly::RequestContext> request_context_;
 
   friend class MysqlClientBase;
-};
-
-// The abstract base for our available Operations.  Subclasses share
-// intimate knowledge with the Operation class (most member variables
-// are protected).
-class OperationImpl : public OperationBase,
-                      public folly::EventHandler,
-                      public folly::AsyncTimeout {
- public:
-  // No public constructor.
-  virtual ~OperationImpl() override = default;
-
-  OperationImpl() = delete;
-  OperationImpl(const OperationImpl&) = delete;
-  OperationImpl& operator=(const OperationImpl&) = delete;
-
-  Duration getMaxThreadBlockTime() {
-    return max_thread_block_time_;
-  }
-
-  Duration getTotalThreadBlockTime() {
-    return total_thread_block_time_;
-  }
-
-  void logThreadBlockTime(const folly::stop_watch<Duration> sw) {
-    auto block_time = sw.elapsed();
-    max_thread_block_time_ = std::max(max_thread_block_time_, block_time);
-    total_thread_block_time_ += block_time;
-  }
-
-  // // host and port we are connected to (or will be connected to).
-  // const std::string& host() const;
-  // int port() const;
-
-  // Information about why this operation failed.
-  unsigned int mysql_errno() const override;
-  const std::string& mysql_error() const override;
-
-  static std::string connectStageString(connect_stage stage);
-
-  void setObserverCallback(ObserverCallback obs_cb) override;
-
-  /**
-   * Set callbacks that are invoked asynchronously before/after query operations
-   * (if using asynchronous query APIs). They do not execute on operations that
-   * have failed, and if they fail the operation will fail too.
-   *
-   * PreQueryCallbacks execute after a query operation is initialized and before
-   * it has been run. They are allowed to modify the operation by reference.
-   *
-   * PostQueryCallbacks execute after a query operation returns results. They
-   * are allowed to do post-processing on the results received and returned via
-   * rvalue reference.
-   */
-  void setPreQueryCallback(AsyncPreQueryCallback&& callback) override;
-  void setPostQueryCallback(AsyncPostQueryCallback&& callback) override;
-
-  MysqlClientBase& client() const;
-
-  // void setAsyncClientError(
-  //     unsigned int mysql_errno,
-  //     folly::StringPiece msg);
-
- protected:
-  // Helper functions to set query callbacks
-  static AsyncPreQueryCallback appendCallback(
-      AsyncPreQueryCallback&& callback1,
-      AsyncPreQueryCallback&& callback2);
-
-  static AsyncPostQueryCallback appendCallback(
-      AsyncPostQueryCallback&& callback1,
-      AsyncPostQueryCallback&& callback2);
-
-  static constexpr double kCallbackDelayStallThresholdUs = 50 * 1000;
-
-  std::optional<folly::SemiFuture<folly::Unit>> callPreQueryCallback(
-      FetchOperation& op) const override;
-  DbQueryResult callPostQueryCallback(DbQueryResult result) const override;
-  DbMultiQueryResult callPostQueryCallback(
-      DbMultiQueryResult result) const override;
-  AsyncPostQueryCallback stealPostQueryCallback() override;
-
-  explicit OperationImpl(std::unique_ptr<ConnectionProxy> conn);
-
-  // Called when an Operation needs to wait for the data to be readable or
-  // writable (aka actionable).
-  void waitForActionable();
-
-  // Overridden in child classes and invoked when the status is actionable. This
-  // function should either completeOperation or waitForActionable.
-  virtual void actionable() = 0;
-
-  // EventHandler override
-  void handlerReady(uint16_t /*events*/) noexcept override;
-
-  // AsyncTimeout override
-  void timeoutExpired() noexcept override {
-    timeoutTriggered();
-  }
-
-  // Called by AsyncTimeout::timeoutExpired when the operation timed out
-  void timeoutTriggered() override;
-
-  // Our operation has completed.  During completeOperation,
-  // specializedCompleteOperation is invoked for subclasses to perform
-  // their own finalization (typically annotating errors and handling
-  // timeouts).
-  void completeOperation(OperationResult result);
-  void completeOperationInner(OperationResult result);
-  virtual void specializedTimeoutTriggered() = 0;
-  virtual void specializedCompleteOperation() = 0;
-
-  void protocolCompleteOperation(OperationResult result) override;
-
-  bool isInEventBaseThread() const;
-  bool isEventBaseSet() const;
-
-  std::string threadOverloadMessage(double cbDelayUs) const;
-  std::string timeoutMessage(Millis delta) const;
-
-  // This will contain the max block time of the thread
-  Duration max_thread_block_time_ = Duration(0);
-  Duration total_thread_block_time_ = Duration(0);
-
-  // Friends because they need to access the query callbacks on this class
-  template <typename Operation>
-  friend folly::SemiFuture<folly::Unit> handlePreQueryCallback(Operation& op);
-  template <typename ReturnType, typename Operation, typename QueryResult>
-  friend void handleQueryCompletion(
-      Operation& op,
-      QueryResult query_result,
-      QueryCallbackReason reason,
-      folly::Promise<std::pair<ReturnType, AsyncPostQueryCallback>>& promise);
-
-  std::shared_ptr<db::ConnectionContextBase> connection_context_;
-
-  void setConnectionContext(
-      std::shared_ptr<db::ConnectionContextBase> context) override {
-    CHECK_THROW(
-        state() == OperationState::Unstarted, db::OperationStateException);
-    connection_context_ = std::move(context);
-  }
-
-  // Access to connection context
-  std::shared_ptr<db::ConnectionContextBase> copyConnectionContextPtr()
-      override {
-    return connection_context_;
-  }
-  db::ConnectionContextBase* getConnectionContext() const override {
-    return connection_context_.get();
-  }
-  void withOptionalConnectionContext(
-      std::function<void(db::ConnectionContextBase&)> func) {
-    if (connection_context_) {
-      func(*connection_context_);
-    }
-  }
-
- private:
-  // Restore folly::RequestContext and also invoke actionable()
-  void invokeActionable();
-
-  ObserverCallback observer_callback_;
-
-  MysqlClientBase& mysql_client_;
-
-  friend class Operation;
-  friend class Connection;
-  friend class ConnectOperation;
-  friend class SyncConnection;
-  friend class SyncConnectionPool;
 };
 
 //  Public facing Operation API

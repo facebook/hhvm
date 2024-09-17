@@ -17,15 +17,17 @@
 
 namespace facebook::common::mysql_client {
 
+class ConnectOperation;
+class ConnectionHolder;
+
 // An operation representing a pending connection.  Constructed via
 // AsyncMysqlClient::beginConnection.
-class ConnectOperationImpl : public OperationImpl {
+class ConnectOperationImpl : virtual public OperationBase {
  public:
-  virtual ~ConnectOperationImpl() override;
-
-  void setCallback(ConnectCallback cb) {
-    connect_callback_ = std::move(cb);
-  }
+  ConnectOperationImpl(
+      MysqlClientBase* mysql_client,
+      std::shared_ptr<const ConnectionKey> conn_key);
+  virtual ~ConnectOperationImpl() override = default;
 
   const std::string& database() const {
     return conn_key_->db_name();
@@ -34,16 +36,18 @@ class ConnectOperationImpl : public OperationImpl {
     return conn_key_->user();
   }
 
-  std::shared_ptr<const MysqlConnectionKey> getConnectionKey() const {
+  std::shared_ptr<const ConnectionKey> getConnectionKey() const {
     return conn_key_;
   }
-  const ConnectionOptions& getConnectionOptions() const;
-  std::shared_ptr<const MysqlConnectionKey> getKey() const {
+  std::shared_ptr<const ConnectionKey> getKey() const {
     return conn_key_;
   }
-  const MysqlConnectionKey getKeyRef() const {
+  const ConnectionKey& getKeyRef() const {
     return *conn_key_;
   }
+
+  void setConnectionOptions(const ConnectionOptions& conn_options);
+  const ConnectionOptions& getConnectionOptions() const;
 
   void setSSLOptionsProviderBase(
       std::unique_ptr<SSLOptionsProviderBase> ssl_options_provider);
@@ -53,14 +57,17 @@ class ConnectOperationImpl : public OperationImpl {
   // Default timeout for queries created by the connection this
   // operation will create.
   void setDefaultQueryTimeout(Duration t);
+
   void setSniServerName(const std::string& sni_servername);
   void enableResetConnBeforeClose();
   void enableDelayedResetConn();
   void enableChangeUser();
+
   void setCertValidationCallback(
       CertValidatorCallback callback,
       const void* context = nullptr,
       bool opPtrAsContext = false);
+
   const CertValidatorCallback& getCertValidationCallback() const {
     return conn_options_.getCertValidationCallback();
   }
@@ -94,7 +101,6 @@ class ConnectOperationImpl : public OperationImpl {
   //
   // See Also ConnectionOptions::setDscp
   void setDscp(uint8_t dscp);
-
   folly::Optional<uint8_t> getDscp() const {
     return conn_options_.getDscp();
   }
@@ -102,7 +108,6 @@ class ConnectOperationImpl : public OperationImpl {
   uint32_t attemptsMade() const noexcept {
     return attempts_made_;
   }
-
   Duration getAttemptTimeout() const noexcept {
     return conn_options_.getTimeout();
   }
@@ -110,7 +115,6 @@ class ConnectOperationImpl : public OperationImpl {
   // Set if we should open a new connection to kill a timed out query
   // Should not be used when connecting through a proxy
   void setKillOnQueryTimeout(bool killOnQueryTimeout);
-
   bool getKillOnQueryTimeout() const noexcept {
     return killOnQueryTimeout_;
   }
@@ -118,115 +122,35 @@ class ConnectOperationImpl : public OperationImpl {
   void setCompression(folly::Optional<CompressionAlgorithm> compression_lib) {
     conn_options_.setCompression(std::move(compression_lib));
   }
-
   const folly::Optional<CompressionAlgorithm>& getCompression() const {
     return conn_options_.getCompression();
   }
 
-  void setConnectionOptions(const ConnectionOptions& conn_options);
-
-  static constexpr Duration kMinimumViableConnectTimeout =
-      std::chrono::microseconds(50);
-
-  bool isActive() const {
-    return active_in_client_;
+  virtual bool isActive() const {
+    return false;
   }
 
  protected:
-  friend class MysqlClientBase;
-
-  ConnectOperationImpl(
-      MysqlClientBase* mysql_client,
-      std::shared_ptr<const ConnectionKey> conn_key);
-
-  static std::unique_ptr<ConnectOperationImpl> create(
-      MysqlClientBase* mysql_client,
-      std::shared_ptr<const ConnectionKey> conn_key);
-
-  virtual void attemptFailed(OperationResult result);
-  virtual void attemptSucceeded(OperationResult result);
-
-  virtual void specializedRun() override;
-  void actionable() override;
-  void specializedTimeoutTriggered() override;
-  void specializedCompleteOperation() override;
-
-  // Called when tcp timeout is triggered
-  void tcpConnectTimeoutTriggered();
-
-  // Removes the Client ref, it can be called by child classes without needing
-  // to add them as friend classes of AsyncMysqlClient
-  virtual void removeClientReference();
-
-  bool shouldCompleteOperation(OperationResult result);
-
-  folly::ssl::SSLSessionUniquePtr getSSLSession();
-
-  // Implementation of timeout handling for tcpTimeout and overall connect
-  // timeout
-  void timeoutHandler(bool isTcpTimeout, bool isPool = false);
-
-  uint32_t attempts_made_ = 0;
-  bool killOnQueryTimeout_ = false;
-  ConnectionOptions conn_options_;
-
- private:
-  virtual void specializedRunImpl();
-
-  void logConnectCompleted(OperationResult result);
-
-  void maybeStoreSSLSession();
-
-  bool isDoneWithTcpHandShake();
-
-  static int mysqlCertValidator(
-      X509* server_cert,
-      const void* context,
-      const char** errptr);
-
-  std::shared_ptr<const MysqlConnectionKey> conn_key_;
-
-  int flags_;
-
-  ConnectCallback connect_callback_;
-  bool active_in_client_;
-
-  // Timeout used for controlling early timeout of just the tcp handshake phase
-  // before doing heavy lifting like ssl and other mysql protocol for connection
-  // establishment
-  class ConnectTcpTimeoutHandler : public folly::AsyncTimeout {
-   public:
-    ConnectTcpTimeoutHandler(
-        folly::EventBase* base,
-        ConnectOperationImpl* connect_operation)
-        : folly::AsyncTimeout(base), op_(connect_operation) {}
-
-    ConnectTcpTimeoutHandler() = delete;
-    ConnectTcpTimeoutHandler(const ConnectTcpTimeoutHandler&) = delete;
-    ConnectTcpTimeoutHandler& operator=(const ConnectTcpTimeoutHandler&) =
-        delete;
-
-    void timeoutExpired() noexcept override {
-      op_->tcpConnectTimeoutTriggered();
-    }
-
-   private:
-    ConnectOperationImpl* op_;
-  };
-
   ConnectOperation& op() const;
 
-  ConnectTcpTimeoutHandler tcp_timeout_handler_;
+  // Functions to deal with the connection
+  [[nodiscard]] const InternalConnection& getInternalConnection() const;
+  [[nodiscard]] InternalConnection& getInternalConnection();
+  ConnectionHolder* mysqlConnection() const;
 
-  friend class AsyncMysqlClient;
-  friend class MysqlClientBase;
+  ConnectionOptions conn_options_;
+  std::shared_ptr<const ConnectionKey> conn_key_;
+  uint32_t attempts_made_ = 0;
+  bool killOnQueryTimeout_ = false;
 };
 
 class ConnectOperation : public Operation {
  public:
   void setCallback(ConnectCallback cb) {
-    impl()->setCallback(std::move(cb));
+    connect_callback_ = std::move(cb);
   }
+
+  void callConnectCallback();
 
   // Overriding to narrow the return type
   // Each connect attempt will take at most this timeout to retry to acquire
@@ -355,6 +279,9 @@ class ConnectOperation : public Operation {
   std::shared_ptr<const ConnectionKey> getKey() const {
     return impl()->getKey();
   }
+  const ConnectionKey& getKeyRef() const {
+    return impl()->getKeyRef();
+  }
 
   db::OperationType getOperationType() const override {
     return db::OperationType::Connect;
@@ -407,13 +334,16 @@ class ConnectOperation : public Operation {
   }
 
   virtual ConnectOperationImpl* impl() override {
-    return (ConnectOperationImpl*)impl_.get();
+    return impl_.get();
   }
   virtual const ConnectOperationImpl* impl() const override {
-    return (ConnectOperationImpl*)impl_.get();
+    return impl_.get();
   }
 
   std::unique_ptr<ConnectOperationImpl> impl_;
+
+ private:
+  ConnectCallback connect_callback_;
 };
 
 } // namespace facebook::common::mysql_client

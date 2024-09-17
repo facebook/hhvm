@@ -6,12 +6,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/detail/MysqlResult.h"
-#include "squangle/mysql_client/detail/MysqlConnection.h"
-#include "squangle/mysql_client/detail/MysqlRow.h"
-#include "squangle/mysql_client/detail/MysqlRowMetadata.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlResult.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlRow.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlRowMetadata.h"
 
-namespace facebook::common::mysql_client::detail {
+namespace facebook::common::mysql_client::mysql_protocol {
 
 class MysqlRowMetadata;
 
@@ -89,4 +89,4 @@ InternalResult::FetchRowRet AsyncMysqlResult::fetchRow() const {
   return std::make_pair(MysqlConnection::toHandlerStatus(ret), std::move(row));
 }
 
-} // namespace facebook::common::mysql_client::detail
+} // namespace facebook::common::mysql_client::mysql_protocol

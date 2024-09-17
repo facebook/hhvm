@@ -37,6 +37,7 @@
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/ConnectionPool.h"
 #include "squangle/mysql_client/Operation.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlConnectPoolOperationImpl.h"
 
 namespace facebook::common::mysql_client {
 
@@ -47,7 +48,7 @@ class PoolKey;
 
 using AsyncConnectPoolOperation = ConnectPoolOperation<AsyncMysqlClient>;
 using AsyncConnectPoolOperationImpl =
-    ConnectPoolOperationImpl<AsyncMysqlClient>;
+    mysql_protocol::MysqlConnectPoolOperationImpl<AsyncMysqlClient>;
 
 class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
  public:

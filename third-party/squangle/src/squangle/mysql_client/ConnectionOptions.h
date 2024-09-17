@@ -207,6 +207,15 @@ class ConnectionOptions {
     return opPtrAsCertValidationContext_;
   }
 
+  ConnectionOptions& setCryptoAuthTokenList(const std::string& tokenList) {
+    crypt_auth_token_list_ = tokenList;
+    return *this;
+  }
+
+  const folly::Optional<std::string> getCryptoAuthTokenList() const {
+    return crypt_auth_token_list_;
+  }
+
  private:
   Duration connection_timeout_;
   folly::Optional<Duration> connection_tcp_timeout_;
@@ -219,6 +228,7 @@ class ConnectionOptions {
   uint32_t max_attempts_ = 1;
   folly::Optional<uint8_t> dscp_;
   folly::Optional<std::string> sni_servername_;
+  folly::Optional<std::string> crypt_auth_token_list_;
   bool reset_conn_before_close_ = false;
   bool delayed_reset_conn_ = false;
   bool change_user_ = false;

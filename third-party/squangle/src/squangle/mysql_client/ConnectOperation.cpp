@@ -35,14 +35,13 @@ void ConnectOperationImpl::setConnectionOptions(
   }
   setTotalTimeout(conn_opts.getTotalTimeout());
   setCompression(conn_opts.getCompression());
-  auto provider = conn_opts.getSSLOptionsProvider();
   if (conn_opts.getConnectTcpTimeout()) {
     setTcpTimeout(*conn_opts.getConnectTcpTimeout());
   }
   if (conn_opts.getSniServerName()) {
     setSniServerName(*conn_opts.getSniServerName());
   }
-  if (provider) {
+  if (auto provider = conn_opts.getSSLOptionsProvider()) {
     setSSLOptionsProvider(std::move(provider));
   }
   if (conn_opts.getCertValidationCallback()) {
@@ -50,6 +49,9 @@ void ConnectOperationImpl::setConnectionOptions(
         conn_opts.getCertValidationCallback(),
         conn_opts.getCertValidationContext(),
         conn_opts.isOpPtrAsValidationContext());
+  }
+  if (auto cats = conn_opts.getCryptoAuthTokenList()) {
+    setCryptoAuthTokenList(std::move(*cats));
   }
 }
 

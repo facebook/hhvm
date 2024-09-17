@@ -81,7 +81,15 @@ void MysqlConnectOperationImpl::specializedRunImpl() {
   removeClientReference();
 
   auto* mysql_conn = getMysqlConnection();
-  mysql_conn->setConnectAttributes(getAttributes());
+  auto attrs = getAttributes();
+  // The MySQL protocol needs any CATs to be sent via connection attributes.
+  // Note that the standard MySQL server doesn't know what to do with.  It is
+  // intended for use inside Meta's architecture so will be useless elsewhere.
+  if (auto cats = getCryptoAuthTokenList()) {
+    attrs.emplace("crypto_auth_tokens", *cats);
+  }
+
+  mysql_conn->setConnectAttributes(attrs);
 
   if (const auto& optCompressionLib = getCompression()) {
     mysql_conn->setCompression(*optCompressionLib);

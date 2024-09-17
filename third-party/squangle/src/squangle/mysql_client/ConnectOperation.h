@@ -126,6 +126,13 @@ class ConnectOperationImpl : virtual public OperationBase {
     return conn_options_.getCompression();
   }
 
+  void setCryptoAuthTokenList(std::string cryptoAuthTokenList) {
+    conn_options_.setCryptoAuthTokenList(std::move(cryptoAuthTokenList));
+  }
+  folly::Optional<std::string> getCryptoAuthTokenList() const {
+    return conn_options_.getCryptoAuthTokenList();
+  }
+
   virtual bool isActive() const {
     return false;
   }

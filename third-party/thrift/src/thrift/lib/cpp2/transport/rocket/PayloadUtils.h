@@ -23,20 +23,12 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
+#include <thrift/lib/cpp2/transport/rocket/RequestPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache {
 namespace thrift {
-
-struct RequestPayload {
-  RequestPayload(std::unique_ptr<folly::IOBuf> p, RequestRpcMetadata md)
-      : payload(std::move(p)), metadata(std::move(md)) {}
-
-  std::unique_ptr<folly::IOBuf> payload;
-  RequestRpcMetadata metadata;
-};
-
 namespace rocket {
 namespace detail {
 template <class Metadata, class ProtocolWriter>

@@ -76,7 +76,7 @@ class FutureCallbackHelper {
   }
 
   static folly::Try<Result> processClientInterceptorsAndExtractResult(
-      PromiseResult&& result) {
+      PromiseResult&& result) noexcept {
     apache::thrift::ClientReceiveState clientReceiveState =
         extractClientReceiveState(result);
     auto* contextStack = clientReceiveState.ctx();
@@ -86,7 +86,7 @@ class FutureCallbackHelper {
         return folly::Try<Result>(std::move(exTry).exception());
       }
     }
-    return folly::Try<Result>(extractResult(std::move(result)));
+    return folly::makeTryWith([&] { return extractResult(std::move(result)); });
   }
 };
 

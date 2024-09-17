@@ -178,6 +178,32 @@ void convertStringToBinary(Value& v) {
       notImpl();
   }
 }
+
+type::Type toPatchType(type::Type input) {
+  for (auto t :
+       {input.toThrift().name()->structType_ref(),
+        input.toThrift().name()->unionType_ref()}) {
+    if (!t) {
+      continue;
+    }
+    if (auto p = t->uri_ref()) {
+      *p += "Patch";
+      return input;
+    }
+    if (auto p = t->scopedName_ref()) {
+      *p += "Patch";
+      return input;
+    }
+    folly::throw_exception<std::runtime_error>(fmt::format(
+        "Unsupported Uri: {}",
+        apache::thrift::util::enumNameSafe(t->getType())));
+  }
+
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Unsupported type: {}",
+      apache::thrift::util::enumNameSafe(input.toThrift().name()->getType())));
+}
+
 } // namespace detail
 
 bool DynamicPatch::empty(detail::Badge badge) const {

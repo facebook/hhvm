@@ -89,6 +89,8 @@ struct DynamicPatchOptions {
   bool doNotConvertStringToBinary = false;
 };
 
+type::Type toPatchType(type::Type input);
+
 } // namespace detail
 
 class DynamicPatch;

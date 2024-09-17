@@ -232,7 +232,9 @@ MessageBegin deserializeMessageBegin(
         break;
       }
       default:
-        break;
+        meta.isValid = false;
+        meta.errMessage = "unsupported protocol, unparseable message begin";
+        LOG(ERROR) << "received unsupported protocol value: " << protType;
     }
   } catch (const TException& ex) {
     meta.isValid = false;

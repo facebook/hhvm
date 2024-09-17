@@ -40,6 +40,8 @@ THRIFT_FLAG_DEFINE_bool(server_header_reject_all, true);
 
 THRIFT_FLAG_DEFINE_int64(monitoring_over_header_logging_sample_rate, 1'000'000);
 
+THRIFT_FLAG_DECLARE_bool(enforce_header_transport_valid_protocol);
+
 namespace apache {
 namespace thrift {
 
@@ -435,20 +437,23 @@ void Cpp2Connection::requestReceived(
       hreq->getHeader()->getProtocolId());
   auto msgBegin = apache::thrift::detail::ap::deserializeMessageBegin(
       *hreq->getBuf(), protoId);
+
+  if (THRIFT_FLAG(enforce_header_transport_valid_protocol) &&
+      !msgBegin.metadata.isValid) {
+    disconnect("Rejecting unparseable message begin");
+    return;
+  }
+
   std::string& methodName = msgBegin.methodName;
   const auto& meta = msgBegin.metadata;
 
   // If the transport upgrade has begun, we should reject any requests made
   // before it's completed.
   if (upgradeToRocketCallback_ != nullptr) {
-    killRequest(
-        std::move(hreq),
-        TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
-        kMethodUnknownErrorCode,
-        fmt::format(
-            "Unexpected request '{}' while upgrading transport to rocket",
-            methodName)
-            .c_str());
+    // In essence, we've already swapped to Rocket even if the current message
+    // was still in the buffer. Handle this as a protocol error, as a
+    // misbehaving client.
+    disconnect("Unexpected Header message after Rocket upgrade");
     return;
   }
   // Transport upgrade: check if client requested transport upgrade from header
@@ -484,13 +489,11 @@ void Cpp2Connection::requestReceived(
         break;
       default:
         LOG(DFATAL) << "Unsupported protocol found";
-        // if protocol is neither binary or compact, we want to kill the
-        // request and abort upgrade
-        killRequest(
-            std::move(hreq),
-            TApplicationException::TApplicationExceptionType::INVALID_PROTOCOL,
-            kUnknownErrorCode,
-            "invalid protocol used");
+        // This should never occur. Unsupported protocols should be caught and
+        // handled higher up in the stack. If we somehow still reach this, and
+        // the protocol is neither binary nor compact, disconnect the client and
+        // abort the upgrade.
+        disconnect("Unsupported protocol found during Rocket upgrade");
         return;
     }
 

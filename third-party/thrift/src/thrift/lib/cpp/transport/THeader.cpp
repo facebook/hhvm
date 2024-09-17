@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp/transport/TBufferTransports.h>
 #include <thrift/lib/cpp/util/THttpParser.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 
@@ -46,6 +47,8 @@ using std::shared_ptr;
 using std::string;
 using std::unique_ptr;
 using std::vector;
+
+THRIFT_FLAG_DEFINE_bool(enforce_header_transport_valid_protocol, true);
 
 namespace apache {
 namespace thrift {
@@ -483,7 +486,21 @@ unique_ptr<IOBuf> THeader::readHeaderFormat(
   }
   Cursor data(buf.get());
   data += headerSize;
-  c_.protoId_ = readVarint<uint16_t>(c);
+  if (THRIFT_FLAG(enforce_header_transport_valid_protocol)) {
+    uint16_t wireProtocol = readVarint<uint16_t>(c);
+    switch (wireProtocol) {
+      case T_BINARY_PROTOCOL:
+      case T_COMPACT_PROTOCOL:
+      case T_SIMPLE_JSON_PROTOCOL:
+        c_.protoId_ = wireProtocol;
+        break;
+      default:
+        throw TTransportException(
+            TTransportException::INVALID_STATE, "Unknown protocol in header");
+    }
+  } else {
+    c_.protoId_ = readVarint<uint16_t>(c);
+  }
   uint16_t numTransforms = readVarint<uint16_t>(c);
   c_.readTrans_.reserve(numTransforms);
 

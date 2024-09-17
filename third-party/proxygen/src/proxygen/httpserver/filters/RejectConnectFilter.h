@@ -75,7 +75,7 @@ class RejectConnectFilter : public Filter {
   void sendEOM() noexcept override {
   }
 
-  void sendAbort() noexcept override {
+  void sendAbort(folly::Optional<ErrorCode>) noexcept override {
   }
 
   void refreshTimeout() noexcept override {

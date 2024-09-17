@@ -60,7 +60,7 @@ class RequestHandlerAdaptor
   void sendBody(std::unique_ptr<folly::IOBuf> body) noexcept override;
   void sendChunkTerminator() noexcept override;
   void sendEOM() noexcept override;
-  void sendAbort() noexcept override;
+  void sendAbort(folly::Optional<ErrorCode> errorCode) noexcept override;
   void refreshTimeout() noexcept override;
   void pauseIngress() noexcept override;
   void resumeIngress() noexcept override;

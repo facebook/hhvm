@@ -131,7 +131,7 @@ class CompressionFilter : public Filter {
 
  protected:
   void fail() {
-    Filter::sendAbort();
+    Filter::sendAbort(folly::none);
   }
 
   std::unique_ptr<HTTPMessage> responseMessage_;

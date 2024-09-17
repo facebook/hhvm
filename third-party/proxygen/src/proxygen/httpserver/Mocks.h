@@ -32,7 +32,10 @@ class MockResponseHandler : public ResponseHandler {
   MOCK_METHOD((void), pauseIngress, (), (noexcept));
   MOCK_METHOD((void), refreshTimeout, (), (noexcept));
   MOCK_METHOD((void), resumeIngress, (), (noexcept));
-  MOCK_METHOD((void), sendAbort, (), (noexcept));
+  MOCK_METHOD((void),
+              sendAbort,
+              (folly::Optional<ErrorCode> errorCode),
+              (noexcept));
   MOCK_METHOD((void), sendBody, (std::shared_ptr<folly::IOBuf>), (noexcept));
   MOCK_METHOD((void), sendChunkHeader, (size_t), (noexcept));
   MOCK_METHOD((void), sendChunkTerminator, (), (noexcept));

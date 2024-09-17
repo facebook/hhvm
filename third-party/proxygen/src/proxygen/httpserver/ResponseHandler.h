@@ -67,7 +67,8 @@ class ResponseHandler {
 
   virtual void sendEOM() noexcept = 0;
 
-  virtual void sendAbort() noexcept = 0;
+  virtual void sendAbort(
+      folly::Optional<ErrorCode> errorCode = folly::none) noexcept = 0;
 
   virtual void refreshTimeout() noexcept = 0;
 

@@ -109,8 +109,8 @@ class Filter
     downstream_->sendEOM();
   }
 
-  void sendAbort() noexcept override {
-    downstream_->sendAbort();
+  void sendAbort(folly::Optional<ErrorCode> errorCode) noexcept override {
+    downstream_->sendAbort(errorCode);
   }
 
   void refreshTimeout() noexcept override {

@@ -109,7 +109,7 @@ void RequestHandlerAdaptor::onError(const HTTPException& error) noexcept {
     setError(kErrorTimeout);
 
     if (!txn_->canSendHeaders()) {
-      sendAbort();
+      sendAbort(folly::none);
     } else {
       ResponseBuilder(this)
           .status(408, "Request Timeout")
@@ -120,7 +120,7 @@ void RequestHandlerAdaptor::onError(const HTTPException& error) noexcept {
     setError(kErrorRead);
 
     if (!txn_->canSendHeaders()) {
-      sendAbort();
+      sendAbort(folly::none);
     } else {
       ResponseBuilder(this)
           .status(400, "Bad Request")
@@ -185,8 +185,13 @@ void RequestHandlerAdaptor::sendEOM() noexcept {
   txn_->sendEOM();
 }
 
-void RequestHandlerAdaptor::sendAbort() noexcept {
-  txn_->sendAbort();
+void RequestHandlerAdaptor::sendAbort(
+    folly::Optional<ErrorCode> errorCode) noexcept {
+  if (errorCode.has_value()) {
+    txn_->sendAbort(errorCode.value());
+  } else {
+    txn_->sendAbort();
+  }
 }
 
 void RequestHandlerAdaptor::refreshTimeout() noexcept {

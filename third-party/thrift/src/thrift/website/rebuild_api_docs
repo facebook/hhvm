@@ -1,5 +1,10 @@
 #!/bin/bash
 
+cd "$(hg root)/fbcode/thrift/website" || exit
+
+# Install doxygen
+feature install fb_doxygen
+
 # Copy js components
 cp -r ../../../fbcode/staticdocs/websites/fbcref/src/components src
 

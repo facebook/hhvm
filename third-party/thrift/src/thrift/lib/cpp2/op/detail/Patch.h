@@ -20,9 +20,9 @@
 #include <type_traits>
 #include <utility>
 
+#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Adapter.h>
-#include <thrift/lib/cpp2/op/detail/AssignPatch.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/op/detail/ContainerPatch.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
@@ -36,6 +36,9 @@ namespace detail {
 
 template <class>
 class AnyPatch;
+
+template <class>
+class AssignPatch;
 
 // Latest Thrift Static Patch version that the process is aware of. Any Thrift
 // Static Patch with a version higher than this will not be processed by the

@@ -60,6 +60,11 @@ class RowStream {
     return mysql_query_result_ ? mysql_query_result_->numRows() : 0;
   }
 
+  folly::coro::Task<void> co_crank() {
+    // If needed, crank the query result
+    co_await mysql_query_result_->co_crank();
+  }
+
   ~RowStream() = default;
   RowStream(RowStream&&) = default;
   RowStream& operator=(RowStream&&) = default;

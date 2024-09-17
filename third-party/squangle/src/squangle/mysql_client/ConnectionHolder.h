@@ -227,10 +227,6 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->getSchemaChanged();
   }
 
-  [[nodiscard]] bool hasMoreResults() const override {
-    return internalConn_->hasMoreResults();
-  }
-
   [[nodiscard]] bool getNoIndexUsed() const override {
     return internalConn_->getNoIndexUsed();
   }

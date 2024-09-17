@@ -23,6 +23,7 @@ using namespace std::chrono_literals;
 namespace facebook::common::mysql_client {
 
 void OperationBase::run() {
+  client_.addOperation(op_->shared_from_this());
   stopwatch_ = std::make_unique<StopWatch>();
   if (callbacks_.pre_operation_callback_) {
     CHECK_THROW(
@@ -303,6 +304,7 @@ OperationBase::OperationBase(std::unique_ptr<ConnectionProxy> safe_conn)
     : client_(safe_conn->get()->client()),
       conn_proxy_(std::move(safe_conn)),
       observer_callback_(nullptr) {
+  conn().resetActionable();
   timeout_ = Duration(FLAGS_async_mysql_timeout_micros);
   request_context_.store(
       folly::RequestContext::saveContext(), std::memory_order_relaxed);

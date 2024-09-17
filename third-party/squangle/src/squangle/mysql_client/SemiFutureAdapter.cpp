@@ -139,14 +139,16 @@ template <typename ResultType, typename Operation, typename QueryResult>
 folly::SemiFuture<ResultType> toSemiFutureHelper(
     std::shared_ptr<Operation> op) {
   // Run pre-query callbacks
-  auto& opRef = *op; // take a reference so we can move it in deferValue
-  return handlePreQueryCallback<Operation>(opRef)
-      // Then run the query
-      .deferValue([op = std::move(op)](auto&& /* unused */) {
-        return handleRunQuery<ResultType>(std::move(op));
-      })
-      // Then run post-query callbacks
-      .deferValue(handlePostQueryCallback<ResultType>);
+  auto sfut1 = handlePreQueryCallback<Operation>(*op);
+  auto sfut2 = std::move(sfut1).deferValue([=](auto&& /* unused */) {
+    return handleRunQuery<ResultType>(std::move(op));
+  });
+
+  return std::move(sfut2).deferValue([op = std::move(op)](auto&& result) {
+    // Pass `op` into this lambda to verify it's lifetime until we have handled
+    // post query callbacks
+    return handlePostQueryCallback<ResultType>(std::move(result));
+  });
 }
 
 folly::SemiFuture<DbQueryResult> toSemiFuture(QueryOperation_ptr query_op) {

@@ -289,6 +289,10 @@ class ConnectionPoolBase {
     shouldThrottleCallback_ = std::move(cb);
   }
 
+  virtual bool isInCorrectThread(bool /*expectMysqlThread*/) const {
+    return true;
+  }
+
  protected:
   virtual bool isShuttingDown() const = 0;
 
@@ -411,7 +415,6 @@ class ConnectionPool
           << "Attempt to start pool operation while pool is shutting down";
       ret->cancel();
     }
-    mysql_client_->addOperation(ret);
     return ret;
   }
 
@@ -588,10 +591,8 @@ class ConnectionPool
     }
 
     // For async - run in mysql thread; for sync - run in current thread
-    runInCorrectThread([changeUserOp = std::move(changeUserOp)] {
-      changeUserOp->connection()->client().addOperation(changeUserOp);
-      changeUserOp->run();
-    });
+    runInCorrectThread(
+        [changeUserOp = std::move(changeUserOp)] { changeUserOp->run(); });
   }
 
   void connectionSpotFreed(const PoolKey& conn_key) override {
@@ -674,10 +675,7 @@ class ConnectionPool
     }
 
     // For async - run in mysql thread; for sync - run in current thread
-    runInCorrectThread([resetOp = std::move(resetOp)]() {
-      resetOp->conn().client().addOperation(resetOp);
-      resetOp->run();
-    });
+    runInCorrectThread([resetOp = std::move(resetOp)]() { resetOp->run(); });
   }
 
  protected:

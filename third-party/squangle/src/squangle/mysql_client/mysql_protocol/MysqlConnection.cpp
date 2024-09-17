@@ -713,7 +713,7 @@ InternalConnection::Status AsyncMysqlConnection::nextResult() const {
   return toHandlerStatus(ret);
 }
 
-std::unique_ptr<InternalResult> SyncMysqlConnection::getResult() const {
+std::unique_ptr<MysqlResult> SyncMysqlConnection::getResult() const {
   CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
 
   MYSQL_RES* res = mysql_store_result(mysql_);
@@ -722,7 +722,7 @@ std::unique_ptr<InternalResult> SyncMysqlConnection::getResult() const {
   return std::make_unique<SyncMysqlResult>(res);
 }
 
-std::unique_ptr<InternalResult> AsyncMysqlConnection::getResult() const {
+std::unique_ptr<MysqlResult> AsyncMysqlConnection::getResult() const {
   CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
 
   MYSQL_RES* res = mysql_use_result(mysql_);

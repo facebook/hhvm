@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <folly/experimental/coro/Task.h>
 #include <folly/io/async/EventHandler.h>
 #include <optional>
 
@@ -61,13 +62,16 @@ class InternalResult {
 
   using FetchRowRet = std::pair<InternalStatus, std::unique_ptr<InternalRow>>;
 
-  virtual FetchRowRet fetchRow() const = 0;
+  virtual FetchRowRet fetchRow() = 0;
 
   virtual size_t numRows() const = 0;
 
   virtual void close() = 0;
 
-  virtual std::unique_ptr<InternalRowMetadata> getRowMetadata() const = 0;
+  // If needed this can be overridden to make sure the rows get cranked
+  virtual folly::coro::Task<void> co_crank() {
+    co_return;
+  }
 };
 
 class InternalConnection {
@@ -148,8 +152,6 @@ class InternalConnection {
   virtual std::optional<std::string> getRecvGtid() const = 0;
 
   virtual std::optional<std::string> getSchemaChanged() const = 0;
-
-  virtual bool hasMoreResults() const = 0;
 
   virtual bool getNoIndexUsed() const = 0;
 

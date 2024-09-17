@@ -114,7 +114,6 @@ std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
   if (connection_cb_) {
     ret->setObserverCallback(connection_cb_);
   }
-  addOperation(ret);
   return ret;
 }
 

@@ -246,12 +246,7 @@ AsyncConnection::~AsyncConnection() {
     conn_dying_callback_ = nullptr;
 
     auto resetOp = Connection::resetConn(std::move(conn));
-    runInThread([resetOp = std::move(resetOp)] {
-      // addOperation() is necessary here for proper cancelling of reset
-      // operation in case of sudden AsyncMysqlClient shutdown
-      resetOp->connection()->client().addOperation(resetOp);
-      resetOp->run();
-    });
+    runInThread([resetOp = std::move(resetOp)] { resetOp->run(); });
   }
 }
 

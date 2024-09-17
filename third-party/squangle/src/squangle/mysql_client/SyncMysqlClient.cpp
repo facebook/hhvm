@@ -71,9 +71,6 @@ SyncConnection::~SyncConnection() {
     conn->setConnectionDyingCallback(std::move(conn_dying_callback_));
     conn_dying_callback_ = nullptr;
     auto resetOp = Connection::resetConn(std::move(conn));
-    // addOperation() is necessary here for proper cancelling of reset
-    // operation in case of sudden SyncMysqlClient shutdown
-    client().addOperation(resetOp);
     resetOp->run().wait();
   }
 }

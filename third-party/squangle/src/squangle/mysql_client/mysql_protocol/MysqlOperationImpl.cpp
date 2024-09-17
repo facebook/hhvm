@@ -21,9 +21,7 @@ void MysqlOperationImpl::protocolCompleteOperation(OperationResult result) {
 MysqlOperationImpl::MysqlOperationImpl()
     : OperationBase(nullptr),
       EventHandler(client_.getEventBase()),
-      AsyncTimeout(client_.getEventBase()) {
-  conn().resetActionable();
-}
+      AsyncTimeout(client_.getEventBase()) {}
 
 bool MysqlOperationImpl::isInEventBaseThread() const {
   return conn().isInEventBaseThread();

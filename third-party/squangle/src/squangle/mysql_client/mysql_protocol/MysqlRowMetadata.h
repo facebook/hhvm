@@ -9,6 +9,7 @@
 #pragma once
 
 #include "squangle/mysql_client/InternalConnection.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlResult.h"
 
 namespace facebook::common::mysql_client::mysql_protocol {
 

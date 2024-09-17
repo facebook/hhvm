@@ -113,7 +113,7 @@ class MysqlConnection : public InternalConnection {
 
   [[nodiscard]] std::optional<std::string> getSchemaChanged() const override;
 
-  [[nodiscard]] bool hasMoreResults() const override;
+  [[nodiscard]] bool hasMoreResults() const;
 
   [[nodiscard]] bool getNoIndexUsed() const override {
     return mysql_->server_status & SERVER_QUERY_NO_INDEX_USED;
@@ -170,7 +170,7 @@ class MysqlConnection : public InternalConnection {
 
   [[nodiscard]] virtual Status nextResult() const = 0;
 
-  [[nodiscard]] virtual std::unique_ptr<InternalResult> getResult() const = 0;
+  [[nodiscard]] virtual std::unique_ptr<MysqlResult> getResult() const = 0;
 
   static inline Status toHandlerStatus(net_async_status status) {
     if (status == NET_ASYNC_ERROR) {
@@ -273,7 +273,7 @@ class AsyncMysqlConnection : public MysqlConnection {
 
   [[nodiscard]] Status nextResult() const override;
 
-  [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override;
+  [[nodiscard]] std::unique_ptr<MysqlResult> getResult() const override;
 };
 
 class SyncMysqlConnection : public MysqlConnection {
@@ -291,7 +291,7 @@ class SyncMysqlConnection : public MysqlConnection {
 
   [[nodiscard]] Status nextResult() const override;
 
-  [[nodiscard]] std::unique_ptr<InternalResult> getResult() const override;
+  [[nodiscard]] std::unique_ptr<MysqlResult> getResult() const override;
 };
 
 } // namespace facebook::common::mysql_client::mysql_protocol

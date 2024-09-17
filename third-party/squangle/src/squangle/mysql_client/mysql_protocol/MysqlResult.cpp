@@ -63,7 +63,7 @@ InternalResult::FetchRowRet MysqlRowFactory(
 
 } // namespace
 
-InternalResult::FetchRowRet SyncMysqlResult::fetchRow() const {
+InternalResult::FetchRowRet SyncMysqlResult::fetchRow() {
   auto mysqlRow = mysql_fetch_row(res_.get());
   VLOG(4) << fmt::format(
       "mysql_fetch_row({}) returned {}", (void*)res_.get(), (void*)mysqlRow);
@@ -71,7 +71,7 @@ InternalResult::FetchRowRet SyncMysqlResult::fetchRow() const {
   return MysqlRowFactory(res_.get(), mysqlRow);
 }
 
-InternalResult::FetchRowRet AsyncMysqlResult::fetchRow() const {
+InternalResult::FetchRowRet AsyncMysqlResult::fetchRow() {
   std::unique_ptr<InternalRow> row;
 
   MYSQL_ROW mysqlRow;

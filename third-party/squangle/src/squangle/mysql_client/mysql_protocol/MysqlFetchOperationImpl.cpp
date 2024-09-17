@@ -11,6 +11,7 @@
 #include "squangle/mysql_client/Connection.h"
 #include "squangle/mysql_client/MysqlClientBase.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
+#include "squangle/mysql_client/mysql_protocol/MysqlResult.h"
 
 namespace {
 const std::string kQueryChecksumKey = "checksum";

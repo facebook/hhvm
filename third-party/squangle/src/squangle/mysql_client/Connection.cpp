@@ -66,12 +66,6 @@ Connection::~Connection() {
 
 std::shared_ptr<ResetOperation> Connection::resetConn(
     std::unique_ptr<Connection> conn) {
-  // This function is very similar to beginQuery(), but this does not call
-  // addOperation(), which is called by the caller prior to calling
-  // resetOp->run(). This is to avoid race condition where shutdownClient() can
-  // remove the reset operation from pending_operations_ queue, while the
-  // operation still exists in operations_to_remove_ queue; in that case,
-  // cleanupCompletedOperations() hits FATAL error.
   const auto& client = conn->mysql_client_;
   auto resetOperationPtr = std::make_shared<ResetOperation>(
       client.createSpecialOperationImpl(std::move(conn)));
@@ -159,7 +153,6 @@ std::shared_ptr<QueryType> Connection::beginAnyQuery(
     ret->setTimeout(timeout);
   }
 
-  conn.mysql_client_.addOperation(ret);
   ret->setPreOperationCallback([&](Operation& op) {
     if (conn.callbacks_.pre_operation_callback_) {
       conn.callbacks_.pre_operation_callback_(op);
@@ -562,7 +555,6 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   if (timeout.count() > 0) {
     ret->setTimeout(timeout);
   }
-  ret->connection()->mysql_client_.addOperation(ret);
 
   // MultiQueryStreamHandler needs to be alive while the operation is running.
   // To accomplish that, ~MultiQueryStreamHandler waits until

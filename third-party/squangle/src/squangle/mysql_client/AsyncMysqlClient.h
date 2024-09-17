@@ -69,7 +69,6 @@
 #include <folly/Exception.h>
 #include <folly/Portability.h>
 #include <folly/Singleton.h>
-#include <folly/fibers/Baton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
@@ -153,6 +152,10 @@ class AsyncMysqlClient : public MysqlClientBase {
   void drain(bool also_block_operations);
 
   folly::EventBase* getEventBase() override {
+    return &event_base_;
+  }
+
+  const folly::EventBase* getEventBase() const override {
     return &event_base_;
   }
 
@@ -263,6 +266,11 @@ class AsyncMysqlClient : public MysqlClientBase {
   std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
       std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
 
+  bool isInCorrectThread(bool expectMysqlThread) const override {
+    auto eb = getEventBase();
+    return expectMysqlThread == (eb == nullptr || eb->isInEventBaseThread());
+  }
+
  private:
   // Private methods, primarily used by Operations and its subclasses.
   friend class AsyncConnectionPool;
@@ -357,43 +365,23 @@ class AsyncMysqlClient : public MysqlClientBase {
 
 // Don't these directly. Used to separate the Connection synchronization
 // between AsyncMysqlClient or SyncMysqlClient.
-class AsyncConnection : public Connection {
+class AsyncConnection : public AsyncConnectionHelper {
  public:
   AsyncConnection(
       MysqlClientBase& mysql_client,
       std::shared_ptr<const ConnectionKey> conn_key,
       std::unique_ptr<ConnectionHolder> conn = nullptr)
-      : Connection(mysql_client, std::move(conn_key), std::move(conn)) {}
+      : AsyncConnectionHelper(
+            mysql_client,
+            std::move(conn_key),
+            std::move(conn)) {}
 
   virtual ~AsyncConnection() override;
-
-  // Operations call these methods as the operation becomes unblocked, as
-  // callers want to wait for completion, etc.
-  void notify() override {
-    if (actionableBaton_.try_wait()) {
-      LOG(DFATAL) << "asked to notify already-actionable operation";
-    }
-    actionableBaton_.post();
-  }
-
-  void wait() const override {
-    CHECK_THROW(
-        folly::fibers::onFiber() || !isInEventBaseThread(), std::runtime_error);
-    actionableBaton_.wait();
-  }
-
-  // Called when a new operation is being started.
-  void resetActionable() override {
-    actionableBaton_.reset();
-  }
 
  protected:
   std::unique_ptr<InternalConnection> createInternalConnection() override {
     return std::make_unique<mysql_protocol::AsyncMysqlConnection>();
   }
-
- private:
-  mutable folly::fibers::Baton actionableBaton_;
 };
 
 } // namespace facebook::common::mysql_client

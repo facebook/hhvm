@@ -29,7 +29,7 @@ class MysqlClientBase {
   virtual ~MysqlClientBase() = default;
 
   // Initiate a connection to a database.  This is the main entrypoint.
-  std::shared_ptr<ConnectOperation> beginConnection(
+  virtual std::shared_ptr<ConnectOperation> beginConnection(
       const std::string& host,
       int port,
       const std::string& database_name,
@@ -44,6 +44,10 @@ class MysqlClientBase {
       std::shared_ptr<const ConnectionKey> conn_key) = 0;
 
   virtual folly::EventBase* getEventBase() {
+    return nullptr;
+  }
+
+  virtual const folly::EventBase* getEventBase() const {
     return nullptr;
   }
 
@@ -144,6 +148,10 @@ class MysqlClientBase {
       std::shared_ptr<const ConnectionKey> /*key*/) {}
   virtual void activeConnectionRemoved(
       std::shared_ptr<const ConnectionKey> /*key*/) {}
+
+  virtual bool isInCorrectThread(bool /*expectMysqlThread*/) const {
+    return true;
+  }
 
  protected:
   friend class Connection;

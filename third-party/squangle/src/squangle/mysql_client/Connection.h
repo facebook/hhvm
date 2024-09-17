@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <folly/fibers/Baton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 
@@ -401,8 +402,15 @@ class Connection {
   }
 
   bool isInEventBaseThread() const {
-    auto eb = getEventBase();
-    return eb == nullptr || eb->isInEventBaseThread();
+    return isInCorrectThread(true);
+  }
+
+  bool isNotInEventBaseThread() const {
+    return isInCorrectThread(false);
+  }
+
+  bool isInCorrectThread(bool expectMysqlThread) const {
+    return client().isInCorrectThread(expectMysqlThread);
   }
 
   virtual bool runInThread(std::function<void()>&& fn) {
@@ -599,11 +607,6 @@ class Connection {
     return mysql_connection_->getSchemaChanged();
   }
 
-  [[nodiscard]] bool hasMoreResults() const {
-    CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
-    return mysql_connection_->hasMoreResults();
-  }
-
   [[nodiscard]] bool getNoIndexUsed() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->getNoIndexUsed();
@@ -711,5 +714,44 @@ std::shared_ptr<QueryOperation> Connection::beginQuery(
   Query query{std::forward<Args>(args)...};
   return beginQuery(std::move(conn), std::move(query));
 }
+
+// Helper class to support needing to wait on async connections - the sync
+// client doesn't need this but other clients might - so making it into its own
+// class to be able to derive from it.
+class AsyncConnectionHelper : public Connection {
+ public:
+  AsyncConnectionHelper(
+      MysqlClientBase& mysql_client,
+      std::shared_ptr<const ConnectionKey> conn_key,
+      std::unique_ptr<ConnectionHolder> conn = nullptr)
+      : Connection(mysql_client, std::move(conn_key), std::move(conn)) {}
+
+  virtual ~AsyncConnectionHelper() override = default;
+
+ protected:
+  // Operations call these methods as the operation becomes unblocked, as
+  // callers want to wait for completion, etc.
+  void notify() override {
+    if (actionableBaton_.try_wait()) {
+      LOG(DFATAL) << "asked to notify already-actionable operation";
+    }
+    actionableBaton_.post();
+  }
+
+  void wait() const override {
+    CHECK_THROW(
+        folly::fibers::onFiber() || isNotInEventBaseThread(),
+        std::runtime_error);
+    actionableBaton_.wait();
+  }
+
+  // Called when a new operation is being started.
+  void resetActionable() override {
+    actionableBaton_.reset();
+  }
+
+ private:
+  mutable folly::fibers::Baton actionableBaton_;
+};
 
 } // namespace facebook::common::mysql_client

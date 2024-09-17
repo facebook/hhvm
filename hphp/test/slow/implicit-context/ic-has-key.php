@@ -9,21 +9,18 @@ function print_state(string $s, bool $b)[zoned]: void {
 function backdoored_fn(): void {
   echo "in backdoored_fn\n";
   print_state('ClassContext::exists', ClassContext::exists());
-  print_state('!HH\ImplicitContext\is_inaccessible', !HH\ImplicitContext\is_inaccessible());
 }
 
 <<__Memoize(#KeyedByIC)>>
 function memo($a, $b)[zoned]: mixed{
   echo "in keyedbyIC memo\n";
   print_state('ClassContext::exists', ClassContext::exists());
-  print_state('!HH\ImplicitContext\is_inaccessible', !HH\ImplicitContext\is_inaccessible());
 }
 
 <<__Memoize>>
 function memo2($a, $b): mixed{
   echo "in default memo\n";
   print_state('ClassContext::exists', ClassContext::exists());
-  print_state('!HH\ImplicitContext\is_inaccessible', !HH\ImplicitContext\is_inaccessible());
 }
 
 function g()[zoned]: mixed{
@@ -34,7 +31,6 @@ function g()[zoned]: mixed{
 function f()[zoned]: mixed{
   echo "in zoned...\n";
   print_state('ClassContext::exists', ClassContext::exists());
-  print_state('!HH\ImplicitContext\is_inaccessible', !HH\ImplicitContext\is_inaccessible());
   memo(1, 3);
   g();
 }

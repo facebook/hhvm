@@ -1,12 +1,8 @@
 in zoned...
 ClassContext::exists: True
-!HH\ImplicitContext\is_inaccessible: True
 in keyedbyIC memo
 ClassContext::exists: True
-!HH\ImplicitContext\is_inaccessible: True
 in backdoored_fn
 ClassContext::exists: False
-!HH\ImplicitContext\is_inaccessible: False
 in default memo
 ClassContext::exists: False
-!HH\ImplicitContext\is_inaccessible: False

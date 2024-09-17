@@ -70,15 +70,6 @@ enum State: string as string {
 <<__Native>>
 function get_state_unsafe()[zoned]: string /* State */;
 
-/**
- * Returns True if we are in the empty IC state
- * False otherwise
- *
- * Does not affect the state of the IC
- */
-<<__Native>>
-function is_inaccessible()[zoned]: bool;
-
 } // namespace ImplicitContext
 
 namespace ImplicitContext\_Private {

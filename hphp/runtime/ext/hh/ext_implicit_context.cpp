@@ -220,13 +220,6 @@ bool HHVM_FUNCTION(has_key, StringArg keyArg) {
   return context->m_map.find(key) != context->m_map.end();
 }
 
-bool HHVM_FUNCTION(is_inaccessible) {
-  assertx(*ImplicitContext::activeCtx);
-  auto const obj = *ImplicitContext::activeCtx;
-  auto const context = Native::data<ImplicitContext>(obj);
-  return context->m_memoKey == kAgnosticMemoKey;
-}
-
 String HHVM_FUNCTION(get_state_unsafe) {
   assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
@@ -354,8 +347,6 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(create_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\is_inaccessible,
-                  HHVM_FN(is_inaccessible));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\has_key,
                   HHVM_FN(has_key));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_debug_info,

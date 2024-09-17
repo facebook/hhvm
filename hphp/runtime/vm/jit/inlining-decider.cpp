@@ -319,7 +319,7 @@ Vcost computeTranslationCostSlow(SrcKey at,
   return irlower::computeIRUnitCost(*unit);
 }
 
-folly::Synchronized<InlineCostCache> s_inlCostCache;
+folly::ImplicitSynchronized<InlineCostCache> s_inlCostCache;
 
 int computeTranslationCost(SrcKey at,
                            const RegionDesc& region,

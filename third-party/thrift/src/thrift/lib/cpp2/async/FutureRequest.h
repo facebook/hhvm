@@ -42,7 +42,8 @@ class FutureCallbackHelper {
     std::move(result).error().first.throw_exception();
   }
 
-  static ClientReceiveState&& extractClientReceiveState(PromiseResult& result) {
+  static ClientReceiveState&& extractClientReceiveState(
+      PromiseResult& result) noexcept {
     if (result.hasValue()) {
       return std::move(std::move(result).value().second);
     }

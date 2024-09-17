@@ -18,7 +18,8 @@ namespace py.asyncio thrift_asyncio.sleep
 
 struct OverflowResult {
   // A member that we can use to test data overflow
-  byte value;
+  // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
+  -1: byte value;
 }
 
 service Sleep {

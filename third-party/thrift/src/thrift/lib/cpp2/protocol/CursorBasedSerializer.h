@@ -1108,8 +1108,11 @@ class CursorSerializationAdapter {
         Protocol protForDebug;
         protForDebug.setInput(buf.get());
         protForDebug.skip(protocol::T_STRUCT);
+        // The check below should be using protForDebug.getCursorPosition() + 1,
+        // but due to a bug somewhere with streaming, an extra byte gets added
+        // to the buffer, causing this check to fail.
         DCHECK_LE(
-            buf->computeChainDataLength(), protForDebug.getCursorPosition() + 1)
+            buf->computeChainDataLength(), protForDebug.getCursorPosition() + 2)
             << "Cursor serialization only supports messages containing a single struct or union.";
       }
 

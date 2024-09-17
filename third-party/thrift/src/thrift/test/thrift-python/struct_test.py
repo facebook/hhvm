@@ -14,6 +14,7 @@
 
 # pyre-strict
 
+import copy
 import pickle
 import types
 import typing
@@ -57,6 +58,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     set_constant,
     string_constant,
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
+    TestExceptionCopy as TestExceptionCopyMutable,
     TestStruct as TestStructMutable,
     TestStructAdaptedTypes as TestStructAdaptedTypesMutable,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
@@ -1723,3 +1725,73 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Check for immutable struct
         immutable_s1 = TestStructAllThriftContainerTypesImmutable()
         self.assertEqual([], immutable_s1.unqualified_list_i32)
+
+    def test_exception_deepcopy(self) -> None:
+        """
+        exception TestExceptionCopy {
+          1: i32 unqualified_i32;
+          2: optional i32 optional_i32;
+
+          3: string unqualified_string;
+          4: optional string optional_string;
+
+          5: list<i32> unqualified_list_i32;
+          6: optional list<i32> optional_list_i32;
+
+          7: set<string> unqualified_set_string;
+          8: optional set<string> optional_set_string;
+
+          9: map<string, i32> unqualified_map_string_i32;
+          10: optional TestExceptionCopy recursive_exception;
+        }
+        """
+        e = TestExceptionCopyMutable(
+            unqualified_i32=2,
+            optional_i32=3,
+            unqualified_string="thrift",
+            optional_string="python",
+            unqualified_list_i32=[1, 2, 3],
+            optional_list_i32=[4, 5, 6],
+            unqualified_set_string={"1", "2", "3"},
+            unqualified_map_string_i32={"a": 1, "b": 2, "c": 3},
+        )
+        e_clone = copy.deepcopy(e)
+
+        self.assertIsNot(e, e_clone)
+
+        self.assertEqual(e.unqualified_i32, e_clone.unqualified_i32)
+        self.assertEqual(e.optional_i32, e_clone.optional_i32)
+        self.assertEqual(e.unqualified_string, e_clone.unqualified_string)
+        self.assertEqual(e.optional_string, e_clone.optional_string)
+
+        self.assertEqual(e.unqualified_list_i32, e_clone.unqualified_list_i32)
+        self.assertIsNot(e.unqualified_list_i32, e_clone.unqualified_list_i32)
+        self.assertEqual(e.optional_list_i32, e_clone.optional_list_i32)
+        self.assertIsNot(e.optional_list_i32, e_clone.optional_list_i32)
+
+        # Although `assertIsNot()` appears to check the deepcopy result, the
+        # best way to test it is to mutate `e_clone` (due to implementation
+        # details) and verify that it doesn't affect `e`.
+        e_clone.unqualified_list_i32.append(4)
+        self.assertNotEqual(e.unqualified_list_i32, e_clone.unqualified_list_i32)
+        # pyre-ignore[16]: Fixme: type error to be addressed later
+        e_clone.optional_list_i32.append(4)
+        self.assertNotEqual(e.optional_list_i32, e_clone.optional_list_i32)
+
+        self.assertEqual(e.unqualified_set_string, e_clone.unqualified_set_string)
+        self.assertIsNot(e.unqualified_set_string, e_clone.unqualified_set_string)
+        e_clone.unqualified_set_string.add("4")
+        self.assertNotEqual(e.unqualified_set_string, e_clone.unqualified_set_string)
+
+        self.assertIsNone(e_clone.optional_set_string)
+
+        self.assertEqual(
+            e.unqualified_map_string_i32, e_clone.unqualified_map_string_i32
+        )
+        self.assertIsNot(
+            e.unqualified_map_string_i32, e_clone.unqualified_map_string_i32
+        )
+        e_clone.unqualified_map_string_i32["d"] = 4
+        self.assertNotEqual(
+            e.unqualified_map_string_i32, e_clone.unqualified_map_string_i32
+        )

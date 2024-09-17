@@ -211,3 +211,20 @@ struct TestStructCopy {
   @cpp.Type{name = "folly::IOBuf"}
   9: binary unqualified_binary;
 }
+
+exception TestExceptionCopy {
+  1: i32 unqualified_i32;
+  2: optional i32 optional_i32;
+
+  3: string unqualified_string;
+  4: optional string optional_string;
+
+  5: list<i32> unqualified_list_i32;
+  6: optional list<i32> optional_list_i32;
+
+  7: set<string> unqualified_set_string;
+  8: optional set<string> optional_set_string;
+
+  9: map<string, i32> unqualified_map_string_i32;
+  10: optional TestExceptionCopy recursive_exception;
+}

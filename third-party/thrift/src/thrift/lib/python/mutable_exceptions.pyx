@@ -15,6 +15,8 @@
 from folly.iobuf cimport from_unique_ptr
 from libcpp.utility cimport move as std_move
 
+import copy
+
 from thrift.python.mutable_serializer cimport c_mutable_serialize, c_mutable_deserialize
 from thrift.python.mutable_types cimport (
     MutableStructInfo,
@@ -198,6 +200,9 @@ cdef class MutableGeneratedError(Error):
     def __repr__(self):
         fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
         return f"{type(self).__name__}({fields})"
+
+    def __deepcopy__(MutableGeneratedError self, memo):
+        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data, memo))
 
     def __eq__(MutableGeneratedError self, other):
         if other is self:

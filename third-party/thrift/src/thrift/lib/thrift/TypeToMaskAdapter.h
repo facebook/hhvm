@@ -60,13 +60,15 @@ class ValidatingTypeMap {
     return map_.find(key);
   }
 
-  std::pair<iterator, bool> emplace(const key_type& key, value_type&& value) {
+  template <typename... Args>
+  std::pair<iterator, bool> emplace(const key_type& key, Args&&... args) {
     validateTypeIsFull(key);
-    return map_.emplace(key, std::move(value));
+    return map_.emplace(key, std::forward<Args>(args)...);
   }
-  std::pair<iterator, bool> emplace(key_type&& key, value_type&& value) {
+  template <typename... Args>
+  std::pair<iterator, bool> emplace(key_type&& key, Args&&... args) {
     validateTypeIsFull(key);
-    return map_.emplace(std::move(key), std::move(value));
+    return map_.emplace(std::move(key), std::forward<Args>(args)...);
   }
 
   mapped_type& operator[](const key_type& key) {

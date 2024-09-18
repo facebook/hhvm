@@ -130,7 +130,7 @@ struct FooEnsureStruct {
 
 // All fields are terse. Original qualifier will be ignored.
 @thrift.TerseWrite
-struct FooFieldPatch {
+struct Foo_fbthrift_FieldPatch {
   1: Type1Patch field1;
   2: Type2Patch field2:
   ...
@@ -145,13 +145,13 @@ struct FooPatch {
   2: bool clear;
 
   // Patch each field in Foo
-  3: FooFieldPatch patchPrior;
+  3: Foo_fbthrift_FieldPatch patchPrior;
 
   // Ensure each field in Foo
   5: FooEnsureStruct ensure;
 
   // Patch each field in Foo
-  6: FooFieldPatch patch;
+  6: Foo_fbthrift_FieldPatch patch;
 }
 ```
 
@@ -217,7 +217,7 @@ The type of each PatchOps in `Patch` is based on Patch type. e.g., for BoolPatch
 | list                               |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | N/A             | Same as value   | ---                                    | ---                           | ---                                    |
 | set                                |               |        | N/A                  | N/A               | N/A               | N/A                  | `list<Element>` or `set<Element>` | `list<Element>` | `list<Element>` | ---                                    | ---                           | ---                                    |
 | map                                |               |        | `map<Key, ValPatch>` | N/A               | Same as value     | `map<Key, ValPatch>` | `list<Key>` or `set<Key>`         | N/A             | Same as value   | ---                                    | ---                           | ---                                    |
-| struct/union                       |               |        | `FooFieldPatch`      | `FooEnsureStruct` | `FooEnsureStruct` | `FooFieldPatch`      | N/A                               | N/A             | N/A             | ---                                    | ---                           | ---                                    |
+| struct/union                       |               |        | `Foo_fbthrift_FieldPatch`      | `FooEnsureStruct` | `FooEnsureStruct` | `Foo_fbthrift_FieldPatch`      | N/A                               | N/A             | N/A             | ---                                    | ---                           | ---                                    |
 | Thrift Any                         |               |        | N/A                  | N/A               | N/A               | N/A                  | N/A                               | N/A             | N/A             | `list<TypeToPatchInternalDoNotUse>`    | `any.Any`                     | `list<TypeToPatchInternalDoNotUse>`    |
 
 The corresponding C++ implementation can be found here: [Patch.cpp](https://github.com/facebook/fbthrift/blob/v2023.01.16.00/thrift/lib/cpp2/protocol/Patch.cpp#L126-L164).

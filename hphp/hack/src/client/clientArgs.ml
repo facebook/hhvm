@@ -951,6 +951,7 @@ let parse_lsp_args () =
   in
   let from = ref "" in
   let config = ref [] in
+  let disable_format_on_save = ref false in
   let notebook_mode = ref false in
   let verbose = ref false in
   let ignore_hh_version = ref false in
@@ -960,6 +961,10 @@ let parse_lsp_args () =
     [
       Common_argspecs.from from;
       Common_argspecs.config config;
+      ( "--disable-format-on-save",
+        Arg.Set disable_format_on_save,
+        " disable `textDocument/willSaveWaitUntil` handling of format-on-save"
+      );
       (* Please keep these sorted in the alphabetical order *)
       ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--ffp-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
@@ -986,6 +991,7 @@ let parse_lsp_args () =
     {
       ClientLsp.from = !from;
       config = !config;
+      disable_format_on_save = !disable_format_on_save;
       ignore_hh_version = !ignore_hh_version;
       naming_table = !naming_table;
       warnings_saved_state_path = !warnings_saved_state_path;

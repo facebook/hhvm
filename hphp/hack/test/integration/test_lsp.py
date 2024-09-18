@@ -7530,6 +7530,91 @@ function baz<T>(readonly T $x): readonly T {
         )
         self.run_spec(spec, variables)
 
+    def test_initialize_will_save_wait_until_is_disabled(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        spec = (
+            LspTestSpec("test_initialize_will_save_wait_until_is_disabled")
+            .ignore_notifications(method="telemetry/event")
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .ignore_requests(
+                method="client/registerCapability",
+                params={
+                    "registrations": [
+                        {
+                            "id": "did-change-watched-files",
+                            "method": "workspace/didChangeWatchedFiles",
+                            "registerOptions": {
+                                "watchers": [
+                                    {
+                                        "globPattern": "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}",
+                                        "kind": 7,
+                                    }
+                                ]
+                            },
+                        }
+                    ]
+                },
+            )
+            .request(
+                line=line(),
+                method="initialize",
+                params={
+                    "initializationOptions": {},
+                    "processId": None,
+                    "rootPath": "${root_path}",
+                    "capabilities": {},
+                },
+                result={
+                    "capabilities": {
+                        "textDocumentSync": {
+                            "openClose": True,
+                            "change": 2,
+                            "willSave": False,
+                            "willSaveWaitUntil": False,
+                            "save": {"includeText": False},
+                        },
+                        "hoverProvider": True,
+                        "completionProvider": {
+                            "resolveProvider": True,
+                            "triggerCharacters": [
+                                "$",
+                                ">",
+                                "\\",
+                                ":",
+                                "<",
+                                "[",
+                                "'",
+                                '"',
+                                "{",
+                                "#",
+                            ],
+                        },
+                        "signatureHelpProvider": {"triggerCharacters": ["(", ","]},
+                        "definitionProvider": True,
+                        "typeDefinitionProvider": True,
+                        "referencesProvider": True,
+                        "documentHighlightProvider": True,
+                        "documentSymbolProvider": True,
+                        "workspaceSymbolProvider": True,
+                        "codeActionProvider": {"resolveProvider": True},
+                        "documentFormattingProvider": True,
+                        "documentRangeFormattingProvider": True,
+                        "documentOnTypeFormattingProvider": {
+                            "firstTriggerCharacter": ";",
+                            "moreTriggerCharacter": ["}"],
+                        },
+                        "renameProvider": True,
+                        "implementationProvider": True,
+                        "rageProvider": True,
+                        "experimental": {"snippetTextEdit": True, "autoCloseJsx": True},
+                    }
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, lsp_extra_args=["--disable-format-on-save"])
+
     def test_serverless_ide_will_save_wait_until_no_format(
         self,
     ) -> None:

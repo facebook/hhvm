@@ -17,6 +17,7 @@ open Hh_json_helpers
 type args = {
   from: string;
   config: (string * string) list;
+  disable_format_on_save: bool;
   ignore_hh_version: bool;
   naming_table: string option;
   warnings_saved_state_path: Path.t option;
@@ -41,6 +42,7 @@ let env =
         {
           from = "[init]";
           config = [];
+          disable_format_on_save = false;
           ignore_hh_version = false;
           naming_table = None;
           warnings_saved_state_path = None;
@@ -3761,7 +3763,7 @@ let do_initialize ~initialize_params : Initialize.result =
               want_openClose = true;
               want_change = IncrementalSync;
               want_willSave = false;
-              want_willSaveWaitUntil = true;
+              want_willSaveWaitUntil = not !env.args.disable_format_on_save;
               want_didSave = Some { includeText = false };
             };
           hoverProvider = true;

@@ -37,6 +37,7 @@ enum class LifecycleFunc {
   ON_STOP_REQUESTED = 1,
 };
 
+namespace {
 std::string getLifecycleFuncName(LifecycleFunc func) {
   switch (func) {
     case LifecycleFunc::ON_START_SERVING: {
@@ -47,6 +48,7 @@ std::string getLifecycleFuncName(LifecycleFunc func) {
     }
   }
 }
+} // namespace
 
 folly::SemiFuture<folly::Unit>
 PythonAsyncProcessorFactory::semifuture_onStartServing() {

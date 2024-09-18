@@ -302,7 +302,7 @@ File "ctor_generic.php", line 20, character 63 - line 20, character 66:
 
 [Upper] Step 4 of 4
 
-The subtype is a nullable type so next I checked the non-null part.
+The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this generic parameter `TB` of `TestServiceBase`
 

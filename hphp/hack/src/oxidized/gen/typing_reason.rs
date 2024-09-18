@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f790074a15c84351d70f7023b02c7ea0>>
+// @generated SignedSource<<ce76dd9c13d1e14f53e58e01918fa2c6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -306,6 +306,10 @@ pub enum PrjAsymm {
     PrjAsymmNeg,
     #[rust_to_ocaml(name = "Prj_asymm_nullable")]
     PrjAsymmNullable,
+    #[rust_to_ocaml(name = "Prj_asymm_arraykey")]
+    PrjAsymmArraykey,
+    #[rust_to_ocaml(name = "Prj_asymm_num")]
+    PrjAsymmNum,
 }
 impl TrivialDrop for PrjAsymm {}
 arena_deserializer::impl_deserialize_in_arena!(PrjAsymm);

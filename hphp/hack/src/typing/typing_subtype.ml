@@ -3402,6 +3402,12 @@ end = struct
        * we break out num first.
        *)
       | (r, Tprim Nast.Tnum) ->
+        let r =
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            Typing_reason.prj_num_sub ~sub:r ~sub_prj:r
+          else
+            r
+        in
         let ty_float = MakeType.float r and ty_int = MakeType.int r in
         simplify
           ~subtype_env
@@ -3416,6 +3422,12 @@ end = struct
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
       (* Likewise, reduce nullable on left to a union *)
       | (r, Toption ty) ->
+        let r =
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r
+          else
+            r
+        in
         let ty_null = MakeType.null r in
         let prop_null =
           let prop =
@@ -4656,6 +4668,12 @@ end = struct
           end
       (* ?t <: A <=> null <: A && t <: A *)
       | (r, Toption ty_sub) ->
+        let r =
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r
+          else
+            r
+        in
         let ty_null = MakeType.null r in
         (* Errors due to `null` should refer to full option type *)
         let prop_null =
@@ -4683,6 +4701,12 @@ end = struct
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
       | (r, Tprim Aast.Tarraykey) ->
+        let r =
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            Typing_reason.prj_arraykey_sub ~sub:r ~sub_prj:r
+          else
+            r
+        in
         let ty_string = MakeType.string r and ty_int = MakeType.int r in
         let prop env =
           env

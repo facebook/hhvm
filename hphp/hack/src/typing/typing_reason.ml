@@ -253,6 +253,8 @@ type prj_asymm =
   | Prj_asymm_inter
   | Prj_asymm_neg
   | Prj_asymm_nullable
+  | Prj_asymm_arraykey
+  | Prj_asymm_num
 [@@deriving hash]
 
 let prj_asymm_to_json = function
@@ -260,6 +262,8 @@ let prj_asymm_to_json = function
   | Prj_asymm_inter -> Hh_json.JSON_String "Prj_asymm_inter"
   | Prj_asymm_neg -> Hh_json.JSON_String "Prj_asymm_neg"
   | Prj_asymm_nullable -> Hh_json.JSON_String "Prj_asymm_nullable"
+  | Prj_asymm_arraykey -> Hh_json.JSON_String "Prj_asymm_arraykey"
+  | Prj_asymm_num -> Hh_json.JSON_String "Prj_asymm_num"
 
 (* ~~ Flow kinds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -2557,6 +2561,17 @@ module Constructors = struct
   let prj_nullable_super ~super ~super_prj =
     prj_asymm_super ~super ~super_prj Prj_asymm_nullable
 
+  let prj_num_sub ~sub ~sub_prj = prj_asymm_sub ~sub ~sub_prj Prj_asymm_num
+
+  let prj_num_super ~super ~super_prj =
+    prj_asymm_super ~super ~super_prj Prj_asymm_num
+
+  let prj_arraykey_sub ~sub ~sub_prj =
+    prj_asymm_sub ~sub ~sub_prj Prj_asymm_arraykey
+
+  let prj_arraykey_super ~super ~super_prj =
+    prj_asymm_super ~super ~super_prj Prj_asymm_arraykey
+
   let missing_field = Missing_field
 
   let pessimised_this p = from_witness_decl @@ Pessimised_this p
@@ -3016,7 +3031,11 @@ module Derivation = struct
       | Prj_asymm_inter ->
         "The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element."
       | Prj_asymm_nullable ->
-        "The subtype is a nullable type so next I checked the non-null part."
+        "The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts."
+      | Prj_asymm_num ->
+        "The subtype is a num type so next I checked the subtype constraint is satisfied for both the int and float parts."
+      | Prj_asymm_arraykey ->
+        "The subtype is an arraykey type so next I checked the subtype constraint is satisfied for both the int and string parts."
       | Prj_asymm_neg ->
         "The subtype is a negated type so next I checked the inner type."
 
@@ -3027,7 +3046,11 @@ module Derivation = struct
       | Prj_asymm_inter ->
         "The supertype is an intersection type so next I checked the subtype constraint is satsified for all of its elements."
       | Prj_asymm_nullable ->
-        "The supertype is a nullable type so next I checked the non-null part."
+        "The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part."
+      | Prj_asymm_num ->
+        "The supertype is a num type so next I checked the subtype constraint is satisfied for either the int or float part."
+      | Prj_asymm_arraykey ->
+        "The supertype is an arraykey type so next I checked the subtype constraint is satisfied for either the int or string part."
       | Prj_asymm_neg ->
         "The supertype is a negated type so I checked the inner type."
 

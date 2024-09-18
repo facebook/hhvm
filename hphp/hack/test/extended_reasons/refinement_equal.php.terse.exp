@@ -28,7 +28,7 @@ File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
 Here's why:
 
-Step 1 of 1 (here is where the error occurred)
+Step 1 of 2
 
 I started by checking this subtype relationship.
 
@@ -71,6 +71,58 @@ File "refinement_equal.php", line 12, character 3 - line 12, character 12:
  13 | }
 
 The supertype comes from this hint
+
+File "refinement_equal.php", line 6, character 36 - line 6, character 36:
+
+ 6 | function inter_equal(?A $a, C $c): »C« {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+
+Step 2 of 2 (here is where the error occurred)
+
+The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
+
+The subtype comes from this type variable
+
+File "refinement_equal.php", line 7, character 6 - line 7, character 15:
+
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if(»$a == null«) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+
+and flows into this expression as the type of the local variable
+
+File "refinement_equal.php", line 8, character 5 - line 8, character 6:
+
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     »$z« = $a;
+ 9 |   } else {
+10 |     $z = $c;
+
+which I solved to this type variable
+
+File "refinement_equal.php", line 7, character 6 - line 7, character 15:
+
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if(»$a == null«) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+
+and flows into this expression as the type of the local variable
+
+File "refinement_equal.php", line 12, character 3 - line 12, character 12:
+
+ 11 |   }
+ 12 |   »return $z;«
+ 13 | }
+
+The supertype is the same as before.
 
 File "refinement_equal.php", line 6, character 36 - line 6, character 36:
 

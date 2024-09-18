@@ -530,15 +530,38 @@ val prj_neg_super :
   super:locl_phase t_ -> super_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a nullable type in
-    subtype position and some other type into another contraint between the
-    non-null part of the nullable type and the other type *)
+    subtype position and some other type into another contraint between either
+    the null or non-null part of the nullable type and the other type *)
 val prj_nullable_sub :
   sub:locl_phase t_ -> sub_prj:locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a subtype constraint between a nullable type in
-    supertype position and some other type into another contraint between the
-    non-null part of the nullable type and the other type *)
+    supertype position and some other type into another contraint between either
+    the null or non-null part of the nullable type and the other type *)
 val prj_nullable_super :
+  super:locl_phase t_ -> super_prj:locl_phase t_ -> locl_phase t_
+
+(** Record the decomposition of a subtype constraint between a num type in
+    subtype position and some other type into another contraint between either
+    the int or float part of the num type and the other type *)
+val prj_num_sub : sub:locl_phase t_ -> sub_prj:locl_phase t_ -> locl_phase t_
+
+(** Record the decomposition of a subtype constraint between a num type in
+    supertype position and some other type into another contraint between either
+    the int or float part of the num type and the other type *)
+val prj_num_super :
+  super:locl_phase t_ -> super_prj:locl_phase t_ -> locl_phase t_
+
+(** Record the decomposition of a subtype constraint between an arraykey type in
+    subtype position and some other type into another contraint between either
+    the int or string part of the arraykey type and the other type *)
+val prj_arraykey_sub :
+  sub:locl_phase t_ -> sub_prj:locl_phase t_ -> locl_phase t_
+
+(** Record the decomposition of a subtype constraint between an arraykey type in
+    supertype position and some other type into another contraint between either
+    the int or string part of the arraykey type and the other type *)
+val prj_arraykey_super :
   super:locl_phase t_ -> super_prj:locl_phase t_ -> locl_phase t_
 
 val missing_field : t

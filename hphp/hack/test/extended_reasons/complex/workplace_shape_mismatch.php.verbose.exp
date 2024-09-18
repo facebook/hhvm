@@ -130,7 +130,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -321,7 +321,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -512,7 +512,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -703,7 +703,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -910,7 +910,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -1133,7 +1133,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -1340,7 +1340,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -1531,7 +1531,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -1722,7 +1722,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -1913,7 +1913,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -2104,7 +2104,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -2295,7 +2295,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -2486,7 +2486,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -2677,7 +2677,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -2867,7 +2867,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -3073,7 +3073,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 
@@ -3288,7 +3288,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
 
 Step 3 of 4
 
-The supertype is a nullable type so next I checked the non-null part.
+The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
 The subtype is the same as before.
 

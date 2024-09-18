@@ -441,8 +441,7 @@ void recordDependencies(Env& env) {
 }
 
 void truncateLiterals(Env& env) {
-  if (!env.region || env.region->empty() ||
-      env.region->blocks().back()->empty()) return;
+  assertx(!env.region->blocks().back()->empty());
 
   // Don't finish a region with literal values or values that have a class
   // related to the current context class. They produce valuable information
@@ -456,19 +455,13 @@ void truncateLiterals(Env& env) {
       auto const op = sk.op();
       if (isLiteral(op) || isThisSelfOrParent(op) || isTypeAssert(op)) continue;
     }
-
-    if (i == len - 1) return;
     endSk = sk;
   }
 
   // Don't truncate if we've decided we want to truncate the entire block.
   // That'll mean we'll chop off the trailing N-1 opcodes, then in the next
   // region we'll select N-1 opcodes and chop off N-2 opcodes, and so forth...
-  if (endSk != lastBlock.start()) {
-    FTRACE(1, "selectTracelet truncating block after offset {}:\n{}\n",
-           endSk.offset(), show(lastBlock));
-    lastBlock.truncateAfter(endSk);
-  }
+  if (endSk != lastBlock.start()) lastBlock.truncateAfter(endSk);
 }
 
 RegionDescPtr form_region(Env& env) {
@@ -596,7 +589,6 @@ RegionDescPtr form_region(Env& env) {
       // to the last bytecode instruction in the region.  Note that this
       // check has to happen before the call to truncateLiterals()
       // because that updates the region but not the IR unit.
-      if (env.region->blocks().back()->empty()) return true;
       auto lastSk = env.region->lastSrcKey();
       auto const mainExits = findMainExitBlocks(env.irgs.irb->unit(), lastSk);
       /*
@@ -611,9 +603,7 @@ RegionDescPtr form_region(Env& env) {
       return true;
     }();
 
-    if (truncate) {
-      truncateLiterals(env);
-    }
+    if (truncate) truncateLiterals(env);
   }
 
   return std::move(env.region);
@@ -642,9 +632,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     }
   };
 
-  if (ctx.liveTypes.size() > Cfg::Jit::TraceletLiveLocsLimit) {
-    return nullptr;
-  }
+  if (ctx.liveTypes.size() > Cfg::Jit::TraceletLiveLocsLimit) return nullptr;
 
   do {
     Env env{ctx, kind, interp, maxBCInstrs, inlining};
@@ -658,11 +646,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     return nullptr;
   }
 
-  if (region->blocks().back()->length() == 0) {
-    // If the final block is empty because it would've only contained
-    // instructions producing literal values, kill it.
-    region->deleteBlock(region->blocks().back()->id());
-  }
+  assertx(region->blocks().back()->length() > 0);
 
   tracing::annotateBlock(
     [&] {

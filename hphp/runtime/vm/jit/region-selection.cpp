@@ -721,6 +721,7 @@ void RegionDesc::Block::addInstruction() {
 }
 
 void RegionDesc::Block::truncateAfter(SrcKey final) {
+  if (final == m_last) return;
   auto skIter = start();
   int newLen = -1;
   for (int i = 0; i < m_length; ++i, skIter.advance(func())) {
@@ -730,6 +731,8 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
     }
   }
   assertx(newLen != -1);
+  FTRACE(1, "selectTracelet truncating block after offset {}:\n{}\n",
+          final.offset(), show(*this));
   m_length = newLen;
   m_last = final;
 

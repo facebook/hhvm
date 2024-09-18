@@ -303,6 +303,9 @@ std::string get_go_package_name(
 std::string get_go_package_dir(
     const t_program* program, std::string name_override) {
   auto go_package = get_go_package_name(program, name_override);
+  if (go_package.find('/') != std::string::npos) {
+    return go_package;
+  }
   return boost::replace_all_copy(go_package, ".", "/");
 }
 

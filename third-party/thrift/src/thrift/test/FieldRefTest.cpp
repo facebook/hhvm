@@ -370,6 +370,14 @@ class TestStructInternBoxedValue {
   apache::thrift::detail::isset_bitset<2> __isset{};
 };
 
+template <class FieldRef>
+bool is_set(FieldRef s) {
+  EXPECT_EQ(
+      s.is_set(),
+      apache::thrift::is_non_optional_field_set_manually_or_by_serializer(s));
+  return s.is_set();
+}
+
 // TODO(dokwon): Clean up FieldRefTest using TYPED_TEST.
 TEST(field_ref_test, access_default_value) {
   auto s = TestStruct();
@@ -378,17 +386,17 @@ TEST(field_ref_test, access_default_value) {
 
 TEST(field_ref_test, has_value) {
   auto s = TestStruct();
-  EXPECT_FALSE(s.name().is_set());
+  EXPECT_FALSE(is_set(s.name()));
   s.name() = "foo";
-  EXPECT_TRUE(s.name().is_set());
+  EXPECT_TRUE(is_set(s.name()));
 }
 
 TEST(field_ref_test, assign) {
   auto s = TestStruct();
-  EXPECT_FALSE(s.name().is_set());
+  EXPECT_FALSE(is_set(s.name()));
   EXPECT_EQ(*s.name(), "default");
   s.name() = "foo";
-  EXPECT_TRUE(s.name().is_set());
+  EXPECT_TRUE(is_set(s.name()));
   EXPECT_EQ(*s.name(), "foo");
 }
 
@@ -397,10 +405,10 @@ TEST(field_ref_test, copy_from) {
   auto s2 = TestStruct();
   s.name() = "foo";
   s.name().copy_from(s2.name());
-  EXPECT_FALSE(s.name().is_set());
+  EXPECT_FALSE(is_set(s.name()));
   s2.name() = "foo";
   s.name().copy_from(s2.name());
-  EXPECT_TRUE(s.name().is_set());
+  EXPECT_TRUE(is_set(s.name()));
   EXPECT_EQ(*s.name(), "foo");
 }
 
@@ -410,7 +418,7 @@ TEST(field_ref_test, copy_from_const) {
   const auto& s_const = s2;
   s2.name() = "foo";
   s.name().copy_from(s_const.name());
-  EXPECT_TRUE(s.name().is_set());
+  EXPECT_TRUE(is_set(s.name()));
   EXPECT_EQ(*s.name(), "foo");
 }
 
@@ -419,7 +427,7 @@ TEST(field_ref_test, copy_from_other_type) {
   auto s2 = TestStruct();
   s2.int_val() = 42;
   s.int_assign().copy_from(s2.int_val());
-  EXPECT_TRUE(s.int_assign().is_set());
+  EXPECT_TRUE(is_set(s.int_assign()));
   EXPECT_EQ(s.int_assign()->value, 42);
 }
 
@@ -442,7 +450,7 @@ TEST(field_ref_test, is_assignable) {
 TEST(field_ref_test, assign_forwards) {
   auto s = TestStruct();
   s.int_assign() = 42;
-  EXPECT_TRUE(s.int_assign().is_set());
+  EXPECT_TRUE(is_set(s.int_assign()));
   EXPECT_EQ(s.int_assign()->value, 42);
 }
 
@@ -451,7 +459,7 @@ TEST(field_ref_test, construct_const_from_mutable) {
   s.name() = "foo";
   field_ref<std::string&> name = s.name();
   field_ref<const std::string&> const_name = name;
-  EXPECT_TRUE(const_name.is_set());
+  EXPECT_TRUE(is_set(const_name));
   EXPECT_EQ(*const_name, "foo");
 }
 
@@ -484,15 +492,15 @@ TEST(field_ref_test, mutable_accessors) {
   EXPECT_EQ(*name, "baz");
 
   // Field is not marked as set but that's OK for unqualified field.
-  EXPECT_FALSE(name.is_set());
+  EXPECT_FALSE(is_set(name));
 }
 
 TEST(field_ref_test, ensure) {
   TestStruct s;
   s.name().value() = "foo";
-  EXPECT_FALSE(s.name().is_set());
+  EXPECT_FALSE(is_set(s.name()));
   s.name().ensure();
-  EXPECT_TRUE(s.name().is_set());
+  EXPECT_TRUE(is_set(s.name()));
   EXPECT_EQ(s.name(), "foo");
 }
 
@@ -1083,7 +1091,7 @@ TYPED_TEST(intern_boxed_field_ref_typed_test, emplace) {
   typename TestFixture::Struct s;
   s.struct_field1().emplace();
   if constexpr (TestFixture::Struct::qual == FieldQualifier::Fill) {
-    EXPECT_TRUE(s.struct_field1().is_set());
+    EXPECT_TRUE(is_set(s.struct_field1()));
   }
   EXPECT_NE(
       &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
@@ -1093,9 +1101,9 @@ TYPED_TEST(intern_boxed_field_ref_typed_test, emplace) {
 TYPED_TEST(intern_boxed_field_ref_typed_test, has_value) {
   typename TestFixture::Struct s;
   if constexpr (TestFixture::Struct::qual == FieldQualifier::Fill) {
-    EXPECT_FALSE(s.struct_field1().is_set());
+    EXPECT_FALSE(is_set(s.struct_field1()));
     s.struct_field1() = ThriftStruct();
-    EXPECT_TRUE(s.struct_field1().is_set());
+    EXPECT_TRUE(is_set(s.struct_field1()));
   }
 }
 
@@ -1103,11 +1111,11 @@ TYPED_TEST(intern_boxed_field_ref_typed_test, ensure) {
   typename TestFixture::Struct s;
   s.struct_field1().value().name() = "foo";
   if constexpr (TestFixture::Struct::qual == FieldQualifier::Fill) {
-    EXPECT_FALSE(s.struct_field1().is_set());
+    EXPECT_FALSE(is_set(s.struct_field1()));
   }
   s.struct_field1().ensure();
   if constexpr (TestFixture::Struct::qual == FieldQualifier::Fill) {
-    EXPECT_TRUE(s.struct_field1().is_set());
+    EXPECT_TRUE(is_set(s.struct_field1()));
   }
   EXPECT_EQ(s.struct_field1()->name(), "foo");
 }

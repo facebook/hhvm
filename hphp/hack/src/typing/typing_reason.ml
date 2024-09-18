@@ -3516,11 +3516,11 @@ module Derivation = struct
 
       let from_complexity complexity =
         if complexity = 0 then
-          verbose
+          terse
         else if complexity = 1 then
           chatty
         else
-          terse
+          verbose
 
       let suppress_derivation { deriv_config; _ } cur_depth =
         match deriv_config with

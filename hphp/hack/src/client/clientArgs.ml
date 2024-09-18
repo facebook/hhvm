@@ -967,10 +967,10 @@ let parse_lsp_args () =
       Common_argspecs.naming_table naming_table;
       ( "--warnings-saved-state",
         Arg.String (fun s -> warnings_saved_state_path := Some (Path.make s)),
-        "path to the warnings saved state" );
+        " path to the warnings saved state" );
       ( "--notebook-mode",
         Arg.Set notebook_mode,
-        "Enable notebook mode, which is designed for use in notebooks. For example, this mode enables top-level statements."
+        " enable notebook mode, which is designed for use in notebooks. For example, this mode enables top-level statements."
       );
       ("--ranked-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--serverless-ide", Arg.Unit (fun () -> ()), " [legacy] no-op");

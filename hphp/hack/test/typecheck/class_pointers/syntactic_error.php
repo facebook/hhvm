@@ -53,6 +53,10 @@ abstract class A {
   const string S = self::class;
   abstract const string T = self::class;
 }
-enum class E: mixed {
+enum class EC: mixed {
   string A = E::class;
+}
+
+enum E: string {
+  A = E::class;
 }

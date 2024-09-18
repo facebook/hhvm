@@ -120,6 +120,7 @@ let visitor ctx =
             Some Remove_dead_unsafe_casts.patch_location_collection_handler
           else
             None);
+          Some Class_pointer_check.handler;
         ]
     @ Tast_check_pluggin.checks
   in

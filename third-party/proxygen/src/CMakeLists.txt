@@ -83,6 +83,7 @@ find_package(Boost 1.58 REQUIRED
     regex
     system
     thread
+    chrono
 )
 
 list(APPEND

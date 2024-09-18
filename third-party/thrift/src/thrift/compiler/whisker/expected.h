@@ -215,12 +215,8 @@ template <typename T, typename E>
 class expected {
   static_assert(detail::check_valid_value_type<T>());
   static_assert(!std::is_void_v<T>, "Use std::monostate instead.");
-  static_assert(std::is_nothrow_move_constructible_v<T>);
-  static_assert(std::is_nothrow_move_assignable_v<T>);
 
   static_assert(detail::check_valid_error_type<E>());
-  static_assert(std::is_nothrow_move_constructible_v<E>);
-  static_assert(std::is_nothrow_move_assignable_v<E>);
 
   // Restrictions on constructor (6):
   //   https://en.cppreference.com/w/cpp/utility/expected/expected#Version_6
@@ -296,12 +292,22 @@ class expected {
   expected(const expected& other) noexcept(
       std::is_nothrow_copy_constructible_v<T> &&
       std::is_nothrow_copy_constructible_v<E>)
-      : storage_(from_other(other.storage_)) {}
+      : storage_(from_other(other.storage_)) {
+    // To properly SFINAE this, we need to move the copy ctor to a base class or
+    // use C++20 concepts
+    static_assert(
+        std::is_copy_constructible_v<T> && std::is_copy_constructible_v<E>);
+  }
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_3
   expected(expected&& other) noexcept(
       std::is_nothrow_move_constructible_v<T> &&
       std::is_nothrow_move_constructible_v<E>)
-      : storage_(from_other(std::move(other.storage_))) {}
+      : storage_(from_other(std::move(other.storage_))) {
+    // To properly SFINAE this, we need to move the move ctor to a base class or
+    // use C++20 concepts
+    static_assert(
+        std::is_move_constructible_v<T> && std::is_move_constructible_v<E>);
+  }
 
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_4
   // (implicit)
@@ -735,7 +741,7 @@ class expected {
       storage_.template emplace<New>(std::move(tmp));
     } else {
       static_assert(std::is_nothrow_move_constructible_v<Current>);
-      Current tmp(*std::move(*this));
+      Current tmp(std::move(std::get<Current>(storage_)));
       try {
         storage_.template emplace<New>(std::forward<Args>(args)...);
       } catch (...) {

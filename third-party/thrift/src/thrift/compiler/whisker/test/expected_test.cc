@@ -85,6 +85,30 @@ struct move_only {
   move_only& operator=(move_only&&) noexcept = default;
 };
 
+struct non_movable {
+  non_movable() = default;
+  non_movable(non_movable&&) = delete;
+  non_movable& operator=(non_movable&&) = delete;
+};
+
+struct maythrow_movable {
+  maythrow_movable(bool should_throw = false) noexcept
+      : should_throw(should_throw) {}
+  maythrow_movable(maythrow_movable&&) noexcept(false) {
+    if (should_throw) {
+      throw std::runtime_error("maythrow_movable(maythrow_movable&&)");
+    }
+  }
+  maythrow_movable& operator=(maythrow_movable&&) noexcept(false) {
+    if (should_throw) {
+      throw std::runtime_error("maythrow_movable::operator=");
+    }
+    return *this;
+  }
+
+  bool should_throw;
+};
+
 } // namespace
 
 TEST(ExpectedTest, construct_default) {
@@ -132,6 +156,28 @@ TEST(ExpectedTest, construct_move_only) {
   expected<move_only, int> e1;
   expected<move_only, int> e2 = std::move(e1);
   EXPECT_TRUE(e2.has_value());
+}
+
+TEST(ExpectedTest, construct_value_with_move_only_error) {
+  expected<int, move_only> e1;
+  expected<int, move_only> e2 = std::move(e1);
+  EXPECT_EQ(std::move(e2).value(), 0);
+}
+
+TEST(ExpectedTest, construct_non_movable) {
+  expected<non_movable, int> e1;
+  EXPECT_TRUE(e1.has_value());
+  e1 = unexpected(1);
+  EXPECT_FALSE(e1.has_value());
+  EXPECT_EQ(e1.error(), 1);
+}
+
+TEST(ExpectedTest, construct_value_with_non_movable_error) {
+  expected<int, non_movable> e1{unexpect};
+  EXPECT_FALSE(e1.has_value());
+  e1 = 1;
+  EXPECT_TRUE(e1.has_value());
+  EXPECT_EQ(*e1, 1);
 }
 
 TEST(ExpectedTest, construct_error) {
@@ -211,6 +257,12 @@ TEST(ExpectedTest, emplace) {
 
 TEST(ExpectedTest, emplace_move_only) {
   expected<move_only, int> e = unexpected(1);
+  e.emplace();
+  EXPECT_TRUE(e.has_value());
+}
+
+TEST(ExpectedTest, emplace_non_movable) {
+  expected<non_movable, int> e = unexpected(1);
   e.emplace();
   EXPECT_TRUE(e.has_value());
 }
@@ -338,6 +390,39 @@ TEST(ExpectedTest, assign_move_only) {
   expected<move_only, int> e2;
   e1 = std::move(e2);
   EXPECT_TRUE(e1.has_value());
+}
+
+TEST(ExpectedTest, assign_move_only_error) {
+  expected<int, move_only> e1 = unexpected(move_only());
+  expected<int, move_only> e2;
+  e2 = std::move(e1);
+  EXPECT_FALSE(e2.has_value());
+}
+
+TEST(ExpectedTest, assign_maythrow_movable) {
+  expected<maythrow_movable, int> e1 = unexpected(1);
+  expected<maythrow_movable, int> e2;
+  e2 = std::move(e1);
+  EXPECT_EQ(e2.error(), 1);
+
+  expected<maythrow_movable, int> e3{std::in_place, true};
+  expected<maythrow_movable, int> e4 = unexpected(1);
+  EXPECT_THROW((e4 = std::move(e3)), std::runtime_error);
+  EXPECT_FALSE(e4.has_value());
+  EXPECT_EQ(e4.error(), 1);
+}
+
+TEST(ExpectedTest, assign_maythrow_movable_error) {
+  expected<int, maythrow_movable> e1 = unexpected(1);
+  expected<int, maythrow_movable> e2;
+  e2 = std::move(e1);
+  EXPECT_FALSE(e2.has_value());
+
+  expected<int, maythrow_movable> e3{unexpect, true};
+  expected<int, maythrow_movable> e4 = 1;
+  EXPECT_THROW((e4 = std::move(e3)), std::runtime_error);
+  EXPECT_TRUE(e4.has_value());
+  EXPECT_EQ(*e4, 1);
 }
 
 TEST(ExpectedTest, comparison) {

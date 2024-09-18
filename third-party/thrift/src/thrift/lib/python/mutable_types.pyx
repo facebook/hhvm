@@ -94,6 +94,13 @@ def _isset(MutableStructOrError struct):
     }
 
 
+cdef _resetFieldToStandardDefault(structOrError, field_index):
+    if isinstance(structOrError, MutableStruct):
+        (<MutableStruct>structOrError)._fbthrift_reset_field_to_standard_default(field_index)
+    else:
+        (<MutableGeneratedError>structOrError)._fbthrift_reset_field_to_standard_default(field_index)
+
+
 class _MutableStructField:
     """
     The `_MutableStructField` class is a descriptor class that is used to
@@ -102,10 +109,11 @@ class _MutableStructField:
     """
     # `_field_index` is the insertion order of the field in the
     # `MutableStructInfo` (this is not the Thrift field id)
-    __slots__ = ('_field_index',)
+    __slots__ = ('_field_index', '_is_optional')
 
-    def __init__(self, field_id):
+    def __init__(self, field_id, is_optional):
         self._field_index = field_id
+        self._is_optional = is_optional
 
     def __get__(self, obj, objtype):
         if obj is None:
@@ -118,6 +126,11 @@ class _MutableStructField:
 
     def __set__(self, obj, value):
         if obj is None:
+            return
+
+        if value is None and self._is_optional:
+            # reseting optional field to default is setting it to `None`
+            _resetFieldToStandardDefault(obj, self._field_index)
             return
 
         if isinstance(obj, MutableStruct):
@@ -136,10 +149,11 @@ cdef is_container(ThriftIdlType idl_type):
 
 
 class _MutableStructCachedField:
-    __slots__ = ('_field_index')
+    __slots__ = ('_field_index', '_is_optional')
 
-    def __init__(self, field_id):
+    def __init__(self, field_id, is_optional):
         self._field_index = field_id
+        self._is_optional = is_optional
 
     def __get__(self, obj, objtype):
         if obj is None:
@@ -152,6 +166,12 @@ class _MutableStructCachedField:
 
     def __set__(self, obj, value):
         if obj is None:
+            return
+
+        if value is None and self._is_optional:
+            # reseting optional field to default is setting it to `None`
+            _resetFieldToStandardDefault(obj, self._field_index)
+            obj._fbthrift_field_cache[self._field_index] = None
             return
 
         if isinstance(obj, MutableStruct):
@@ -534,25 +554,31 @@ cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
         # if field has an adapter or is not primitive type, consider
         # as "non-primitive"
         if field_info.adapter_info is not None or not field_info.is_primitive:
-            non_primitive_types.append(
-                (field_index, field_info.py_name, field_info.idl_type, field_info.adapter_info))
+            non_primitive_types.append((field_index,
+                                        field_info.py_name,
+                                        field_info.qualifier,
+                                        field_info.idl_type,
+                                        field_info.adapter_info)) 
         else:
-            primitive_types.append((field_index, field_info.py_name, field_info.idl_type))
+            primitive_types.append((field_index,
+                                    field_info.py_name,
+                                    field_info.qualifier,
+                                    field_info.idl_type))
 
     dct["__slots__"] = slots
     klass = type.__new__(cls, cls_name, bases, dct)
 
-    for field_index, field_name, *_ in primitive_types:
+    for field_index, field_name, field_qualifier, *_ in primitive_types:
         type.__setattr__(
             klass,
             field_name,
-            _MutableStructField(field_index),
+            _MutableStructField(field_index, field_qualifier == FieldQualifier.Optional),
         )
 
-    for field_index, field_name, idl_type, adapter_info in non_primitive_types:
-        field_descriptor = _MutableStructField(field_index)
+    for field_index, field_name, field_qualifier, idl_type, adapter_info in non_primitive_types:
+        field_descriptor = _MutableStructField(field_index, field_qualifier == FieldQualifier.Optional)
         if is_container(idl_type) or adapter_info is not None or is_cacheable_non_primitive(idl_type):
-            field_descriptor = _MutableStructCachedField(field_index)
+            field_descriptor = _MutableStructCachedField(field_index, field_qualifier == FieldQualifier.Optional)
 
         type.__setattr__(
             klass,

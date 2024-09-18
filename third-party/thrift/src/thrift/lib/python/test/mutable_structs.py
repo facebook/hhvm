@@ -101,13 +101,16 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             overflow_value (optional): A value that, when set, should raise
                 an `OverflowError`. This is typically used for integral types.
         """
+        # If `expected_default_value` is `None`, field is optional
+        is_optional = expected_default_value is None
+
         # Check for the `expected_default_value`. The unqualified field should
         # never be `None`
-        if expected_default_value is not None:
+        if not is_optional:
             self.assertIsNotNone(getattr(struct, field_name))
             self.assertEqual(expected_default_value, getattr(struct, field_name))
             self.assertFalse(mutable_isset(struct)[field_name])
-        else:  # OPTIONAL
+        else:
             self.assertIsNone(getattr(struct, field_name))
             self.assertFalse(mutable_isset(struct)[field_name])
 
@@ -118,11 +121,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # pyre-ignore[16]: internal, could be remove/replaced later
         struct._fbthrift_internal_resetFieldToStandardDefault(field_name)
-        if expected_default_value is not None:
+        if not is_optional:
             self.assertIsNotNone(getattr(struct, field_name))
             self.assertEqual(expected_default_value, getattr(struct, field_name))
             self.assertTrue(mutable_isset(struct)[field_name])
-        else:  # OPTIONAL
+        else:
             self.assertIsNone(getattr(struct, field_name))
             self.assertFalse(mutable_isset(struct)[field_name])
 
@@ -130,9 +133,16 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaises(AttributeError):
             delattr(struct, field_name)
 
-        # Assigning `None` raises a `TypeError`
-        with self.assertRaises(TypeError):
+        # Assigning `None` raises a `TypeError` for non-optional fields
+        if not is_optional:
+            with self.assertRaises(TypeError):
+                setattr(struct, field_name, None)
+        else:
+            # For optional fields, assigning `None` resets the field
+            setattr(struct, field_name, value)
+            self.assertTrue(mutable_isset(struct)[field_name])
             setattr(struct, field_name, None)
+            self.assertFalse(mutable_isset(struct)[field_name])
 
         # Value with wrong type raises `TypeError`
         with self.assertRaises(TypeError):

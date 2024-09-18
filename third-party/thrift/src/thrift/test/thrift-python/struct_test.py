@@ -595,9 +595,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertIs(w_mutable, w_mutable._to_mutable_python())
 
     def test_create_and_assign_for_i32(self) -> None:
-        # This is the singular version of `test_create_and_assign_for_all_types`
-        # for the i32 type. It's more readable since it doesn't use the
-        # `verify_{qualified,optional}_helper` functions.
         s = TestStructAllThriftPrimitiveTypesMutable(unqualified_i32=11)
 
         # Check the value assigned during initialization
@@ -651,7 +648,95 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # Boundary check for integral types
         with self.assertRaises(OverflowError):
-            s.unqualified_i32 = -(2**31 + 1)
+            s.unqualified_i32 = max_i32 + 1
+
+    def test_create_and_assign_for_optional_i32_and_optional_string(self) -> None:
+        s = TestStructAllThriftPrimitiveTypesMutable()
+
+        # Check optional fields are `None`
+        self.assertIsNone(s.optional_i32)
+        self.assertIsNone(s.optional_string)
+
+        # Set the values and read them back
+        s.optional_i32 = 23
+        s.optional_string = "thrift"
+
+        self.assertEqual(23, s.optional_i32)
+        self.assertEqual("thrift", s.optional_string)
+
+        # `del struct.field_name` raises a `AttributeError`
+        with self.assertRaises(AttributeError):
+            del s.optional_i32
+
+        with self.assertRaises(AttributeError):
+            del s.optional_string
+
+        # Assigning a value of the wrong type raises a `TypeError`
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[8]: Intentional for test
+            s.optional_i32 = "This is not an integer"
+
+        with self.assertRaisesRegex(TypeError, "Expected type <class 'str'>"):
+            # pyre-ignore[8]: Intentional for test
+            s.optional_string = 42
+
+        self.assertEqual(23, s.optional_i32)
+        self.assertEqual("thrift", s.optional_string)
+
+        # Assigning `None` is reseting the optional field to `None`
+        s.optional_i32 = None
+        s.optional_string = None
+
+        self.assertIsNone(s.optional_i32)
+        self.assertIsNone(s.optional_string)
+
+        # Assigning a value of the wrong type raises a `TypeError` when fields
+        # are `None`
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[8]: Intentional for test
+            s.optional_i32 = "This is not an integer"
+
+        with self.assertRaisesRegex(TypeError, "Expected type <class 'str'>"):
+            # pyre-ignore[8]: Intentional for test
+            s.optional_string = 42
+
+        # Boundary check for integral types
+        with self.assertRaises(OverflowError):
+            s.optional_i32 = -(2**31 + 1)
+
+    def test_create_and_assign_for_optional_container(self) -> None:
+        s = TestStructAllThriftContainerTypesMutable()
+
+        # Check optional field is `None`
+        self.assertIsNone(s.optional_list_i32)
+
+        # Set the value and read it back
+        s.optional_list_i32 = [1, 2, 3]
+        self.assertEqual([1, 2, 3], s.optional_list_i32)
+
+        # `del struct.field_name` raises a `AttributeError`
+        with self.assertRaises(AttributeError):
+            del s.optional_list_i32
+
+        # Assigning a value of the wrong type raises a `TypeError`
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[8]: Intentional for test
+            s.optional_list_i32 = ["list", "with", "different", "type"]
+
+        self.assertEqual([1, 2, 3], s.optional_list_i32)
+
+        # Assigning `None` is reseting the optional field to `None`
+        s.optional_list_i32 = None
+
+        # Assigning a value of the wrong type raises a `TypeError` when fields
+        # are `None`
+        with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[8]: Intentional for test
+            s.optional_list_i32 = ["list", "with", "different", "type"]
+
+        # Boundary check for integral types
+        with self.assertRaises(OverflowError):
+            s.optional_list_i32 = [max_i32 + 1]
 
     def test_serialization_round_trip(self) -> None:
         s = TestStructAllThriftPrimitiveTypesMutable()
@@ -1363,6 +1448,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
           7: map<string, i32> unqualified_map_string_i32;
 
           8: optional TestStructCopy recursive_struct;
+
           @cpp.Type{name = "folly::IOBuf"}
           9: binary unqualified_binary;
         }
@@ -1473,6 +1559,10 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(e.optional_i32, e_clone.optional_i32)
         self.assertEqual(e.unqualified_string, e_clone.unqualified_string)
         self.assertEqual(e.optional_string, e_clone.optional_string)
+
+        e_clone.optional_i32 = None
+        self.assertIsNone(e_clone.optional_i32)
+        self.assertIsNotNone(e.optional_i32)
 
         self.assertEqual(e.unqualified_list_i32, e_clone.unqualified_list_i32)
         self.assertIsNot(e.unqualified_list_i32, e_clone.unqualified_list_i32)

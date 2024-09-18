@@ -710,6 +710,13 @@ void insertEnsureReadKeysToMask(
   }
 }
 
+void insertTypeToMask(Mask& mask, const type::Type& type) {
+  if (mask == allMask()) {
+    return;
+  }
+  mask.includes_type_ref().ensure().emplace(type, allMask());
+}
+
 template <typename T>
 const T& getKeyOrElem(const T& value) {
   return value;
@@ -892,6 +899,20 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   // mask.
   if (auto* ensureUnion = findOp(patch, PatchOp::EnsureUnion)) {
     insertEnsureReadFieldsToMask(masks.read, *ensureUnion);
+    masks.write = allMask();
+  }
+
+  // If EnsureAny, add type to mask for read mask and all mask for write mask.
+  if (auto* ensureAny = findOp(patch, PatchOp::EnsureAny)) {
+    type::AnyStruct anyStruct;
+    if (!ProtocolValueToThriftValue<type::struct_t<type::AnyStruct>>{}(
+            *ensureAny, anyStruct)) {
+      throw std::runtime_error("Failed to convert current object to AnyStruct");
+    }
+    if (!type::AnyData::isValid(anyStruct)) {
+      throw std::runtime_error("Invalid AnyStruct");
+    }
+    insertTypeToMask(masks.read, anyStruct.type().value());
     masks.write = allMask();
   }
 

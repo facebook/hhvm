@@ -4618,6 +4618,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     && !is_parent_class_access(&x.qualifier, &x.name) => {}
             NameofExpression(x) => match x.target.children {
                 // Match behavior for ScopeResolution expression when rhs is ::class
+                QualifiedName(_) if !self.env.is_typechecker() => {}
                 Token(t) => {
                     // The parser does a weird clone fork to separate a name-token of "parent" vs.
                     // a token kind of parent when the following token is a :: for scope resolution

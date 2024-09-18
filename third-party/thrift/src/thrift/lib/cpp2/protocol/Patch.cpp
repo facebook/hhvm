@@ -829,6 +829,39 @@ void insertFieldsToMask(
   }
 }
 
+void insertTypesToMask(
+    ExtractedMasksFromPatch& masks,
+    const Value& patchTypes,
+    bool recursive,
+    bool view) {
+  auto getIncludesTypeRef = [&](Mask& mask) {
+    return mask.includes_type_ref();
+  };
+  for (const auto& typePatchVal : patchTypes.as_list()) {
+    op::TypeToPatchInternalDoNotUse type_to_patch;
+    if (!ProtocolValueToThriftValue<
+            type::struct_t<op::TypeToPatchInternalDoNotUse>>{}(
+            typePatchVal, type_to_patch)) {
+      throw std::runtime_error(
+          "Invalid AnyPatch PatchIfTypeIsPrior/PatchIfTypeIsAfter");
+    }
+    if (!type_to_patch.type()->isValid()) {
+      throw std::runtime_error("Invalid Type");
+    }
+    auto dynPatch =
+        protocol::detail::parseValueFromAny(type_to_patch.patch().value());
+    insertNextMask(
+        masks,
+        dynPatch,
+        type_to_patch.type().value(),
+        type_to_patch.type().value(),
+        recursive,
+        view,
+        getIncludesTypeRef);
+    insertTypeToMask(masks.read, type_to_patch.type().value());
+  }
+}
+
 ExtractedMasksFromPatch extractMaskFromPatch(
     const protocol::Object& patch, bool view) {
   ExtractedMasksFromPatch masks = {noneMask(), noneMask()};
@@ -900,6 +933,14 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   if (auto* ensureUnion = findOp(patch, PatchOp::EnsureUnion)) {
     insertEnsureReadFieldsToMask(masks.read, *ensureUnion);
     masks.write = allMask();
+  }
+
+  // If PatchIfTypeIsPrior or PatchIfTypeIsAfter, recursively constructs the
+  // mask each type patch.
+  for (auto op : {PatchOp::PatchIfTypeIsPrior, PatchOp::PatchIfTypeIsAfter}) {
+    if (auto* patchTypes = findOp(patch, op)) {
+      insertTypesToMask(masks, *patchTypes, true, view);
+    }
   }
 
   // If EnsureAny, add type to mask for read mask and all mask for write mask.

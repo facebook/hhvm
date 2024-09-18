@@ -632,6 +632,12 @@ void Cpp2Connection::requestReceived(
     folly::IOBufQueue bufQueue;
     bufQueue.append(hreq->extractBuf());
     bufQueue.trimStart(meta.size);
+    if (bufQueue.empty()) {
+      // If the request only contained metadata, trimStart could clear the
+      // entire queue. Return an empty IOBuf if that happens (move() otherwise
+      // returns nullptr).
+      return SerializedRequest(folly::IOBuf::create(0));
+    }
     return SerializedRequest(bufQueue.move());
   }();
 

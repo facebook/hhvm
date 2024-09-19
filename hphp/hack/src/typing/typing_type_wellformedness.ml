@@ -183,10 +183,11 @@ and hint_ ~in_signature env p h_ =
     Lint.option_mixed p;
     []
   | Hvec_or_dict (ty1, ty2) -> hint_opt env ty1 @ hint env ty2
-  | Htuple hl
   | Hunion hl
   | Hintersection hl ->
     hints env hl
+  | Htuple { tup_required; tup_optional; tup_variadic } ->
+    hints env tup_required @ hints env tup_optional @ hint_opt env tup_variadic
   | Hclass_args h
   | Hoption h
   | Hsoft h

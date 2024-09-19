@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3edbfa1396e6f817eaa41c11ce62f6ae>>
+// @generated SignedSource<<8db4c3392f9d6533d2eeb4fab1c92a2c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2506,6 +2506,33 @@ impl Transform for NastShapeInfo {
                     __binding_0.transform(env, &mut pass.clone())
                 }
                 { __binding_1.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for TupleInfo {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_tuple_info_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        in_pass.on_ty_tuple_info_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            TupleInfo {
+                required: ref mut __binding_0,
+                optional: ref mut __binding_1,
+                variadic: ref mut __binding_2,
+            } => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                { __binding_2.transform(env, &mut pass.clone()) }
             }
         }
     }

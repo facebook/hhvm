@@ -23,6 +23,7 @@ use oxidized::aast_defs::Hint_::*;
 use oxidized::aast_defs::NastShapeInfo;
 use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::aast_defs::Tprim;
+use oxidized::aast_defs::TupleInfo;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ShapeFieldName;
 
@@ -141,7 +142,8 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
                 .map(|v| v.join(", "))?;
             string_utils::prefix_namespace("HH", &format!("shape({})", shape_fields))
         }
-        Htuple(hints) => format!("({})", fmt_hints(tparams, hints)?),
+        // TODO optional and variadic components T201398626 T201398652
+        Htuple(TupleInfo { required, .. }) => format!("({})", fmt_hints(tparams, required)?),
         Hlike(t) => format!("~{}", fmt_hint(tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t)?),
         h => fmt_name_or_prim(tparams, hint_to_string(h)).into(),

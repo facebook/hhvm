@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7a702dff22bbee1442e41e2e67a26de1>>
+// @generated SignedSource<<953ec23cddf9a3fe14ac712f9ae914e1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2571,7 +2571,7 @@ pub enum Hint_ {
     Hoption(Hint),
     Hlike(Hint),
     Hfun(HintFun),
-    Htuple(Vec<Hint>),
+    Htuple(TupleInfo),
     #[rust_to_ocaml(name = "Hclass_args")]
     HclassArgs(Hint),
     Hshape(NastShapeInfo),
@@ -2762,6 +2762,29 @@ pub struct ShapeFieldInfo {
 pub struct NastShapeInfo {
     pub allows_unknown_fields: bool,
     pub field_map: Vec<ShapeFieldInfo>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "tup_")]
+#[repr(C)]
+pub struct TupleInfo {
+    pub required: Vec<Hint>,
+    pub optional: Vec<Hint>,
+    pub variadic: Option<Hint>,
 }
 
 #[derive(

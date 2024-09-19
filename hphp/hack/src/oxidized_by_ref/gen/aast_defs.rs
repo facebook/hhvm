@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f7c5b88a53dfd1537d63f7fa47d9b296>>
+// @generated SignedSource<<bd4529be1391f8ca8822861fdfd3a798>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3140,7 +3140,7 @@ pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hfun(&'a HintFun<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Htuple(&'a [&'a Hint<'a>]),
+    Htuple(&'a TupleInfo<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Hclass_args")]
     HclassArgs(&'a Hint<'a>),
@@ -3381,6 +3381,34 @@ pub struct NastShapeInfo<'a> {
 }
 impl<'a> TrivialDrop for NastShapeInfo<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(NastShapeInfo<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "tup_")]
+#[repr(C)]
+pub struct TupleInfo<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub required: &'a [&'a Hint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub optional: &'a [&'a Hint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub variadic: Option<&'a Hint<'a>>,
+}
+impl<'a> TrivialDrop for TupleInfo<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TupleInfo<'arena>);
 
 pub use oxidized::aast_defs::KvcKind;
 pub use oxidized::aast_defs::VcKind;

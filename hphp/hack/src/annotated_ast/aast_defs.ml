@@ -1223,7 +1223,7 @@ and hint_ =
   | Hoption of hint
   | Hlike of hint
   | Hfun of hint_fun
-  | Htuple of hint list
+  | Htuple of tuple_info
   | Hclass_args of hint
   | Hshape of nast_shape_info
   | Haccess of hint * sid list
@@ -1292,6 +1292,12 @@ and shape_field_info = {
 and nast_shape_info = {
   nsi_allows_unknown_fields: bool;
   nsi_field_map: shape_field_info list;
+}
+
+and tuple_info = {
+  tup_required: hint list;
+  tup_optional: hint list;
+  tup_variadic: hint option;
 }
 
 and kvc_kind =

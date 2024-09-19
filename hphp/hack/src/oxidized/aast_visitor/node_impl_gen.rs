@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7972d78ffc1cec2b3f28fba56fc29210>>
+// @generated SignedSource<<877cd5329ab78a779db4b909cc6aee63>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2178,6 +2178,24 @@ impl<P: Params> Node<P> for Tprim {
             Tprim::Tarraykey => Ok(()),
             Tprim::Tnoreturn => Ok(()),
         }
+    }
+}
+impl<P: Params> Node<P> for TupleInfo {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_tuple_info(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.required.accept(c, v)?;
+        self.optional.accept(c, v)?;
+        self.variadic.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for TypeHint<P::Ex> {

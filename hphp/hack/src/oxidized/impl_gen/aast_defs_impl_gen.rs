@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<03e895d494776242c95ed973b19d6174>>
+// @generated SignedSource<<8ee9f8de90509d276b575f3df431900a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3552,7 +3552,7 @@ impl Hint_ {
     pub fn mk_hfun(p0: HintFun) -> Self {
         Hint_::Hfun(p0)
     }
-    pub fn mk_htuple(p0: Vec<Hint>) -> Self {
+    pub fn mk_htuple(p0: TupleInfo) -> Self {
         Hint_::Htuple(p0)
     }
     pub fn mk_hclass_args(p0: Hint) -> Self {
@@ -3774,7 +3774,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_htuple(&self) -> Option<&Vec<Hint>> {
+    pub fn as_htuple(&self) -> Option<&TupleInfo> {
         match self {
             Hint_::Htuple(p0) => Some(p0),
             _ => None,
@@ -3876,7 +3876,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_htuple_mut(&mut self) -> Option<&mut Vec<Hint>> {
+    pub fn as_htuple_mut(&mut self) -> Option<&mut TupleInfo> {
         match self {
             Hint_::Htuple(p0) => Some(p0),
             _ => None,
@@ -3978,7 +3978,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_htuple_into(self) -> Option<Vec<Hint>> {
+    pub fn as_htuple_into(self) -> Option<TupleInfo> {
         match self {
             Hint_::Htuple(p0) => Some(p0),
             _ => None,

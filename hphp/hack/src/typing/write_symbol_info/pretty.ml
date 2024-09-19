@@ -67,9 +67,10 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
       append "<";
       parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
       append ">"
-    | Htuple hints ->
+    (* TODO optional and variadic components T201398626 T201398652 *)
+    | Htuple { tup_required; tup_optional = _; tup_variadic = _ } ->
       append "(";
-      parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
+      parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) tup_required;
       append ")"
     | Hprim p -> append (Aast_defs.string_of_tprim p)
     | Haccess (hint, sids) ->

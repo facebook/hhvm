@@ -922,7 +922,11 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 field_map,
             }))
         }
-        TupleTypeSpecifier(c) => Ok(Htuple(could_map(&c.types, env, p_hint)?)),
+        TupleTypeSpecifier(c) => Ok(Htuple(ast::TupleInfo {
+            required: could_map(&c.types, env, p_hint)?,
+            optional: vec![],
+            variadic: None,
+        })),
         UnionTypeSpecifier(c) => Ok(Hunion(could_map(&c.types, env, p_hint)?)),
         IntersectionTypeSpecifier(c) => Ok(Hintersection(could_map(&c.types, env, p_hint)?)),
         KeysetTypeSpecifier(c) => Ok(Happly(

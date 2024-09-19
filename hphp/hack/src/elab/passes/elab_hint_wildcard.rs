@@ -167,15 +167,26 @@ mod tests {
             elab_utils::expr::null(),
             Hint(
                 Pos::default(),
-                Box::new(Hint_::Htuple(vec![make_wildcard()])),
+                Box::new(Hint_::Htuple(nast::TupleInfo {
+                    required: vec![make_wildcard()],
+                    open: false,
+                })),
             ),
         )));
         elem.transform(&env, &mut pass);
 
         assert!(env.into_errors().is_empty());
         assert!(match elem {
-            Expr_::Is(box (_, Hint(_, box Hint_::Htuple(mut hints)))) =>
-                hints.pop().map_or(false, |hint| is_wildcard(&hint)),
+            Expr_::Is(box (
+                _,
+                Hint(
+                    _,
+                    box Hint_::Htuple(nast::TupleInfo {
+                        required: mut hints,
+                        ..
+                    }),
+                ),
+            )) => hints.pop().map_or(false, |hint| is_wildcard(&hint)),
             _ => false,
         })
     }

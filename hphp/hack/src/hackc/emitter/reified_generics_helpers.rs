@@ -13,6 +13,7 @@ use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use naming_special_names_rust as sn;
 use oxidized::aast;
+use oxidized::aast_defs::TupleInfo;
 use oxidized::ast_defs::Id;
 use oxidized::pos::Pos;
 
@@ -188,7 +189,15 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
             Hint_::Hlike(h) => Hint_::Hlike(rec(env, h)),
             Hint_::HclassArgs(h) => Hint_::HclassArgs(rec(env, h)),
             Hint_::Hoption(h) => Hint_::Hoption(rec(env, h)),
-            Hint_::Htuple(hs) => Hint_::Htuple(hs.into_iter().map(|h| rec(env, h)).collect()),
+            Hint_::Htuple(TupleInfo {
+                required,
+                optional,
+                variadic,
+            }) => Hint_::Htuple(TupleInfo {
+                required: required.into_iter().map(|h| rec(env, h)).collect(),
+                optional: optional.into_iter().map(|h| rec(env, h)).collect(),
+                variadic: variadic.map(|h| rec(env, h)),
+            }),
             Hint_::Hunion(hs) => Hint_::Hunion(hs.into_iter().map(|h| rec(env, h)).collect()),
             Hint_::Hintersection(hs) => {
                 Hint_::Hintersection(hs.into_iter().map(|h| rec(env, h)).collect())

@@ -19,6 +19,7 @@ use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::NastShapeInfo;
 use oxidized::aast_defs::ShapeFieldInfo;
+use oxidized::aast_defs::TupleInfo;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::ast_defs::ShapeFieldName;
@@ -366,12 +367,13 @@ fn hint_to_type_constant_list(
             r.append(&mut return_type);
             r
         }
-        Hint_::Htuple(hints) => {
+        // TODO optional and variadic components T201398626 T201398652
+        Hint_::Htuple(TupleInfo { required, .. }) => {
             let mut r = vec![];
             r.push(encode_kind(TypeStructureKind::T_tuple));
             r.push(encode_entry(
                 "elem_types",
-                hints_to_type_constant(opts, tparams, targ_map, type_refinement_in_hint, hints)?,
+                hints_to_type_constant(opts, tparams, targ_map, type_refinement_in_hint, required)?,
             ));
             r
         }

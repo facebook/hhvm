@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fa97ff6e1b3226f26c740652ef7cf705>>
+// @generated SignedSource<<317a62f8a0b8ef48a5b53f3ee4636705>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1189,6 +1189,14 @@ pub trait Pass: PassClone {
         env: &Env,
         elem: &mut NastShapeInfo,
     ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_info_top_down(&mut self, env: &Env, elem: &mut TupleInfo) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_info_bottom_up(&mut self, env: &Env, elem: &mut TupleInfo) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -2966,6 +2974,20 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_nast_shape_info_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_info_top_down(&mut self, env: &Env, elem: &mut TupleInfo) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_tuple_info_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_info_bottom_up(&mut self, env: &Env, elem: &mut TupleInfo) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_tuple_info_bottom_up(env, elem)?;
         }
         Continue(())
     }

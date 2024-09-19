@@ -254,10 +254,15 @@ and hint_ p env = function
           { cr_consts = SMap.add id rc cr_consts })
     in
     Trefinement (root_ty, class_ref)
-  | Htuple hl ->
-    let tyl = List.map hl ~f:(hint env) in
-    Ttuple
-      { t_required = tyl; t_optional = []; t_variadic = hint env (p, Hnothing) }
+  | Htuple { tup_required; tup_optional; tup_variadic } ->
+    let t_required = List.map tup_required ~f:(hint env) in
+    let t_optional = List.map tup_optional ~f:(hint env) in
+    let t_variadic =
+      match tup_variadic with
+      | None -> hint env (p, Hnothing)
+      | Some t -> hint env t
+    in
+    Ttuple { t_required; t_optional; t_variadic }
   | Hunion hl ->
     let tyl = List.map hl ~f:(hint env) in
     Tunion tyl

@@ -651,9 +651,12 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Haccess (h, _) ->
     hint env variance h
   | Hunion tyl
-  | Hintersection tyl
-  | Htuple tyl ->
+  | Hintersection tyl ->
     hint_list env variance tyl
+  | Htuple { tup_required; tup_optional; tup_variadic } ->
+    hint_list env variance tup_required;
+    hint_list env variance tup_optional;
+    Option.iter tup_variadic ~f:(hint env variance)
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     List.iter
       nsi_field_map

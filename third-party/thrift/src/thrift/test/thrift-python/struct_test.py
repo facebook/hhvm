@@ -70,15 +70,12 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     TestStructNested_1 as TestStructNested_1_Mutable,
     TestStructNested_2 as TestStructNested_2_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
-    TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
-    TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
     TestStructAdaptedTypes as TestStructAdaptedTypesImmutable,
-    TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,

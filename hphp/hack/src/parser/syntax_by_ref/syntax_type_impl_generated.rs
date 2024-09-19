@@ -1731,6 +1731,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_tuple_or_union_or_intersection_element_type_specifier(ctx: &C, optional: Self, type_: Self, ellipsis: Self) -> Self {
+        let syntax = SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(ctx.get_arena().alloc(TupleOrUnionOrIntersectionElementTypeSpecifierChildren {
+            optional,
+            type_,
+            ellipsis,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_type_refinement(ctx: &C, type_: Self, keyword: Self, left_brace: Self, members: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::TypeRefinement(ctx.get_arena().alloc(TypeRefinementChildren {
             type_,

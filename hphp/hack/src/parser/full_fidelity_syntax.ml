@@ -218,6 +218,8 @@ module WithToken (Token : TokenType) = struct
       | ClosureTypeSpecifier _ -> SyntaxKind.ClosureTypeSpecifier
       | ClosureParameterTypeSpecifier _ ->
         SyntaxKind.ClosureParameterTypeSpecifier
+      | TupleOrUnionOrIntersectionElementTypeSpecifier _ ->
+        SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier
       | TypeRefinement _ -> SyntaxKind.TypeRefinement
       | TypeInRefinement _ -> SyntaxKind.TypeInRefinement
       | CtxInRefinement _ -> SyntaxKind.CtxInRefinement
@@ -605,6 +607,9 @@ module WithToken (Token : TokenType) = struct
 
     let is_closure_parameter_type_specifier =
       has_kind SyntaxKind.ClosureParameterTypeSpecifier
+
+    let is_tuple_or_union_or_intersection_element_type_specifier =
+      has_kind SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier
 
     let is_type_refinement = has_kind SyntaxKind.TypeRefinement
 
@@ -2352,6 +2357,16 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc closure_parameter_readonly in
         let acc = f acc closure_parameter_type in
         let acc = f acc closure_parameter_ellipsis in
+        acc
+      | TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          } ->
+        let acc = f acc tuple_or_union_or_intersection_element_optional in
+        let acc = f acc tuple_or_union_or_intersection_element_type in
+        let acc = f acc tuple_or_union_or_intersection_element_ellipsis in
         acc
       | TypeRefinement
           {
@@ -4134,6 +4149,17 @@ module WithToken (Token : TokenType) = struct
           closure_parameter_readonly;
           closure_parameter_type;
           closure_parameter_ellipsis;
+        ]
+      | TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          } ->
+        [
+          tuple_or_union_or_intersection_element_optional;
+          tuple_or_union_or_intersection_element_type;
+          tuple_or_union_or_intersection_element_ellipsis;
         ]
       | TypeRefinement
           {
@@ -5924,6 +5950,17 @@ module WithToken (Token : TokenType) = struct
           "closure_parameter_readonly";
           "closure_parameter_type";
           "closure_parameter_ellipsis";
+        ]
+      | TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          } ->
+        [
+          "tuple_or_union_or_intersection_element_optional";
+          "tuple_or_union_or_intersection_element_type";
+          "tuple_or_union_or_intersection_element_ellipsis";
         ]
       | TypeRefinement
           {
@@ -7927,6 +7964,18 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_readonly;
             closure_parameter_type;
             closure_parameter_ellipsis;
+          }
+      | ( SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier,
+          [
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          ] ) ->
+        TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
           }
       | ( SyntaxKind.TypeRefinement,
           [
@@ -10435,6 +10484,21 @@ module WithToken (Token : TokenType) = struct
               closure_parameter_readonly;
               closure_parameter_type;
               closure_parameter_ellipsis;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_tuple_or_union_or_intersection_element_type_specifier
+          tuple_or_union_or_intersection_element_optional
+          tuple_or_union_or_intersection_element_type
+          tuple_or_union_or_intersection_element_ellipsis =
+        let syntax =
+          TupleOrUnionOrIntersectionElementTypeSpecifier
+            {
+              tuple_or_union_or_intersection_element_optional;
+              tuple_or_union_or_intersection_element_type;
+              tuple_or_union_or_intersection_element_ellipsis;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

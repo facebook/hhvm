@@ -682,6 +682,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_closure_parameter_type_specifier(self, optional, call_convention, readonly, type_, ellipsis)
     }
 
+    fn make_tuple_or_union_or_intersection_element_type_specifier(&mut self, optional: Self::Output, type_: Self::Output, ellipsis: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_tuple_or_union_or_intersection_element_type_specifier(self, optional, type_, ellipsis)
+    }
+
     fn make_type_refinement(&mut self, type_: Self::Output, keyword: Self::Output, left_brace: Self::Output, members: Self::Output, right_brace: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_type_refinement(self, type_, keyword, left_brace, members, right_brace)
     }

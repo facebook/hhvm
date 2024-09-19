@@ -2191,6 +2191,20 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "TupleOrUnionOrIntersectionElementTypeSpecifier";
+      type_name = "tuple_or_union_or_intersection_element_type_specifier";
+      func_name = "tuple_or_union_or_intersection_element_type_specifier";
+      description = "tuple_or_union_or_intersection_element_type_specifier";
+      prefix = "tuple_or_union_or_intersection_element";
+      aggregates = [Specifier];
+      fields =
+        [
+          ("optional", ZeroOrOne Token);
+          ("type", Aggregate Specifier);
+          ("ellipsis", ZeroOrOne Token);
+        ];
+    };
+    {
       kind_name = "TypeRefinement";
       type_name = "type_refinement";
       func_name = "type_refinement";
@@ -2447,7 +2461,9 @@ let schema : schema_node list =
       fields =
         [
           ("left_paren", Token);
-          ("types", ZeroOrMore (Aggregate Specifier));
+          ( "types",
+            ZeroOrMore (Just "TupleOrUnionOrIntersectionElementTypeSpecifier")
+          );
           ("right_paren", Token);
         ];
     };

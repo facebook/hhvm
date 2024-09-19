@@ -5460,6 +5460,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ClassArgsTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::ClassType);
             }
+            TupleOrUnionOrIntersectionElementTypeSpecifier(c) => {
+                let has_optional = !c.optional.is_missing();
+                let has_ellipsis = !c.ellipsis.is_missing();
+                if has_optional || has_ellipsis {
+                    self.check_can_use_feature(node, &FeatureName::OpenTuples);
+                }
+            }
             _ => {}
         }
         self.lval_errors(node);

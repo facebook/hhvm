@@ -4967,7 +4967,6 @@
               "line_number":61
             }
           },
-          "tuple_types":{"kind":"list","elements":[]},
           "tuple_right_paren":{
             "kind":"token",
             "token":{

@@ -179,6 +179,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::DictionaryTypeSpecifier {..} => SyntaxKind::DictionaryTypeSpecifier,
             SyntaxVariant::ClosureTypeSpecifier {..} => SyntaxKind::ClosureTypeSpecifier,
             SyntaxVariant::ClosureParameterTypeSpecifier {..} => SyntaxKind::ClosureParameterTypeSpecifier,
+            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier {..} => SyntaxKind::TupleOrUnionOrIntersectionElementTypeSpecifier,
             SyntaxVariant::TypeRefinement {..} => SyntaxKind::TypeRefinement,
             SyntaxVariant::TypeInRefinement {..} => SyntaxKind::TypeInRefinement,
             SyntaxVariant::CtxInRefinement {..} => SyntaxKind::CtxInRefinement,

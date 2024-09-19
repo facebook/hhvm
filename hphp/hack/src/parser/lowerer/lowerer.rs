@@ -741,6 +741,16 @@ fn p_closure_parameter<'a>(
     }
 }
 
+fn p_union_or_intersection_element<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
+    match &node.children {
+        TupleOrUnionOrIntersectionElementTypeSpecifier(c) => {
+            let hint = p_hint(&c.type_, env)?;
+            Ok(hint)
+        }
+        _ => missing_syntax("union or intersection tuple element", node, env),
+    }
+}
+
 fn map_shape_expression_field<'a, F, R>(
     node: S<'a>,
     env: &mut Env<'a>,
@@ -922,13 +932,79 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 field_map,
             }))
         }
-        TupleTypeSpecifier(c) => Ok(Htuple(ast::TupleInfo {
-            required: could_map(&c.types, env, p_hint)?,
-            optional: vec![],
-            variadic: None,
-        })),
-        UnionTypeSpecifier(c) => Ok(Hunion(could_map(&c.types, env, p_hint)?)),
-        IntersectionTypeSpecifier(c) => Ok(Hintersection(could_map(&c.types, env, p_hint)?)),
+        TupleTypeSpecifier(c) => {
+            let nodes = c.types.syntax_node_to_list_skip_separator();
+            let mut seen_optional = false;
+            let mut seen_ellipsis = false;
+            let (min, _) = nodes.size_hint();
+            let mut required = Vec::with_capacity(min);
+            let mut optional = Vec::with_capacity(min);
+            let mut variadic = None;
+            for n in nodes {
+                match &n.children {
+                    TupleOrUnionOrIntersectionElementTypeSpecifier(c) => {
+                        let hint = p_hint(&c.type_, env)?;
+                        let has_optional = !c.optional.is_missing();
+                        let has_ellipsis = !c.ellipsis.is_missing();
+                        if has_ellipsis {
+                            if seen_ellipsis {
+                                raise_parsing_error(
+                                    node,
+                                    env,
+                                    "There must be only one variadic element",
+                                );
+                            } else if has_optional {
+                                raise_parsing_error(
+                                    node,
+                                    env,
+                                    &syntax_error::no_optional_on_variadic_parameter,
+                                );
+                            }
+                            seen_ellipsis = true;
+                            variadic = Some(hint);
+                        } else {
+                            if seen_ellipsis {
+                                raise_parsing_error(
+                                    node,
+                                    env,
+                                    "There must be no elements following a variadic element",
+                                );
+                            }
+                            if has_optional {
+                                seen_optional = true;
+                                optional.push(hint);
+                            } else {
+                                if seen_optional {
+                                    raise_parsing_error(
+                                        node,
+                                        env,
+                                        "There must be no required elements following an optional element",
+                                    );
+                                }
+                                required.push(hint);
+                            }
+                        }
+                    }
+                    _ => raise_missing_syntax("tuple element", node, env),
+                }
+            }
+
+            Ok(Htuple(ast::TupleInfo {
+                required,
+                optional,
+                variadic,
+            }))
+        }
+        UnionTypeSpecifier(c) => Ok(Hunion(could_map(
+            &c.types,
+            env,
+            p_union_or_intersection_element,
+        )?)),
+        IntersectionTypeSpecifier(c) => Ok(Hintersection(could_map(
+            &c.types,
+            env,
+            p_union_or_intersection_element,
+        )?)),
         KeysetTypeSpecifier(c) => Ok(Happly(
             pos_name(&c.keyword, env)?,
             could_map(&c.type_, env, p_hint)?,

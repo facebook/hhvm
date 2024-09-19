@@ -1,0 +1,29 @@
+File "tuple_open_syntax.php", line 16, characters 3-14:
+  (int, optional string)
+File "tuple_open_syntax.php", line 17, characters 3-14:
+  (int, mixed...)
+File "tuple_open_syntax.php", line 18, characters 3-14:
+  (optional bool, arraykey...)
+File "tuple_open_syntax.php", line 19, characters 3-14:
+  (bool, int, optional string, optional float)
+File "tuple_open_syntax.php", line 20, characters 3-14:
+  (int)
+File "tuple_open_syntax.php", line 21, characters 3-14:
+  (optional bool)
+File "tuple_open_syntax.php", line 22, characters 3-14:
+  (string...)
+File "tuple_open_syntax.php", line 26, characters 3-14:
+  (int, optional string)
+File "tuple_open_syntax.php", line 27, characters 3-14:
+  (int, mixed...)
+File "tuple_open_syntax.php", line 28, characters 3-14:
+  (optional bool, arraykey...)
+File "tuple_open_syntax.php", line 29, characters 3-14:
+  (bool, int, optional string, optional float)
+File "tuple_open_syntax.php", line 30, characters 3-14:
+  (int)
+File "tuple_open_syntax.php", line 31, characters 3-14:
+  (optional bool)
+File "tuple_open_syntax.php", line 32, characters 3-14:
+  (string...)
+No errors

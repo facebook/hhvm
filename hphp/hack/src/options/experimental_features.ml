@@ -58,6 +58,7 @@ type feature_name =
   | ExpressionTreeNest
   | SealedMethods
   | AwaitInSplice
+  | OpenTuples
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -92,6 +93,7 @@ let feature_name_map =
       ("expression_tree_nest", ExpressionTreeNest);
       ("sealed_methods", SealedMethods);
       ("await_in_splice", AwaitInSplice);
+      ("open_tuples", OpenTuples);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

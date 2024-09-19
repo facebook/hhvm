@@ -1072,6 +1072,11 @@ struct
         closure_parameter_type: t;
         closure_parameter_ellipsis: t;
       }
+    | TupleOrUnionOrIntersectionElementTypeSpecifier of {
+        tuple_or_union_or_intersection_element_optional: t;
+        tuple_or_union_or_intersection_element_type: t;
+        tuple_or_union_or_intersection_element_ellipsis: t;
+      }
     | TypeRefinement of {
         type_refinement_type: t;
         type_refinement_keyword: t;

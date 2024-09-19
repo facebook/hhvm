@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a350a65062d1f5f4f99dd01ab57f295b>>
+// @generated SignedSource<<6fa9b77744baae418031d43903fc8500>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -106,6 +106,7 @@ pub enum FeatureName {
     ExpressionTreeNest,
     SealedMethods,
     AwaitInSplice,
+    OpenTuples,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

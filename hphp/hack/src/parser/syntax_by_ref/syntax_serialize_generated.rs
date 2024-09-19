@@ -1432,6 +1432,14 @@ ss.serialize_field("closure_parameter_type", &self.with(type_))?;
 ss.serialize_field("closure_parameter_ellipsis", &self.with(ellipsis))?;
       ss.end()
 } 
+SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier (TupleOrUnionOrIntersectionElementTypeSpecifierChildren{optional,type_,ellipsis} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
+      ss.serialize_field("kind", "tuple_or_union_or_intersection_element_type_specifier")?;
+      ss.serialize_field("tuple_or_union_or_intersection_element_optional", &self.with(optional))?;
+ss.serialize_field("tuple_or_union_or_intersection_element_type", &self.with(type_))?;
+ss.serialize_field("tuple_or_union_or_intersection_element_ellipsis", &self.with(ellipsis))?;
+      ss.end()
+} 
 SyntaxVariant::TypeRefinement (TypeRefinementChildren{type_,keyword,left_brace,members,right_brace} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "type_refinement")?;

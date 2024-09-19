@@ -298,19 +298,22 @@
                         {
                           "kind":"list_item",
                           "list_item":{
-                            "kind":"simple_type_specifier",
-                            "simple_type_specifier":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"int",
-                                "text":"int",
-                                "offset":116,
-                                "leading_width":0,
-                                "width":3,
-                                "trailing_width":0,
-                                "leading":[],
-                                "trailing":[],
-                                "line_number":8
+                            "kind":"tuple_or_union_or_intersection_element_type_specifier",
+                            "tuple_or_union_or_intersection_element_type":{
+                              "kind":"simple_type_specifier",
+                              "simple_type_specifier":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"int",
+                                  "text":"int",
+                                  "offset":116,
+                                  "leading_width":0,
+                                  "width":3,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":8
+                                }
                               }
                             }
                           },
@@ -332,19 +335,22 @@
                         {
                           "kind":"list_item",
                           "list_item":{
-                            "kind":"simple_type_specifier",
-                            "simple_type_specifier":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"int",
-                                "text":"int",
-                                "offset":121,
-                                "leading_width":0,
-                                "width":3,
-                                "trailing_width":0,
-                                "leading":[],
-                                "trailing":[],
-                                "line_number":8
+                            "kind":"tuple_or_union_or_intersection_element_type_specifier",
+                            "tuple_or_union_or_intersection_element_type":{
+                              "kind":"simple_type_specifier",
+                              "simple_type_specifier":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":"int",
+                                  "text":"int",
+                                  "offset":121,
+                                  "leading_width":0,
+                                  "width":3,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":8
+                                }
                               }
                             }
                           }
@@ -782,19 +788,22 @@
                                 {
                                   "kind":"list_item",
                                   "list_item":{
-                                    "kind":"simple_type_specifier",
-                                    "simple_type_specifier":{
-                                      "kind":"token",
-                                      "token":{
-                                        "kind":"int",
-                                        "text":"int",
-                                        "offset":200,
-                                        "leading_width":0,
-                                        "width":3,
-                                        "trailing_width":0,
-                                        "leading":[],
-                                        "trailing":[],
-                                        "line_number":11
+                                    "kind":"tuple_or_union_or_intersection_element_type_specifier",
+                                    "tuple_or_union_or_intersection_element_type":{
+                                      "kind":"simple_type_specifier",
+                                      "simple_type_specifier":{
+                                        "kind":"token",
+                                        "token":{
+                                          "kind":"int",
+                                          "text":"int",
+                                          "offset":200,
+                                          "leading_width":0,
+                                          "width":3,
+                                          "trailing_width":0,
+                                          "leading":[],
+                                          "trailing":[],
+                                          "line_number":11
+                                        }
                                       }
                                     }
                                   },
@@ -816,19 +825,22 @@
                                 {
                                   "kind":"list_item",
                                   "list_item":{
-                                    "kind":"simple_type_specifier",
-                                    "simple_type_specifier":{
-                                      "kind":"token",
-                                      "token":{
-                                        "kind":"int",
-                                        "text":"int",
-                                        "offset":205,
-                                        "leading_width":0,
-                                        "width":3,
-                                        "trailing_width":0,
-                                        "leading":[],
-                                        "trailing":[],
-                                        "line_number":11
+                                    "kind":"tuple_or_union_or_intersection_element_type_specifier",
+                                    "tuple_or_union_or_intersection_element_type":{
+                                      "kind":"simple_type_specifier",
+                                      "simple_type_specifier":{
+                                        "kind":"token",
+                                        "token":{
+                                          "kind":"int",
+                                          "text":"int",
+                                          "offset":205,
+                                          "leading_width":0,
+                                          "width":3,
+                                          "trailing_width":0,
+                                          "leading":[],
+                                          "trailing":[],
+                                          "line_number":11
+                                        }
                                       }
                                     }
                                   }

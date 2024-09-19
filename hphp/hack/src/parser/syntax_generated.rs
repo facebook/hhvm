@@ -1725,6 +1725,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_tuple_or_union_or_intersection_element_type_specifier(_: &C, tuple_or_union_or_intersection_element_optional: Self, tuple_or_union_or_intersection_element_type: Self, tuple_or_union_or_intersection_element_ellipsis: Self) -> Self {
+        let syntax = SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(Box::new(TupleOrUnionOrIntersectionElementTypeSpecifierChildren {
+            tuple_or_union_or_intersection_element_optional,
+            tuple_or_union_or_intersection_element_type,
+            tuple_or_union_or_intersection_element_ellipsis,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_type_refinement(_: &C, type_refinement_type: Self, type_refinement_keyword: Self, type_refinement_left_brace: Self, type_refinement_members: Self, type_refinement_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::TypeRefinement(Box::new(TypeRefinementChildren {
             type_refinement_type,
@@ -3288,6 +3298,13 @@ where
                 let acc = f(closure_parameter_ellipsis, acc);
                 acc
             },
+            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => {
+                let TupleOrUnionOrIntersectionElementTypeSpecifierChildren { tuple_or_union_or_intersection_element_optional, tuple_or_union_or_intersection_element_type, tuple_or_union_or_intersection_element_ellipsis } = *x;
+                let acc = f(tuple_or_union_or_intersection_element_optional, acc);
+                let acc = f(tuple_or_union_or_intersection_element_type, acc);
+                let acc = f(tuple_or_union_or_intersection_element_ellipsis, acc);
+                acc
+            },
             SyntaxVariant::TypeRefinement(x) => {
                 let TypeRefinementChildren { type_refinement_type, type_refinement_keyword, type_refinement_left_brace, type_refinement_members, type_refinement_right_brace } = *x;
                 let acc = f(type_refinement_type, acc);
@@ -3668,6 +3685,7 @@ where
             SyntaxVariant::DictionaryTypeSpecifier {..} => SyntaxKind::DictionaryTypeSpecifier,
             SyntaxVariant::ClosureTypeSpecifier {..} => SyntaxKind::ClosureTypeSpecifier,
             SyntaxVariant::ClosureParameterTypeSpecifier {..} => SyntaxKind::ClosureParameterTypeSpecifier,
+            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier {..} => SyntaxKind::TupleOrUnionOrIntersectionElementTypeSpecifier,
             SyntaxVariant::TypeRefinement {..} => SyntaxKind::TypeRefinement,
             SyntaxVariant::TypeInRefinement {..} => SyntaxKind::TypeInRefinement,
             SyntaxVariant::CtxInRefinement {..} => SyntaxKind::CtxInRefinement,
@@ -4785,6 +4803,12 @@ where
                  closure_parameter_optional: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::TupleOrUnionOrIntersectionElementTypeSpecifier, 3) => SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(Box::new(TupleOrUnionOrIntersectionElementTypeSpecifierChildren {
+                 tuple_or_union_or_intersection_element_ellipsis: ts.pop().unwrap(),
+                 tuple_or_union_or_intersection_element_type: ts.pop().unwrap(),
+                 tuple_or_union_or_intersection_element_optional: ts.pop().unwrap(),
+                 
+             })),
              (SyntaxKind::TypeRefinement, 5) => SyntaxVariant::TypeRefinement(Box::new(TypeRefinementChildren {
                  type_refinement_right_brace: ts.pop().unwrap(),
                  type_refinement_members: ts.pop().unwrap(),
@@ -5136,6 +5160,7 @@ where
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_outer_left_paren, 11) },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_optional, 5) },
+            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_or_union_or_intersection_element_optional, 3) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.ctx_in_refinement_keyword, 6) },
@@ -5327,6 +5352,7 @@ where
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_outer_left_paren, 11) },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_optional, 5) },
+            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_or_union_or_intersection_element_optional, 3) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_in_refinement_keyword, 6) },
@@ -6751,6 +6777,14 @@ pub struct ClosureParameterTypeSpecifierChildren<T, V> {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
+pub struct TupleOrUnionOrIntersectionElementTypeSpecifierChildren<T, V> {
+    pub tuple_or_union_or_intersection_element_optional: Syntax<T, V>,
+    pub tuple_or_union_or_intersection_element_type: Syntax<T, V>,
+    pub tuple_or_union_or_intersection_element_ellipsis: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeRefinementChildren<T, V> {
     pub type_refinement_type: Syntax<T, V>,
     pub type_refinement_keyword: Syntax<T, V>,
@@ -7155,6 +7189,7 @@ pub enum SyntaxVariant<T, V> {
     DictionaryTypeSpecifier(Box<DictionaryTypeSpecifierChildren<T, V>>),
     ClosureTypeSpecifier(Box<ClosureTypeSpecifierChildren<T, V>>),
     ClosureParameterTypeSpecifier(Box<ClosureParameterTypeSpecifierChildren<T, V>>),
+    TupleOrUnionOrIntersectionElementTypeSpecifier(Box<TupleOrUnionOrIntersectionElementTypeSpecifierChildren<T, V>>),
     TypeRefinement(Box<TypeRefinementChildren<T, V>>),
     TypeInRefinement(Box<TypeInRefinementChildren<T, V>>),
     CtxInRefinement(Box<CtxInRefinementChildren<T, V>>),
@@ -8748,6 +8783,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.closure_parameter_readonly),
                     3 => Some(&x.closure_parameter_type),
                     4 => Some(&x.closure_parameter_ellipsis),
+                        _ => None,
+                    }
+                })
+            },
+            TupleOrUnionOrIntersectionElementTypeSpecifier(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.tuple_or_union_or_intersection_element_optional),
+                    1 => Some(&x.tuple_or_union_or_intersection_element_type),
+                    2 => Some(&x.tuple_or_union_or_intersection_element_ellipsis),
                         _ => None,
                     }
                 })

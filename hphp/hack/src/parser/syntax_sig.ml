@@ -941,6 +941,11 @@ module type Syntax_S = sig
         closure_parameter_type: t;
         closure_parameter_ellipsis: t;
       }
+    | TupleOrUnionOrIntersectionElementTypeSpecifier of {
+        tuple_or_union_or_intersection_element_optional: t;
+        tuple_or_union_or_intersection_element_type: t;
+        tuple_or_union_or_intersection_element_ellipsis: t;
+      }
     | TypeRefinement of {
         type_refinement_type: t;
         type_refinement_keyword: t;
@@ -1474,6 +1479,9 @@ module type Syntax_S = sig
 
   val make_closure_parameter_type_specifier : t -> t -> t -> t -> t -> t
 
+  val make_tuple_or_union_or_intersection_element_type_specifier :
+    t -> t -> t -> t
+
   val make_type_refinement : t -> t -> t -> t -> t -> t
 
   val make_type_in_refinement : t -> t -> t -> t -> t -> t -> t
@@ -1847,6 +1855,8 @@ module type Syntax_S = sig
   val is_closure_type_specifier : t -> bool
 
   val is_closure_parameter_type_specifier : t -> bool
+
+  val is_tuple_or_union_or_intersection_element_type_specifier : t -> bool
 
   val is_type_refinement : t -> bool
 

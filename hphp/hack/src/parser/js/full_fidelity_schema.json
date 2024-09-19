@@ -1985,6 +1985,15 @@
         { "field_name" : "type" },
         { "field_name" : "ellipsis" }
       ] },
+    { "kind_name" : "TupleOrUnionOrIntersectionElementTypeSpecifier",
+      "type_name" : "tuple_or_union_or_intersection_element_type_specifier",
+      "description" : "tuple_or_union_or_intersection_element_type_specifier",
+      "prefix" : "tuple_or_union_or_intersection_element",
+      "fields" : [
+        { "field_name" : "optional" },
+        { "field_name" : "type" },
+        { "field_name" : "ellipsis" }
+      ] },
     { "kind_name" : "TypeRefinement",
       "type_name" : "type_refinement",
       "description" : "type_refinement",

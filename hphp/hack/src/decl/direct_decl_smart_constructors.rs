@@ -816,6 +816,13 @@ pub struct ClosureTypeHint<'a> {
 }
 
 #[derive(Debug)]
+pub struct TupleComponentNode<'a> {
+    optional: bool,
+    hint: Node<'a>,
+    ellipsis: bool,
+}
+
+#[derive(Debug)]
 pub struct NamespaceUseClause<'a> {
     kind: NamespaceUseKind,
     id: Id<'a>,
@@ -1013,6 +1020,7 @@ pub enum Node<'a> {
     WhereConstraint(&'a WhereConstraint<'a>),
     RefinedConst(&'a (&'a str, RefinedConst<'a>)),
     EnumClassLabel(&'a str),
+    TupleComponent(&'a TupleComponentNode<'a>),
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
@@ -1467,6 +1475,32 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         self.node_to_ty_(node, true)
     }
 
+    fn node_to_tuple_element_ty(
+        &self,
+        node: Node<'a>,
+        select_optional: bool,
+    ) -> Option<&'a Ty<'a>> {
+        match node {
+            Node::TupleComponent(TupleComponentNode {
+                optional,
+                hint,
+                ellipsis,
+            }) if !ellipsis && *optional == select_optional => self.node_to_ty(*hint),
+            _ => None,
+        }
+    }
+
+    fn node_to_tuple_variadic_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
+        match node {
+            Node::TupleComponent(TupleComponentNode {
+                optional: _,
+                hint,
+                ellipsis,
+            }) if *ellipsis => self.node_to_ty(*hint),
+            _ => None,
+        }
+    }
+
     fn make_supportdyn(&self, pos: &'a Pos<'a>, ty: Ty_<'a>) -> Ty_<'a> {
         Ty_::Tapply(self.alloc((
             (pos, naming_special_names::typehints::HH_SUPPORTDYN),
@@ -1496,6 +1530,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 Some(self.alloc(Ty(reason, Ty_::Tunion(&[]))))
             }
             Node::Ty(ty) => Some(ty),
+            Node::TupleComponent(TupleComponentNode { hint, .. }) => self.node_to_ty(*hint),
             Node::Expr(expr) => {
                 fn expr_to_ty<'a>(arena: &'a Bump, expr: &'a nast::Expr<'a>) -> Option<Ty_<'a>> {
                     use aast::Expr_::*;
@@ -1848,6 +1883,24 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             None => CapDefaults(default_pos),
         };
         self.alloc(FunImplicitParams { capability })
+    }
+
+    fn make_variadic_type(&self, ellipsis: Node<'a>) -> &'a Ty<'a> {
+        let pos = self.get_pos(ellipsis);
+        let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
+        match ellipsis.token_kind() {
+            // Type of unknown fields is mixed, or supportdyn<mixed> under implicit SD
+            Some(TokenKind::DotDotDot) => self.alloc(Ty(
+                reason,
+                if self.implicit_sdt() {
+                    self.make_supportdyn(pos, Ty_::Tmixed)
+                } else {
+                    Ty_::Tmixed
+                },
+            )),
+            // Closed shapes and tuples are expressed using `nothing` (empty union) as the type of unknown fields
+            _ => self.alloc(Ty(reason, Ty_::Tunion(&[]))),
+        }
     }
 
     fn function_to_ty(
@@ -5406,16 +5459,44 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
         let pos = self.merge_positions(left_paren, right_paren);
+        // Lowerer will check that required precede optional precede at most one variadic element
+        let required = self.slice(
+            tys.iter()
+                .filter_map(|&node| self.node_to_tuple_element_ty(node, false)),
+        );
+        let optional = self.slice(
+            tys.iter()
+                .filter_map(|&node| self.node_to_tuple_element_ty(node, true)),
+        );
+        let variadic_opt = tys
+            .iter()
+            .find_map(|&node| self.node_to_tuple_variadic_ty(node));
         let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
-        let tys = self.slice(tys.iter().filter_map(|&node| self.node_to_ty(node)));
+        let variadic = match variadic_opt {
+            None => self.alloc(Ty(reason, Ty_::Tunion(&[]))),
+            Some(ty) => ty,
+        };
         self.hint_ty(
             pos,
             Ty_::Ttuple(self.alloc(TupleType {
-                required: tys,
-                optional: &[],
-                variadic: self.alloc(Ty(reason, Ty_::Tunion(&[]))),
+                required,
+                optional,
+                variadic,
             })),
         )
+    }
+
+    fn make_tuple_or_union_or_intersection_element_type_specifier(
+        &mut self,
+        optional: Self::Output,
+        type_: Self::Output,
+        ellipsis: Self::Output,
+    ) -> Self::Output {
+        Node::TupleComponent(self.alloc(TupleComponentNode {
+            optional: optional.is_present(),
+            hint: type_,
+            ellipsis: ellipsis.is_present(),
+        }))
     }
 
     fn make_tuple_type_explicit_specifier(
@@ -5474,21 +5555,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 fields.insert(self.make_t_shape_field_name(name), type_)
             }
         }
-        let pos = self.get_pos(open);
-        let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
-        let kind = match open.token_kind() {
-            // Type of unknown fields is mixed, or supportdyn<mixed> under implicit SD
-            Some(TokenKind::DotDotDot) => self.alloc(Ty(
-                reason,
-                if self.implicit_sdt() {
-                    self.make_supportdyn(pos, Ty_::Tmixed)
-                } else {
-                    Ty_::Tmixed
-                },
-            )),
-            // Closed shapes are expressed using `nothing` (empty union) as the type of unknown fields
-            _ => self.alloc(Ty(reason, Ty_::Tunion(&[]))),
-        };
+        let kind = self.make_variadic_type(open);
         let pos = self.merge_positions(shape, rparen);
         let origin = TypeOrigin::MissingOrigin;
         self.hint_ty(

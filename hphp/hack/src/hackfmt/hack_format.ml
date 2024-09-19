@@ -2340,6 +2340,19 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env cp_type;
           t env ellipsis;
         ]
+    | Syntax.TupleOrUnionOrIntersectionElementTypeSpecifier
+        {
+          tuple_or_union_or_intersection_element_optional = optional;
+          tuple_or_union_or_intersection_element_type = cp_type;
+          tuple_or_union_or_intersection_element_ellipsis = ellipsis;
+        } ->
+      Concat
+        [
+          t env optional;
+          when_present optional space;
+          t env cp_type;
+          t env ellipsis;
+        ]
     | Syntax.ClassArgsTypeSpecifier
         {
           class_args_keyword = kw;

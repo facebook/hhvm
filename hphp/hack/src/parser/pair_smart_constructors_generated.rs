@@ -697,6 +697,10 @@ where
         Node(self.0.make_closure_parameter_type_specifier(optional.0, call_convention.0, readonly.0, type_.0, ellipsis.0), self.1.make_closure_parameter_type_specifier(optional.1, call_convention.1, readonly.1, type_.1, ellipsis.1))
     }
 
+    fn make_tuple_or_union_or_intersection_element_type_specifier(&mut self, optional: Self::Output, type_: Self::Output, ellipsis: Self::Output) -> Self::Output {
+        Node(self.0.make_tuple_or_union_or_intersection_element_type_specifier(optional.0, type_.0, ellipsis.0), self.1.make_tuple_or_union_or_intersection_element_type_specifier(optional.1, type_.1, ellipsis.1))
+    }
+
     fn make_type_refinement(&mut self, type_: Self::Output, keyword: Self::Output, left_brace: Self::Output, members: Self::Output, right_brace: Self::Output) -> Self::Output {
         Node(self.0.make_type_refinement(type_.0, keyword.0, left_brace.0, members.0, right_brace.0), self.1.make_type_refinement(type_.1, keyword.1, left_brace.1, members.1, right_brace.1))
     }

@@ -625,6 +625,15 @@ where
             .make_closure_parameter_type_specifier(optional, callconv, readonly, ts, ellipsis)
     }
 
+    fn parse_tuple_or_union_or_intersection_element_type(&mut self) -> S::Output {
+        let optional = self.parse_optional_opt();
+        let ts =
+            self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ true);
+        let ellipsis = self.parse_ellipsis_opt();
+        self.sc_mut()
+            .make_tuple_or_union_or_intersection_element_type_specifier(optional, ts, ellipsis)
+    }
+
     fn parse_optionally_reified_type(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Reify {
             let token = self.next_token();
@@ -935,13 +944,21 @@ where
 
         let left_paren = self.assert_token(TokenKind::LeftParen);
 
-        let (args, _, separator_kind) = self.parse_separated_list_predicate(
-            |x| x == TokenKind::Bar || x == TokenKind::Ampersand || x == TokenKind::Comma,
-            SeparatedListKind::TrailingAllowed,
-            |x| x == TokenKind::RightParen,
-            Errors::error1007,
-            |x: &mut Self| x.parse_type_specifier(false, true),
-        );
+        let (args, _, separator_kind) = match self.peek_token_kind() {
+            // Special case for empty tuple ()
+            TokenKind::RightParen => {
+                let pos = self.pos();
+                let item_list = self.sc_mut().make_list(vec![], pos);
+                (item_list, false, TokenKind::Comma)
+            }
+            _ => self.parse_separated_list_predicate(
+                |x| x == TokenKind::Bar || x == TokenKind::Ampersand || x == TokenKind::Comma,
+                SeparatedListKind::TrailingAllowed,
+                |x| x == TokenKind::RightParen || x == TokenKind::DotDotDot,
+                Errors::error1007,
+                |x| x.parse_tuple_or_union_or_intersection_element_type(),
+            ),
+        };
 
         if self.peek_token_kind() == TokenKind::RightParen {
             let right_paren = self.next_token();

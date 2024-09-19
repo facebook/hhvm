@@ -1,0 +1,20 @@
+ERROR: File "forest.php", line 4, characters 11-16:
+Cyclic type definition (Typing[4014])
+  File "forest.php", line 4, characters 33-41:
+  Cyclic use is here
+ERROR: File "forest.php", line 16, characters 11-13:
+Cyclic type definition (Typing[4014])
+  File "forest.php", line 16, characters 24-29:
+  Cyclic use is here
+ERROR: File "forest.php", line 10, characters 10-18:
+Invalid return type (Typing[4336])
+  File "forest.php", line 10, characters 39-39:
+  Expected `T`
+  File "forest.php", line 10, characters 10-18:
+  But got `void` because this function does not always return a value
+ERROR: File "forest.php", line 10, characters 1-102:
+This function can exit with and without returning a value (Typing[4421])
+  File "forest.php", line 12, characters 5-25:
+  Returning a value here.
+  File "forest.php", line 10, characters 1-102:
+  This function does not always return a value

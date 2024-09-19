@@ -21,9 +21,9 @@
 #include <stdexcept>
 
 #include <folly/ExceptionString.h>
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Sleep.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Sleep.h>
 #include <thrift/conformance/RpcStructComparator.h>
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_types.h>

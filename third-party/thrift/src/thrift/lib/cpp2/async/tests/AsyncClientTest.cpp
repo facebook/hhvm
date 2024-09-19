@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/experimental/coro/GtestHelpers.h>
+#include <folly/coro/GtestHelpers.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/async/AsyncClient.h>

@@ -21,8 +21,8 @@
 #include <gtest/gtest.h>
 
 #include <folly/SocketAddress.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Task.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>

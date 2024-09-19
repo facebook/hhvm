@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
 #include <thrift/conformance/stresstest/client/StressTestClient.h>
 
 namespace apache {

@@ -18,10 +18,10 @@
 
 #include <folly/Portability.h>
 #include <folly/Try.h>
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/Baton.h>
-#include <folly/experimental/coro/Invoke.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/Baton.h>
+#include <folly/coro/Invoke.h>
+#include <folly/coro/Task.h>
 #include <thrift/lib/cpp2/async/ServerStreamDetail.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>

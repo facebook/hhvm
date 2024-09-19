@@ -23,8 +23,8 @@
 #include <folly/testing/TestUtil.h>
 
 #include <folly/Memory.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Sleep.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Sleep.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/test/TestSSLServer.h>

@@ -16,7 +16,7 @@
 
 #include <thrift/conformance/stresstest/client/StressTestClient.h>
 
-#include <folly/experimental/coro/Sleep.h>
+#include <folly/coro/Sleep.h>
 
 namespace apache {
 namespace thrift {

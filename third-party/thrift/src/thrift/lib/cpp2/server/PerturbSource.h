@@ -18,10 +18,10 @@
 
 #include <chrono>
 
-#include <folly/experimental/coro/AsyncScope.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncScope.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Sleep.h>
+#include <folly/coro/Task.h>
 
 #if FOLLY_HAS_COROUTINES
 

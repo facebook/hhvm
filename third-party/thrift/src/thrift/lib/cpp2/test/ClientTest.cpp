@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/coro/BlockingWait.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp2/test/gen-cpp2/HandlerGeneric.h>

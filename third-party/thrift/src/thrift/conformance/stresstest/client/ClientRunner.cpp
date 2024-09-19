@@ -16,7 +16,7 @@
 
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 
-#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/coro/BlockingWait.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 
 #include <folly/experimental/io/IoUringBackend.h>

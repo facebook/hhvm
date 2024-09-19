@@ -19,7 +19,7 @@
 #include <chrono>
 #include <exception>
 
-#include <folly/experimental/coro/AsyncGenerator.h>
+#include <folly/coro/AsyncGenerator.h>
 
 namespace apache::thrift::conformance {
 

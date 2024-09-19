@@ -21,8 +21,8 @@
 
 #include <folly/Portability.h>
 #include <folly/Try.h>
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/Task.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>

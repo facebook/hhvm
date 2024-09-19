@@ -24,9 +24,9 @@
 #include <folly/ExceptionString.h>
 #include <folly/GLog.h>
 #include <folly/Portability.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/CurrentExecutor.h>
-#include <folly/experimental/coro/Sleep.h>
+#include <folly/coro/Collect.h>
+#include <folly/coro/CurrentExecutor.h>
+#include <folly/coro/Sleep.h>
 #include <folly/futures/Future.h>
 
 #if FOLLY_HAS_COROUTINES

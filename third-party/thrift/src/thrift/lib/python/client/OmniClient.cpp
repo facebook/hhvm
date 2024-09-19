@@ -17,7 +17,7 @@
 #include <thrift/lib/python/client/OmniClient.h>
 
 #include <fmt/format.h>
-#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/coro/BlockingWait.h>
 #include <folly/futures/Promise.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/ContextStack.h>

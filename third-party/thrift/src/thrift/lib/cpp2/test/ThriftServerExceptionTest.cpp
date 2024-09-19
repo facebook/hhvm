@@ -19,7 +19,7 @@
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 #include <fmt/core.h>
-#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/coro/BlockingWait.h>
 #include <folly/portability/GTest.h>
 
 using namespace std;

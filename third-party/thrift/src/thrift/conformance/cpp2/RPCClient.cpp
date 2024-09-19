@@ -18,9 +18,9 @@
 #include <glog/logging.h>
 #include <folly/init/Init.h>
 
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Sleep.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Sleep.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 

@@ -19,8 +19,8 @@
 
 #include <folly/SharedMutex.h>
 #include <folly/Synchronized.h>
-#include <folly/experimental/coro/Baton.h>
-#include <folly/experimental/coro/GtestHelpers.h>
+#include <folly/coro/Baton.h>
+#include <folly/coro/GtestHelpers.h>
 #include <folly/observer/Observer.h>
 #include <folly/observer/SimpleObservable.h>
 #include <folly/portability/GTest.h>

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
 #include <folly/stats/Histogram.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 

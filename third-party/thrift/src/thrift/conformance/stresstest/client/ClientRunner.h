@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <folly/experimental/coro/AsyncScope.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncScope.h>
+#include <folly/coro/Task.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/RelaxedAtomic.h>

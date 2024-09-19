@@ -24,8 +24,8 @@
 
 #include <folly/Format.h>
 #include <folly/ThreadLocal.h>
+#include <folly/coro/BlockingWait.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/coro/BlockingWait.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/Request.h>

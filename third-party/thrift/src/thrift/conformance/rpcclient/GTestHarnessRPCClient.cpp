@@ -24,9 +24,9 @@
 
 #include <fmt/core.h>
 #include <folly/Subprocess.h>
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Sleep.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Sleep.h>
 #include <folly/futures/Future.h>
 #include <thrift/conformance/PluggableFunctions.h>
 #include <thrift/conformance/RpcStructComparator.h>

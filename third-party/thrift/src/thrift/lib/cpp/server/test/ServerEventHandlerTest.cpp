@@ -16,7 +16,7 @@
 
 #include <folly/portability/GTest.h>
 
-#include <folly/experimental/coro/GtestHelpers.h>
+#include <folly/coro/GtestHelpers.h>
 #include <thrift/lib/cpp/server/test/TrackingTServerEventHandler.h>
 #include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>

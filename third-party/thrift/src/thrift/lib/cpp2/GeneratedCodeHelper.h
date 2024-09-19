@@ -28,7 +28,7 @@
 #include <fmt/core.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
-#include <folly/experimental/coro/FutureUtil.h>
+#include <folly/coro/FutureUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/io/Cursor.h>
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>

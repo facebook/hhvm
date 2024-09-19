@@ -38,10 +38,10 @@
 #include <folly/Synchronized.h>
 #include <folly/TokenBucket.h>
 #include <folly/concurrency/memory/PrimaryPtr.h>
+#include <folly/coro/AsyncScope.h>
 #include <folly/dynamic.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/executors/VirtualExecutor.h>
-#include <folly/experimental/coro/AsyncScope.h>
 #include <folly/io/ShutdownSocketSet.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncServerSocket.h>

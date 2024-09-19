@@ -19,7 +19,7 @@
 #include <chrono>
 #include <vector>
 
-#include <folly/experimental/coro/AsyncGenerator.h>
+#include <folly/coro/AsyncGenerator.h>
 #include <folly/observer/Observer.h>
 
 #include <thrift/lib/cpp2/server/PolledServiceHealth.h>

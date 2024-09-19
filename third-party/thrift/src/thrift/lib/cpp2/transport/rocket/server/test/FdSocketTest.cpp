@@ -17,7 +17,7 @@
 #include <chrono>
 #include <string_view>
 
-#include <folly/experimental/coro/Baton.h>
+#include <folly/coro/Baton.h>
 #include <folly/portability/GMock.h>
 #include <folly/testing/TestUtil.h>
 

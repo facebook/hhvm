@@ -16,9 +16,9 @@
 
 #include <functional>
 #include <folly/Portability.h>
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Task.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>

@@ -23,10 +23,10 @@
 // rule. Until then, extra dependencies must be added manually. For convenience
 // reasons, we include a few useful coroutine headers here for use in stress
 // test definitions.
-#include <folly/experimental/coro/AsyncScope.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncScope.h>
+#include <folly/coro/Collect.h>
+#include <folly/coro/Sleep.h>
+#include <folly/coro/Task.h>
 
 #define THRIFT_STRESS_TEST(name)                                            \
   class THRIFT_STRESS_TEST__##name                                          \

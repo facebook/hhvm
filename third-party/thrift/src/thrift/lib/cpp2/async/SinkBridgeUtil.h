@@ -19,8 +19,8 @@
 #include <variant>
 
 #include <folly/Portability.h>
-#include <folly/experimental/coro/Baton.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Baton.h>
+#include <folly/coro/Task.h>
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 

@@ -18,7 +18,7 @@
 
 #include <variant>
 
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
 
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 

@@ -22,8 +22,8 @@
 
 #include <folly/GLog.h>
 #include <folly/Portability.h>
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/Baton.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/Baton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/fdsock/SocketFds.h>
 #include <folly/synchronization/Baton.h>

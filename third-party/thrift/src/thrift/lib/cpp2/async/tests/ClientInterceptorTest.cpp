@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/experimental/coro/GtestHelpers.h>
+#include <folly/coro/GtestHelpers.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 

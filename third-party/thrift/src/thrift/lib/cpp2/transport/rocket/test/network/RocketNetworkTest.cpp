@@ -28,10 +28,10 @@
 #include <folly/Range.h>
 #include <folly/SocketAddress.h>
 #include <folly/Try.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Task.h>
 #include <folly/executors/ManualExecutor.h>
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Task.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncSocket.h>

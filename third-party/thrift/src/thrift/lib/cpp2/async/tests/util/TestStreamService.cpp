@@ -17,7 +17,7 @@
 #include <thrift/lib/cpp2/async/tests/util/TestStreamService.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
-#include <folly/experimental/coro/AsyncScope.h>
+#include <folly/coro/AsyncScope.h>
 #include <folly/portability/GTest.h>
 
 namespace apache::thrift::detail::test {

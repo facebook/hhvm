@@ -16,8 +16,8 @@
 
 #include <exception>
 
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Coroutine.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Coroutine.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/portability/GTest.h>
 

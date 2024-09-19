@@ -16,10 +16,10 @@
 
 #include <thrift/conformance/stresstest/server/StressTestHandler.h>
 
-#include <folly/experimental/coro/AsyncGenerator.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/AsyncGenerator.h>
+#include <folly/coro/Collect.h>
+#include <folly/coro/Sleep.h>
+#include <folly/coro/Task.h>
 
 namespace apache {
 namespace thrift {

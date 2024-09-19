@@ -19,7 +19,7 @@
 #include <cstdint>
 
 #include <folly/Portability.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
 
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 

@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <folly/experimental/coro/DetachOnCancel.h>
-#include <folly/experimental/coro/Result.h>
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/DetachOnCancel.h>
+#include <folly/coro/Result.h>
+#include <folly/coro/Task.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/futures/Future.h>
 #include <thrift/lib/cpp/TApplicationException.h>

@@ -21,7 +21,7 @@
 #include <thread>
 
 #include <folly/Portability.h>
-#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/coro/BlockingWait.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>

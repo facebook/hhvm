@@ -18,7 +18,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include <folly/experimental/coro/GtestHelpers.h>
+#include <folly/coro/GtestHelpers.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>

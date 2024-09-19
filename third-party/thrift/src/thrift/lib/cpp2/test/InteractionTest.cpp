@@ -883,7 +883,9 @@ TEST(InteractionCodegenTest, ReuseIdDuringConstructor) {
   {
     auto id = client.getChannel()->registerInteraction("Addition", 1);
     CalculatorAsyncClient::Addition adder(
-        client.getChannelShared(), std::move(id));
+        client.getChannelShared(),
+        std::move(id),
+        nullptr /* clientInterceptors */);
     adder.semifuture_noop().via(&eb).getVia(&eb);
     handler->b1.wait();
   } // sends termination while constructor is blocked
@@ -891,7 +893,9 @@ TEST(InteractionCodegenTest, ReuseIdDuringConstructor) {
 
   auto id = client.getChannel()->registerInteraction("Addition", 1);
   CalculatorAsyncClient::Addition adder(
-      client.getChannelShared(), std::move(id));
+      client.getChannelShared(),
+      std::move(id),
+      nullptr /* clientInterceptors */);
 
   auto fut = adder.semifuture_accumulatePrimitive(1);
   handler->b2.post();

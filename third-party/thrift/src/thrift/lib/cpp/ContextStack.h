@@ -100,6 +100,11 @@ class ContextStack {
 
   void resetClientRequestContextHeader();
 
+  const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&
+  getClientInterceptors() const {
+    return clientInterceptors_;
+  }
+
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnRequest() noexcept;
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse() noexcept;
 

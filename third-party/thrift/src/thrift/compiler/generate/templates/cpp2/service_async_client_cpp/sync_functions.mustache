@@ -50,7 +50,7 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
     rpcOptions.getBufferOptions());
 {{/unless}}
 {{#if function:creates_interaction?}}
-  {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
+  {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
 {{/if}}
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
@@ -59,7 +59,7 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+      fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     });
   if (contextStack != nullptr) {
     contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
@@ -85,12 +85,12 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
       {{else}}
       {{#unless type:void?}}
       return std::make_pair(
-        std::move(handle),
+        std::move(interactionHandle),
         recv_{{function:cpp_name}}(returnState)
       );
       {{else}}
       recv_{{function:cpp_name}}(returnState);
-      return std::move(handle);
+      return std::move(interactionHandle);
       {{/unless}}
       {{/unless}}
     {{/if}}

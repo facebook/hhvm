@@ -216,10 +216,10 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::InteractWithShared>::rec
 }
 
 apache::thrift::Client<::cpp2::InteractWithShared>::MyInteraction apache::thrift::Client<::cpp2::InteractWithShared>::createMyInteraction() {
-  return MyInteraction(channel_, "MyInteraction");
+  return MyInteraction(channel_, "MyInteraction", interceptors_);
 }
 apache::thrift::Client<::cpp2::InteractWithShared>::SharedInteraction apache::thrift::Client<::cpp2::InteractWithShared>::createshared.SharedInteraction() {
-  return SharedInteraction(channel_, "SharedInteraction");
+  return SharedInteraction(channel_, "SharedInteraction", interceptors_);
 }
 
 

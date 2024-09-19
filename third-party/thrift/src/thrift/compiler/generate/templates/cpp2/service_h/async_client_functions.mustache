@@ -136,15 +136,15 @@
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
   {{/function:stream?}}
   {{#function:creates_interaction?}}
-    {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
+    {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", ctx ? ctx->getClientInterceptors() : nullptr);
   {{/function:creates_interaction?}}
     if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_{{function:cpp_name}}(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+      fbthrift_serialize_and_send_{{function:cpp_name}}(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     } else {
-      fbthrift_serialize_and_send_{{function:cpp_name}}(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+      fbthrift_serialize_and_send_{{function:cpp_name}}(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -188,10 +188,10 @@
   {{/function:creates_interaction?}}
   {{#function:creates_interaction?}}
     {{^type:void?}}
-    co_return std::make_pair(std::move(handle), std::move(_return));
+    co_return std::make_pair(std::move(interactionHandle), std::move(_return));
     {{/type:void?}}
     {{#type:void?}}
-    co_return handle;
+    co_return interactionHandle;
     {{/type:void?}}
   {{/function:creates_interaction?}}
   {{/function:oneway?}}

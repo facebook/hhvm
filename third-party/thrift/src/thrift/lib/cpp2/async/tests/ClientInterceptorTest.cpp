@@ -60,6 +60,30 @@ struct TestHandler
     }
     co_return std::move(str);
   }
+
+  folly::coro::Task<apache::thrift::TileAndResponse<SampleInteractionIf, void>>
+  co_createInteraction() override {
+    class SampleInteractionImpl : public SampleInteractionIf {
+      folly::coro::Task<std::unique_ptr<std::string>> co_echo(
+          std::unique_ptr<std::string> str) override {
+        co_return std::move(str);
+      }
+    };
+    co_return {std::make_unique<SampleInteractionImpl>()};
+  }
+
+  folly::coro::Task<apache::thrift::TileAndResponse<
+      SampleInteractionIf,
+      std::unique_ptr<std::string>>>
+  co_createInteractionAndEcho(std::unique_ptr<::std::string> str) override {
+    class SampleInteractionImpl : public SampleInteractionIf {
+      folly::coro::Task<std::unique_ptr<std::string>> co_echo(
+          std::unique_ptr<std::string> str) override {
+        co_return std::move(str);
+      }
+    };
+    co_return {std::make_unique<SampleInteractionImpl>(), std::move(str)};
+  }
 };
 
 class ClientInterface {
@@ -73,6 +97,13 @@ class ClientInterface {
 
   virtual folly::coro::Task<std::string> echo(std::string str) = 0;
   virtual folly::coro::Task<void> noop() = 0;
+  virtual folly::coro::Task<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
+  createInteraction() = 0;
+  virtual folly::coro::Task<std::pair<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
+      std::string>>
+  createInteractionAndEcho(std::string str) = 0;
 
  protected:
   std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>> client_;
@@ -89,6 +120,17 @@ class CoroClientInterface : public ClientInterface {
     co_await client_->co_noop();
     co_return;
   }
+  folly::coro::Task<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
+  createInteraction() override {
+    co_return co_await client_->co_createInteraction();
+  }
+  folly::coro::Task<std::pair<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
+      std::string>>
+  createInteractionAndEcho(std::string str) override {
+    co_return co_await client_->co_createInteractionAndEcho(std::move(str));
+  }
 };
 
 class SyncClientInterface : public ClientInterface {
@@ -104,6 +146,17 @@ class SyncClientInterface : public ClientInterface {
     client_->sync_noop();
     co_return;
   }
+  folly::coro::Task<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
+  createInteraction() override {
+    co_return client_->sync_createInteraction();
+  }
+  folly::coro::Task<std::pair<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
+      std::string>>
+  createInteractionAndEcho(std::string str) override {
+    co_return client_->sync_createInteractionAndEcho(std::move(str));
+  }
 };
 
 class SemiFutureClientInterface : public ClientInterface {
@@ -116,6 +169,18 @@ class SemiFutureClientInterface : public ClientInterface {
   folly::coro::Task<void> noop() override {
     co_await client_->semifuture_noop();
   }
+  folly::coro::Task<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
+  createInteraction() override {
+    co_return co_await client_->semifuture_createInteraction();
+  }
+  folly::coro::Task<std::pair<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
+      std::string>>
+  createInteractionAndEcho(std::string str) override {
+    co_return co_await client_->semifuture_createInteractionAndEcho(
+        std::move(str));
+  }
 };
 
 class FutureClientInterface : public ClientInterface {
@@ -126,6 +191,17 @@ class FutureClientInterface : public ClientInterface {
     co_return co_await client_->future_echo(str);
   }
   folly::coro::Task<void> noop() override { co_await client_->future_noop(); }
+  folly::coro::Task<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
+  createInteraction() override {
+    throw std::logic_error("future_* functions do not support interactions");
+  }
+  folly::coro::Task<std::pair<
+      apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
+      std::string>>
+  createInteractionAndEcho(std::string) override {
+    throw std::logic_error("future_* functions do not support interactions");
+  }
 };
 
 class ClientInterceptorTestP
@@ -461,6 +537,88 @@ CO_TEST_P(ClientInterceptorTestP, NonTrivialRequestState) {
 
   EXPECT_EQ(counts.construct, 2);
   EXPECT_EQ(counts.destruct, 2);
+}
+
+CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports interactions
+    co_return;
+  }
+  if (clientCallbackType() == ClientCallbackKind::FUTURE) {
+    // future_* functions do not support interactions
+    co_return;
+  }
+
+  {
+    auto interceptor1 =
+        std::make_shared<ClientInterceptorCountWithRequestState>(
+            "Interceptor1");
+    auto interceptor2 =
+        std::make_shared<ClientInterceptorCountWithRequestState>(
+            "Interceptor2");
+    auto client = makeClient(makeInterceptorsList(interceptor1, interceptor2));
+
+    {
+      auto interaction = co_await client->createInteraction();
+      for (auto& interceptor : {interceptor1, interceptor2}) {
+        EXPECT_EQ(interceptor->onRequestCount, 1);
+        EXPECT_EQ(interceptor->onResponseCount, 1);
+      }
+
+      co_await interaction.co_echo("");
+      for (auto& interceptor : {interceptor1, interceptor2}) {
+        EXPECT_EQ(interceptor->onRequestCount, 2);
+        EXPECT_EQ(interceptor->onResponseCount, 2);
+      }
+
+      co_await client->echo("");
+      for (auto& interceptor : {interceptor1, interceptor2}) {
+        EXPECT_EQ(interceptor->onRequestCount, 3);
+        EXPECT_EQ(interceptor->onResponseCount, 3);
+      }
+    }
+
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 3);
+      EXPECT_EQ(interceptor->onResponseCount, 3);
+    }
+  }
+
+  // With initial response
+  {
+    auto interceptor1 =
+        std::make_shared<ClientInterceptorCountWithRequestState>(
+            "Interceptor1");
+    auto interceptor2 =
+        std::make_shared<ClientInterceptorCountWithRequestState>(
+            "Interceptor2");
+    auto client = makeClient(makeInterceptorsList(interceptor1, interceptor2));
+    {
+      auto [interaction, response] =
+          co_await client->createInteractionAndEcho("hello");
+      for (auto& interceptor : {interceptor1, interceptor2}) {
+        EXPECT_EQ(interceptor->onRequestCount, 1);
+        EXPECT_EQ(interceptor->onResponseCount, 1);
+      }
+
+      co_await interaction.co_echo("");
+      for (auto& interceptor : {interceptor1, interceptor2}) {
+        EXPECT_EQ(interceptor->onRequestCount, 2);
+        EXPECT_EQ(interceptor->onResponseCount, 2);
+      }
+
+      co_await client->echo("");
+      for (auto& interceptor : {interceptor1, interceptor2}) {
+        EXPECT_EQ(interceptor->onRequestCount, 3);
+        EXPECT_EQ(interceptor->onResponseCount, 3);
+      }
+    }
+
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 3);
+      EXPECT_EQ(interceptor->onResponseCount, 3);
+    }
+  }
 }
 
 INSTANTIATE_TEST_SUITE_P(

@@ -16,8 +16,19 @@
 
 namespace cpp2 apache.thrift.test
 
+interaction SampleInteraction {
+  string echo(1: string str);
+}
+
+interaction SampleInteraction2 {
+  string echo(1: string str);
+}
+
 service ClientInterceptorTest {
   void noop();
 
   string echo(1: string str);
+
+  SampleInteraction createInteraction();
+  SampleInteraction, string createInteractionAndEcho(1: string str);
 }

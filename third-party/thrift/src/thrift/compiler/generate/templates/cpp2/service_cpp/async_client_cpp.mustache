@@ -55,7 +55,7 @@ void apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}(f
 {{/function:oneway?}}
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}
 apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{type:name}} apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}() {
-  return {{type:name}}(channel_, "{{type:name}}");
+  return {{type:name}}(channel_, "{{type:name}}", interceptors_);
 }
 {{/function:starts_interaction?}}
 {{/function:return_type}}{{/service:functions}}

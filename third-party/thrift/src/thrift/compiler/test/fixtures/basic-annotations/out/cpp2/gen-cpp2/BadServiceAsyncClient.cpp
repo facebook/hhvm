@@ -27,7 +27,7 @@ void apache::thrift::Client<::cpp2::GoodService>::fbthrift_send_bar(apache::thri
 
 
 apache::thrift::Client<::cpp2::GoodService>::BadInteraction apache::thrift::Client<::cpp2::GoodService>::createBadInteraction() {
-  return BadInteraction(channel_, "BadInteraction");
+  return BadInteraction(channel_, "BadInteraction", interceptors_);
 }
 void apache::thrift::Client<::cpp2::GoodService>::bar(std::unique_ptr<apache::thrift::RequestCallback> callback) {
   ::apache::thrift::RpcOptions rpcOptions;

@@ -27,13 +27,13 @@ void apache::thrift::Client<::cpp2::Perform>::fbthrift_send_foo(apache::thrift::
 
 
 apache::thrift::Client<::cpp2::Perform>::MyInteraction apache::thrift::Client<::cpp2::Perform>::createMyInteraction() {
-  return MyInteraction(channel_, "MyInteraction");
+  return MyInteraction(channel_, "MyInteraction", interceptors_);
 }
 apache::thrift::Client<::cpp2::Perform>::MyInteractionFast apache::thrift::Client<::cpp2::Perform>::createMyInteractionFast() {
-  return MyInteractionFast(channel_, "MyInteractionFast");
+  return MyInteractionFast(channel_, "MyInteractionFast", interceptors_);
 }
 apache::thrift::Client<::cpp2::Perform>::SerialInteraction apache::thrift::Client<::cpp2::Perform>::createSerialInteraction() {
-  return SerialInteraction(channel_, "SerialInteraction");
+  return SerialInteraction(channel_, "SerialInteraction", interceptors_);
 }
 void apache::thrift::Client<::cpp2::Perform>::foo(std::unique_ptr<apache::thrift::RequestCallback> callback) {
   ::apache::thrift::RpcOptions rpcOptions;

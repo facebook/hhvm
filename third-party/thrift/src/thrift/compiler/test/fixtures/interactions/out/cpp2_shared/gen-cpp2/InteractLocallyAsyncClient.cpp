@@ -14,7 +14,7 @@ namespace thrift::shared_interactions {
 
 
 apache::thrift::Client<::thrift::shared_interactions::InteractLocally>::SharedInteraction apache::thrift::Client<::thrift::shared_interactions::InteractLocally>::createSharedInteraction() {
-  return SharedInteraction(channel_, "SharedInteraction");
+  return SharedInteraction(channel_, "SharedInteraction", interceptors_);
 }
 
 

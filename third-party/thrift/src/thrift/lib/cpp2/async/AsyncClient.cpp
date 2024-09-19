@@ -52,15 +52,22 @@ void GeneratedAsyncClient::setInteraction(
 }
 
 InteractionHandle::InteractionHandle(
-    std::shared_ptr<RequestChannel> channel, folly::StringPiece methodName)
-    : GeneratedAsyncClient(channel),
+    std::shared_ptr<RequestChannel> channel,
+    folly::StringPiece methodName,
+    std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+        interceptors)
+    : GeneratedAsyncClient(channel, std::move(interceptors)),
       interactionId_(createInteraction(*channel, methodName)) {
   DCHECK(interactionId_);
 }
 
 InteractionHandle::InteractionHandle(
-    std::shared_ptr<RequestChannel> channel, InteractionId id)
-    : GeneratedAsyncClient(channel), interactionId_(std::move(id)) {
+    std::shared_ptr<RequestChannel> channel,
+    InteractionId id,
+    std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+        interceptors)
+    : GeneratedAsyncClient(channel, std::move(interceptors)),
+      interactionId_(std::move(id)) {
   DCHECK(interactionId_);
 }
 

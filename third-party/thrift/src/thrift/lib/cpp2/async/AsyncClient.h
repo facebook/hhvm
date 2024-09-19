@@ -100,8 +100,15 @@ class GeneratedAsyncClient : public TClientBase {
 class InteractionHandle : public GeneratedAsyncClient {
  public:
   InteractionHandle(
-      std::shared_ptr<RequestChannel> channel, folly::StringPiece methodName);
-  InteractionHandle(std::shared_ptr<RequestChannel> channel, InteractionId id);
+      std::shared_ptr<RequestChannel> channel,
+      folly::StringPiece methodName,
+      std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+          interceptors);
+  InteractionHandle(
+      std::shared_ptr<RequestChannel> channel,
+      InteractionId id,
+      std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
+          interceptors);
   ~InteractionHandle() override;
   InteractionHandle(InteractionHandle&&) noexcept = default;
   InteractionHandle& operator=(InteractionHandle&&);

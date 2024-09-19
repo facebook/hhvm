@@ -978,14 +978,14 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    MyInteraction handle(channel_, "MyInteraction");
+    MyInteraction interactionHandle(channel_, "MyInteraction", ctx ? ctx->getClientInterceptors() : nullptr);
     if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_interact(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle, p_arg);
+      fbthrift_serialize_and_send_interact(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), interactionHandle, p_arg);
     } else {
-      fbthrift_serialize_and_send_interact(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle, p_arg);
+      fbthrift_serialize_and_send_interact(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), interactionHandle, p_arg);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1013,7 +1013,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     if (auto ew = recv_wrapped_interact(returnState)) {
       co_yield folly::coro::co_error(std::move(ew));
     }
-    co_return handle;
+    co_return interactionHandle;
   }
  public:
 #endif // FOLLY_HAS_COROUTINES
@@ -1088,14 +1088,14 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-    MyInteractionFast handle(channel_, "MyInteractionFast");
+    MyInteractionFast interactionHandle(channel_, "MyInteractionFast", ctx ? ctx->getClientInterceptors() : nullptr);
     if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_interactFast(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
+      fbthrift_serialize_and_send_interactFast(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), interactionHandle);
     } else {
-      fbthrift_serialize_and_send_interactFast(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
+      fbthrift_serialize_and_send_interactFast(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), interactionHandle);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1124,7 +1124,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     if (auto ew = recv_wrapped_interactFast(_return, returnState)) {
       co_yield folly::coro::co_error(std::move(ew));
     }
-    co_return std::make_pair(std::move(handle), std::move(_return));
+    co_return std::make_pair(std::move(interactionHandle), std::move(_return));
   }
  public:
 #endif // FOLLY_HAS_COROUTINES
@@ -1201,14 +1201,14 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-    SerialInteraction handle(channel_, "SerialInteraction");
+    SerialInteraction interactionHandle(channel_, "SerialInteraction", ctx ? ctx->getClientInterceptors() : nullptr);
     if (ctx != nullptr) {
       ctx->processClientInterceptorsOnRequest().throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_serialize(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
+      fbthrift_serialize_and_send_serialize(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), interactionHandle);
     } else {
-      fbthrift_serialize_and_send_serialize(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
+      fbthrift_serialize_and_send_serialize(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), interactionHandle);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1237,7 +1237,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     if (auto ew = recv_wrapped_serialize(_return, returnState)) {
       co_yield folly::coro::co_error(std::move(ew));
     }
-    co_return std::make_pair(std::move(handle), std::move(_return));
+    co_return std::make_pair(std::move(interactionHandle), std::move(_return));
   }
  public:
 #endif // FOLLY_HAS_COROUTINES

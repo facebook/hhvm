@@ -34,10 +34,10 @@ folly::coro::Task<{{ > types/return_type_client}}> {{ > service_common/client_cl
   auto wrappedCallback = apache::thrift::createSinkClientCallback(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 {{#function:creates_interaction?}}
-  {{function:created_interaction}} handle(channel_, "{{function:created_interaction}}");
+  {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
 {{/function:creates_interaction?}}
 
-  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -55,7 +55,7 @@ folly::coro::Task<{{ > types/return_type_client}}> {{ > service_common/client_cl
 {{/function:creates_interaction?}}
 {{#function:creates_interaction?}}
   co_return std::make_pair(
-    std::move(handle),
+    std::move(interactionHandle),
     recv_{{function:cpp_name}}(returnState)
   );
 {{/function:creates_interaction?}}

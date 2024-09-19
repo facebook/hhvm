@@ -27,7 +27,7 @@ void apache::thrift::Client<::cpp2::A>::fbthrift_send_foo(apache::thrift::Serial
 
 
 apache::thrift::Client<::cpp2::A>::I apache::thrift::Client<::cpp2::A>::createI() {
-  return I(channel_, "I");
+  return I(channel_, "I", interceptors_);
 }
 void apache::thrift::Client<::cpp2::A>::foo(std::unique_ptr<apache::thrift::RequestCallback> callback) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -961,7 +961,7 @@ namespace cpp2 {
 
 
 apache::thrift::Client<::cpp2::C>::I apache::thrift::Client<::cpp2::C>::createI() {
-  return I(channel_, "I");
+  return I(channel_, "I", interceptors_);
 }
 
 

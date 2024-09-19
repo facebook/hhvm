@@ -212,7 +212,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and RangeContains: sig
@@ -288,7 +288,7 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key x = File.to_json x
-  and to_json_value str = JSON_String str
+  and to_json_value x = JSON_String x
 end
 
 
@@ -328,7 +328,7 @@ end = struct
   type t = PackedByteSpansGroup.t list
   [@@deriving ord]
 
-  let to_json l = JSON_Array (List.map ~f:(fun x -> PackedByteSpansGroup.to_json x) l)
+  let to_json x = JSON_Array (List.map ~f:(fun x -> PackedByteSpansGroup.to_json x) x)
 end
 
 and PackedByteSpansGroup: sig

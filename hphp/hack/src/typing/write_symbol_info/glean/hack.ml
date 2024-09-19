@@ -412,8 +412,8 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
-  and to_json_value v = JSON_String (List.map ~f:Base64.encode_string v |> String.concat ~sep:"")
+  and to_json_key x = JSON_String x
+  and to_json_value x = JSON_String (List.map ~f:Base64.encode_string x|> String.concat ~sep:"")
 end
 
 and ClassDefinition: sig
@@ -513,7 +513,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and DeclarationLocation: sig
@@ -759,7 +759,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and MethodOccurrence: sig
@@ -2223,7 +2223,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and TargetUsesAbs: sig
@@ -2672,7 +2672,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and DeclarationTarget: sig

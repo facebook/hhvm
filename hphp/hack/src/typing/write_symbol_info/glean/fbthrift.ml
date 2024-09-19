@@ -229,7 +229,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and EnumValueDef: sig
@@ -838,7 +838,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and StructType: sig
@@ -1234,7 +1234,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and ServiceDefinition: sig
@@ -1685,7 +1685,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key str = JSON_String str
+  and to_json_key x = JSON_String x
 end
 
 and Namespace: sig

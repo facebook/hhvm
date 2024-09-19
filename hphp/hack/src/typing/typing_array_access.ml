@@ -68,6 +68,14 @@ let error_assign_array_append env p ty =
              });
   (env, ty)
 
+let add_error_tuple env p =
+  Typing_error_utils.add_typing_error
+    ~env
+    Typing_error.(
+      primary
+      @@ Primary.Generic_unify
+           { pos = p; msg = Reason.string_of_ureason Reason.index_tuple })
+
 let maybe_make_supportdyn r env ~supportdyn ty =
   if supportdyn then
     Typing_utils.make_supportdyn r env ty
@@ -580,25 +588,34 @@ let rec array_get
         in
         Option.iter ty_err1 ~f:(Typing_error_utils.add_typing_error ~env);
         (env, (ty, dflt_arr_res, idx_err_res))
-      (* TOOD: optional and variadic fields T201398626 T201398652 *)
-      | Ttuple { t_required = tyl; t_optional = []; t_variadic = _ } ->
+      | Ttuple { t_required; t_optional; t_variadic } -> begin
         (* requires integer literal *)
-        (match e2 with
-        | (_, p, Int n) ->
-          let idx = int_of_string_opt n in
-          (match Option.bind idx ~f:(List.nth tyl) with
-          | Some nth -> (env, (nth, dflt_arr_res, Ok ty2))
-          | None ->
-            Typing_error_utils.add_typing_error
-              ~env
-              Typing_error.(
-                primary
-                @@ Primary.Generic_unify
-                     {
-                       pos = p;
-                       msg = Reason.string_of_ureason Reason.index_tuple;
-                     });
+        match e2 with
+        | (_, p, Int idx_str) ->
+          let idx = int_of_string_opt idx_str in
+          let count_required = List.length t_required in
+          let count_optional = List.length t_optional in
+          (match idx with
+          (* Index is within required elements *)
+          | Some n when Int.(n >= 0) && Int.(n < count_required) ->
+            (env, (List.nth_exn t_required n, dflt_arr_res, Ok ty2))
+          (* Index is within optional elements; error if this isn't a null coalesce *)
+          | Some n
+            when Int.(n >= count_required)
+                 && Int.(n < count_required + count_optional) ->
+            let ty = List.nth_exn t_optional (n - count_required) in
+            if not lhs_of_null_coalesce then add_error_tuple env p;
+            (env, (ty, dflt_arr_res, Ok ty2))
+          (* Index is within variadic elements; error if this isn't a null coalesce *)
+          | Some n
+            when Int.(n >= count_required + count_optional)
+                 && not (is_nothing t_variadic) ->
+            if not lhs_of_null_coalesce then add_error_tuple env p;
+            (env, (t_variadic, dflt_arr_res, Ok ty2))
+          (* Index is out of range *)
+          | _ ->
             let (env, ty) = err_witness env p in
+            add_error_tuple env p;
             (env, (ty, dflt_arr_res, Ok ty2)))
         | (_, p, _) ->
           Typing_error_utils.add_typing_error
@@ -611,7 +628,8 @@ let rec array_get
                      msg = Reason.string_of_ureason Reason.URtuple_access;
                    });
           let (env, ty) = err_witness env expr_pos in
-          (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
+          (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none)))
+      end
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cPair ->
         let (ty_fst, ty_snd) =
@@ -838,7 +856,6 @@ let rec array_get
       | Tintersection _
       | Taccess _
       | Tlabel _
-      | Ttuple _
       | Tneg _ ->
         if not ignore_error then error_array env expr_pos expr_ty;
         let (env, res_ty) = err_witness env expr_pos in

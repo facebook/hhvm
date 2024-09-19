@@ -133,7 +133,8 @@ std::vector<t_annotation> get_fatal_annotations(
 }
 
 std::string get_fatal_string_short_id(const std::string& key) {
-  return boost::algorithm::replace_all_copy(key, ".", "_");
+  return boost::algorithm::replace_all_copy(
+      boost::algorithm::replace_all_copy(key, ".", "_"), "/", "_");
 }
 std::string get_fatal_string_short_id(const t_named* node) {
   // Use the unmodified cpp name.
@@ -144,6 +145,7 @@ std::string get_fatal_namespace_name_short_id(
     const std::string& lang, const std::string& ns) {
   std::string replacement = lang == "cpp" || lang == "cpp2" ? "__" : "_";
   std::string result = boost::algorithm::replace_all_copy(ns, ".", replacement);
+  result = boost::algorithm::replace_all_copy(result, "/", "_");
   return result;
 }
 

@@ -36,7 +36,7 @@ class type ['env] type_mapper_type =
     method on_ttuple :
       'env ->
       Typing_reason.t ->
-      Typing_defs.locl_ty list ->
+      Typing_defs.locl_phase Typing_defs.tuple_type ->
       'env * Typing_defs.locl_ty
 
     method on_tunion :

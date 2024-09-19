@@ -215,24 +215,53 @@ and intersect_ env ~r ty1 ty2 =
         let (env, inter_ty) =
           try
             match (deref ty1, deref ty2) with
-            | ((_, Ttuple tyl1), (_, Ttuple tyl2))
-              when Int.equal (List.length tyl1) (List.length tyl2) ->
-              let (env, inter_tyl) =
-                List.map2_env env tyl1 tyl2 ~f:(intersect ~r)
+            (* TODO: optional and variadic fields T201398626 T201398652 *)
+            | ( ( _,
+                  Ttuple
+                    {
+                      t_required = t_required1;
+                      t_optional = [];
+                      t_variadic = t_variadic1;
+                    } ),
+                ( _,
+                  Ttuple
+                    {
+                      t_required = t_required2;
+                      t_optional = [];
+                      t_variadic = t_variadic2;
+                    } ) )
+              when Int.equal (List.length t_required1) (List.length t_required2)
+              ->
+              let (env, t_required) =
+                List.map2_env env t_required1 t_required2 ~f:(intersect ~r)
               in
-              (env, mk (r, Ttuple inter_tyl))
+              let (env, t_variadic) =
+                intersect ~r env t_variadic1 t_variadic2
+              in
+              (env, mk (r, Ttuple { t_required; t_optional = []; t_variadic }))
             (* Runtime representation of tuples is vec, which can be observed in Hack via refinement.
              * Therefore it's sound to simplify vec<t> & (t1,...,tn) to (t & t1, ..., t & tn)
              * but because we don't support subtyping directly between tuples and vecs, we need
              * to keep the vec conjunct i.e. simplify to vec<t> & (t & t1, ..., t & tn)
              *)
-            | (((_, Tclass ((_, cn), _, [ty])) as vty), (rt, Ttuple tyl))
-            | ((rt, Ttuple tyl), ((_, Tclass ((_, cn), _, [ty])) as vty))
+            | ( ((_, Tclass ((_, cn), _, [ty])) as vty),
+                (rt, Ttuple { t_required; t_optional; t_variadic }) )
+            | ( (rt, Ttuple { t_required; t_optional; t_variadic }),
+                ((_, Tclass ((_, cn), _, [ty])) as vty) )
               when String.equal cn Naming_special_names.Collections.cVec ->
-              let (env, inter_tyl) =
-                List.map_env env tyl ~f:(fun env ty' -> intersect ~r env ty ty')
+              let (env, t_required) =
+                List.map_env env t_required ~f:(fun env ty' ->
+                    intersect ~r env ty ty')
               in
-              make_intersection env r [mk vty; mk (rt, Ttuple inter_tyl)]
+              let (env, t_optional) =
+                List.map_env env t_optional ~f:(fun env ty' ->
+                    intersect ~r env ty ty')
+              in
+              let (env, t_variadic) = intersect ~r env ty t_variadic in
+              make_intersection
+                env
+                r
+                [mk vty; mk (rt, Ttuple { t_required; t_variadic; t_optional })]
             | ( ( _,
                   Tshape
                     {

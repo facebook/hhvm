@@ -567,15 +567,30 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         lty
     in
     (env_err, lty)
-  | Ttuple tyl ->
-    let ((env, ty_err, cycles), tyl) =
+  | Ttuple { t_required; t_optional; t_variadic } ->
+    let ((env, ty_err_opt1, cycles1), t_required) =
       list_map_env_err_cycles
         env
-        tyl
+        t_required
         ~f:(localize ~ety_env)
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    ((env, ty_err, cycles), mk (r, Ttuple tyl))
+    let ((env, ty_err_opt2, cycles2), t_optional) =
+      list_map_env_err_cycles
+        env
+        t_optional
+        ~f:(localize ~ety_env)
+        ~combine_ty_errs:Typing_error.multiple_opt
+    in
+    let ((env, ty_err_opt3, cycles3), t_variadic) =
+      localize ~ety_env env t_variadic
+    in
+    let ty_err_opt =
+      Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both
+    in
+    let ty_err_opt = Option.merge ty_err_opt ty_err_opt3 ~f:Typing_error.both in
+    ( (env, ty_err_opt, cycles1 @ cycles2 @ cycles3),
+      mk (r, Ttuple { t_required; t_optional; t_variadic }) )
   | Tunion tyl ->
     let ((env, ty_err_opt, cycles), tyl) =
       list_map_env_err_cycles

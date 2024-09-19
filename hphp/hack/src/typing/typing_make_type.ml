@@ -182,7 +182,8 @@ let nullable : type a. a Reason.t_ -> a ty -> a ty =
 
 let apply r id tyl = mk (r, Tapply (id, tyl))
 
-let tuple r tyl = mk (r, Ttuple tyl)
+let tuple r tyl =
+  mk (r, Ttuple { t_required = tyl; t_optional = []; t_variadic = nothing r })
 
 let union r tyl =
   match tyl with

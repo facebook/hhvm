@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1633ec17f360ad6cb9dc27aa3797841a>>
+// @generated SignedSource<<21b95e180251e346d7a9cfe0d9191e66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -534,6 +534,30 @@ arena_deserializer::impl_deserialize_in_arena!(ShapePredicate<'arena>);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct TuplePredicate<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub tp_required: &'a [TypePredicate<'a>],
+}
+impl<'a> TrivialDrop for TuplePredicate<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TuplePredicate<'arena>);
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -554,7 +578,7 @@ pub enum TypePredicate_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     IsTag(&'a TypeTag<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    IsTupleOf(&'a [TypePredicate<'a>]),
+    IsTupleOf(&'a TuplePredicate<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     IsShapeOf(&'a ShapePredicate<'a>),
 }
@@ -582,7 +606,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypePredicate_<'arena>);
 #[repr(C)]
 pub struct TypePredicate<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::Reason<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub TypePredicate_<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a TypePredicate_<'a>,
 );
 impl<'a> TrivialDrop for TypePredicate<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypePredicate<'arena>);
@@ -725,9 +749,9 @@ pub enum Ty_<'a> {
     /// function, method, lambda, etc.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tfun(&'a FunType<'a>),
-    /// Tuple, with ordered list of the types of the elements of the tuple.
+    /// A wrapper around tuple_type, which contains information about tuple elements
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Ttuple(&'a [&'a Ty<'a>]),
+    Ttuple(&'a TupleType<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tshape(&'a ShapeType<'a>),
     /// The type of a generic parameter. The constraints on a generic parameter
@@ -1005,3 +1029,37 @@ pub struct ShapeType<'a> {
 }
 impl<'a> TrivialDrop for ShapeType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShapeType<'arena>);
+
+/// Required, optional and variadic components of a tuple. For example
+/// (string,bool,optional float,optional bool,int...)
+/// has require components string, bool, optional components float, bool
+/// and variadic component int.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(prefix = "t_")]
+#[repr(C)]
+pub struct TupleType<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub required: &'a [&'a Ty<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub optional: &'a [&'a Ty<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub variadic: &'a Ty<'a>,
+}
+impl<'a> TrivialDrop for TupleType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TupleType<'arena>);

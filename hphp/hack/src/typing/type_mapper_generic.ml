@@ -35,7 +35,8 @@ class type ['env] type_mapper_type =
 
     method on_tprim : 'env -> Reason.t -> Aast.tprim -> 'env * locl_ty
 
-    method on_ttuple : 'env -> Reason.t -> locl_ty list -> 'env * locl_ty
+    method on_ttuple :
+      'env -> Reason.t -> locl_phase tuple_type -> 'env * locl_ty
 
     method on_tunion : 'env -> Reason.t -> locl_ty list -> 'env * locl_ty
 
@@ -88,7 +89,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tprim env r p = (env, mk (r, Tprim p))
 
-    method on_ttuple env r tyl = (env, mk (r, Ttuple tyl))
+    method on_ttuple env r t = (env, mk (r, Ttuple t))
 
     method on_tunion env r tyl = (env, mk (r, Tunion tyl))
 
@@ -140,7 +141,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tnonnull -> this#on_tnonnull env r
       | Tany _ -> this#on_tany env r
       | Tprim p -> this#on_tprim env r p
-      | Ttuple tyl -> this#on_ttuple env r tyl
+      | Ttuple t -> this#on_ttuple env r t
       | Tunion tyl -> this#on_tunion env r tyl
       | Tintersection tyl -> this#on_tintersection env r tyl
       | Toption ty -> this#on_toption env r ty
@@ -176,9 +177,13 @@ class ['env] deep_type_mapper =
       let (env, tyl) = List.map_env env tyl ~f:this#on_type in
       (env, mk (r, Tintersection tyl))
 
-    method! on_ttuple env r tyl =
-      let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, mk (r, Ttuple tyl))
+    method! on_ttuple env r t =
+      let { t_variadic; t_optional; t_required } = t in
+      let (env, t_variadic) = this#on_type env t_variadic in
+      let (env, t_optional) = this#on_locl_ty_list env t_optional in
+      let (env, t_required) = this#on_locl_ty_list env t_required in
+      let t = { t_variadic; t_optional; t_required } in
+      (env, mk (r, Ttuple t))
 
     method! on_toption env r ty =
       let (env, ty) = this#on_type env ty in

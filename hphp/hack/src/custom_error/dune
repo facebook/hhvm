@@ -45,4 +45,4 @@
  (preprocess
   (pps ppx_compare ppx_sexp_conv))
  (modules custom_error_eval)
- (libraries core_kernel custom_error_types typing_defs_core typing_error))
+ (libraries core_kernel custom_error_types typing_defs_core typing_defs typing_error))

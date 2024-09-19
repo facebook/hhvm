@@ -48,6 +48,7 @@ let add_indirection_between () =
     ("patt_locl_ty", "PattLoclTy", "Params");
     ("patt_locl_ty", "ShapeField", "PattLoclTy");
     ("patt_error", "PattError", "Secondary");
+    ("typing_defs_core", "TypePredicate", "TypePredicate_");
   ]
   @
   match Configuration.mode () with

@@ -505,7 +505,26 @@ module Full = struct
     in
     (fuel, tfun_doc)
 
-  let ttuple ~fuel k tyl = list ~fuel "(" k tyl ")"
+  let ttuple ~fuel k t_required t_optional t_variadic =
+    let tuple_elem ~fuel (is_optional, is_variadic, ty) =
+      let (fuel, doc) = k ~fuel ty in
+      ( fuel,
+        if is_optional then
+          Concat [text "optional "; doc]
+        else if is_variadic then
+          Concat [doc; text "..."]
+        else
+          doc )
+    in
+    let required = List.map t_required ~f:(fun ty -> (false, false, ty)) in
+    let optional = List.map t_optional ~f:(fun ty -> (true, false, ty)) in
+    let variadic =
+      if Typing_defs.is_nothing t_variadic then
+        []
+      else
+        [(false, true, t_variadic)]
+    in
+    list ~fuel "(" tuple_elem (required @ optional @ variadic) ")"
 
   let tshape ~fuel k to_doc penv s is_open_mixed =
     let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } = s in
@@ -810,10 +829,13 @@ module Full = struct
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in
       (fuel, generic_doc)
-    | Ttuple tyl -> ttuple ~fuel k tyl
+    | Ttuple { t_required; t_optional; t_variadic } ->
+      ttuple ~fuel k t_required t_optional t_variadic
     | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl ->
-      let (fuel, tys_doc) = ttuple ~fuel k tyl in
+      let (fuel, tys_doc) =
+        ttuple ~fuel k tyl [] (Typing_make_type.nothing Reason.none)
+      in
       let union_doc = Concat [text "|"; tys_doc] in
       (fuel, union_doc)
     | Tintersection [] -> (fuel, text "mixed")
@@ -1005,7 +1027,8 @@ module Full = struct
       (fuel, dependent_doc)
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
-    | Ttuple tyl -> ttuple ~fuel k tyl
+    | Ttuple { t_required; t_optional; t_variadic } ->
+      ttuple ~fuel k t_required t_optional t_variadic
     | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl ->
       let tyl =
@@ -1172,8 +1195,8 @@ module Full = struct
     let rec predicate_doc predicate =
       match snd predicate with
       | IsTag tag -> tag_doc tag
-      | IsTupleOf predicates ->
-        let texts = List.map predicates ~f:predicate_doc in
+      | IsTupleOf { tp_required } ->
+        let texts = List.map tp_required ~f:predicate_doc in
         Concat
           ([text "("] @ List.intersperse texts ~sep:(text ", ") @ [text ")"])
       | IsShapeOf { sp_fields } ->
@@ -1512,7 +1535,13 @@ module ErrorString = struct
     | Tintersection [] -> (fuel, "a mixed value")
     | Tintersection l -> intersection ~fuel env l
     | Tvec_or_dict _ -> (fuel, "a vec_or_dict")
-    | Ttuple l -> (fuel, "a tuple of size " ^ string_of_int (List.length l))
+    | Ttuple { t_required; t_optional; t_variadic } ->
+      ( fuel,
+        (if List.is_empty t_optional && is_nothing t_variadic then
+          "a tuple of size "
+        else
+          "a tuple of size at least ")
+        ^ string_of_int (List.length t_required) )
     | Tnonnull -> (fuel, "a nonnull value")
     | Toption x ->
       let str =
@@ -1574,8 +1603,8 @@ module ErrorString = struct
       let rec str predicate =
         match predicate with
         | IsTag tag -> tag_str tag
-        | IsTupleOf predicates ->
-          let strings = List.map predicates ~f:(fun (_, pred) -> str pred) in
+        | IsTupleOf { tp_required } ->
+          let strings = List.map tp_required ~f:(fun (_, pred) -> str pred) in
           "(" ^ String.concat ~sep:", " strings ^ ")"
         | IsShapeOf { sp_fields } ->
           let texts =
@@ -1749,7 +1778,13 @@ module Json = struct
         | (p, Tvar _) -> obj @@ kind p "var"
         | _ -> from_type env ~show_like_ty ty
       end
-    | (p, Ttuple tys) -> obj @@ kind p "tuple" @ is_array false @ args tys
+    | (p, Ttuple { t_required; t_optional = _; t_variadic }) ->
+      let fields_known = is_nothing t_variadic in
+      obj
+      @@ kind p "tuple"
+      @ is_array false
+      @ [("fields_known", JSON_Bool fields_known)]
+      @ args t_required
     | (p, Tany _) -> obj @@ kind p "any"
     | (p, Tnonnull) -> obj @@ kind p "nonnull"
     | (p, Tdynamic) -> obj @@ kind p "dynamic"
@@ -1795,9 +1830,9 @@ module Json = struct
       let rec predicate_json predicate =
         match snd predicate with
         | IsTag tag -> tag_json tag
-        | IsTupleOf predicates ->
+        | IsTupleOf { tp_required } ->
           let predicates_json =
-            List.map predicates ~f:(fun p -> obj @@ predicate_json p)
+            List.map tp_required ~f:(fun p -> obj @@ predicate_json p)
           in
           name "istuple" @ [("args", JSON_Array predicates_json)]
         | IsShapeOf { sp_fields } ->
@@ -2025,7 +2060,16 @@ module Json = struct
           end
         | "tuple" ->
           get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
-          aux_args args ~keytrace:args_keytrace >>= fun args -> ty (Ttuple args)
+          aux_args args ~keytrace:args_keytrace >>= fun args ->
+          get_bool "fields_known" (json, keytrace)
+          >>= fun (fields_known, _fields_known_keytrace) ->
+          let t_variadic =
+            if fields_known then
+              Typing_make_type.nothing Reason.none
+            else
+              Typing_make_type.mixed Reason.none
+          in
+          ty (Ttuple { t_required = args; t_optional = []; t_variadic })
         | "nullable" ->
           get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           begin

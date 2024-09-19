@@ -86,9 +86,11 @@ and instantiate_ subst x =
   | (Tthis | Tmixed | Twildcard | Tdynamic | Tnonnull | Tany _ | Tprim _) as x
     ->
     x
-  | Ttuple tyl ->
-    let tyl = List.map tyl ~f:(instantiate subst) in
-    Ttuple tyl
+  | Ttuple { t_required; t_optional; t_variadic } ->
+    let t_required = List.map t_required ~f:(instantiate subst) in
+    let t_optional = List.map t_optional ~f:(instantiate subst) in
+    let t_variadic = instantiate subst t_variadic in
+    Ttuple { t_required; t_optional; t_variadic }
   | Tunion tyl ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tunion tyl

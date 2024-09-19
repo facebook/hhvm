@@ -10,6 +10,7 @@
       },
       "kind": "tuple",
       "is_array": false,
+      "fields_known": true,
       "args": [
         {
           "src_pos": {
@@ -83,6 +84,7 @@
       },
       "kind": "tuple",
       "is_array": false,
+      "fields_known": true,
       "args": [
         {
           "src_pos": {

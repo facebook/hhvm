@@ -124,16 +124,26 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     let ty = MakeType.keyed_container r index_ty element_ty in
     (env, Some ty)
   (* For tuples, we just freshen the element types *)
-  | (r, Ttuple tyl) -> begin
+  | (r, Ttuple { t_required; t_optional; t_variadic }) -> begin
     (* requires integer literal *)
     match index_expr with
     (* Should freshen type variables *)
     | (_, _, Aast.Int _) ->
-      let (env, params) =
-        List.map_env env tyl ~f:(fun env _ty ->
+      let (env, t_required) =
+        List.map_env env t_required ~f:(fun env _ty ->
             Env.fresh_type_invariant env expr_pos)
       in
-      (env, Some (MakeType.tuple r params))
+      let (env, t_optional) =
+        List.map_env env t_optional ~f:(fun env _ty ->
+            Env.fresh_type_invariant env expr_pos)
+      in
+      let (env, t_variadic) =
+        if is_nothing t_variadic then
+          (env, t_variadic)
+        else
+          Env.fresh_type_invariant env expr_pos
+      in
+      (env, Some (mk (r, Ttuple { t_required; t_optional; t_variadic })))
     | _ -> (env, None)
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
@@ -570,7 +580,8 @@ let rec array_get
         in
         Option.iter ty_err1 ~f:(Typing_error_utils.add_typing_error ~env);
         (env, (ty, dflt_arr_res, idx_err_res))
-      | Ttuple tyl ->
+      (* TOOD: optional and variadic fields T201398626 T201398652 *)
+      | Ttuple { t_required = tyl; t_optional = []; t_variadic = _ } ->
         (* requires integer literal *)
         (match e2 with
         | (_, p, Int n) ->
@@ -827,6 +838,7 @@ let rec array_get
       | Tintersection _
       | Taccess _
       | Tlabel _
+      | Ttuple _
       | Tneg _ ->
         if not ignore_error then error_array env expr_pos expr_ty;
         let (env, res_ty) = err_witness env expr_pos in
@@ -1039,16 +1051,20 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
   match deref ty with
   (* dynamic is valid for assign array get *)
   | (_, Tdynamic) -> ((env, None), Some ty)
-  | (r, Ttuple tyl) -> begin
+  | (r, Ttuple { t_required; t_optional; t_variadic }) -> begin
     (* requires integer literal *)
     match index_expr with
     (* Should freshen type variables *)
     | (_, _, Aast.Int _) ->
-      let (env, params) =
-        List.map_env env tyl ~f:(fun env _ty ->
+      let (env, t_required) =
+        List.map_env env t_required ~f:(fun env _ty ->
             Env.fresh_type_invariant env expr_pos)
       in
-      ((env, None), Some (mk (r, Ttuple params)))
+      let (env, t_optional) =
+        List.map_env env t_optional ~f:(fun env _ty ->
+            Env.fresh_type_invariant env expr_pos)
+      in
+      ((env, None), Some (mk (r, Ttuple { t_required; t_optional; t_variadic })))
     | _ -> ((env, None), None)
   end
   | _ -> ((env, None), None)
@@ -1362,7 +1378,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           iter ~f:(Typing_error_utils.add_typing_error ~env)
           @@ merge ty_err1 ty_err2 ~f:Typing_error.both);
         (env, (ety1, Ok ety1, idx_err, err_res))
-      | Ttuple tyl ->
+      (* TODO T201398626 T201398652 *)
+      | Ttuple { t_required; t_optional = []; t_variadic = _ } ->
         let fail key_err reason =
           let (_, p, _) = key in
           Typing_error_utils.add_typing_error
@@ -1377,7 +1394,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           match key with
           | (_, _, Int n) ->
             let idx = int_of_string_opt n in
-            (match Option.map ~f:(List.split_n tyl) idx with
+            (match Option.map ~f:(List.split_n t_required) idx with
             | Some (tyl', _ :: tyl'') ->
               let ty = MakeType.tuple r (tyl' @ (ty2 :: tyl'')) in
               let (env, ty) = maybe_make_supportdyn r env ~supportdyn ty in
@@ -1441,6 +1458,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
       | Tclass _
       | Taccess _
       | Tlabel _
+      | Ttuple _
       | Tneg _ ->
         Typing_error_utils.add_typing_error
           ~env

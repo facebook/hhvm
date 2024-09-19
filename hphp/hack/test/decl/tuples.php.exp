@@ -5,8 +5,10 @@
        td_type =
        (Rhint ([3:19-33]),
         (Ttuple
-           [(Rhint ([3:20-25]), (Tprim Tfloat));
-             (Rhint ([3:27-32]), (Tprim Tfloat))]));
+           { t_required =
+             [(Rhint ([3:20-25]), (Tprim Tfloat));
+               (Rhint ([3:27-32]), (Tprim Tfloat))];
+             t_optional = []; t_variadic = (Rhint ([3:19-33]), (Tunion [])) }));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package_override = None }));
   ("\\takes_tuple",
@@ -22,8 +24,11 @@
                  fp_type =
                  (Rhint ([5:22-36]),
                   (Ttuple
-                     [(Rhint ([5:23-28]), (Tprim Tfloat));
-                       (Rhint ([5:30-35]), (Tprim Tfloat))]));
+                     { t_required =
+                       [(Rhint ([5:23-28]), (Tprim Tfloat));
+                         (Rhint ([5:30-35]), (Tprim Tfloat))];
+                       t_optional = [];
+                       t_variadic = (Rhint ([5:22-36]), (Tunion [])) }));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -66,8 +71,11 @@
               ft_ret =
               (Rhint ([9:43-57]),
                (Ttuple
-                  [(Rhint ([9:44-49]), (Tprim Tfloat));
-                    (Rhint ([9:51-56]), (Tprim Tfloat))]));
+                  { t_required =
+                    [(Rhint ([9:44-49]), (Tprim Tfloat));
+                      (Rhint ([9:51-56]), (Tprim Tfloat))];
+                    t_optional = [];
+                    t_variadic = (Rhint ([9:43-57]), (Tunion [])) }));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -97,8 +105,11 @@
                  fp_type =
                  (Rhint ([13:27-33]),
                   (Ttuple
-                     [(Rhint ([13:28-29]), (Tgeneric ("T", [])));
-                       (Rhint ([13:31-32]), (Tgeneric ("T", [])))]));
+                     { t_required =
+                       [(Rhint ([13:28-29]), (Tgeneric ("T", [])));
+                         (Rhint ([13:31-32]), (Tgeneric ("T", [])))];
+                       t_optional = [];
+                       t_variadic = (Rhint ([13:27-33]), (Tunion [])) }));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -109,8 +120,11 @@
               ft_ret =
               (Rhint ([13:42-48]),
                (Ttuple
-                  [(Rhint ([13:43-44]), (Tgeneric ("T", [])));
-                    (Rhint ([13:46-47]), (Tgeneric ("T", [])))]));
+                  { t_required =
+                    [(Rhint ([13:43-44]), (Tgeneric ("T", [])));
+                      (Rhint ([13:46-47]), (Tgeneric ("T", [])))];
+                    t_optional = [];
+                    t_variadic = (Rhint ([13:42-48]), (Tunion [])) }));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

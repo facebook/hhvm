@@ -290,6 +290,10 @@ walkable!(ShapeFieldType<R> => [ty]);
 #[serde(bound = "R: Reason")]
 pub struct ShapeType<R: Reason>(pub Ty<R>, pub BTreeMap<TshapeFieldName, ShapeFieldType<R>>);
 
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
+pub struct TupleType<R: Reason>(pub Box<[Ty<R>]>, pub Box<[Ty<R>]>, pub Ty<R>);
+
 walkable!(ShapeType<R> => [0, 1]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
@@ -350,7 +354,7 @@ pub enum Ty_<R: Reason> {
     /// function, method, lambda, etc.
     Tfun(Box<FunType<R, Ty<R>>>),
     /// Tuple, with ordered list of the types of the elements of the tuple.
-    Ttuple(Box<[Ty<R>]>),
+    Ttuple(Box<TupleType<R>>),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
     Tshape(Box<ShapeType<R>>),
@@ -400,7 +404,13 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
             }
             Tlike(ty) | Toption(ty) => ty.accept(v),
             Tfun(ft) => ft.accept(v),
-            Ttuple(tys) | Tunion(tys) | Tintersection(tys) => tys.accept(v),
+            Tunion(tys) | Tintersection(tys) => tys.accept(v),
+            Ttuple(tup) => {
+                let TupleType(required, optional, variadic) = &**tup;
+                required.accept(v);
+                optional.accept(v);
+                variadic.accept(v)
+            }
             Tshape(kind_and_fields) => {
                 let ShapeType(_, fields) = &**kind_and_fields;
                 fields.accept(v)

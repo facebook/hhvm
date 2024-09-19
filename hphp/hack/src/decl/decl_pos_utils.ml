@@ -44,7 +44,13 @@ struct
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric (name, args) -> Tgeneric (name, List.map args ~f:ty)
-    | Ttuple tyl -> Ttuple (List.map tyl ~f:ty)
+    | Ttuple { t_required; t_optional; t_variadic } ->
+      Ttuple
+        {
+          t_required = List.map t_required ~f:ty;
+          t_optional = List.map t_optional ~f:ty;
+          t_variadic = ty t_variadic;
+        }
     | Tunion tyl -> Tunion (List.map tyl ~f:ty)
     | Tintersection tyl -> Tintersection (List.map tyl ~f:ty)
     | Toption x -> Toption (ty x)

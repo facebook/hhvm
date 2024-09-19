@@ -146,7 +146,15 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             typing_defs_core::Ty_::Toption(ty) => Toption(ty.into()),
             typing_defs_core::Ty_::Tprim(prim) => Tprim(*prim),
             typing_defs_core::Ty_::Tfun(ft) => Tfun(Box::new(ft.into())),
-            typing_defs_core::Ty_::Ttuple(tys) => Ttuple(slice(tys)),
+            typing_defs_core::Ty_::Ttuple(&typing_defs_core::TupleType {
+                required,
+                optional,
+                variadic,
+            }) => Ttuple(Box::new(ty::TupleType(
+                slice(required),
+                slice(optional),
+                variadic.into(),
+            ))),
             typing_defs_core::Ty_::Tshape(&typing_defs_core::ShapeType {
                 origin: _,
                 unknown_value: kind,

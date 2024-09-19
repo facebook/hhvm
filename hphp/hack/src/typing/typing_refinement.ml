@@ -34,8 +34,9 @@ let rec split_ty_by_tuple
     (ty : locl_ty)
     (sub_predicates : type_predicate list) : env * TyPartition.t =
   match deref ty with
-  | (ty_reason, Ttuple tuple_tyl) ->
-    let predicate_ty_pairs = List.zip sub_predicates tuple_tyl in
+  (* TODO: optional and variadic fields T201398626 T201398652 *)
+  | (ty_reason, Ttuple { t_required; t_optional = []; t_variadic = _ }) ->
+    let predicate_ty_pairs = List.zip sub_predicates t_required in
     begin
       match predicate_ty_pairs with
       | List.Or_unequal_lengths.Unequal_lengths ->
@@ -177,7 +178,7 @@ and split_ty
   let partition_f ((env : env), (ty_datatype : DataType.t)) :
       env * TyPartition.t =
     match snd predicate with
-    | IsTupleOf sub_predicates ->
+    | IsTupleOf { tp_required = sub_predicates } ->
       split_ty_by_tuple ~expansions ~ty_datatype env ety sub_predicates
     | IsShapeOf shape_predicate ->
       split_ty_by_shape ~expansions ~ty_datatype env ety shape_predicate
@@ -353,15 +354,18 @@ module TyPredicate = struct
     | Tprim Aast.Tnum -> Result.Ok (IsTag NumTag)
     | Tprim Aast.Tresource -> Result.Ok (IsTag ResourceTag)
     | Tprim Aast.Tnull -> Result.Ok (IsTag NullTag)
-    | Ttuple tys -> begin
+    (* TODO: optional and variadic fields T201398626 T201398652 *)
+    | Ttuple { t_required; t_optional = []; t_variadic }
+      when is_nothing t_variadic -> begin
       match
-        List.fold_left tys ~init:(Result.Ok []) ~f:(fun acc ty ->
+        List.fold_left t_required ~init:(Result.Ok []) ~f:(fun acc ty ->
             let open Result.Monad_infix in
             acc >>= fun predicates ->
             of_ty env ty >>| fun predicate -> predicate :: predicates)
       with
       | Result.Error err -> Result.Error ("tuple-" ^ err)
-      | Result.Ok predicates -> Result.Ok (IsTupleOf (List.rev predicates))
+      | Result.Ok predicates ->
+        Result.Ok (IsTupleOf { tp_required = List.rev predicates })
     end
     | Tshape { s_origin = _; s_unknown_value; s_fields } ->
       if
@@ -412,6 +416,7 @@ module TyPredicate = struct
     | Tclass _ -> Result.Error "class"
     | Tneg _ -> Result.Error "neg"
     | Tlabel _ -> Result.Error "label"
+    | Ttuple _ -> Result.Error "tuple"
 
   let rec to_ty predicate =
     let tag_to_ty reason tag =
@@ -428,8 +433,15 @@ module TyPredicate = struct
     in
     match predicate with
     | (reason, IsTag tag) -> tag_to_ty reason tag
-    | (reason, IsTupleOf predicates) ->
-      Typing_make_type.tuple reason (List.map predicates ~f:to_ty)
+    | (reason, IsTupleOf { tp_required }) ->
+      mk
+        ( reason,
+          Ttuple
+            {
+              t_required = List.map tp_required ~f:to_ty;
+              t_optional = [];
+              t_variadic = Typing_make_type.nothing reason;
+            } )
     | (reason, IsShapeOf { sp_fields }) ->
       let map =
         TShapeMap.map

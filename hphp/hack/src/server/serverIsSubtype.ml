@@ -61,9 +61,12 @@ let rec validate_free_type env locl_ty =
     | Decl_entry.NotYetAvailable ->
       ["Unbound class name " ^ class_id]
     | Decl_entry.Found _ -> validate_l env tyargs)
+  | Ttuple { t_required; t_optional; t_variadic } ->
+    validate_l env t_required
+    @ validate_l env t_optional
+    @ validate_free_type env t_variadic
   | Tunion tyargs
-  | Tintersection tyargs
-  | Ttuple tyargs ->
+  | Tintersection tyargs ->
     validate_l env tyargs
   | Toption locl_ty -> validate_free_type env locl_ty
   | Tnonnull

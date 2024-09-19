@@ -66,9 +66,11 @@ module Locl_Inst = struct
     | (Tvar _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tneg _ | Tlabel _) as x
       ->
       x
-    | Ttuple tyl ->
-      let tyl = List.map tyl ~f:(instantiate subst) in
-      Ttuple tyl
+    | Ttuple { t_required; t_optional; t_variadic } ->
+      let t_required = List.map t_required ~f:(instantiate subst) in
+      let t_optional = List.map t_optional ~f:(instantiate subst) in
+      let t_variadic = instantiate subst t_variadic in
+      Ttuple { t_required; t_optional; t_variadic }
     | Tunion tyl ->
       let tyl = List.map tyl ~f:(instantiate subst) in
       Tunion tyl
@@ -406,7 +408,10 @@ module Simple = struct
     | Tlike ty
     | Toption ty ->
       check ty
-    | Ttuple tyl
+    | Ttuple { t_required; t_optional; t_variadic } ->
+      List.iter t_required ~f:check;
+      List.iter t_optional ~f:check;
+      check t_variadic
     | Tunion tyl
     | Tintersection tyl ->
       List.iter tyl ~f:check

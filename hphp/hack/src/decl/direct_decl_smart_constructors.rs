@@ -75,6 +75,7 @@ use oxidized_by_ref::typing_defs::ShapeType;
 use oxidized_by_ref::typing_defs::TaccessType;
 use oxidized_by_ref::typing_defs::Tparam;
 use oxidized_by_ref::typing_defs::TshapeFieldName;
+use oxidized_by_ref::typing_defs::TupleType;
 use oxidized_by_ref::typing_defs::Ty;
 use oxidized_by_ref::typing_defs::Ty_;
 use oxidized_by_ref::typing_defs::TypeOrigin;
@@ -2320,11 +2321,24 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),
             ))),
-            Ty_::Ttuple(tys) => Ty_::Ttuple(
-                self.slice(
-                    tys.iter()
-                        .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
-                ),
+            Ty_::Ttuple(&TupleType {
+                required,
+                optional,
+                variadic,
+            }) => Ty_::Ttuple(
+                self.alloc(TupleType {
+                    required: self.slice(
+                        required
+                            .iter()
+                            .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
+                    ),
+                    optional: self.slice(
+                        optional
+                            .iter()
+                            .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
+                    ),
+                    variadic: self.convert_tapply_to_tgeneric(variadic),
+                }),
             ),
             Ty_::Tintersection(tys) => Ty_::Tintersection(
                 self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty))),
@@ -5392,8 +5406,16 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
         let pos = self.merge_positions(left_paren, right_paren);
+        let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
         let tys = self.slice(tys.iter().filter_map(|&node| self.node_to_ty(node)));
-        self.hint_ty(pos, Ty_::Ttuple(tys))
+        self.hint_ty(
+            pos,
+            Ty_::Ttuple(self.alloc(TupleType {
+                required: tys,
+                optional: &[],
+                variadic: self.alloc(Ty(reason, Ty_::Tunion(&[]))),
+            })),
+        )
     }
 
     fn make_tuple_type_explicit_specifier(

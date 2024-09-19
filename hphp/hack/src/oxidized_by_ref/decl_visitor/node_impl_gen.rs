@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<916227a602a680c0f11147654e52e491>>
+// @generated SignedSource<<e77b69bc3ef9a54c531ecf7694a65b2d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -616,6 +616,18 @@ impl<'a> Node<'a> for ShapePredicate<'a> {
         }
     }
 }
+impl<'a> Node<'a> for TuplePredicate<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tuple_predicate(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TuplePredicate {
+                tp_required: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for TypePredicate_<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_type_predicate_(self)
@@ -806,6 +818,28 @@ impl<'a> Node<'a> for ShapeType<'a> {
                 origin: ref __binding_0,
                 unknown_value: ref __binding_1,
                 fields: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for TupleType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tuple_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TupleType {
+                required: ref __binding_0,
+                optional: ref __binding_1,
+                variadic: ref __binding_2,
             } => {
                 {
                     __binding_0.accept(v)

@@ -254,9 +254,12 @@ and shape_predicate = {
   sp_fields: shape_field_predicate TShapeMap.t;
 }
 
+(* TODO optional and variadic components T201398626 T201398652 *)
+and tuple_predicate = { tp_required: type_predicate list }
+
 and type_predicate_ =
   | IsTag of type_tag
-  | IsTupleOf of type_predicate list
+  | IsTupleOf of tuple_predicate
   | IsShapeOf of shape_predicate
 
 and type_predicate =
@@ -355,8 +358,8 @@ and _ ty_ =
   | Tfun : 'phase ty fun_type -> 'phase ty_
       (** A wrapper around fun_type, which contains the full type information for a
        * function, method, lambda, etc. *)
-  | Ttuple : 'phase ty list -> 'phase ty_
-      (** Tuple, with ordered list of the types of the elements of the tuple. *)
+  | Ttuple : 'phase tuple_type -> 'phase ty_
+      (** A wrapper around tuple_type, which contains information about tuple elements *)
   | Tshape : 'phase shape_type -> 'phase ty_
   | Tgeneric : string * 'phase ty list -> 'phase ty_
       (** The type of a generic parameter. The constraints on a generic parameter
@@ -460,6 +463,19 @@ and 'phase shape_type = {
   s_origin: type_origin;
   s_unknown_value: 'phase ty;
   s_fields: 'phase shape_field_type TShapeMap.t;
+}
+[@@deriving hash]
+
+(**
+  Required, optional and variadic components of a tuple. For example
+    (string,bool,optional float,optional bool,int...)
+  has require components string, bool, optional components float, bool
+  and variadic component int.
+*)
+and 'phase tuple_type = {
+  t_required: 'phase ty list;
+  t_optional: 'phase ty list;
+  t_variadic: 'phase ty;
 }
 [@@deriving hash]
 
@@ -616,7 +632,7 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Ttuple a0 ->
       Format.fprintf fmt "(@[<2>Ttuple@ ";
-      pp_list pp_ty fmt a0;
+      pp_tuple_type fmt a0;
       Format.fprintf fmt "@])"
     | Tshape a0 ->
       Format.fprintf fmt "(@[<2>Tshape@ ";
@@ -758,6 +774,26 @@ module Pp = struct
 
     Format.fprintf fmt "@ }@]"
 
+  and pp_tuple_type : type a. Format.formatter -> a tuple_type -> unit =
+   fun fmt { t_required; t_optional; t_variadic } ->
+    Format.fprintf fmt "@[<2>{ ";
+
+    Format.fprintf fmt "@[%s =@ " "t_required";
+    pp_list pp_ty fmt t_required;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "t_optional";
+    pp_list pp_ty fmt t_optional;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "t_variadic";
+    pp_ty fmt t_variadic;
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt "@ }@]"
+
   let pp_decl_ty : Format.formatter -> decl_ty -> unit =
    (fun fmt ty -> pp_ty fmt ty)
 
@@ -868,8 +904,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tunion tyl1, Tunion tyl2)
     | (Tintersection tyl1, Tintersection tyl2) ->
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
-    | (Ttuple tyl1, Ttuple tyl2) ->
-      tyl_compare ~sort:false ~normalize_lists tyl1 tyl2
+    | (Ttuple t1, Ttuple t2) -> tuple_type_compare t1 t2
     | (Tgeneric (n1, args1), Tgeneric (n2, args2)) -> begin
       match String.compare n1 n2 with
       | 0 -> tyl_compare ~sort:false ~normalize_lists args1 args2
@@ -952,6 +987,31 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
             | n -> n)
           (TShapeMap.elements fields1)
           (TShapeMap.elements fields2)
+      | n -> n
+    end
+  and tuple_type_compare : type a. a tuple_type -> a tuple_type -> int =
+   fun t1 t2 ->
+    let {
+      t_variadic = t_variadic1;
+      t_optional = t_optional1;
+      t_required = t_required1;
+    } =
+      t1
+    in
+    let {
+      t_variadic = t_variadic2;
+      t_optional = t_optional2;
+      t_required = t_required2;
+    } =
+      t2
+    in
+    begin
+      match ty_compare t_variadic1 t_variadic2 with
+      | 0 -> begin
+        match List.compare ty_compare t_optional1 t_optional2 with
+        | 0 -> List.compare ty_compare t_required1 t_required2
+        | n -> n
+      end
       | n -> n
     end
   and user_attribute_param_compare p1 p2 =

@@ -7,7 +7,7 @@
  *)
 
 open Core
-module Ty = Typing_defs_core
+module Ty = Typing_defs
 
 exception Invalid_pattern of string * Validation_err.t list
 
@@ -15,7 +15,7 @@ exception Illegal_name of string
 
 module Value = struct
   type t =
-    | Ty of (Typing_defs_core.locl_ty[@compare.ignore] [@sexp.opaque])
+    | Ty of (Ty.locl_ty[@compare.ignore] [@sexp.opaque])
     | Name of ((Pos_or_decl.t[@opaque]) * string)
   [@@deriving compare, sexp]
 end
@@ -203,7 +203,10 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
         matches_name patt_name ~scrut:(ty_pos, "vec_or_dict") ~env
         >>= fun env -> aux_params patt_params [ty_key; ty_val] ~env)
     | (Option t, Ty.Toption ty) -> aux t ty ~env
-    | (Tuple ts, Ty.Ttuple tys) -> aux_tuple ts tys ~env
+    (* TODO optional and variadic fields T201398626 T201398652 *)
+    | (Tuple ts, Ty.(Ttuple { t_required; t_optional = []; t_variadic }))
+      when Ty.is_nothing t_variadic ->
+      aux_tuple ts t_required ~env
     (* -- Primitives & other base types ------------------------------------- *)
     | (Prim Null, Ty.Tprim Ast_defs.Tnull)
     | (Prim Void, Ty.Tprim Ast_defs.Tvoid)
@@ -298,12 +301,15 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
     | (Nil, _)
     | (Cons _, []) ->
       Match.no_match
-  and aux_tuple ts tys ~env =
-    match (ts, tys) with
-    | (t :: ts, ty :: tys) ->
-      Match.(aux t ty ~env >>= fun env -> aux_tuple ts tys ~env)
-    | ([], []) -> Match.matched env
-    | _ -> Match.no_match
+  and aux_tuple ts t_required ~env =
+    let rec aux_tys ts tys ~env =
+      match (ts, tys) with
+      | (t :: ts, ty :: tys) ->
+        Match.(aux t ty ~env >>= fun env -> aux_tys ts tys ~env)
+      | ([], []) -> Match.matched env
+      | _ -> Match.no_match
+    in
+    aux_tys ts t_required ~env
   in
   aux t scrut ~env
 
@@ -379,8 +385,7 @@ let matches_error ?(env = Env.empty) t ~scrut =
   (* -- Internal types: we don't expose contraint types so handle here ------ *)
   and aux_internal_ty patt_locl_ty internal_ty ~env =
     match internal_ty with
-    | Typing_defs_core.LoclType scrut ->
-      matches_locl_ty patt_locl_ty ~scrut ~env
+    | Ty.LoclType scrut -> matches_locl_ty patt_locl_ty ~scrut ~env
     | _ -> Match.no_match
   (* -- Type parameters ----------------------------------------------------- *)
   and aux_param patt_name (_, (_, scrut)) ~env =

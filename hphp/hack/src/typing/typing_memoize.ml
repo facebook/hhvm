@@ -50,7 +50,10 @@ let check_param : env -> Nast.fun_param -> unit =
           @@ Typing_error.primary
           @@ error ty
         | Toption ty -> check_memoizable env ty
-        | Ttuple tyl -> List.iter tyl ~f:(check_memoizable env)
+        | Ttuple { t_required; t_optional; t_variadic } ->
+          List.iter t_required ~f:(check_memoizable env);
+          List.iter t_optional ~f:(check_memoizable env);
+          check_memoizable env t_variadic
         (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
         | Tgeneric _ ->
           (* FIXME fun fact:

@@ -56,7 +56,7 @@ impl<R: Reason> Display for Ty_<R> {
             Taccess(ta) => write!(f, "{}::{}", ta.ty, ta.type_const.id()),
             Tfun(ft) => write!(f, "{}", ft),
             Tshape(params) => tshape(f, &params.0, &params.1),
-            Ttuple(tys) => list(f, "(", ", ", ")", tys.iter()),
+            Ttuple(tup) => ttuple(f, &tup.0, &tup.1, &tup.2),
             Trefinement(r) => {
                 write!(f, "({} with ", r.ty)?;
                 trefinements(f, &r.refinement.consts)?;
@@ -190,6 +190,42 @@ fn trefinements<TY: Display>(
         }
     }
     write!(f, "}}")
+}
+
+fn ttuple<R: Reason>(
+    f: &mut Formatter<'_>,
+    required: &[Ty<R>],
+    optional: &[Ty<R>],
+    variadic: &Ty<R>,
+) -> fmt::Result {
+    write!(f, "(")?;
+    let mut is_first = true;
+    // Closed tuple is represented by variadic having type nothing
+    for ty in required {
+        if !is_first {
+            write!(f, ", ")?;
+        }
+        is_first = false;
+        write!(f, "{}", ty)?;
+    }
+    for ty in optional {
+        if !is_first {
+            write!(f, ", ")?;
+        }
+        is_first = false;
+        write!(f, "optional {}", ty)?;
+    }
+    match &**variadic.node() {
+        // Closed tuple is represented by variadic having type nothing
+        Ty_::Tunion(tys) if tys.is_empty() => {}
+        _ => {
+            if !is_first {
+                write!(f, ", ")?;
+            }
+            write!(f, "...")?;
+        }
+    }
+    write!(f, ")")
 }
 
 fn tshape<R: Reason>(

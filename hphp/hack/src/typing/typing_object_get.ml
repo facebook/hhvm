@@ -367,7 +367,10 @@ let rec this_appears_covariantly ~contra env ty =
   in
   match get_node ty with
   | Tthis -> not contra
-  | Ttuple tyl
+  | Ttuple { t_required; t_optional; t_variadic } ->
+    List.exists t_required ~f:(this_appears_covariantly ~contra env)
+    || List.exists t_optional ~f:(this_appears_covariantly ~contra env)
+    || this_appears_covariantly ~contra env t_variadic
   | Tunion tyl
   | Tintersection tyl ->
     List.exists tyl ~f:(this_appears_covariantly ~contra env)

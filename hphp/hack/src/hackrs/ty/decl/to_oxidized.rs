@@ -156,7 +156,17 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::Toption(x) => typing_defs::Ty_::Toption(x.to_oxidized(arena)),
             Ty_::Tprim(x) => typing_defs::Ty_::Tprim(arena.alloc(*x)),
             Ty_::Tfun(x) => typing_defs::Ty_::Tfun(x.to_oxidized(arena)),
-            Ty_::Ttuple(x) => typing_defs::Ty_::Ttuple(x.to_oxidized(arena)),
+            Ty_::Ttuple(tuple) => {
+                let TupleType(required, optional, variadic) = &**tuple;
+                let variadic = variadic.to_oxidized(arena);
+                let required = required.to_oxidized(arena);
+                let optional = optional.to_oxidized(arena);
+                typing_defs::Ty_::Ttuple(arena.alloc(typing_defs::TupleType {
+                    variadic,
+                    optional,
+                    required,
+                }))
+            }
             Ty_::Tshape(shape) => {
                 let mut shape_fields = arena_collections::AssocListMut::new_in(arena);
                 let ShapeType(shape_kind, shape_field_type_map) = &**shape;

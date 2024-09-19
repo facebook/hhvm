@@ -1585,7 +1585,10 @@ and get_tyvars_i env (ty : internal_type) =
     | Tneg _ ->
       (env, Tvid.Set.empty, Tvid.Set.empty)
     | Toption ty -> get_tyvars env ty
-    | Ttuple tyl
+    | Ttuple { t_required; t_optional; t_variadic } ->
+      get_tyvars env t_variadic |> fun init ->
+      List.fold_left t_required ~init ~f:get_tyvars_union |> fun init ->
+      List.fold_left t_optional ~f:get_tyvars_union ~init
     | Tunion tyl
     | Tintersection tyl ->
       List.fold_left

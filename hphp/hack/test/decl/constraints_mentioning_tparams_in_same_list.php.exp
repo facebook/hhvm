@@ -159,8 +159,11 @@
             [(Constraint_as,
               (Rhint ([19:13-21]),
                (Ttuple
-                  [(Rhint ([19:14-16]), (Tgeneric ("Ta", [])));
-                    (Rhint ([19:18-20]), (Tgeneric ("Tb", [])))])))
+                  { t_required =
+                    [(Rhint ([19:14-16]), (Tgeneric ("Ta", [])));
+                      (Rhint ([19:18-20]), (Tgeneric ("Tb", [])))];
+                    t_optional = [];
+                    t_variadic = (Rhint ([19:13-21]), (Tunion [])) })))
               ];
             tp_reified = Erased; tp_user_attributes = [] }
           ];

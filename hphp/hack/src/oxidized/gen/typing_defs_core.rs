@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cd99be56accdb63126e1dabb18f0540c>>
+// @generated SignedSource<<bab3138fe514dc1b865365f29d47a91d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -564,10 +564,31 @@ pub struct ShapePredicate {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct TuplePredicate {
+    pub tp_required: Vec<TypePredicate>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum TypePredicate_ {
     IsTag(TypeTag),
-    IsTupleOf(Vec<TypePredicate>),
+    IsTupleOf(TuplePredicate),
     IsShapeOf(ShapePredicate),
 }
 
@@ -589,7 +610,7 @@ pub enum TypePredicate_ {
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C)]
-pub struct TypePredicate(pub reason::Reason, pub TypePredicate_);
+pub struct TypePredicate(pub reason::Reason, pub Box<TypePredicate_>);
 
 #[derive(
     Clone,
@@ -716,8 +737,8 @@ pub enum Ty_ {
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
     Tfun(FunType),
-    /// Tuple, with ordered list of the types of the elements of the tuple.
-    Ttuple(Vec<Ty>),
+    /// A wrapper around tuple_type, which contains information about tuple elements
+    Ttuple(TupleType),
     Tshape(ShapeType),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
@@ -944,6 +965,35 @@ pub struct ShapeType {
     pub origin: TypeOrigin,
     pub unknown_value: Ty,
     pub fields: t_shape_map::TShapeMap<ShapeFieldType>,
+}
+
+/// Required, optional and variadic components of a tuple. For example
+/// (string,bool,optional float,optional bool,int...)
+/// has require components string, bool, optional components float, bool
+/// and variadic component int.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(prefix = "t_")]
+#[repr(C)]
+pub struct TupleType {
+    pub required: Vec<Ty>,
+    pub optional: Vec<Ty>,
+    pub variadic: Ty,
 }
 
 #[derive(

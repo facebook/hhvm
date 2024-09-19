@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 use pos::TypeName;
 use ty::decl::subst::Subst;
 use ty::decl::ty::ShapeType;
+use ty::decl::ty::TupleType;
 use ty::decl::AbstractTypeconst;
 use ty::decl::ClassConst;
 use ty::decl::ClassRefinement;
@@ -112,11 +113,21 @@ impl<'a, R: Reason> Substitution<'a, R> {
             | Ty_::Tnonnull
             | Ty_::Tany
             | Ty_::Tprim(_) => x.clone(),
-            Ty_::Ttuple(tys) => Ty_::Ttuple(
-                tys.iter()
-                    .map(|t| self.instantiate(t))
-                    .collect::<Box<[_]>>(),
-            ),
+            Ty_::Ttuple(params) => {
+                let TupleType(ref required, ref optional, ref variadic) = **params;
+
+                Ty_::Ttuple(Box::new(TupleType(
+                    required
+                        .iter()
+                        .map(|t| self.instantiate(t))
+                        .collect::<Box<[_]>>(),
+                    optional
+                        .iter()
+                        .map(|t| self.instantiate(t))
+                        .collect::<Box<[_]>>(),
+                    self.instantiate(variadic),
+                )))
+            }
             Ty_::Tunion(tys) => Ty_::Tunion(
                 tys.iter()
                     .map(|t| self.instantiate(t))

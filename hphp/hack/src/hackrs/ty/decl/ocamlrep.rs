@@ -325,6 +325,28 @@ impl<R: Reason> FromOcamlRep for ShapeType<R> {
     }
 }
 
+impl<R: Reason> ToOcamlRep for TupleType<R> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        let Self(required, optional, variadic) = &self;
+        let mut block = alloc.block_with_size(3);
+        alloc.set_field(&mut block, 0, alloc.add(required));
+        alloc.set_field(&mut block, 1, alloc.add(optional));
+        alloc.set_field(&mut block, 2, alloc.add(variadic));
+        block.build()
+    }
+}
+
+impl<R: Reason> FromOcamlRep for TupleType<R> {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let block = ocamlrep::from::expect_tuple(value, 3)?;
+        Ok(TupleType(
+            ocamlrep::from::field(block, 0)?,
+            ocamlrep::from::field(block, 1)?,
+            ocamlrep::from::field(block, 2)?,
+        ))
+    }
+}
+
 // Hand-written because we represent shape field names differently (see comment
 // on `shape_field_name_to_ocamlrep`) and don't represent TanySentinel.
 impl<R: Reason> ToOcamlRep for Ty_<R> {

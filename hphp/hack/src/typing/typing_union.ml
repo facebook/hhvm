@@ -312,12 +312,33 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
         let (env, tyl) = union_newtype ~approx_cancel_neg env id1 tyl1 tyl2 in
         let (env, tcstr) = union ~approx_cancel_neg env tcstr1 tcstr2 in
         (env, Some (mk (r, Tnewtype (id1, tyl, tcstr))))
-    | ((_, Ttuple tyl1), (_, Ttuple tyl2)) ->
-      if Int.equal (List.length tyl1) (List.length tyl2) then
-        let (env, tyl) =
-          List.map2_env env tyl1 tyl2 ~f:(union ?reason:None ~approx_cancel_neg)
+    (* TODO: optional and variadic fields T201398626 T201398652 *)
+    | ( ( _,
+          Ttuple
+            {
+              t_required = t_required1;
+              t_optional = [];
+              t_variadic = t_variadic1;
+            } ),
+        ( _,
+          Ttuple
+            {
+              t_required = t_required2;
+              t_optional = [];
+              t_variadic = t_variadic2;
+            } ) ) ->
+      if Int.equal (List.length t_required1) (List.length t_required2) then
+        let (env, t_required) =
+          List.map2_env
+            env
+            t_required1
+            t_required2
+            ~f:(union ?reason:None ~approx_cancel_neg)
         in
-        (env, Some (mk (r, Ttuple tyl)))
+        let (env, t_variadic) =
+          union ~approx_cancel_neg env t_variadic1 t_variadic2
+        in
+        (env, Some (mk (r, Ttuple { t_required; t_optional = []; t_variadic })))
       else
         (env, None)
     | ( ( r1,

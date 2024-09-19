@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c2cf8e5e69c431750caae2aea98dec69>>
+// @generated SignedSource<<28de4c79e3c088dc5b09d5cbe4dda467>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -102,6 +102,9 @@ pub trait Visitor<'a> {
     fn visit_shape_predicate(&mut self, p: &'a ShapePredicate<'a>) {
         p.recurse(self.object())
     }
+    fn visit_tuple_predicate(&mut self, p: &'a TuplePredicate<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_type_predicate_(&mut self, p: &'a TypePredicate_<'a>) {
         p.recurse(self.object())
     }
@@ -136,6 +139,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_shape_type(&mut self, p: &'a ShapeType<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_tuple_type(&mut self, p: &'a TupleType<'a>) {
         p.recurse(self.object())
     }
     fn visit_class_const_from(&mut self, p: &'a ClassConstFrom<'a>) {

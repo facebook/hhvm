@@ -219,8 +219,11 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
   (* If it's a Tclass it's an array type by is_value_collection *)
   | Tintersection tyl -> List.exists tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   (* Only error if there isn't a type that it could be that's primitive *)
-  | Tunion tyl -> List.exists tyl ~f:(fun l -> is_safe_mut_ty env seen l)
-  | Ttuple tyl -> List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
+  | Tunion tyl -> List.exists tyl ~f:(is_safe_mut_ty env seen)
+  (* See comment about open shapes *)
+  | Ttuple { t_required; t_optional; t_variadic = _ } ->
+    List.for_all t_required ~f:(is_safe_mut_ty env seen)
+    && List.for_all t_optional ~f:(is_safe_mut_ty env seen)
   | Tdependent (_, upper) ->
     (* check upper bounds *)
     is_safe_mut_ty env seen upper

@@ -211,8 +211,10 @@ let pack_errs pos ty subtyping_errs =
      aux to subsitute the expected type where we have a type error
      then reconstruct the type in the continuation *)
   match deref ty with
-  | (r, Ttuple tys) ->
-    aux (subtyping_errs, tys) ~k:(fun tys -> mk (r, Ttuple tys))
+  | (r, Ttuple { t_required; t_optional; t_variadic }) ->
+    aux (subtyping_errs, t_required) ~k:(fun t_required ->
+        aux (subtyping_errs, t_optional) ~k:(fun t_optional ->
+            mk (r, Ttuple { t_required; t_optional; t_variadic })))
   | (r, Tclass (pos_id, exact, tys)) ->
     aux (subtyping_errs, tys) ~k:(fun tys ->
         mk (r, Tclass (pos_id, exact, tys)))
@@ -2024,7 +2026,8 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     | Decl_entry.DoesNotExist ->
       (env, (MakeType.nothing (Reason.missing_class ivar_pos), true))
   end
-  | (Ttuple ivar_tyl, Ttuple hint_tyl)
+  (* TODO optional and variadic fields T201398626 T201398652 *)
+  | (Ttuple { t_required = ivar_tyl; _ }, Ttuple { t_required = hint_tyl; _ })
     when Int.equal (List.length ivar_tyl) (List.length hint_tyl) ->
     let (env, tyl) =
       List.map2_env env ivar_tyl hint_tyl ~f:(fun env ivar_ty hint_ty ->
@@ -3437,7 +3440,8 @@ end = struct
       in
       let (env, tel, tyl) =
         match expected with
-        | Some (pos, ur, _, _, Ttuple expected_tyl) ->
+        (* TODO: optional and variadic fields T201398626 T201398652 *)
+        | Some (pos, ur, _, _, Ttuple { t_required = expected_tyl; _ }) ->
           let expected_tys =
             List.map expected_tyl ~f:(ExpectedTy.make pos ur)
           in
@@ -3472,7 +3476,7 @@ end = struct
               expected
           in
           (match expected with
-          | Some (pos, ur, _, _, Ttuple expected_tyl) ->
+          | Some (pos, ur, _, _, Ttuple { t_required = expected_tyl; _ }) ->
             let expected_tys =
               List.map expected_tyl ~f:(ExpectedTy.make pos ur)
             in

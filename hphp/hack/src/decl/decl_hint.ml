@@ -256,7 +256,8 @@ and hint_ p env = function
     Trefinement (root_ty, class_ref)
   | Htuple hl ->
     let tyl = List.map hl ~f:(hint env) in
-    Ttuple tyl
+    Ttuple
+      { t_required = tyl; t_optional = []; t_variadic = hint env (p, Hnothing) }
   | Hunion hl ->
     let tyl = List.map hl ~f:(hint env) in
     Tunion tyl

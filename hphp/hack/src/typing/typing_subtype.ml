@@ -4074,7 +4074,7 @@ end = struct
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
             in
             param_props env &&& ret_prop
-        | (_, Ttuple tyl) ->
+        | (_, Ttuple { t_required; t_optional; t_variadic }) ->
           List.fold_left
             ~init:(env, TL.valid)
             ~f:(fun res ty_sub ->
@@ -4085,7 +4085,7 @@ end = struct
                     ~lhs:{ sub_supportdyn; ty_sub }
                     ~rhs:
                       { super_like = false; super_supportdyn = false; ty_super })
-            tyl
+            ((t_variadic :: t_optional) @ t_required)
         | ( _,
             Tshape
               {
@@ -4393,9 +4393,24 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
-    (* -- C-Tuple-R --------------------------------------------------------- *)
-    | ((_, Ttuple tyl_sub), (_, Ttuple tyl_super))
-      when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
+      (* -- C-Tuple-R --------------------------------------------------------- *)
+      (* TODO optional and variadic components T201398626 T201398652 *)
+    | ( ( _,
+          Ttuple
+            {
+              t_required = t_required_sub;
+              t_optional = [];
+              t_variadic = t_variadic_sub;
+            } ),
+        ( _,
+          Ttuple
+            {
+              t_required = t_required_super;
+              t_optional = [];
+              t_variadic = t_variadic_super;
+            } ) )
+      when Int.equal (List.length t_required_super) (List.length t_required_sub)
+      ->
       wfold_left2
         (fun res ty_sub ty_super ->
           let ty_super = Sd.liken ~super_like env ty_super in
@@ -4406,8 +4421,18 @@ end = struct
                 ~lhs:{ sub_supportdyn; ty_sub }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super })
         (env, TL.valid)
-        tyl_sub
-        tyl_super
+        t_required_sub
+        t_required_super
+      &&& simplify
+            ~subtype_env
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
+            ~rhs:
+              {
+                super_like = false;
+                super_supportdyn = false;
+                ty_super = t_variadic_super;
+              }
     | ((_, Ttuple _), (_, Ttuple _)) -> invalid env ~fail
     | (_, (_, Ttuple _)) ->
       default_subtype
@@ -5428,8 +5453,14 @@ end = struct
                (mk_constraint_type (r_super, Tdestructure destructure)))
       in
       match (deref ty_sub, destructure.d_kind) with
-      | ((r, Ttuple tyl), _) ->
-        destructure_tuple ~subtype_env ~this_ty (sub_supportdyn, r, tyl) rhs env
+      (* TODO optional and variadic components T201398626 T201398652 *)
+      | ((r, Ttuple { t_required; _ }), _) ->
+        destructure_tuple
+          ~subtype_env
+          ~this_ty
+          (sub_supportdyn, r, t_required)
+          rhs
+          env
       | ((r, Tclass ((_, x), _, tyl)), _)
         when String.equal x SN.Collections.cPair ->
         destructure_tuple ~subtype_env ~this_ty (sub_supportdyn, r, tyl) rhs env
@@ -8718,10 +8749,11 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
       env
       ty1
       MakeType.(dict r (arraykey r) (mixed r))
-  | (Ttuple tyl1, Ttuple tyl2) ->
+  | (Ttuple { t_required = tyl1; _ }, Ttuple { t_required = tyl2; _ }) ->
     (match List.exists2 ~f:(is_type_disjoint_help visited env) tyl1 tyl2 with
     | List.Or_unequal_lengths.Ok res -> res
     | List.Or_unequal_lengths.Unequal_lengths -> true)
+  (* TODO optional and variadic components T201398626 T201398652 *)
   | (Ttuple _, _) ->
     (* Treat tuples as vec<mixed> because that implementation detail
        leaks through when doing is vec<_> on them, and they are also

@@ -23,6 +23,7 @@ use oxidized_by_ref::typing_defs_core::FunParams;
 use oxidized_by_ref::typing_defs_core::ShapeType;
 use oxidized_by_ref::typing_defs_core::Tparam;
 use oxidized_by_ref::typing_defs_core::TshapeFieldName;
+use oxidized_by_ref::typing_defs_core::TupleType;
 use oxidized_by_ref::typing_defs_core::Ty;
 use oxidized_by_ref::typing_defs_core::Ty_;
 use oxidized_by_ref::typing_defs_core::UserAttribute;
@@ -640,11 +641,15 @@ fn build_type_structure(outer_ty: &Ty<'_>) -> ExtDeclTypeStructure {
                 },
             ],
         },
-        Ty_::Ttuple(tys) => ExtDeclTypeStructure {
+        Ty_::Ttuple(&TupleType {
+            required,
+            optional: _,
+            variadic: _,
+        }) => ExtDeclTypeStructure {
             type_: extract_type_name(outer_ty),
             kind: String::from("tuple"),
             nullable: false,
-            subtypes: tys
+            subtypes: required
                 .iter()
                 .map(build_unnamed_type_structure_subtype)
                 .collect(),

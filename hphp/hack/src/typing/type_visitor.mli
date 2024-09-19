@@ -52,7 +52,10 @@ class type ['a] decl_type_visitor_type =
       'a
 
     method on_ttuple :
-      'a -> Typing_reason.decl_t -> Typing_defs.decl_ty list -> 'a
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_phase Typing_defs.tuple_type ->
+      'a
 
     method on_tunion :
       'a -> Typing_reason.decl_t -> Typing_defs.decl_ty list -> 'a
@@ -118,7 +121,11 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.locl_ty ->
       'a
 
-    method on_ttuple : 'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
+    method on_ttuple :
+      'a ->
+      Typing_reason.t ->
+      Typing_defs.locl_phase Typing_defs.tuple_type ->
+      'a
 
     method on_tunion : 'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
 

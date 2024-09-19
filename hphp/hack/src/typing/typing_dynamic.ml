@@ -206,11 +206,17 @@ let push_like_tyargs env tyl tparams =
 
 let rec try_push_like env ty =
   match deref ty with
-  | (r, Ttuple tyl) ->
-    let (changed, tyl) = List.map_env false tyl ~f:(make_like env) in
+  | (r, Ttuple { t_required; t_optional; t_variadic }) ->
+    let (changed, t_required) =
+      List.map_env false t_required ~f:(make_like env)
+    in
+    let (changed, t_optional) =
+      List.map_env changed t_optional ~f:(make_like env)
+    in
+    let (changed, t_variadic) = make_like env changed t_variadic in
     ( env,
       if changed then
-        Some (mk (r, Ttuple tyl))
+        Some (mk (r, Ttuple { t_required; t_optional; t_variadic }))
       else
         None )
   | (r, Tfun ft) ->
@@ -293,9 +299,15 @@ let rec strip_covariant_like env ty =
   | (env, Some ty) -> (env, ty)
   | (env, None) ->
     (match deref ty with
-    | (r, Ttuple tyl) ->
-      let (env, tyl) = List.map_env env ~f:strip_covariant_like tyl in
-      (env, mk (r, Ttuple tyl))
+    | (r, Ttuple { t_required; t_optional; t_variadic }) ->
+      let (env, t_required) =
+        List.map_env env ~f:strip_covariant_like t_required
+      in
+      let (env, t_optional) =
+        List.map_env env ~f:strip_covariant_like t_optional
+      in
+      let (env, t_variadic) = strip_covariant_like env t_variadic in
+      (env, mk (r, Ttuple { t_required; t_optional; t_variadic }))
     | (r, Tfun ft) ->
       let (env, ret_ty) = strip_covariant_like env ft.ft_ret in
       (env, mk (r, Tfun { ft with ft_ret = ret_ty }))

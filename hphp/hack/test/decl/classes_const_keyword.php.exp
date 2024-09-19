@@ -236,14 +236,20 @@
            scc_type =
            (Rhint ([41:9-32]),
             (Ttuple
-               [(Rhint ([41:10-13]), (Tprim Tint));
-                 (Rhint ([41:15-31]),
-                  (Toption
-                     (Rhint ([41:16-31]),
-                      (Ttuple
-                         [(Rhint ([41:17-23]), (Tprim Tstring));
-                           (Rhint ([41:25-30]), (Tprim Tfloat))]))))
-                 ]));
+               { t_required =
+                 [(Rhint ([41:10-13]), (Tprim Tint));
+                   (Rhint ([41:15-31]),
+                    (Toption
+                       (Rhint ([41:16-31]),
+                        (Ttuple
+                           { t_required =
+                             [(Rhint ([41:17-23]), (Tprim Tstring));
+                               (Rhint ([41:25-30]), (Tprim Tfloat))];
+                             t_optional = [];
+                             t_variadic = (Rhint ([41:16-31]), (Tunion [])) }))))
+                   ];
+                 t_optional = [];
+                 t_variadic = (Rhint ([41:9-32]), (Tunion [])) }));
            scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

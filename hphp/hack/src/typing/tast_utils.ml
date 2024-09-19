@@ -174,10 +174,13 @@ let rec truthiness env ty =
         Always_truthy
       else
         Possibly_falsy
-  | Ttuple [] -> Always_falsy
-  | Ttuple (_ :: _) ->
+  | Ttuple { t_required = []; t_optional = []; t_variadic }
+    when is_nothing t_variadic ->
+    Always_falsy
+  | Ttuple { t_required = _ :: _; _ } ->
     (* A tuple is a vec at runtime, and non-empty vecs are truthy. *)
     Always_truthy
+  | Ttuple _ -> Possibly_falsy
   | Tfun _
   | Taccess _ ->
     (* TODO(T36532263) check if that's ok *) Unknown

@@ -3439,7 +3439,13 @@ and transform_container_literal
     left_p
     members
     right_p =
-  let force_newlines = node_has_trailing_newline left_p in
+  let force_newlines =
+    node_has_trailing_newline left_p
+    &&
+    match members.Syntax.syntax with
+    | Syntax.Missing -> false
+    | _ -> true
+  in
   let ty =
     match explicit_type with
     | Some ex_ty -> t env ex_ty

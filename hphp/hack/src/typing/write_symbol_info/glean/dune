@@ -6,11 +6,11 @@
 (modules
  util
  fact_id
- fbthrift
- builtin
  gencode
  hack
- src)
+ src
+ builtin
+ fbthrift)
 (libraries
  utils_core
  core

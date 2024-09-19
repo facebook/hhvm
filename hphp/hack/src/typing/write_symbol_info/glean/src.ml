@@ -13,42 +13,7 @@ open Hh_json
 open Core [@@warning "-33"]
 
 
-module rec FileDigest: sig
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= File.t
-  [@@deriving ord]
-  and value= string
-  [@@deriving ord]
-
-  val to_json: t -> json
-
-  val to_json_key: key -> json
-  val to_json_value: value -> json
-
-end = struct
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= File.t
-  [@@deriving ord]
-  and value= string
-  [@@deriving ord]
-
-  let rec to_json = function
-    | Id f -> Util.id f
-    | Key t -> Util.key (to_json_key t)
-
-  and to_json_key x = File.to_json x
-  and to_json_value str = JSON_String str
-end
-
-and IndexFailure: sig
+module rec IndexFailure: sig
   type t =
     | Id of Fact_id.t
     | Key of key
@@ -92,15 +57,17 @@ end = struct
 
 end
 
-and RangeContains: sig
+and FileLines: sig
   type t =
     | Id of Fact_id.t
     | Key of key
   [@@deriving ord]
 
   and key= {
-    file_lines: Range.t;
-    contains: Range.t;
+    file: File.t;
+    lengths: int list;
+    ends_in_newline: bool;
+    has_unicode_or_tabs: bool;
   }
   [@@deriving ord]
 
@@ -115,8 +82,10 @@ end = struct
   [@@deriving ord]
 
   and key= {
-    file_lines: Range.t;
-    contains: Range.t;
+    file: File.t;
+    lengths: int list;
+    ends_in_newline: bool;
+    has_unicode_or_tabs: bool;
   }
   [@@deriving ord]
 
@@ -124,10 +93,53 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {file_lines; contains} = 
+  and to_json_key {file; lengths; ends_in_newline; has_unicode_or_tabs} = 
     let fields = [
-      ("fileLines", Range.to_json file_lines);
-      ("contains", Range.to_json contains);
+      ("file", File.to_json file);
+      ("lengths", JSON_Array (List.map ~f:(fun x -> JSON_Number (string_of_int x)) lengths));
+      ("endsInNewline", JSON_Bool ends_in_newline);
+      ("hasUnicodeOrTabs", JSON_Bool has_unicode_or_tabs);
+    ] in
+    JSON_Object fields
+
+end
+
+and FileLanguage: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    file: File.t;
+    language: Language.t;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    file: File.t;
+    language: Language.t;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {file; language} = 
+    let fields = [
+      ("file", File.to_json file);
+      ("language", Language.to_json language);
     ] in
     JSON_Object fields
 
@@ -203,15 +215,15 @@ end = struct
   and to_json_key str = JSON_String str
 end
 
-and FileLanguage: sig
+and RangeContains: sig
   type t =
     | Id of Fact_id.t
     | Key of key
   [@@deriving ord]
 
   and key= {
-    file: File.t;
-    language: Language.t;
+    file_lines: Range.t;
+    contains: Range.t;
   }
   [@@deriving ord]
 
@@ -226,8 +238,8 @@ end = struct
   [@@deriving ord]
 
   and key= {
-    file: File.t;
-    language: Language.t;
+    file_lines: Range.t;
+    contains: Range.t;
   }
   [@@deriving ord]
 
@@ -235,32 +247,30 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {file; language} = 
+  and to_json_key {file_lines; contains} = 
     let fields = [
-      ("file", File.to_json file);
-      ("language", Language.to_json language);
+      ("fileLines", Range.to_json file_lines);
+      ("contains", Range.to_json contains);
     ] in
     JSON_Object fields
 
 end
 
-and FileLines: sig
+and FileDigest: sig
   type t =
     | Id of Fact_id.t
     | Key of key
   [@@deriving ord]
 
-  and key= {
-    file: File.t;
-    lengths: int list;
-    ends_in_newline: bool;
-    has_unicode_or_tabs: bool;
-  }
+  and key= File.t
+  [@@deriving ord]
+  and value= string
   [@@deriving ord]
 
   val to_json: t -> json
 
   val to_json_key: key -> json
+  val to_json_value: value -> json
 
 end = struct
   type t =
@@ -268,77 +278,19 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
-    file: File.t;
-    lengths: int list;
-    ends_in_newline: bool;
-    has_unicode_or_tabs: bool;
-  }
+  and key= File.t
+  [@@deriving ord]
+  and value= string
   [@@deriving ord]
 
   let rec to_json = function
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {file; lengths; ends_in_newline; has_unicode_or_tabs} = 
-    let fields = [
-      ("file", File.to_json file);
-      ("lengths", JSON_Array (List.map ~f:(fun x -> JSON_Number (string_of_int x)) lengths));
-      ("endsInNewline", JSON_Bool ends_in_newline);
-      ("hasUnicodeOrTabs", JSON_Bool has_unicode_or_tabs);
-    ] in
-    JSON_Object fields
-
+  and to_json_key x = File.to_json x
+  and to_json_value str = JSON_String str
 end
 
-
-and RelByteSpan: sig
-  type t = {
-    offset: int;
-    length: int;
-  }
-  [@@deriving ord]
-
-  val to_json : t -> json
-end = struct
-  type t = {
-    offset: int;
-    length: int;
-  }
-  [@@deriving ord]
-
-  let to_json {offset; length} = 
-    let fields = [
-      ("offset", JSON_Number (string_of_int offset));
-      ("length", JSON_Number (string_of_int length));
-    ] in
-    JSON_Object fields
-
-end
-
-and ByteRange: sig
-  type t = {
-    begin_: int;
-    end_: int;
-  }
-  [@@deriving ord]
-
-  val to_json : t -> json
-end = struct
-  type t = {
-    begin_: int;
-    end_: int;
-  }
-  [@@deriving ord]
-
-  let to_json {begin_; end_} = 
-    let fields = [
-      ("begin", JSON_Number (string_of_int begin_));
-      ("end", JSON_Number (string_of_int end_));
-    ] in
-    JSON_Object fields
-
-end
 
 and IndexFailureReason: sig
   type t = 
@@ -364,90 +316,6 @@ end = struct
      | BuildSystemError -> JSON_Number (string_of_int 1)
      | Unclassified -> JSON_Number (string_of_int 2)
      | DiscoveryError -> JSON_Number (string_of_int 3)
-
-end
-
-and Loc: sig
-  type t = {
-    file: File.t;
-    line: int;
-    column: int;
-  }
-  [@@deriving ord]
-
-  val to_json : t -> json
-end = struct
-  type t = {
-    file: File.t;
-    line: int;
-    column: int;
-  }
-  [@@deriving ord]
-
-  let to_json {file; line; column} = 
-    let fields = [
-      ("file", File.to_json file);
-      ("line", JSON_Number (string_of_int line));
-      ("column", JSON_Number (string_of_int column));
-    ] in
-    JSON_Object fields
-
-end
-
-and ByteSpan: sig
-  type t = {
-    start: int;
-    length: int;
-  }
-  [@@deriving ord]
-
-  val to_json : t -> json
-end = struct
-  type t = {
-    start: int;
-    length: int;
-  }
-  [@@deriving ord]
-
-  let to_json {start; length} = 
-    let fields = [
-      ("start", JSON_Number (string_of_int start));
-      ("length", JSON_Number (string_of_int length));
-    ] in
-    JSON_Object fields
-
-end
-
-and Range: sig
-  type t = {
-    file: File.t;
-    line_begin: int;
-    column_begin: int;
-    line_end: int;
-    column_end: int;
-  }
-  [@@deriving ord]
-
-  val to_json : t -> json
-end = struct
-  type t = {
-    file: File.t;
-    line_begin: int;
-    column_begin: int;
-    line_end: int;
-    column_end: int;
-  }
-  [@@deriving ord]
-
-  let to_json {file; line_begin; column_begin; line_end; column_end} = 
-    let fields = [
-      ("file", File.to_json file);
-      ("lineBegin", JSON_Number (string_of_int line_begin));
-      ("columnBegin", JSON_Number (string_of_int column_begin));
-      ("lineEnd", JSON_Number (string_of_int line_end));
-      ("columnEnd", JSON_Number (string_of_int column_end));
-    ] in
-    JSON_Object fields
 
 end
 
@@ -482,6 +350,39 @@ end = struct
     let fields = [
       ("length", JSON_Number (string_of_int length));
       ("offsets", JSON_Array (List.map ~f:(fun x -> JSON_Number (string_of_int x)) offsets));
+    ] in
+    JSON_Object fields
+
+end
+
+and Range: sig
+  type t = {
+    file: File.t;
+    line_begin: int;
+    column_begin: int;
+    line_end: int;
+    column_end: int;
+  }
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t = {
+    file: File.t;
+    line_begin: int;
+    column_begin: int;
+    line_end: int;
+    column_end: int;
+  }
+  [@@deriving ord]
+
+  let to_json {file; line_begin; column_begin; line_end; column_end} = 
+    let fields = [
+      ("file", File.to_json file);
+      ("lineBegin", JSON_Number (string_of_int line_begin));
+      ("columnBegin", JSON_Number (string_of_int column_begin));
+      ("lineEnd", JSON_Number (string_of_int line_end));
+      ("columnEnd", JSON_Number (string_of_int column_end));
     ] in
     JSON_Object fields
 
@@ -532,6 +433,105 @@ end = struct
      | Thrift -> JSON_Number (string_of_int 8)
      | Java -> JSON_Number (string_of_int 9)
      | GraphQL -> JSON_Number (string_of_int 10)
+
+end
+
+and ByteRange: sig
+  type t = {
+    begin_: int;
+    end_: int;
+  }
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t = {
+    begin_: int;
+    end_: int;
+  }
+  [@@deriving ord]
+
+  let to_json {begin_; end_} = 
+    let fields = [
+      ("begin", JSON_Number (string_of_int begin_));
+      ("end", JSON_Number (string_of_int end_));
+    ] in
+    JSON_Object fields
+
+end
+
+and ByteSpan: sig
+  type t = {
+    start: int;
+    length: int;
+  }
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t = {
+    start: int;
+    length: int;
+  }
+  [@@deriving ord]
+
+  let to_json {start; length} = 
+    let fields = [
+      ("start", JSON_Number (string_of_int start));
+      ("length", JSON_Number (string_of_int length));
+    ] in
+    JSON_Object fields
+
+end
+
+and RelByteSpan: sig
+  type t = {
+    offset: int;
+    length: int;
+  }
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t = {
+    offset: int;
+    length: int;
+  }
+  [@@deriving ord]
+
+  let to_json {offset; length} = 
+    let fields = [
+      ("offset", JSON_Number (string_of_int offset));
+      ("length", JSON_Number (string_of_int length));
+    ] in
+    JSON_Object fields
+
+end
+
+and Loc: sig
+  type t = {
+    file: File.t;
+    line: int;
+    column: int;
+  }
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t = {
+    file: File.t;
+    line: int;
+    column: int;
+  }
+  [@@deriving ord]
+
+  let to_json {file; line; column} = 
+    let fields = [
+      ("file", File.to_json file);
+      ("line", JSON_Number (string_of_int line));
+      ("column", JSON_Number (string_of_int column));
+    ] in
+    JSON_Object fields
 
 end
 

@@ -13,106 +13,7 @@ open Hh_json
 open Core [@@warning "-33"]
 
 
-module rec GenCodeSignature: sig
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= string
-  [@@deriving ord]
-
-  val to_json: t -> json
-
-  val to_json_key: key -> json
-
-end = struct
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= string
-  [@@deriving ord]
-
-  let rec to_json = function
-    | Id f -> Util.id f
-    | Key t -> Util.key (to_json_key t)
-
-  and to_json_key str = JSON_String str
-end
-
-and GenCodeBySource: sig
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= {
-    source: Src.File.t;
-    gencode: Src.File.t;
-  }
-  [@@deriving ord]
-
-  val to_json: t -> json
-
-  val to_json_key: key -> json
-
-end = struct
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= {
-    source: Src.File.t;
-    gencode: Src.File.t;
-  }
-  [@@deriving ord]
-
-  let rec to_json = function
-    | Id f -> Util.id f
-    | Key t -> Util.key (to_json_key t)
-
-  and to_json_key {source; gencode} = 
-    let fields = [
-      ("source", Src.File.to_json source);
-      ("gencode", Src.File.to_json gencode);
-    ] in
-    JSON_Object fields
-
-end
-
-and GenCodeCommand: sig
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= string
-  [@@deriving ord]
-
-  val to_json: t -> json
-
-  val to_json_key: key -> json
-
-end = struct
-  type t =
-    | Id of Fact_id.t
-    | Key of key
-  [@@deriving ord]
-
-  and key= string
-  [@@deriving ord]
-
-  let rec to_json = function
-    | Id f -> Util.id f
-    | Key t -> Util.key (to_json_key t)
-
-  and to_json_key str = JSON_String str
-end
-
-and GenCodeClass: sig
+module rec GenCodeClass: sig
   type t =
     | Id of Fact_id.t
     | Key of key
@@ -204,6 +105,105 @@ end = struct
       | Some signature -> ("signature", GenCodeSignature.to_json signature) :: fields in
     JSON_Object fields
 
+end
+
+and GenCodeCommand: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= string
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= string
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key str = JSON_String str
+end
+
+and GenCodeBySource: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    source: Src.File.t;
+    gencode: Src.File.t;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= {
+    source: Src.File.t;
+    gencode: Src.File.t;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {source; gencode} = 
+    let fields = [
+      ("source", Src.File.to_json source);
+      ("gencode", Src.File.to_json gencode);
+    ] in
+    JSON_Object fields
+
+end
+
+and GenCodeSignature: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= string
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key= string
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key str = JSON_String str
 end
 
 

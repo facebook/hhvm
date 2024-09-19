@@ -562,36 +562,6 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   return MultiQueryStreamHandler(ret);
 }
 
-std::shared_ptr<QueryOperation> Connection::beginTransaction(
-    std::unique_ptr<Connection> conn) {
-  return beginQuery(std::move(conn), "BEGIN");
-}
-
-std::shared_ptr<QueryOperation> Connection::commitTransaction(
-    std::unique_ptr<Connection> conn) {
-  return beginQuery(std::move(conn), "COMMIT");
-}
-
-std::shared_ptr<QueryOperation> Connection::rollbackTransaction(
-    std::unique_ptr<Connection> conn) {
-  return beginQuery(std::move(conn), "ROLLBACK");
-}
-
-std::shared_ptr<QueryOperation> Connection::beginTransaction(
-    std::shared_ptr<QueryOperation>& op) {
-  return beginQuery(op, "BEGIN");
-}
-
-std::shared_ptr<QueryOperation> Connection::commitTransaction(
-    std::shared_ptr<QueryOperation>& op) {
-  return beginQuery(op, "COMMIT");
-}
-
-std::shared_ptr<QueryOperation> Connection::rollbackTransaction(
-    std::shared_ptr<QueryOperation>& op) {
-  return beginQuery(op, "ROLLBACK");
-}
-
 void Connection::mergePersistentQueryAttributes(QueryAttributes& attrs) const {
   for (const auto& [key, value] : getPersistentQueryAttributes()) {
     attrs[key] = value;

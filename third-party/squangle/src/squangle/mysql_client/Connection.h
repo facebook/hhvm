@@ -181,25 +181,6 @@ class Connection {
       MultiQuery&& multi_query,
       const AttributeMap& attributes = AttributeMap());
 
-  // variant that takes a QueryOperation for more convenient chaining of
-  // queries.
-  //
-  // These return QueryOperations that are used to verify success or
-  // failure.
-  static std::shared_ptr<QueryOperation> beginTransaction(
-      std::unique_ptr<Connection> conn);
-  static std::shared_ptr<QueryOperation> rollbackTransaction(
-      std::unique_ptr<Connection> conn);
-  static std::shared_ptr<QueryOperation> commitTransaction(
-      std::unique_ptr<Connection> conn);
-
-  static std::shared_ptr<QueryOperation> beginTransaction(
-      std::shared_ptr<QueryOperation>& op);
-  static std::shared_ptr<QueryOperation> rollbackTransaction(
-      std::shared_ptr<QueryOperation>& op);
-  static std::shared_ptr<QueryOperation> commitTransaction(
-      std::shared_ptr<QueryOperation>& op);
-
   // Called in the libevent thread to create the MYSQL* client.
   void initMysqlOnly();
   void initialize(bool initMysql = true);

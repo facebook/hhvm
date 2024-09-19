@@ -35,6 +35,18 @@ the dependencies and `proxygen`. You can run the tests manually with `cd _build/
 Then run `./install.sh` to install it. You can remove the temporary build directory (`_build`) and `./build.sh && ./install.sh`
 to rebase the dependencies, and then rebuild and reinstall `proxygen`.
 
+##### Package Managers
+
+You can download and install proxygen using the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
+
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    ./vcpkg integrate install
+    ./vcpkg install proxygen
+
+The proxygen port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ##### Other Platforms
 
 If you are running on another platform, you may need to install several

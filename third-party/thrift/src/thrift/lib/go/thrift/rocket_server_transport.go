@@ -80,7 +80,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 			case <-ctx.Done():
 				return nil
 			default:
-				err = fmt.Errorf("accept next conn failed: %w", err)
+				return fmt.Errorf("listener.Accept failed in rocketServerTransport.acceptLoop: %w", err)
 			}
 		}
 		if conn == nil {

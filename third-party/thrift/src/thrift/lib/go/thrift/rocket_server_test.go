@@ -21,6 +21,7 @@ import (
 	"context"
 	"net"
 	"testing"
+	"time"
 )
 
 type rocketServerTestProcessor struct {
@@ -125,4 +126,48 @@ func TestRocketServerOneWay(t *testing.T) {
 	<-received
 	cancel()
 	<-errChan
+}
+
+// Test that rocket server stops serving if listener is closed.
+func TestRocketServerCloseListener(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	errChan := make(chan error)
+	// defer close(errChan)
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatalf("failed to listen: %v", err)
+	}
+	server := NewSimpleServer(&rocketServerTestProcessor{}, listener, TransportIDRocket)
+	go func() {
+		errChan <- server.ServeContext(ctx)
+	}()
+	addr := listener.Addr()
+	conn, err := net.Dial(addr.Network(), addr.String())
+	if err != nil {
+		t.Fatalf("failed to dial: %v", err)
+	}
+	proto, err := newRocketClient(conn, ProtocolIDCompact, 0, nil)
+	if err != nil {
+		t.Fatalf("could not create client protocol: %s", err)
+	}
+	client := NewSerialChannel(proto)
+	req := &MyTestStruct{
+		St: "hello",
+	}
+	resp := &MyTestStruct{}
+	if err := client.Call(context.Background(), "test", req, resp); err != nil {
+		t.Fatalf("could not complete call: %v", err)
+	}
+	if resp.St != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", resp.St)
+	}
+	listener.Close()
+	select {
+	case <-errChan:
+		break
+	case <-time.After(3 * time.Second):
+		t.Fatalf("listener did not close")
+	}
+	cancel()
 }

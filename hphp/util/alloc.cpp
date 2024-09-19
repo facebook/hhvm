@@ -777,6 +777,12 @@ SwappableReadonlyArena* get_swappable_readonly_arena() {
 
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16"
+#if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 3) || \
+    (JEMALLOC_VERSION_MAJOR > 5) // requires jemalloc >= 5.3
+#if (JEMALLOC_VERSION_NREV >= 211)
+    ",experimental_tcache_gc:false"
+#endif
+#endif
 #if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 1) || \
     (JEMALLOC_VERSION_MAJOR > 5) // requires jemalloc >= 5.1
     ",metadata_thp:disabled"

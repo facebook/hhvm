@@ -20,21 +20,16 @@ COLOR_OFF="\033[0m"
 function detect_platform() {
   unameOut="$(uname -s)"
   case "${unameOut}" in
-      Linux*)     PLATFORM=Linux;;
+      Linux*)     PLATFORM=Linux; DISTRO="$(lsb_release -is)";;
       Darwin*)    PLATFORM=Mac;;
       *)          PLATFORM="UNKNOWN:${unameOut}"
   esac
   echo -e "${COLOR_GREEN}Detected platform: $PLATFORM ${COLOR_OFF}"
 }
 
-function install_dependencies_linux() {
+function install_dependencies_linux_default() {
   sudo apt-get install -yq \
-    git \
-    cmake \
-    m4 \
-    g++ \
-    flex \
-    bison \
+    $deps_universal \
     libgflags-dev \
     libgoogle-glog-dev \
     libkrb5-dev \
@@ -43,22 +38,68 @@ function install_dependencies_linux() {
     pkg-config \
     libssl-dev \
     libcap-dev \
-    gperf \
     libevent-dev \
     libtool \
     libboost-all-dev \
     libjemalloc-dev \
     libsnappy-dev \
-    wget \
-    unzip \
     libiberty-dev \
     liblz4-dev \
     liblzma-dev \
-    make \
     zlib1g-dev \
     binutils-dev \
     libsodium-dev \
     libdouble-conversion-dev
+}
+
+function install_dependencies_linux_fedora() {
+  sudo dnf install -y \
+    $deps_universal \
+    m4 \
+    g++ \
+    flex \
+    bison \
+    gflags-devel \
+    glog-devel \
+    krb5-libs \
+    double-conversion-devel \
+    libzstd-devel \
+    libsodium-devel \
+    binutils-devel \
+    zlib-devel \
+    make \
+    lz4-devel \
+    wget \
+    unzip \
+    snappy-devel \
+    jemalloc-devel \
+    boost-devel\
+    cyrus-sasl-devel \
+    numactl-libs \
+    openssl-devel \
+    libcap-devel \
+    libevent-devel \
+    libtool \
+    gperf
+}
+
+function install_dependencies_linux {
+  deps_universal="\
+    git \
+    cmake \
+    m4 \
+    g++ \
+    flex \
+    bison \
+    gperf \
+    wget \
+    unzip \
+    make"
+
+  case "$DISTRO" in
+      Fedora*)    install_dependencies_linux_fedora;;
+      *)          install_dependencies_linux_default;;
+  esac
 }
 
 function install_dependencies_mac() {

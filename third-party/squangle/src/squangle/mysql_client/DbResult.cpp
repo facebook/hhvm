@@ -189,6 +189,10 @@ folly::Optional<EphemeralRow> StreamedQueryResult::nextRow() {
   return current_row;
 }
 
+bool StreamedQueryResult::hasDataInNativeFormat() const {
+  return stream_handler_ && stream_handler_->hasDataInNativeFormat();
+}
+
 void StreamedQueryResult::checkStoredException() {
   if (exception_wrapper_) {
     SCOPE_EXIT {
@@ -281,6 +285,10 @@ unsigned int MultiQueryStreamHandler::mysql_errno() const {
 
 const std::string& MultiQueryStreamHandler::mysql_error() const {
   return operation_->mysql_error();
+}
+
+bool MultiQueryStreamHandler::hasDataInNativeFormat() const {
+  return operation_->hasDataInNativeFormat();
 }
 
 void MultiQueryStreamHandler::streamCallback(

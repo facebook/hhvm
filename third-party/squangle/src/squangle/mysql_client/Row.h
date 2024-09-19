@@ -18,6 +18,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include <boost/iterator/iterator_facade.hpp>
@@ -33,6 +34,7 @@
 #include <folly/json/dynamic.h>
 
 #include "squangle/mysql_client/InternalConnection.h"
+#include "squangle/mysql_client/StringStore.h"
 
 namespace facebook::common::mysql_client {
 
@@ -249,7 +251,9 @@ class RowBlock {
 
   // Is this field NULL?
   bool isNull(size_t row, size_t field_num) const {
-    return null_values_[row * row_fields_info_->numFields() + field_num];
+    CHECK_LT(row, rows_.size());
+    CHECK_LT(field_num, row_fields_info_->numFields());
+    return std::holds_alternative<std::monostate>(rows_[row][field_num]);
   }
 
   // Ditto, but by name.
@@ -300,7 +304,7 @@ class RowBlock {
 
   // Is our rowblock empty?
   bool empty() const {
-    return field_offsets_.empty();
+    return rows_.empty();
   }
 
   // How many fields and rows do we have?
@@ -310,8 +314,7 @@ class RowBlock {
 
   // How many rows are in this RowBlock?
   size_t numRows() const {
-    CHECK_EQ(0, field_offsets_.size() % row_fields_info_->numFields());
-    return field_offsets_.size() / row_fields_info_->numFields();
+    return rows_.size();
   }
 
   // Iterator support.  Allows iteration over the rows in this block.
@@ -355,19 +358,26 @@ class RowBlock {
 
   // Functions called when building a RowBlock.  Not for general use.
   void startRow() {
-    CHECK_EQ(0, field_offsets_.size() % row_fields_info_->numFields());
+    rows_.emplace_back();
+    rows_.back().reserve(row_fields_info_->numFields());
   }
   void finishRow() {
-    CHECK_EQ(0, field_offsets_.size() % row_fields_info_->numFields());
+    CHECK_EQ(rows_.back().size(), row_fields_info_->numFields());
   }
-  void appendValue(const folly::StringPiece value) {
-    field_offsets_.push_back(buffer_.size());
-    null_values_.push_back(false);
-    buffer_.insert(buffer_.end(), value.begin(), value.end());
+  template <typename T>
+  void appendValue(T value) {
+    CHECK_LT(rows_.back().size(), row_fields_info_->numFields());
+    rows_.back().emplace_back(std::forward<T>(value));
+  }
+  // Special override for folly::StringPiece to match existing code
+  template <>
+  void appendValue(folly::StringPiece value) {
+    CHECK_LT(rows_.back().size(), row_fields_info_->numFields());
+    rows_.back().push_back(value.str());
   }
   void appendNull() {
-    field_offsets_.push_back(buffer_.size());
-    null_values_.push_back(true);
+    CHECK_LT(rows_.back().size(), row_fields_info_->numFields());
+    rows_.back().push_back({});
   }
 
   // Let the compiler make our move operations.  We disallow copies below.
@@ -388,14 +398,17 @@ class RowBlock {
     }
   }
 
-  // We represent the RowBlock as a vector of char's and offsets
-  // inside of that vector.  The Nth row's Mth column's offset is
-  // field_offsets_[N * num_fields + M] and extends to
-  // field_offsets_[N * num_fields + M + 1] (or the end of the
-  // buffer for the last row/column).
-  std::vector<char> buffer_;
-  std::vector<bool> null_values_;
-  std::vector<size_t> field_offsets_;
+  using StorageColumn = std::
+      variant<std::monostate, bool, int64_t, uint64_t, double, std::string>;
+  using StorageRow = std::vector<StorageColumn>;
+
+  std::vector<StorageRow> rows_;
+
+  // Storage for strings when we convert a column to std::string_view or
+  // folly::StringPiece.  Must be `mutable` because this can occur on a
+  // `getField()` call which is a `const` method.
+  using RowColumnKey = std::pair<size_t, size_t>;
+  mutable StringStore<RowColumnKey> string_store_;
 
   // field_name_map_ and field_names_ are owned by the RowFields shared between
   // RowBlocks of same query
@@ -480,7 +493,22 @@ class EphemeralRow {
       : row_(std::move(row)), row_fields_(std::move(row_fields)) {}
 
   // Beginning simple, just give the basic indexing.
-  folly::StringPiece operator[](size_t col) const;
+  InternalRow::Type getType(size_t col) const;
+
+  bool getBool(size_t col) const;
+
+  int64_t getInt64(size_t col) const;
+
+  uint64_t getUInt64(size_t col) const;
+
+  double getDouble(size_t col) const;
+
+  folly::StringPiece getString(size_t col) const;
+
+  // Helper function to convert the data to string format - note this can be
+  // expensive as it always generates a new string.  This is useful for logging
+  // and other non-performance critical code.
+  std::string convertToString(size_t col) const;
 
   bool isNull(size_t col) const;
 
@@ -488,6 +516,10 @@ class EphemeralRow {
 
   // Calculates the number of bytes in the row data
   uint64_t calculateRowLength() const;
+
+  const EphemeralRowFields& getRowFields() const {
+    return *row_fields_;
+  }
 
   EphemeralRow(EphemeralRow const&) = delete;
   EphemeralRow& operator=(EphemeralRow const&) = delete;
@@ -503,6 +535,27 @@ class EphemeralRow {
 };
 
 // Declarations of specializations and trivial implementations.
+template <>
+bool RowBlock::getField(size_t row, size_t field_num) const;
+
+template <>
+int64_t RowBlock::getField(size_t row, size_t field_num) const;
+
+template <>
+uint64_t RowBlock::getField(size_t row, size_t field_num) const;
+
+template <>
+double RowBlock::getField(size_t row, size_t field_num) const;
+
+template <>
+std::string RowBlock::getField(size_t row, size_t field_num) const;
+
+template <>
+std::string_view RowBlock::getField(size_t row, size_t field_num) const;
+
+template <>
+folly::fbstring RowBlock::getField(size_t row, size_t field_num) const;
+
 template <>
 folly::StringPiece RowBlock::getField(size_t row, size_t field_num) const;
 

@@ -134,6 +134,8 @@ class FetchOperationImpl : virtual public OperationBase {
 
   RowStream* rowStream();
 
+  virtual bool hasDataInNativeFormat() const = 0;
+
   virtual void pauseForConsumer() = 0;
   virtual void resume() = 0;
   virtual bool isPaused() const = 0;
@@ -283,6 +285,10 @@ class FetchOperation : public Operation {
 
   bool isPaused() const {
     return impl_->isPaused();
+  }
+
+  bool hasDataInNativeFormat() const {
+    return impl_->hasDataInNativeFormat();
   }
 
   // Overridden in child classes and invoked when the Query fetching

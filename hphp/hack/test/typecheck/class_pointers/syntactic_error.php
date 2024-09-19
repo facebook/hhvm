@@ -60,3 +60,12 @@ enum class EC: mixed {
 enum E: string {
   A = E::class;
 }
+
+function ak(dict<string, mixed> $d): void {
+  $d[C::class];
+  dict[C::class => 4];
+  Map { C::class => 4 };
+  keyset[C::class];
+  Set { C::class };
+  ImmSet { C::class };
+}

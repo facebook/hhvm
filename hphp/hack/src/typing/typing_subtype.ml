@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Common
-open Utils
 open Typing_defs
 open Typing_env_types
 open Typing_logic_helpers
@@ -4394,46 +4393,95 @@ end = struct
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
       (* -- C-Tuple-R --------------------------------------------------------- *)
-      (* TODO optional and variadic components T201398626 T201398652 *)
     | ( ( _,
           Ttuple
             {
               t_required = t_required_sub;
-              t_optional = [];
+              t_optional = t_optional_sub;
               t_variadic = t_variadic_sub;
             } ),
         ( _,
           Ttuple
             {
               t_required = t_required_super;
-              t_optional = [];
+              t_optional = t_optional_super;
               t_variadic = t_variadic_super;
-            } ) )
-      when Int.equal (List.length t_required_super) (List.length t_required_sub)
-      ->
-      wfold_left2
-        (fun res ty_sub ty_super ->
-          let ty_super = Sd.liken ~super_like env ty_super in
-          res
-          &&& simplify
-                ~subtype_env
-                ~this_ty:None
-                ~lhs:{ sub_supportdyn; ty_sub }
-                ~rhs:{ super_like = false; super_supportdyn = false; ty_super })
-        (env, TL.valid)
-        t_required_sub
-        t_required_super
-      &&& simplify
-            ~subtype_env
-            ~this_ty:None
-            ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
-            ~rhs:
-              {
-                super_like = false;
-                super_supportdyn = false;
-                ty_super = t_variadic_super;
-              }
-    | ((_, Ttuple _), (_, Ttuple _)) -> invalid env ~fail
+            } ) ) ->
+      (* Subtype should have at least as many required elements as supertype *)
+      if List.length t_required_sub < List.length t_required_super then
+        invalid env ~fail
+      else
+        let sub_closed = is_nothing t_variadic_sub in
+        let super_closed = is_nothing t_variadic_super in
+        (* Shortcut: closed tuples with no optional elements should have the same arity *)
+        if
+          sub_closed
+          && super_closed
+          && List.is_empty t_optional_sub
+          && List.is_empty t_optional_super
+          && not
+               (Int.equal
+                  (List.length t_required_sub)
+                  (List.length t_required_super))
+        then
+          invalid env ~fail
+        else
+          let ty_subs = t_required_sub @ t_optional_sub in
+          let ty_supers = t_required_super @ t_optional_super in
+          let rec simplify_elems ty_subs ty_supers env =
+            match (ty_subs, ty_supers) with
+            (* We've run out of elements in the supertype so use the variadic *)
+            | (ty_sub :: ty_subs, []) ->
+              (* Shortcut if variadic supertype is nothing (closed) *)
+              if super_closed then
+                invalid env ~fail
+              else
+                let ty_super = Sd.liken ~super_like env t_variadic_super in
+                env
+                |> simplify
+                     ~subtype_env
+                     ~this_ty:None
+                     ~lhs:{ sub_supportdyn; ty_sub }
+                     ~rhs:
+                       {
+                         super_like = false;
+                         super_supportdyn = false;
+                         ty_super;
+                       }
+                &&& simplify_elems ty_subs ty_supers
+            (* We've run out of elements in both subtype and the supertype so just compare variadics *)
+            | ([], []) ->
+              let ty_super = Sd.liken ~super_like env t_variadic_super in
+              env
+              |> simplify
+                   ~subtype_env
+                   ~this_ty:None
+                   ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
+                   ~rhs:
+                     { super_like = false; super_supportdyn = false; ty_super }
+            (* We have a supertype and no more subtypes so compare variadic subtype *)
+            | ([], ty_super :: ty_supers) ->
+              let ty_super = Sd.liken ~super_like env ty_super in
+              env
+              |> simplify
+                   ~subtype_env
+                   ~this_ty:None
+                   ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
+                   ~rhs:
+                     { super_like = false; super_supportdyn = false; ty_super }
+              &&& simplify_elems ty_subs ty_supers
+            | (ty_sub :: ty_subs, ty_super :: ty_supers) ->
+              let ty_super = Sd.liken ~super_like env ty_super in
+              env
+              |> simplify
+                   ~subtype_env
+                   ~this_ty:None
+                   ~lhs:{ sub_supportdyn; ty_sub }
+                   ~rhs:
+                     { super_like = false; super_supportdyn = false; ty_super }
+              &&& simplify_elems ty_subs ty_supers
+          in
+          env |> simplify_elems ty_subs ty_supers
     | (_, (_, Ttuple _)) ->
       default_subtype
         ~subtype_env

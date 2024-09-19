@@ -65,22 +65,22 @@ class Connection {
   // Query object, it is used directly; otherwise a Query object is
   // constructed via Query(args...) and that is used for the query.
   template <typename... Args>
-  static std::shared_ptr<QueryOperation> beginQuery(
+  [[nodiscard]] static std::shared_ptr<QueryOperation> beginQuery(
       std::unique_ptr<Connection> conn,
       Args&&... args);
 
   template <typename... Args>
-  static std::shared_ptr<MultiQueryOperation> beginMultiQuery(
+  [[nodiscard]] static std::shared_ptr<MultiQueryOperation> beginMultiQuery(
       std::unique_ptr<Connection> conn,
       Args&&... args);
 
-  FOLLY_NODISCARD static folly::SemiFuture<DbQueryResult> querySemiFuture(
+  [[nodiscard]] static folly::SemiFuture<DbQueryResult> querySemiFuture(
       std::unique_ptr<Connection> conn,
       Query&& query,
       QueryCallback&& cb,
       QueryOptions&& options = QueryOptions());
 
-  FOLLY_NODISCARD static folly::SemiFuture<DbQueryResult> querySemiFuture(
+  [[nodiscard]] static folly::SemiFuture<DbQueryResult> querySemiFuture(
       std::unique_ptr<Connection> conn,
       Query&& query,
       QueryOptions&& options = QueryOptions()) {
@@ -88,14 +88,14 @@ class Connection {
         std::move(conn), std::move(query), nullptr, std::move(options));
   }
 
-  FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
+  [[nodiscard]] static folly::SemiFuture<DbMultiQueryResult>
   multiQuerySemiFuture(
       std::unique_ptr<Connection> conn,
       Query&& query,
       MultiQueryCallback&& cb,
       QueryOptions&& options = QueryOptions());
 
-  FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
+  [[nodiscard]] static folly::SemiFuture<DbMultiQueryResult>
   multiQuerySemiFuture(
       std::unique_ptr<Connection> conn,
       Query&& query,
@@ -104,14 +104,14 @@ class Connection {
         std::move(conn), std::move(query), nullptr, std::move(options));
   }
 
-  FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
+  [[nodiscard]] static folly::SemiFuture<DbMultiQueryResult>
   multiQuerySemiFuture(
       std::unique_ptr<Connection> conn,
       std::vector<Query>&& queries,
       MultiQueryCallback&& cb,
       QueryOptions&& options = QueryOptions());
 
-  FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
+  [[nodiscard]] static folly::SemiFuture<DbMultiQueryResult>
   multiQuerySemiFuture(
       std::unique_ptr<Connection> conn,
       std::vector<Query>&& queries,
@@ -133,7 +133,8 @@ class Connection {
   }
 
   // Experimental
-  virtual std::shared_ptr<MultiQueryStreamOperation> createOperation(
+  [[nodiscard]] virtual std::shared_ptr<MultiQueryStreamOperation>
+  createOperation(
       std::unique_ptr<OperationBase::ConnectionProxy> proxy,
       MultiQuery&& multi_query) {
     auto impl = client().createFetchOperationImpl(std::move(proxy));
@@ -142,9 +143,8 @@ class Connection {
   }
 
   template <typename... Args>
-  static std::shared_ptr<MultiQueryStreamOperation> beginMultiQueryStreaming(
-      std::unique_ptr<Connection> conn,
-      Args&&... args);
+  [[nodiscard]] static std::shared_ptr<MultiQueryStreamOperation>
+  beginMultiQueryStreaming(std::unique_ptr<Connection> conn, Args&&... args);
 
   // Synchronous calls
   template <typename... Args>
@@ -171,12 +171,12 @@ class Connection {
   // EXPERIMENTAL
 
   // StreamResultHandler
-  static MultiQueryStreamHandler streamMultiQuery(
+  [[nodiscard]] static MultiQueryStreamHandler streamMultiQuery(
       std::unique_ptr<Connection> connection,
       std::vector<Query>&& queries,
       const AttributeMap& attributes = AttributeMap());
 
-  static MultiQueryStreamHandler streamMultiQuery(
+  [[nodiscard]] static MultiQueryStreamHandler streamMultiQuery(
       std::unique_ptr<Connection> connection,
       MultiQuery&& multi_query,
       const AttributeMap& attributes = AttributeMap());
@@ -185,15 +185,15 @@ class Connection {
   void initMysqlOnly();
   void initialize(bool initMysql = true);
 
-  bool hasInitialized() const {
+  [[nodiscard]] bool hasInitialized() const noexcept {
     return initialized_;
   }
 
-  bool ok() const {
+  [[nodiscard]] bool ok() const noexcept {
     return mysql_connection_ != nullptr;
   }
 
-  void close() {
+  void close() noexcept {
     if (mysql_connection_) {
       mysql_connection_.reset();
     }
@@ -214,14 +214,14 @@ class Connection {
     mysql_connection_->setLastActivityTime(last_activity_time);
   }
 
-  Timepoint getLastActivityTime() const {
+  [[nodiscard]] Timepoint getLastActivityTime() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->getLastActivityTime();
   }
 
   // Returns the MySQL server version. If the connection has been closed
   // an error is generated.
-  std::string serverInfo() const {
+  [[nodiscard]] std::string serverInfo() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->serverInfo();
   }
@@ -229,62 +229,62 @@ class Connection {
   // Returns whether or not the SSL session was reused from a previous
   // connection.
   // If the connection isn't SSL, it will return false as well.
-  bool sslSessionReused() const {
+  [[nodiscard]] bool sslSessionReused() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->sslSessionReused();
   }
 
   // Checks if `client_flag` is set for SSL.
-  bool isSSL() const;
+  [[nodiscard]] bool isSSL() const;
 
   // Escape the provided string using mysql_real_escape_string(). You almost
   // certainly don't want to use this - look at the Query class instead.
   //
   // This is provided so that non-Facebook users of the HHVM extension have
   // a familiar API.
-  std::string escapeString(folly::StringPiece unescaped) const {
+  [[nodiscard]] std::string escapeString(folly::StringPiece unescaped) const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->InternalConnection::escapeString(unescaped);
   }
 
   // Returns the number of errors, warnings, and notes generated during
   // execution of the previous SQL statement
-  unsigned int warningCount() const {
+  [[nodiscard]] unsigned int warningCount() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->warningCount();
   }
 
-  const std::string& host() const {
+  [[nodiscard]] const std::string& host() const {
     return getKeyRef().host();
   }
-  int port() const {
+  [[nodiscard]] int port() const {
     return getKeyRef().port();
   }
-  const std::string& user() const {
+  [[nodiscard]] const std::string& user() const {
     return getKeyRef().user();
   }
-  const std::string& database() const {
+  [[nodiscard]] const std::string& database() const {
     return getKeyRef().db_name();
   }
 
-  const std::string& password() const {
+  [[nodiscard]] const std::string& password() const {
     return getKeyRef().password();
   }
 
-  MysqlClientBase& client() const {
+  [[nodiscard]] MysqlClientBase& client() const noexcept {
     return mysql_client_;
   }
 
-  long mysqlThreadId() const {
+  [[nodiscard]] long mysqlThreadId() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->threadId();
   }
 
-  ConnectionHolder* mysql_for_testing_only() const {
+  [[nodiscard]] ConnectionHolder* mysql_for_testing_only() const {
     return mysql_connection_.get();
   }
 
-  std::unique_ptr<ConnectionHolder> stealConnectionHolder(
+  [[nodiscard]] std::unique_ptr<ConnectionHolder> stealConnectionHolder(
       bool skipCheck = false) {
     if (!skipCheck) {
       DCHECK(isInEventBaseThread());
@@ -292,11 +292,11 @@ class Connection {
     return std::move(mysql_connection_);
   }
 
-  std::shared_ptr<const ConnectionKey> getKey() const {
+  [[nodiscard]] std::shared_ptr<const ConnectionKey> getKey() const {
     return conn_key_;
   }
 
-  const ConnectionKey& getKeyRef() const {
+  [[nodiscard]] const ConnectionKey& getKeyRef() const {
     return *conn_key_;
   }
 
@@ -306,7 +306,7 @@ class Connection {
     }
   }
 
-  bool isReusable() const {
+  [[nodiscard]] bool isReusable() const {
     if (mysql_connection_) {
       return mysql_connection_->isReusable();
     }
@@ -322,12 +322,12 @@ class Connection {
     mysql_connection_->setReusable(false);
   }
 
-  bool inTransaction() const {
+  [[nodiscard]] bool inTransaction() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->inTransaction();
   }
 
-  const ConnectionOptions& getConnectionOptions() const {
+  [[nodiscard]] const ConnectionOptions& getConnectionOptions() const {
     return conn_options_;
   }
 
@@ -339,7 +339,7 @@ class Connection {
     killOnQueryTimeout_ = killOnQueryTimeout;
   }
 
-  bool getKillOnQueryTimeout() {
+  [[nodiscard]] bool getKillOnQueryTimeout() {
     return killOnQueryTimeout_;
   }
 
@@ -374,23 +374,23 @@ class Connection {
         std::move(callbacks.post_query_callback_));
   }
 
-  const folly::EventBase* getEventBase() const {
+  [[nodiscard]] const folly::EventBase* getEventBase() const {
     return client().getEventBase();
   }
 
-  folly::EventBase* getEventBase() {
+  [[nodiscard]] folly::EventBase* getEventBase() {
     return client().getEventBase();
   }
 
-  bool isInEventBaseThread() const {
+  [[nodiscard]] bool isInEventBaseThread() const {
     return isInCorrectThread(true);
   }
 
-  bool isNotInEventBaseThread() const {
+  [[nodiscard]] bool isNotInEventBaseThread() const {
     return isInCorrectThread(false);
   }
 
-  bool isInCorrectThread(bool expectMysqlThread) const {
+  [[nodiscard]] bool isInCorrectThread(bool expectMysqlThread) const {
     return client().isInCorrectThread(expectMysqlThread);
   }
 
@@ -466,7 +466,7 @@ class Connection {
 
   virtual std::unique_ptr<InternalConnection> createInternalConnection() = 0;
 
-  ChainedCallback setCallback(
+  [[nodiscard]] ChainedCallback setCallback(
       ChainedCallback orgCallback,
       ChainedCallback newCallback) {
     if (!orgCallback) {
@@ -484,7 +484,7 @@ class Connection {
     };
   }
 
-  ConnectionHolder* mysqlConnection() const {
+  [[nodiscard]] ConnectionHolder* mysqlConnection() const {
     DCHECK(isInEventBaseThread());
     return mysql_connection_.get();
   }
@@ -493,7 +493,7 @@ class Connection {
   // on the specified in the templates. Being used to avoid duplicated code
   // that both need to do.
   template <typename QueryType, typename QueryArg>
-  static std::shared_ptr<QueryType> beginAnyQuery(
+  [[nodiscard]] static std::shared_ptr<QueryType> beginAnyQuery(
       std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
       QueryArg&& query);
 

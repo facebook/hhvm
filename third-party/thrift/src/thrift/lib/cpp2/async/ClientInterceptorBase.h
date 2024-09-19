@@ -33,11 +33,31 @@ class ClientInterceptorBase {
 
   struct RequestInfo {
     detail::ClientInterceptorOnRequestStorage* storage = nullptr;
+    /**
+     * The name of the service definition as specified in Thrift IDL.
+     */
+    const char* serviceName = nullptr;
+    /**
+     * The name of the method as specified in Thrift IDL. This does NOT include
+     * the service name. If the method is an interaction method, then it will be
+     * in the format `{interaction_name}.{method_name}`.
+     */
+    const char* methodName = nullptr;
   };
   virtual void internal_onRequest(RequestInfo) = 0;
 
   struct ResponseInfo {
     detail::ClientInterceptorOnRequestStorage* storage = nullptr;
+    /**
+     * The name of the service definition as specified in Thrift IDL.
+     */
+    const char* serviceName = nullptr;
+    /**
+     * The name of the method as specified in Thrift IDL. This does NOT include
+     * the service name. If the method is an interaction method, then it will be
+     * in the format `{interaction_name}.{method_name}`.
+     */
+    const char* methodName = nullptr;
   };
   virtual void internal_onResponse(ResponseInfo) = 0;
 };

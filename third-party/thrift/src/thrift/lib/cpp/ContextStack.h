@@ -113,8 +113,12 @@ class ContextStack {
       handlers_;
   std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>
       clientInterceptors_;
+  // Must be NUL-terminated.
   const char* const serviceName_;
-  const char* const method_;
+  // "{service_name}.{method_name}"
+  const char* const methodNamePrefixed_;
+  // "{method_name}", without the service name prefix
+  const char* const methodNameUnprefixed_;
   void** serviceContexts_;
   // While the server-side has a Cpp2RequestContext, the client-side "fakes" it
   // with an embedded version. We can't make it nullptr because this is the API

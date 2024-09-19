@@ -339,12 +339,39 @@ class ClientInterceptorThatThrowsOnResponse
   }
 };
 
+class TracingClientInterceptor : public NamedClientInterceptor<folly::Unit> {
+ public:
+  using NamedClientInterceptor::NamedClientInterceptor;
+
+  using Trace = std::pair<std::string, std::string>;
+  const std::vector<Trace>& requests() const { return requests_; }
+  const std::vector<Trace>& responses() const { return responses_; }
+
+  std::optional<folly::Unit> onRequest(RequestInfo requestInfo) override {
+    requests_.push_back(
+        {std::string(requestInfo.serviceName),
+         std::string(requestInfo.methodName)});
+    return folly::unit;
+  }
+
+  void onResponse(folly::Unit*, ResponseInfo responseInfo) override {
+    responses_.push_back(
+        {std::string(responseInfo.serviceName),
+         std::string(responseInfo.methodName)});
+  }
+
+ private:
+  std::vector<Trace> requests_;
+  std::vector<Trace> responses_;
+};
+
 } // namespace
 
 CO_TEST_P(ClientInterceptorTestP, Basic) {
   auto interceptor =
       std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
-  auto client = makeClient(makeInterceptorsList(interceptor));
+  auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
+  auto client = makeClient(makeInterceptorsList(interceptor, tracer));
 
   co_await client->echo("foo");
   EXPECT_EQ(interceptor->onRequestCount, 1);
@@ -353,6 +380,14 @@ CO_TEST_P(ClientInterceptorTestP, Basic) {
   co_await client->noop();
   EXPECT_EQ(interceptor->onRequestCount, 2);
   EXPECT_EQ(interceptor->onResponseCount, 2);
+
+  using Trace = TracingClientInterceptor::Trace;
+  const std::vector<Trace> expectedTrace{
+      Trace{"ClientInterceptorTest", "echo"},
+      Trace{"ClientInterceptorTest", "noop"},
+  };
+  EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
+  EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
 }
 
 CO_TEST_P(ClientInterceptorTestP, OnRequestException) {
@@ -362,8 +397,9 @@ CO_TEST_P(ClientInterceptorTestP, OnRequestException) {
       std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor2");
   auto interceptor3 =
       std::make_shared<ClientInterceptorThatThrowsOnRequest>("Interceptor3");
+  auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
   auto client = makeClient(
-      makeInterceptorsList(interceptor1, interceptor2, interceptor3));
+      makeInterceptorsList(interceptor1, interceptor2, interceptor3, tracer));
 
   EXPECT_THROW(
       {
@@ -387,6 +423,11 @@ CO_TEST_P(ClientInterceptorTestP, OnRequestException) {
   EXPECT_EQ(interceptor1->onResponseCount, 0);
   EXPECT_EQ(interceptor2->onResponseCount, 0);
   EXPECT_EQ(interceptor3->onResponseCount, 0);
+
+  using Trace = TracingClientInterceptor::Trace;
+  EXPECT_THAT(
+      tracer->requests(), ElementsAre(Trace{"ClientInterceptorTest", "noop"}));
+  EXPECT_THAT(tracer->responses(), IsEmpty());
 }
 
 CO_TEST_P(ClientInterceptorTestP, IterationOrder) {
@@ -556,7 +597,9 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
     auto interceptor2 =
         std::make_shared<ClientInterceptorCountWithRequestState>(
             "Interceptor2");
-    auto client = makeClient(makeInterceptorsList(interceptor1, interceptor2));
+    auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
+    auto client =
+        makeClient(makeInterceptorsList(interceptor1, interceptor2, tracer));
 
     {
       auto interaction = co_await client->createInteraction();
@@ -582,6 +625,15 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
       EXPECT_EQ(interceptor->onRequestCount, 3);
       EXPECT_EQ(interceptor->onResponseCount, 3);
     }
+
+    using Trace = TracingClientInterceptor::Trace;
+    const std::vector<Trace> expectedTrace{
+        Trace{"ClientInterceptorTest", "createInteraction"},
+        Trace{"ClientInterceptorTest", "SampleInteraction.echo"},
+        Trace{"ClientInterceptorTest", "echo"},
+    };
+    EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
+    EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
   }
 
   // With initial response
@@ -592,7 +644,9 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
     auto interceptor2 =
         std::make_shared<ClientInterceptorCountWithRequestState>(
             "Interceptor2");
-    auto client = makeClient(makeInterceptorsList(interceptor1, interceptor2));
+    auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
+    auto client =
+        makeClient(makeInterceptorsList(interceptor1, interceptor2, tracer));
     {
       auto [interaction, response] =
           co_await client->createInteractionAndEcho("hello");
@@ -618,6 +672,15 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
       EXPECT_EQ(interceptor->onRequestCount, 3);
       EXPECT_EQ(interceptor->onResponseCount, 3);
     }
+
+    using Trace = TracingClientInterceptor::Trace;
+    const std::vector<Trace> expectedTrace{
+        Trace{"ClientInterceptorTest", "createInteractionAndEcho"},
+        Trace{"ClientInterceptorTest", "SampleInteraction.echo"},
+        Trace{"ClientInterceptorTest", "echo"},
+    };
+    EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
+    EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
   }
 }
 

@@ -13,7 +13,7 @@ type kind =
   | Simple of Cost.t
   | Always
   | Parental
-[@@deriving eq]
+[@@deriving eq, show { with_path = false }]
 
 let is_always = function
   | Always -> true

@@ -218,7 +218,8 @@ let dump ?(ignored = false) node =
       | Nest nodes -> dump_list "Nest" nodes
       | ConditionalNest nodes -> dump_list "ConditionalNest" nodes
       | BlockNest nodes -> dump_list "BlockNest" nodes
-      | WithRule (_, body) -> dump_list "WithRule" [body]
+      | WithRule (kind, body) ->
+        dump_list ("WithRule " ^ Rule.show_kind kind) [body]
       | WithLazyRule (_, before, body) ->
         print "WithLazyRule ([";
         dump_list_items [before];

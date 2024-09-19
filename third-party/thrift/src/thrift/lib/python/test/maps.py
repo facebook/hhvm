@@ -283,14 +283,13 @@ class MapImmutablePythonTests(unittest.TestCase):
 
 # TODO: Collapse these two test cases into parameterized test above
 class MapMutablePythonTests(unittest.TestCase):
-    # pyre-ignore
     Color = mutable_containers_types.Color
-    # pyre-ignore
     Maps = mutable_containers_types.Maps
 
     # this test case documents behavior divergences from thrift-python
     @unittest.expectedFailure
     def test_contains_enum(self) -> None:
+        # pyre-ignore[6]: Fixme: type error to be addressed later
         cmap = self.Maps(colorMap={c: c for c in [self.Color.red, self.Color.blue]})
         # TODO(T194526180): mutable thrift-python should not raise
         self.assertNotIn("str", cmap.colorMap)

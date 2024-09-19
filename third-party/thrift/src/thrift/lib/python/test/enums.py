@@ -447,6 +447,7 @@ class FlagTests(unittest.TestCase):
 )
 class EnumMetaTests(unittest.TestCase):
     def setUp(self) -> None:
+        # pyre-ignore[16]: has no attribute `test_types`
         self.Color: Type[Color] = self.test_types.Color
         self.Kind: Type[Kind] = self.test_types.Kind
         self.Perm: Type[Perm] = self.test_types.Perm

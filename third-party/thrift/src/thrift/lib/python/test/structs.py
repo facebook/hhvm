@@ -34,7 +34,6 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
-# pyre-ignore[21]: Could not find a name
 from testing.thrift_mutable_types import __Reserved as DoubleUnderscoreReservedMutable
 
 from testing.thrift_types import (
@@ -98,10 +97,10 @@ class StructTestsParameterized(unittest.TestCase):
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        # pyre-ignore[8]: Intentional for test
         self.DoubleUnderscoreReserved: Type[DoubleUnderscoreReserved] = (
             DoubleUnderscoreReserved
             if not self.is_mutable_run
-            # pyre-ignore[16]: no attribute
             else DoubleUnderscoreReservedMutable
         )
         # pyre-ignore[16]: has no attribute `serializer_module`

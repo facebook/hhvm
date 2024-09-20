@@ -148,6 +148,8 @@ type t = {
   interrupt_on_client: bool;
   trace_parsing: bool;
   prechecked_files: bool;
+      (** Whether we use the prechecked algorithm, which only includes the fanout of
+          changes since the mergebase when initializing *)
   enable_global_access_check: bool;
       (** run global access checker to check global writes and reads *)
   enable_type_check_filter_files: bool;

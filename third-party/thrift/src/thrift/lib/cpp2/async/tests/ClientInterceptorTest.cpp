@@ -84,6 +84,13 @@ struct TestHandler
     };
     co_return {std::make_unique<SampleInteractionImpl>(), std::move(str)};
   }
+
+  folly::coro::Task<std::unique_ptr<std::string>> co_requestArgs(
+      std::int32_t,
+      std::unique_ptr<std::string>,
+      std::unique_ptr<test::RequestArgsStruct>) override {
+    co_return std::make_unique<std::string>("return value");
+  }
 };
 
 class ClientInterface {
@@ -104,6 +111,9 @@ class ClientInterface {
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
       std::string>>
   createInteractionAndEcho(std::string str) = 0;
+
+  virtual folly::coro::Task<std::string> requestArgs(
+      std::int32_t arg1, std::string arg2, test::RequestArgsStruct arg3) = 0;
 
  protected:
   std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>> client_;
@@ -131,6 +141,14 @@ class CoroClientInterface : public ClientInterface {
   createInteractionAndEcho(std::string str) override {
     co_return co_await client_->co_createInteractionAndEcho(std::move(str));
   }
+
+  folly::coro::Task<std::string> requestArgs(
+      std::int32_t arg1,
+      std::string arg2,
+      test::RequestArgsStruct arg3) override {
+    co_return co_await client_->co_requestArgs(
+        arg1, std::move(arg2), std::move(arg3));
+  }
 };
 
 class SyncClientInterface : public ClientInterface {
@@ -157,6 +175,15 @@ class SyncClientInterface : public ClientInterface {
   createInteractionAndEcho(std::string str) override {
     co_return client_->sync_createInteractionAndEcho(std::move(str));
   }
+
+  folly::coro::Task<std::string> requestArgs(
+      std::int32_t arg1,
+      std::string arg2,
+      test::RequestArgsStruct arg3) override {
+    std::string ret;
+    client_->sync_requestArgs(ret, arg1, std::move(arg2), std::move(arg3));
+    co_return ret;
+  }
 };
 
 class SemiFutureClientInterface : public ClientInterface {
@@ -181,6 +208,14 @@ class SemiFutureClientInterface : public ClientInterface {
     co_return co_await client_->semifuture_createInteractionAndEcho(
         std::move(str));
   }
+
+  folly::coro::Task<std::string> requestArgs(
+      std::int32_t arg1,
+      std::string arg2,
+      test::RequestArgsStruct arg3) override {
+    co_return co_await client_->semifuture_requestArgs(
+        arg1, std::move(arg2), std::move(arg3));
+  }
 };
 
 class FutureClientInterface : public ClientInterface {
@@ -201,6 +236,14 @@ class FutureClientInterface : public ClientInterface {
       std::string>>
   createInteractionAndEcho(std::string) override {
     throw std::logic_error("future_* functions do not support interactions");
+  }
+
+  folly::coro::Task<std::string> requestArgs(
+      std::int32_t arg1,
+      std::string arg2,
+      test::RequestArgsStruct arg3) override {
+    co_return co_await client_->future_requestArgs(
+        arg1, std::move(arg2), std::move(arg3));
   }
 };
 
@@ -682,6 +725,44 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
     EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
     EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
   }
+}
+
+CO_TEST_P(ClientInterceptorTestP, RequestArguments) {
+  class ClientInterceptorWithRequestArguments
+      : public NamedClientInterceptor<folly::Unit> {
+   public:
+    using RequestState = folly::Unit;
+
+    using NamedClientInterceptor::NamedClientInterceptor;
+
+    std::optional<RequestState> onRequest(RequestInfo requestInfo) override {
+      argsCount = requestInfo.arguments.count();
+      arg1 = requestInfo.arguments.get(0)->value<std::int32_t>();
+      arg2 = requestInfo.arguments.get(1)->value<std::string>();
+      arg3 = requestInfo.arguments.get(2)->value<test::RequestArgsStruct>();
+      EXPECT_THROW(
+          requestInfo.arguments.get(2)->value<std::int32_t>(), std::bad_cast);
+      EXPECT_FALSE(requestInfo.arguments.get(3).has_value());
+      return std::nullopt;
+    }
+
+    std::size_t argsCount = 0;
+    std::int32_t arg1 = 0;
+    std::string arg2;
+    test::RequestArgsStruct arg3;
+  };
+  auto interceptor = std::make_shared<ClientInterceptorWithRequestArguments>(
+      "WithRequestArguments");
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  test::RequestArgsStruct requestArgs;
+  requestArgs.foo() = 1;
+  requestArgs.bar() = "hello";
+  auto result = co_await client->requestArgs(1, "hello", requestArgs);
+  EXPECT_EQ(interceptor->argsCount, 3);
+  EXPECT_EQ(interceptor->arg1, 1);
+  EXPECT_EQ(interceptor->arg2, "hello");
+  EXPECT_EQ(interceptor->arg3, requestArgs);
 }
 
 INSTANTIATE_TEST_SUITE_P(

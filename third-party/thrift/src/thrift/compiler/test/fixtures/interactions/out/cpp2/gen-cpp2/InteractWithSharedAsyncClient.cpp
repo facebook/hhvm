@@ -96,7 +96,8 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::sync_do_some_similar_th
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -135,7 +136,9 @@ folly::SemiFuture<::thrift::shared_interactions::DoSomethingResult> apache::thri
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie();
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<::thrift::shared_interactions::DoSomethingResult>(std::move(exTry).exception());
     }
   }
@@ -365,7 +368,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -404,7 +408,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::InteractWithSha
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie();
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<::std::int32_t>(std::move(exTry).exception());
     }
   }
@@ -526,7 +532,8 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::MyInteraction::sync_pin
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -555,7 +562,9 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::InteractWithShared
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie();
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<folly::Unit>(std::move(exTry).exception());
     }
   }
@@ -646,7 +655,8 @@ apache::thrift::ClientBufferedStream<bool> apache::thrift::Client<::cpp2::Intera
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -685,7 +695,9 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> apache::thrift::Cl
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie();
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ClientBufferedStream<bool>>(std::move(exTry).exception());
     }
   }
@@ -980,7 +992,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1019,7 +1032,9 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::cpp2::InteractWithSha
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie();
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<::std::int32_t>(std::move(exTry).exception());
     }
   }
@@ -1142,7 +1157,8 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::SharedInteraction::sync
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1181,7 +1197,9 @@ folly::SemiFuture<::thrift::shared_interactions::DoSomethingResult> apache::thri
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie();
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<::thrift::shared_interactions::DoSomethingResult>(std::move(exTry).exception());
     }
   }
@@ -1302,7 +1320,8 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::SharedInteraction::sync
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1341,7 +1360,9 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::InteractWithShared
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie();
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<folly::Unit>(std::move(exTry).exception());
     }
   }

@@ -33,6 +33,7 @@ class ClientInterceptorBase {
 
   struct RequestInfo {
     detail::ClientInterceptorOnRequestStorage* storage = nullptr;
+    ClientInterceptorOnRequestArguments arguments;
     /**
      * The name of the service definition as specified in Thrift IDL.
      */

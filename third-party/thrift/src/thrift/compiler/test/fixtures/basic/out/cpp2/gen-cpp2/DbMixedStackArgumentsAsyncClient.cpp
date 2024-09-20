@@ -110,7 +110,8 @@ void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::syn
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_key);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -149,7 +150,9 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::test::fixtures::basic:
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_key);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<::std::string>(std::move(exTry).exception());
     }
   }
@@ -300,7 +303,8 @@ void apache::thrift::Client<::test::fixtures::basic::DbMixedStackArguments>::syn
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_key);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -339,7 +343,9 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::test::fixtures::basic:
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_key);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<::std::string>(std::move(exTry).exception());
     }
   }

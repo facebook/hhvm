@@ -97,7 +97,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_init(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -202,7 +203,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_do_something(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -307,7 +309,8 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_tear_down(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));

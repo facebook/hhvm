@@ -94,7 +94,8 @@ class Client<::test::namespace_from_package::module::TestService> : public apach
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie(p_int1);
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_init(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_int1);

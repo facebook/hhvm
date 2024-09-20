@@ -98,7 +98,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_frobnicate(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -202,7 +203,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_ping(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -289,7 +291,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_truthify(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -425,7 +428,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_frobnicate(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -529,7 +533,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_ping(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -616,7 +621,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_truthify(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -752,7 +758,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_frobnicate(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
@@ -868,7 +875,8 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_foo(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));

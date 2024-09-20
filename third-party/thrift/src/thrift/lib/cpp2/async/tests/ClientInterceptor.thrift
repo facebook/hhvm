@@ -24,6 +24,11 @@ interaction SampleInteraction2 {
   string echo(1: string str);
 }
 
+struct RequestArgsStruct {
+  1: i32 foo;
+  2: string bar;
+}
+
 service ClientInterceptorTest {
   void noop();
 
@@ -31,4 +36,10 @@ service ClientInterceptorTest {
 
   SampleInteraction createInteraction();
   SampleInteraction, string createInteractionAndEcho(1: string str);
+
+  string requestArgs(
+    1: i32 primitive,
+    2: string str,
+    3: RequestArgsStruct request,
+  );
 }

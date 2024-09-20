@@ -139,7 +139,8 @@
     {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", ctx ? ctx->getClientInterceptors() : nullptr);
   {{/function:creates_interaction?}}
     if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnRequest().throwUnlessValue();
+      auto argsAsRefs = std::tie({{ > service_common/param_list}});
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_{{function:cpp_name}}(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});

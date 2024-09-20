@@ -16,11 +16,16 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/util/TypeErasedTupleRef.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
 
-namespace apache::thrift::detail {
+namespace apache::thrift {
 
+namespace detail {
 using ClientInterceptorOnRequestStorage =
     util::TypeErasedValue<128, alignof(std::max_align_t)>;
+} // namespace detail
 
-}
+using ClientInterceptorOnRequestArguments = util::TypeErasedTupleRef;
+
+} // namespace apache::thrift

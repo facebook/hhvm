@@ -105,7 +105,8 @@ class ContextStack {
     return clientInterceptors_;
   }
 
-  [[nodiscard]] folly::Try<void> processClientInterceptorsOnRequest() noexcept;
+  [[nodiscard]] folly::Try<void> processClientInterceptorsOnRequest(
+      ClientInterceptorOnRequestArguments arguments) noexcept;
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse() noexcept;
 
  private:

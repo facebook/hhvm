@@ -232,7 +232,8 @@ apache::thrift::ClientBufferedStream<::std::int32_t> apache::thrift::Client<::cp
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_i32_from, p_i32_to);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -271,7 +272,9 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_i32_from, p_i32_to);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -416,7 +419,8 @@ apache::thrift::ClientBufferedStream<::std::int32_t> apache::thrift::Client<::cp
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_foo);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -455,7 +459,9 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_foo);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -600,7 +606,8 @@ apache::thrift::ClientBufferedStream<::std::int32_t> apache::thrift::Client<::cp
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_foo);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -639,7 +646,9 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_foo);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -784,7 +793,8 @@ apache::thrift::ClientBufferedStream<::std::int32_t> apache::thrift::Client<::cp
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_foo);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -823,7 +833,9 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_foo);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -968,7 +980,8 @@ apache::thrift::ClientBufferedStream<::std::int32_t> apache::thrift::Client<::cp
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_foo);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1007,7 +1020,9 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_foo);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -1152,7 +1167,8 @@ apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t> a
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_foo);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1191,7 +1207,9 @@ folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_foo);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -1336,7 +1354,8 @@ apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t> a
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_foo);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1375,7 +1394,9 @@ folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_foo);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -1520,7 +1541,8 @@ apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t> a
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_foo);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1559,7 +1581,9 @@ folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_foo);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>(std::move(exTry).exception());
     }
   }
@@ -1705,7 +1729,8 @@ apache::thrift::ClientBufferedStream<::std::int32_t> apache::thrift::Client<::cp
     rpcOptions.getBufferOptions());
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnRequest().throwUnlessValue();
+    auto argsAsRefs = std::tie(p_i32_from, p_i32_to);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -1744,7 +1769,9 @@ folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> apache::
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallbackAndContextStack.first), rpcOptions.getBufferOptions());
   if (contextStack != nullptr) {
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(); exTry.hasException()) {
+    auto argsAsRefs = std::tie(p_i32_from, p_i32_to);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+        exTry.hasException()) {
       return folly::makeSemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>>(std::move(exTry).exception());
     }
   }

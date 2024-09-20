@@ -365,7 +365,8 @@ void ContextStack::resetClientRequestContextHeader() {
   connectionContext->resetRequestHeader();
 }
 
-folly::Try<void> ContextStack::processClientInterceptorsOnRequest() noexcept {
+folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
+    ClientInterceptorOnRequestArguments arguments) noexcept {
   if (clientInterceptors_ == nullptr) {
     return {};
   }
@@ -374,6 +375,7 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest() noexcept {
     const auto& clientInterceptor = (*clientInterceptors_)[i];
     ClientInterceptorBase::RequestInfo requestInfo{
         getStorageForClientInterceptorOnRequestByIndex(i),
+        arguments,
         serviceName_,
         methodNameUnprefixed_};
     try {

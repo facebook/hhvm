@@ -107,7 +107,7 @@ class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMi
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
     return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
   }
 
@@ -126,7 +126,7 @@ class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMi
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
     return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
   }
 
@@ -150,7 +150,7 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
     return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
   }
 
@@ -169,7 +169,7 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
       'key' => $key,
     ));
     await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
     return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
   }
 
@@ -178,7 +178,7 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
     $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
       'key' => $key,
     ));
-    return $this->sendImplHelper($args, "getDataByKey0", false);
+    return $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
   }
   public function recv_getDataByKey0(?int $expectedsequenceid = null): string {
     return $this->recvImplHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $expectedsequenceid);
@@ -187,7 +187,7 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
     $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
       'key' => $key,
     ));
-    return $this->sendImplHelper($args, "getDataByKey1", false);
+    return $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
   }
   public function recv_getDataByKey1(?int $expectedsequenceid = null): string {
     return $this->recvImplHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $expectedsequenceid);

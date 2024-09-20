@@ -106,7 +106,7 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
       'm' => $m,
     ));
     await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "bounce_map", false);
+    $currentseqid = $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
     return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
   }
 
@@ -125,7 +125,7 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
       'r' => new Vector($r),
     ));
     await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false);
+    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
     return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
   }
 
@@ -149,7 +149,7 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
       'm' => $m,
     ));
     await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "bounce_map", false);
+    $currentseqid = $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
     return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
   }
 
@@ -168,7 +168,7 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
       'r' => new Vector($r),
     ));
     await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false);
+    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
     return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
   }
 
@@ -177,7 +177,7 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
     $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
-    return $this->sendImplHelper($args, "bounce_map", false);
+    return $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
   }
   public function recv_bounce_map(?int $expectedsequenceid = null): Map<int, string> {
     return $this->recvImplHelper(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $expectedsequenceid);
@@ -186,7 +186,7 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
     $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
-    return $this->sendImplHelper($args, "binary_keyed_map", false);
+    return $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
   }
   public function recv_binary_keyed_map(?int $expectedsequenceid = null): Map<string, int> {
     return $this->recvImplHelper(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $expectedsequenceid);

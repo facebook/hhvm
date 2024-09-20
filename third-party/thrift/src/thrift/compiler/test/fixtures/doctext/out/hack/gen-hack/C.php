@@ -145,7 +145,7 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = C_f_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("C", "f", $args);
-    $currentseqid = $this->sendImplHelper($args, "f", false);
+    $currentseqid = $this->sendImplHelper($args, "f", false, "C" );
     await $this->genAwaitResponse(C_f_result::class, "f", true, $currentseqid, $rpc_options);
   }
 
@@ -164,7 +164,7 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = C_numbers_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("C", "numbers", $args);
-    $currentseqid = $this->sendImplHelper($args, "numbers", false);
+    $currentseqid = $this->sendImplHelper($args, "numbers", false, "C" );
     return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
   }
 
@@ -189,7 +189,7 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
       'c' => $c,
     ));
     await $this->asyncHandler_->genBefore("C", "thing", $args);
-    $currentseqid = $this->sendImplHelper($args, "thing", false);
+    $currentseqid = $this->sendImplHelper($args, "thing", false, "C" );
     return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
   }
 
@@ -213,7 +213,7 @@ class CClient extends \ThriftClientBase implements CClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = C_f_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("C", "f", $args);
-    $currentseqid = $this->sendImplHelper($args, "f", false);
+    $currentseqid = $this->sendImplHelper($args, "f", false, "C" );
     await $this->genAwaitResponse(C_f_result::class, "f", true, $currentseqid, $rpc_options);
   }
 
@@ -232,7 +232,7 @@ class CClient extends \ThriftClientBase implements CClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = C_numbers_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("C", "numbers", $args);
-    $currentseqid = $this->sendImplHelper($args, "numbers", false);
+    $currentseqid = $this->sendImplHelper($args, "numbers", false, "C" );
     return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
   }
 
@@ -257,14 +257,14 @@ class CClient extends \ThriftClientBase implements CClientIf {
       'c' => $c,
     ));
     await $this->asyncHandler_->genBefore("C", "thing", $args);
-    $currentseqid = $this->sendImplHelper($args, "thing", false);
+    $currentseqid = $this->sendImplHelper($args, "thing", false, "C" );
     return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_f(): int {
     $args = C_f_args::withDefaultValues();
-    return $this->sendImplHelper($args, "f", false);
+    return $this->sendImplHelper($args, "f", false, "C" );
   }
   public function recv_f(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(C_f_result::class, "f", true, $expectedsequenceid);
@@ -275,7 +275,7 @@ class CClient extends \ThriftClientBase implements CClientIf {
       'b' => $b,
       'c' => $c,
     ));
-    return $this->sendImplHelper($args, "thing", false);
+    return $this->sendImplHelper($args, "thing", false, "C" );
   }
   public function recv_thing(?int $expectedsequenceid = null): string {
     return $this->recvImplHelper(C_thing_result::class, "thing", false, $expectedsequenceid);

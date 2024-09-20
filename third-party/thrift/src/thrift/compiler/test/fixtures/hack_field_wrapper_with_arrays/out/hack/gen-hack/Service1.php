@@ -132,7 +132,7 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
       'arg2' => $arg2,
     ));
     await $this->asyncHandler_->genBefore("Service1", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "Service1" );
     return await $this->genAwaitResponse(Service1_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -153,7 +153,7 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
       'arg2' => $arg2,
     ));
     await $this->asyncHandler_->genBefore("Service1", "func1", $args);
-    $currentseqid = $this->sendImplHelper($args, "func1", false);
+    $currentseqid = $this->sendImplHelper($args, "func1", false, "Service1" );
     return await $this->genAwaitResponse(Service1_func1_result::class, "func1", false, $currentseqid, $rpc_options);
   }
 
@@ -177,7 +177,7 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
       $args->arg2 = $arg2;
     }
     await $this->asyncHandler_->genBefore("Service1", "func2", $args);
-    $currentseqid = $this->sendImplHelper($args, "func2", false);
+    $currentseqid = $this->sendImplHelper($args, "func2", false, "Service1" );
     return await $this->genAwaitResponse(Service1_func2_result::class, "func2", false, $currentseqid, $rpc_options);
   }
 
@@ -203,7 +203,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
       'arg2' => $arg2,
     ));
     await $this->asyncHandler_->genBefore("Service1", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "Service1" );
     return await $this->genAwaitResponse(Service1_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -224,7 +224,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
       'arg2' => $arg2,
     ));
     await $this->asyncHandler_->genBefore("Service1", "func1", $args);
-    $currentseqid = $this->sendImplHelper($args, "func1", false);
+    $currentseqid = $this->sendImplHelper($args, "func1", false, "Service1" );
     return await $this->genAwaitResponse(Service1_func1_result::class, "func1", false, $currentseqid, $rpc_options);
   }
 
@@ -248,7 +248,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
       $args->arg2 = $arg2;
     }
     await $this->asyncHandler_->genBefore("Service1", "func2", $args);
-    $currentseqid = $this->sendImplHelper($args, "func2", false);
+    $currentseqid = $this->sendImplHelper($args, "func2", false, "Service1" );
     return await $this->genAwaitResponse(Service1_func2_result::class, "func2", false, $currentseqid, $rpc_options);
   }
 
@@ -258,7 +258,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
       'arg1' => $arg1,
       'arg2' => $arg2,
     ));
-    return $this->sendImplHelper($args, "func", false);
+    return $this->sendImplHelper($args, "func", false, "Service1" );
   }
   public function recv_func(?int $expectedsequenceid = null): MyStruct {
     return $this->recvImplHelper(Service1_func_result::class, "func", false, $expectedsequenceid);
@@ -268,7 +268,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
       'arg1' => $arg1,
       'arg2' => $arg2,
     ));
-    return $this->sendImplHelper($args, "func1", false);
+    return $this->sendImplHelper($args, "func1", false, "Service1" );
   }
   public function recv_func1(?int $expectedsequenceid = null): MyStruct {
     return $this->recvImplHelper(Service1_func1_result::class, "func1", false, $expectedsequenceid);
@@ -281,7 +281,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
     if ($arg2 !== null) {
       $args->arg2 = $arg2;
     }
-    return $this->sendImplHelper($args, "func2", false);
+    return $this->sendImplHelper($args, "func2", false, "Service1" );
   }
   public function recv_func2(?int $expectedsequenceid = null): i64WithWrapper {
     return $this->recvImplHelper(Service1_func2_result::class, "func2", false, $expectedsequenceid);

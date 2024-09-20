@@ -77,7 +77,7 @@ class FactoriesAsyncClient extends \ThriftClientBase implements FactoriesAsyncCl
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Factories_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("Factories", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "Factories" );
     await $this->genAwaitResponse(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
@@ -99,14 +99,14 @@ class FactoriesClient extends \ThriftClientBase implements FactoriesClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Factories_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("Factories", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "Factories" );
     await $this->genAwaitResponse(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_foo(): int {
     $args = Factories_foo_args::withDefaultValues();
-    return $this->sendImplHelper($args, "foo", false);
+    return $this->sendImplHelper($args, "foo", false, "Factories" );
   }
   public function recv_foo(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(Factories_foo_result::class, "foo", true, $expectedsequenceid);

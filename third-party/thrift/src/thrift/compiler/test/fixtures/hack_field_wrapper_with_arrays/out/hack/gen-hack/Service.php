@@ -84,7 +84,7 @@ class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClient
       'arg2' => $arg2,
     ));
     await $this->asyncHandler_->genBefore("Service", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
     return await $this->genAwaitResponse(Service_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -110,7 +110,7 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
       'arg2' => $arg2,
     ));
     await $this->asyncHandler_->genBefore("Service", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
     return await $this->genAwaitResponse(Service_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -120,7 +120,7 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
       'arg1' => $arg1,
       'arg2' => $arg2,
     ));
-    return $this->sendImplHelper($args, "func", false);
+    return $this->sendImplHelper($args, "func", false, "Service" );
   }
   public function recv_func(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(Service_func_result::class, "func", false, $expectedsequenceid);

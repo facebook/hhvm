@@ -90,7 +90,7 @@ class InteractWithSharedAsyncClient extends \ThriftClientBase implements Interac
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractWithShared", "do_some_similar_things", $args);
-    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false);
+    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
     return await $this->genAwaitResponse(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options);
   }
 
@@ -112,14 +112,14 @@ class InteractWithSharedClient extends \ThriftClientBase implements InteractWith
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractWithShared", "do_some_similar_things", $args);
-    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false);
+    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
     return await $this->genAwaitResponse(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_do_some_similar_things(): int {
     $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
-    return $this->sendImplHelper($args, "do_some_similar_things", false);
+    return $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
   }
   public function recv_do_some_similar_things(?int $expectedsequenceid = null): DoSomethingResult {
     return $this->recvImplHelper(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $expectedsequenceid);

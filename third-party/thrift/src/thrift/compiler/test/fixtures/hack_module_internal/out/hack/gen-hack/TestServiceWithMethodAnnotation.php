@@ -101,7 +101,7 @@ class TestServiceWithMethodAnnotationAsyncClient extends \ThriftClientBase imple
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, "TestServiceWithMethodAnnotation" );
     return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options);
   }
 
@@ -118,7 +118,7 @@ class TestServiceWithMethodAnnotationAsyncClient extends \ThriftClientBase imple
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithoutAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, "TestServiceWithMethodAnnotation" );
     await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
   }
 
@@ -140,7 +140,7 @@ class TestServiceWithMethodAnnotationClient extends \ThriftClientBase implements
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, "TestServiceWithMethodAnnotation" );
     return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options);
   }
 
@@ -157,21 +157,21 @@ class TestServiceWithMethodAnnotationClient extends \ThriftClientBase implements
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithoutAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, "TestServiceWithMethodAnnotation" );
     await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   internal function send_testMethodWithAnnotation(): int {
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
-    return $this->sendImplHelper($args, "testMethodWithAnnotation", false);
+    return $this->sendImplHelper($args, "testMethodWithAnnotation", false, "TestServiceWithMethodAnnotation" );
   }
   internal function recv_testMethodWithAnnotation(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $expectedsequenceid);
   }
   public function send_testMethodWithoutAnnotation(): int {
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
-    return $this->sendImplHelper($args, "testMethodWithoutAnnotation", false);
+    return $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, "TestServiceWithMethodAnnotation" );
   }
   public function recv_testMethodWithoutAnnotation(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $expectedsequenceid);

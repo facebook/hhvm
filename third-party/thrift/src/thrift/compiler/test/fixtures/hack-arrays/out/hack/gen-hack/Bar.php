@@ -86,7 +86,7 @@ class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
       ),
     ));
     await $this->asyncHandler_->genBefore("Bar", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, "Bar" );
     return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options);
   }
 
@@ -114,7 +114,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
       ),
     ));
     await $this->asyncHandler_->genBefore("Bar", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, "Bar" );
     return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options);
   }
 
@@ -126,7 +126,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
         $_val0 ==> dict($_val0)
       ),
     ));
-    return $this->sendImplHelper($args, "baz", false);
+    return $this->sendImplHelper($args, "baz", false, "Bar" );
   }
   public function recv_baz(?int $expectedsequenceid = null): string {
     return $this->recvImplHelper(Bar_baz_result::class, "baz", false, $expectedsequenceid);

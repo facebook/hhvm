@@ -119,7 +119,7 @@ class FooBarBazServiceAsyncClient extends \ThriftClientBase implements FooBarBaz
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooBarBazService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "FooBarBazService" );
     await $this->genAwaitResponse(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
@@ -136,7 +136,7 @@ class FooBarBazServiceAsyncClient extends \ThriftClientBase implements FooBarBaz
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooBarBazService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, "FooBarBazService" );
     await $this->genAwaitResponse(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
   }
 
@@ -153,7 +153,7 @@ class FooBarBazServiceAsyncClient extends \ThriftClientBase implements FooBarBaz
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_baz_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooBarBazService", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, "FooBarBazService" );
     await $this->genAwaitResponse(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
   }
 
@@ -175,7 +175,7 @@ class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServi
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooBarBazService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "FooBarBazService" );
     await $this->genAwaitResponse(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
@@ -192,7 +192,7 @@ class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServi
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooBarBazService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, "FooBarBazService" );
     await $this->genAwaitResponse(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
   }
 
@@ -209,28 +209,28 @@ class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServi
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_baz_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("FooBarBazService", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, "FooBarBazService" );
     await $this->genAwaitResponse(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_foo(): int {
     $args = FooBarBazService_foo_args::withDefaultValues();
-    return $this->sendImplHelper($args, "foo", false);
+    return $this->sendImplHelper($args, "foo", false, "FooBarBazService" );
   }
   public function recv_foo(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(FooBarBazService_foo_result::class, "foo", true, $expectedsequenceid);
   }
   public function send_bar(): int {
     $args = FooBarBazService_bar_args::withDefaultValues();
-    return $this->sendImplHelper($args, "bar", false);
+    return $this->sendImplHelper($args, "bar", false, "FooBarBazService" );
   }
   public function recv_bar(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(FooBarBazService_bar_result::class, "bar", true, $expectedsequenceid);
   }
   public function send_baz(): int {
     $args = FooBarBazService_baz_args::withDefaultValues();
-    return $this->sendImplHelper($args, "baz", false);
+    return $this->sendImplHelper($args, "baz", false, "FooBarBazService" );
   }
   public function recv_baz(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(FooBarBazService_baz_result::class, "baz", true, $expectedsequenceid);

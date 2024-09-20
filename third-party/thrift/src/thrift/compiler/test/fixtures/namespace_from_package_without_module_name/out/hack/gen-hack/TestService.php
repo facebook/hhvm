@@ -85,7 +85,7 @@ class TestServiceAsyncClient extends \ThriftClientBase implements TestServiceAsy
       'int1' => $int1,
     ));
     await $this->asyncHandler_->genBefore("TestService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false);
+    $currentseqid = $this->sendImplHelper($args, "init", false, "TestService" );
     return await $this->genAwaitResponse(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
@@ -109,7 +109,7 @@ class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf
       'int1' => $int1,
     ));
     await $this->asyncHandler_->genBefore("TestService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false);
+    $currentseqid = $this->sendImplHelper($args, "init", false, "TestService" );
     return await $this->genAwaitResponse(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
@@ -118,7 +118,7 @@ class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf
     $args = \test\namespace_from_package_without_module_name\TestService_init_args::fromShape(shape(
       'int1' => $int1,
     ));
-    return $this->sendImplHelper($args, "init", false);
+    return $this->sendImplHelper($args, "init", false, "TestService" );
   }
   public function recv_init(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $expectedsequenceid);

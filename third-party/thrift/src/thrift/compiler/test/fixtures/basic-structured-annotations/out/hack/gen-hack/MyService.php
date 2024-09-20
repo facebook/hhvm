@@ -104,7 +104,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "first", $args);
-    $currentseqid = $this->sendImplHelper($args, "first", false);
+    $currentseqid = $this->sendImplHelper($args, "first", false, "MyService" );
     return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
   }
 
@@ -123,7 +123,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       'count' => $count,
     ));
     await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false);
+    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
     return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
@@ -145,7 +145,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "first", $args);
-    $currentseqid = $this->sendImplHelper($args, "first", false);
+    $currentseqid = $this->sendImplHelper($args, "first", false, "MyService" );
     return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
   }
 
@@ -164,14 +164,14 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       'count' => $count,
     ));
     await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false);
+    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
     return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_first(): int {
     $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
-    return $this->sendImplHelper($args, "first", false);
+    return $this->sendImplHelper($args, "first", false, "MyService" );
   }
   public function recv_first(?int $expectedsequenceid = null): string {
     return $this->recvImplHelper(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $expectedsequenceid);
@@ -180,7 +180,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
     $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
-    return $this->sendImplHelper($args, "second", false);
+    return $this->sendImplHelper($args, "second", false, "MyService" );
   }
   public function recv_second(?int $expectedsequenceid = null): bool {
     return $this->recvImplHelper(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $expectedsequenceid);

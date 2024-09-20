@@ -79,7 +79,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       'count' => $count,
     ));
     await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false);
+    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
     return await $this->genAwaitResponse(MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
@@ -103,7 +103,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       'count' => $count,
     ));
     await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false);
+    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
     return await $this->genAwaitResponse(MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
@@ -112,7 +112,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
     $args = MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
-    return $this->sendImplHelper($args, "second", false);
+    return $this->sendImplHelper($args, "second", false, "MyService" );
   }
   public function recv_second(?int $expectedsequenceid = null): bool {
     return $this->recvImplHelper(MyService_second_result::class, "second", false, $expectedsequenceid);

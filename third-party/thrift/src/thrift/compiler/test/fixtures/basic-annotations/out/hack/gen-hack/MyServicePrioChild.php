@@ -77,7 +77,7 @@ class MyServicePrioChildAsyncClient extends MyServicePrioParentAsyncClient imple
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyServicePrioChild_pang_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyServicePrioChild", "pang", $args);
-    $currentseqid = $this->sendImplHelper($args, "pang", false);
+    $currentseqid = $this->sendImplHelper($args, "pang", false, "MyServicePrioChild" );
     await $this->genAwaitResponse(MyServicePrioChild_pang_result::class, "pang", true, $currentseqid, $rpc_options);
   }
 
@@ -99,14 +99,14 @@ class MyServicePrioChildClient extends MyServicePrioParentClient implements MySe
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyServicePrioChild_pang_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyServicePrioChild", "pang", $args);
-    $currentseqid = $this->sendImplHelper($args, "pang", false);
+    $currentseqid = $this->sendImplHelper($args, "pang", false, "MyServicePrioChild" );
     await $this->genAwaitResponse(MyServicePrioChild_pang_result::class, "pang", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_pang(): int {
     $args = MyServicePrioChild_pang_args::withDefaultValues();
-    return $this->sendImplHelper($args, "pang", false);
+    return $this->sendImplHelper($args, "pang", false, "MyServicePrioChild" );
   }
   public function recv_pang(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(MyServicePrioChild_pang_result::class, "pang", true, $expectedsequenceid);

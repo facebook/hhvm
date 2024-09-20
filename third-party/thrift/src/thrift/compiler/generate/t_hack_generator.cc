@@ -476,7 +476,9 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice,
       const t_function* tfunction);
   void _generate_sendImplHelper(
-      std::ofstream& out, const t_function* tfunction);
+      std::ofstream& out,
+      const t_function* tfunction,
+      const t_service* tservice);
   void generate_service(const t_service* tservice, bool mangle);
   void generate_service_helpers(const t_service* tservice, bool mangle);
   void generate_service_interactions(const t_service* tservice, bool mangle);
@@ -5540,12 +5542,14 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method(
 }
 
 void t_hack_generator::_generate_sendImplHelper(
-    std::ofstream& out, const t_function* tfunction) {
+    std::ofstream& out,
+    const t_function* tfunction,
+    const t_service* tservice) {
   out << "$this->sendImplHelper($args, " << "\"" << find_hack_name(tfunction)
       << "\", "
       << (tfunction->qualifier() == t_function_qualifier::oneway ? "true"
                                                                  : "false")
-      << ");\n";
+      << ", \"" << tservice->name() << "\" " << ");\n";
 }
 
 /**
@@ -6875,7 +6879,7 @@ void t_hack_generator::_generate_current_seq_id(
     out << ");\n";
   } else {
     out << indent() << "$currentseqid = ";
-    _generate_sendImplHelper(out, tfunction);
+    _generate_sendImplHelper(out, tfunction, tservice);
   }
 }
 
@@ -7119,7 +7123,7 @@ void t_hack_generator::_generate_service_client_children(
       indent_up();
       _generate_args(out, tservice, function);
       out << indent() << "return ";
-      _generate_sendImplHelper(out, function);
+      _generate_sendImplHelper(out, function, tservice);
       indent_down();
       out << indent() << "}\n";
 

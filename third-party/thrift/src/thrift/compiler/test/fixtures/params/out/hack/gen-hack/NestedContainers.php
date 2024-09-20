@@ -165,7 +165,7 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
       ),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "mapList", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapList", false);
+    $currentseqid = $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
   }
 
@@ -184,7 +184,7 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
       'foo' => new Map($foo),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "mapSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapSet", false);
+    $currentseqid = $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
   }
 
@@ -205,7 +205,7 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
       ),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "listMap", $args);
-    $currentseqid = $this->sendImplHelper($args, "listMap", false);
+    $currentseqid = $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
   }
 
@@ -224,7 +224,7 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
       'foo' => new Vector($foo),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "listSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "listSet", false);
+    $currentseqid = $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
   }
 
@@ -249,7 +249,7 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
       ),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "turtles", $args);
-    $currentseqid = $this->sendImplHelper($args, "turtles", false);
+    $currentseqid = $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
   }
 
@@ -275,7 +275,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
       ),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "mapList", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapList", false);
+    $currentseqid = $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
   }
 
@@ -294,7 +294,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
       'foo' => new Map($foo),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "mapSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapSet", false);
+    $currentseqid = $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
   }
 
@@ -315,7 +315,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
       ),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "listMap", $args);
-    $currentseqid = $this->sendImplHelper($args, "listMap", false);
+    $currentseqid = $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
   }
 
@@ -334,7 +334,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
       'foo' => new Vector($foo),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "listSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "listSet", false);
+    $currentseqid = $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
   }
 
@@ -359,7 +359,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
       ),
     ));
     await $this->asyncHandler_->genBefore("NestedContainers", "turtles", $args);
-    $currentseqid = $this->sendImplHelper($args, "turtles", false);
+    $currentseqid = $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
     await $this->genAwaitResponse(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
   }
 
@@ -370,7 +370,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
         $_val0 ==> new Vector($_val0)
       ),
     ));
-    return $this->sendImplHelper($args, "mapList", false);
+    return $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
   }
   public function recv_mapList(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(NestedContainers_mapList_result::class, "mapList", true, $expectedsequenceid);
@@ -379,7 +379,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
     $args = NestedContainers_mapSet_args::fromShape(shape(
       'foo' => new Map($foo),
     ));
-    return $this->sendImplHelper($args, "mapSet", false);
+    return $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
   }
   public function recv_mapSet(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(NestedContainers_mapSet_result::class, "mapSet", true, $expectedsequenceid);
@@ -390,7 +390,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
         $_val0 ==> new Map($_val0)
       ),
     ));
-    return $this->sendImplHelper($args, "listMap", false);
+    return $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
   }
   public function recv_listMap(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(NestedContainers_listMap_result::class, "listMap", true, $expectedsequenceid);
@@ -399,7 +399,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
     $args = NestedContainers_listSet_args::fromShape(shape(
       'foo' => new Vector($foo),
     ));
-    return $this->sendImplHelper($args, "listSet", false);
+    return $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
   }
   public function recv_listSet(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(NestedContainers_listSet_result::class, "listSet", true, $expectedsequenceid);
@@ -414,7 +414,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
         )
       ),
     ));
-    return $this->sendImplHelper($args, "turtles", false);
+    return $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
   }
   public function recv_turtles(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(NestedContainers_turtles_result::class, "turtles", true, $expectedsequenceid);

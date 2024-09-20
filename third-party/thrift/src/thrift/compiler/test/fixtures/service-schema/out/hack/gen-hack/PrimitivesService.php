@@ -129,7 +129,7 @@ class PrimitivesServiceAsyncClient extends \ThriftClientBase implements Primitiv
       'param1' => $param1,
     ));
     await $this->asyncHandler_->genBefore("PrimitivesService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false);
+    $currentseqid = $this->sendImplHelper($args, "init", false, "PrimitivesService" );
     return await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
@@ -147,7 +147,7 @@ class PrimitivesServiceAsyncClient extends \ThriftClientBase implements Primitiv
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = PrimitivesService_method_that_throws_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("PrimitivesService", "method_that_throws", $args);
-    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false);
+    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
     return await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options);
   }
 
@@ -166,7 +166,7 @@ class PrimitivesServiceAsyncClient extends \ThriftClientBase implements Primitiv
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("PrimitivesService", "return_void_method", $args);
-    $currentseqid = $this->sendImplHelper($args, "return_void_method", false);
+    $currentseqid = $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
     await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
   }
 
@@ -192,7 +192,7 @@ class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesSer
       'param1' => $param1,
     ));
     await $this->asyncHandler_->genBefore("PrimitivesService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false);
+    $currentseqid = $this->sendImplHelper($args, "init", false, "PrimitivesService" );
     return await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
@@ -210,7 +210,7 @@ class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesSer
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = PrimitivesService_method_that_throws_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("PrimitivesService", "method_that_throws", $args);
-    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false);
+    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
     return await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options);
   }
 
@@ -229,7 +229,7 @@ class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesSer
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore("PrimitivesService", "return_void_method", $args);
-    $currentseqid = $this->sendImplHelper($args, "return_void_method", false);
+    $currentseqid = $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
     await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
   }
 
@@ -239,14 +239,14 @@ class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesSer
       'param0' => $param0,
       'param1' => $param1,
     ));
-    return $this->sendImplHelper($args, "init", false);
+    return $this->sendImplHelper($args, "init", false, "PrimitivesService" );
   }
   public function recv_init(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(PrimitivesService_init_result::class, "init", false, $expectedsequenceid);
   }
   public function send_method_that_throws(): int {
     $args = PrimitivesService_method_that_throws_args::withDefaultValues();
-    return $this->sendImplHelper($args, "method_that_throws", false);
+    return $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
   }
   public function recv_method_that_throws(?int $expectedsequenceid = null): Result {
     return $this->recvImplHelper(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $expectedsequenceid);
@@ -255,7 +255,7 @@ class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesSer
     $args = PrimitivesService_return_void_method_args::fromShape(shape(
       'id' => $id,
     ));
-    return $this->sendImplHelper($args, "return_void_method", false);
+    return $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
   }
   public function recv_return_void_method(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(PrimitivesService_return_void_method_result::class, "return_void_method", true, $expectedsequenceid);

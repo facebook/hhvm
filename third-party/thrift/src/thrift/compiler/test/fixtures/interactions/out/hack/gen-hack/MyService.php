@@ -96,7 +96,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "MyService" );
     await $this->genAwaitResponse(MyService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
@@ -118,14 +118,14 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "MyService" );
     await $this->genAwaitResponse(MyService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_foo(): int {
     $args = MyService_foo_args::withDefaultValues();
-    return $this->sendImplHelper($args, "foo", false);
+    return $this->sendImplHelper($args, "foo", false, "MyService" );
   }
   public function recv_foo(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(MyService_foo_result::class, "foo", true, $expectedsequenceid);

@@ -157,7 +157,7 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_method_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "method", $args);
-    $currentseqid = $this->sendImplHelper($args, "method", false);
+    $currentseqid = $this->sendImplHelper($args, "method", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_method_FirstResponse::class, SinkService_method_SinkPayload::class, SinkService_method_FinalResponse::class, "method", true, $currentseqid, $rpc_options);
   }
 
@@ -174,7 +174,7 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodAndReponse_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodAndReponse", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodAndReponse", false);
+    $currentseqid = $this->sendImplHelper($args, "methodAndReponse", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodAndReponse_FirstResponse::class, SinkService_methodAndReponse_SinkPayload::class, SinkService_methodAndReponse_FinalResponse::class, "methodAndReponse", false, $currentseqid, $rpc_options);
   }
 
@@ -192,7 +192,7 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodThrow_FirstResponse::class, SinkService_methodThrow_SinkPayload::class, SinkService_methodThrow_FinalResponse::class, "methodThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -209,7 +209,7 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodSinkThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodSinkThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodSinkThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodSinkThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodSinkThrow_FirstResponse::class, SinkService_methodSinkThrow_SinkPayload::class, SinkService_methodSinkThrow_FinalResponse::class, "methodSinkThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -226,7 +226,7 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodFinalThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodFinalThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodFinalThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodFinalThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodFinalThrow_FirstResponse::class, SinkService_methodFinalThrow_SinkPayload::class, SinkService_methodFinalThrow_FinalResponse::class, "methodFinalThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -243,7 +243,7 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodBothThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodBothThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodBothThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodBothThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodBothThrow_FirstResponse::class, SinkService_methodBothThrow_SinkPayload::class, SinkService_methodBothThrow_FinalResponse::class, "methodBothThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -260,7 +260,7 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodFast_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodFast", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodFast", false);
+    $currentseqid = $this->sendImplHelper($args, "methodFast", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodFast_FirstResponse::class, SinkService_methodFast_SinkPayload::class, SinkService_methodFast_FinalResponse::class, "methodFast", true, $currentseqid, $rpc_options);
   }
 
@@ -282,7 +282,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_method_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "method", $args);
-    $currentseqid = $this->sendImplHelper($args, "method", false);
+    $currentseqid = $this->sendImplHelper($args, "method", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_method_FirstResponse::class, SinkService_method_SinkPayload::class, SinkService_method_FinalResponse::class, "method", true, $currentseqid, $rpc_options);
   }
 
@@ -299,7 +299,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodAndReponse_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodAndReponse", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodAndReponse", false);
+    $currentseqid = $this->sendImplHelper($args, "methodAndReponse", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodAndReponse_FirstResponse::class, SinkService_methodAndReponse_SinkPayload::class, SinkService_methodAndReponse_FinalResponse::class, "methodAndReponse", false, $currentseqid, $rpc_options);
   }
 
@@ -317,7 +317,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodThrow_FirstResponse::class, SinkService_methodThrow_SinkPayload::class, SinkService_methodThrow_FinalResponse::class, "methodThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -334,7 +334,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodSinkThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodSinkThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodSinkThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodSinkThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodSinkThrow_FirstResponse::class, SinkService_methodSinkThrow_SinkPayload::class, SinkService_methodSinkThrow_FinalResponse::class, "methodSinkThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -351,7 +351,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodFinalThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodFinalThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodFinalThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodFinalThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodFinalThrow_FirstResponse::class, SinkService_methodFinalThrow_SinkPayload::class, SinkService_methodFinalThrow_FinalResponse::class, "methodFinalThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -368,7 +368,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodBothThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodBothThrow", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodBothThrow", false);
+    $currentseqid = $this->sendImplHelper($args, "methodBothThrow", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodBothThrow_FirstResponse::class, SinkService_methodBothThrow_SinkPayload::class, SinkService_methodBothThrow_FinalResponse::class, "methodBothThrow", true, $currentseqid, $rpc_options);
   }
 
@@ -385,7 +385,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = SinkService_methodFast_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("SinkService", "methodFast", $args);
-    $currentseqid = $this->sendImplHelper($args, "methodFast", false);
+    $currentseqid = $this->sendImplHelper($args, "methodFast", false, "SinkService" );
     return await $this->genAwaitSinkResponse(SinkService_methodFast_FirstResponse::class, SinkService_methodFast_SinkPayload::class, SinkService_methodFast_FinalResponse::class, "methodFast", true, $currentseqid, $rpc_options);
   }
 

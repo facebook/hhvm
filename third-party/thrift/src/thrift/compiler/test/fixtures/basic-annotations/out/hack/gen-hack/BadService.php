@@ -84,7 +84,7 @@ class BadServiceAsyncClient extends \ThriftClientBase implements BadServiceAsync
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = BadService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("BadService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, "BadService" );
     return await $this->genAwaitResponse(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options);
   }
 
@@ -106,14 +106,14 @@ class BadServiceClient extends \ThriftClientBase implements BadServiceClientIf {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = BadService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("BadService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, "BadService" );
     return await $this->genAwaitResponse(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_bar(): int {
     $args = BadService_bar_args::withDefaultValues();
-    return $this->sendImplHelper($args, "bar", false);
+    return $this->sendImplHelper($args, "bar", false, "BadService" );
   }
   public function recv_bar(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(BadService_bar_result::class, "bar", false, $expectedsequenceid);

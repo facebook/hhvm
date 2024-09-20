@@ -89,7 +89,7 @@ class TestServiceAsyncClient extends \foo\hack_ns\FooHackServiceAsyncClient impl
       'str_arg' => $str_arg,
     ));
     await $this->asyncHandler_->genBefore("TestService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, "TestService" );
     return await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
@@ -114,7 +114,7 @@ class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements Tes
       'str_arg' => $str_arg,
     ));
     await $this->asyncHandler_->genBefore("TestService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, "TestService" );
     return await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
@@ -123,7 +123,7 @@ class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements Tes
     $args = \hack_ns2\TestService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
-    return $this->sendImplHelper($args, "ping", false);
+    return $this->sendImplHelper($args, "ping", false, "TestService" );
   }
   public function recv_ping(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(\hack_ns2\TestService_ping_result::class, "ping", false, $expectedsequenceid);

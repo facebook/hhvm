@@ -86,7 +86,7 @@ class FB303ServiceAsyncClient extends \ThriftClientBase implements FB303ServiceA
       'int_parameter' => $int_parameter,
     ));
     await $this->asyncHandler_->genBefore("FB303Service", "renamed_rpc", $args);
-    $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false);
+    $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false, "FB303Service" );
     return await $this->genAwaitResponse(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
   }
 
@@ -110,7 +110,7 @@ class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClient
       'int_parameter' => $int_parameter,
     ));
     await $this->asyncHandler_->genBefore("FB303Service", "renamed_rpc", $args);
-    $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false);
+    $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false, "FB303Service" );
     return await $this->genAwaitResponse(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
   }
 
@@ -119,7 +119,7 @@ class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClient
     $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
       'int_parameter' => $int_parameter,
     ));
-    return $this->sendImplHelper($args, "renamed_rpc", false);
+    return $this->sendImplHelper($args, "renamed_rpc", false, "FB303Service" );
   }
   public function recv_renamed_rpc(?int $expectedsequenceid = null): \test\fixtures\basic\MyRenamedStruct {
     return $this->recvImplHelper(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "renamed_rpc", false, $expectedsequenceid);

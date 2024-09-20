@@ -82,7 +82,7 @@ class FooService1AsyncClient extends \ThriftClientBase implements FooService1Asy
       'str_arg' => $str_arg,
     ));
     await $this->asyncHandler_->genBefore("FooService1", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, "FooService1" );
     return await $this->genAwaitResponse(\test\fixtures\jsenum\FooService1_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
@@ -107,7 +107,7 @@ class FooService1Client extends \ThriftClientBase implements FooService1ClientIf
       'str_arg' => $str_arg,
     ));
     await $this->asyncHandler_->genBefore("FooService1", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, "FooService1" );
     return await $this->genAwaitResponse(\test\fixtures\jsenum\FooService1_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
@@ -116,7 +116,7 @@ class FooService1Client extends \ThriftClientBase implements FooService1ClientIf
     $args = \test\fixtures\jsenum\FooService1_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
-    return $this->sendImplHelper($args, "ping", false);
+    return $this->sendImplHelper($args, "ping", false, "FooService1" );
   }
   public function recv_ping(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(\test\fixtures\jsenum\FooService1_ping_result::class, "ping", false, $expectedsequenceid);

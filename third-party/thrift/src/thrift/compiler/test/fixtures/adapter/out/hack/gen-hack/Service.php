@@ -95,7 +95,7 @@ class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClient
       'arg3' => $arg3,
     ));
     await $this->asyncHandler_->genBefore("Service", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
     return await $this->genAwaitResponse(\facebook\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -123,7 +123,7 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
       'arg3' => $arg3,
     ));
     await $this->asyncHandler_->genBefore("Service", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
     return await $this->genAwaitResponse(\facebook\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -134,7 +134,7 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
       'arg2' => $arg2,
       'arg3' => $arg3,
     ));
-    return $this->sendImplHelper($args, "func", false);
+    return $this->sendImplHelper($args, "func", false, "Service" );
   }
   public function recv_func(?int $expectedsequenceid = null): \facebook\thrift\test\MyI32_4873 {
     return $this->recvImplHelper(\facebook\thrift\test\Service_func_result::class, "func", false, $expectedsequenceid);

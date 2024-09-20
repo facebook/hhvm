@@ -1288,9 +1288,9 @@ struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
 struct ubfmli { Immed mr, ms; Vreg32 s, d; };
-struct loadpair { Vptr64 s; Vreg64 d0, d1; };
+struct loadpair { Vptr128 s; Vreg64 d0, d1; };
 struct loadpairl { Vptr64 s; Vreg32 d0, d1; };
-struct storepair { Vreg64 s0, s1; Vptr64 d; };
+struct storepair { Vreg64 s0, s1; Vptr128 d; };
 struct storepairl { Vreg32 s0, s1; Vptr64 d; };
 
 ///////////////////////////////////////////////////////////////////////////////

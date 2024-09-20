@@ -237,10 +237,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::fcvtzs:
     case Vinstr::mrs:
     case Vinstr::msr:
-    case Vinstr::storepair:
-    case Vinstr::storepairl:
-    case Vinstr::loadpair:
-    case Vinstr::loadpairl:
       return Width::AnyNF;
 
     case Vinstr::andb:
@@ -321,11 +317,13 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testlm:
     case Vinstr::movl:
     case Vinstr::loadl:
+    case Vinstr::loadpairl:
     case Vinstr::loadzbl:
     case Vinstr::loadsbl:
     case Vinstr::loadtql:
     case Vinstr::storel:
     case Vinstr::storeli:
+    case Vinstr::storepairl:
     case Vinstr::ubfmli:
       return Width::Long;
 
@@ -385,7 +383,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::loadzwq:
     case Vinstr::loadzlq:
     case Vinstr::loadsbq:
+    case Vinstr::loadpair:
     case Vinstr::storeqi:
+    case Vinstr::storepair:
     case Vinstr::addsd:
     case Vinstr::subsd:
     case Vinstr::cmpsd:

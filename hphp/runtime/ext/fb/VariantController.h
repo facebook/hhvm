@@ -248,6 +248,7 @@ struct VariantControllerImpl {
     map.setIntishCast(idx, k, std::move(v));
   }
   static int64_t mapSize(const MapType& map) { return map.size(); }
+  static int64_t mapSize(const_variant_ref map) { return map.toArray().size(); }
   static ArrayIter mapIterator(const MapType& map) {
     return ArrayIter(map);
   }
@@ -272,6 +273,9 @@ struct VariantControllerImpl {
   }
   static int64_t vectorSize(const VectorType& vec) {
     return vec.size();
+  }
+   static int64_t vectorSize(const_variant_ref vec) {
+    return vec.toArray().size();
   }
   static void vectorAppend(VectorType& vec, const VariantType& v) {
     if constexpr (HackArraysMode == VariantControllerHackArraysMode::OFF) {

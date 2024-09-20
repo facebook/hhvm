@@ -278,6 +278,7 @@ type t = {
       (** Number of retries when uploading/download/executing with hh_distc *)
   tco_enable_abstract_method_optional_parameters: bool;
       (** Enable use of optional on parameters in abstract methods *)
+  recursive_case_types: bool;  (** Enable recursive case types *)
 }
 [@@deriving eq, show]
 
@@ -386,6 +387,7 @@ val set :
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->
   ?tco_enable_abstract_method_optional_parameters:bool ->
+  ?recursive_case_types:bool ->
   t ->
   t
 

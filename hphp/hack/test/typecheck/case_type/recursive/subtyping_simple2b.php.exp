@@ -1,8 +1,4 @@
 ERROR: File "subtyping_simple2b.php", line 4, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "subtyping_simple2b.php", line 4, characters 22-22:
-  Cyclic use is here
-ERROR: File "subtyping_simple2b.php", line 4, characters 11-11:
 Invalid constraint on `newtype` (Typing[4332])
   File "subtyping_simple2b.php", line 4, characters 16-18:
   Expected `int`

@@ -1,7 +1,3 @@
-ERROR: File "subtyping_mutual3d.php", line 6, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "subtyping_mutual3d.php", line 4, characters 16-16:
-  Cyclic use is here
 ERROR: File "subtyping_mutual3d.php", line 26, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3d.php", line 10, characters 22-27:

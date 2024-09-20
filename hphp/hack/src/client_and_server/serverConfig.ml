@@ -492,6 +492,7 @@ let load_config config options =
       |> Option.map ~f:(function
              | true -> GlobalOptions.All_except []
              | false -> GlobalOptions.NNone))
+    ?recursive_case_types:(bool_opt "recursive_case_types" config)
     options
 
 let load

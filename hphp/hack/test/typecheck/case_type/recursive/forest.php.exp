@@ -1,11 +1,3 @@
-ERROR: File "forest.php", line 4, characters 11-16:
-Cyclic type definition (Typing[4014])
-  File "forest.php", line 4, characters 33-41:
-  Cyclic use is here
-ERROR: File "forest.php", line 16, characters 11-13:
-Cyclic type definition (Typing[4014])
-  File "forest.php", line 16, characters 24-29:
-  Cyclic use is here
 ERROR: File "forest.php", line 10, characters 10-18:
 Invalid return type (Typing[4336])
   File "forest.php", line 10, characters 39-39:

@@ -1,7 +1,3 @@
-ERROR: File "non_termination_bug_inter1.php", line 4, characters 11-13:
-Cyclic type definition (Typing[4014])
-  File "non_termination_bug_inter1.php", line 4, characters 27-32:
-  Cyclic use is here
 ERROR: File "non_termination_bug_inter1.php", line 9, characters 13-29:
 Invalid `is` expression hint (Typing[4195])
   File "non_termination_bug_inter1.php", line 9, characters 20-28:

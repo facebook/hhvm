@@ -1,4 +1,1 @@
-ERROR: File "int_tree.php", line 4, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "int_tree.php", line 4, characters 19-19:
-  Cyclic use is here
+No errors

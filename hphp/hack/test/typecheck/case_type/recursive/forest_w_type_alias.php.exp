@@ -1,8 +1,1 @@
-ERROR: File "forest_w_type_alias.php", line 4, characters 11-13:
-Cyclic type definition (Typing[4014])
-  File "forest_w_type_alias.php", line 4, characters 24-29:
-  Cyclic use is here
-ERROR: File "forest_w_type_alias.php", line 32, characters 11-16:
-Cyclic type definition (Typing[4014])
-  File "forest_w_type_alias.php", line 35, characters 15-23:
-  Cyclic use is here
+No errors

@@ -191,6 +191,7 @@ type t = {
   hh_distc_should_disable_trace_store: bool;
   hh_distc_exponential_backoff_num_retries: int;
   tco_enable_abstract_method_optional_parameters: bool;
+  recursive_case_types: bool;
 }
 [@@deriving eq, show]
 
@@ -300,6 +301,7 @@ let default =
     hh_distc_should_disable_trace_store = false;
     hh_distc_exponential_backoff_num_retries = 10;
     tco_enable_abstract_method_optional_parameters = false;
+    recursive_case_types = false;
   }
 
 let set
@@ -407,6 +409,7 @@ let set
     ?hh_distc_should_disable_trace_store
     ?hh_distc_exponential_backoff_num_retries
     ?tco_enable_abstract_method_optional_parameters
+    ?recursive_case_types
     options =
   let setting setting option =
     match setting with
@@ -687,6 +690,8 @@ let set
       setting
         tco_enable_abstract_method_optional_parameters
         options.tco_enable_abstract_method_optional_parameters;
+    recursive_case_types =
+      setting recursive_case_types options.recursive_case_types;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

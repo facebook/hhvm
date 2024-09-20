@@ -144,6 +144,7 @@ impl Default for GlobalOptions {
             hh_distc_should_disable_trace_store: false,
             hh_distc_exponential_backoff_num_retries: 10,
             tco_enable_abstract_method_optional_parameters: false,
+            recursive_case_types: false,
         }
     }
 }

@@ -1,4 +1,1 @@
-ERROR: File "list_w_type_alias.php", line 4, characters 11-13:
-Cyclic type definition (Typing[4014])
-  File "list_w_type_alias.php", line 5, characters 20-25:
-  Cyclic use is here
+No errors

@@ -100,6 +100,18 @@ let casetype_def env typedef =
     env
   | _ -> env
 
+let do_report_cycles env (vis : typedef_visibility) =
+  match vis with
+  | Transparent
+  | Opaque
+  | OpaqueModule ->
+    true
+  | CaseType ->
+    let recursive_case_types env =
+      (Env.get_tcopt env).GlobalOptions.recursive_case_types
+    in
+    not (recursive_case_types env)
+
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let {
@@ -152,8 +164,9 @@ let typedef_def ctx typedef =
         ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name_)
         t_kind
     in
-    Type_expansions.report cycles
-    |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
+    if do_report_cycles env t_vis then
+      Type_expansions.report cycles
+      |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
     let env = casetype_def env typedef in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
 

@@ -18,11 +18,12 @@ package thrift
 
 import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
 type responsePayload struct {
-	metadata  *ResponseRpcMetadata
+	metadata  *rpcmetadata.ResponseRpcMetadata
 	exception *rocketException
 	data      []byte
 }
@@ -39,7 +40,7 @@ func (r *responsePayload) Data() []byte {
 }
 
 func (r *responsePayload) Zstd() bool {
-	return r.metadata != nil && r.metadata.GetCompression() == CompressionAlgorithm_ZSTD
+	return r.metadata != nil && r.metadata.GetCompression() == rpcmetadata.CompressionAlgorithm_ZSTD
 }
 
 func (r *responsePayload) Error() error {
@@ -52,9 +53,9 @@ func (r *responsePayload) Error() error {
 func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	msg = payload.Clone(msg)
 	if msg == nil {
-		return &responsePayload{metadata: &ResponseRpcMetadata{}, data: []byte{}}, nil
+		return &responsePayload{metadata: &rpcmetadata.ResponseRpcMetadata{}, data: []byte{}}, nil
 	}
-	res := &responsePayload{metadata: &ResponseRpcMetadata{}, data: msg.Data()}
+	res := &responsePayload{metadata: &rpcmetadata.ResponseRpcMetadata{}, data: msg.Data()}
 	var err error
 	metadataBytes, ok := msg.Metadata()
 	if ok {
@@ -75,15 +76,15 @@ func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 }
 
 func encodeResponsePayload(name string, messageType types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
-	metadata := NewResponseRpcMetadata()
+	metadata := rpcmetadata.NewResponseRpcMetadata()
 	metadata.SetOtherMetadata(headers)
 	if zstd {
-		compression := CompressionAlgorithm_ZSTD
+		compression := rpcmetadata.CompressionAlgorithm_ZSTD
 		metadata.SetCompression(&compression)
 	}
 	if messageType == types.EXCEPTION {
 		excpetionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
-		metadata.SetPayloadMetadata(NewPayloadMetadata().SetExceptionMetadata(excpetionMetadata))
+		metadata.SetPayloadMetadata(rpcmetadata.NewPayloadMetadata().SetExceptionMetadata(excpetionMetadata))
 	}
 	metadataBytes, err := serializeCompact(metadata)
 	if err != nil {

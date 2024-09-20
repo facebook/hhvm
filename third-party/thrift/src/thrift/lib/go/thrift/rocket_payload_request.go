@@ -21,18 +21,19 @@ import (
 	"maps"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
 type requestPayload struct {
-	metadata *RequestRpcMetadata
+	metadata *rpcmetadata.RequestRpcMetadata
 	data     []byte
 	typeID   types.MessageType
 	protoID  types.ProtocolID
 }
 
 func encodeRequestPayload(name string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
-	metadata := NewRequestRpcMetadata()
+	metadata := rpcmetadata.NewRequestRpcMetadata()
 	metadata.SetName(&name)
 	rpcProtocolID, err := protocolIDToRPCProtocolID(protoID)
 	if err != nil {
@@ -45,7 +46,7 @@ func encodeRequestPayload(name string, protoID types.ProtocolID, typeID types.Me
 	}
 	metadata.SetKind(&kind)
 	if zstd {
-		compression := CompressionAlgorithm_ZSTD
+		compression := rpcmetadata.CompressionAlgorithm_ZSTD
 		metadata.SetCompression(&compression)
 	}
 	metadata.OtherMetadata = make(map[string]string)
@@ -70,7 +71,7 @@ func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 	var err error
 	metadataBytes, ok := msg.Metadata()
 	if ok {
-		metadata := &RequestRpcMetadata{}
+		metadata := &rpcmetadata.RequestRpcMetadata{}
 		if err := deserializeCompact(metadataBytes, metadata); err != nil {
 			return nil, err
 		}
@@ -117,7 +118,7 @@ func (r *requestPayload) ProtoID() types.ProtocolID {
 }
 
 func (r *requestPayload) Zstd() bool {
-	return r.metadata != nil && r.metadata.GetCompression() == CompressionAlgorithm_ZSTD
+	return r.metadata != nil && r.metadata.GetCompression() == rpcmetadata.CompressionAlgorithm_ZSTD
 }
 
 func (r *requestPayload) Headers() map[string]string {
@@ -127,41 +128,41 @@ func (r *requestPayload) Headers() map[string]string {
 	return r.metadata.GetOtherMetadata()
 }
 
-func protocolIDToRPCProtocolID(protocolID types.ProtocolID) (ProtocolId, error) {
+func protocolIDToRPCProtocolID(protocolID types.ProtocolID) (rpcmetadata.ProtocolId, error) {
 	switch protocolID {
 	case types.ProtocolIDBinary:
-		return ProtocolId_BINARY, nil
+		return rpcmetadata.ProtocolId_BINARY, nil
 	case types.ProtocolIDCompact:
-		return ProtocolId_COMPACT, nil
+		return rpcmetadata.ProtocolId_COMPACT, nil
 	}
 	return 0, fmt.Errorf("unsupported ProtocolID %v", protocolID)
 }
 
-func rpcProtocolIDToProtocolID(protocolID ProtocolId) (types.ProtocolID, error) {
+func rpcProtocolIDToProtocolID(protocolID rpcmetadata.ProtocolId) (types.ProtocolID, error) {
 	switch protocolID {
-	case ProtocolId_BINARY:
+	case rpcmetadata.ProtocolId_BINARY:
 		return types.ProtocolIDBinary, nil
-	case ProtocolId_COMPACT:
+	case rpcmetadata.ProtocolId_COMPACT:
 		return types.ProtocolIDCompact, nil
 	}
 	return 0, fmt.Errorf("unsupported ProtocolId %v", protocolID)
 }
 
-func messageTypeToRPCKind(typeID types.MessageType) (RpcKind, error) {
+func messageTypeToRPCKind(typeID types.MessageType) (rpcmetadata.RpcKind, error) {
 	switch typeID {
 	case types.CALL:
-		return RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, nil
+		return rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, nil
 	case types.ONEWAY:
-		return RpcKind_SINGLE_REQUEST_NO_RESPONSE, nil
+		return rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE, nil
 	}
 	return 0, fmt.Errorf("unsupported MessageType %v", typeID)
 }
 
-func rpcKindToMessageType(kind RpcKind) (types.MessageType, error) {
+func rpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {
 	switch kind {
-	case RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE:
+	case rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE:
 		return types.CALL, nil
-	case RpcKind_SINGLE_REQUEST_NO_RESPONSE:
+	case rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE:
 		return types.ONEWAY, nil
 	}
 	return 0, fmt.Errorf("unsupported RpcKind %v", kind)

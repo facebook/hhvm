@@ -18,6 +18,8 @@ package thrift
 
 import (
 	"encoding/json"
+
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
 type rocketExceptionType int16
@@ -54,21 +56,21 @@ type rocketException struct {
 	Name          string
 	What          string
 	ExceptionType rocketExceptionType
-	Kind          ErrorKind
-	Blame         ErrorBlame
-	Safety        ErrorSafety
+	Kind          rpcmetadata.ErrorKind
+	Blame         rpcmetadata.ErrorBlame
+	Safety        rpcmetadata.ErrorSafety
 }
 
 var _ error = (*rocketException)(nil)
 
-func newRocketException(exception *PayloadExceptionMetadataBase) *rocketException {
+func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *rocketException {
 	err := &rocketException{
 		Name:          "unknown",
 		What:          "unknown",
 		ExceptionType: rocketExceptionUnknown,
-		Kind:          ErrorKind_UNSPECIFIED,
-		Blame:         ErrorBlame_UNSPECIFIED,
-		Safety:        ErrorSafety_UNSPECIFIED,
+		Kind:          rpcmetadata.ErrorKind_UNSPECIFIED,
+		Blame:         rpcmetadata.ErrorBlame_UNSPECIFIED,
+		Safety:        rpcmetadata.ErrorSafety_UNSPECIFIED,
 	}
 	if exception.NameUTF8 != nil {
 		err.Name = *exception.NameUTF8
@@ -76,7 +78,7 @@ func newRocketException(exception *PayloadExceptionMetadataBase) *rocketExceptio
 	if exception.WhatUTF8 != nil {
 		err.What = *exception.WhatUTF8
 	}
-	var class *ErrorClassification
+	var class *rpcmetadata.ErrorClassification
 	if exception.Metadata != nil {
 		if exception.Metadata.DeclaredException != nil {
 			err.ExceptionType = rocketExceptionDeclared
@@ -108,39 +110,39 @@ func newRocketException(exception *PayloadExceptionMetadataBase) *rocketExceptio
 	return err
 }
 
-func newUnknownPayloadExceptionMetadataBase(name string, what string) *PayloadExceptionMetadataBase {
+func newUnknownPayloadExceptionMetadataBase(name string, what string) *rpcmetadata.PayloadExceptionMetadataBase {
 	return newPayloadExceptionMetadataBase(&rocketException{
 		Name:          name,
 		What:          what,
 		ExceptionType: rocketExceptionUnknown,
-		Safety:        ErrorSafety_SAFE,
-		Kind:          ErrorKind_TRANSIENT,
-		Blame:         ErrorBlame_SERVER,
+		Safety:        rpcmetadata.ErrorSafety_SAFE,
+		Kind:          rpcmetadata.ErrorKind_TRANSIENT,
+		Blame:         rpcmetadata.ErrorBlame_SERVER,
 	})
 }
 
-func newPayloadExceptionMetadataBase(err *rocketException) *PayloadExceptionMetadataBase {
-	base := NewPayloadExceptionMetadataBase()
+func newPayloadExceptionMetadataBase(err *rocketException) *rpcmetadata.PayloadExceptionMetadataBase {
+	base := rpcmetadata.NewPayloadExceptionMetadataBase()
 	base.SetNameUTF8(&err.Name)
 	base.SetWhatUTF8(&err.What)
-	class := NewErrorClassification()
+	class := rpcmetadata.NewErrorClassification()
 	class.SetKind(&err.Kind)
 	class.SetBlame(&err.Blame)
 	class.SetSafety(&err.Safety)
-	metadata := NewPayloadExceptionMetadata()
+	metadata := rpcmetadata.NewPayloadExceptionMetadata()
 	switch err.ExceptionType {
 	case rocketExceptionDeclared:
-		declared := NewPayloadDeclaredExceptionMetadata()
+		declared := rpcmetadata.NewPayloadDeclaredExceptionMetadata()
 		declared.SetErrorClassification(class)
 		metadata.SetDeclaredException(declared)
 	case rocketExceptionAppUnknown:
-		appUnknown := NewPayloadAppUnknownExceptionMetdata()
+		appUnknown := rpcmetadata.NewPayloadAppUnknownExceptionMetdata()
 		appUnknown.SetErrorClassification(class)
 		metadata.SetAppUnknownException(appUnknown)
 	case rocketExceptionAny:
-		metadata.SetAnyException(NewPayloadAnyExceptionMetadata())
+		metadata.SetAnyException(rpcmetadata.NewPayloadAnyExceptionMetadata())
 	case rocketExceptionDeprecatedProxy:
-		metadata.SetDEPRECATEDProxyException(NewPayloadProxyExceptionMetadata())
+		metadata.SetDEPRECATEDProxyException(rpcmetadata.NewPayloadProxyExceptionMetadata())
 	case rocketExceptionUnknown:
 	default:
 		panic("unreachable")

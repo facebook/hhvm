@@ -21,6 +21,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
@@ -40,10 +41,10 @@ func checkRequestSetupMetadata8(pay payload.Payload) error {
 	if err != nil {
 		return err
 	}
-	if int64(key) != KRocketProtocolKey {
-		return fmt.Errorf("expected key %d, got %d", KRocketProtocolKey, key)
+	if int64(key) != rpcmetadata.KRocketProtocolKey {
+		return fmt.Errorf("expected key %d, got %d", rpcmetadata.KRocketProtocolKey, key)
 	}
-	req := RequestSetupMetadata{}
+	req := rpcmetadata.RequestSetupMetadata{}
 	if err := deserializeCompact(metdataBytes[4:], &req); err != nil {
 		return err
 	}
@@ -55,8 +56,8 @@ func checkRequestSetupMetadata8(pay payload.Payload) error {
 	return nil
 }
 
-func newRequestSetupMetadataVersion8() *RequestSetupMetadata {
-	res := NewRequestSetupMetadata()
+func newRequestSetupMetadataVersion8() *rpcmetadata.RequestSetupMetadata {
+	res := rpcmetadata.NewRequestSetupMetadata()
 	version := int32(8)
 	res.SetMaxVersion(&version)
 	res.SetMinVersion(&version)
@@ -67,7 +68,7 @@ func newRequestSetupMetadataVersion8() *RequestSetupMetadata {
 func newRequestSetupMetadataVersion8Bytes() ([]byte, error) {
 	// write key first rpcmetadata.KRocketProtocolKey
 	buf := new(bytes.Buffer)
-	key := uint32(KRocketProtocolKey)
+	key := uint32(rpcmetadata.KRocketProtocolKey)
 	err := binary.Write(buf, binary.BigEndian, key)
 	if err != nil {
 		return nil, err
@@ -91,8 +92,8 @@ func newRequestSetupPayloadVersion8() (payload.Payload, error) {
 }
 
 // If connection establishment was successful, the server MUST respond with a SetupResponse control message.
-func newSetupResponseVersion8() *SetupResponse {
-	res := NewSetupResponse()
+func newSetupResponseVersion8() *rpcmetadata.SetupResponse {
+	res := rpcmetadata.NewSetupResponse()
 	version := int32(8)
 	res.SetVersion(&version)
 	ztsdSupported := true

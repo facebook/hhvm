@@ -19,21 +19,22 @@ package thrift
 import (
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewRocketException(t *testing.T) {
-	kind := ErrorKind_PERMANENT
-	blame := ErrorBlame_CLIENT
-	safety := ErrorSafety_SAFE
-	class := &ErrorClassification{
+	kind := rpcmetadata.ErrorKind_PERMANENT
+	blame := rpcmetadata.ErrorBlame_CLIENT
+	safety := rpcmetadata.ErrorSafety_SAFE
+	class := &rpcmetadata.ErrorClassification{
 		Kind:   &kind,
 		Blame:  &blame,
 		Safety: &safety,
 	}
-	declaredException := &PayloadExceptionMetadataBase{
-		Metadata: &PayloadExceptionMetadata{
-			DeclaredException: &PayloadDeclaredExceptionMetadata{
+	declaredException := &rpcmetadata.PayloadExceptionMetadataBase{
+		Metadata: &rpcmetadata.PayloadExceptionMetadata{
+			DeclaredException: &rpcmetadata.PayloadDeclaredExceptionMetadata{
 				ErrorClassification: class,
 			},
 		},
@@ -41,9 +42,9 @@ func TestNewRocketException(t *testing.T) {
 	err := newRocketException(declaredException)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "DeclaredException")
-	appUnknownException := &PayloadExceptionMetadataBase{
-		Metadata: &PayloadExceptionMetadata{
-			AppUnknownException: &PayloadAppUnknownExceptionMetdata{
+	appUnknownException := &rpcmetadata.PayloadExceptionMetadataBase{
+		Metadata: &rpcmetadata.PayloadExceptionMetadata{
+			AppUnknownException: &rpcmetadata.PayloadAppUnknownExceptionMetdata{
 				ErrorClassification: class,
 			},
 		},
@@ -51,9 +52,9 @@ func TestNewRocketException(t *testing.T) {
 	err = newRocketException(appUnknownException)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "AppUnknownException")
-	appUnknownException2 := &PayloadExceptionMetadataBase{
-		Metadata: &PayloadExceptionMetadata{
-			AppUnknownException: &PayloadAppUnknownExceptionMetdata{},
+	appUnknownException2 := &rpcmetadata.PayloadExceptionMetadataBase{
+		Metadata: &rpcmetadata.PayloadExceptionMetadata{
+			AppUnknownException: &rpcmetadata.PayloadAppUnknownExceptionMetdata{},
 		},
 	}
 	err = newRocketException(appUnknownException2)

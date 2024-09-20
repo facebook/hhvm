@@ -19,6 +19,7 @@ package thrift
 import (
 	"fmt"
 
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
@@ -39,7 +40,7 @@ func decodeServerMetadataPushVersion8(msg payload.Payload) (*serverMetadataPaylo
 		return nil, fmt.Errorf("no metadata in server metadata push")
 	}
 	// Use ServerPushMetadata{} and do not use &ServerPushMetadata{} to ensure stack and avoid heap allocation.
-	metadata := ServerPushMetadata{}
+	metadata := rpcmetadata.ServerPushMetadata{}
 	if err := deserializeCompact(metadataBytes, &metadata); err != nil {
 		panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
 	}
@@ -62,8 +63,8 @@ func decodeServerMetadataPushVersion8(msg payload.Payload) (*serverMetadataPaylo
 
 func encodeServerMetadataPushVersion8(zstdSupported bool) (payload.Payload, error) {
 	version := int32(8)
-	res := NewServerPushMetadata().
-		SetSetupResponse(NewSetupResponse().
+	res := rpcmetadata.NewServerPushMetadata().
+		SetSetupResponse(rpcmetadata.NewSetupResponse().
 			SetVersion(&version).
 			SetZstdSupported(&zstdSupported))
 	metadataBytes, err := serializeCompact(res)

@@ -45,6 +45,8 @@ class codegen_data {
   bool compat_setters = true;
   // whether to generate Thrift metadata
   bool gen_metadata = true;
+  // whether to generate DefaultGet method
+  bool gen_default_get = true;
 
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.

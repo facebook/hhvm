@@ -85,6 +85,8 @@ class mstch_go_program : public mstch_program {
              &mstch_go_program::thrift_metadata_import},
             {"program:go_package_alias", &mstch_go_program::go_package_alias},
             {"program:gen_metadata?", &mstch_go_program::should_gen_metadata},
+            {"program:gen_default_get?",
+             &mstch_go_program::should_gen_default_get},
             {"program:import_metadata_package?",
              &mstch_go_program::should_import_metadata_package},
             {"program:metadata_qualifier",
@@ -124,6 +126,7 @@ class mstch_go_program : public mstch_program {
     return data_.get_go_package_alias(program_);
   }
   mstch::node should_gen_metadata() { return data_.gen_metadata; }
+  mstch::node should_gen_default_get() { return data_.gen_default_get; }
   mstch::node should_import_metadata_package() {
     // We don't need to import the metadata package if we are
     // generating metadata inside the metadata package itself. Duh.
@@ -797,6 +800,9 @@ void t_mstch_go_generator::generate_program() {
   }
   if (auto gen_metadata = get_option("gen_metadata")) {
     data_.gen_metadata = (gen_metadata.value() == "true");
+  }
+  if (auto gen_default_get = get_option("gen_default_get")) {
+    data_.gen_default_get = (gen_default_get.value() == "true");
   }
 
   const auto& prog = cached_program(program);

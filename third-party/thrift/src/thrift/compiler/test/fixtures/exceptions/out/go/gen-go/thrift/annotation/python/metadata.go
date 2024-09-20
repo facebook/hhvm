@@ -32,6 +32,18 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("python.Py3Hidden").
     SetIsUnion(false),
     metadata.NewThriftStruct().
+    SetName("python.PyDeprecatedHidden").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("reason").
+    SetIsOptional(false).
+    SetType(premadeThriftType_string),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("python.Flags").
     SetIsUnion(false),
     metadata.NewThriftStruct().

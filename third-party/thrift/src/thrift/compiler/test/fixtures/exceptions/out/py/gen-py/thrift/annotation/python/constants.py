@@ -13,5 +13,5 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 
-from .ttypes import UTF8STRINGS, Py3Hidden, Flags, Name, Adapter, UseCAPI
+from .ttypes import UTF8STRINGS, Py3Hidden, PyDeprecatedHidden, Flags, Name, Adapter, UseCAPI
 

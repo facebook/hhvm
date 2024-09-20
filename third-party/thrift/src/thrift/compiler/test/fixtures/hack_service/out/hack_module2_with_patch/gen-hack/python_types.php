@@ -73,6 +73,96 @@ class Py3Hidden implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
+ * Hides in thrift-py-deprecated only
+ *
+ * Original thrift struct:-
+ * PyDeprecatedHidden
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/PyDeprecatedHidden'))>>
+class PyDeprecatedHidden implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'reason',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'reason' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'reason' => ?string,
+  );
+
+  const int STRUCTURAL_ID = 3707764047816594739;
+  /**
+   * Original thrift field:-
+   * 1: string reason
+   */
+  public string $reason;
+
+  public function __construct(?string $reason = null)[] {
+    $this->reason = $reason ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'reason'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'PyDeprecatedHidden';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "python.PyDeprecatedHidden",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "reason",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
  * Original thrift struct:-
  * Flags
  */

@@ -27,6 +27,16 @@ inline void reset_field<::facebook::thrift::annotation::python::Py3Hidden>(
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::python::PyDeprecatedHidden>(
+    ::facebook::thrift::annotation::python::PyDeprecatedHidden& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.reason_ref().copy_from(default_inst<::facebook::thrift::annotation::python::PyDeprecatedHidden>().reason_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::facebook::thrift::annotation::python::Flags>(
     ::facebook::thrift::annotation::python::Flags& obj, uint16_t index) {
   switch (index) {
@@ -69,6 +79,16 @@ inline void reset_field<::facebook::thrift::annotation::python::UseCAPI>(
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::Py3Hidden>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::python::PyDeprecatedHidden>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

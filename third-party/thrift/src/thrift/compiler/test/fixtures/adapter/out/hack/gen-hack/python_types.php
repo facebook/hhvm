@@ -93,6 +93,122 @@ class Py3Hidden implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
 }
 
 /**
+ * Hides in thrift-py-deprecated only
+ *
+ * Original thrift struct:-
+ * PyDeprecatedHidden
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/PyDeprecatedHidden'))>>
+class PyDeprecatedHidden implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'reason',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'reason' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'reason' => ?string,
+  );
+
+  const type TShape = shape(
+    'reason' => string,
+  );
+  const int STRUCTURAL_ID = 3707764047816594739;
+  /**
+   * Original thrift field:-
+   * 1: string reason
+   */
+  public string $reason;
+
+  public function __construct(?string $reason = null)[] {
+    $this->reason = $reason ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'reason'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'PyDeprecatedHidden';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "python.PyDeprecatedHidden",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "reason",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['reason'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'reason' => $this->reason,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'reason') !== null) {
+      $this->reason = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['reason']);
+    }
+  }
+
+}
+
+/**
  * Original thrift struct:-
  * Flags
  */

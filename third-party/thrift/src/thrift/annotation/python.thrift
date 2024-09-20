@@ -30,6 +30,12 @@ namespace py thrift.annotation.python
 @scope.Definition
 struct Py3Hidden {}
 
+/// Hides in thrift-py-deprecated only
+@scope.Field
+struct PyDeprecatedHidden {
+  1: string reason;
+}
+
 @scope.Enum
 struct Flags {}
 

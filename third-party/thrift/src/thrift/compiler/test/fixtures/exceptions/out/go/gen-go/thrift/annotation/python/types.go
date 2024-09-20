@@ -94,6 +94,134 @@ func (x *Py3Hidden) String() string {
     return sb.String()
 }
 
+type PyDeprecatedHidden struct {
+    Reason string `thrift:"reason,1" json:"reason" db:"reason"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*PyDeprecatedHidden)(nil)
+
+func NewPyDeprecatedHidden() *PyDeprecatedHidden {
+    return (&PyDeprecatedHidden{}).
+        SetReasonNonCompat("")
+}
+
+func (x *PyDeprecatedHidden) GetReason() string {
+    return x.Reason
+}
+
+func (x *PyDeprecatedHidden) SetReasonNonCompat(value string) *PyDeprecatedHidden {
+    x.Reason = value
+    return x
+}
+
+func (x *PyDeprecatedHidden) SetReason(value string) *PyDeprecatedHidden {
+    x.Reason = value
+    return x
+}
+
+func (x *PyDeprecatedHidden) writeField1(p thrift.Encoder) error {  // Reason
+    if err := p.WriteFieldBegin("reason", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Reason
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *PyDeprecatedHidden) readField1(p thrift.Decoder) error {  // Reason
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.Reason = result
+    return nil
+}
+
+func (x *PyDeprecatedHidden) toString1() string {  // Reason
+    return fmt.Sprintf("%v", x.Reason)
+}
+
+
+
+func (x *PyDeprecatedHidden) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("PyDeprecatedHidden"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *PyDeprecatedHidden) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // reason
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *PyDeprecatedHidden) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("PyDeprecatedHidden({")
+    sb.WriteString(fmt.Sprintf("Reason:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Flags struct {
 }
 // Compile time interface enforcer
@@ -615,6 +743,7 @@ func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("facebook.com/thrift/annotation/python/Py3Hidden", func() any { return NewPy3Hidden() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/PyDeprecatedHidden", func() any { return NewPyDeprecatedHidden() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Flags", func() any { return NewFlags() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", func() any { return NewAdapter() })

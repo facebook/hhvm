@@ -25,8 +25,40 @@
         }
       }
     },
+    "PyDeprecatedHidden" : {
+      "lineno" : 34,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "reason" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 36,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 36,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 34,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 37,
+          "column" : 2
+        }
+      }
+    },
     "Flags" : {
-      "lineno" : 33,
+      "lineno" : 39,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -34,17 +66,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 33,
+          "line" : 39,
           "column" : 1
         },
         "end" : {
-          "line" : 34,
+          "line" : 40,
           "column" : 16
         }
       }
     },
     "Name" : {
-      "lineno" : 36,
+      "lineno" : 42,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -54,11 +86,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 38,
+              "line" : 44,
               "column" : 3
             },
             "end" : {
-              "line" : 38,
+              "line" : 44,
               "column" : 18
             }
           }
@@ -66,17 +98,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 36,
+          "line" : 42,
           "column" : 1
         },
         "end" : {
-          "line" : 39,
+          "line" : 45,
           "column" : 2
         }
       }
     },
     "Adapter" : {
-      "lineno" : 72,
+      "lineno" : 78,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -86,11 +118,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 77,
+              "line" : 83,
               "column" : 3
             },
             "end" : {
-              "line" : 77,
+              "line" : 83,
               "column" : 18
             }
           }
@@ -101,11 +133,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 80,
+              "line" : 86,
               "column" : 3
             },
             "end" : {
-              "line" : 80,
+              "line" : 86,
               "column" : 22
             }
           }
@@ -113,17 +145,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 72,
+          "line" : 78,
           "column" : 1
         },
         "end" : {
-          "line" : 81,
+          "line" : 87,
           "column" : 2
         }
       }
     },
     "UseCAPI" : {
-      "lineno" : 88,
+      "lineno" : 94,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -134,11 +166,11 @@
           "default_value" : false,
           "source_range" : {
             "begin" : {
-              "line" : 90,
+              "line" : 96,
               "column" : 3
             },
             "end" : {
-              "line" : 90,
+              "line" : 96,
               "column" : 29
             }
           }
@@ -146,11 +178,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 88,
+          "line" : 94,
           "column" : 1
         },
         "end" : {
-          "line" : 91,
+          "line" : 97,
           "column" : 2
         }
       }

@@ -230,6 +230,10 @@ class FizzServerContext {
     return certManager_->getCert(identity);
   }
 
+  const CertManager* getCertManager() const {
+    return certManager_.get();
+  }
+
   /**
    * Sets the early data settings.
    */

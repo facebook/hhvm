@@ -453,7 +453,7 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   1 - All functions can be renamed
   2 - Functions in RenamableFunctions config list can be renamed
 
-- uint32_t Jit.BuiltinsInterceptableByDefault = true, UNKNOWN, globaldata|compileroption(BuiltinsInterceptableByDefault)|unitcacheflag
+- bool Jit.BuiltinsInterceptableByDefault = true, UNKNOWN, compileroption(JitBuiltinsInterceptableByDefault)|unitcacheflag
 - uint32_t Jit.InterceptFunctionLogRate = 1000, UNKNOWN
 - bool Jit.UseVtuneAPI = false, UNKNOWN
 - bool Jit.DisabledByHphpd = false, UNKNOWN

@@ -243,15 +243,16 @@ func (x *reqFinderByPlate) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // plate
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -398,15 +399,16 @@ func (x *respFinderByPlate) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 0 && wireType == thrift.Type(thrift.STRUCT)):  // success
-            if err := x.readField0(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField0(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -529,15 +531,16 @@ func (x *reqFinderAliasByPlate) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // plate
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -684,15 +687,16 @@ func (x *respFinderAliasByPlate) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 0 && wireType == thrift.Type(thrift.STRUCT)):  // success
-            if err := x.readField0(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField0(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -815,15 +819,16 @@ func (x *reqFinderPreviousPlate) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // plate
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -966,15 +971,16 @@ func (x *respFinderPreviousPlate) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 0 && wireType == thrift.Type(thrift.STRING)):  // success
-            if err := x.readField0(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField0(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

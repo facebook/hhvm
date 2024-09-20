@@ -34,19 +34,20 @@ func (x *{{struct:go_name}}) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         {{#struct:fields_sorted}}
         {{#field:type}}
         case (id == {{field:key}} && wireType == thrift.Type({{> common/ttype}})):  // {{field:name}}
-            if err := x.readField{{field:key_str}}(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField{{field:key_str}}(p)
         {{/field:type}}
         {{/struct:fields_sorted}}
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

@@ -316,23 +316,20 @@ func (x *reqServiceFunc) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // arg1
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // arg2
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         case (id == 3 && wireType == thrift.Type(thrift.STRUCT)):  // arg3
-            if err := x.readField3(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField3(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -477,15 +474,16 @@ func (x *respServiceFunc) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
-            if err := x.readField0(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField0(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -754,11 +752,14 @@ func (x *reqAdapterServiceCount) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -904,15 +905,16 @@ func (x *respAdapterServiceCount) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 0 && wireType == thrift.Type(thrift.STRUCT)):  // success
-            if err := x.readField0(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField0(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1055,15 +1057,16 @@ func (x *reqAdapterServiceAdaptedTypes) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // arg
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1210,15 +1213,16 @@ func (x *respAdapterServiceAdaptedTypes) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 0 && wireType == thrift.Type(thrift.STRUCT)):  // success
-            if err := x.readField0(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField0(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

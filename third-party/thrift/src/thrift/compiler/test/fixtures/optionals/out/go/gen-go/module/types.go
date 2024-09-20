@@ -328,27 +328,22 @@ func (x *Color) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.DOUBLE)):  // red
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.DOUBLE)):  // green
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         case (id == 3 && wireType == thrift.Type(thrift.DOUBLE)):  // blue
-            if err := x.readField3(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField3(p)
         case (id == 4 && wireType == thrift.Type(thrift.DOUBLE)):  // alpha
-            if err := x.readField4(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField4(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -753,31 +748,24 @@ func (x *Vehicle) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // color
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // licensePlate
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         case (id == 3 && wireType == thrift.Type(thrift.STRING)):  // description
-            if err := x.readField3(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField3(p)
         case (id == 4 && wireType == thrift.Type(thrift.STRING)):  // name
-            if err := x.readField4(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField4(p)
         case (id == 5 && wireType == thrift.Type(thrift.BOOL)):  // hasAC
-            if err := x.readField5(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField5(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1574,51 +1562,34 @@ func (x *Person) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // name
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         case (id == 3 && wireType == thrift.Type(thrift.I16)):  // age
-            if err := x.readField3(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField3(p)
         case (id == 4 && wireType == thrift.Type(thrift.STRING)):  // address
-            if err := x.readField4(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField4(p)
         case (id == 5 && wireType == thrift.Type(thrift.STRUCT)):  // favoriteColor
-            if err := x.readField5(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField5(p)
         case (id == 6 && wireType == thrift.Type(thrift.SET)):  // friends
-            if err := x.readField6(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField6(p)
         case (id == 7 && wireType == thrift.Type(thrift.I64)):  // bestFriend
-            if err := x.readField7(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField7(p)
         case (id == 8 && wireType == thrift.Type(thrift.MAP)):  // petNames
-            if err := x.readField8(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField8(p)
         case (id == 9 && wireType == thrift.Type(thrift.I32)):  // afraidOfAnimal
-            if err := x.readField9(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField9(p)
         case (id == 10 && wireType == thrift.Type(thrift.LIST)):  // vehicles
-            if err := x.readField10(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField10(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

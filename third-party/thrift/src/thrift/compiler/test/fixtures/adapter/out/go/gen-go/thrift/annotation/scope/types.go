@@ -59,11 +59,14 @@ func (x *Transitive) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -132,11 +135,14 @@ func (x *Program) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -205,11 +211,14 @@ func (x *Struct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -278,11 +287,14 @@ func (x *Union) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -351,11 +363,14 @@ func (x *Exception) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -424,11 +439,14 @@ func (x *Field) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -497,11 +515,14 @@ func (x *Typedef) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -570,11 +591,14 @@ func (x *Service) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -643,11 +667,14 @@ func (x *Interaction) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -716,11 +743,14 @@ func (x *Function) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -789,11 +819,14 @@ func (x *EnumValue) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -862,11 +895,14 @@ func (x *Const) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -935,11 +971,14 @@ func (x *Enum) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1008,11 +1047,14 @@ func (x *Structured) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1081,11 +1123,14 @@ func (x *Interface) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1154,11 +1199,14 @@ func (x *RootDefinition) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1227,11 +1275,14 @@ func (x *Definition) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

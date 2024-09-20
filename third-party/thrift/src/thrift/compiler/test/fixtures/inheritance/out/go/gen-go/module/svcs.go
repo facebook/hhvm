@@ -141,11 +141,14 @@ func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -221,11 +224,14 @@ func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -480,11 +486,14 @@ func (x *reqMyNodeDoMid) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -560,11 +569,14 @@ func (x *respMyNodeDoMid) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -796,11 +808,14 @@ func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -876,11 +891,14 @@ func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

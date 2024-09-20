@@ -261,15 +261,16 @@ func (x *MyStructNestedAnnotation) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -351,11 +352,14 @@ func (x *MyUnion) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -424,11 +428,14 @@ func (x *MyException) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -981,47 +988,32 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // abstract
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.I64)):  // major
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         case (id == 3 && wireType == thrift.Type(thrift.STRING)):  // annotation_with_quote
-            if err := x.readField3(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField3(p)
         case (id == 4 && wireType == thrift.Type(thrift.STRING)):  // class_
-            if err := x.readField4(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField4(p)
         case (id == 5 && wireType == thrift.Type(thrift.STRING)):  // annotation_with_trailing_comma
-            if err := x.readField5(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField5(p)
         case (id == 6 && wireType == thrift.Type(thrift.STRING)):  // empty_annotations
-            if err := x.readField6(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField6(p)
         case (id == 7 && wireType == thrift.Type(thrift.I32)):  // my_enum
-            if err := x.readField7(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField7(p)
         case (id == 8 && wireType == thrift.Type(thrift.LIST)):  // cpp_type_annotation
-            if err := x.readField8(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField8(p)
         case (id == 9 && wireType == thrift.Type(thrift.STRUCT)):  // my_union
-            if err := x.readField9(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField9(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -1199,19 +1191,18 @@ func (x *SecretStruct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // password
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

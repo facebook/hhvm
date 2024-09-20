@@ -634,27 +634,22 @@ func (x *SomeStruct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.I32)):  // reasonable
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.I32)):  // fine
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         case (id == 3 && wireType == thrift.Type(thrift.I32)):  // questionable
-            if err := x.readField3(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField3(p)
         case (id == 4 && wireType == thrift.Type(thrift.SET)):  // tags
-            if err := x.readField4(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField4(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -939,27 +934,22 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 1 && wireType == thrift.Type(thrift.I32)):  // me2_3
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         case (id == 2 && wireType == thrift.Type(thrift.I32)):  // me3_n3
-            if err := x.readField2(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField2(p)
         case (id == 4 && wireType == thrift.Type(thrift.I32)):  // me1_t1
-            if err := x.readField4(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField4(p)
         case (id == 6 && wireType == thrift.Type(thrift.I32)):  // me1_t2
-            if err := x.readField6(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField6(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

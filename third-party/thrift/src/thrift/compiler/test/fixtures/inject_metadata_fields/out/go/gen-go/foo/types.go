@@ -239,23 +239,20 @@ func (x *Fields) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 100 && wireType == thrift.Type(thrift.STRING)):  // injected_field
-            if err := x.readField100(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField100(p)
         case (id == 101 && wireType == thrift.Type(thrift.STRING)):  // injected_structured_annotation_field
-            if err := x.readField101(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField101(p)
         case (id == 102 && wireType == thrift.Type(thrift.STRING)):  // injected_unstructured_annotation_field
-            if err := x.readField102(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField102(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

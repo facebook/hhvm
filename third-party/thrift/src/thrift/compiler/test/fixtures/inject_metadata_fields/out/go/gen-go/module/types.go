@@ -111,15 +111,16 @@ func (x *Fields) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == 100 && wireType == thrift.Type(thrift.STRING)):  // injected_field
-            if err := x.readField100(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField100(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -239,15 +240,16 @@ func (x *FieldsInjectedToEmptyStruct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == -1100 && wireType == thrift.Type(thrift.STRING)):  // injected_field
-            if err := x.readField_1100(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField_1100(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -417,19 +419,18 @@ func (x *FieldsInjectedToStruct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == -1100 && wireType == thrift.Type(thrift.STRING)):  // injected_field
-            if err := x.readField_1100(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField_1100(p)
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // string_field
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {
@@ -730,27 +731,22 @@ func (x *FieldsInjectedWithIncludedStruct) Read(p thrift.Decoder) error {
             break;
         }
 
+        var fieldReadErr error
         switch {
         case (id == -1102 && wireType == thrift.Type(thrift.STRING)):  // injected_unstructured_annotation_field
-            if err := x.readField_1102(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField_1102(p)
         case (id == -1101 && wireType == thrift.Type(thrift.STRING)):  // injected_structured_annotation_field
-            if err := x.readField_1101(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField_1101(p)
         case (id == -1100 && wireType == thrift.Type(thrift.STRING)):  // injected_field
-            if err := x.readField_1100(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField_1100(p)
         case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // string_field
-            if err := x.readField1(p); err != nil {
-                return err
-            }
+            fieldReadErr = x.readField1(p)
         default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
         }
 
         if err := p.ReadFieldEnd(); err != nil {

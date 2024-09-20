@@ -386,6 +386,17 @@ MaskedDecodeResultValue parseValueWithMask(
     MaskedProtocolData& protocolData,
     bool string_to_binary = true) {
   MaskedDecodeResultValue result;
+  if (arg_type == protocol::T_BOOL) {
+    // For Compact protocol, Bool field values are encoded directly in the field
+    // header, in which case the encoded value will be empty.
+    //
+    // https://github.com/apache/thrift/blob/master/doc/specs/thrift-compact-protocol.md#boolean-encoding
+    //
+    // Given that the bool field is cheap to decode, we can just decode it
+    // unconditionally.
+    prot.readBool(result.included.emplace_bool());
+    return result;
+  }
   if (readMaskRef.isAllMask()) { // serialize all
     parseValueInplace(prot, arg_type, result.included, string_to_binary);
     return result;

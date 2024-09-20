@@ -19,11 +19,12 @@ package thrift
 import (
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
-	protocol, err := newHeaderProtocol(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
+	protocol, err := newHeaderProtocol(newMockSocket(), types.ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
 	v, ok := protocol.(*headerProtocol).trans.persistentWriteInfoHeaders["key"]
 	assert.True(t, ok)
@@ -31,7 +32,7 @@ func TestHeaderProtocolSomePersistentHeaders(t *testing.T) {
 }
 
 func TestRocketProtocolSomePersistentHeaders(t *testing.T) {
-	protocol, err := newRocketClient(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
+	protocol, err := newRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
 	v, ok := protocol.(*rocketClient).persistentHeaders["key"]
 	assert.True(t, ok)
@@ -39,7 +40,7 @@ func TestRocketProtocolSomePersistentHeaders(t *testing.T) {
 }
 
 func TestUpgradeToRocketProtocolSomePersistentHeaders(t *testing.T) {
-	upgradeProtocol, err := newUpgradeToRocketClient(newMockSocket(), ProtocolIDCompact, 0, map[string]string{"key": "value"})
+	upgradeProtocol, err := newUpgradeToRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, map[string]string{"key": "value"})
 	assert.NoError(t, err)
 	protocol := upgradeProtocol.(*upgradeToRocketClient).headerProtocol
 	v, ok := protocol.(*headerProtocol).trans.persistentWriteInfoHeaders["key"]

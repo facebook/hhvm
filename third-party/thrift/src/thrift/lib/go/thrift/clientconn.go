@@ -19,29 +19,21 @@ package thrift
 import (
 	"context"
 	"fmt"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // ClientConn holds all the connection information for a thrift client
 type ClientConn struct {
-	proto Protocol
+	proto types.Protocol
 	seqID int32
 }
 
 // NewClientConn creates a new ClientConn object using a protocol
-func NewClientConn(proto Protocol) ClientConn {
+func NewClientConn(proto types.Protocol) ClientConn {
 	return ClientConn{
 		proto: proto,
 	}
-}
-
-// IRequest represents a request to be sent to a thrift endpoint
-type IRequest interface {
-	Write(p Encoder) error
-}
-
-// IResponse represents a response received from a thrift call
-type IResponse interface {
-	Read(p Decoder) error
 }
 
 // Close closes the client connection
@@ -50,7 +42,7 @@ func (cc *ClientConn) Close() error {
 }
 
 // SendMsg sends a request to a given thrift endpoint
-func (cc *ClientConn) SendMsg(ctx context.Context, method string, req IRequest, msgType MessageType) error {
+func (cc *ClientConn) SendMsg(ctx context.Context, method string, req types.IRequest, msgType types.MessageType) error {
 	cc.seqID++
 
 	if err := setRequestHeaders(ctx, cc.proto); err != nil {
@@ -73,7 +65,7 @@ func (cc *ClientConn) SendMsg(ctx context.Context, method string, req IRequest, 
 }
 
 // RecvMsg receives the response from a call to a thrift endpoint
-func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res IResponse) error {
+func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res types.IResponse) error {
 	recvMethod, mTypeID, seqID, err := cc.proto.ReadMessageBegin()
 
 	if err != nil {
@@ -81,22 +73,22 @@ func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res IResponse)
 	}
 
 	if method != recvMethod {
-		return NewApplicationException(WRONG_METHOD_NAME, fmt.Sprintf("%s failed: wrong method name", method))
+		return types.NewApplicationException(types.WRONG_METHOD_NAME, fmt.Sprintf("%s failed: wrong method name", method))
 	}
 
 	if cc.seqID != seqID {
-		return NewApplicationException(BAD_SEQUENCE_ID, fmt.Sprintf("%s failed: out of sequence response", method))
+		return types.NewApplicationException(types.BAD_SEQUENCE_ID, fmt.Sprintf("%s failed: out of sequence response", method))
 	}
 
 	switch mTypeID {
-	case REPLY:
+	case types.REPLY:
 		if err := res.Read(cc.proto); err != nil {
 			return err
 		}
 
 		return cc.proto.ReadMessageEnd()
-	case EXCEPTION:
-		err := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
+	case types.EXCEPTION:
+		err := types.NewApplicationException(types.UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
 
 		recvdErr, readErr := err.Read(cc.proto)
 
@@ -109,6 +101,6 @@ func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res IResponse)
 		}
 		return recvdErr
 	default:
-		return NewApplicationException(INVALID_MESSAGE_TYPE_EXCEPTION, fmt.Sprintf("%s failed: invalid message type", method))
+		return types.NewApplicationException(types.INVALID_MESSAGE_TYPE_EXCEPTION, fmt.Sprintf("%s failed: invalid message type", method))
 	}
 }

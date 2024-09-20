@@ -20,6 +20,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 var errFakeResponseRead = errors.New("error reading from FakeResponse")
@@ -30,19 +32,19 @@ var errFakeProtoWriteMessageEnd = errors.New("error writing message end from Fak
 var errFakeProtoFlush = errors.New("error flushing FakeProto")
 
 type fakeResponse struct {
-	IResponse
+	types.IResponse
 	shouldReturnError bool
 }
 
 type fakeRequest struct {
-	IRequest
+	types.IRequest
 	shouldReturnError bool
 }
 
 type fakeProto struct {
-	Protocol
+	types.Protocol
 	method            string
-	typeID            MessageType
+	typeID            types.MessageType
 	seqID             int32
 	shouldReturnError bool
 	errOnMessageBegin bool
@@ -50,14 +52,14 @@ type fakeProto struct {
 	errOnFlush        bool
 }
 
-func (f *fakeRequest) Write(proto Encoder) error {
+func (f *fakeRequest) Write(proto types.Encoder) error {
 	if f.shouldReturnError {
 		return errFakeRequestWrite
 	}
 	return nil
 }
 
-func (f *fakeProto) WriteMessageBegin(method string, typeID MessageType, seqID int32) error {
+func (f *fakeProto) WriteMessageBegin(method string, typeID types.MessageType, seqID int32) error {
 	if f.errOnMessageBegin {
 		return errFakeProtoWriteMessageBegin
 	}
@@ -78,7 +80,7 @@ func (f *fakeProto) Flush() error {
 	return nil
 }
 
-func (f *fakeProto) ReadMessageBegin() (method string, typeID MessageType, seqID int32, err error) {
+func (f *fakeProto) ReadMessageBegin() (method string, typeID types.MessageType, seqID int32, err error) {
 	if f.shouldReturnError {
 		err = errFakeProtoReadMessageBegin
 		return
@@ -87,7 +89,7 @@ func (f *fakeProto) ReadMessageBegin() (method string, typeID MessageType, seqID
 	return f.method, f.typeID, f.seqID, nil
 }
 
-func (f *fakeResponse) Read(proto Decoder) error {
+func (f *fakeResponse) Read(proto types.Decoder) error {
 	if f.shouldReturnError {
 		return errFakeResponseRead
 	}
@@ -96,8 +98,8 @@ func (f *fakeResponse) Read(proto Decoder) error {
 
 func TestSendMsgError(t *testing.T) {
 	testCases := []struct {
-		proto    Protocol
-		request  IRequest
+		proto    types.Protocol
+		request  types.IRequest
 		expected error
 	}{
 		// Bad WriteMessageBegin
@@ -130,7 +132,7 @@ func TestSendMsgError(t *testing.T) {
 	for i, testCase := range testCases {
 		cc := ClientConn{proto: testCase.proto}
 
-		if err := cc.SendMsg(ctx, "foobar", testCase.request, CALL); err.Error() != testCase.expected.Error() {
+		if err := cc.SendMsg(ctx, "foobar", testCase.request, types.CALL); err.Error() != testCase.expected.Error() {
 			t.Errorf("#%d: expected call to SendMsg to return \"%+v\"; got \"%+v\"", i, testCase.expected, err)
 		}
 	}
@@ -139,8 +141,8 @@ func TestSendMsgError(t *testing.T) {
 
 func TestRecvMsgError(t *testing.T) {
 	testCases := []struct {
-		proto    Protocol
-		response IResponse
+		proto    types.Protocol
+		response types.IResponse
 		expected error
 	}{
 		// Error reading message begin
@@ -152,24 +154,24 @@ func TestRecvMsgError(t *testing.T) {
 		// Bad method name in response
 		{
 			proto:    &fakeProto{method: "foobar2"},
-			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: wrong method name"),
+			expected: types.NewApplicationException(types.WRONG_METHOD_NAME, "foobar failed: wrong method name"),
 		},
 
 		// Bad seqID in response
 		{
 			proto:    &fakeProto{method: "foobar", seqID: -1},
-			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: out of sequence response"),
+			expected: types.NewApplicationException(types.WRONG_METHOD_NAME, "foobar failed: out of sequence response"),
 		},
 
 		// Bad typeID in response
 		{
 			proto:    &fakeProto{method: "foobar", seqID: 0, typeID: -1},
-			expected: NewApplicationException(WRONG_METHOD_NAME, "foobar failed: invalid message type"),
+			expected: types.NewApplicationException(types.WRONG_METHOD_NAME, "foobar failed: invalid message type"),
 		},
 
 		// Bad REPLY response body read
 		{
-			proto:    &fakeProto{method: "foobar", seqID: 0, typeID: REPLY},
+			proto:    &fakeProto{method: "foobar", seqID: 0, typeID: types.REPLY},
 			response: &fakeResponse{shouldReturnError: true},
 			expected: errFakeResponseRead,
 		},

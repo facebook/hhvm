@@ -8,7 +8,7 @@ package module1
 import (
     module0 "module0"
     module2 "module2"
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 var _ = module0.GoUnusedProtection__

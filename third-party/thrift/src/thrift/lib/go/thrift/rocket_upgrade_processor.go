@@ -18,18 +18,20 @@ package thrift
 
 import (
 	"context"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type rocketUpgradeProcessor struct {
 	upgraded  bool
-	processor Processor
+	processor types.Processor
 }
 
-func newRocketUpgradeProcessor(processor Processor) *rocketUpgradeProcessor {
+func newRocketUpgradeProcessor(processor types.Processor) *rocketUpgradeProcessor {
 	return &rocketUpgradeProcessor{processor: processor}
 }
 
-func (r *rocketUpgradeProcessor) GetProcessorFunction(name string) ProcessorFunction {
+func (r *rocketUpgradeProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
 	// The upgradeToRocket function in thrift/lib/thrift/RocketUpgrade.thrift
 	// asks the server to upgrade to using the rocket protocol.
 	// If the server does not respond with an error,
@@ -43,7 +45,7 @@ func (r *rocketUpgradeProcessor) GetProcessorFunction(name string) ProcessorFunc
 
 type rocketUpgradeProcessorFunction struct{}
 
-func (r *rocketUpgradeProcessorFunction) Read(prot Decoder) (Struct, Exception) {
+func (r *rocketUpgradeProcessorFunction) Read(prot types.Decoder) (types.Struct, types.Exception) {
 	args := &reqServiceUpgradeToRocket{}
 	if err := args.Read(prot); err != nil {
 		return nil, err
@@ -51,16 +53,16 @@ func (r *rocketUpgradeProcessorFunction) Read(prot Decoder) (Struct, Exception) 
 	return args, prot.ReadMessageEnd()
 }
 
-func (r *rocketUpgradeProcessorFunction) RunContext(_ context.Context, _ Struct) (WritableStruct, ApplicationException) {
+func (r *rocketUpgradeProcessorFunction) RunContext(_ context.Context, _ types.Struct) (types.WritableStruct, types.ApplicationException) {
 	return &respServiceUpgradeToRocket{}, nil
 }
 
-func (r *rocketUpgradeProcessorFunction) Write(seqID int32, result WritableStruct, prot Encoder) (err Exception) {
+func (r *rocketUpgradeProcessorFunction) Write(seqID int32, result types.WritableStruct, prot types.Encoder) (err types.Exception) {
 	var err2 error
-	messageType := REPLY
+	messageType := types.REPLY
 	switch result.(type) {
-	case ApplicationException:
-		messageType = EXCEPTION
+	case types.ApplicationException:
+		messageType = types.EXCEPTION
 	}
 
 	if err2 = prot.WriteMessageBegin("upgradeToRocket", messageType, seqID); err2 != nil {

@@ -20,16 +20,22 @@ import (
 	"context"
 	"net"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type upgradeToRocketClient struct {
-	Protocol
-	rocketProtocol Protocol
-	headerProtocol Protocol
+	types.Protocol
+	rocketProtocol types.Protocol
+	headerProtocol types.Protocol
 }
 
+var _ types.Protocol = (*upgradeToRocketClient)(nil)
+var _ types.RequestHeaders = (*upgradeToRocketClient)(nil)
+var _ types.ResponseHeaderGetter = (*upgradeToRocketClient)(nil)
+
 // newUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
-func newUpgradeToRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	rocket, err := newRocketClient(conn, protoID, timeout, persistentHeaders)
 	if err != nil {
 		return nil, err
@@ -47,7 +53,7 @@ func newUpgradeToRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Du
 // WriteMessageBegin first sends a upgradeToRocket message using the HeaderProtocol.
 // If this succeeds, we switch to the RocketProtocol and write the message using it.
 // If this fails, we send the original message using the HeaderProtocol and continue using the HeaderProtocol.
-func (p *upgradeToRocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+func (p *upgradeToRocketClient) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
 	if p.Protocol == nil {
 		if err := p.upgradeToRocket(); err != nil {
 			p.Protocol = p.headerProtocol
@@ -64,11 +70,11 @@ func (p *upgradeToRocketClient) upgradeToRocket() error {
 
 func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
 	if p.Protocol == nil {
-		p.rocketProtocol.(RequestHeaders).SetRequestHeader(key, value)
-		p.headerProtocol.(RequestHeaders).SetRequestHeader(key, value)
+		p.rocketProtocol.(types.RequestHeaders).SetRequestHeader(key, value)
+		p.headerProtocol.(types.RequestHeaders).SetRequestHeader(key, value)
 		return
 	}
-	p.Protocol.(RequestHeaders).SetRequestHeader(key, value)
+	p.Protocol.(types.RequestHeaders).SetRequestHeader(key, value)
 }
 
 func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {

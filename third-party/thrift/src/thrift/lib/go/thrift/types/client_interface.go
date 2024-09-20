@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
 // ClientInterface specifies the common methods every thrift client
 // should implement

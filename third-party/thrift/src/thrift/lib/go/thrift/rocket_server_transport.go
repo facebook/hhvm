@@ -26,19 +26,20 @@ import (
 	"os"
 	"runtime/debug"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/rsocket/rsocket-go/core/transport"
 )
 
 type rocketServerTransport struct {
 	listener    net.Listener
-	processor   Processor
+	processor   types.Processor
 	acceptor    transport.ServerTransportAcceptor
 	transportID TransportID
 	log         *log.Logger
 	connContext ConnContextFunc
 }
 
-func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID) transport.ServerTransport {
+func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor types.Processor, transportID TransportID) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
 		processor:   processor,
@@ -136,7 +137,7 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 	r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(*transport.Transport) {})
 }
 
-func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor Processor) error {
+func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol types.Protocol, processor types.Processor) error {
 	exc := process(ctx, processor, protocol)
 	if isEOF(exc) {
 		return exc
@@ -148,7 +149,7 @@ func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protoc
 	return nil
 }
 
-func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol Protocol, processor Processor) error {
+func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol types.Protocol, processor types.Processor) error {
 	defer func() {
 		if err := recover(); err != nil {
 			r.log.Printf("panic in processor: %v: %s", err, debug.Stack())

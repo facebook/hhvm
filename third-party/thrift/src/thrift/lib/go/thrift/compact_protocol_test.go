@@ -20,12 +20,14 @@ import (
 	"io"
 	"strings"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func TestReadWriteCompactProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) Format { return NewCompactProtocol(transport) })
+	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactProtocol(transport) })
 	// CompactProtocol is capable of reading and writing in different goroutines.
-	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriteCloser) Format { return NewCompactProtocol(transport) })
+	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactProtocol(transport) })
 	transports := []io.ReadWriteCloser{
 		NewMemoryBuffer(),
 		newFramedTransport(NewMemoryBuffer()),

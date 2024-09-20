@@ -21,13 +21,15 @@ import (
 	"net"
 	"testing"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type headerServerTestProcessor struct {
 	requests chan<- *MyTestStruct
 }
 
-func (t *headerServerTestProcessor) GetProcessorFunction(name string) ProcessorFunction {
+func (t *headerServerTestProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
 	if name == "test" {
 		return &headerServerTestProcessorFunction{&testProcessorFunction{}, t.requests}
 	}
@@ -35,11 +37,11 @@ func (t *headerServerTestProcessor) GetProcessorFunction(name string) ProcessorF
 }
 
 type headerServerTestProcessorFunction struct {
-	ProcessorFunction
+	types.ProcessorFunction
 	requests chan<- *MyTestStruct
 }
 
-func (p *headerServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct Struct) (WritableStruct, ApplicationException) {
+func (p *headerServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct types.Struct) (types.WritableStruct, types.ApplicationException) {
 	if p.requests != nil {
 		p.requests <- reqStruct.(*MyTestStruct)
 	}

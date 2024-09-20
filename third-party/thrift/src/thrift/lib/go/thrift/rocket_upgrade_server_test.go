@@ -20,6 +20,8 @@ import (
 	"context"
 	"net"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // Test that upgrade to rocket server accepts one way calls.
@@ -42,7 +44,7 @@ func TestUpgradeToRocketServerOneWay(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newUpgradeToRocketClient(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

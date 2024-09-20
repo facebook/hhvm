@@ -21,10 +21,12 @@ import (
 	"encoding/hex"
 	"io"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func TestHeaderTransport(t *testing.T) {
-	trans := newHeaderTransport(newMockSocket(), ProtocolIDCompact)
+	trans := newHeaderTransport(newMockSocket(), types.ProtocolIDCompact)
 	TransportTest(t, trans, trans)
 }
 
@@ -32,8 +34,8 @@ func TestHeaderTransport(t *testing.T) {
 // Reflect the result after going through the header pipeline, and make sure that:
 // The original proto could still read what it sent
 // Header found the correct protocol from the incoming frame
-func testHeaderToProto(t *testing.T, clientType ClientType, tmb *mockSocket, proto Format, headertrans *headerTransport) {
-	tFname, tTypeID, tID, tData := "func", CALL, int32(1), "ASDF"
+func testHeaderToProto(t *testing.T, clientType ClientType, tmb *mockSocket, proto types.Format, headertrans *headerTransport) {
+	tFname, tTypeID, tID, tData := "func", types.CALL, int32(1), "ASDF"
 	err := proto.WriteMessageBegin(tFname, tTypeID, tID)
 	if err != nil {
 		t.Fatalf("failed to write message for clientType: %s", clientType)
@@ -104,7 +106,7 @@ func TestHeaderFramedBinary(t *testing.T) {
 	testHeaderToProto(
 		t, FramedDeprecated, tmb,
 		NewBinaryProtocol(newFramedTransport(tmb), true, true),
-		newHeaderTransport(tmb, ProtocolIDCompact),
+		newHeaderTransport(tmb, types.ProtocolIDCompact),
 	)
 }
 
@@ -113,7 +115,7 @@ func TestHeaderFramedCompact(t *testing.T) {
 	testHeaderToProto(
 		t, FramedCompact, tmb,
 		NewCompactProtocol(newFramedTransport(tmb)),
-		newHeaderTransport(tmb, ProtocolIDCompact),
+		newHeaderTransport(tmb, types.ProtocolIDCompact),
 	)
 }
 
@@ -121,7 +123,7 @@ func TestHeaderHeaders(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
 	// write transport
-	trans1 := newHeaderTransport(tmb, ProtocolIDCompact)
+	trans1 := newHeaderTransport(tmb, types.ProtocolIDCompact)
 	trans1.persistentWriteInfoHeaders = map[string]string{
 		IDVersionHeader:    IDVersion,
 		IdentityHeader:     "localhost",
@@ -129,7 +131,7 @@ func TestHeaderHeaders(t *testing.T) {
 	}
 
 	// read transport
-	trans2 := newHeaderTransport(tmb, ProtocolIDCompact)
+	trans2 := newHeaderTransport(tmb, types.ProtocolIDCompact)
 
 	// make sure we don't barf reading header with no frame
 	_, ok := trans1.GetResponseHeaders()["something"]
@@ -192,7 +194,7 @@ func peerIdentity(t *headerTransport) string {
 func TestHeaderRWSmall(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb, ProtocolIDCompact)
+	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
 	data := []byte("ASDFASDFASDF")
 
 	_, err := trans.Write(data)
@@ -255,7 +257,7 @@ func TestHeaderRWSmall(t *testing.T) {
 func TestHeaderZlib(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb, ProtocolIDCompact)
+	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
 
@@ -326,7 +328,7 @@ func testRWOnce(t *testing.T, n int, data []byte, trans *headerTransport) {
 
 func TestHeaderTransportRWMultiple(t *testing.T) {
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb, ProtocolIDCompact)
+	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
 
 	// Test Junk Data
 	testRWOnce(t, 1, []byte("ASDF"), trans)
@@ -340,7 +342,7 @@ func BenchmarkHeaderFlush(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		tmb := newMockSocket()
-		trans1 := newHeaderTransport(tmb, ProtocolIDCompact)
+		trans1 := newHeaderTransport(tmb, types.ProtocolIDCompact)
 		trans1.SetRequestHeader("thrift_protocol", "compact")
 		trans1.SetRequestHeader("thrift_transport", "header")
 		trans1.SetRequestHeader("preferred_cheese", "cheddar")

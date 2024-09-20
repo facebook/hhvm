@@ -18,14 +18,18 @@ package thrift
 
 import (
 	"log"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type debugProtocol struct {
-	Delegate  Format
+	Delegate  types.Format
 	LogPrefix string
 }
 
-func (tdp *debugProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
+var _ types.Format = (*debugProtocol)(nil)
+
+func (tdp *debugProtocol) WriteMessageBegin(name string, typeId types.MessageType, seqid int32) error {
 	err := tdp.Delegate.WriteMessageBegin(name, typeId, seqid)
 	log.Printf("%sWriteMessageBegin(name=%#v, typeId=%#v, seqid=%#v) => %#v", tdp.LogPrefix, name, typeId, seqid, err)
 	return err
@@ -45,7 +49,7 @@ func (tdp *debugProtocol) WriteStructEnd() error {
 	log.Printf("%sWriteStructEnd() => %#v", tdp.LogPrefix, err)
 	return err
 }
-func (tdp *debugProtocol) WriteFieldBegin(name string, typeId Type, id int16) error {
+func (tdp *debugProtocol) WriteFieldBegin(name string, typeId types.Type, id int16) error {
 	err := tdp.Delegate.WriteFieldBegin(name, typeId, id)
 	log.Printf("%sWriteFieldBegin(name=%#v, typeId=%#v, id%#v) => %#v", tdp.LogPrefix, name, typeId, id, err)
 	return err
@@ -60,7 +64,7 @@ func (tdp *debugProtocol) WriteFieldStop() error {
 	log.Printf("%sWriteFieldStop() => %#v", tdp.LogPrefix, err)
 	return err
 }
-func (tdp *debugProtocol) WriteMapBegin(keyType Type, valueType Type, size int) error {
+func (tdp *debugProtocol) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
 	err := tdp.Delegate.WriteMapBegin(keyType, valueType, size)
 	log.Printf("%sWriteMapBegin(keyType=%#v, valueType=%#v, size=%#v) => %#v", tdp.LogPrefix, keyType, valueType, size, err)
 	return err
@@ -70,7 +74,7 @@ func (tdp *debugProtocol) WriteMapEnd() error {
 	log.Printf("%sWriteMapEnd() => %#v", tdp.LogPrefix, err)
 	return err
 }
-func (tdp *debugProtocol) WriteListBegin(elemType Type, size int) error {
+func (tdp *debugProtocol) WriteListBegin(elemType types.Type, size int) error {
 	err := tdp.Delegate.WriteListBegin(elemType, size)
 	log.Printf("%sWriteListBegin(elemType=%#v, size=%#v) => %#v", tdp.LogPrefix, elemType, size, err)
 	return err
@@ -80,7 +84,7 @@ func (tdp *debugProtocol) WriteListEnd() error {
 	log.Printf("%sWriteListEnd() => %#v", tdp.LogPrefix, err)
 	return err
 }
-func (tdp *debugProtocol) WriteSetBegin(elemType Type, size int) error {
+func (tdp *debugProtocol) WriteSetBegin(elemType types.Type, size int) error {
 	err := tdp.Delegate.WriteSetBegin(elemType, size)
 	log.Printf("%sWriteSetBegin(elemType=%#v, size=%#v) => %#v", tdp.LogPrefix, elemType, size, err)
 	return err
@@ -136,7 +140,7 @@ func (tdp *debugProtocol) WriteBinary(value []byte) error {
 	return err
 }
 
-func (tdp *debugProtocol) ReadMessageBegin() (name string, typeId MessageType, seqid int32, err error) {
+func (tdp *debugProtocol) ReadMessageBegin() (name string, typeId types.MessageType, seqid int32, err error) {
 	name, typeId, seqid, err = tdp.Delegate.ReadMessageBegin()
 	log.Printf("%sReadMessageBegin() (name=%#v, typeId=%#v, seqid=%#v, err=%#v)", tdp.LogPrefix, name, typeId, seqid, err)
 	return
@@ -156,7 +160,7 @@ func (tdp *debugProtocol) ReadStructEnd() (err error) {
 	log.Printf("%sReadStructEnd() err=%#v", tdp.LogPrefix, err)
 	return
 }
-func (tdp *debugProtocol) ReadFieldBegin() (name string, typeId Type, id int16, err error) {
+func (tdp *debugProtocol) ReadFieldBegin() (name string, typeId types.Type, id int16, err error) {
 	name, typeId, id, err = tdp.Delegate.ReadFieldBegin()
 	log.Printf("%sReadFieldBegin() (name=%#v, typeId=%#v, id=%#v, err=%#v)", tdp.LogPrefix, name, typeId, id, err)
 	return
@@ -166,7 +170,7 @@ func (tdp *debugProtocol) ReadFieldEnd() (err error) {
 	log.Printf("%sReadFieldEnd() err=%#v", tdp.LogPrefix, err)
 	return
 }
-func (tdp *debugProtocol) ReadMapBegin() (keyType Type, valueType Type, size int, err error) {
+func (tdp *debugProtocol) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
 	keyType, valueType, size, err = tdp.Delegate.ReadMapBegin()
 	log.Printf("%sReadMapBegin() (keyType=%#v, valueType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, keyType, valueType, size, err)
 	return
@@ -176,7 +180,7 @@ func (tdp *debugProtocol) ReadMapEnd() (err error) {
 	log.Printf("%sReadMapEnd() err=%#v", tdp.LogPrefix, err)
 	return
 }
-func (tdp *debugProtocol) ReadListBegin() (elemType Type, size int, err error) {
+func (tdp *debugProtocol) ReadListBegin() (elemType types.Type, size int, err error) {
 	elemType, size, err = tdp.Delegate.ReadListBegin()
 	log.Printf("%sReadListBegin() (elemType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, elemType, size, err)
 	return
@@ -186,7 +190,7 @@ func (tdp *debugProtocol) ReadListEnd() (err error) {
 	log.Printf("%sReadListEnd() err=%#v", tdp.LogPrefix, err)
 	return
 }
-func (tdp *debugProtocol) ReadSetBegin() (elemType Type, size int, err error) {
+func (tdp *debugProtocol) ReadSetBegin() (elemType types.Type, size int, err error) {
 	elemType, size, err = tdp.Delegate.ReadSetBegin()
 	log.Printf("%sReadSetBegin() (elemType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, elemType, size, err)
 	return
@@ -241,7 +245,7 @@ func (tdp *debugProtocol) ReadBinary() (value []byte, err error) {
 	log.Printf("%sReadBinary() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
 	return
 }
-func (tdp *debugProtocol) Skip(fieldType Type) (err error) {
+func (tdp *debugProtocol) Skip(fieldType types.Type) (err error) {
 	err = tdp.Delegate.Skip(fieldType)
 	log.Printf("%sSkip(fieldType=%#v) (err=%#v)", tdp.LogPrefix, fieldType, err)
 	return

@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
@@ -73,14 +74,14 @@ func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	return res, res.Error()
 }
 
-func encodeResponsePayload(name string, messageType MessageType, headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
+func encodeResponsePayload(name string, messageType types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
 	metadata := NewResponseRpcMetadata()
 	metadata.SetOtherMetadata(headers)
 	if zstd {
 		compression := CompressionAlgorithm_ZSTD
 		metadata.SetCompression(&compression)
 	}
-	if messageType == EXCEPTION {
+	if messageType == types.EXCEPTION {
 		excpetionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
 		metadata.SetPayloadMetadata(NewPayloadMetadata().SetExceptionMetadata(excpetionMetadata))
 	}
@@ -88,7 +89,7 @@ func encodeResponsePayload(name string, messageType MessageType, headers map[str
 	if err != nil {
 		return nil, err
 	}
-	if messageType == EXCEPTION {
+	if messageType == types.EXCEPTION {
 		return payload.New(nil, metadataBytes), nil
 	}
 

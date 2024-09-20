@@ -20,13 +20,15 @@ import (
 	"crypto/tls"
 	"net"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // clientOptions thrift and connectivity options for the thrift client
 type clientOptions struct {
 	conn              net.Conn
 	transport         TransportID
-	protocol          ProtocolID
+	protocol          types.ProtocolID
 	timeout           time.Duration
 	persistentHeaders map[string]string
 }
@@ -35,7 +37,7 @@ type clientOptions struct {
 type ClientOption func(*clientOptions) error
 
 // WithProtocolID sets protocol to given protocolID
-func WithProtocolID(id ProtocolID) ClientOption {
+func WithProtocolID(id types.ProtocolID) ClientOption {
 	return func(opts *clientOptions) error {
 		opts.protocol = id
 		return nil
@@ -152,7 +154,7 @@ func newDefaultPersistentHeaders() map[string]string {
 // newOptions creates a new options objects and inits it
 func newOptions(opts ...ClientOption) (*clientOptions, error) {
 	res := &clientOptions{
-		protocol:          ProtocolIDCompact,
+		protocol:          types.ProtocolIDCompact,
 		transport:         TransportIDHeader,
 		persistentHeaders: newDefaultPersistentHeaders(),
 	}
@@ -167,7 +169,7 @@ func newOptions(opts ...ClientOption) (*clientOptions, error) {
 // NewClient will return a connected thrift protocol object.
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
-func NewClient(opts ...ClientOption) (Protocol, error) {
+func NewClient(opts ...ClientOption) (types.Protocol, error) {
 	options, err := newOptions(opts...)
 	if err != nil {
 		return nil, err

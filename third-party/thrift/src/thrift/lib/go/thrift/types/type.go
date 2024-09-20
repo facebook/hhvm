@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
 // Type constants in the Thrift protocol
 type Type byte

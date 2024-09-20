@@ -22,6 +22,8 @@ import (
 	"net"
 	"testing"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type closeConn struct {
@@ -52,7 +54,7 @@ func TestRocketClientClose(t *testing.T) {
 		t.Fatalf("failed to dial: %v", err)
 	}
 	cconn := &closeConn{Conn: conn, closed: make(chan struct{}, 10)}
-	proto, err := newRocketClient(cconn, ProtocolIDCompact, 0, nil)
+	proto, err := newRocketClient(cconn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
 import (
 	"context"
@@ -42,7 +42,7 @@ func (c *SerialChannel) sendMsg(ctx context.Context, method string, request IReq
 	c.seqID++
 	seqID := c.seqID
 
-	if err := setRequestHeaders(ctx, c.protocol); err != nil {
+	if err := SetRequestHeaders(ctx, c.protocol); err != nil {
 		return seqID, err
 	}
 

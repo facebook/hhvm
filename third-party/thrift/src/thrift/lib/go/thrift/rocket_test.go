@@ -20,6 +20,8 @@ import (
 	"context"
 	"net"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // This tests the rocket client against a rocket server.
@@ -41,7 +43,7 @@ func TestRocket(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newRocketClient(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

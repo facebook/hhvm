@@ -17,25 +17,20 @@
 package thrift
 
 import (
-	"errors"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-// Exception is a generic thrift exception
-type Exception interface {
-	error
-}
-
-// PrependError prepends additional information to an error without losing the thrift exception interface
-func PrependError(prepend string, err error) error {
-	if t, ok := err.(TransportException); ok {
-		return NewTransportException(t.TypeID(), prepend+t.Error())
+// sendException is a utility function to send the exception for the specified
+// method.
+func sendException(prot types.Encoder, name string, seqID int32, err types.ApplicationException) error {
+	if e2 := prot.WriteMessageBegin(name, types.EXCEPTION, seqID); e2 != nil {
+		return e2
+	} else if e2 := err.Write(prot); e2 != nil {
+		return e2
+	} else if e2 := prot.WriteMessageEnd(); e2 != nil {
+		return e2
+	} else if e2 := prot.Flush(); e2 != nil {
+		return e2
 	}
-	if t, ok := err.(ProtocolException); ok {
-		return NewProtocolExceptionWithType(t.TypeID(), errors.New(prepend+err.Error()))
-	}
-	if t, ok := err.(ApplicationException); ok {
-		return NewApplicationException(t.TypeID(), prepend+t.Error())
-	}
-
-	return errors.New(prepend + err.Error())
+	return nil
 }

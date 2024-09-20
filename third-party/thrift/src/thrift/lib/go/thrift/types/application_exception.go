@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
 const (
 	UNKNOWN_APPLICATION_EXCEPTION  = 0
@@ -152,19 +152,4 @@ func (e *applicationException) Write(prot Encoder) (err error) {
 	}
 	err = prot.WriteStructEnd()
 	return
-}
-
-// sendException is a utility function to send the exception for the specified
-// method.
-func sendException(prot Encoder, name string, seqID int32, err ApplicationException) error {
-	if e2 := prot.WriteMessageBegin(name, EXCEPTION, seqID); e2 != nil {
-		return e2
-	} else if e2 := err.Write(prot); e2 != nil {
-		return e2
-	} else if e2 := prot.WriteMessageEnd(); e2 != nil {
-		return e2
-	} else if e2 := prot.Flush(); e2 != nil {
-		return e2
-	}
-	return nil
 }

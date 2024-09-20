@@ -18,6 +18,8 @@ package thrift
 
 import (
 	"net"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func resolveAddr(hostPort string) (net.Addr, error) {
@@ -35,14 +37,14 @@ func DialHostPort(hostPort string) (net.Conn, error) {
 		return nil, err
 	}
 	if len(addr.Network()) == 0 {
-		return nil, NewTransportException(NOT_OPEN, "Cannot open bad network name.")
+		return nil, types.NewTransportException(types.NOT_OPEN, "Cannot open bad network name.")
 	}
 	if len(addr.String()) == 0 {
-		return nil, NewTransportException(NOT_OPEN, "Cannot open bad address.")
+		return nil, types.NewTransportException(types.NOT_OPEN, "Cannot open bad address.")
 	}
 	conn, err := net.Dial(addr.Network(), addr.String())
 	if err != nil {
-		return nil, NewTransportException(NOT_OPEN, err.Error())
+		return nil, types.NewTransportException(types.NOT_OPEN, err.Error())
 	}
 	return conn, nil
 }

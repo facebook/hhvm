@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
-// Message type constants in the Thrift protocol.
-type MessageType int32
+// Protocol defines the interface that must be implemented by all protocols
+type Protocol interface {
+	Format
 
-const (
-	INVALID_MESSAGE_TYPE MessageType = 0
-	CALL                 MessageType = 1
-	REPLY                MessageType = 2
-	EXCEPTION            MessageType = 3
-	ONEWAY               MessageType = 4
-)
+	// used by SerialChannel and generated thrift Clients
+	Close() error
+
+	ResponseHeaderGetter
+
+	// Deprecated
+	RequestHeaders
+}
+
+// ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
+type ResponseHeaderGetter interface {
+	GetResponseHeaders() map[string]string
+}
+
+// Deprecated: RequestHeaders will eventually be private.
+type RequestHeaders interface {
+	SetRequestHeader(key, value string)
+}

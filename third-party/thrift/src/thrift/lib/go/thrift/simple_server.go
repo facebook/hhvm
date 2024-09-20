@@ -19,10 +19,12 @@ package thrift
 import (
 	"fmt"
 	"net"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // NewSimpleServer creates a new server that only supports Header Transport.
-func NewSimpleServer(processor Processor, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) Server {
+func NewSimpleServer(processor types.Processor, listener net.Listener, transportType TransportID, options ...func(*ServerOptions)) Server {
 	serverOptions := simpleServerOptions(options...)
 	processor = WrapInterceptor(serverOptions.interceptor, processor)
 	switch transportType {

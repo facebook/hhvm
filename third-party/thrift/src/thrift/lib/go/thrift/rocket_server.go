@@ -23,6 +23,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
@@ -30,7 +31,7 @@ import (
 )
 
 type rocketServer struct {
-	proc          Processor
+	proc          types.Processor
 	listener      net.Listener
 	transportID   TransportID
 	zstdSupported bool
@@ -38,7 +39,7 @@ type rocketServer struct {
 	connContext   ConnContextFunc
 }
 
-func newRocketServer(proc Processor, listener net.Listener, options *ServerOptions) Server {
+func newRocketServer(proc types.Processor, listener net.Listener, options *ServerOptions) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
@@ -49,7 +50,7 @@ func newRocketServer(proc Processor, listener net.Listener, options *ServerOptio
 	}
 }
 
-func newUpgradeToRocketServer(proc Processor, listener net.Listener, options *ServerOptions) Server {
+func newUpgradeToRocketServer(proc types.Processor, listener net.Listener, options *ServerOptions) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
@@ -86,11 +87,11 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 
 type rocketServerSocket struct {
 	ctx  context.Context
-	proc Processor
+	proc types.Processor
 	log  *log.Logger
 }
 
-func newRocketServerSocket(ctx context.Context, proc Processor, log *log.Logger) *rocketServerSocket {
+func newRocketServerSocket(ctx context.Context, proc types.Processor, log *log.Logger) *rocketServerSocket {
 	return &rocketServerSocket{ctx: ctx, proc: proc, log: log}
 }
 

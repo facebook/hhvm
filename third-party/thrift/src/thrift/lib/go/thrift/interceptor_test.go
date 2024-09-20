@@ -19,14 +19,16 @@ package thrift
 import (
 	"context"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type exampleProcessor struct {
-	Processor
+	types.Processor
 	hit *bool
 }
 
-func (ep *exampleProcessor) GetProcessorFunction(name string) ProcessorFunction {
+func (ep *exampleProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
 	*ep.hit = true
 	return nil // happens in "no such method" case
 }
@@ -45,6 +47,6 @@ func TestInterceptorWrapperNilFunctionContext(t *testing.T) {
 	}
 }
 
-func emptyInterceptor(ctx context.Context, methodName string, pfunc ProcessorFunction, args Struct) (WritableStruct, ApplicationException) {
+func emptyInterceptor(ctx context.Context, methodName string, pfunc types.ProcessorFunction, args types.Struct) (types.WritableStruct, types.ApplicationException) {
 	return pfunc.RunContext(ctx, args)
 }

@@ -16,33 +16,14 @@
 
 package thrift
 
+import (
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+)
+
 // A Serializer is used to turn a Struct in to a byte stream
 type Serializer struct {
 	Transport *MemoryBuffer
-	Protocol  Encoder
-}
-
-// WritableStruct is an interface used to encapsulate a message that can be written to a protocol
-type WritableStruct interface {
-	Write(p Encoder) error
-}
-
-// WritableException is an interface used to encapsulate an exception that can be written to a protocol
-type WritableException interface {
-	WritableStruct
-	Exception
-}
-
-// WritableResult is an interface used to encapsulate a result struct that can be written to a protocol
-type WritableResult interface {
-	WritableStruct
-	Exception() WritableException
-}
-
-// Struct is the interface used to encapsulate a message that can be read and written to a protocol
-type Struct interface {
-	Write(p Encoder) error
-	Read(p Decoder) error
+	Protocol  types.Encoder
 }
 
 // NewSerializer create a new serializer using the binary protocol
@@ -59,7 +40,7 @@ func NewCompactSerializer() *Serializer {
 	return &Serializer{transport, protocol}
 }
 
-func serializeCompact(msg Struct) ([]byte, error) {
+func serializeCompact(msg types.Struct) ([]byte, error) {
 	return NewCompactSerializer().Write(msg)
 }
 
@@ -78,7 +59,7 @@ func NewSimpleJSONSerializer() *Serializer {
 }
 
 // WriteString writes msg to the serializer and returns it as a string
-func (s *Serializer) WriteString(msg Struct) (str string, err error) {
+func (s *Serializer) WriteString(msg types.Struct) (str string, err error) {
 	s.Transport.Reset()
 
 	if err = msg.Write(s.Protocol); err != nil {
@@ -93,7 +74,7 @@ func (s *Serializer) WriteString(msg Struct) (str string, err error) {
 }
 
 // Write writes msg to the serializer and returns it as a byte array
-func (s *Serializer) Write(msg Struct) (b []byte, err error) {
+func (s *Serializer) Write(msg types.Struct) (b []byte, err error) {
 	s.Transport.Reset()
 
 	if err = msg.Write(s.Protocol); err != nil {

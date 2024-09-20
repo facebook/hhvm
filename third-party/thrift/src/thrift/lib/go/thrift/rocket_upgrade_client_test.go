@@ -18,6 +18,8 @@ package thrift
 
 import (
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func TestCloseWithoutSendingMessages(t *testing.T) {
@@ -34,7 +36,7 @@ func TestCloseWithoutSendingMessages(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
-	proto, err := newUpgradeToRocketClient(clientSocket, ProtocolIDCompact, 0, nil)
+	proto, err := newUpgradeToRocketClient(clientSocket, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

@@ -23,10 +23,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func TestReadWriteBinaryProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) Format { return NewBinaryProtocolTransport(transport) })
+	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) types.Format { return NewBinaryProtocolTransport(transport) })
 }
 
 func TestWriteBinaryEmptyBinaryProtocol(t *testing.T) {

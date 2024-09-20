@@ -22,13 +22,15 @@ import (
 	"net"
 	"testing"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type rocketServerTestProcessor struct {
 	requests chan<- *MyTestStruct
 }
 
-func (t *rocketServerTestProcessor) GetProcessorFunction(name string) ProcessorFunction {
+func (t *rocketServerTestProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
 	if name == "test" {
 		return &rocketServerTestProcessorFunction{&testProcessorFunction{}, t.requests}
 	}
@@ -36,11 +38,11 @@ func (t *rocketServerTestProcessor) GetProcessorFunction(name string) ProcessorF
 }
 
 type rocketServerTestProcessorFunction struct {
-	ProcessorFunction
+	types.ProcessorFunction
 	requests chan<- *MyTestStruct
 }
 
-func (p *rocketServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct Struct) (WritableStruct, ApplicationException) {
+func (p *rocketServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct types.Struct) (types.WritableStruct, types.ApplicationException) {
 	v, ok := ConnInfoFromContext(ctx)
 	if ok {
 		reqStruct.(*MyTestStruct).Bin = []byte(v.RemoteAddr.String())
@@ -70,7 +72,7 @@ func TestRocketServerConnInfo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newRocketClient(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
@@ -112,7 +114,7 @@ func TestRocketServerOneWay(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newRocketClient(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
@@ -147,7 +149,7 @@ func TestRocketServerCloseListener(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newRocketClient(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

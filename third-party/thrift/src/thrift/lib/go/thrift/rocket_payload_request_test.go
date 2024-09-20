@@ -19,13 +19,14 @@ package thrift
 import (
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRequestRPCMetadata(t *testing.T) {
 	wantName := "test123"
-	wantType := CALL
-	wantProto := ProtocolIDCompact
+	wantType := types.CALL
+	wantProto := types.ProtocolIDCompact
 	wantZstd := false
 	wantOther := map[string]string{"header": "1"}
 	data, err := encodeRequestPayload(wantName, wantProto, wantType, wantOther, wantZstd, nil)

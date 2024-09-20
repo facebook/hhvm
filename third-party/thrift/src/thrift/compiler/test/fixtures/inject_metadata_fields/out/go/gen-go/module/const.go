@@ -7,7 +7,7 @@ package module
 
 import (
     foo "foo"
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 var _ = foo.GoUnusedProtection__

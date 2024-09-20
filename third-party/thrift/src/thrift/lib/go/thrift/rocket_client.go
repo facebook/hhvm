@@ -22,11 +22,13 @@ import (
 	"maps"
 	"net"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type rocketClient struct {
-	Encoder
-	Decoder
+	types.Encoder
+	types.Decoder
 
 	// rsocket client state
 	client RSocketClient
@@ -36,11 +38,11 @@ type rocketClient struct {
 
 	timeout time.Duration
 
-	protoID ProtocolID
+	protoID types.ProtocolID
 	zstd    bool
 
 	messageName string
-	writeType   MessageType
+	writeType   types.MessageType
 	seqID       int32
 
 	reqHeaders        map[string]string
@@ -51,16 +53,20 @@ type rocketClient struct {
 	wbuf *MemoryBuffer
 }
 
+var _ types.Protocol = (*rocketClient)(nil)
+var _ types.RequestHeaders = (*rocketClient)(nil)
+var _ types.ResponseHeaderGetter = (*rocketClient)(nil)
+
 // NewRocketClient creates a new Rocket client given an RSocketClient.
-func NewRocketClient(client RSocketClient, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func NewRocketClient(client RSocketClient, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	return newRocketClientFromRsocket(client, protoID, timeout, persistentHeaders)
 }
 
-func newRocketClient(conn net.Conn, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func newRocketClient(conn net.Conn, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, timeout, persistentHeaders)
 }
 
-func newRocketClientFromRsocket(client RSocketClient, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	p := &rocketClient{
 		client:            client,
 		protoID:           protoID,
@@ -72,19 +78,19 @@ func newRocketClientFromRsocket(client RSocketClient, protoID ProtocolID, timeou
 		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
 	switch p.protoID {
-	case ProtocolIDBinary:
+	case types.ProtocolIDBinary:
 		p.Decoder = newBinaryDecoder(p.rbuf)
 		p.Encoder = newBinaryEncoder(p.wbuf)
-	case ProtocolIDCompact:
+	case types.ProtocolIDCompact:
 		p.Decoder = newCompactDecoder(p.rbuf)
 		p.Encoder = newCompactEncoder(p.wbuf)
 	default:
-		return nil, NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
+		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
 	return p, nil
 }
 
-func (p *rocketClient) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+func (p *rocketClient) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
 	p.wbuf.Reset()
 	p.seqID = seqid
 	p.writeType = typeID
@@ -102,10 +108,10 @@ func (p *rocketClient) Flush() (err error) {
 		return err
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
-	if p.writeType == ONEWAY {
+	if p.writeType == types.ONEWAY {
 		return p.client.FireAndForget(p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
 	}
-	if p.writeType != CALL {
+	if p.writeType != types.CALL {
 		return nil
 	}
 	ctx := context.Background()
@@ -135,22 +141,22 @@ func (p *rocketClient) serverMetadataPush(zstd bool, drain bool) {
 	p.zstd = p.zstd && zstd
 }
 
-func (p *rocketClient) ReadMessageBegin() (string, MessageType, int32, error) {
+func (p *rocketClient) ReadMessageBegin() (string, types.MessageType, int32, error) {
 	name := p.messageName
 	if p.resultErr != nil {
-		return name, EXCEPTION, p.seqID, p.resultErr
+		return name, types.EXCEPTION, p.seqID, p.resultErr
 	}
 
 	p.rbuf.Init(p.resultData)
-	return name, REPLY, p.seqID, nil
+	return name, types.REPLY, p.seqID, nil
 }
 
 func (p *rocketClient) ReadMessageEnd() error {
 	return nil
 }
 
-func (p *rocketClient) Skip(fieldType Type) (err error) {
-	return SkipDefaultDepth(p, fieldType)
+func (p *rocketClient) Skip(fieldType types.Type) (err error) {
+	return types.SkipDefaultDepth(p, fieldType)
 }
 
 func (p *rocketClient) SetRequestHeader(key, value string) {

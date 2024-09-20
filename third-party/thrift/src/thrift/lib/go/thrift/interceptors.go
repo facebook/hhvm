@@ -18,6 +18,8 @@ package thrift
 
 import (
 	"context"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // ChainInterceptors returns a thrift interceptor that chains the execution of
@@ -27,8 +29,8 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 	n := len(interceptors)
 	switch n {
 	case 0:
-		return func(ctx context.Context, name string, pf ProcessorFunction,
-			args Struct) (WritableStruct, ApplicationException) {
+		return func(ctx context.Context, name string, pf types.ProcessorFunction,
+			args types.Struct) (types.WritableStruct, types.ApplicationException) {
 
 			return pf.RunContext(ctx, args)
 		}
@@ -36,8 +38,8 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 		return interceptors[0]
 	}
 
-	return func(ctx context.Context, name string, pf ProcessorFunction,
-		args Struct) (WritableStruct, ApplicationException) {
+	return func(ctx context.Context, name string, pf types.ProcessorFunction,
+		args types.Struct) (types.WritableStruct, types.ApplicationException) {
 
 		handler := &chainHandler{
 			last:         n - 1,
@@ -55,21 +57,21 @@ type chainHandler struct {
 	curI         int
 	last         int
 	name         string
-	origHandler  ProcessorFunction
+	origHandler  types.ProcessorFunction
 	interceptors []Interceptor
 }
 
 // Read does nothing here, it is not used and shouldn't be called
-func (ch *chainHandler) Read(_ Decoder) (Struct, Exception) {
+func (ch *chainHandler) Read(_ types.Decoder) (types.Struct, types.Exception) {
 	return nil, nil
 }
 
 // Write does nothing here, it is not used and shouldn't be called
-func (ch *chainHandler) Write(_ int32, _ WritableStruct, _ Encoder) Exception {
+func (ch *chainHandler) Write(_ int32, _ types.WritableStruct, _ types.Encoder) types.Exception {
 	return nil
 }
 
-func (ch *chainHandler) RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException) {
+func (ch *chainHandler) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationException) {
 	if ch.curI == ch.last {
 		return ch.origHandler.RunContext(ctx, args)
 	}

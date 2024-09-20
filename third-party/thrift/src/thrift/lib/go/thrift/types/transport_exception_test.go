@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
 import (
 	"errors"
 	"fmt"
 	"io"
-
 	"testing"
 )
 

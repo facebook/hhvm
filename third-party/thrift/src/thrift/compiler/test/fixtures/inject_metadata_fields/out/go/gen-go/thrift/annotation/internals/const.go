@@ -6,7 +6,7 @@
 package internals
 
 import (
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // (needed to ensure safety because of naive import list construction)

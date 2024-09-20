@@ -20,12 +20,14 @@ import (
 	"bytes"
 	"io"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func TestHeaderZstd(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()
-	trans := newHeaderTransport(tmb, ProtocolIDCompact)
+	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
 

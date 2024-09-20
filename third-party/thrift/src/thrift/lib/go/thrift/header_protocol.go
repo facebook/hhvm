@@ -20,21 +20,27 @@ import (
 	"fmt"
 	"net"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type headerProtocol struct {
-	Format
+	types.Format
 	trans *headerTransport
 
-	protoID ProtocolID
+	protoID types.ProtocolID
 }
+
+var _ types.Protocol = (*headerProtocol)(nil)
+var _ types.RequestHeaders = (*headerProtocol)(nil)
+var _ types.ResponseHeaderGetter = (*headerProtocol)(nil)
 
 // NewHeaderProtocol creates a new header protocol.
-func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
-	return newHeaderProtocol(conn, ProtocolIDCompact, 0, nil)
+func NewHeaderProtocol(conn net.Conn) (types.Protocol, error) {
+	return newHeaderProtocol(conn, types.ProtocolIDCompact, 0, nil)
 }
 
-func newHeaderProtocol(conn net.Conn, protoID ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
+func newHeaderProtocol(conn net.Conn, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	p := &headerProtocol{protoID: protoID}
 	p.trans = newHeaderTransport(conn, protoID)
 	p.trans.conn.readTimeout = timeout
@@ -55,13 +61,13 @@ func (p *headerProtocol) resetProtocol() error {
 
 	p.protoID = p.trans.protoID
 	switch p.protoID {
-	case ProtocolIDBinary:
+	case types.ProtocolIDBinary:
 		// These defaults match cpp implementation
 		p.Format = NewBinaryProtocol(p.trans, false, true)
-	case ProtocolIDCompact:
+	case types.ProtocolIDCompact:
 		p.Format = NewCompactProtocol(p.trans)
 	default:
-		return NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
+		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
 	return nil
 }
@@ -70,13 +76,13 @@ func (p *headerProtocol) resetProtocol() error {
 // Writing methods.
 //
 
-func (p *headerProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
+func (p *headerProtocol) WriteMessageBegin(name string, typeId types.MessageType, seqid int32) error {
 	if err := p.resetProtocol(); err != nil {
 		return err
 	}
 	// The conditions here only match on the Go client side.
 	// If we are a client, set header seq id same as msg id
-	if typeId == CALL || typeId == ONEWAY {
+	if typeId == types.CALL || typeId == types.ONEWAY {
 		p.trans.SetSeqID(uint32(seqid))
 	}
 	return p.Format.WriteMessageBegin(name, typeId, seqid)
@@ -86,15 +92,15 @@ func (p *headerProtocol) WriteMessageBegin(name string, typeId MessageType, seqi
 // Reading methods.
 //
 
-func (p *headerProtocol) ReadMessageBegin() (name string, typeId MessageType, seqid int32, err error) {
-	if typeId == INVALID_MESSAGE_TYPE {
+func (p *headerProtocol) ReadMessageBegin() (name string, typeId types.MessageType, seqid int32, err error) {
+	if typeId == types.INVALID_MESSAGE_TYPE {
 		if err = p.trans.ResetProtocol(); err != nil {
-			return name, EXCEPTION, seqid, err
+			return name, types.EXCEPTION, seqid, err
 		}
 	}
 	err = p.resetProtocol()
 	if err != nil {
-		return name, EXCEPTION, seqid, err
+		return name, types.EXCEPTION, seqid, err
 	}
 	// see https://github.com/apache/thrift/blob/master/doc/specs/SequenceNumbers.md
 	// TODO:  This is a bug. if we are speaking header protocol, we should be using
@@ -104,11 +110,11 @@ func (p *headerProtocol) ReadMessageBegin() (name string, typeId MessageType, se
 }
 
 func (p *headerProtocol) Flush() (err error) {
-	return NewProtocolException(p.trans.Flush())
+	return types.NewProtocolException(p.trans.Flush())
 }
 
-func (p *headerProtocol) Skip(fieldType Type) (err error) {
-	return SkipDefaultDepth(p, fieldType)
+func (p *headerProtocol) Skip(fieldType types.Type) (err error) {
+	return types.SkipDefaultDepth(p, fieldType)
 }
 
 func (p *headerProtocol) Close() error {
@@ -136,7 +142,7 @@ func (p *headerProtocol) GetResponseHeaders() map[string]string {
 	return p.trans.GetResponseHeaders()
 }
 
-func (p *headerProtocol) ProtocolID() ProtocolID {
+func (p *headerProtocol) ProtocolID() types.ProtocolID {
 	return p.protoID
 }
 

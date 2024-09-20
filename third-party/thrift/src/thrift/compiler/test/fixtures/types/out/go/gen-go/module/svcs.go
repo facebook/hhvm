@@ -12,7 +12,7 @@ import (
     "strings"
 
     included "included"
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 

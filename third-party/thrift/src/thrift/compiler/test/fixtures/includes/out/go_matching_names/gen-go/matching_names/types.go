@@ -10,7 +10,7 @@ import (
     "strings"
 
     includesAlso "IncludesAlso"
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 var _ = includesAlso.GoUnusedProtection__

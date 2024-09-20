@@ -20,6 +20,8 @@ import (
 	"context"
 	"net"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // This tests the upgradeToRocket client against a header server.
@@ -41,7 +43,7 @@ func TestUpgradeToRocketFallbackAgainstHeaderServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newUpgradeToRocketClient(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
@@ -79,7 +81,7 @@ func TestUpgradeToRocketServerAgainstHeaderClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newHeaderProtocol(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newHeaderProtocol(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
@@ -117,7 +119,7 @@ func TestUpgradeToRocketAgainstUpgradeToRocketServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to dial: %v", err)
 	}
-	proto, err := newUpgradeToRocketClient(conn, ProtocolIDCompact, 0, nil)
+	proto, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

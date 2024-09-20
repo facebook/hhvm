@@ -8,7 +8,7 @@ package service
 import (
     module "module"
     includes "includes"
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 var _ = module.GoUnusedProtection__

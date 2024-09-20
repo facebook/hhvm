@@ -20,6 +20,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,7 +34,7 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	protocol, err := newHeaderProtocol(newMockSocket(), ProtocolIDCompact, 0, nil)
+	protocol, err := newHeaderProtocol(newMockSocket(), types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +47,7 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestHeaderProtocolSetNilHeaders(t *testing.T) {
-	protocol, err := newHeaderProtocol(newMockSocket(), ProtocolIDCompact, 0, nil)
+	protocol, err := newHeaderProtocol(newMockSocket(), types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +66,7 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	protocol, err := newRocketClient(newMockSocket(), ProtocolIDCompact, 0, nil)
+	protocol, err := newRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +79,7 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestRocketProtocolSetNilHeaders(t *testing.T) {
-	protocol, err := newRocketClient(newMockSocket(), ProtocolIDCompact, 0, nil)
+	protocol, err := newRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +90,7 @@ func TestRocketProtocolSetNilHeaders(t *testing.T) {
 
 // somewhere we are still passing context as nil, so we need to support this for now
 func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
-	protocol, err := newUpgradeToRocketClient(newMockSocket(), ProtocolIDCompact, 0, nil)
+	protocol, err := newUpgradeToRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

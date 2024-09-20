@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
-// ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
-type ResponseHeaderGetter interface {
-	GetResponseHeaders() map[string]string
-}
+// Message type constants in the Thrift protocol.
+type MessageType int32
 
-// Compile time interface enforcer
-var _ ResponseHeaderGetter = (*headerProtocol)(nil)
-var _ ResponseHeaderGetter = (*rocketClient)(nil)
-var _ ResponseHeaderGetter = (*upgradeToRocketClient)(nil)
-var _ ResponseHeaderGetter = (*httpProtocol)(nil)
+const (
+	INVALID_MESSAGE_TYPE MessageType = 0
+	CALL                 MessageType = 1
+	REPLY                MessageType = 2
+	EXCEPTION            MessageType = 3
+	ONEWAY               MessageType = 4
+)

@@ -19,17 +19,23 @@ package thrift
 import (
 	"fmt"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type httpProtocol struct {
-	Format
+	types.Format
 	transport         *httpClient
-	protoID           ProtocolID
+	protoID           types.ProtocolID
 	persistentHeaders map[string]string
 }
 
+var _ types.Protocol = (*httpProtocol)(nil)
+var _ types.RequestHeaders = (*httpProtocol)(nil)
+var _ types.ResponseHeaderGetter = (*httpProtocol)(nil)
+
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
-func NewHTTPProtocol(url string) (Protocol, error) {
+func NewHTTPProtocol(url string) (types.Protocol, error) {
 	httpClient, err := newHTTPPostClient(url)
 	if err != nil {
 		return nil, err
@@ -37,7 +43,7 @@ func NewHTTPProtocol(url string) (Protocol, error) {
 	p := &httpProtocol{
 		transport:         httpClient,
 		persistentHeaders: make(map[string]string),
-		protoID:           ProtocolIDCompact,
+		protoID:           types.ProtocolIDCompact,
 	}
 	p.SetRequestHeader("User-Agent", "Go/THttpClient")
 	if err := p.resetProtocol(); err != nil {
@@ -52,18 +58,18 @@ func (p *httpProtocol) SetTimeout(timeout time.Duration) {
 
 func (p *httpProtocol) resetProtocol() error {
 	switch p.protoID {
-	case ProtocolIDBinary:
+	case types.ProtocolIDBinary:
 		// These defaults match cpp implementation
 		p.Format = NewBinaryProtocol(p.transport, false, true)
-	case ProtocolIDCompact:
+	case types.ProtocolIDCompact:
 		p.Format = NewCompactProtocol(p.transport)
 	default:
-		return NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
+		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}
 	return nil
 }
 
-func (p *httpProtocol) SetProtocolID(protoID ProtocolID) error {
+func (p *httpProtocol) SetProtocolID(protoID types.ProtocolID) error {
 	p.protoID = protoID
 	return p.resetProtocol()
 }
@@ -80,7 +86,7 @@ func (p *httpProtocol) SetRequestHeader(key, value string) {
 	p.transport.SetHeader(key, value)
 }
 
-func (p *httpProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+func (p *httpProtocol) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
 	for k, v := range p.persistentHeaders {
 		p.transport.SetHeader(k, v)
 	}

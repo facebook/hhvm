@@ -20,33 +20,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
-
-// Processor exposes access to processor functions which
-// manage I/O and processing of a input message for a specific
-// server function
-type Processor interface {
-	// GetProcessorFunction is given the name of a thrift function and
-	// the type of the inbound thrift message.  It is expected to return
-	// a non-nil GetProcessorFunction when the function can be successfully
-	// found.
-	//
-	// If ProcessorFunction is nil, a generic error will be
-	// sent which explains that no processor function exists with the specified
-	// name on this server.
-	GetProcessorFunction(name string) ProcessorFunction
-}
-
-// ProcessorFunction is the interface that must be implemented in
-// order to perform io and message processing
-type ProcessorFunction interface {
-	// Read a serializable message from the protocol.
-	Read(prot Decoder) (Struct, Exception)
-	// RunContext processes a message handing it to the client handler.
-	RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException)
-	// Write a serializable response
-	Write(seqID int32, result WritableStruct, prot Encoder) Exception
-}
 
 func errorType(err error) string {
 	// get type name without package or pointer information
@@ -55,31 +31,31 @@ func errorType(err error) string {
 	return et[len(et)-1]
 }
 
-func getProcessorFunction(processor Processor, messageType MessageType, name string) (ProcessorFunction, ApplicationException) {
-	if messageType != CALL && messageType != ONEWAY {
+func getProcessorFunction(processor types.Processor, messageType types.MessageType, name string) (types.ProcessorFunction, types.ApplicationException) {
+	if messageType != types.CALL && messageType != types.ONEWAY {
 		// case one: invalid message type
-		return nil, NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
+		return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
 	}
 	if pf := processor.GetProcessorFunction(name); pf != nil {
 		return pf, nil
 	}
-	return nil, NewApplicationException(UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
+	return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
 }
 
-func skipMessage(protocol Protocol) error {
-	if err := protocol.Skip(STRUCT); err != nil {
+func skipMessage(protocol types.Protocol) error {
+	if err := protocol.Skip(types.STRUCT); err != nil {
 		return err
 	}
 	return protocol.ReadMessageEnd()
 }
 
-func setRequestHeadersForError(protocol Protocol, err ApplicationException) {
+func setRequestHeadersForError(protocol types.Protocol, err types.ApplicationException) {
 	protocol.SetRequestHeader("uex", errorType(err))
 	protocol.SetRequestHeader("uexw", err.Error())
 }
 
-func setRequestHeadersForResult(protocol Protocol, result WritableStruct) {
-	if rr, ok := result.(WritableResult); ok && rr.Exception() != nil {
+func setRequestHeadersForResult(protocol types.Protocol, result types.WritableStruct) {
+	if rr, ok := result.(types.WritableResult); ok && rr.Exception() != nil {
 		// If we got a structured exception back, write metadata about it into headers
 		terr := rr.Exception()
 		protocol.SetRequestHeader("uex", errorType(terr))
@@ -92,7 +68,7 @@ func setRequestHeadersForResult(protocol Protocol, result WritableStruct) {
 // 1. Read the message from the protocol.
 // 2. Process the message.
 // 3. Write the message to the protocol.
-func process(ctx context.Context, processor Processor, prot Protocol) (ext Exception) {
+func process(ctx context.Context, processor types.Processor, prot types.Protocol) (ext types.Exception) {
 	// Step 1: Decode message only using Decoder interface and GetResponseHeaders method on the protocol.
 
 	// Step 1a: find the processor function for the message.
@@ -101,7 +77,7 @@ func process(ctx context.Context, processor Processor, prot Protocol) (ext Excep
 		// close connection on read failure
 		return readErr
 	}
-	var argStruct Struct
+	var argStruct types.Struct
 	pfunc, appException := getProcessorFunction(processor, messageType, name)
 
 	// Step 1b: finish reading the message.
@@ -124,14 +100,14 @@ func process(ctx context.Context, processor Processor, prot Protocol) (ext Excep
 	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
 
 	// Step 2: Processing the message without using the Protocol.
-	var result WritableStruct
+	var result types.WritableStruct
 	if pfunc != nil {
 		result, appException = pfunc.RunContext(ctx, argStruct)
 	}
 
 	// Often times oneway calls do not even have msgType ONEWAY.
 	// Then we detect a oneway call with a result that is nil.
-	isOneWay := messageType == ONEWAY || (appException == nil && result == nil)
+	isOneWay := messageType == types.ONEWAY || (appException == nil && result == nil)
 	if isOneWay {
 		// for ONEWAY messages, never send a response and never throw an exception.
 		return nil

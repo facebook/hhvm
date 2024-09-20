@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
 import (
 	"errors"
 	"fmt"
-	"io"
 )
 
 type ProtocolID int16
@@ -116,12 +115,15 @@ type Encoder interface {
 	Flush() (err error)
 }
 
-// Compile time check that all serialization formats implement the interface.
-var _ Format = (*compactProtocol)(nil)
-var _ Format = (*binaryProtocol)(nil)
-var _ Format = (*jsonProtocol)(nil)
-var _ Format = (*simpleJSONProtocol)(nil)
-var _ Format = (*debugProtocol)(nil)
+// IRequest represents a request to be sent to a thrift endpoint
+type IRequest interface {
+	Write(p Encoder) error
+}
+
+// IResponse represents a response received from a thrift call
+type IResponse interface {
+	Read(p Decoder) error
+}
 
 // The maximum recursive depth the skip() function will traverse
 const DEFAULT_RECURSION_DEPTH = 64
@@ -224,14 +226,6 @@ type Flusher interface {
 	Flush() (err error)
 }
 
-func flush(writer io.Writer) error {
-	flusher, ok := writer.(Flusher)
-	if !ok {
-		return nil
-	}
-	return NewProtocolException(flusher.Flush())
-}
-
 // ReadSizeProvider is the interface that wraps the basic RemainingBytes method
 type ReadSizeProvider interface {
 	RemainingBytes() (numBytes uint64)
@@ -240,38 +234,3 @@ type ReadSizeProvider interface {
 // UnknownRemaining is used by transports that can not return a real answer
 // for RemainingBytes()
 const UnknownRemaining = ^uint64(0)
-
-func remainingBytes(r io.Reader) uint64 {
-	readSizeProvider, ok := r.(ReadSizeProvider)
-	if !ok {
-		return UnknownRemaining
-	}
-	return readSizeProvider.RemainingBytes()
-}
-
-func readByte(r io.Reader) (c byte, err error) {
-	if byteReader, ok := r.(io.ByteReader); ok {
-		return byteReader.ReadByte()
-	}
-	v := [1]byte{0}
-	n, err := r.Read(v[0:1])
-	if n > 0 && (err == nil || err == io.EOF) {
-		return v[0], nil
-	}
-	if n > 0 && err != nil {
-		return v[0], err
-	}
-	if err != nil {
-		return 0, err
-	}
-	return v[0], nil
-}
-
-func writeByte(w io.Writer, c byte) error {
-	if byteWriter, ok := w.(io.ByteWriter); ok {
-		return byteWriter.WriteByte(c)
-	}
-	v := [1]byte{c}
-	_, err := w.Write(v[0:1])
-	return err
-}

@@ -16,24 +16,28 @@
 
 package thrift
 
+import (
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+)
+
 // CompositeProcessor is a serial Processor can report what functions it has
 // Currently all generated Go processors satisfy this interface.
 type CompositeProcessor interface {
-	Processor
-	Include(processor map[string]ProcessorFunction)
-	ProcessorFunctionMap() map[string]ProcessorFunction
+	types.Processor
+	Include(processor map[string]types.ProcessorFunction)
+	ProcessorFunctionMap() map[string]types.ProcessorFunction
 }
 
 // compositeProcessor allows different ComposableProcessor to sit under one
 // server as long as their functions carry distinct names
 type compositeProcessor struct {
-	serviceProcessorMap map[string]ProcessorFunction
+	serviceProcessorMap map[string]types.ProcessorFunction
 }
 
 // NewCompositeProcessor creates a new CompositeProcessor
 func NewCompositeProcessor() CompositeProcessor {
 	return &compositeProcessor{
-		serviceProcessorMap: make(map[string]ProcessorFunction),
+		serviceProcessorMap: make(map[string]types.ProcessorFunction),
 	}
 }
 
@@ -42,19 +46,19 @@ func NewCompositeProcessor() CompositeProcessor {
 // include wins).
 // A full solution (inclusion respecting namespaces) will require changes
 // to the thrift compiler
-func (p *compositeProcessor) Include(processorMap map[string]ProcessorFunction) {
+func (p *compositeProcessor) Include(processorMap map[string]types.ProcessorFunction) {
 	for name, tfunc := range processorMap {
 		p.serviceProcessorMap[name] = tfunc
 	}
 }
 
 // GetProcessorFunction multiplexes redirects to the appropriate Processor
-func (p *compositeProcessor) GetProcessorFunction(name string) ProcessorFunction {
+func (p *compositeProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
 	tfunc, _ := p.serviceProcessorMap[name]
 	return tfunc
 }
 
 // ProcessorMap returns the map that maps method names to Processors
-func (p *compositeProcessor) ProcessorFunctionMap() map[string]ProcessorFunction {
+func (p *compositeProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	return p.serviceProcessorMap
 }

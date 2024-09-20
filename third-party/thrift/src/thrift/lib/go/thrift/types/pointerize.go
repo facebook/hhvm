@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package types
 
 ///////////////////////////////////////////////////////////////////////////////
 // This file is home to helpers that convert from various base types to

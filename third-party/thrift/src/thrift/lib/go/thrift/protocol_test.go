@@ -25,13 +25,15 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 const PROTOCOL_BINARY_DATA_SIZE = 155
 
 type fieldData struct {
 	name  string
-	typ   Type
+	typ   types.Type
 	id    int16
 	value interface{}
 }
@@ -49,21 +51,21 @@ var (
 	int16Values    = []int16{459, 0, 1, -1, -128, 127, 32767, -32768}
 	int32Values    = []int32{459, 0, 1, -1, -128, 127, 32767, 2147483647, -2147483535}
 	int64Values    = []int64{459, 0, 1, -1, -128, 127, 32767, 2147483647, -2147483535, 34359738481, -35184372088719, -9223372036854775808, 9223372036854775807}
-	doubleValues   = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
-	floatValues    = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
+	doubleValues   = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
+	floatValues    = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
 	stringValues   = []string{"", "a", "st[uf]f", "st,u:ff with spaces", "stuff\twith\nescape\\characters'...\"lots{of}fun</xml>"}
 	structTestData = structData{
 		name: "test struct",
 		fields: []fieldData{
 			{
 				name:  "field1",
-				typ:   BOOL,
+				typ:   types.BOOL,
 				id:    1,
 				value: true,
 			},
 			{
 				name:  "field2",
-				typ:   STRING,
+				typ:   types.STRING,
 				id:    2,
 				value: "hi",
 			},
@@ -164,9 +166,9 @@ func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
 	return rConn, wConn
 }
 
-type protocolTest func(t testing.TB, p Format, trans io.ReadWriter)
-type protocolReaderTest func(t testing.TB, p Format, trans io.Reader)
-type protocolWriterTest func(t testing.TB, p Format, trans io.Writer)
+type protocolTest func(t testing.TB, p types.Format, trans io.ReadWriter)
+type protocolReaderTest func(t testing.TB, p types.Format, trans io.Reader)
+type protocolWriterTest func(t testing.TB, p types.Format, trans io.Writer)
 
 // ReadWriteProtocolParallelTest tests that a given protocol is safe to read
 // from and write to in different goroutines. This requires both a protocol
@@ -175,7 +177,7 @@ type protocolWriterTest func(t testing.TB, p Format, trans io.Writer)
 // It also should only be used with an underlying Transport that is capable of
 // blocking reads and writes (socket, stream), since other golang Transport
 // implementations require that the data exists to be read when they are called (like bytes.Buffer)
-func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteCloser) Format) {
+func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteCloser) types.Format) {
 	rConn, wConn := tcpStreamSetupForTest(t)
 	rdr, writer := io.Pipe()
 
@@ -221,7 +223,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 	doForAllTransportsParallel(ReadStruct, WriteStruct)
 
 	// perform set of many sequenced sets of reads and writes
-	doForAllTransportsParallel(func(t testing.TB, p Format, trans io.Reader) {
+	doForAllTransportsParallel(func(t testing.TB, p types.Format, trans io.Reader) {
 		ReadBool(t, p, trans)
 		ReadByte(t, p, trans)
 		ReadI16(t, p, trans)
@@ -232,7 +234,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 		ReadString(t, p, trans)
 		ReadBinary(t, p, trans)
 		ReadStruct(t, p, trans)
-	}, func(t testing.TB, p Format, trans io.Writer) {
+	}, func(t testing.TB, p types.Format, trans io.Writer) {
 		WriteBool(t, p, trans)
 		WriteByte(t, p, trans)
 		WriteI16(t, p, trans)
@@ -246,7 +248,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 	})
 }
 
-func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) Format) {
+func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) types.Format) {
 	l := HTTPClientSetupForTest(t)
 	defer l.Close()
 
@@ -285,7 +287,7 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) Form
 	doForAllTransports(ReadWriteStruct)
 
 	// perform set of many sequenced reads and writes
-	doForAllTransports(func(t testing.TB, p Format, trans io.ReadWriter) {
+	doForAllTransports(func(t testing.TB, p types.Format, trans io.ReadWriter) {
 		ReadWriteI64(t, p, trans)
 		ReadWriteDouble(t, p, trans)
 		ReadWriteFloat(t, p, trans)
@@ -295,8 +297,8 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) Form
 	})
 }
 
-func ReadBool(t testing.TB, p Format, trans io.Reader) {
-	thetype := Type(BOOL)
+func ReadBool(t testing.TB, p types.Format, trans io.Reader) {
+	thetype := types.Type(types.BOOL)
 	thelen := len(boolValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -326,8 +328,8 @@ func ReadBool(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func WriteBool(t testing.TB, p Format, trans io.Writer) {
-	thetype := Type(BOOL)
+func WriteBool(t testing.TB, p types.Format, trans io.Writer) {
+	thetype := types.Type(types.BOOL)
 	thelen := len(boolValues)
 	err := p.WriteListBegin(thetype, thelen)
 	if err != nil {
@@ -349,13 +351,13 @@ func WriteBool(t testing.TB, p Format, trans io.Writer) {
 	}
 }
 
-func ReadWriteBool(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteBool(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteBool(t, p, trans)
 	ReadBool(t, p, trans)
 }
 
-func WriteByte(t testing.TB, p Format, trans io.Writer) {
-	thetype := Type(BYTE)
+func WriteByte(t testing.TB, p types.Format, trans io.Writer) {
+	thetype := types.Type(types.BYTE)
 	thelen := len(byteValues)
 	err := p.WriteListBegin(thetype, thelen)
 	if err != nil {
@@ -377,8 +379,8 @@ func WriteByte(t testing.TB, p Format, trans io.Writer) {
 	}
 }
 
-func ReadByte(t testing.TB, p Format, trans io.Reader) {
-	thetype := Type(BYTE)
+func ReadByte(t testing.TB, p types.Format, trans io.Reader) {
+	thetype := types.Type(types.BYTE)
 	thelen := len(byteValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -408,13 +410,13 @@ func ReadByte(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func ReadWriteByte(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteByte(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteByte(t, p, trans)
 	ReadByte(t, p, trans)
 }
 
-func WriteI16(t testing.TB, p Format, trans io.Writer) {
-	thetype := Type(I16)
+func WriteI16(t testing.TB, p types.Format, trans io.Writer) {
+	thetype := types.Type(types.I16)
 	thelen := len(int16Values)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range int16Values {
@@ -424,8 +426,8 @@ func WriteI16(t testing.TB, p Format, trans io.Writer) {
 	p.Flush()
 }
 
-func ReadI16(t testing.TB, p Format, trans io.Reader) {
-	thetype := Type(I16)
+func ReadI16(t testing.TB, p types.Format, trans io.Reader) {
+	thetype := types.Type(types.I16)
 	thelen := len(int16Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -455,13 +457,13 @@ func ReadI16(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func ReadWriteI16(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteI16(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteI16(t, p, trans)
 	ReadI16(t, p, trans)
 }
 
-func WriteI32(t testing.TB, p Format, trans io.Writer) {
-	thetype := Type(I32)
+func WriteI32(t testing.TB, p types.Format, trans io.Writer) {
+	thetype := types.Type(types.I32)
 	thelen := len(int32Values)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range int32Values {
@@ -471,8 +473,8 @@ func WriteI32(t testing.TB, p Format, trans io.Writer) {
 	p.Flush()
 }
 
-func ReadI32(t testing.TB, p Format, trans io.Reader) {
-	thetype := Type(I32)
+func ReadI32(t testing.TB, p types.Format, trans io.Reader) {
+	thetype := types.Type(types.I32)
 	thelen := len(int32Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -501,13 +503,13 @@ func ReadI32(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func ReadWriteI32(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteI32(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteI32(t, p, trans)
 	ReadI32(t, p, trans)
 }
 
-func WriteI64(t testing.TB, p Format, trans io.Writer) {
-	thetype := Type(I64)
+func WriteI64(t testing.TB, p types.Format, trans io.Writer) {
+	thetype := types.Type(types.I64)
 	thelen := len(int64Values)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range int64Values {
@@ -517,8 +519,8 @@ func WriteI64(t testing.TB, p Format, trans io.Writer) {
 	p.Flush()
 }
 
-func ReadI64(t testing.TB, p Format, trans io.Reader) {
-	thetype := Type(I64)
+func ReadI64(t testing.TB, p types.Format, trans io.Reader) {
+	thetype := types.Type(types.I64)
 	thelen := len(int64Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -547,14 +549,14 @@ func ReadI64(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func ReadWriteI64(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteI64(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteI64(t, p, trans)
 	ReadI64(t, p, trans)
 }
 
-func WriteDouble(t testing.TB, p Format, trans io.Writer) {
-	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
-	thetype := Type(DOUBLE)
+func WriteDouble(t testing.TB, p types.Format, trans io.Writer) {
+	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
+	thetype := types.Type(types.DOUBLE)
 	thelen := len(doubleValues)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range doubleValues {
@@ -565,9 +567,9 @@ func WriteDouble(t testing.TB, p Format, trans io.Writer) {
 
 }
 
-func ReadDouble(t testing.TB, p Format, trans io.Reader) {
-	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
-	thetype := Type(DOUBLE)
+func ReadDouble(t testing.TB, p types.Format, trans io.Reader) {
+	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
+	thetype := types.Type(types.DOUBLE)
 	thelen := len(doubleValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -598,15 +600,15 @@ func ReadDouble(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func ReadWriteDouble(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteDouble(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteDouble(t, p, trans)
 	ReadDouble(t, p, trans)
 }
 
-func WriteFloat(t testing.TB, p Format, trans io.Writer) {
-	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
+func WriteFloat(t testing.TB, p types.Format, trans io.Writer) {
+	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
 
-	thetype := Type(FLOAT)
+	thetype := types.Type(types.FLOAT)
 	thelen := len(floatValues)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range floatValues {
@@ -617,10 +619,10 @@ func WriteFloat(t testing.TB, p Format, trans io.Writer) {
 
 }
 
-func ReadFloat(t testing.TB, p Format, trans io.Reader) {
-	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
+func ReadFloat(t testing.TB, p types.Format, trans io.Reader) {
+	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
 
-	thetype := Type(FLOAT)
+	thetype := types.Type(types.FLOAT)
 	thelen := len(floatValues)
 
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -653,13 +655,13 @@ func ReadFloat(t testing.TB, p Format, trans io.Reader) {
 
 }
 
-func ReadWriteFloat(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteFloat(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteFloat(t, p, trans)
 	ReadFloat(t, p, trans)
 }
 
-func WriteString(t testing.TB, p Format, trans io.Writer) {
-	thetype := Type(STRING)
+func WriteString(t testing.TB, p types.Format, trans io.Writer) {
+	thetype := types.Type(types.STRING)
 	thelen := len(stringValues)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range stringValues {
@@ -669,8 +671,8 @@ func WriteString(t testing.TB, p Format, trans io.Writer) {
 	p.Flush()
 }
 
-func ReadString(t testing.TB, p Format, trans io.Reader) {
-	thetype := Type(STRING)
+func ReadString(t testing.TB, p types.Format, trans io.Reader) {
+	thetype := types.Type(types.STRING)
 	thelen := len(stringValues)
 
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -700,18 +702,18 @@ func ReadString(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func ReadWriteString(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteString(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteString(t, p, trans)
 	ReadString(t, p, trans)
 }
 
-func WriteBinary(t testing.TB, p Format, trans io.Writer) {
+func WriteBinary(t testing.TB, p types.Format, trans io.Writer) {
 	v := protocolBdata
 	p.WriteBinary(v)
 	p.Flush()
 }
 
-func ReadBinary(t testing.TB, p Format, trans io.Reader) {
+func ReadBinary(t testing.TB, p types.Format, trans io.Reader) {
 	v := protocolBdata
 	value, err := p.ReadBinary()
 	if err != nil {
@@ -729,12 +731,12 @@ func ReadBinary(t testing.TB, p Format, trans io.Reader) {
 
 }
 
-func ReadWriteBinary(t testing.TB, p Format, trans io.ReadWriter) {
+func ReadWriteBinary(t testing.TB, p types.Format, trans io.ReadWriter) {
 	WriteBinary(t, p, trans)
 	ReadBinary(t, p, trans)
 }
 
-func WriteStruct(t testing.TB, p Format, trans io.Writer) {
+func WriteStruct(t testing.TB, p types.Format, trans io.Writer) {
 	v := structTestData
 	p.WriteStructBegin(v.name)
 	p.WriteFieldBegin(v.fields[0].name, v.fields[0].typ, v.fields[0].id)
@@ -756,7 +758,7 @@ func WriteStruct(t testing.TB, p Format, trans io.Writer) {
 	}
 }
 
-func ReadStruct(t testing.TB, p Format, trans io.Reader) {
+func ReadStruct(t testing.TB, p types.Format, trans io.Reader) {
 	v := structTestData
 	_, err := p.ReadStructBegin()
 	if err != nil {
@@ -816,7 +818,7 @@ func ReadStruct(t testing.TB, p Format, trans io.Reader) {
 	}
 }
 
-func ReadWriteStruct(t testing.TB, p Format, buffer io.ReadWriter) {
+func ReadWriteStruct(t testing.TB, p types.Format, buffer io.ReadWriter) {
 	WriteStruct(t, p, buffer)
 	ReadStruct(t, p, buffer)
 }

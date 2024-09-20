@@ -18,11 +18,13 @@ package thrift
 
 import (
 	"io"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type Deserializer struct {
 	Transport io.ReadWriteCloser
-	Protocol  Decoder
+	Protocol  types.Decoder
 }
 
 func NewDeserializer() *Deserializer {
@@ -38,7 +40,7 @@ func NewCompactDeserializer() *Deserializer {
 	return &Deserializer{transport, protocol}
 }
 
-func deserializeCompact(data []byte, msg Struct) error {
+func deserializeCompact(data []byte, msg types.Struct) error {
 	buffer := NewMemoryBufferWithData(data)
 	format := NewCompactProtocol(buffer)
 	return msg.Read(format)
@@ -57,7 +59,7 @@ func NewSimpleJSONDeserializer() *Deserializer {
 	return &Deserializer{transport, protocol}
 }
 
-func (t *Deserializer) ReadString(msg Struct, s string) (err error) {
+func (t *Deserializer) ReadString(msg types.Struct, s string) (err error) {
 	err = nil
 	if _, err = t.Transport.Write([]byte(s)); err != nil {
 		return
@@ -68,7 +70,7 @@ func (t *Deserializer) ReadString(msg Struct, s string) (err error) {
 	return
 }
 
-func (t *Deserializer) Read(msg Struct, b []byte) (err error) {
+func (t *Deserializer) Read(msg types.Struct, b []byte) (err error) {
 	err = nil
 	if _, err = t.Transport.Write(b); err != nil {
 		return

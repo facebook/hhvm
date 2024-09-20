@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type httpClient struct {
@@ -92,13 +94,13 @@ func (p *httpClient) Close() error {
 
 func (p *httpClient) Read(buf []byte) (int, error) {
 	if p.response == nil {
-		return 0, NewTransportException(NOT_OPEN, "Response buffer is empty, no request.")
+		return 0, types.NewTransportException(types.NOT_OPEN, "Response buffer is empty, no request.")
 	}
 	n, err := p.responseBuffer.Read(buf)
 	if n > 0 && (err == nil || err == io.EOF) {
 		return n, nil
 	}
-	return n, NewTransportExceptionFromError(err)
+	return n, types.NewTransportExceptionFromError(err)
 }
 
 func (p *httpClient) ReadByte() (c byte, err error) {
@@ -124,13 +126,13 @@ func (p *httpClient) Flush() error {
 
 	req, err := http.NewRequest("POST", p.url.String(), p.requestBuffer)
 	if err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 	p.header.Set("Content-Type", "application/x-thrift")
 	req.Header = p.header
 	response, err := p.client.Do(req)
 	if err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 
 	defer response.Body.Close()
@@ -142,12 +144,12 @@ func (p *httpClient) Flush() error {
 		p.closeResponse()
 
 		// TODO(pomack) log bad response
-		return NewTransportException(UNKNOWN_TRANSPORT_EXCEPTION, "HTTP Response code: "+strconv.Itoa(response.StatusCode))
+		return types.NewTransportException(types.UNKNOWN_TRANSPORT_EXCEPTION, "HTTP Response code: "+strconv.Itoa(response.StatusCode))
 	}
 
 	_, err = io.Copy(&p.responseBuffer, response.Body)
 	if err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 
 	p.response = response

@@ -18,6 +18,8 @@ package thrift
 
 import (
 	"fmt"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // protocolBuffer is a protocol that simply buffers all calls:
@@ -26,20 +28,20 @@ import (
 // - saves request headers
 // - returns response headers
 type protocolBuffer struct {
-	Decoder
-	Encoder
+	types.Decoder
+	types.Encoder
 	wbuf        *MemoryBuffer
 	rbuf        *MemoryBuffer
 	name        string
-	messageType MessageType
+	messageType types.MessageType
 	seqID       int32
 	reqHeaders  map[string]string
 	respHeaders map[string]string
 }
 
-var _ Protocol = (*protocolBuffer)(nil)
+var _ types.Protocol = (*protocolBuffer)(nil)
 
-func newProtocolBuffer(respHeaders map[string]string, protoID ProtocolID, data []byte) (*protocolBuffer, error) {
+func newProtocolBuffer(respHeaders map[string]string, protoID types.ProtocolID, data []byte) (*protocolBuffer, error) {
 	p := &protocolBuffer{
 		respHeaders: respHeaders,
 		reqHeaders:  map[string]string{},
@@ -47,14 +49,14 @@ func newProtocolBuffer(respHeaders map[string]string, protoID ProtocolID, data [
 		rbuf:        NewMemoryBufferWithData(data),
 	}
 	switch protoID {
-	case ProtocolIDBinary:
+	case types.ProtocolIDBinary:
 		p.Decoder = newBinaryDecoder(p.rbuf)
 		p.Encoder = newBinaryEncoder(p.wbuf)
-	case ProtocolIDCompact:
+	case types.ProtocolIDCompact:
 		p.Decoder = newCompactDecoder(p.rbuf)
 		p.Encoder = newCompactEncoder(p.wbuf)
 	default:
-		return nil, NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", protoID))
+		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", protoID))
 	}
 	return p, nil
 }
@@ -63,7 +65,7 @@ func (b *protocolBuffer) Bytes() []byte {
 	return b.wbuf.Bytes()
 }
 
-func (b *protocolBuffer) ReadMessageBegin() (string, MessageType, int32, error) {
+func (b *protocolBuffer) ReadMessageBegin() (string, types.MessageType, int32, error) {
 	return b.name, b.messageType, 0, nil
 }
 
@@ -71,7 +73,7 @@ func (b *protocolBuffer) ReadMessageEnd() error {
 	return nil
 }
 
-func (b *protocolBuffer) WriteMessageBegin(name string, messageType MessageType, seqid int32) error {
+func (b *protocolBuffer) WriteMessageBegin(name string, messageType types.MessageType, seqid int32) error {
 	b.name = name
 	b.messageType = messageType
 	b.seqID = seqid

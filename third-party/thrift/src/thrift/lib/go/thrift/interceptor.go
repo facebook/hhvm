@@ -18,6 +18,8 @@ package thrift
 
 import (
 	"context"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // Interceptor is a function that runs before the actual method. It is passed
@@ -25,17 +27,17 @@ import (
 // The interceptor is responsible for calling pfunc.RunContext() and it can
 // return a result or an exception which are then sent back to the caller.
 // The interceptor is expected to be concurrency safe.
-type Interceptor func(ctx context.Context, methodName string, pfunc ProcessorFunction, args Struct) (WritableStruct, ApplicationException)
+type Interceptor func(ctx context.Context, methodName string, pfunc types.ProcessorFunction, args types.Struct) (types.WritableStruct, types.ApplicationException)
 
 type interceptorProcessor struct {
 	interceptor Interceptor
-	Processor
+	types.Processor
 }
 
 // WrapInterceptor wraps an interceptor around the Processor p
 // such as when running the method returned by that processor it will execute
 // the interceptor instead.
-func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
+func WrapInterceptor(interceptor Interceptor, p types.Processor) types.Processor {
 	if interceptor == nil {
 		return p
 	}
@@ -45,7 +47,7 @@ func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
 	}
 }
 
-func (p *interceptorProcessor) GetProcessorFunction(name string) ProcessorFunction {
+func (p *interceptorProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
 	pf := p.Processor.GetProcessorFunction(name)
 	if pf == nil {
 		return nil // see ProcessContext, this semantic means 'no such function'.
@@ -60,9 +62,9 @@ func (p *interceptorProcessor) GetProcessorFunction(name string) ProcessorFuncti
 type interceptorProcessorFunction struct {
 	interceptor Interceptor
 	methodName  string
-	ProcessorFunction
+	types.ProcessorFunction
 }
 
-func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args Struct) (WritableStruct, ApplicationException) {
+func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationException) {
 	return pf.interceptor(ctx, pf.methodName, pf.ProcessorFunction, args)
 }

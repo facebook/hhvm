@@ -23,6 +23,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // Header keys
@@ -168,8 +170,8 @@ func (c TransformID) Untransformer() (func(byteReader) (byteReader, error), erro
 	case TransformZstd:
 		return zstdRead, nil
 	default:
-		return nil, NewProtocolExceptionWithType(
-			NOT_IMPLEMENTED, fmt.Errorf("Header transform %s not supported", c.String()),
+		return nil, types.NewProtocolExceptionWithType(
+			types.NOT_IMPLEMENTED, fmt.Errorf("Header transform %s not supported", c.String()),
 		)
 	}
 }
@@ -181,7 +183,7 @@ type tHeader struct {
 	headerLen  uint16
 	payloadLen uint64
 
-	protoID    ProtocolID
+	protoID    types.ProtocolID
 	transforms []TransformID
 
 	// Map to use for headers
@@ -272,7 +274,7 @@ func readTransforms(buf byteReader) ([]TransformID, error) {
 
 	numtransforms, err := binary.ReadUvarint(buf)
 	if err != nil {
-		return nil, NewTransportExceptionFromError(
+		return nil, types.NewTransportExceptionFromError(
 			fmt.Errorf("tHeader: error reading number of transforms: %s", err.Error()),
 		)
 	}
@@ -281,7 +283,7 @@ func readTransforms(buf byteReader) ([]TransformID, error) {
 	for i := uint64(0); i < numtransforms; i++ {
 		transformID, err := binary.ReadUvarint(buf)
 		if err != nil {
-			return nil, NewTransportExceptionFromError(
+			return nil, types.NewTransportExceptionFromError(
 				fmt.Errorf("tHeader: error reading transforms: %s", err.Error()),
 			)
 		}
@@ -290,12 +292,12 @@ func readTransforms(buf byteReader) ([]TransformID, error) {
 			if supported {
 				transforms = append(transforms, tid)
 			} else {
-				return nil, NewTransportExceptionFromError(
+				return nil, types.NewTransportExceptionFromError(
 					fmt.Errorf("tHeader: unsupported transform: %s", tid.String()),
 				)
 			}
 		} else {
-			return nil, NewTransportExceptionFromError(
+			return nil, types.NewTransportExceptionFromError(
 				fmt.Errorf("tHeader: unknown transform ID: %#x", tid),
 			)
 		}
@@ -319,7 +321,7 @@ func readInfoHeaders(buf byteReader) (map[string]string, map[string]string, erro
 		}
 
 		if err != nil {
-			return nil, nil, NewTransportExceptionFromError(
+			return nil, nil, types.NewTransportExceptionFromError(
 				fmt.Errorf("tHeader: error reading infoID: %s", err.Error()),
 			)
 		}
@@ -344,7 +346,7 @@ func readInfoHeaders(buf byteReader) (map[string]string, map[string]string, erro
 				infopHeaders[k] = v
 			}
 		default:
-			return nil, nil, NewTransportExceptionFromError(
+			return nil, nil, types.NewTransportExceptionFromError(
 				fmt.Errorf("tHeader: error reading infoIDType: %#x", infoID),
 			)
 		}
@@ -357,11 +359,11 @@ func (hdr *tHeader) readVarHeader(buf byteReader) error {
 	// Read protocol ID
 	protoID, err := binary.ReadUvarint(buf)
 	if err != nil {
-		return NewTransportExceptionFromError(
+		return types.NewTransportExceptionFromError(
 			fmt.Errorf("tHeader: error reading protocol ID: %s", err.Error()),
 		)
 	}
-	hdr.protoID = ProtocolID(protoID)
+	hdr.protoID = types.ProtocolID(protoID)
 	hdr.transforms, err = readTransforms(buf)
 	if err != nil {
 		return err
@@ -418,18 +420,18 @@ func analyzeSecond32Bit(word uint32) ClientType {
 func checkFramed(hdr *tHeader, clientType ClientType) error {
 	switch clientType {
 	case FramedDeprecated:
-		hdr.protoID = ProtocolIDBinary
+		hdr.protoID = types.ProtocolIDBinary
 		hdr.clientType = clientType
 		hdr.payloadLen = hdr.length
 		return nil
 	case FramedCompact:
-		hdr.protoID = ProtocolIDCompact
+		hdr.protoID = types.ProtocolIDCompact
 		hdr.clientType = clientType
 		hdr.payloadLen = hdr.length
 		return nil
 	default:
-		return NewProtocolExceptionWithType(
-			NOT_IMPLEMENTED, fmt.Errorf("Transport %s not supported on tHeader", clientType),
+		return types.NewProtocolExceptionWithType(
+			types.NOT_IMPLEMENTED, fmt.Errorf("Transport %s not supported on tHeader", clientType),
 		)
 	}
 }
@@ -444,7 +446,7 @@ func (hdr *tHeader) Read(buf *bufio.Reader) error {
 	)
 
 	if wordbuf, err = buf.Peek(4); err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 	firstword = binary.BigEndian.Uint32(wordbuf)
 
@@ -454,7 +456,7 @@ func (hdr *tHeader) Read(buf *bufio.Reader) error {
 	case UnknownClientType:
 		break
 	default:
-		return NewTransportExceptionFromError(
+		return types.NewTransportExceptionFromError(
 			fmt.Errorf("Transport %s not supported on tHeader (word=%#x)", clientType, firstword),
 		)
 	}
@@ -462,7 +464,7 @@ func (hdr *tHeader) Read(buf *bufio.Reader) error {
 	// From here on out, all protocols supported are frame-based. First word is length.
 	hdr.length = uint64(firstword)
 	if firstword > MaxFrameSize {
-		return NewTransportExceptionFromError(
+		return types.NewTransportExceptionFromError(
 			fmt.Errorf("BigFrames not supported: got size %d", firstword),
 		)
 	}
@@ -471,12 +473,12 @@ func (hdr *tHeader) Read(buf *bufio.Reader) error {
 	_, err = buf.Discard(4)
 	if err != nil {
 		// Shouldn't be possible to fail here, but check anyways
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 
 	// Only peek here. If it was framed transport, we are now reading payload.
 	if wordbuf, err = buf.Peek(4); err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 	secondword = binary.BigEndian.Uint32(wordbuf)
 
@@ -489,23 +491,23 @@ func (hdr *tHeader) Read(buf *bufio.Reader) error {
 	_, err = buf.Discard(4)
 	if err != nil {
 		// Shouldn't be possible to fail here, but check anyways
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 
 	// Assume header protocol from here on in, parse rest of header
 	hdr.flags = uint16(secondword & FlagsMask)
 	err = binary.Read(buf, binary.BigEndian, &hdr.seq)
 	if err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 
 	err = binary.Read(buf, binary.BigEndian, &hdr.headerLen)
 	if err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 
 	if uint32(hdr.headerLen*4) > MaxHeaderSize {
-		return NewTransportExceptionFromError(
+		return types.NewTransportExceptionFromError(
 			fmt.Errorf("invalid header length: %d", int64(hdr.headerLen*4)),
 		)
 	}
@@ -641,16 +643,16 @@ func (hdr *tHeader) calcLenFromPayload() error {
 		// TODO: Changes with bigframes
 		fixedlen = 10
 	default:
-		return NewApplicationException(
-			UNKNOWN_TRANSPORT_EXCEPTION,
+		return types.NewApplicationException(
+			types.UNKNOWN_TRANSPORT_EXCEPTION,
 			fmt.Sprintf("cannot get length of non-framed transport %s", hdr.clientType.String()),
 		)
 	}
 	framesize := uint64(hdr.payloadLen + fixedlen + uint64(hdr.headerLen)*4)
 	// FIXME: support bigframes
 	if framesize > uint64(MaxFrameSize) {
-		return NewTransportException(
-			INVALID_FRAME_SIZE,
+		return types.NewTransportException(
+			types.INVALID_FRAME_SIZE,
 			fmt.Sprintf("cannot send bigframe of size %d", framesize),
 		)
 	}
@@ -668,13 +670,13 @@ func (hdr *tHeader) Write(buf io.Writer) error {
 	}
 
 	if (hdrbuf.Len() % 4) > 0 {
-		return NewTransportException(
-			INVALID_FRAME_SIZE, fmt.Sprintf("unable to write header of size %d (must be multiple of 4)", hdr.headerLen),
+		return types.NewTransportException(
+			types.INVALID_FRAME_SIZE, fmt.Sprintf("unable to write header of size %d (must be multiple of 4)", hdr.headerLen),
 		)
 	}
 	if hdrbuf.Len() > int(MaxHeaderSize) {
-		return NewApplicationException(
-			INVALID_FRAME_SIZE, fmt.Sprintf("unable to write header of size %d (max is %d)", hdrbuf.Len(), MaxHeaderSize),
+		return types.NewApplicationException(
+			types.INVALID_FRAME_SIZE, fmt.Sprintf("unable to write header of size %d (max is %d)", hdrbuf.Len(), MaxHeaderSize),
 		)
 	}
 	hdr.headerLen = uint16(hdrbuf.Len() / 4)

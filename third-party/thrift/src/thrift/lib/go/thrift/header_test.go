@@ -21,6 +21,8 @@ import (
 	"bytes"
 	"encoding/hex"
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func MustDecodeHex(s string) []byte {
@@ -54,7 +56,7 @@ func TestHeaderDeserSer(t *testing.T) {
 		t.Fatalf("failed to parse correct header: %s", err.Error())
 	}
 
-	if hdr.protoID != ProtocolIDCompact {
+	if hdr.protoID != types.ProtocolIDCompact {
 		t.Errorf("expected compact proto, got: %#x", int64(hdr.protoID))
 	}
 

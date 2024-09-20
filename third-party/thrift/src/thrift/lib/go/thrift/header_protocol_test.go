@@ -18,11 +18,13 @@ package thrift
 
 import (
 	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func TestHeaderProtocolHeaders(t *testing.T) {
 	mockSocket := newMockSocket()
-	proto1, err := newHeaderProtocol(mockSocket, ProtocolIDCompact, 0, map[string]string{
+	proto1, err := newHeaderProtocol(mockSocket, types.ProtocolIDCompact, 0, map[string]string{
 		"preferred_cheese": "gouda",
 		IDVersionHeader:    IDVersion,
 		IdentityHeader:     "batman",
@@ -43,7 +45,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("wrong number of headers")
 	}
 
-	proto1.WriteMessageBegin("", CALL, 1)
+	proto1.WriteMessageBegin("", types.CALL, 1)
 	proto1.WriteMessageEnd()
 	proto1.Flush()
 

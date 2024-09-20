@@ -7,7 +7,7 @@ package module
 
 import (
     shared "shared"
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 var _ = shared.GoUnusedProtection__

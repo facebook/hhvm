@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 const BinaryVersionMask uint32 = 0xffff0000
@@ -33,13 +35,15 @@ type binaryProtocol struct {
 	io.Closer
 }
 
+var _ types.Format = (*binaryProtocol)(nil)
+
 // NewBinaryProtocolTransport creates a new protocol handler using a buffer
-func NewBinaryProtocolTransport(t io.ReadWriteCloser) Format {
+func NewBinaryProtocolTransport(t io.ReadWriteCloser) types.Format {
 	return NewBinaryProtocol(t, false, true)
 }
 
 // NewBinaryProtocol creates a new protocol handler using a buffer
-func NewBinaryProtocol(t io.ReadWriteCloser, strictRead, strictWrite bool) Format {
+func NewBinaryProtocol(t io.ReadWriteCloser, strictRead, strictWrite bool) types.Format {
 	p := &binaryProtocol{}
 	p.binaryDecoder = binaryDecoder{reader: t, strictRead: strictRead}
 	p.binaryEncoder = binaryEncoder{writer: t, strictWrite: strictWrite}
@@ -47,12 +51,12 @@ func NewBinaryProtocol(t io.ReadWriteCloser, strictRead, strictWrite bool) Forma
 	return p
 }
 
-func newBinaryEncoder(writer io.Writer) Encoder {
+func newBinaryEncoder(writer io.Writer) types.Encoder {
 	// This default for binaryEncoder's strictWrite matches cpp implementation
 	return &binaryEncoder{writer: writer, strictWrite: true}
 }
 
-func newBinaryDecoder(reader io.Reader) Decoder {
+func newBinaryDecoder(reader io.Reader) types.Decoder {
 	// This default for binaryEncoder's strictRead matches cpp implementation
 	return &binaryDecoder{reader: reader, strictRead: false}
 }
@@ -67,9 +71,9 @@ type binaryEncoder struct {
 	buffer      [64]byte
 }
 
-func (p *binaryEncoder) WriteMessageBegin(name string, typeID MessageType, seqID int32) error {
+func (p *binaryEncoder) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
 	if p.strictWrite {
-		version := uint32(VERSION_1) | uint32(typeID)
+		version := uint32(types.VERSION_1) | uint32(typeID)
 		e := p.WriteI32(int32(version))
 		if e != nil {
 			return e
@@ -106,7 +110,7 @@ func (p *binaryEncoder) WriteStructEnd() error {
 	return nil
 }
 
-func (p *binaryEncoder) WriteFieldBegin(name string, typeID Type, id int16) error {
+func (p *binaryEncoder) WriteFieldBegin(name string, typeID types.Type, id int16) error {
 	e := p.WriteByte(byte(typeID))
 	if e != nil {
 		return e
@@ -120,11 +124,11 @@ func (p *binaryEncoder) WriteFieldEnd() error {
 }
 
 func (p *binaryEncoder) WriteFieldStop() error {
-	e := p.WriteByte(STOP)
+	e := p.WriteByte(types.STOP)
 	return e
 }
 
-func (p *binaryEncoder) WriteMapBegin(keyType Type, valueType Type, size int) error {
+func (p *binaryEncoder) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
 	e := p.WriteByte(byte(keyType))
 	if e != nil {
 		return e
@@ -141,7 +145,7 @@ func (p *binaryEncoder) WriteMapEnd() error {
 	return nil
 }
 
-func (p *binaryEncoder) WriteListBegin(elemType Type, size int) error {
+func (p *binaryEncoder) WriteListBegin(elemType types.Type, size int) error {
 	e := p.WriteByte(byte(elemType))
 	if e != nil {
 		return e
@@ -154,7 +158,7 @@ func (p *binaryEncoder) WriteListEnd() error {
 	return nil
 }
 
-func (p *binaryEncoder) WriteSetBegin(elemType Type, size int) error {
+func (p *binaryEncoder) WriteSetBegin(elemType types.Type, size int) error {
 	e := p.WriteByte(byte(elemType))
 	if e != nil {
 		return e
@@ -176,28 +180,28 @@ func (p *binaryEncoder) WriteBool(value bool) error {
 
 func (p *binaryEncoder) WriteByte(value byte) error {
 	e := writeByte(p.writer, value)
-	return NewProtocolException(e)
+	return types.NewProtocolException(e)
 }
 
 func (p *binaryEncoder) WriteI16(value int16) error {
 	v := p.buffer[0:2]
 	binary.BigEndian.PutUint16(v, uint16(value))
 	_, e := p.writer.Write(v)
-	return NewProtocolException(e)
+	return types.NewProtocolException(e)
 }
 
 func (p *binaryEncoder) WriteI32(value int32) error {
 	v := p.buffer[0:4]
 	binary.BigEndian.PutUint32(v, uint32(value))
 	_, e := p.writer.Write(v)
-	return NewProtocolException(e)
+	return types.NewProtocolException(e)
 }
 
 func (p *binaryEncoder) WriteI64(value int64) error {
 	v := p.buffer[0:8]
 	binary.BigEndian.PutUint64(v, uint64(value))
 	_, err := p.writer.Write(v)
-	return NewProtocolException(err)
+	return types.NewProtocolException(err)
 }
 
 func (p *binaryEncoder) WriteDouble(value float64) error {
@@ -214,7 +218,7 @@ func (p *binaryEncoder) WriteString(value string) error {
 		return e
 	}
 	_, err := p.writer.Write([]byte(value))
-	return NewProtocolException(err)
+	return types.NewProtocolException(err)
 }
 
 func (p *binaryEncoder) WriteBinary(value []byte) error {
@@ -225,7 +229,7 @@ func (p *binaryEncoder) WriteBinary(value []byte) error {
 	if len(value) > 0 {
 		_, err = p.writer.Write(value)
 	}
-	return NewProtocolException(err)
+	return types.NewProtocolException(err)
 }
 
 func (p *binaryEncoder) Flush() (err error) {
@@ -242,29 +246,29 @@ type binaryDecoder struct {
 	buffer     [64]byte
 }
 
-func (p *binaryDecoder) ReadMessageBegin() (name string, typeID MessageType, seqID int32, err error) {
+func (p *binaryDecoder) ReadMessageBegin() (name string, typeID types.MessageType, seqID int32, err error) {
 	size, e := p.ReadI32()
 	if e != nil {
-		return "", typeID, 0, NewProtocolException(e)
+		return "", typeID, 0, types.NewProtocolException(e)
 	}
 	if size < 0 {
-		typeID = MessageType(size & 0x0ff)
-		version := int64(int64(size) & VERSION_MASK)
-		if version != VERSION_1 {
-			return name, typeID, seqID, NewProtocolExceptionWithType(BAD_VERSION, fmt.Errorf("Bad version in ReadMessageBegin"))
+		typeID = types.MessageType(size & 0x0ff)
+		version := int64(int64(size) & types.VERSION_MASK)
+		if version != types.VERSION_1 {
+			return name, typeID, seqID, types.NewProtocolExceptionWithType(types.BAD_VERSION, fmt.Errorf("Bad version in ReadMessageBegin"))
 		}
 		name, e = p.ReadString()
 		if e != nil {
-			return name, typeID, seqID, NewProtocolException(e)
+			return name, typeID, seqID, types.NewProtocolException(e)
 		}
 		seqID, e = p.ReadI32()
 		if e != nil {
-			return name, typeID, seqID, NewProtocolException(e)
+			return name, typeID, seqID, types.NewProtocolException(e)
 		}
 		return name, typeID, seqID, nil
 	}
 	if p.strictRead {
-		return name, typeID, seqID, NewProtocolExceptionWithType(BAD_VERSION, fmt.Errorf("Missing version in ReadMessageBegin"))
+		return name, typeID, seqID, types.NewProtocolExceptionWithType(types.BAD_VERSION, fmt.Errorf("Missing version in ReadMessageBegin"))
 	}
 	name, e2 := p.readStringBody(size)
 	if e2 != nil {
@@ -274,7 +278,7 @@ func (p *binaryDecoder) ReadMessageBegin() (name string, typeID MessageType, seq
 	if e3 != nil {
 		return name, typeID, seqID, e3
 	}
-	typeID = MessageType(b)
+	typeID = types.MessageType(b)
 	seqID, e4 := p.ReadI32()
 	if e4 != nil {
 		return name, typeID, seqID, e4
@@ -294,13 +298,13 @@ func (p *binaryDecoder) ReadStructEnd() error {
 	return nil
 }
 
-func (p *binaryDecoder) ReadFieldBegin() (name string, typeID Type, seqID int16, err error) {
+func (p *binaryDecoder) ReadFieldBegin() (name string, typeID types.Type, seqID int16, err error) {
 	t, err := p.ReadByte()
-	typeID = Type(t)
+	typeID = types.Type(t)
 	if err != nil {
 		return name, typeID, seqID, err
 	}
-	if t != STOP {
+	if t != types.STOP {
 		seqID, err = p.ReadI16()
 	}
 	return name, typeID, seqID, err
@@ -310,24 +314,24 @@ func (p *binaryDecoder) ReadFieldEnd() error {
 	return nil
 }
 
-var invalidDataLength = NewProtocolExceptionWithType(INVALID_DATA, errors.New("Invalid data length"))
+var invalidDataLength = types.NewProtocolExceptionWithType(types.INVALID_DATA, errors.New("Invalid data length"))
 
-func (p *binaryDecoder) ReadMapBegin() (kType, vType Type, size int, err error) {
+func (p *binaryDecoder) ReadMapBegin() (kType, vType types.Type, size int, err error) {
 	k, e := p.ReadByte()
 	if e != nil {
-		err = NewProtocolException(e)
+		err = types.NewProtocolException(e)
 		return
 	}
-	kType = Type(k)
+	kType = types.Type(k)
 	v, e := p.ReadByte()
 	if e != nil {
-		err = NewProtocolException(e)
+		err = types.NewProtocolException(e)
 		return
 	}
-	vType = Type(v)
+	vType = types.Type(v)
 	size32, e := p.ReadI32()
 	if e != nil {
-		err = NewProtocolException(e)
+		err = types.NewProtocolException(e)
 		return
 	}
 	if size32 < 0 {
@@ -335,7 +339,7 @@ func (p *binaryDecoder) ReadMapBegin() (kType, vType Type, size int, err error) 
 		return
 	}
 	remainingBytes := remainingBytes(p.reader)
-	if uint64(size32*2) > remainingBytes || remainingBytes == UnknownRemaining {
+	if uint64(size32*2) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		err = invalidDataLength
 		return
 	}
@@ -347,16 +351,16 @@ func (p *binaryDecoder) ReadMapEnd() error {
 	return nil
 }
 
-func (p *binaryDecoder) ReadListBegin() (elemType Type, size int, err error) {
+func (p *binaryDecoder) ReadListBegin() (elemType types.Type, size int, err error) {
 	b, e := p.ReadByte()
 	if e != nil {
-		err = NewProtocolException(e)
+		err = types.NewProtocolException(e)
 		return
 	}
-	elemType = Type(b)
+	elemType = types.Type(b)
 	size32, e := p.ReadI32()
 	if e != nil {
-		err = NewProtocolException(e)
+		err = types.NewProtocolException(e)
 		return
 	}
 	if size32 < 0 {
@@ -364,7 +368,7 @@ func (p *binaryDecoder) ReadListBegin() (elemType Type, size int, err error) {
 		return
 	}
 	remainingBytes := remainingBytes(p.reader)
-	if uint64(size32) > remainingBytes || remainingBytes == UnknownRemaining {
+	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		err = invalidDataLength
 		return
 	}
@@ -377,16 +381,16 @@ func (p *binaryDecoder) ReadListEnd() error {
 	return nil
 }
 
-func (p *binaryDecoder) ReadSetBegin() (elemType Type, size int, err error) {
+func (p *binaryDecoder) ReadSetBegin() (elemType types.Type, size int, err error) {
 	b, e := p.ReadByte()
 	if e != nil {
-		err = NewProtocolException(e)
+		err = types.NewProtocolException(e)
 		return
 	}
-	elemType = Type(b)
+	elemType = types.Type(b)
 	size32, e := p.ReadI32()
 	if e != nil {
-		err = NewProtocolException(e)
+		err = types.NewProtocolException(e)
 		return
 	}
 	if size32 < 0 {
@@ -394,7 +398,7 @@ func (p *binaryDecoder) ReadSetBegin() (elemType Type, size int, err error) {
 		return
 	}
 	remainingBytes := remainingBytes(p.reader)
-	if uint64(size32) > remainingBytes || remainingBytes == UnknownRemaining {
+	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		err = invalidDataLength
 		return
 	}
@@ -476,23 +480,23 @@ func (p *binaryDecoder) ReadBinary() ([]byte, error) {
 		return nil, invalidDataLength
 	}
 	remainingBytes := remainingBytes(p.reader)
-	if uint64(size) > remainingBytes || remainingBytes == UnknownRemaining {
+	if uint64(size) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return nil, invalidDataLength
 	}
 
 	isize := int(size)
 	buf := make([]byte, isize)
 	_, err := io.ReadFull(p.reader, buf)
-	return buf, NewProtocolException(err)
+	return buf, types.NewProtocolException(err)
 }
 
-func (p *binaryDecoder) Skip(fieldType Type) (err error) {
-	return SkipDefaultDepth(p, fieldType)
+func (p *binaryDecoder) Skip(fieldType types.Type) (err error) {
+	return types.SkipDefaultDepth(p, fieldType)
 }
 
 func (p *binaryDecoder) readAll(buf []byte) error {
 	_, err := io.ReadFull(p.reader, buf)
-	return NewProtocolException(err)
+	return types.NewProtocolException(err)
 }
 
 func (p *binaryDecoder) readStringBody(size int32) (value string, err error) {
@@ -500,7 +504,7 @@ func (p *binaryDecoder) readStringBody(size int32) (value string, err error) {
 		return "", nil
 	}
 	remainingBytes := remainingBytes(p.reader)
-	if uint64(size) > remainingBytes || remainingBytes == UnknownRemaining {
+	if uint64(size) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return "", invalidDataLength
 	}
 	var buf []byte
@@ -510,5 +514,5 @@ func (p *binaryDecoder) readStringBody(size int32) (value string, err error) {
 		buf = make([]byte, size)
 	}
 	_, e := io.ReadFull(p.reader, buf)
-	return string(buf), NewProtocolException(e)
+	return string(buf), types.NewProtocolException(e)
 }

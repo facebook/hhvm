@@ -21,6 +21,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
@@ -29,8 +30,8 @@ import (
 // RSocketClient is a client that uses a rsocket library.
 type RSocketClient interface {
 	SendSetup(serverMetadataPush OnServerMetadataPush) error
-	FireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error
-	RequestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error)
+	FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) error
+	RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error)
 	Close() error
 }
 
@@ -103,7 +104,7 @@ func (r *rsocketClient) resetDeadline() {
 	r.conn.SetDeadline(time.Time{})
 }
 
-func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error) {
+func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error) {
 	r.resetDeadline()
 	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)
 	if err != nil {
@@ -127,7 +128,7 @@ var rsocketBlock func(ctx context.Context, client rsocket.Client, request payloa
 	return val, err
 }
 
-func (r *rsocketClient) FireAndForget(messageName string, protoID ProtocolID, typeID MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {
+func (r *rsocketClient) FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {
 	r.resetDeadline()
 	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)
 	if err != nil {

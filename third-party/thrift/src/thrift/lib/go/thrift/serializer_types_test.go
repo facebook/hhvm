@@ -47,10 +47,12 @@ struct MyTestStruct {
 
 import (
 	"fmt"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // (needed to ensure safety because of naive import list construction.)
-var _ = ZERO
+var _ = types.ZERO
 var _ = fmt.Printf
 
 var GoUnusedProtection__ int
@@ -179,17 +181,17 @@ func (p *MyTestStruct) GetStringSet() map[string]bool {
 func (p *MyTestStruct) GetE() MyTestEnum {
 	return p.E
 }
-func (p *MyTestStruct) Read(prot Decoder) error {
+func (p *MyTestStruct) Read(prot types.Decoder) error {
 	if _, err := prot.ReadStructBegin(); err != nil {
-		return PrependError(fmt.Sprintf("%T read error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
 
 	for {
 		_, fieldTypeId, fieldId, err := prot.ReadFieldBegin()
 		if err != nil {
-			return PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+			return types.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
 		}
-		if fieldTypeId == STOP {
+		if fieldTypeId == types.STOP {
 			break
 		}
 		switch fieldId {
@@ -255,23 +257,23 @@ func (p *MyTestStruct) Read(prot Decoder) error {
 		}
 	}
 	if err := prot.ReadStructEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField1(prot Decoder) error {
+func (p *MyTestStruct) ReadField1(prot types.Decoder) error {
 	if v, err := prot.ReadBool(); err != nil {
-		return PrependError("error reading field 1: ", err)
+		return types.PrependError("error reading field 1: ", err)
 	} else {
 		p.On = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField2(prot Decoder) error {
+func (p *MyTestStruct) ReadField2(prot types.Decoder) error {
 	if v, err := prot.ReadByte(); err != nil {
-		return PrependError("error reading field 2: ", err)
+		return types.PrependError("error reading field 2: ", err)
 	} else {
 		temp := byte(v)
 		p.B = temp
@@ -279,144 +281,144 @@ func (p *MyTestStruct) ReadField2(prot Decoder) error {
 	return nil
 }
 
-func (p *MyTestStruct) ReadField3(prot Decoder) error {
+func (p *MyTestStruct) ReadField3(prot types.Decoder) error {
 	if v, err := prot.ReadI16(); err != nil {
-		return PrependError("error reading field 3: ", err)
+		return types.PrependError("error reading field 3: ", err)
 	} else {
 		p.Int16 = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField4(prot Decoder) error {
+func (p *MyTestStruct) ReadField4(prot types.Decoder) error {
 	if v, err := prot.ReadI32(); err != nil {
-		return PrependError("error reading field 4: ", err)
+		return types.PrependError("error reading field 4: ", err)
 	} else {
 		p.Int32 = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField5(prot Decoder) error {
+func (p *MyTestStruct) ReadField5(prot types.Decoder) error {
 	if v, err := prot.ReadI64(); err != nil {
-		return PrependError("error reading field 5: ", err)
+		return types.PrependError("error reading field 5: ", err)
 	} else {
 		p.Int64 = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField6(prot Decoder) error {
+func (p *MyTestStruct) ReadField6(prot types.Decoder) error {
 	if v, err := prot.ReadDouble(); err != nil {
-		return PrependError("error reading field 6: ", err)
+		return types.PrependError("error reading field 6: ", err)
 	} else {
 		p.D = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField7(prot Decoder) error {
+func (p *MyTestStruct) ReadField7(prot types.Decoder) error {
 	if v, err := prot.ReadFloat(); err != nil {
-		return PrependError("error reading field 7: ", err)
+		return types.PrependError("error reading field 7: ", err)
 	} else {
 		p.F = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField8(prot Decoder) error {
+func (p *MyTestStruct) ReadField8(prot types.Decoder) error {
 	if v, err := prot.ReadString(); err != nil {
-		return PrependError("error reading field 8: ", err)
+		return types.PrependError("error reading field 8: ", err)
 	} else {
 		p.St = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField9(prot Decoder) error {
+func (p *MyTestStruct) ReadField9(prot types.Decoder) error {
 	if v, err := prot.ReadBinary(); err != nil {
-		return PrependError("error reading field 9: ", err)
+		return types.PrependError("error reading field 9: ", err)
 	} else {
 		p.Bin = v
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField10(prot Decoder) error {
+func (p *MyTestStruct) ReadField10(prot types.Decoder) error {
 	_, _, size, err := prot.ReadMapBegin()
 	if err != nil {
-		return PrependError("error reading map begin: ", err)
+		return types.PrependError("error reading map begin: ", err)
 	}
 	tMap := make(map[string]string, size)
 	p.StringMap = tMap
 	for i := 0; i < size; i++ {
 		var _key0 string
 		if v, err := prot.ReadString(); err != nil {
-			return PrependError("error reading field 0: ", err)
+			return types.PrependError("error reading field 0: ", err)
 		} else {
 			_key0 = v
 		}
 		var _val1 string
 		if v, err := prot.ReadString(); err != nil {
-			return PrependError("error reading field 0: ", err)
+			return types.PrependError("error reading field 0: ", err)
 		} else {
 			_val1 = v
 		}
 		p.StringMap[_key0] = _val1
 	}
 	if err := prot.ReadMapEnd(); err != nil {
-		return PrependError("error reading map end: ", err)
+		return types.PrependError("error reading map end: ", err)
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField11(prot Decoder) error {
+func (p *MyTestStruct) ReadField11(prot types.Decoder) error {
 	_, size, err := prot.ReadListBegin()
 	if err != nil {
-		return PrependError("error reading list begin: ", err)
+		return types.PrependError("error reading list begin: ", err)
 	}
 	tSlice := make([]string, 0, size)
 	p.StringList = tSlice
 	for i := 0; i < size; i++ {
 		var _elem2 string
 		if v, err := prot.ReadString(); err != nil {
-			return PrependError("error reading field 0: ", err)
+			return types.PrependError("error reading field 0: ", err)
 		} else {
 			_elem2 = v
 		}
 		p.StringList = append(p.StringList, _elem2)
 	}
 	if err := prot.ReadListEnd(); err != nil {
-		return PrependError("error reading list end: ", err)
+		return types.PrependError("error reading list end: ", err)
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField12(prot Decoder) error {
+func (p *MyTestStruct) ReadField12(prot types.Decoder) error {
 	_, size, err := prot.ReadSetBegin()
 	if err != nil {
-		return PrependError("error reading set begin: ", err)
+		return types.PrependError("error reading set begin: ", err)
 	}
 	tSet := make(map[string]bool, size)
 	p.StringSet = tSet
 	for i := 0; i < size; i++ {
 		var _elem3 string
 		if v, err := prot.ReadString(); err != nil {
-			return PrependError("error reading field 0: ", err)
+			return types.PrependError("error reading field 0: ", err)
 		} else {
 			_elem3 = v
 		}
 		p.StringSet[_elem3] = true
 	}
 	if err := prot.ReadSetEnd(); err != nil {
-		return PrependError("error reading set end: ", err)
+		return types.PrependError("error reading set end: ", err)
 	}
 	return nil
 }
 
-func (p *MyTestStruct) ReadField13(prot Decoder) error {
+func (p *MyTestStruct) ReadField13(prot types.Decoder) error {
 	if v, err := prot.ReadI32(); err != nil {
-		return PrependError("error reading field 13: ", err)
+		return types.PrependError("error reading field 13: ", err)
 	} else {
 		temp := MyTestEnum(v)
 		p.E = temp
@@ -424,9 +426,9 @@ func (p *MyTestStruct) ReadField13(prot Decoder) error {
 	return nil
 }
 
-func (p *MyTestStruct) Write(prot Encoder) error {
+func (p *MyTestStruct) Write(prot types.Encoder) error {
 	if err := prot.WriteStructBegin("MyTestStruct"); err != nil {
-		return PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if err := p.writeField1(prot); err != nil {
 		return err
@@ -468,206 +470,206 @@ func (p *MyTestStruct) Write(prot Encoder) error {
 		return err
 	}
 	if err := prot.WriteFieldStop(); err != nil {
-		return PrependError("write field stop error: ", err)
+		return types.PrependError("write field stop error: ", err)
 	}
 	if err := prot.WriteStructEnd(); err != nil {
-		return PrependError("write struct stop error: ", err)
+		return types.PrependError("write struct stop error: ", err)
 	}
 	return nil
 }
 
-func (p *MyTestStruct) writeField1(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("on", BOOL, 1); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 1:on: ", p), err)
+func (p *MyTestStruct) writeField1(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("on", types.BOOL, 1); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 1:on: ", p), err)
 	}
 	if err := prot.WriteBool(bool(p.On)); err != nil {
-		return PrependError(fmt.Sprintf("%T.on (1) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.on (1) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 1:on: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 1:on: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField2(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("b", BYTE, 2); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 2:b: ", p), err)
+func (p *MyTestStruct) writeField2(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("b", types.BYTE, 2); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 2:b: ", p), err)
 	}
 	if err := prot.WriteByte(byte(p.B)); err != nil {
-		return PrependError(fmt.Sprintf("%T.b (2) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.b (2) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 2:b: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 2:b: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField3(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("int16", I16, 3); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 3:int16: ", p), err)
+func (p *MyTestStruct) writeField3(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("int16", types.I16, 3); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 3:int16: ", p), err)
 	}
 	if err := prot.WriteI16(int16(p.Int16)); err != nil {
-		return PrependError(fmt.Sprintf("%T.int16 (3) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.int16 (3) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 3:int16: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 3:int16: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField4(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("int32", I32, 4); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 4:int32: ", p), err)
+func (p *MyTestStruct) writeField4(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("int32", types.I32, 4); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 4:int32: ", p), err)
 	}
 	if err := prot.WriteI32(int32(p.Int32)); err != nil {
-		return PrependError(fmt.Sprintf("%T.int32 (4) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.int32 (4) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 4:int32: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 4:int32: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField5(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("int64", I64, 5); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 5:int64: ", p), err)
+func (p *MyTestStruct) writeField5(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("int64", types.I64, 5); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 5:int64: ", p), err)
 	}
 	if err := prot.WriteI64(int64(p.Int64)); err != nil {
-		return PrependError(fmt.Sprintf("%T.int64 (5) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.int64 (5) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 5:int64: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 5:int64: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField6(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("d", DOUBLE, 6); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 6:d: ", p), err)
+func (p *MyTestStruct) writeField6(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("d", types.DOUBLE, 6); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 6:d: ", p), err)
 	}
 	if err := prot.WriteDouble(float64(p.D)); err != nil {
-		return PrependError(fmt.Sprintf("%T.d (6) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.d (6) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 6:d: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 6:d: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField7(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("f", FLOAT, 7); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 7:f: ", p), err)
+func (p *MyTestStruct) writeField7(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("f", types.FLOAT, 7); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 7:f: ", p), err)
 	}
 	if err := prot.WriteFloat(float32(p.F)); err != nil {
-		return PrependError(fmt.Sprintf("%T.f (7) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.f (7) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 7:f: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 7:f: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField8(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("st", STRING, 8); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 8:st: ", p), err)
+func (p *MyTestStruct) writeField8(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("st", types.STRING, 8); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 8:st: ", p), err)
 	}
 	if err := prot.WriteString(string(p.St)); err != nil {
-		return PrependError(fmt.Sprintf("%T.st (8) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.st (8) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 8:st: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 8:st: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField9(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("bin", STRING, 9); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 9:bin: ", p), err)
+func (p *MyTestStruct) writeField9(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("bin", types.STRING, 9); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 9:bin: ", p), err)
 	}
 	if err := prot.WriteBinary(p.Bin); err != nil {
-		return PrependError(fmt.Sprintf("%T.bin (9) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.bin (9) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 9:bin: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 9:bin: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField10(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("stringMap", MAP, 10); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 10:stringMap: ", p), err)
+func (p *MyTestStruct) writeField10(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("stringMap", types.MAP, 10); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 10:stringMap: ", p), err)
 	}
-	if err := prot.WriteMapBegin(STRING, STRING, len(p.StringMap)); err != nil {
-		return PrependError("error writing map begin: ", err)
+	if err := prot.WriteMapBegin(types.STRING, types.STRING, len(p.StringMap)); err != nil {
+		return types.PrependError("error writing map begin: ", err)
 	}
 	for k, v := range p.StringMap {
 		if err := prot.WriteString(string(k)); err != nil {
-			return PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+			return types.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
 		}
 		if err := prot.WriteString(string(v)); err != nil {
-			return PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+			return types.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
 		}
 	}
 	if err := prot.WriteMapEnd(); err != nil {
-		return PrependError("error writing map end: ", err)
+		return types.PrependError("error writing map end: ", err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 10:stringMap: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 10:stringMap: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField11(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("stringList", LIST, 11); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 11:stringList: ", p), err)
+func (p *MyTestStruct) writeField11(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("stringList", types.LIST, 11); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 11:stringList: ", p), err)
 	}
-	if err := prot.WriteListBegin(STRING, len(p.StringList)); err != nil {
-		return PrependError("error writing list begin: ", err)
+	if err := prot.WriteListBegin(types.STRING, len(p.StringList)); err != nil {
+		return types.PrependError("error writing list begin: ", err)
 	}
 	for _, v := range p.StringList {
 		if err := prot.WriteString(string(v)); err != nil {
-			return PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+			return types.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
 		}
 	}
 	if err := prot.WriteListEnd(); err != nil {
-		return PrependError("error writing list end: ", err)
+		return types.PrependError("error writing list end: ", err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 11:stringList: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 11:stringList: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField12(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("stringSet", SET, 12); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 12:stringSet: ", p), err)
+func (p *MyTestStruct) writeField12(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("stringSet", types.SET, 12); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 12:stringSet: ", p), err)
 	}
-	if err := prot.WriteSetBegin(STRING, len(p.StringSet)); err != nil {
-		return PrependError("error writing set begin: ", err)
+	if err := prot.WriteSetBegin(types.STRING, len(p.StringSet)); err != nil {
+		return types.PrependError("error writing set begin: ", err)
 	}
 	for v := range p.StringSet {
 		if err := prot.WriteString(string(v)); err != nil {
-			return PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+			return types.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
 		}
 	}
 	if err := prot.WriteSetEnd(); err != nil {
-		return PrependError("error writing set end: ", err)
+		return types.PrependError("error writing set end: ", err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 12:stringSet: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 12:stringSet: ", p), err)
 	}
 	return err
 }
 
-func (p *MyTestStruct) writeField13(prot Encoder) (err error) {
-	if err := prot.WriteFieldBegin("e", I32, 13); err != nil {
-		return PrependError(fmt.Sprintf("%T write field begin error 13:e: ", p), err)
+func (p *MyTestStruct) writeField13(prot types.Encoder) (err error) {
+	if err := prot.WriteFieldBegin("e", types.I32, 13); err != nil {
+		return types.PrependError(fmt.Sprintf("%T write field begin error 13:e: ", p), err)
 	}
 	if err := prot.WriteI32(int32(p.E)); err != nil {
-		return PrependError(fmt.Sprintf("%T.e (13) field write error: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T.e (13) field write error: ", p), err)
 	}
 	if err := prot.WriteFieldEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field end error 13:e: ", p), err)
+		return types.PrependError(fmt.Sprintf("%T write field end error 13:e: ", p), err)
 	}
 	return err
 }

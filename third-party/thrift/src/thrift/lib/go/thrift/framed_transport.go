@@ -22,6 +22,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 const DEFAULT_MAX_LENGTH = 16384000
@@ -62,7 +64,7 @@ func (p *FramedTransport) Read(buf []byte) (l int, err error) {
 		l, err = p.Read(tmp)
 		copy(buf, tmp)
 		if err == nil {
-			err = NewTransportExceptionFromError(fmt.Errorf("Not enough frame size %d to read %d bytes", frameSize, len(buf)))
+			err = types.NewTransportExceptionFromError(fmt.Errorf("Not enough frame size %d to read %d bytes", frameSize, len(buf)))
 			return
 		}
 	}
@@ -70,9 +72,9 @@ func (p *FramedTransport) Read(buf []byte) (l int, err error) {
 	p.frameSize = p.frameSize - uint32(got)
 	//sanity check
 	if p.frameSize < 0 {
-		return 0, NewTransportException(UNKNOWN_TRANSPORT_EXCEPTION, "Negative frame size")
+		return 0, types.NewTransportException(types.UNKNOWN_TRANSPORT_EXCEPTION, "Negative frame size")
 	}
-	return got, NewTransportExceptionFromError(err)
+	return got, types.NewTransportExceptionFromError(err)
 }
 
 func (p *FramedTransport) ReadByte() (c byte, err error) {
@@ -83,7 +85,7 @@ func (p *FramedTransport) ReadByte() (c byte, err error) {
 		}
 	}
 	if p.frameSize < 1 {
-		return 0, NewTransportExceptionFromError(fmt.Errorf("Not enough frame size %d to read %d bytes", p.frameSize, 1))
+		return 0, types.NewTransportExceptionFromError(fmt.Errorf("Not enough frame size %d to read %d bytes", p.frameSize, 1))
 	}
 	c, err = p.framebuf.ReadByte()
 	if err == nil {
@@ -94,7 +96,7 @@ func (p *FramedTransport) ReadByte() (c byte, err error) {
 
 func (p *FramedTransport) Write(buf []byte) (int, error) {
 	n, err := p.buf.Write(buf)
-	return n, NewTransportExceptionFromError(err)
+	return n, types.NewTransportExceptionFromError(err)
 }
 
 func (p *FramedTransport) WriteByte(c byte) error {
@@ -111,12 +113,12 @@ func (p *FramedTransport) Flush() error {
 	binary.BigEndian.PutUint32(buf, uint32(size))
 	_, err := p.buffer.Write(buf)
 	if err != nil {
-		return NewTransportExceptionFromError(err)
+		return types.NewTransportExceptionFromError(err)
 	}
 	if size > 0 {
 		if n, err := p.buf.WriteTo(p.buffer); err != nil {
 			print("Error while flushing write buffer of size ", size, " to transport, only wrote ", n, " bytes: ", err.Error(), "\n")
-			return NewTransportExceptionFromError(err)
+			return types.NewTransportExceptionFromError(err)
 		}
 	}
 	return flush(p.buffer)
@@ -129,7 +131,7 @@ func (p *FramedTransport) readFrameHeader() (uint32, error) {
 	}
 	size := binary.BigEndian.Uint32(buf)
 	if size < 0 || size > p.maxLength {
-		return 0, NewTransportException(UNKNOWN_TRANSPORT_EXCEPTION, fmt.Sprintf("Incorrect frame size (%d)", size))
+		return 0, types.NewTransportException(types.UNKNOWN_TRANSPORT_EXCEPTION, fmt.Sprintf("Incorrect frame size (%d)", size))
 	}
 
 	framebuf := newLimitedByteReader(p.reader, int64(size))
@@ -138,7 +140,7 @@ func (p *FramedTransport) readFrameHeader() (uint32, error) {
 		return 0, err
 	}
 	if uint32(len(out)) < size {
-		return 0, NewTransportExceptionFromError(fmt.Errorf("Unable to read full frame of size %d", size))
+		return 0, types.NewTransportExceptionFromError(fmt.Errorf("Unable to read full frame of size %d", size))
 	}
 	p.framebuf = newLimitedByteReader(bytes.NewBuffer(out), int64(size))
 

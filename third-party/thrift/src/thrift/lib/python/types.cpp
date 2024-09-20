@@ -175,11 +175,13 @@ std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
 std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
     const detail::TypeInfo& typeInfo) {
   UniquePyObjectPtr value = nullptr;
-  // Immutable types use a default-value cache and initialize the fields
-  // with the same cached Python object repeatedly. However, this approach
-  // doesn't work well with mutable types when there is no copy-on-write
-  // mechanism in place. The issue is particularly problematic with container
-  // types and structs/unions
+  // Immutable types use a default-value cache and initialize the fields with
+  // the same cached Python object repeatedly. However, this approach does not
+  // work well with mutable types when there is no copy-on-write mechanism in
+  // place. The issue is particularly problematic with container types and
+  // structs/unions. However, since we deep copy the default values for mutable
+  // types above the cache layer, it is fine to keep `addValueToCache = true`
+  // even for containers.
   bool addValueToCache = true;
   switch (typeInfo.type) {
     case protocol::TType::T_BYTE:
@@ -220,17 +222,14 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
       break;
     case protocol::TType::T_LIST:
       value = UniquePyObjectPtr(PyList_New(0));
-      addValueToCache = false;
       break;
     case protocol::TType::T_MAP:
       // For maps, the default value is an empty `dict`.
       value = UniquePyObjectPtr(PyDict_New());
-      addValueToCache = false;
       break;
     case protocol::TType::T_SET:
       // For sets, the default value is an empty `set`.
       value = UniquePyObjectPtr(PySet_New(nullptr));
-      addValueToCache = false;
       break;
     case protocol::TType::T_STRUCT: {
       // For struct and unions, the default value is a (recursively)
@@ -242,7 +241,6 @@ std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
               ? createMutableUnionDataHolder()
               : createStructListWithDefaultValues(
                     *structInfo, getStandardMutableDefaultValueForType));
-      addValueToCache = false;
       break;
     }
     default:
@@ -341,6 +339,13 @@ struct TupleContainer final {
   static bool Check(const PyObject* p) { return PyTuple_Check(p); }
 
   static Py_ssize_t Size(PyObject* p) { return PyTuple_Size(p); }
+
+  /**
+   * Returns a deep copy of the given object. Since TupleContainer acts as a
+   * data holder policy for immutable types, this operation simply returns the
+   * original object, as no actual copying is necessary for immutable data.
+   */
+  static PyObject* deepCopy(PyObject* p) { return p; }
 };
 
 /*
@@ -383,6 +388,16 @@ struct ListContainer final {
   static bool Check(const PyObject* p) { return PyList_Check(p); }
 
   static Py_ssize_t Size(PyObject* p) { return PyList_Size(p); }
+
+  /**
+   * Returns a deep copy of the given object. Since ListContainer acts as a
+   * data holder policy for mutable types, a real deep copy is necessary. For
+   * immutable types, the deep copy operation simply returns the object itself.
+   */
+  static PyObject* deepCopy(PyObject* p) {
+    ensureImportOrThrow();
+    return deepcopy(p);
+  }
 };
 
 /**
@@ -450,7 +465,10 @@ PyObject* createStructContainerWithDefaultValues(
               .release());
     }
   }
-  return container.release();
+
+  // The policy determines the actual deep copy operation; it performs a no-op
+  // for immutable types.
+  return Container::deepCopy(container.release());
 }
 
 /**
@@ -522,12 +540,12 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
       Container::SET_ITEM(
           container,
           i + 1,
-          getDefaultValueForField(
-              fieldInfo.typeInfo,
-              defaultValues,
-              i,
-              getStandardDefaultValueForTypeFunc)
-              .release());
+          Container::deepCopy(getDefaultValueForField(
+                                  fieldInfo.typeInfo,
+                                  defaultValues,
+                                  i,
+                                  getStandardDefaultValueForTypeFunc)
+                                  .release()));
     }
     Py_DECREF(oldValue);
   }
@@ -1234,6 +1252,7 @@ void populateMutableStructListUnsetFieldsWithDefaultValues(
 
 void resetFieldToStandardDefault(
     PyObject* structList, const detail::StructInfo& structInfo, int index) {
+  ensureImportOrThrow();
   if (structList == nullptr) {
     throw std::runtime_error(fmt::format(
         "Received null list while resetting struct:`{}`, field-index:'{}'",
@@ -1254,15 +1273,17 @@ void resetFieldToStandardDefault(
     setMutableStructIsset(structList, index, false);
   } else {
     // getDefaultValueForField calls `Py_INCREF`
+    // This function is called only to reset the fields of mutable types.
+    // Therefore, a deep copy of the given default field value is necessary.
     PyList_SET_ITEM(
         structList,
         index + 1,
-        getDefaultValueForField(
-            fieldInfo.typeInfo,
-            defaultValues,
-            index,
-            getStandardMutableDefaultValueForType)
-            .release());
+        deepcopy(getDefaultValueForField(
+                     fieldInfo.typeInfo,
+                     defaultValues,
+                     index,
+                     getStandardMutableDefaultValueForType)
+                     .release()));
   }
   Py_DECREF(oldValue);
 }

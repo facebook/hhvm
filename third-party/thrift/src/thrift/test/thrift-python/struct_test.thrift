@@ -54,6 +54,8 @@ struct TestStructWithDefaultValues {
   5: TestStruct unqualified_struct_intrinsic_default;
 
   6: optional TestStruct optional_struct_intrinsic_default;
+
+  7: list<i32> unqualified_list_i32 = [1, 2, 3];
 }
 
 struct TestStructAllThriftPrimitiveTypes {

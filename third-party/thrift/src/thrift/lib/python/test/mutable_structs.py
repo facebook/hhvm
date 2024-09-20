@@ -37,6 +37,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
+    TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
     TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
@@ -379,3 +380,44 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Check for immutable struct
         immutable_s1 = TestStructAllThriftContainerTypesImmutable()
         self.assertEqual([], immutable_s1.unqualified_list_i32)
+
+    def test_struct_user_default_value(self) -> None:
+        """
+        struct TestStructWithDefaultValues {
+          1: i32 unqualified_integer = 42;
+
+          2: optional i32 optional_integer = 43;
+
+          3: TestStruct unqualified_struct = TestStruct{unqualified_string = "hello"};
+
+          4: optional TestStruct optional_struct = TestStruct{
+            unqualified_string = "world",
+          };
+
+          5: TestStruct unqualified_struct_intrinsic_default;
+
+          6: optional TestStruct optional_struct_intrinsic_default;
+
+          7: list<i32> unqualified_list_i32 = [1, 2, 3];
+        }
+        """
+        mutable_s1 = TestStructWithDefaultValuesMutable()
+        self.assertEqual(42, mutable_s1.unqualified_integer)
+        self.assertEqual("hello", mutable_s1.unqualified_struct.unqualified_string)
+        self.assertEqual([1, 2, 3], mutable_s1.unqualified_list_i32)
+
+        mutable_s1.unqualified_integer = 11
+        mutable_s1.unqualified_struct.unqualified_string = "world"
+        mutable_s1.unqualified_list_i32.append(4)
+
+        self.assertEqual(11, mutable_s1.unqualified_integer)
+        self.assertEqual("world", mutable_s1.unqualified_struct.unqualified_string)
+        self.assertEqual([1, 2, 3, 4], mutable_s1.unqualified_list_i32)
+
+        # Updating the values in a mutable struct instance should not update
+        # the default values. Verify that a new instance is created with
+        # user-specified default values.
+        mutable_s2 = TestStructWithDefaultValuesMutable()
+        self.assertEqual(42, mutable_s2.unqualified_integer)
+        self.assertEqual("hello", mutable_s2.unqualified_struct.unqualified_string)
+        self.assertEqual([1, 2, 3], mutable_s2.unqualified_list_i32)

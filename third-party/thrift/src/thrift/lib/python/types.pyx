@@ -71,6 +71,12 @@ except ImportError:
     def _make_cached_property(getter_function, struct_class, field_name):
         return _make_noncached_property(getter_function, struct_class, field_name)
 
+cdef public api object deepcopy(object obj):
+    """
+    Wraps the python `copy.deepcopy()` operation for use from C++. There is no
+    direct C API implementation of the copy library.
+    """
+    return copy.deepcopy(obj)
 
 cdef public api cIOBuf* get_cIOBuf(object buf):
     if buf is None:

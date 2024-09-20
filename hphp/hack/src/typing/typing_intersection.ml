@@ -36,6 +36,37 @@ module Log = struct
         Some (Typing_print.debug env ty))
 end
 
+module TrackedOperation = struct
+  type t = {
+    ty1: locl_ty;
+    ty2: locl_ty;
+  }
+  [@@deriving eq]
+end
+
+module Recursion_tracker : sig
+  type t
+
+  val empty : t
+
+  val check_infinite_recursion :
+    t -> locl_ty -> locl_ty -> (t, TrackedOperation.t) result
+end = struct
+  include Recursion_tracker.Make (TrackedOperation)
+
+  let is_type_alias (ty : locl_ty) : bool =
+    match get_node ty with
+    | Tnewtype _ -> true
+    | _ -> false
+
+  let check_infinite_recursion t (ty1 : locl_ty) ty2 =
+    if is_type_alias ty1 || is_type_alias ty2 then
+      (* There can be infinite recursion with recursive type aliases, so we track them *)
+      add_op_and_check_infinite_recursion t { TrackedOperation.ty1; ty2 }
+    else
+      Ok t
+end
+
 (** Computes the negation of a type when it is known, which is currently the case
 for null, nonnull, mixed, nothing, primitives, and classes.
 Otherwise approximate up or down according to
@@ -71,10 +102,10 @@ let negate_type env r ty ~approx =
       decompose_nullable ?A = null | A
       decompose_nullable ?(A | ?B) = null | A | B
 
-    The implementation has the side-effect of flattening unions if the type is
-    nullable, e.g.,
+  The implementation has the side-effect of flattening unions if the type is
+  nullable, e.g.,
 
-      decompose_optional ?(A | (B | C)) = null | A | B | C
+    decompose_optional ?(A | (B | C)) = null | A | B | C
   *)
 let decompose_nullable ty =
   let rec has_option (ty : 'a ty) : bool =
@@ -168,17 +199,18 @@ let make_intersection env r tyl =
   let (env, ty) = Utils.wrap_union_inter_ty_in_var env r ty in
   (env, ty)
 
-let rec intersect env ~r ty1 ty2 =
+let rec intersect env rec_tracker ~r ty1 ty2 =
   if Log.should_log env ~level:2 then
-    Log.log_intersection env r ty1 ty2 @@ fun () -> intersect_ env ~r ty1 ty2
+    Log.log_intersection env r ty1 ty2 @@ fun () ->
+    intersect_ env rec_tracker ~r ty1 ty2
   else
-    intersect_ env ~r ty1 ty2
+    intersect_ env rec_tracker ~r ty1 ty2
 
 (** Computes the intersection (greatest lower bound) of two types.
 For the intersection of unions, attempt to simplify by using the distributivity
 of intersection over union. Uses the the `collapses` test function to make sure
 the resulting type is no greater in size than the trivial `Tintersection [ty1; ty2]`. *)
-and intersect_ env ~r ty1 ty2 =
+and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
   if ty_equal ty1 ty2 then
     (env, ty1)
   else
@@ -191,175 +223,203 @@ and intersect_ env ~r ty1 ty2 =
     else if Utils.is_type_disjoint env ty1 ty2 then
       (env, MkType.nothing r)
     else
-      (* Attempt to simplify any case types involved in the intersection.
-         If simplification occurs we re-run [intersect] with the simplified type
-         until no more simplications can be performed.
+      match Recursion_tracker.check_infinite_recursion rec_tracker ty1 ty2 with
+      | Error { TrackedOperation.ty1 = _; ty2 = _ } ->
+        (env, MkType.intersection r [ty1; ty2])
+      | Ok rec_tracker ->
+        (* Attempt to simplify any case types involved in the intersection.
+           If simplification occurs we re-run [intersect] with the simplified type
+           until no more simplications can be performed.
 
-         Note: Re-running [intersect] when neither [ty1] or [ty2] has been
-         simplified will lead to infinite recursion.
-      *)
-      let (env, simplified_ty1_opt) =
-        try_simplifying_case_type env ~case_type:ty1 ~intersect_ty:ty2
-      in
-      let (env, simplified_ty2_opt) =
-        try_simplifying_case_type env ~case_type:ty2 ~intersect_ty:ty1
-      in
-      match (simplified_ty1_opt, simplified_ty2_opt) with
-      | (Some simplified_ty1, None) -> intersect env ~r simplified_ty1 ty2
-      | (None, Some simplified_ty2) -> intersect env ~r ty1 simplified_ty2
-      | (Some simplified_ty1, Some simplified_ty2) ->
-        intersect env ~r simplified_ty1 simplified_ty2
-      | (None, None) ->
-        let ty1 = decompose_nullable ty1 in
-        let ty2 = decompose_nullable ty2 in
-        let (env, inter_ty) =
-          try
-            match (deref ty1, deref ty2) with
-            (* TODO: optional and variadic fields T201398626 T201398652 *)
-            | ( ( _,
-                  Ttuple
-                    {
-                      t_required = t_required1;
-                      t_optional = [];
-                      t_variadic = t_variadic1;
-                    } ),
-                ( _,
-                  Ttuple
-                    {
-                      t_required = t_required2;
-                      t_optional = [];
-                      t_variadic = t_variadic2;
-                    } ) )
-              when Int.equal (List.length t_required1) (List.length t_required2)
-              ->
-              let (env, t_required) =
-                List.map2_env env t_required1 t_required2 ~f:(intersect ~r)
-              in
-              let (env, t_variadic) =
-                intersect ~r env t_variadic1 t_variadic2
-              in
-              (env, mk (r, Ttuple { t_required; t_optional = []; t_variadic }))
-            (* Runtime representation of tuples is vec, which can be observed in Hack via refinement.
-             * Therefore it's sound to simplify vec<t> & (t1,...,tn) to (t & t1, ..., t & tn)
-             * but because we don't support subtyping directly between tuples and vecs, we need
-             * to keep the vec conjunct i.e. simplify to vec<t> & (t & t1, ..., t & tn)
-             *)
-            | ( ((_, Tclass ((_, cn), _, [ty])) as vty),
-                (rt, Ttuple { t_required; t_optional; t_variadic }) )
-            | ( (rt, Ttuple { t_required; t_optional; t_variadic }),
-                ((_, Tclass ((_, cn), _, [ty])) as vty) )
-              when String.equal cn Naming_special_names.Collections.cVec ->
-              let (env, t_required) =
-                List.map_env env t_required ~f:(fun env ty' ->
-                    intersect ~r env ty ty')
-              in
-              let (env, t_optional) =
-                List.map_env env t_optional ~f:(fun env ty' ->
-                    intersect ~r env ty ty')
-              in
-              let (env, t_variadic) = intersect ~r env ty t_variadic in
-              make_intersection
-                env
-                r
-                [mk vty; mk (rt, Ttuple { t_required; t_variadic; t_optional })]
-            | ( ( _,
-                  Tshape
-                    {
-                      s_origin = _;
-                      s_unknown_value = shape_kind1;
-                      s_fields = fdm1;
-                    } ),
-                ( _,
-                  Tshape
-                    {
-                      s_origin = _;
-                      s_unknown_value = shape_kind2;
-                      s_fields = fdm2;
-                    } ) ) ->
-              let (env, shape_kind, fdm) =
-                intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2)
-              in
-              ( env,
-                mk
-                  ( r,
+           Note: Re-running [intersect] when neither [ty1] or [ty2] has been
+           simplified will lead to infinite recursion.
+        *)
+        let (env, simplified_ty1_opt) =
+          try_simplifying_case_type
+            env
+            rec_tracker
+            ~case_type:ty1
+            ~intersect_ty:ty2
+        in
+        let (env, simplified_ty2_opt) =
+          try_simplifying_case_type
+            env
+            rec_tracker
+            ~case_type:ty2
+            ~intersect_ty:ty1
+        in
+        (match (simplified_ty1_opt, simplified_ty2_opt) with
+        | (Some simplified_ty1, None) ->
+          intersect env rec_tracker ~r simplified_ty1 ty2
+        | (None, Some simplified_ty2) ->
+          intersect env rec_tracker ~r ty1 simplified_ty2
+        | (Some simplified_ty1, Some simplified_ty2) ->
+          intersect env rec_tracker ~r simplified_ty1 simplified_ty2
+        | (None, None) ->
+          let ty1 = decompose_nullable ty1 in
+          let ty2 = decompose_nullable ty2 in
+          let (env, inter_ty) =
+            try
+              match (deref ty1, deref ty2) with
+              (* TODO: optional and variadic fields T201398626 T201398652 *)
+              | ( ( _,
+                    Ttuple
+                      {
+                        t_required = t_required1;
+                        t_optional = [];
+                        t_variadic = t_variadic1;
+                      } ),
+                  ( _,
+                    Ttuple
+                      {
+                        t_required = t_required2;
+                        t_optional = [];
+                        t_variadic = t_variadic2;
+                      } ) )
+                when Int.equal
+                       (List.length t_required1)
+                       (List.length t_required2) ->
+                let (env, t_required) =
+                  List.map2_env env t_required1 t_required2 ~f:(function
+                      | env -> intersect ~r env rec_tracker)
+                in
+                let (env, t_variadic) =
+                  intersect ~r env rec_tracker t_variadic1 t_variadic2
+                in
+                (env, mk (r, Ttuple { t_required; t_optional = []; t_variadic }))
+              (* Runtime representation of tuples is vec, which can be observed in Hack via refinement.
+               * Therefore it's sound to simplify vec<t> & (t1,...,tn) to (t & t1, ..., t & tn)
+               * but because we don't support subtyping directly between tuples and vecs, we need
+               * to keep the vec conjunct i.e. simplify to vec<t> & (t & t1, ..., t & tn)
+               *)
+              | ( ((_, Tclass ((_, cn), _, [ty])) as vty),
+                  (rt, Ttuple { t_required; t_optional; t_variadic }) )
+              | ( (rt, Ttuple { t_required; t_optional; t_variadic }),
+                  ((_, Tclass ((_, cn), _, [ty])) as vty) )
+                when String.equal cn Naming_special_names.Collections.cVec ->
+                let (env, t_required) =
+                  List.map_env env t_required ~f:(fun env ty' ->
+                      intersect ~r env rec_tracker ty ty')
+                in
+                let (env, t_optional) =
+                  List.map_env env t_optional ~f:(fun env ty' ->
+                      intersect ~r env rec_tracker ty ty')
+                in
+                let (env, t_variadic) =
+                  intersect ~r env rec_tracker ty t_variadic
+                in
+                make_intersection
+                  env
+                  r
+                  [
+                    mk vty;
+                    mk (rt, Ttuple { t_required; t_variadic; t_optional });
+                  ]
+              | ( ( _,
                     Tshape
                       {
-                        s_origin = Missing_origin;
-                        s_unknown_value = shape_kind;
-                        s_fields = fdm;
-                      } ) )
-            | ((_, Tintersection tyl1), (_, Tintersection tyl2)) ->
-              intersect_lists env r tyl1 tyl2
-            (* Simplify `supportdyn<t> & u` to `supportdyn<t & u>`. Do not apply if `u` is
-             * a type variable, else we end up with recursion in constraints. *)
-            | ((r, Tnewtype (name1, [ty1arg], _)), _)
-              when String.equal name1 Naming_special_names.Classes.cSupportDyn
-                   && not (is_tyvar ty2) ->
-              let (env, ty) = intersect ~r env ty1arg ty2 in
-              let (env, res) = Utils.simple_make_supportdyn r env ty in
-              (env, res)
-            | (_, (r, Tnewtype (name1, [ty2arg], _)))
-              when String.equal name1 Naming_special_names.Classes.cSupportDyn
-                   && not (is_tyvar ty1) ->
-              let (env, ty) = intersect ~r env ty1 ty2arg in
-              let (env, res) = Utils.simple_make_supportdyn r env ty in
-              (env, res)
-            | ((_, Tintersection tyl), _) -> intersect_lists env r [ty2] tyl
-            | (_, (_, Tintersection tyl)) -> intersect_lists env r [ty1] tyl
-            | ((r1, Tunion tyl1), (r2, Tunion tyl2)) ->
-              let (common_tyl, tyl1', tyl2') =
-                Typing_algebra.factorize_common_types tyl1 tyl2
-              in
-              let (env, not_common_tyl) =
-                intersect_unions env r (r1, tyl1') (r2, tyl2')
-              in
-              recompose_atomic env r (common_tyl @ not_common_tyl)
-            | ((r_union, Tunion tyl), ty)
-            | (ty, (r_union, Tunion tyl)) ->
-              let (env, inter_tyl) =
-                intersect_ty_union env r (mk ty) (r_union, tyl)
-              in
-              recompose_atomic env r inter_tyl
-            | ((_, Tprim Aast.Tnum), (_, Tprim Aast.Tarraykey))
-            | ((_, Tprim Aast.Tarraykey), (_, Tprim Aast.Tnum)) ->
-              (env, MkType.int r)
-            | ((neg_reason, Tneg predicate), ty)
-            | (ty, (neg_reason, Tneg predicate)) ->
-              let (env, partition) =
-                Typing_refinement.partition_ty env (mk ty) predicate
-              in
-              if List.is_empty partition.Typing_refinement.span then
-                if List.is_empty partition.Typing_refinement.left then
-                  (* This is logically the same result as the else case handling
-                     would produce but may be simpler *)
-                  (env, mk ty)
+                        s_origin = _;
+                        s_unknown_value = shape_kind1;
+                        s_fields = fdm1;
+                      } ),
+                  ( _,
+                    Tshape
+                      {
+                        s_origin = _;
+                        s_unknown_value = shape_kind2;
+                        s_fields = fdm2;
+                      } ) ) ->
+                let (env, shape_kind, fdm) =
+                  intersect_shapes
+                    env
+                    rec_tracker
+                    r
+                    (shape_kind1, fdm1)
+                    (shape_kind2, fdm2)
+                in
+                ( env,
+                  mk
+                    ( r,
+                      Tshape
+                        {
+                          s_origin = Missing_origin;
+                          s_unknown_value = shape_kind;
+                          s_fields = fdm;
+                        } ) )
+              | ((_, Tintersection tyl1), (_, Tintersection tyl2)) ->
+                intersect_lists env rec_tracker r tyl1 tyl2
+              (* Simplify `supportdyn<t> & u` to `supportdyn<t & u>`. Do not apply if `u` is
+               * a type variable, else we end up with recursion in constraints. *)
+              | ((r, Tnewtype (name1, [ty1arg], _)), _)
+                when String.equal name1 Naming_special_names.Classes.cSupportDyn
+                     && not (is_tyvar ty2) ->
+                let (env, ty) = intersect ~r env rec_tracker ty1arg ty2 in
+                let (env, res) = Utils.simple_make_supportdyn r env ty in
+                (env, res)
+              | (_, (r, Tnewtype (name1, [ty2arg], _)))
+                when String.equal name1 Naming_special_names.Classes.cSupportDyn
+                     && not (is_tyvar ty1) ->
+                let (env, ty) = intersect ~r env rec_tracker ty1 ty2arg in
+                let (env, res) = Utils.simple_make_supportdyn r env ty in
+                (env, res)
+              | ((_, Tintersection tyl), _) ->
+                intersect_lists env rec_tracker r [ty2] tyl
+              | (_, (_, Tintersection tyl)) ->
+                intersect_lists env rec_tracker r [ty1] tyl
+              | ((r1, Tunion tyl1), (r2, Tunion tyl2)) ->
+                let (common_tyl, tyl1', tyl2') =
+                  Typing_algebra.factorize_common_types tyl1 tyl2
+                in
+                let (env, not_common_tyl) =
+                  intersect_unions env rec_tracker r (r1, tyl1') (r2, tyl2')
+                in
+                recompose_atomic env r (common_tyl @ not_common_tyl)
+              | ((r_union, Tunion tyl), ty)
+              | (ty, (r_union, Tunion tyl)) ->
+                let (env, inter_tyl) =
+                  intersect_ty_union env rec_tracker r (mk ty) (r_union, tyl)
+                in
+                recompose_atomic env r inter_tyl
+              | ((_, Tprim Aast.Tnum), (_, Tprim Aast.Tarraykey))
+              | ((_, Tprim Aast.Tarraykey), (_, Tprim Aast.Tnum)) ->
+                (env, MkType.int r)
+              | ((neg_reason, Tneg predicate), ty)
+              | (ty, (neg_reason, Tneg predicate)) ->
+                let (env, partition) =
+                  Typing_refinement.partition_ty env (mk ty) predicate
+                in
+                if List.is_empty partition.Typing_refinement.span then
+                  if List.is_empty partition.Typing_refinement.left then
+                    (* This is logically the same result as the else case handling
+                       would produce but may be simpler *)
+                    (env, mk ty)
+                  else
+                    let (env, intersections) =
+                      List.fold_left
+                        partition.Typing_refinement.right
+                        ~init:(env, [])
+                        ~f:(fun (env, acc) tys ->
+                          (* recursion here should be safe since, while the type
+                             may not be structurally smaller, it should be
+                             logically smaller and we shouldn't repeat !predicate
+                          *)
+                          let (env, intersection) =
+                            intersect_list env rec_tracker neg_reason tys
+                          in
+                          (env, intersection :: acc))
+                    in
+                    let (env, right_ty) =
+                      Utils.simplify_unions env
+                      @@ MkType.union neg_reason intersections
+                    in
+                    (env, right_ty)
                 else
-                  let (env, intersections) =
-                    List.fold_left
-                      partition.Typing_refinement.right
-                      ~init:(env, [])
-                      ~f:(fun (env, acc) tys ->
-                        (* recursion here should be safe since, while the type
-                           may not be structurally smaller, it should be
-                           logically smaller and we shouldn't repeat !predicate
-                        *)
-                        let (env, intersection) =
-                          intersect_list env neg_reason tys
-                        in
-                        (env, intersection :: acc))
-                  in
-                  let (env, right_ty) =
-                    Utils.simplify_unions env
-                    @@ MkType.union neg_reason intersections
-                  in
-                  (env, right_ty)
-              else
-                make_intersection env r [ty1; ty2]
-            | _ -> make_intersection env r [ty1; ty2]
-          with
-          | Nothing -> (env, MkType.nothing r)
-        in
-        (env, inter_ty)
+                  make_intersection env r [ty1; ty2]
+              | _ -> make_intersection env r [ty1; ty2]
+            with
+            | Nothing -> (env, MkType.nothing r)
+          in
+          (env, inter_ty))
 
 (** Attempts to simplify an intersection involving a case type and another type. If [case_type]
  is a case type, we fetch the list of variant types, then filter this list down to only the types
@@ -381,7 +441,7 @@ and intersect_ env ~r ty1 ty2 =
 
   This would succeed, because the union `int | string` would simplify to `arraykey`
   *)
-and try_simplifying_case_type env ~case_type ~intersect_ty =
+and try_simplifying_case_type env rec_tracker ~case_type ~intersect_ty =
   match deref case_type with
   | (r, Tnewtype (name, ty_args, _)) ->
     let (env, variants_opt) =
@@ -415,6 +475,7 @@ and try_simplifying_case_type env ~case_type ~intersect_ty =
         let (env, simplified_ty_opt) =
           try_simplifying_case_type
             env
+            rec_tracker
             ~case_type:ty
             ~intersect_ty:(MkType.intersection r ((intersect_ty :: tyl) @ acc))
         in
@@ -430,13 +491,15 @@ and try_simplifying_case_type env ~case_type ~intersect_ty =
       simplify_all_case_types env tyl ([], false)
     in
     if changed then
-      let (env, simplified_ty) = intersect_list env r simplified_tyl in
+      let (env, simplified_ty) =
+        intersect_list env rec_tracker r simplified_tyl
+      in
       (env, Some simplified_ty)
     else
       (env, None)
   | _ -> (env, None)
 
-and intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) =
+and intersect_shapes env rec_tracker r (shape_kind1, fdm1) (shape_kind2, fdm2) =
   let (env, fdm) =
     TShapeMap.merge_env env fdm1 fdm2 ~combine:(fun env _sfn sft1 sft2 ->
         match
@@ -450,40 +513,42 @@ and intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) =
         | ((true, None), (_, Some { sft_optional = false; _ })) ->
           raise Nothing
         | ((_, Some sft), (_, None)) ->
-          let (env, ty) = intersect env ~r shape_kind2 sft.sft_ty in
+          let (env, ty) = intersect env rec_tracker ~r shape_kind2 sft.sft_ty in
           (env, Some { sft with sft_ty = ty })
         | ((_, None), (_, Some sft)) ->
-          let (env, ty) = intersect env ~r shape_kind1 sft.sft_ty in
+          let (env, ty) = intersect env rec_tracker ~r shape_kind1 sft.sft_ty in
           (env, Some { sft with sft_ty = ty })
         | ( (_, Some { sft_optional = opt1; sft_ty = ty1 }),
             (_, Some { sft_optional = opt2; sft_ty = ty2 }) ) ->
           let opt = opt1 && opt2 in
-          let (env, ty) = intersect env ~r ty1 ty2 in
+          let (env, ty) = intersect env rec_tracker ~r ty1 ty2 in
           (env, Some { sft_optional = opt; sft_ty = ty }))
   in
-  let (env, shape_kind) = intersect env ~r shape_kind1 shape_kind2 in
+  let (env, shape_kind) =
+    intersect env rec_tracker ~r shape_kind1 shape_kind2
+  in
   (env, shape_kind, fdm)
 
-and intersect_lists env r tyl1 tyl2 =
+and intersect_lists env rec_tracker r tyl1 tyl2 =
   let rec intersect_lists env tyl1 tyl2 acc_tyl =
     match (tyl1, tyl2) with
     | ([], _) -> (env, tyl2 @ acc_tyl)
     | (_, []) -> (env, tyl1 @ acc_tyl)
     | (ty1 :: tyl1', _) ->
       let (env, (inter_ty, missed_inter_tyl2)) =
-        intersect_ty_tyl env r ty1 tyl2
+        intersect_ty_tyl env rec_tracker r ty1 tyl2
       in
       intersect_lists env tyl1' missed_inter_tyl2 (inter_ty :: acc_tyl)
   in
   let (env, tyl) = intersect_lists env tyl1 tyl2 [] in
   make_intersection env r tyl
 
-and intersect_ty_tyl env r ty tyl =
+and intersect_ty_tyl env rec_tracker r ty tyl =
   let rec intersect_ty_tyl env ty tyl missed_inter_tyl =
     match tyl with
     | [] -> (env, (ty, missed_inter_tyl))
     | ty' :: tyl' ->
-      let (env, ty_opt) = try_intersect env r ty ty' in
+      let (env, ty_opt) = try_intersect env rec_tracker r ty ty' in
       begin
         match ty_opt with
         | None -> intersect_ty_tyl env ty tyl' (ty' :: missed_inter_tyl)
@@ -492,14 +557,14 @@ and intersect_ty_tyl env r ty tyl =
   in
   intersect_ty_tyl env ty tyl []
 
-and try_intersect env r ty1 ty2 =
-  let (env, ty) = intersect env ~r ty1 ty2 in
+and try_intersect env rec_tracker r ty1 ty2 =
+  let (env, ty) = intersect env rec_tracker ~r ty1 ty2 in
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tintersection _ -> (env, None)
   | _ -> (env, Some ty)
 
-and intersect_unions env r (r1, tyl1) (r2, tyl2) =
+and intersect_unions env rec_tracker r (r1, tyl1) (r2, tyl2) =
   (* The order matters. (A | B | C) & (A | B) gets simplified to (A | B)
      while (A | B) & (A | B | C) would become A | B | ((A | B) & C), so we
      put the longest union first as a heuristic. *)
@@ -510,7 +575,7 @@ and intersect_unions env r (r1, tyl1) (r2, tyl2) =
       ((r2, tyl2), (r1, tyl1))
   in
   let union_ty1 = MkType.union r1 tyl1 in
-  intersect_ty_union env r union_ty1 (r2, tyl2)
+  intersect_ty_union env rec_tracker r union_ty1 (r2, tyl2)
 
 (** For (A1 | .. | An) & B, compute each of the A1 & B, .. , An & B.
 Keep those which collapse (see `collapses` function) with B
@@ -520,9 +585,10 @@ and J the set of indices such that this is not the case,
 the result would be
   (|_{i in I} (Ai & B)) | (B & (|_{j in J} Aj))
 *)
-and intersect_ty_union env r (ty1 : locl_ty) (r_union, tyl2) =
+and intersect_ty_union env rec_tracker r (ty1 : locl_ty) (r_union, tyl2) =
   let (env, inter_tyl) =
-    List.map_env env tyl2 ~f:(fun env ty2 -> intersect env ~r ty1 ty2)
+    List.map_env env tyl2 ~f:(fun env ty2 ->
+        intersect env rec_tracker ~r ty1 ty2)
   in
   let zipped = List.zip_exn tyl2 inter_tyl in
   let (collapsed, not_collapsed) =
@@ -540,12 +606,14 @@ and intersect_ty_union env r (ty1 : locl_ty) (r_union, tyl2) =
   in
   (env, not_collapsed @ collapsed)
 
-and intersect_list env r tyl =
+and intersect_list env rec_tracker r tyl =
   (* We need to match tyl here because we'd mess the reason if tyl was just
      [mixed] *)
   match tyl with
   | [] -> (env, MkType.mixed r)
-  | ty :: tyl -> List.fold_left_env env tyl ~init:ty ~f:(intersect ~r)
+  | ty :: tyl ->
+    List.fold_left_env env tyl ~init:ty ~f:(fun env ->
+        intersect env rec_tracker ~r)
 
 let normalize_intersection env ?on_tyvar tyl =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
@@ -584,13 +652,17 @@ let simplify_intersections env ?on_tyvar ty =
   let r = get_reason ty in
   let (env, r', tys) = normalize_intersection env [ty] ?on_tyvar in
   let r = Option.value r' ~default:r in
-  intersect_list env r (TySet.elements tys)
+  intersect_list env Recursion_tracker.empty r (TySet.elements tys)
 
 let intersect env ~r ty1 ty2 =
+  let rec_tracker = Recursion_tracker.empty in
   if Log.should_log env ~level:1 then
-    Log.log_intersection env r ty1 ty2 @@ fun () -> intersect env ~r ty1 ty2
+    Log.log_intersection env r ty1 ty2 @@ fun () ->
+    intersect env rec_tracker ~r ty1 ty2
   else
-    intersect env ~r ty1 ty2
+    intersect env rec_tracker ~r ty1 ty2
+
+let intersect_list env = intersect_list env Recursion_tracker.empty
 
 let () = Utils.negate_type_ref := negate_type
 

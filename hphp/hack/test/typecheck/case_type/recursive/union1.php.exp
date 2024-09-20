@@ -1,0 +1,4 @@
+ERROR: File "union1.php", line 4, characters 11-13:
+Cyclic type definition (Typing[4014])
+  File "union1.php", line 4, characters 24-29:
+  Cyclic use is here

@@ -333,6 +333,15 @@ class StructTestsParameterized(unittest.TestCase):
         for _ in mock.create_autospec(self.easy()):
             pass
 
+    def test_copy(self) -> None:
+        x = self.easy(
+            val=1, an_int=self.Integers(small=300), name="foo", val_list=[1, 2, 3, 4]
+        )
+        dif_list = copy.copy(x.val_list)
+        self.assertEqual(x.val_list, dif_list)
+        dif_int = copy.copy(x.an_int)
+        self.assertEqual(x.an_int, dif_int)
+
 
 class StructTestsImmutable(unittest.TestCase):
     """
@@ -355,13 +364,6 @@ class StructTestsImmutable(unittest.TestCase):
 
 
 class StructTests(unittest.TestCase):
-    def test_copy(self) -> None:
-        x = easy(val=1, an_int=Integers(small=300), name="foo", val_list=[1, 2, 3, 4])
-        dif_list = copy.copy(x.val_list)
-        self.assertEqual(x.val_list, dif_list)
-        dif_int = copy.copy(x.an_int)
-        self.assertEqual(x.an_int, dif_int)
-
     def test_update_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         n = update_nested_field(n, {"a.b.c": easy(val=128)})

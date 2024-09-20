@@ -895,6 +895,9 @@ cdef class MutableUnion(MutableStructOrUnion):
             f"'{current_field_enum.name}'."
         )
 
+    def __copy__(self):
+        return self._fbthrift_create(copy.copy(self._fbthrift_data))
+
     @classmethod
     def _fbthrift_create(cls, data):
         cdef MutableUnion inst = cls.__new__(cls)

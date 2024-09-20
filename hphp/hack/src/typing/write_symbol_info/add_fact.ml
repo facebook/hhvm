@@ -165,18 +165,20 @@ let hint_to_type_info (hint : Aast.hint) fa : Type.t * TypeInfo.t * Fact_acc.t =
     in
     Map.Poly.to_alist jmap
   in
-  let type_info ~ty sym_pos fa =
+  let type_info ~ty sym_pos hint fa =
     let json =
       TypeInfo.(
         {
           display_type = Type.Key (ty |> Utils.strip_ns);
           xrefs = Build_fact.hint_xrefs sym_pos;
+          hint = Some hint;
         }
         |> to_json_key)
     in
     Fact_acc.add_fact Predicate.(Hack TypeInfo) json fa
   in
   let (ty, sym_pos) = Pretty.hint_to_string_and_symbols ~is_ctx:false hint in
+  let hint = Pretty.hint_to_angle hint in
   let pos_map =
     match Fact_acc.get_pos_map fa with
     | Some pos_map -> pos_map
@@ -189,7 +191,7 @@ let hint_to_type_info (hint : Aast.hint) fa : Type.t * TypeInfo.t * Fact_acc.t =
         | _ -> None)
   in
   let decl_json_aggr_pos = aggregate_pos decl_json_pos in
-  let (fact_id, fa) = type_info ~ty decl_json_aggr_pos fa in
+  let (fact_id, fa) = type_info ~ty decl_json_aggr_pos hint fa in
   (Type.Key ty, TypeInfo.Id fact_id, fa)
 
 let hint_opt_to_type_info fa = function

@@ -8,6 +8,8 @@
 
 (** Pretty-printers for hints and contexts. *)
 
+open Hack
+
 type pos = {
   start: int;
   length: int;
@@ -20,6 +22,8 @@ val hint_to_string_and_symbols :
   is_ctx:bool -> Aast.hint -> string * (Pos.t * pos) list
 
 val hint_to_string : is_ctx:bool -> Aast.hint -> string
+
+val hint_to_angle : Aast.hint -> Hint.t
 
 (* Pretty-printer for expressions. Fetch representation from the source.
    Strip enclosing double/single quotes if any.

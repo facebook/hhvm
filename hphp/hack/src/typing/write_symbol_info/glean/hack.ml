@@ -2078,6 +2078,7 @@ and TypeInfo: sig
   and key = {
     display_type: Type.t;
     xrefs: XRef.t list;
+    hint: Hint.t option;
   }
   [@@deriving ord]
 
@@ -2094,6 +2095,7 @@ end = struct
   and key = {
     display_type: Type.t;
     xrefs: XRef.t list;
+    hint: Hint.t option;
   }
   [@@deriving ord]
 
@@ -2101,11 +2103,15 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {display_type; xrefs} = 
+  and to_json_key {display_type; xrefs; hint} = 
     let fields = [
       ("displayType", Type.to_json display_type);
       ("xrefs", JSON_Array (List.map ~f:(fun x -> XRef.to_json x) xrefs));
     ] in
+    let fields =
+      match hint with
+      | None -> fields
+      | Some hint -> ("hint", Hint.to_json hint) :: fields in
     JSON_Object fields
 
 end
@@ -2957,6 +2963,177 @@ end = struct
 
 end
 
+and Hint: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = 
+     | Apply of apply
+     | Option of Hint.t
+     | Like of Hint.t
+     | Tuple of tuple
+     | Class_args of Hint.t
+     | Shape of shape
+     | Soft of Hint.t
+     | Intersection of Hint.t list
+     | Union_ of Hint.t list
+     | Vect_or_dict of vect_or_dict
+     | Prim of Type.t
+     | Var_ of string
+     | Fun_context of string
+     | Mixed of unit
+     | Wildcard of unit
+     | Nonnull of unit
+     | This_ of unit
+     | Dynamic of unit
+     | Nothing of unit
+     | Other of Type.t
+  [@@deriving ord]
+  and vect_or_dict = {
+    maybe_key: Hint.t option;
+    value_: Hint.t;
+  }
+  [@@deriving ord]
+  and shape = {
+    open_: bool;
+    map_: ShapeKV.t list;
+  }
+  [@@deriving ord]
+  and tuple = {
+    req: Hint.t list;
+    opt: Hint.t list;
+    variadic: Hint.t option;
+  }
+  [@@deriving ord]
+  and apply = {
+    class_name: QName.t;
+    values: Hint.t list;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+  val vect_or_dict_to_json: vect_or_dict -> json
+  val shape_to_json: shape -> json
+  val tuple_to_json: tuple -> json
+  val apply_to_json: apply -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = 
+     | Apply of apply
+     | Option of Hint.t
+     | Like of Hint.t
+     | Tuple of tuple
+     | Class_args of Hint.t
+     | Shape of shape
+     | Soft of Hint.t
+     | Intersection of Hint.t list
+     | Union_ of Hint.t list
+     | Vect_or_dict of vect_or_dict
+     | Prim of Type.t
+     | Var_ of string
+     | Fun_context of string
+     | Mixed of unit
+     | Wildcard of unit
+     | Nonnull of unit
+     | This_ of unit
+     | Dynamic of unit
+     | Nothing of unit
+     | Other of Type.t
+  [@@deriving ord]
+  and vect_or_dict = {
+    maybe_key: Hint.t option;
+    value_: Hint.t;
+  }
+  [@@deriving ord]
+  and shape = {
+    open_: bool;
+    map_: ShapeKV.t list;
+  }
+  [@@deriving ord]
+  and tuple = {
+    req: Hint.t list;
+    opt: Hint.t list;
+    variadic: Hint.t option;
+  }
+  [@@deriving ord]
+  and apply = {
+    class_name: QName.t;
+    values: Hint.t list;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key  = function
+     | Apply apply -> JSON_Object [("apply", apply_to_json apply)]
+     | Option option -> JSON_Object [("option", Hint.to_json option)]
+     | Like like -> JSON_Object [("like", Hint.to_json like)]
+     | Tuple tuple -> JSON_Object [("tuple", tuple_to_json tuple)]
+     | Class_args class_args -> JSON_Object [("class_args", Hint.to_json class_args)]
+     | Shape shape -> JSON_Object [("shape", shape_to_json shape)]
+     | Soft soft -> JSON_Object [("soft", Hint.to_json soft)]
+     | Intersection intersection -> JSON_Object [("intersection", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) intersection))]
+     | Union_ union_ -> JSON_Object [("union_", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) union_))]
+     | Vect_or_dict vect_or_dict -> JSON_Object [("vect_or_dict", vect_or_dict_to_json vect_or_dict)]
+     | Prim prim -> JSON_Object [("prim", Type.to_json prim)]
+     | Var_ var_ -> JSON_Object [("var_", JSON_String var_)]
+     | Fun_context fun_context -> JSON_Object [("fun_context", JSON_String fun_context)]
+     | Mixed mixed -> JSON_Object [("mixed", (ignore mixed; JSON_Object []))]
+     | Wildcard wildcard -> JSON_Object [("wildcard", (ignore wildcard; JSON_Object []))]
+     | Nonnull nonnull -> JSON_Object [("nonnull", (ignore nonnull; JSON_Object []))]
+     | This_ this_ -> JSON_Object [("this_", (ignore this_; JSON_Object []))]
+     | Dynamic dynamic -> JSON_Object [("dynamic", (ignore dynamic; JSON_Object []))]
+     | Nothing nothing -> JSON_Object [("nothing", (ignore nothing; JSON_Object []))]
+     | Other other -> JSON_Object [("other", Type.to_json other)]
+
+  and vect_or_dict_to_json {maybe_key; value_} = 
+    let fields = [
+      ("value_", Hint.to_json value_);
+    ] in
+    let fields =
+      match maybe_key with
+      | None -> fields
+      | Some maybe_key -> ("maybe_key", Hint.to_json maybe_key) :: fields in
+    JSON_Object fields
+
+  and shape_to_json {open_; map_} = 
+    let fields = [
+      ("open_", JSON_Bool open_);
+      ("map_", JSON_Array (List.map ~f:(fun x -> ShapeKV.to_json x) map_));
+    ] in
+    JSON_Object fields
+
+  and tuple_to_json {req; opt; variadic} = 
+    let fields = [
+      ("req", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) req));
+      ("opt", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) opt));
+    ] in
+    let fields =
+      match variadic with
+      | None -> fields
+      | Some variadic -> ("variadic", Hint.to_json variadic) :: fields in
+    JSON_Object fields
+
+  and apply_to_json {class_name; values} = 
+    let fields = [
+      ("class_name", QName.to_json class_name);
+      ("values", JSON_Array (List.map ~f:(fun x -> Hint.to_json x) values));
+    ] in
+    JSON_Object fields
+
+end
+
 
 and Constraint: sig
   type t = {
@@ -3007,6 +3184,30 @@ end = struct
     let fields = [
       ("target", XRefTarget.to_json target);
       ("ranges", JSON_Array (List.map ~f:(fun x -> Src.RelByteSpan.to_json x) ranges));
+    ] in
+    JSON_Object fields
+
+end
+
+and FieldClassConst: sig
+  type t = {
+    container: QName.t;
+    name: Name.t;
+  }
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t = {
+    container: QName.t;
+    name: Name.t;
+  }
+  [@@deriving ord]
+
+  let rec to_json {container; name} = 
+    let fields = [
+      ("container", QName.to_json container);
+      ("name", Name.to_json name);
     ] in
     JSON_Object fields
 
@@ -3330,6 +3531,48 @@ end = struct
       | None -> fields
       | Some readonly -> ("readonly", ReadonlyKind.to_json readonly) :: fields in
     JSON_Object fields
+
+end
+
+and ShapeKV: sig
+  type t = {
+    key: key;
+    value: Hint.t;
+    opt: bool;
+  }
+  [@@deriving ord]
+  and key = 
+     | Sf_regex_group of string
+     | Sf_lit_string of string
+     | Sf_class_const of FieldClassConst.t
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t = {
+    key: key;
+    value: Hint.t;
+    opt: bool;
+  }
+  [@@deriving ord]
+  and key = 
+     | Sf_regex_group of string
+     | Sf_lit_string of string
+     | Sf_class_const of FieldClassConst.t
+  [@@deriving ord]
+
+  let rec to_json {key; value; opt} = 
+    let fields = [
+      ("key", key_to_json key);
+      ("value", Hint.to_json value);
+      ("opt", JSON_Bool opt);
+    ] in
+    JSON_Object fields
+
+  and key_to_json  = function
+     | Sf_regex_group sf_regex_group -> JSON_Object [("sf_regex_group", JSON_String sf_regex_group)]
+     | Sf_lit_string sf_lit_string -> JSON_Object [("sf_lit_string", JSON_String sf_lit_string)]
+     | Sf_class_const sf_class_const -> JSON_Object [("sf_class_const", FieldClassConst.to_json sf_class_const)]
 
 end
 

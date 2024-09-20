@@ -76,7 +76,13 @@ void cgKillLoc(IRLS& env, const IRInstruction* inst) {
 void cgLdLoc(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = localOffset(inst->extra<LdLoc>()->locId);
-  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[off]);
+
+  // For ARM, if we need to load the type, then request 'aux' too -- even though
+  // the value is unneeded, it allows for the type and the value to be merged
+  // into a single loadpair.
+  const bool loadAux = arch() == Arch::ARM && inst->dst()->type().needsReg();
+
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[off], loadAux);
 }
 
 void cgLdLocForeign(IRLS& env, const IRInstruction* inst) {
@@ -105,7 +111,14 @@ void cgLdLocAddr(IRLS& env, const IRInstruction* inst) {
 void cgStLoc(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = localOffset(inst->extra<StLoc>()->locId);
-  storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
+
+  // For ARM, we request the `aux' field to be stored too.  That's unused, but
+  // having a wider store for the type allows it to be merged with the store of
+  // the value into a single storepair instruction.
+  const bool storeAux = arch() == Arch::ARM;
+
+  storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1),
+          TBottom, storeAux);
 }
 
 void cgStLocMeta(IRLS&, const IRInstruction*) {}
@@ -156,7 +169,13 @@ void cgDbgTrashFrame(IRLS& env, const IRInstruction* inst) {
 void cgLdStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<LdStk>()->offset.offset);
-  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), sp[off]);
+
+  // For ARM, if we need to load the type, then request 'aux' too -- even though
+  // the value is unneeded, it allows for the type and the value to be merged
+  // into a single loadpair.
+  const bool loadAux = arch() == Arch::ARM && inst->dst()->type().needsReg();
+
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), sp[off], loadAux);
 }
 
 void cgLdStkAddr(IRLS& env, const IRInstruction* inst) {
@@ -173,7 +192,13 @@ void cgStStk(IRLS& env, const IRInstruction* inst) {
     ? inst->typeParam()
     : inst->src(1)->type();
 
-  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type);
+  // For ARM, we request the `aux' field to be stored too.  That's unused, but
+  // having a wider store for the type allows it to be merged with the store of
+  // the value into a single storepair instruction.
+  const bool storeAux = arch() == Arch::ARM;
+
+  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type,
+          storeAux);
 }
 
 void cgStStkMeta(IRLS&, const IRInstruction*) {}

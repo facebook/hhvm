@@ -163,7 +163,7 @@ void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
 }
 
 void storeTVType(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, bool aux) {
-  if (type.needsReg() || aux) {
+  if (type.needsReg()) {
     assertx(srcLoc.hasReg(1));
     if (aux) {
       v << store{srcLoc.reg(1), typePtr};
@@ -171,7 +171,11 @@ void storeTVType(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, bool aux) {
       v << storeb{srcLoc.reg(1), typePtr};
     }
   } else {
-    v << storeb{v.cns(type.toDataType()), typePtr};
+    if (aux) {
+      v << store{v.cns(type.toDataType()), typePtr};
+    } else {
+      v << storeb{v.cns(type.toDataType()), typePtr};
+    }
   }
 }
 

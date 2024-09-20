@@ -16,9 +16,7 @@ except ImportError:
     from typing import _ForwardRef as ForwardRef
 
 # pyre-fixme[5]: Global expression must be annotated.
-# pyre-fixme[6]: Expected `Tuple[typing.Type[Variable[typing._KT]],
-#  typing.Type[Variable[typing._VT_co](covariant)]]` for 1st param but got
-#  `Tuple[typing.Type[str], ForwardRef]`.
+# pyre-fixme[16]: Module `typing` has no attribute `_ForwardRef`.
 JsonObject = Mapping[str, ForwardRef("Json")]
 # pyre-fixme[5]: Global expression must be annotated.
 # pyre-fixme[16]: `Iterable` has no attribute `__getitem__`.

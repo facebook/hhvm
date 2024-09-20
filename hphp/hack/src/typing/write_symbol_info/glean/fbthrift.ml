@@ -9,8 +9,9 @@
 (* @generated
    regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR *)
 
+[@@@warning "-33-39"]
 open Hh_json
-open Core [@@warning "-33"]
+open Core
 
 
 module rec StructuredAnnotation: sig
@@ -19,7 +20,7 @@ module rec StructuredAnnotation: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     type_: TypeSpecification.t;
     value: StructVal.t;
   }
@@ -35,7 +36,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     type_: TypeSpecification.t;
     value: StructVal.t;
   }
@@ -60,7 +61,7 @@ and File: sig
     | Key of key
   [@@deriving ord]
 
-  and key= Src.File.t
+  and key = Src.File.t
   [@@deriving ord]
 
   val to_json: t -> json
@@ -73,7 +74,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= Src.File.t
+  and key = Src.File.t
   [@@deriving ord]
 
   let rec to_json = function
@@ -89,7 +90,7 @@ and FunctionName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     service_: ServiceName.t;
     name: Identifier.t;
   }
@@ -105,7 +106,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     service_: ServiceName.t;
     name: Identifier.t;
   }
@@ -130,7 +131,7 @@ and FileXRefs: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     xrefs: XRef.t list;
   }
@@ -146,7 +147,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     xrefs: XRef.t list;
   }
@@ -171,7 +172,7 @@ and NamedDecl: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: NamedType.t;
   }
   [@@deriving ord]
@@ -186,7 +187,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: NamedType.t;
   }
   [@@deriving ord]
@@ -209,7 +210,7 @@ and Identifier: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -222,7 +223,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -238,7 +239,7 @@ and EnumValueDef: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: EnumValue.t;
     value: IntegerLiteral.t;
     structured_annotations: StructuredAnnotation.t list;
@@ -255,7 +256,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: EnumValue.t;
     value: IntegerLiteral.t;
     structured_annotations: StructuredAnnotation.t list;
@@ -282,7 +283,7 @@ and ServiceChild: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     parent: ServiceName.t;
     child: ServiceName.t;
   }
@@ -298,7 +299,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     parent: ServiceName.t;
     child: ServiceName.t;
   }
@@ -323,7 +324,7 @@ and FunctionDeclarationName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     name: Identifier.t;
     decl: Declaration.t;
@@ -340,7 +341,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     name: Identifier.t;
     decl: Declaration.t;
@@ -367,7 +368,7 @@ and ExceptionName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -382,7 +383,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -405,7 +406,7 @@ and FileDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     decl: Declaration.t;
   }
@@ -421,7 +422,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     decl: Declaration.t;
   }
@@ -446,7 +447,7 @@ and ServiceName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -461,7 +462,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -484,7 +485,7 @@ and ServiceParent: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     child: ServiceName.t;
     parent: ServiceName.t;
   }
@@ -500,7 +501,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     child: ServiceName.t;
     parent: ServiceName.t;
   }
@@ -525,7 +526,7 @@ and TypeDefException: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     alias: NamedDecl.t;
     type_: ExceptionSpecName.t;
   }
@@ -541,7 +542,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     alias: NamedDecl.t;
     type_: ExceptionSpecName.t;
   }
@@ -566,7 +567,7 @@ and DeclarationNameSpan: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     decl: Declaration.t;
     name: Identifier.t;
     file: File.t;
@@ -584,7 +585,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     decl: Declaration.t;
     name: Identifier.t;
     file: File.t;
@@ -613,7 +614,7 @@ and Constant: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -628,7 +629,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -651,7 +652,7 @@ and QualName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     name: Identifier.t;
   }
@@ -667,7 +668,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     name: Identifier.t;
   }
@@ -692,7 +693,7 @@ and InteractionDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: InteractionName.t;
     functions: FunctionSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -709,7 +710,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: InteractionName.t;
     functions: FunctionSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -736,7 +737,7 @@ and ConstantDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     constant: Constant.t;
     definition: TypedConstT.t;
   }
@@ -752,7 +753,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     constant: Constant.t;
     definition: TypedConstT.t;
   }
@@ -777,7 +778,7 @@ and EnumValue: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     enum_: NamedType.t;
     name: Identifier.t;
   }
@@ -793,7 +794,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     enum_: NamedType.t;
     name: Identifier.t;
   }
@@ -818,7 +819,7 @@ and NamespaceValue: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -831,7 +832,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -847,7 +848,7 @@ and StructType: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     fields: FieldSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -864,7 +865,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     fields: FieldSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -891,7 +892,7 @@ and NameLowerCase: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name_str: string;
     name: Identifier.t;
   }
@@ -907,7 +908,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name_str: string;
     name: Identifier.t;
   }
@@ -932,7 +933,7 @@ and StructVal: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     fields: StructFieldVal.t list;
   }
   [@@deriving ord]
@@ -947,7 +948,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     fields: StructFieldVal.t list;
   }
   [@@deriving ord]
@@ -970,7 +971,7 @@ and FieldDecl: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     kind: FieldKind.t;
     name: Identifier.t;
@@ -987,7 +988,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     kind: FieldKind.t;
     name: Identifier.t;
@@ -1014,7 +1015,7 @@ and ExceptionVal: sig
     | Key of key
   [@@deriving ord]
 
-  and key= StructVal.t
+  and key = StructVal.t
   [@@deriving ord]
 
   val to_json: t -> json
@@ -1027,7 +1028,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= StructVal.t
+  and key = StructVal.t
   [@@deriving ord]
 
   let rec to_json = function
@@ -1043,7 +1044,7 @@ and TypeSpecification: sig
     | Key of key
   [@@deriving ord]
 
-  and key= 
+  and key = 
      | Primitive of PrimitiveType.t
      | Container of ContainerType.t
      | Named of NamedType.t
@@ -1059,7 +1060,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= 
+  and key = 
      | Primitive of PrimitiveType.t
      | Container of ContainerType.t
      | Named of NamedType.t
@@ -1082,7 +1083,7 @@ and EnumerationType: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     value: EnumValueDef.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1099,7 +1100,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     value: EnumValueDef.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1126,7 +1127,7 @@ and ExceptionType: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     fields: FieldSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1143,7 +1144,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     fields: FieldSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1170,7 +1171,7 @@ and UnionType: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     alts: UnqualField.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1187,7 +1188,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
     alts: UnqualField.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1214,7 +1215,7 @@ and NamespaceName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -1227,7 +1228,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -1243,7 +1244,7 @@ and ServiceDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: ServiceName.t;
     functions: FunctionSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1261,7 +1262,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: ServiceName.t;
     functions: FunctionSpecification.t list;
     structured_annotations: StructuredAnnotation.t list;
@@ -1290,7 +1291,7 @@ and Package: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: File.t;
     name: PackageName.t;
   }
@@ -1306,7 +1307,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: File.t;
     name: PackageName.t;
   }
@@ -1331,7 +1332,7 @@ and DeclarationComment: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -1348,7 +1349,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -1375,7 +1376,7 @@ and InteractionName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -1390,7 +1391,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -1413,7 +1414,7 @@ and DeclarationFile: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: File.t;
   }
@@ -1429,7 +1430,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: File.t;
   }
@@ -1454,7 +1455,7 @@ and DeclarationName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     decl: Declaration.t;
   }
@@ -1470,7 +1471,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     decl: Declaration.t;
   }
@@ -1495,7 +1496,7 @@ and UnionVal: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     field: UnionFieldVal.t;
   }
   [@@deriving ord]
@@ -1510,7 +1511,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     field: UnionFieldVal.t;
   }
   [@@deriving ord]
@@ -1533,7 +1534,7 @@ and EnumVal: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -1548,7 +1549,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QualName.t;
   }
   [@@deriving ord]
@@ -1571,7 +1572,7 @@ and DeclarationUses: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: Declaration.t;
     file: Src.File.t;
     range: Loc.t;
@@ -1588,7 +1589,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: Declaration.t;
     file: Src.File.t;
     range: Loc.t;
@@ -1615,7 +1616,7 @@ and FunctionSpecification: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: FunctionName.t;
     result: ResultType.t;
     arguments: UnqualField.t list;
@@ -1634,7 +1635,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: FunctionName.t;
     result: ResultType.t;
     arguments: UnqualField.t list;
@@ -1665,7 +1666,7 @@ and PackageName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -1678,7 +1679,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -1694,7 +1695,7 @@ and Namespace: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: File.t;
     name: NamespaceName.t;
     namespace_: NamespaceValue.t;
@@ -1712,7 +1713,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: File.t;
     name: NamespaceName.t;
     namespace_: NamespaceValue.t;
@@ -1741,7 +1742,7 @@ and SearchByName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Identifier.t;
     qname: QualName.t;
   }
@@ -1757,7 +1758,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Identifier.t;
     qname: QualName.t;
   }
@@ -1782,7 +1783,7 @@ and ServiceInteractionFunctions: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: ServiceName.t;
     function_: FunctionSpecification.t;
   }
@@ -1798,7 +1799,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: ServiceName.t;
     function_: FunctionSpecification.t;
   }
@@ -1823,7 +1824,7 @@ and DeclarationMember: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     member: Identifier.t;
     decl: Declaration.t;
@@ -1840,7 +1841,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     qname: QualName.t;
     member: Identifier.t;
     decl: Declaration.t;
@@ -1867,7 +1868,7 @@ and TypeDefType: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     alias: QualName.t;
     type_: TypeSpecification.t;
     structured_annotations: StructuredAnnotation.t list;
@@ -1884,7 +1885,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     alias: QualName.t;
     type_: TypeSpecification.t;
     structured_annotations: StructuredAnnotation.t list;
@@ -1911,7 +1912,7 @@ and Literal: sig
     | Key of key
   [@@deriving ord]
 
-  and key= 
+  and key = 
      | Byte_ of IntegerLiteral.t
      | I16_ of IntegerLiteral.t
      | I32_ of IntegerLiteral.t
@@ -1941,7 +1942,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= 
+  and key = 
      | Byte_ of IntegerLiteral.t
      | I16_ of IntegerLiteral.t
      | I32_ of IntegerLiteral.t
@@ -2002,7 +2003,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {name; value} = 
+  let rec to_json {name; value} = 
     let fields = [
       ("name", Identifier.to_json name);
       ("value", TypedConstT.to_json value);
@@ -2028,7 +2029,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {type_; first_response; final_response} = 
+  let rec to_json {type_; first_response; final_response} = 
     let fields = [
       ("type_", TypeSpecification.to_json type_);
     ] in
@@ -2057,7 +2058,7 @@ end = struct
      | Typedef_ of TypeDefException.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Simple simple -> JSON_Object [("simple", ExceptionName.to_json simple)]
      | Typedef_ typedef_ -> JSON_Object [("typedef_", TypeDefException.to_json typedef_)]
 
@@ -2084,7 +2085,7 @@ end = struct
      | Sink_ of ResultSink.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Oneway_ oneway_ -> JSON_Object [("oneway_", Builtin.Unit.to_json oneway_)]
      | Void_ void_ -> JSON_Object [("void_", Builtin.Unit.to_json void_)]
      | Result result -> JSON_Object [("result", TypeSpecification.to_json result)]
@@ -2111,7 +2112,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Struct_ -> JSON_Number (string_of_int 0)
      | Union_ -> JSON_Number (string_of_int 1)
      | Exception_ -> JSON_Number (string_of_int 2)
@@ -2133,7 +2134,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {is_non_negative; abs_value} = 
+  let rec to_json {is_non_negative; abs_value} = 
     let fields = [
       ("isNonNegative", JSON_Bool is_non_negative);
       ("absValue", JSON_Number (string_of_int abs_value));
@@ -2155,7 +2156,7 @@ end = struct
      | Identifier of Constant.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Literal literal -> JSON_Object [("literal", Literal.to_json literal)]
      | Identifier identifier -> JSON_Object [("identifier", Constant.to_json identifier)]
 
@@ -2178,7 +2179,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Default_ -> JSON_Number (string_of_int 0)
      | Optional_ -> JSON_Number (string_of_int 1)
      | Required_ -> JSON_Number (string_of_int 2)
@@ -2200,7 +2201,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {key_; value} = 
+  let rec to_json {key_; value} = 
     let fields = [
       ("key_", TypeSpecification.to_json key_);
       ("value", TypeSpecification.to_json value);
@@ -2218,7 +2219,7 @@ end = struct
   type t = XRefTarget.t
   [@@deriving ord]
 
-  let to_json x = XRefTarget.to_json x
+  let rec to_json x = XRefTarget.to_json x
 end
 
 and Loc: sig
@@ -2240,7 +2241,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {start_line; start_col; end_line; end_col} = 
+  let rec to_json {start_line; start_col; end_line; end_col} = 
     let fields = [
       ("startLine", JSON_Number (string_of_int start_line));
       ("startCol", JSON_Number (string_of_int start_col));
@@ -2274,7 +2275,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {id; qualifier; type_; name; value; structured_annotations} = 
+  let rec to_json {id; qualifier; type_; name; value; structured_annotations} = 
     let fields = [
       ("id", FieldId.to_json id);
       ("qualifier", Qualifier.to_json qualifier);
@@ -2319,7 +2320,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Bool_ -> JSON_Number (string_of_int 0)
      | Byte_ -> JSON_Number (string_of_int 1)
      | I16_ -> JSON_Number (string_of_int 2)
@@ -2351,7 +2352,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {is_na_n; is_positive; exponent; significand} = 
+  let rec to_json {is_na_n; is_positive; exponent; significand} = 
     let fields = [
       ("isNaN", JSON_Bool is_na_n);
       ("isPositive", JSON_Bool is_positive);
@@ -2377,7 +2378,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {name; kind} = 
+  let rec to_json {name; kind} = 
     let fields = [
       ("name", QualName.to_json name);
       ("kind", NamedKind.to_json kind);
@@ -2411,7 +2412,7 @@ end = struct
      | Field of FieldDecl.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Include_ include_ -> JSON_Object [("include_", File.to_json include_)]
      | Named named -> JSON_Object [("named", NamedDecl.to_json named)]
      | Exception_ exception_ -> JSON_Object [("exception_", ExceptionName.to_json exception_)]
@@ -2438,7 +2439,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {loc_ref; target} = 
+  let rec to_json {loc_ref; target} = 
     let fields = [
       ("locRef", Loc.to_json loc_ref);
       ("target", XRefTarget.to_json target);
@@ -2460,7 +2461,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {target} = 
+  let rec to_json {target} = 
     let fields = [
       ("target", XRefTarget.to_json target);
     ] in
@@ -2477,7 +2478,7 @@ end = struct
   type t = IntegerLiteral.t
   [@@deriving ord]
 
-  let to_json x = IntegerLiteral.to_json x
+  let rec to_json x = IntegerLiteral.to_json x
 end
 
 and NamedKind: sig
@@ -2499,7 +2500,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Typedef_ -> JSON_Number (string_of_int 0)
      | Enum_ -> JSON_Number (string_of_int 1)
      | Struct_ -> JSON_Number (string_of_int 2)
@@ -2522,7 +2523,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {const_; type_} = 
+  let rec to_json {const_; type_} = 
     let fields = [
       ("const_", TypedConst.to_json const_);
       ("type_", TypeSpecification.to_json type_);
@@ -2546,7 +2547,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {key; value} = 
+  let rec to_json {key; value} = 
     let fields = [
       ("key", TypedConst.to_json key);
       ("value", TypedConst.to_json value);
@@ -2570,7 +2571,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {name; value} = 
+  let rec to_json {name; value} = 
     let fields = [
       ("name", Identifier.to_json name);
       ("value", StructFieldValValue.to_json value);
@@ -2598,7 +2599,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {id; type_; name; structured_annotations} = 
+  let rec to_json {id; type_; name; structured_annotations} = 
     let fields = [
       ("id", FieldId.to_json id);
       ("type_", TypeSpecification.to_json type_);
@@ -2626,7 +2627,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {response; stream_; throws_} = 
+  let rec to_json {response; stream_; throws_} = 
     let fields = [
       ("stream_", TypeSpecification.to_json stream_);
       ("throws_", JSON_Array (List.map ~f:(fun x -> ExceptionSpecification.to_json x) throws_));
@@ -2658,7 +2659,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {id; type_; name; structured_annotations} = 
+  let rec to_json {id; type_; name; structured_annotations} = 
     let fields = [
       ("id", FieldId.to_json id);
       ("type_", ExceptionSpecName.to_json type_);
@@ -2684,7 +2685,7 @@ end = struct
      | Map_ of MapType.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | List_ list_ -> JSON_Object [("list_", TypeSpecification.to_json list_)]
      | Set_ set_ -> JSON_Object [("set_", TypeSpecification.to_json set_)]
      | Map_ map_ -> JSON_Object [("map_", MapType.to_json map_)]
@@ -2708,7 +2709,7 @@ end = struct
      | Nothing of unit
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Val val_ -> JSON_Object [("val", TypedConstT.to_json val_)]
      | Default_ default_ -> JSON_Object [("default_", TypeSpecification.to_json default_)]
      | Just just -> JSON_Object [("just", TypedConstT.to_json just)]

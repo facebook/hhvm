@@ -9,8 +9,9 @@
 (* @generated
    regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR *)
 
+[@@@warning "-33-39"]
 open Hh_json
-open Core [@@warning "-33"]
+open Core
 
 
 let key v = JSON_Object [("key", v)]

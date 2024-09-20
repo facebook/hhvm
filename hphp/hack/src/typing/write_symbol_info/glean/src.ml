@@ -9,8 +9,9 @@
 (* @generated
    regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR *)
 
+[@@@warning "-33-39"]
 open Hh_json
-open Core [@@warning "-33"]
+open Core
 
 
 module rec IndexFailure: sig
@@ -19,7 +20,7 @@ module rec IndexFailure: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     reason: IndexFailureReason.t;
     details: string;
@@ -36,7 +37,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     reason: IndexFailureReason.t;
     details: string;
@@ -63,7 +64,7 @@ and FileLines: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     lengths: int list;
     ends_in_newline: bool;
@@ -81,7 +82,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     lengths: int list;
     ends_in_newline: bool;
@@ -110,7 +111,7 @@ and FileLanguage: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     language: Language.t;
   }
@@ -126,7 +127,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: File.t;
     language: Language.t;
   }
@@ -151,7 +152,7 @@ and ByteSpanContains: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     byte_span: ByteSpan.t;
     contains: ByteSpan.t;
   }
@@ -167,7 +168,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     byte_span: ByteSpan.t;
     contains: ByteSpan.t;
   }
@@ -192,7 +193,7 @@ and File: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -205,7 +206,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -221,7 +222,7 @@ and RangeContains: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file_lines: Range.t;
     contains: Range.t;
   }
@@ -237,7 +238,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file_lines: Range.t;
     contains: Range.t;
   }
@@ -262,9 +263,9 @@ and FileDigest: sig
     | Key of key
   [@@deriving ord]
 
-  and key= File.t
+  and key = File.t
   [@@deriving ord]
-  and value= string
+  and value = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -278,9 +279,9 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= File.t
+  and key = File.t
   [@@deriving ord]
-  and value= string
+  and value = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -311,7 +312,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | CompileError -> JSON_Number (string_of_int 0)
      | BuildSystemError -> JSON_Number (string_of_int 1)
      | Unclassified -> JSON_Number (string_of_int 2)
@@ -328,7 +329,7 @@ end = struct
   type t = PackedByteSpansGroup.t list
   [@@deriving ord]
 
-  let to_json x = JSON_Array (List.map ~f:(fun x -> PackedByteSpansGroup.to_json x) x)
+  let rec to_json x = JSON_Array (List.map ~f:(fun x -> PackedByteSpansGroup.to_json x) x)
 end
 
 and PackedByteSpansGroup: sig
@@ -346,7 +347,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {length; offsets} = 
+  let rec to_json {length; offsets} = 
     let fields = [
       ("length", JSON_Number (string_of_int length));
       ("offsets", JSON_Array (List.map ~f:(fun x -> JSON_Number (string_of_int x)) offsets));
@@ -376,7 +377,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {file; line_begin; column_begin; line_end; column_end} = 
+  let rec to_json {file; line_begin; column_begin; line_end; column_end} = 
     let fields = [
       ("file", File.to_json file);
       ("lineBegin", JSON_Number (string_of_int line_begin));
@@ -421,7 +422,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Buck -> JSON_Number (string_of_int 0)
      | C -> JSON_Number (string_of_int 1)
      | Cpp -> JSON_Number (string_of_int 2)
@@ -451,7 +452,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {begin_; end_} = 
+  let rec to_json {begin_; end_} = 
     let fields = [
       ("begin", JSON_Number (string_of_int begin_));
       ("end", JSON_Number (string_of_int end_));
@@ -475,7 +476,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {start; length} = 
+  let rec to_json {start; length} = 
     let fields = [
       ("start", JSON_Number (string_of_int start));
       ("length", JSON_Number (string_of_int length));
@@ -499,7 +500,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {offset; length} = 
+  let rec to_json {offset; length} = 
     let fields = [
       ("offset", JSON_Number (string_of_int offset));
       ("length", JSON_Number (string_of_int length));
@@ -525,7 +526,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {file; line; column} = 
+  let rec to_json {file; line; column} = 
     let fields = [
       ("file", File.to_json file);
       ("line", JSON_Number (string_of_int line));
@@ -550,7 +551,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {file; span} = 
+  let rec to_json {file; span} = 
     let fields = [
       ("file", File.to_json file);
       ("span", ByteSpan.to_json span);

@@ -9,8 +9,9 @@
 (* @generated
    regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR *)
 
+[@@@warning "-33-39"]
 open Hh_json
-open Core [@@warning "-33"]
+open Core
 
 
 module rec DeclarationName: sig
@@ -19,9 +20,9 @@ module rec DeclarationName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= Declaration.t
+  and key = Declaration.t
   [@@deriving ord]
-  and value= Name.t
+  and value = Name.t
   [@@deriving ord]
 
   val to_json: t -> json
@@ -35,9 +36,9 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= Declaration.t
+  and key = Declaration.t
   [@@deriving ord]
-  and value= Name.t
+  and value = Name.t
   [@@deriving ord]
 
   let rec to_json = function
@@ -54,7 +55,7 @@ and TraitDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: TraitDeclaration.t;
     members: Declaration.t list;
     implements_: InterfaceDeclaration.t list;
@@ -78,7 +79,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: TraitDeclaration.t;
     members: Declaration.t list;
     implements_: InterfaceDeclaration.t list;
@@ -125,7 +126,7 @@ and TraitDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -140,7 +141,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -163,7 +164,7 @@ and MethodDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: MethodDeclaration.t;
     signature: Signature.t;
     visibility: Visibility.t;
@@ -188,7 +189,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: MethodDeclaration.t;
     signature: Signature.t;
     visibility: Visibility.t;
@@ -237,7 +238,7 @@ and MethodDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -253,7 +254,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -278,7 +279,7 @@ and ClassConstDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: ClassConstDeclaration.t;
     type_: Type.t option;
     value: string option;
@@ -296,7 +297,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: ClassConstDeclaration.t;
     type_: Type.t option;
     value: string option;
@@ -334,7 +335,7 @@ and GlobalConstDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: GlobalConstDeclaration.t;
     type_: Type.t option;
     value: string;
@@ -352,7 +353,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: GlobalConstDeclaration.t;
     type_: Type.t option;
     value: string;
@@ -387,9 +388,9 @@ and IndexerInputsHash: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
-  and value= string list
+  and value = string list
   [@@deriving ord]
 
   val to_json: t -> json
@@ -403,9 +404,9 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
-  and value= string list
+  and value = string list
   [@@deriving ord]
 
   let rec to_json = function
@@ -422,7 +423,7 @@ and ClassDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: ClassDeclaration.t;
     is_abstract: bool;
     is_final: bool;
@@ -446,7 +447,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: ClassDeclaration.t;
     is_abstract: bool;
     is_final: bool;
@@ -493,7 +494,7 @@ and Type: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -506,7 +507,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -522,7 +523,7 @@ and DeclarationLocation: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -539,7 +540,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -566,7 +567,7 @@ and ClassDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -581,7 +582,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -604,7 +605,7 @@ and QName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     namespace_: NamespaceQName.t option;
   }
@@ -620,7 +621,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     namespace_: NamespaceQName.t option;
   }
@@ -648,7 +649,7 @@ and NamespaceDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: NamespaceQName.t;
   }
   [@@deriving ord]
@@ -663,7 +664,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: NamespaceQName.t;
   }
   [@@deriving ord]
@@ -686,7 +687,7 @@ and TypedefDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: TypedefDeclaration.t;
     is_transparent: bool;
     attributes: UserAttribute.t list;
@@ -705,7 +706,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: TypedefDeclaration.t;
     is_transparent: bool;
     attributes: UserAttribute.t list;
@@ -739,7 +740,7 @@ and StringLiteral: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -752,7 +753,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -768,7 +769,7 @@ and MethodOccurrence: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     class_name: Name.t option;
   }
@@ -784,7 +785,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     class_name: Name.t option;
   }
@@ -812,7 +813,7 @@ and ClassConstDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -828,7 +829,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -853,7 +854,7 @@ and ModuleParent: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     decl: Declaration.t;
     module_: ModuleDeclaration.t;
   }
@@ -869,7 +870,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     decl: Declaration.t;
     module_: ModuleDeclaration.t;
   }
@@ -894,7 +895,7 @@ and ThriftToHack: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     to_: Fbthrift.Declaration.t;
     from: Declaration.t;
   }
@@ -910,7 +911,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     to_: Fbthrift.Declaration.t;
     from: Declaration.t;
   }
@@ -935,7 +936,7 @@ and DeclarationSpan: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -952,7 +953,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -979,7 +980,7 @@ and UserAttribute: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     parameters: string list;
     qname: QName.t option;
@@ -996,7 +997,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     parameters: string list;
     qname: QName.t option;
@@ -1026,7 +1027,7 @@ and PropertyDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: PropertyDeclaration.t;
     type_: Type.t option;
     visibility: Visibility.t;
@@ -1048,7 +1049,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: PropertyDeclaration.t;
     type_: Type.t option;
     visibility: Visibility.t;
@@ -1091,7 +1092,7 @@ and GlobalConstDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -1106,7 +1107,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -1129,7 +1130,7 @@ and FileDeclarations: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     declarations: Declaration.t list;
   }
@@ -1145,7 +1146,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     declarations: Declaration.t list;
   }
@@ -1170,7 +1171,7 @@ and NamespaceQName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     parent: NamespaceQName.t option;
   }
@@ -1186,7 +1187,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     parent: NamespaceQName.t option;
   }
@@ -1214,7 +1215,7 @@ and TargetUses: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: XRefTarget.t;
     file: Src.File.t;
     uses: Src.RelByteSpan.t list;
@@ -1231,7 +1232,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: XRefTarget.t;
     file: Src.File.t;
     uses: Src.RelByteSpan.t list;
@@ -1258,7 +1259,7 @@ and InheritedMembers: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     container: ContainerDeclaration.t;
     inherited_members: MemberCluster.t list;
   }
@@ -1274,7 +1275,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     container: ContainerDeclaration.t;
     inherited_members: MemberCluster.t list;
   }
@@ -1299,7 +1300,7 @@ and ContainerChild: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     container: ContainerDeclaration.t;
     child: ContainerDeclaration.t;
   }
@@ -1315,7 +1316,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     container: ContainerDeclaration.t;
     child: ContainerDeclaration.t;
   }
@@ -1340,7 +1341,7 @@ and DeclarationSource: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: Declaration.t;
     source: Declaration.t;
   }
@@ -1356,7 +1357,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: Declaration.t;
     source: Declaration.t;
   }
@@ -1381,7 +1382,7 @@ and MethodOverridden: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     base: MethodDeclaration.t;
     derived: MethodDeclaration.t;
     annotation: bool option;
@@ -1398,7 +1399,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     base: MethodDeclaration.t;
     derived: MethodDeclaration.t;
     annotation: bool option;
@@ -1428,7 +1429,7 @@ and NameLowerCase: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name_lowercase: string;
     name: Name.t;
   }
@@ -1444,7 +1445,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name_lowercase: string;
     name: Name.t;
   }
@@ -1469,7 +1470,7 @@ and TypedefDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -1484,7 +1485,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -1507,7 +1508,7 @@ and TypeConstDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -1523,7 +1524,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -1548,7 +1549,7 @@ and GlobalNamespaceAlias: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     from: Name.t;
     to_: NamespaceQName.t;
   }
@@ -1564,7 +1565,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     from: Name.t;
     to_: NamespaceQName.t;
   }
@@ -1589,7 +1590,7 @@ and AttributeToDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     attribute: UserAttribute.t;
     definition: Definition.t;
   }
@@ -1605,7 +1606,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     attribute: UserAttribute.t;
     definition: Definition.t;
   }
@@ -1630,7 +1631,7 @@ and TypeConstDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: TypeConstDeclaration.t;
     type_: Type.t option;
     kind: TypeConstKind.t;
@@ -1649,7 +1650,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: TypeConstDeclaration.t;
     type_: Type.t option;
     kind: TypeConstKind.t;
@@ -1686,7 +1687,7 @@ and MemberCluster: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     members: Declaration.t list;
   }
   [@@deriving ord]
@@ -1701,7 +1702,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     members: Declaration.t list;
   }
   [@@deriving ord]
@@ -1724,7 +1725,7 @@ and ModuleChild: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     module_: ModuleDeclaration.t;
     decl: Declaration.t;
   }
@@ -1740,7 +1741,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     module_: ModuleDeclaration.t;
     decl: Declaration.t;
   }
@@ -1765,7 +1766,7 @@ and FileCall: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     callee_span: Src.ByteSpan.t;
     call_args: CallArgument.t list;
@@ -1786,7 +1787,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     callee_span: Src.ByteSpan.t;
     call_args: CallArgument.t list;
@@ -1830,7 +1831,7 @@ and PropertyDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -1846,7 +1847,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     container: ContainerDeclaration.t;
   }
@@ -1871,7 +1872,7 @@ and EnumDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: EnumDeclaration.t;
     enum_base: Type.t;
     enum_base_type_info: TypeInfo.t option;
@@ -1895,7 +1896,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: EnumDeclaration.t;
     enum_base: Type.t;
     enum_base_type_info: TypeInfo.t option;
@@ -1948,7 +1949,7 @@ and EnumDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -1963,7 +1964,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -1986,7 +1987,7 @@ and AttributeToDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     attribute: UserAttribute.t;
     declaration: Declaration.t;
     file: Src.File.t;
@@ -2003,7 +2004,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     attribute: UserAttribute.t;
     declaration: Declaration.t;
     file: Src.File.t;
@@ -2030,7 +2031,7 @@ and AttributeHasParameter: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     parameter: string;
     attribute: UserAttribute.t;
@@ -2047,7 +2048,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     parameter: string;
     attribute: UserAttribute.t;
@@ -2074,7 +2075,7 @@ and TypeInfo: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     display_type: Type.t;
     xrefs: XRef.t list;
   }
@@ -2090,7 +2091,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     display_type: Type.t;
     xrefs: XRef.t list;
   }
@@ -2115,7 +2116,7 @@ and MethodOverrides: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     derived: MethodDeclaration.t;
     base: MethodDeclaration.t;
     annotation: bool option;
@@ -2132,7 +2133,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     derived: MethodDeclaration.t;
     base: MethodDeclaration.t;
     annotation: bool option;
@@ -2162,7 +2163,7 @@ and ModuleDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: ModuleDeclaration.t;
     attributes: UserAttribute.t list;
   }
@@ -2178,7 +2179,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: ModuleDeclaration.t;
     attributes: UserAttribute.t list;
   }
@@ -2203,7 +2204,7 @@ and Context_: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -2216,7 +2217,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -2232,7 +2233,7 @@ and TargetUsesAbs: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: XRefTarget.t;
     file: Src.File.t;
     uses: Src.ByteSpan.t list;
@@ -2249,7 +2250,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     target: XRefTarget.t;
     file: Src.File.t;
     uses: Src.ByteSpan.t list;
@@ -2276,7 +2277,7 @@ and InterfaceDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -2291,7 +2292,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -2314,7 +2315,7 @@ and FileXRefs: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     xrefs: XRef.t list;
   }
@@ -2330,7 +2331,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     xrefs: XRef.t list;
   }
@@ -2355,7 +2356,7 @@ and FunctionDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: FunctionDeclaration.t;
     signature: Signature.t;
     is_async: bool;
@@ -2376,7 +2377,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: FunctionDeclaration.t;
     signature: Signature.t;
     is_async: bool;
@@ -2417,7 +2418,7 @@ and FunctionDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -2432,7 +2433,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: QName.t;
   }
   [@@deriving ord]
@@ -2455,7 +2456,7 @@ and Signature: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     returns: Type.t option;
     parameters: Parameter.t list;
     contexts: Context_.t list option;
@@ -2473,7 +2474,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     returns: Type.t option;
     parameters: Parameter.t list;
     contexts: Context_.t list option;
@@ -2511,7 +2512,7 @@ and Enumerator: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     enumeration: EnumDeclaration.t;
   }
@@ -2527,7 +2528,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
     enumeration: EnumDeclaration.t;
   }
@@ -2552,7 +2553,7 @@ and HackToThrift: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     from: Declaration.t;
     to_: Fbthrift.Declaration.t;
   }
@@ -2568,7 +2569,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     from: Declaration.t;
     to_: Fbthrift.Declaration.t;
   }
@@ -2593,7 +2594,7 @@ and InterfaceDefinition: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: InterfaceDeclaration.t;
     members: Declaration.t list;
     extends_: InterfaceDeclaration.t list;
@@ -2614,7 +2615,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: InterfaceDeclaration.t;
     members: Declaration.t list;
     extends_: InterfaceDeclaration.t list;
@@ -2652,7 +2653,7 @@ and Name: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -2665,7 +2666,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -2681,7 +2682,7 @@ and DeclarationTarget: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     source: Declaration.t;
     target: Declaration.t;
   }
@@ -2697,7 +2698,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     source: Declaration.t;
     target: Declaration.t;
   }
@@ -2722,7 +2723,7 @@ and NamespaceMember: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     namespace_: NamespaceQName.t;
     decl: Declaration.t;
   }
@@ -2738,7 +2739,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     namespace_: NamespaceQName.t;
     decl: Declaration.t;
   }
@@ -2763,7 +2764,7 @@ and ContainerParent: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     container: ContainerDeclaration.t;
     parent: ContainerDeclaration.t;
   }
@@ -2779,7 +2780,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     container: ContainerDeclaration.t;
     parent: ContainerDeclaration.t;
   }
@@ -2804,9 +2805,9 @@ and ContainerDeclarationQName: sig
     | Key of key
   [@@deriving ord]
 
-  and key= ContainerDeclaration.t
+  and key = ContainerDeclaration.t
   [@@deriving ord]
-  and value= QName.t
+  and value = QName.t
   [@@deriving ord]
 
   val to_json: t -> json
@@ -2820,9 +2821,9 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= ContainerDeclaration.t
+  and key = ContainerDeclaration.t
   [@@deriving ord]
-  and value= QName.t
+  and value = QName.t
   [@@deriving ord]
 
   let rec to_json = function
@@ -2839,7 +2840,7 @@ and DeclarationComment: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -2856,7 +2857,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     declaration: Declaration.t;
     file: Src.File.t;
     span: Src.ByteSpan.t;
@@ -2883,7 +2884,7 @@ and ModuleDeclaration: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
   }
   [@@deriving ord]
@@ -2898,7 +2899,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     name: Name.t;
   }
   [@@deriving ord]
@@ -2921,7 +2922,7 @@ and DeclarationNamespace: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     decl: Declaration.t;
     namespace_: NamespaceQName.t;
   }
@@ -2937,7 +2938,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     decl: Declaration.t;
     namespace_: NamespaceQName.t;
   }
@@ -2974,7 +2975,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {constraint_kind; type_; type_info} = 
+  let rec to_json {constraint_kind; type_; type_info} = 
     let fields = [
       ("constraintKind", ConstraintKind.to_json constraint_kind);
       ("type", Type.to_json type_);
@@ -3002,7 +3003,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {target; ranges} = 
+  let rec to_json {target; ranges} = 
     let fields = [
       ("target", XRefTarget.to_json target);
       ("ranges", JSON_Array (List.map ~f:(fun x -> Src.RelByteSpan.to_json x) ranges));
@@ -3024,7 +3025,7 @@ end = struct
      | Occurrence of Occurrence.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Declaration declaration -> JSON_Object [("declaration", Declaration.to_json declaration)]
      | Occurrence occurrence -> JSON_Object [("occurrence", Occurrence.to_json occurrence)]
 
@@ -3061,7 +3062,7 @@ end = struct
      | Module of ModuleDeclaration.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | ClassConst class_const -> JSON_Object [("classConst", ClassConstDeclaration.to_json class_const)]
      | Container container -> JSON_Object [("container", ContainerDeclaration.to_json container)]
      | Enumerator enumerator -> JSON_Object [("enumerator", Enumerator.to_json enumerator)]
@@ -3089,7 +3090,7 @@ end = struct
      | Xref of XRefTarget.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Lit lit -> JSON_Object [("lit", StringLiteral.to_json lit)]
      | Xref xref -> JSON_Object [("xref", XRefTarget.to_json xref)]
 
@@ -3128,7 +3129,7 @@ end = struct
      | Module of ModuleDefinition.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Class_ class_ -> JSON_Object [("class_", ClassDefinition.to_json class_)]
      | ClassConst class_const -> JSON_Object [("classConst", ClassConstDefinition.to_json class_const)]
      | Enum_ enum_ -> JSON_Object [("enum_", EnumDefinition.to_json enum_)]
@@ -3163,7 +3164,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Private -> JSON_Number (string_of_int 0)
      | Protected -> JSON_Number (string_of_int 1)
      | Public -> JSON_Number (string_of_int 2)
@@ -3182,7 +3183,7 @@ end = struct
      | Method of MethodOccurrence.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Method method_ -> JSON_Object [("method", MethodOccurrence.to_json method_)]
 
 end
@@ -3200,7 +3201,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Readonly -> JSON_Number (string_of_int 0)
 
 end
@@ -3222,7 +3223,7 @@ end = struct
      | Trait of TraitDeclaration.t
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Class_ class_ -> JSON_Object [("class_", ClassDeclaration.to_json class_)]
      | Enum_ enum_ -> JSON_Object [("enum_", EnumDeclaration.to_json enum_)]
      | Interface_ interface_ -> JSON_Object [("interface_", InterfaceDeclaration.to_json interface_)]
@@ -3247,7 +3248,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Abstract -> JSON_Number (string_of_int 0)
      | Concrete -> JSON_Number (string_of_int 1)
      | PartiallyAbstract -> JSON_Number (string_of_int 2)
@@ -3271,7 +3272,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Erased -> JSON_Number (string_of_int 0)
      | Reified -> JSON_Number (string_of_int 1)
      | SoftReified -> JSON_Number (string_of_int 2)
@@ -3305,7 +3306,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly} = 
+  let rec to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly} = 
     let fields = [
       ("name", Name.to_json name);
       ("isInout", JSON_Bool is_inout);
@@ -3349,7 +3350,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Contravariant -> JSON_Number (string_of_int 0)
      | Covariant -> JSON_Number (string_of_int 1)
      | Invariant -> JSON_Number (string_of_int 2)
@@ -3373,7 +3374,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | As -> JSON_Number (string_of_int 0)
      | Equal -> JSON_Number (string_of_int 1)
      | Super -> JSON_Number (string_of_int 2)
@@ -3401,7 +3402,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {name; variance; reify_kind; constraints; attributes} = 
+  let rec to_json {name; variance; reify_kind; constraints; attributes} = 
     let fields = [
       ("name", Name.to_json name);
       ("variance", Variance.to_json variance);
@@ -3428,7 +3429,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {declaration; internal} = 
+  let rec to_json {declaration; internal} = 
     let fields = [
       ("declaration", ModuleDeclaration.to_json declaration);
       ("internal", JSON_Bool internal);
@@ -3452,7 +3453,7 @@ end = struct
   }
   [@@deriving ord]
 
-  let to_json {span; argument} = 
+  let rec to_json {span; argument} = 
     let fields = [
       ("span", Src.RelByteSpan.to_json span);
     ] in

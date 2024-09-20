@@ -9,8 +9,9 @@
 (* @generated
    regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR *)
 
+[@@@warning "-33-39"]
 open Hh_json
-open Core [@@warning "-33"]
+open Core
 
 
 module rec GenCodeClass: sig
@@ -19,7 +20,7 @@ module rec GenCodeClass: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -32,7 +33,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -48,7 +49,7 @@ and GenCode: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     variant: GenCodeVariant.t;
     source: Src.File.t option;
@@ -68,7 +69,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     file: Src.File.t;
     variant: GenCodeVariant.t;
     source: Src.File.t option;
@@ -113,7 +114,7 @@ and GenCodeCommand: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -126,7 +127,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -142,7 +143,7 @@ and GenCodeBySource: sig
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     source: Src.File.t;
     gencode: Src.File.t;
   }
@@ -158,7 +159,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= {
+  and key = {
     source: Src.File.t;
     gencode: Src.File.t;
   }
@@ -183,7 +184,7 @@ and GenCodeSignature: sig
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   val to_json: t -> json
@@ -196,7 +197,7 @@ end = struct
     | Key of key
   [@@deriving ord]
 
-  and key= string
+  and key = string
   [@@deriving ord]
 
   let rec to_json = function
@@ -222,7 +223,7 @@ end = struct
 
   [@@deriving ord]
 
-  let to_json  = function
+  let rec to_json  = function
      | Full -> JSON_Number (string_of_int 0)
      | Partial -> JSON_Number (string_of_int 1)
 

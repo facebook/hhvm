@@ -16,11 +16,12 @@
 
 #include "hphp/util/process-cpu.h"
 
-#include <sys/utsname.h>
-#include <assert.h>
+#include <cassert>
 #include <cstring>
 #include <iomanip>
+#include <thread>
 
+#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -28,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int Process::GetCPUCount() {
-  return sysconf(_SC_NPROCESSORS_ONLN);
+  return std::thread::hardware_concurrency();
 }
 
 #ifdef __x86_64__

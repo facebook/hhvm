@@ -6,24 +6,17 @@
 package matching_names
 
 import (
+    "maps"
+
     includesAlso "IncludesAlso"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
-// mapsCopy is a copy of maps.Copy from Go 1.21
-// TODO: remove mapsCopy once we can safely upgrade to Go 1.21 without requiring any rollback.
-func mapsCopy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) {
-	for k, v := range src {
-		dst[k] = v
-	}
-}
-
 var _ = includesAlso.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
-// TODO: uncomment when can safely upgrade to Go 1.21 without requiring any rollback.
-// var _ = maps.Copy[map[int]int, map[int]int]
+var _ = maps.Copy[map[int]int, map[int]int]
 var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
@@ -82,7 +75,7 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     }
 
     // ...now add enum metadatas from recursively included programs.
-    mapsCopy(allEnumsMap, includesAlso.GetEnumsMetadata())
+    maps.Copy(allEnumsMap, includesAlso.GetEnumsMetadata())
 
     return allEnumsMap
 }
@@ -97,7 +90,7 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     }
 
     // ...now add struct metadatas from recursively included programs.
-    mapsCopy(allStructsMap, includesAlso.GetStructsMetadata())
+    maps.Copy(allStructsMap, includesAlso.GetStructsMetadata())
 
     return allStructsMap
 }
@@ -112,7 +105,7 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     }
 
     // ...now add exception metadatas from recursively included programs.
-    mapsCopy(allExceptionsMap, includesAlso.GetExceptionsMetadata())
+    maps.Copy(allExceptionsMap, includesAlso.GetExceptionsMetadata())
 
     return allExceptionsMap
 }
@@ -127,7 +120,7 @@ func GetServicesMetadata() map[string]*metadata.ThriftService {
     }
 
     // ...now add service metadatas from recursively included programs.
-    mapsCopy(allServicesMap, includesAlso.GetServicesMetadata())
+    maps.Copy(allServicesMap, includesAlso.GetServicesMetadata())
 
     return allServicesMap
 }

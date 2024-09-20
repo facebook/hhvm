@@ -6,24 +6,17 @@
 package module
 
 import (
+    "maps"
+
     included "included"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
-// mapsCopy is a copy of maps.Copy from Go 1.21
-// TODO: remove mapsCopy once we can safely upgrade to Go 1.21 without requiring any rollback.
-func mapsCopy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) {
-	for k, v := range src {
-		dst[k] = v
-	}
-}
-
 var _ = included.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
-// TODO: uncomment when can safely upgrade to Go 1.21 without requiring any rollback.
-// var _ = maps.Copy[map[int]int, map[int]int]
+var _ = maps.Copy[map[int]int, map[int]int]
 var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
@@ -870,7 +863,7 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     }
 
     // ...now add enum metadatas from recursively included programs.
-    mapsCopy(allEnumsMap, included.GetEnumsMetadata())
+    maps.Copy(allEnumsMap, included.GetEnumsMetadata())
 
     return allEnumsMap
 }
@@ -885,7 +878,7 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     }
 
     // ...now add struct metadatas from recursively included programs.
-    mapsCopy(allStructsMap, included.GetStructsMetadata())
+    maps.Copy(allStructsMap, included.GetStructsMetadata())
 
     return allStructsMap
 }
@@ -900,7 +893,7 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     }
 
     // ...now add exception metadatas from recursively included programs.
-    mapsCopy(allExceptionsMap, included.GetExceptionsMetadata())
+    maps.Copy(allExceptionsMap, included.GetExceptionsMetadata())
 
     return allExceptionsMap
 }
@@ -915,7 +908,7 @@ func GetServicesMetadata() map[string]*metadata.ThriftService {
     }
 
     // ...now add service metadatas from recursively included programs.
-    mapsCopy(allServicesMap, included.GetServicesMetadata())
+    maps.Copy(allServicesMap, included.GetServicesMetadata())
 
     return allServicesMap
 }

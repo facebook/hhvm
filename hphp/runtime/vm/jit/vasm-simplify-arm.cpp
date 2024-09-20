@@ -169,8 +169,8 @@ int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t m
 bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
   // store{s, d}; store{s, d} --> storepair{s0, s1, d}
   return if_inst<Vinstr::store>(env, b, i + 1, [&](const store& st) {
-    if (!inst.s.isVirt() && !inst.s.isGP()) return false;
-    if (!st.s.isVirt() && !st.s.isGP()) return false;
+    if (!inst.s.isGP()) return false;
+    if (!st.s.isGP()) return false;
     const auto rv = is_adjacent_vptr64(inst.d, st.d, 8, -512, 504);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
@@ -191,8 +191,8 @@ bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
 bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
   // storel{s, d}; storel{s, d} --> storepairl{s0, s1, d}
   return if_inst<Vinstr::storel>(env, b, i + 1, [&](const storel& st) {
-    if (!inst.s.isVirt() && !inst.s.isGP()) return false;
-    if (!st.s.isVirt() && !st.s.isGP()) return false;
+    if (!inst.s.isGP()) return false;
+    if (!st.s.isGP()) return false;
     const auto rv = is_adjacent_vptr64(inst.m, st.m, 4, -256, 252);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
@@ -214,8 +214,8 @@ bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
   // load{d, m}; load{d, m} --> loadpair{s, d0, d1}
   return if_inst<Vinstr::load>(env, b, i + 1, [&](const load& ld) {
     if (inst.d == ld.d) return false;
-    if (!inst.d.isVirt() && !inst.d.isGP()) return false;
-    if (!ld.d.isVirt() && !ld.d.isGP()) return false;
+    if (!inst.d.isGP()) return false;
+    if (!ld.d.isGP()) return false;
     const auto rv = is_adjacent_vptr64(inst.s, ld.s, 8, -512, 504);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
@@ -237,8 +237,8 @@ bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
   // loadl{d, m}; loadl{d, m} --> loadpairl{s, d0, d1}
   return if_inst<Vinstr::loadl>(env, b, i + 1, [&](const loadl& ld) {
     if (inst.d == ld.d) return false;
-    if (!inst.d.isVirt() && !inst.d.isGP()) return false;
-    if (!ld.d.isVirt() && !ld.d.isGP()) return false;
+    if (!inst.d.isGP()) return false;
+    if (!ld.d.isGP()) return false;
     const auto rv = is_adjacent_vptr64(inst.s, ld.s, 4, -256, 252);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {

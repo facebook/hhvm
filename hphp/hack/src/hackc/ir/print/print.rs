@@ -1701,7 +1701,12 @@ fn print_member_key(
     match *key {
         MemberKey::EC => {
             let vid = operands.next().unwrap();
-            write!(w, "{}]", FmtVid(func, vid, verbose))?;
+            match vid.full() {
+                FullInstrId::Imm(_) => write!(w, "cell({})]", FmtVid(func, vid, verbose))?,
+                FullInstrId::Instr(_) | FullInstrId::None => {
+                    write!(w, "{}]", FmtVid(func, vid, verbose))?
+                }
+            }
         }
         MemberKey::EI(i) => write!(w, "{}]", i)?,
         MemberKey::EL => {

@@ -4288,17 +4288,19 @@ fn emit_array_get_<'a, 'd>(
     }
 }
 
+fn class_id_is_class_expr_id(e: &Emitter<'_>, env: &Env<'_>, cname: &ast::ClassId) -> bool {
+    let expr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cname);
+    matches!(expr, ClassExpr::Id(_))
+}
+
+// TODO(199608418) kill this function when these are banned
 fn is_special_class_constant_accessed_with_class_id(
     e: &Emitter<'_>,
     env: &Env<'_>,
     cname: &ast::ClassId,
     id: &str,
 ) -> bool {
-    if !string_utils::is_class(id) {
-        return false;
-    }
-    let expr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cname);
-    matches!(expr, ClassExpr::Id(_))
+    string_utils::is_class(id) && class_id_is_class_expr_id(e, env, cname)
 }
 
 fn emit_elem<'a, 'd>(
@@ -4327,6 +4329,7 @@ fn emit_elem<'a, 'd>(
                     (instr::empty(), 0)
                 }
             }
+            ast::Expr_::Nameof(x) if class_id_is_class_expr_id(e, env, x) => (instr::empty(), 0),
             ast::Expr_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(e, env, &(x.0), &(x.1).1) =>
             {
@@ -4347,6 +4350,24 @@ fn get_elem_member_key<'a, 'd>(
     use ast::ClassId_ as CI_;
     use ast::Expr;
     use ast::Expr_;
+    let class_name_key = |cid: &ast::ClassId| {
+        let cname = match (&cid.2, env.scope.get_class()) {
+            (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(cd.get_name_str()),
+            (CI_::CIexpr(Expr(_, _, Expr_::Id(id))), _) => string_utils::strip_global_ns(&id.1),
+            (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),
+            _ => {
+                return Err(Error::unrecoverable(
+                    "Unreachable due to class_id_is_class_expr_id",
+                ));
+            }
+        };
+
+        let fq_id = ClassName::from_ast_name_and_mangle(cname);
+        Ok(MemberKey::ET(
+            hhbc::intern_bytes(fq_id.as_bytes()),
+            ReadonlyOp::Any,
+        ))
+    };
     match elem {
         // ELement missing (so it's array append)
         None => Ok((MemberKey::W, instr::empty())),
@@ -4378,27 +4399,16 @@ fn get_elem_member_key<'a, 'd>(
                 MemberKey::ET(hhbc::intern_bytes(s.as_slice()), ReadonlyOp::Any),
                 instr::empty(),
             )),
-            // Special case for class name
+            // Special cases for class name
+            Expr_::Nameof(x) if class_id_is_class_expr_id(e, env, x) => {
+                let key = class_name_key(x)?;
+                Ok((key, instr::empty()))
+            }
             Expr_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(e, env, &(x.0), &(x.1).1) =>
             {
-                let cname = match (&(x.0).2, env.scope.get_class()) {
-                    (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(cd.get_name_str()),
-                    (CI_::CIexpr(Expr(_, _, Expr_::Id(id))), _) => {
-                        string_utils::strip_global_ns(&id.1)
-                    }
-                    (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),
-                    _ => {
-                        return Err(Error::unrecoverable(
-                            "Unreachable due to is_special_class_constant_accessed_with_class_id",
-                        ));
-                    }
-                };
-                let fq_id = ClassName::from_ast_name_and_mangle(cname);
-                Ok((
-                    MemberKey::ET(hhbc::intern_bytes(fq_id.as_bytes()), ReadonlyOp::Any),
-                    instr::raise_class_string_conversion_notice(),
-                ))
+                let key = class_name_key(&x.0)?;
+                Ok((key, instr::raise_class_string_conversion_notice()))
             }
             _ => {
                 // General case

@@ -1106,7 +1106,12 @@ impl FunctionParser<'_> {
                     let i = parse_i64(tokenizer)?;
                     (OpKind::I(i), tloc)
                 } else {
-                    let vid = self.vid(tokenizer)?;
+                    let vid = if ident == "cell" {
+                        parse!(tokenizer, "cell" "(" <vid:self.vid> ")");
+                        vid
+                    } else {
+                        self.vid(tokenizer)?
+                    };
                     operands.push(vid);
                     (OpKind::C, tloc)
                 }

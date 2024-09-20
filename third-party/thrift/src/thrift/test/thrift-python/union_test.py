@@ -783,7 +783,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         union_mutable = TestUnionMutable(string_field="hello")
         self.assertIs(union_mutable, union_mutable._to_mutable_python())
 
-    def test_serialize_not_implemented_yet(self) -> None:
+    def test_serialize(self) -> None:
         mutable_serializer.serialize(TestUnionMutable())
 
         with self.assertRaisesRegex(Exception, "underflow"):

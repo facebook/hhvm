@@ -1571,8 +1571,9 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # details) and verify that it doesn't affect `e`.
         e_clone.unqualified_list_i32.append(4)
         self.assertNotEqual(e.unqualified_list_i32, e_clone.unqualified_list_i32)
-        # pyre-ignore[16]: Fixme: type error to be addressed later
-        e_clone.optional_list_i32.append(4)
+        if e_clone.optional_list_i32 is not None:
+            e_clone.optional_list_i32.append(4)
+
         self.assertNotEqual(e.optional_list_i32, e_clone.optional_list_i32)
 
         self.assertEqual(e.unqualified_set_string, e_clone.unqualified_set_string)

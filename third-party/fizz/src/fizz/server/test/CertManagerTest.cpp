@@ -42,6 +42,7 @@ TEST_F(CertManagerTest, TestNoMatchDefault) {
   manager_.addCertAndSetDefault(cert);
   auto res = manager_.getCert(std::string("test.com"), kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
+  EXPECT_TRUE(manager_.hasCerts());
 }
 
 TEST_F(CertManagerTest, TestNoSniDefault) {
@@ -68,6 +69,7 @@ TEST_F(CertManagerTest, TestUppercaseDefault) {
 TEST_F(CertManagerTest, TestNoDefault) {
   EXPECT_FALSE(
       manager_.getCert(std::string("blah.com"), {}, {}, {}).hasValue());
+  EXPECT_FALSE(manager_.hasCerts());
 }
 
 TEST_F(CertManagerTest, TestSigSchemesServerPref) {

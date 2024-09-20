@@ -39,6 +39,8 @@ class CertManager : public CertManagerBase {
    */
   void addCertAndOverride(std::shared_ptr<SelfCert> cert);
 
+  bool hasCerts() const;
+
  protected:
   void addCert(std::shared_ptr<SelfCert> cert, bool overrideExistingEntry);
 

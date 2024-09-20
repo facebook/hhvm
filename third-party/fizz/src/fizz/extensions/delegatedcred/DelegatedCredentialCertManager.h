@@ -32,6 +32,8 @@ class DelegatedCredentialCertManager : public server::CertManager {
 
   void addDelegatedCredential(std::shared_ptr<SelfDelegatedCredential> cred);
 
+  bool hasDelegatedCredential() const;
+
  protected:
   server::CertManager dcMgr_;
 };

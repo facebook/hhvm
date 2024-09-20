@@ -45,5 +45,8 @@ void DelegatedCredentialClientCertManager::addDelegatedCredentialAndOverride(
   dcMgr_.addCertAndOverride(std::move(cert));
 }
 
+bool DelegatedCredentialClientCertManager::hasDelegatedCredential() const {
+  return dcMgr_.hasCerts();
+}
 } // namespace extensions
 } // namespace fizz

@@ -40,6 +40,8 @@ class CertManager : public CertManagerBase {
 
   void addCert(std::shared_ptr<SelfCert> cert);
 
+  bool hasCerts() const;
+
  protected:
   CertMatch findCert(
       const std::string& key,

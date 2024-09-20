@@ -147,5 +147,10 @@ void CertManager::addCert(std::shared_ptr<SelfCert> cert, bool defaultCert) {
     identMap_[primaryIdent] = cert;
   }
 }
+
+bool CertManager::hasCerts() const {
+  return !certs_.empty();
+}
+
 } // namespace server
 } // namespace fizz

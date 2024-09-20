@@ -53,5 +53,8 @@ void DelegatedCredentialCertManager::addDelegatedCredential(
   dcMgr_.addCert(std::move(cred));
 }
 
+bool DelegatedCredentialCertManager::hasDelegatedCredential() const {
+  return dcMgr_.hasCerts();
+}
 } // namespace extensions
 } // namespace fizz

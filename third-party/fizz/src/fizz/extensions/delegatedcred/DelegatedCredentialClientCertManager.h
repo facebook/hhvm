@@ -43,6 +43,8 @@ class DelegatedCredentialClientCertManager : public fizz::client::CertManager {
    */
   void addDelegatedCredentialAndOverride(std::shared_ptr<SelfCert> cert);
 
+  bool hasDelegatedCredential() const;
+
  protected:
   client::CertManager dcMgr_;
 };

@@ -36,10 +36,12 @@ TEST_F(CertManagerTest, TestBasicMatch) {
   manager_.addCertAndOverride(cert);
   auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
   EXPECT_EQ(res->cert, cert);
+  EXPECT_TRUE(manager_.hasCerts());
 }
 
 TEST_F(CertManagerTest, TestNoCertsInMgr) {
   EXPECT_FALSE(manager_.getCert(folly::none, {}, {}, {}).hasValue());
+  EXPECT_FALSE(manager_.hasCerts());
 }
 
 TEST_F(CertManagerTest, TestSigSchemesPref) {

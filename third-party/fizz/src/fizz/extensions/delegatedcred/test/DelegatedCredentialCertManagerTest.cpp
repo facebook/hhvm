@@ -140,12 +140,16 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestSigSchemesServerPref) {
         {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512});
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred);
     cert = cred;
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     cert = DelegatedCredentialCertManagerTest::getCert(
         "www.test.com",
         {},
         {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512});
     DelegatedCredentialCertManagerTest::manager_.addCert(cert);
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
@@ -178,6 +182,8 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestClientSigScheme) {
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred2);
     cert1 = cred1;
     cert2 = cred2;
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     cert1 = DelegatedCredentialCertManagerTest::getCert(
         "www.test.com", {}, {SignatureScheme::rsa_pss_sha256});
@@ -185,6 +191,8 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestClientSigScheme) {
         "www.test.com", {}, {SignatureScheme::rsa_pss_sha512});
     DelegatedCredentialCertManagerTest::manager_.addCert(cert1);
     DelegatedCredentialCertManagerTest::manager_.addCert(cert2);
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
@@ -216,6 +224,8 @@ TYPED_TEST(
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred2);
     cert1 = cred1;
     cert2 = cred2;
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     cert1 = DelegatedCredentialCertManagerTest::getCert(
         "www.test.com", {}, {SignatureScheme::rsa_pss_sha256});
@@ -223,6 +233,8 @@ TYPED_TEST(
         "*.test.com", {}, {SignatureScheme::rsa_pss_sha512});
     DelegatedCredentialCertManagerTest::manager_.addCert(cert1);
     DelegatedCredentialCertManagerTest::manager_.addCert(cert2);
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
@@ -249,12 +261,16 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestAlts) {
         kRsa);
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred);
     cert = cred;
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     cert = DelegatedCredentialCertManagerTest::getCert(
         "www.test.com",
         {"www.test.com", "www.example.com", "*.example.com"},
         kRsa);
     DelegatedCredentialCertManagerTest::manager_.addCert(cert);
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
@@ -277,9 +293,13 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestWildcard) {
         "*.test.com", {}, kRsa);
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred);
     cert = cred;
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     cert = DelegatedCredentialCertManagerTest::getCert("*.test.com", {}, kRsa);
     DelegatedCredentialCertManagerTest::manager_.addCert(cert);
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
@@ -305,6 +325,8 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestExactMatch) {
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred1);
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred2);
     ref = cred2;
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     auto cert1 =
         DelegatedCredentialCertManagerTest::getCert("*.test.com", {}, kRsa);
@@ -313,6 +335,8 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestExactMatch) {
     DelegatedCredentialCertManagerTest::manager_.addCert(cert1);
     DelegatedCredentialCertManagerTest::manager_.addCert(cert2);
     ref = cert2;
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
@@ -325,9 +349,13 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoWildcard) {
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(
         DelegatedCredentialCertManagerTest::getCredential(
             "foo.test.com", {}, kRsa));
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     DelegatedCredentialCertManagerTest::manager_.addCert(
         DelegatedCredentialCertManagerTest::getCert("foo.test.com", {}, kRsa));
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   EXPECT_FALSE(
@@ -348,10 +376,14 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestGetByIdentity) {
         "*.test.com", {"www.example.com"}, kRsa);
     DelegatedCredentialCertManagerTest::manager_.addDelegatedCredential(cred);
     cert = cred;
+    EXPECT_TRUE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   } else {
     cert = DelegatedCredentialCertManagerTest::getCert(
         "*.test.com", {"www.example.com"}, kRsa);
     DelegatedCredentialCertManagerTest::manager_.addCert(cert);
+    EXPECT_FALSE(
+        DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
   EXPECT_EQ(
@@ -372,6 +404,7 @@ TEST_F(DelegatedCredentialCertManagerTest, TestDelegatedMatchPreferred) {
   auto cert2 = getCredential("foo.test.com", {}, kRsa);
   manager_.addCert(cert1);
   manager_.addDelegatedCredential(cert2);
+  EXPECT_TRUE(manager_.hasDelegatedCredential());
 
   auto res = manager_.getCert(
       std::string("foo.test.com"), kRsa, kRsa, DelegatedMode::Extensions());
@@ -395,6 +428,7 @@ TEST_F(DelegatedCredentialCertManagerTest, TestUndelegatedNeverGetsCredential) {
   manager_.addDelegatedCredential(cert4);
   manager_.addDelegatedCredential(cert5);
   manager_.addDelegatedCredential(cert6);
+  EXPECT_TRUE(manager_.hasDelegatedCredential());
   auto res = manager_.getCert(host1, kRsa, kRsa, {});
   EXPECT_FALSE(res);
   res = manager_.getCert(host1, kRsa, {}, {});
@@ -491,6 +525,7 @@ TEST_F(
   auto cert2 = getCredential(host, {}, {SignatureScheme::rsa_pss_sha256});
   manager_.addCert(cert1);
   manager_.addDelegatedCredential(cert2);
+  EXPECT_TRUE(manager_.hasDelegatedCredential());
 
   auto res = manager_.getCert(
       host,
@@ -505,6 +540,7 @@ TEST_F(DelegatedCredentialCertManagerTest, TestDelegatedMatchWithDefaultSet) {
   auto cert2 = getCredential("foo.test.com", {}, kRsa);
   manager_.addCertAndSetDefault(cert1);
   manager_.addDelegatedCredentialAndSetDefault(cert2);
+  EXPECT_TRUE(manager_.hasDelegatedCredential());
 
   auto res = manager_.getCert(
       std::string("foo_blah"), kRsa, kRsa, DelegatedMode::Extensions());
@@ -518,6 +554,7 @@ TEST_F(
   auto cert2 = getCredential("foo.test.com", {}, kRsa);
   manager_.addCertAndSetDefault(cert1);
   manager_.addDelegatedCredential(cert2);
+  EXPECT_TRUE(manager_.hasDelegatedCredential());
 
   auto res = manager_.getCert(
       std::string("foo_blah"), kRsa, kRsa, DelegatedMode::Extensions());

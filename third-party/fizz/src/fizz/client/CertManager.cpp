@@ -55,5 +55,10 @@ void CertManager::addCert(
     }
   }
 }
+
+bool CertManager::hasCerts() const {
+  return !certs_.empty();
+}
+
 } // namespace client
 } // namespace fizz

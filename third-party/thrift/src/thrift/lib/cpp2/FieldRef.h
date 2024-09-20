@@ -50,6 +50,7 @@ struct alias_isset_fn;
 struct move_to_unique_ptr_fn;
 struct assign_from_unique_ptr_fn;
 struct union_value_unsafe_fn;
+struct is_non_optional_field_set_manually_or_by_serializer_fn;
 
 // IntWrapper is a wrapper of integer that's always copy/move assignable
 // even if integer is atomic
@@ -260,6 +261,8 @@ class field_ref {
   template <typename U>
   friend class field_ref;
   friend struct apache::thrift::detail::unset_unsafe_fn;
+  friend struct apache::thrift::detail::
+      is_non_optional_field_set_manually_or_by_serializer_fn;
 
  public:
   using value_type = std::remove_reference_t<T>;
@@ -1164,6 +1167,8 @@ class intern_boxed_field_ref {
 
   template <typename U>
   friend class intern_boxed_field_ref;
+  friend struct apache::thrift::detail::
+      is_non_optional_field_set_manually_or_by_serializer_fn;
 
   // TODO(dokwon): Consider removing `get_default_t` after resolving
   // dependency issue.
@@ -1675,12 +1680,12 @@ struct alias_isset_fn {
 struct is_non_optional_field_set_manually_or_by_serializer_fn {
   template <typename T>
   bool operator()(field_ref<T> ref) const noexcept {
-    return ref.is_set();
+    return bool(ref.bitref_);
   }
 
   template <typename T>
   bool operator()(intern_boxed_field_ref<T> ref) const noexcept {
-    return ref.is_set();
+    return bool(ref.bitref_);
   }
 };
 

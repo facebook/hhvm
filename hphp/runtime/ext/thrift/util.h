@@ -79,15 +79,11 @@ inline bool is_value_type_default(int8_t thrift_typeID, const Variant& value) {
     }
 }
 
-inline uint32_t get_initial_array_size(const uint32_t size) {
+inline Array initialize_array(const uint32_t size) {
   // Reserve up to 16k entries for perf - but after that use "normal"
   // array expansion so that we ensure the data is actually there before
   // allocating massive arrays.
-  return std::min(16384u, size);
-}
-
-inline Array initialize_array(const uint32_t size) {
- return Array::attach(VanillaVec::MakeReserveVec(get_initial_array_size(size)));
+  return Array::attach(VanillaVec::MakeReserveVec(std::min(16384u, size)));
 }
 
 inline void check_container_size(const uint32_t size) {

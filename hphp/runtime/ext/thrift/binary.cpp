@@ -176,7 +176,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
       auto const& val_spec = fieldspec.val();
       hasTypeWrapper = hasTypeWrapper || val_spec.isTypeWrapped;
       if (s_harray.equal(fieldspec.format)) {
-        DictInit arr(get_initial_array_size(size));
+        DictInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
           switch (types[0]) {
             case TType::T_I08:
@@ -208,7 +208,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         }
         return arr.toVariant();
       } else if (s_collection.equal(fieldspec.format)) {
-        auto obj(req::make<c_Map>(get_initial_array_size(size)));
+        auto obj(req::make<c_Map>(size));
         for (uint32_t s = 0; s < size; ++s) {
           auto key = binary_deserialize(
             types[0], transport, key_spec, options, hasTypeWrapper);
@@ -218,7 +218,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         }
         return Variant(std::move(obj));
       } else {
-        DictInit arr(get_initial_array_size(size));
+        DictInit arr(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           arr.setLegacyArray();
         }
@@ -250,7 +250,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         if (size == 0) {
           return Variant(req::make<c_Vector>());
         }
-        auto vec = req::make<c_Vector>(get_initial_array_size(size));
+        auto vec = req::make<c_Vector>(size);
         int64_t i = 0;
         do {
           auto val = binary_deserialize(
@@ -280,7 +280,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
       check_container_size(size);
       auto const& val_spec = fieldspec.val();
       if (s_harray.equal(fieldspec.format)) {
-        KeysetInit arr(get_initial_array_size(size));
+        KeysetInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
           arr.add(
             binary_deserialize(type, transport, val_spec, options, hasTypeWrapper)
@@ -288,7 +288,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         }
         return arr.toVariant();
       } else if (s_collection.equal(fieldspec.format)) {
-        auto set_ret(req::make<c_Set>(get_initial_array_size(size)));
+        auto set_ret(req::make<c_Set>(size));
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(
             type, transport, val_spec, options, hasTypeWrapper);
@@ -301,7 +301,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
 
         return Variant(std::move(set_ret));
       } else {
-        DictInit init(get_initial_array_size(size));
+        DictInit init(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           init.setLegacyArray();
         }

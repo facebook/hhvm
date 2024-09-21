@@ -45,6 +45,7 @@ struct HQBaseParams {
   folly::Optional<folly::SocketAddress> localAddress;
   std::vector<quic::QuicVersion> quicVersions{
       quic::QuicVersion::MVFST,
+      quic::QuicVersion::MVFST_ALIAS,
       quic::QuicVersion::MVFST_EXPERIMENTAL,
       quic::QuicVersion::MVFST_EXPERIMENTAL3,
       quic::QuicVersion::QUIC_V1,

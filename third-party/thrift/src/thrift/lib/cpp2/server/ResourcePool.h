@@ -124,6 +124,13 @@ class ResourcePool : public IResourcePoolAcceptor {
       std::string_view name,
       bool joinExecutorOnStop);
 
+  bool isAsyncPool();
+  bool isDeferredPool();
+  bool isSyncPool();
+  std::optional<ServerRequestRejection> acceptAsync(ServerRequest&& request);
+  std::optional<ServerRequestRejection> acceptDeferred(ServerRequest&& request);
+  std::optional<ServerRequestRejection> acceptSync(ServerRequest&& request);
+
   std::unique_ptr<RequestPileInterface> requestPile_;
   std::shared_ptr<folly::Executor> executor_;
   std::unique_ptr<ConcurrencyControllerInterface> concurrencyController_;

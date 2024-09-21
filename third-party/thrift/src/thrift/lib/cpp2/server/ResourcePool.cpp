@@ -66,13 +66,7 @@ ResourcePool::ResourcePool(
       concurrencyController_(std::move(concurrencyController)),
       name_(name),
       joinExecutorOnStop_(joinExecutorOnStop) {
-  // Current preconditions - either we have all three of these or none of them
-  if (requestPile_ && concurrencyController_ && executor_) {
-    // This is an async pool - that's allowed.
-  } else {
-    // This is a sync/eb pool.
-    DCHECK(!requestPile_ && !concurrencyController && !executor_);
-  }
+  DCHECK(isAsyncPool() || isDeferredPool() || isSyncPool());
 }
 
 void ResourcePool::stop() {
@@ -114,28 +108,75 @@ void ResourcePool::stop() {
 
 ResourcePool::~ResourcePool() {}
 
-std::optional<ServerRequestRejection> ResourcePool::accept(
+bool ResourcePool::isAsyncPool() {
+  return requestPile_ != nullptr && executor_ != nullptr &&
+      concurrencyController_ != nullptr;
+}
+
+bool ResourcePool::isDeferredPool() {
+  return requestPile_ == nullptr && executor_ != nullptr &&
+      concurrencyController_ == nullptr;
+}
+
+bool ResourcePool::isSyncPool() {
+  return requestPile_ == nullptr && executor_ == nullptr &&
+      concurrencyController_ == nullptr;
+}
+
+std::optional<ServerRequestRejection> ResourcePool::acceptAsync(
     ServerRequest&& request) {
-  if (requestPile_) {
-    // This pool is async, enqueue it on the requestPile
-    auto maybeRejection = requestPile_->enqueue(std::move(request));
-    if (maybeRejection) {
-      return maybeRejection;
-    }
-    concurrencyController_->onEnqueued();
-    return {std::nullopt};
-  } else {
-    // Trigger processing of request and check for queue timeouts.
-    if (!request.request()->getShouldStartProcessing()) {
+  // Enqueue the request to be scheduled for proecessing by the concurrency
+  // controller.
+  auto maybeRejection = requestPile_->enqueue(std::move(request));
+  if (maybeRejection) {
+    return maybeRejection;
+  }
+  concurrencyController_->onEnqueued();
+  return {std::nullopt};
+}
+
+std::optional<ServerRequestRejection> ResourcePool::acceptDeferred(
+    ServerRequest&& request) {
+  // Deferr the request to the executor.
+  executor_->add([request = std::move(request)]() mutable {
+    if (!request.request()->isOneway() &&
+        !request.request()->getShouldStartProcessing()) {
       auto eb = detail::ServerRequestHelper::eventBase(request);
       HandlerCallbackBase::releaseRequest(
           detail::ServerRequestHelper::request(std::move(request)), eb);
-      return {std::nullopt};
+    } else {
+      request.requestData().setRequestExecutionBegin();
+      AsyncProcessorHelper::executeRequest(std::move(request));
+      request.requestData().setRequestExecutionEnd();
     }
+  });
+  return {std::nullopt};
+}
 
-    // This pool is sync, just now we execute the request inline.
-    AsyncProcessorHelper::executeRequest(std::move(request));
+std::optional<ServerRequestRejection> ResourcePool::acceptSync(
+    ServerRequest&& request) {
+  // Trigger processing of request and check for queue timeouts.
+  if (!request.request()->getShouldStartProcessing()) {
+    auto eb = detail::ServerRequestHelper::eventBase(request);
+    HandlerCallbackBase::releaseRequest(
+        detail::ServerRequestHelper::request(std::move(request)), eb);
     return {std::nullopt};
+  }
+
+  // This pool is sync, just now we execute the request inline.
+  AsyncProcessorHelper::executeRequest(std::move(request));
+  return {std::nullopt};
+}
+
+std::optional<ServerRequestRejection> ResourcePool::accept(
+    ServerRequest&& request) {
+  if (isAsyncPool()) {
+    return acceptAsync(std::move(request));
+  } else if (isDeferredPool()) {
+    return acceptDeferred(std::move(request));
+  } else {
+    DCHECK(isSyncPool());
+    return acceptSync(std::move(request));
   }
 }
 

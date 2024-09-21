@@ -958,15 +958,15 @@ void ThriftServer::setupThreadManager() {
             .getObserver()
             .addCallback([this](folly::observer::Snapshot<uint32_t> snapshot) {
               auto maxRequests = *snapshot;
-              resourcePoolSet()
-                  .resourcePool(ResourcePoolHandle::defaultAsync())
-                  .concurrencyController()
-                  .value()
-                  .get()
-                  .setExecutionLimitRequests(
-                      maxRequests != 0
-                          ? maxRequests
-                          : std::numeric_limits<decltype(maxRequests)>::max());
+              if (auto cc =
+                      resourcePoolSet()
+                          .resourcePool(ResourcePoolHandle::defaultAsync())
+                          .concurrencyController()) {
+                cc.value().get().setExecutionLimitRequests(
+                    maxRequests != 0
+                        ? maxRequests
+                        : std::numeric_limits<decltype(maxRequests)>::max());
+              }
             });
     setMaxQpsCallbackHandle =
         detail::getThriftServerConfig(*this)
@@ -974,15 +974,14 @@ void ThriftServer::setupThreadManager() {
             .getObserver()
             .addCallback([this](folly::observer::Snapshot<uint32_t> snapshot) {
               auto maxQps = *snapshot;
-              resourcePoolSet()
-                  .resourcePool(ResourcePoolHandle::defaultAsync())
-                  .concurrencyController()
-                  .value()
-                  .get()
-                  .setQpsLimit(
-                      maxQps != 0
-                          ? maxQps
-                          : std::numeric_limits<decltype(maxQps)>::max());
+              if (auto cc =
+                      resourcePoolSet()
+                          .resourcePool(ResourcePoolHandle::defaultAsync())
+                          .concurrencyController()) {
+                cc.value().get().setQpsLimit(
+                    maxQps != 0 ? maxQps
+                                : std::numeric_limits<decltype(maxQps)>::max());
+              }
             });
     // Create an adapter so calls to getThreadManager_deprecated will work
     // when we are using resource pools

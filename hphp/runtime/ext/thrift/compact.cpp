@@ -1118,7 +1118,7 @@ struct CompactReader {
       const uint32_t size,
       bool& hasTypeWrapper
     ) {
-      DictInit arr(size);
+      DictInit arr(get_initial_array_size(size));
       switch (keyType) {
         case TType::T_I08:
         case TType::T_I16:
@@ -1163,7 +1163,7 @@ struct CompactReader {
       const uint32_t size,
       bool& hasTypeWrapper
     ) {
-      auto map(req::make<c_Map>(size));
+      auto map(req::make<c_Map>(get_initial_array_size(size)));
       if (spec.key().adapter == nullptr && spec.val().adapter == nullptr &&
           typeIs16to64Int(keyType) && typeIs16to64Int(valueType)) {
         hasTypeWrapper = hasTypeWrapper || spec.key().isTypeWrapped || spec.val().isTypeWrapped;
@@ -1190,7 +1190,7 @@ struct CompactReader {
       } else if (s_collection.equal(spec.format)) {
         return readMapCollection(spec, keyType, valueType, size, hasTypeWrapper);
       } else {
-        DictInit arr(size);
+        DictInit arr(get_initial_array_size(size));
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           arr.setLegacyArray();
         }
@@ -1260,7 +1260,7 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(req::make<c_Vector>());
       }
-      auto vec = req::make<c_Vector>(size);
+      auto vec = req::make<c_Vector>(get_initial_array_size(size));
       if (spec.val().adapter == nullptr && typeIs16to64Int(valueType)) {
         readIntList(
           [&, i = 0LL](int64_t val) mutable {
@@ -1307,14 +1307,14 @@ struct CompactReader {
       readListBegin(valueType, size);
 
       if (s_harray.equal(spec.format)) {
-        KeysetInit arr(size);
+        KeysetInit arr(get_initial_array_size(size));
         for (uint32_t i = 0; i < size; i++) {
           arr.add(readField(spec.val(), valueType, hasTypeWrapper));
         }
         readCollectionEnd();
         return arr.toVariant();
       } else if (s_collection.equal(spec.format)) {
-        auto set_ret = req::make<c_Set>(size);
+        auto set_ret = req::make<c_Set>(get_initial_array_size(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(spec.val(), valueType, hasTypeWrapper);
           set_ret->add(value);
@@ -1322,7 +1322,7 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(std::move(set_ret));
       } else {
-        DictInit ainit(size);
+        DictInit ainit(get_initial_array_size(size));
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           ainit.setLegacyArray();
         }

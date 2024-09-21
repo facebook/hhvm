@@ -35,8 +35,15 @@ DEFINE_int32(
     -1,
     "Configures max requests, 0 will disable max request limit");
 DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
-DEFINE_bool(no_resource_pile_or_cc, false, "Disable resource pile and cc");
-DEFINE_bool(work_stealing, false, "Enable work stealing test");
+DEFINE_bool(
+    work_stealing,
+    false,
+    "Enable work stealing test. Implies --enable_resource_pools");
+DEFINE_bool(
+    work_stealing_executor_only,
+    false,
+    "Enable work stealing test without request pile or concurrency controller."
+    " Implies --work_stealing and --enable_resource_pools");
 DEFINE_string(
     certPath,
     "folly/io/async/test/certs/tests-cert.pem",
@@ -59,6 +66,18 @@ namespace thrift {
 namespace stress {
 
 namespace {
+
+bool enableResourcePools() {
+  // These flags explicitly or implicitly enable resource pools.
+  return FLAGS_enable_resource_pools || FLAGS_work_stealing ||
+      FLAGS_work_stealing_executor_only;
+}
+
+bool enableWorkStealing() {
+  // These flags explicitly or implicitly enable work stealing executor.
+  return FLAGS_work_stealing || FLAGS_work_stealing_executor_only;
+}
+
 uint32_t sanitizeNumThreads(int32_t n) {
   return n <= 0 ? std::thread::hardware_concurrency() : n;
 }
@@ -143,50 +162,36 @@ std::shared_ptr<ThriftServer> createStressTestServer(
       !FLAGS_caPath.empty()) {
     server->setSSLConfig(getSSLConfig());
   }
-  if (FLAGS_no_resource_pile_or_cc) {
-    LOG(INFO) << "Resource Pile and CC disabled";
-    server->resourcePoolSet().setResourcePool(
-        apache::thrift::ResourcePoolHandle::defaultAsync(),
-        nullptr,
-        std::make_shared<folly::CPUThreadPoolExecutor>(
-            sanitizeNumThreads(FLAGS_cpu_threads)),
-        nullptr);
 
-    server->ensureResourcePools();
-    server->requireResourcePools();
-  }
-
-  if (FLAGS_enable_resource_pools) {
-    server->ensureResourcePools();
-    server->requireResourcePools();
-  }
-
-  if (FLAGS_work_stealing) {
-    LOG(INFO) << "Work stealing enabled";
-    auto t = sanitizeNumThreads(FLAGS_cpu_threads);
-
-    auto executor = std::make_shared<folly::WorkStealingExecutor>(t, 4 * t);
-
-    RoundRobinRequestPile::Options options;
-
-    std::unique_ptr<RequestPileInterface> requestPile{
-        std::make_unique<RoundRobinRequestPile>(std::move(options))};
-
-    auto theConcurrencyController =
-        std::make_unique<ParallelConcurrencyController>(
+  if (enableResourcePools()) {
+    LOG(INFO) << "Resource pools enabled";
+    std::shared_ptr<folly::Executor> executor;
+    std::unique_ptr<RequestPileInterface> requestPile;
+    std::unique_ptr<ConcurrencyControllerInterface> concurrencyController;
+    if (enableWorkStealing()) {
+      LOG(INFO) << "Work stealing executor enabled";
+      auto t = sanitizeNumThreads(FLAGS_cpu_threads);
+      executor = std::make_shared<folly::WorkStealingExecutor>(t, 4 * t);
+      if (FLAGS_work_stealing_executor_only) {
+        LOG(INFO) << "Request pile and concurrency controller disabled";
+      } else {
+        RoundRobinRequestPile::Options options;
+        requestPile =
+            std::make_unique<RoundRobinRequestPile>(std::move(options));
+        concurrencyController = std::make_unique<ParallelConcurrencyController>(
             *requestPile.get(), *executor.get());
+      }
+    }
 
     server->resourcePoolSet().setResourcePool(
-        apache::thrift::ResourcePoolHandle::defaultAsync(),
+        ResourcePoolHandle::defaultAsync(),
         std::move(requestPile),
         executor,
-        std::move(theConcurrencyController),
-        concurrency::PRIORITY::NORMAL,
-        false);
-
+        std::move(concurrencyController));
     server->ensureResourcePools();
     server->requireResourcePools();
   }
+
   return server;
 }
 

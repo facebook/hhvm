@@ -52,7 +52,7 @@ let generate_tables template =
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
 
   let defs =
-    let get_defs (_, (defs, _)) = defs in
+    let get_defs (_, (env, _)) = Gen.Environment.definitions env in
     let ty_defs = Hashtbl.to_alist ty_table |> List.map ~f:get_defs in
     List.concat ty_defs
   in

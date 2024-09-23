@@ -16,6 +16,8 @@ module Environment : sig
   type t
 
   val default : t
+
+  val definitions : t -> Definition.t list
 end
 
 module Type : sig
@@ -25,5 +27,5 @@ module Type : sig
 
   val show : t -> string
 
-  val mk : Environment.t -> depth:int option -> Definition.t list * t
+  val mk : Environment.t -> depth:int option -> Environment.t * t
 end

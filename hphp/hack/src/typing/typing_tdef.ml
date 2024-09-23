@@ -18,16 +18,23 @@ module TUtils = Typing_utils
 module Phase = Typing_phase
 module MakeType = Typing_make_type
 
-(** [expand_typedef_ ~force_expand ety_env env r name ty_args] looks up the type
-  alias [name] in the decls and returns the value of the type alias as a locl_ty, with
-  type parameters substituted with [ty_args].
+type expansion =
+  | Rhs of decl_ty
+  | Opaque of (* constraint *) decl_ty
 
+type expand_result = {
+  tparams: decl_tparam list;
+  expansion: expansion;
+}
+
+(** [expand_typedef_decl ~force_expand ~expand_visible_newtype env r name ty_args] looks up the type
+  alias [name].
   It will not expand opaque type aliases (`newtype`) unless they're visible (in the current file)
   or [force_expand] is true.
   *)
-let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
-  let pos = Reason.to_pos r in
-  let td = unsafe_opt @@ Decl_entry.to_option (Env.get_typedef env x) in
+let expand_typedef_decl
+    ~force_expand ~expand_visible_newtype env (x : string) (td : typedef_type) :
+    expand_result =
   let {
     td_pos;
     td_module = _;
@@ -44,12 +51,38 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
   } =
     td
   in
+  let should_expand =
+    force_expand
+    || Env.is_typedef_visible env ~expand_visible_newtype ~name:x td
+  in
+  let expansion =
+    if should_expand then
+      Rhs td_type
+    else
+      Opaque
+        (match td_as_constraint with
+        | None ->
+          MakeType.mixed (Reason.implicit_upper_bound (td_pos, "?nonnull"))
+        | Some cstr -> cstr)
+  in
+  { tparams = td_tparams; expansion }
+
+(** [expand_typedef_ ~force_expand ety_env env r name ty_args] looks up the type
+  alias [name] in the decls and returns the value of the type alias as a locl_ty, with
+  type parameters substituted with [ty_args].
+
+  It will not expand opaque type aliases (`newtype`) unless they're visible (in the current file)
+  or [force_expand] is true.
+  *)
+let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
+  let td = unsafe_opt @@ Decl_entry.to_option (Env.get_typedef env x) in
+  let { td_pos; td_as_constraint; _ } = td in
   match
     Typing_defs.add_type_expansion_check_cycles
       ety_env
       {
         Type_expansions.name = Type_expansions.Expandable.Type_alias x;
-        use_pos = pos;
+        use_pos = Reason.to_pos r;
         def_pos = Some td_pos;
       }
   with
@@ -66,46 +99,30 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
     in
     ((env, None, [cycle]), (ety_env, ty))
   | Ok ety_env ->
-    let should_expand =
-      force_expand
-      || Env.is_typedef_visible
-           env
-           ~expand_visible_newtype:ety_env.expand_visible_newtype
-           ~name:x
-           td
+    let { tparams; expansion } =
+      expand_typedef_decl
+        ~force_expand
+        ~expand_visible_newtype:ety_env.expand_visible_newtype
+        env
+        x
+        td
     in
-    let ety_env =
-      {
-        ety_env with
-        substs = Subst.make_locl td_tparams argl;
-        on_error =
-          (* Don't report errors in expanded definition.
-           * These will have been reported at the definition site already. *)
-          None;
-      }
-    in
+    let substs = Subst.make_locl tparams argl in
+    let ety_env = { ety_env with substs } in
     let ((env, err, cycles), expanded_ty) =
-      if should_expand then
-        Phase.localize_rec ~ety_env env td_type
-      else
-        let (env, td_as_constraint) =
-          match td_as_constraint with
-          | None ->
-            let r_cstr =
-              Reason.implicit_upper_bound (Reason.to_pos r, "?nonnull")
-            in
-            let cstr = MakeType.mixed r_cstr in
-            ((env, None, []), cstr)
-          | Some cstr ->
-            (* Special case for supportdyn<T> defined with "as T" in order to
-             * avoid supportdynamic.hhi appearing in reason *)
-            if String.equal x SN.Classes.cSupportDyn then
-              ((env, None, []), List.hd_exn argl)
-            else
-              Phase.localize_rec ~ety_env env cstr
+      match expansion with
+      | Rhs ty -> Phase.localize_rec ~ety_env env ty
+      | Opaque cstr_ty ->
+        let ((env, err, cycles), cstr_ty) =
+          (* Special case for supportdyn<T> defined with "as T" in order to
+           * avoid supportdynamic.hhi appearing in reason *)
+          if String.equal x SN.Classes.cSupportDyn then
+            ((env, None, []), List.hd_exn argl)
+          else
+            Phase.localize_rec ~ety_env env cstr_ty
         in
-        (* TODO: update Tnewtype and pass in super constraint as well *)
-        (env, mk (r, Tnewtype (x, argl, td_as_constraint)))
+        let ty = mk (r, Tnewtype (x, argl, cstr_ty)) in
+        ((env, err, cycles), ty)
     in
     ((env, err, cycles), (ety_env, with_reason expanded_ty r))
 

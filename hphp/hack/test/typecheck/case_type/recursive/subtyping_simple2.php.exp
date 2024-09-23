@@ -2,7 +2,7 @@ ERROR: File "subtyping_simple2.php", line 11, characters 14-15:
 Invalid argument (Typing[4110])
   File "subtyping_simple2.php", line 7, characters 21-23:
   Expected `int`
-  File "subtyping_simple2.php", line 9, characters 14-14:
+  File "subtyping_simple2.php", line 4, characters 11-11:
   But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
 ERROR: File "subtyping_simple2.php", line 4, characters 11-11:
 Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag (Typing[4475])

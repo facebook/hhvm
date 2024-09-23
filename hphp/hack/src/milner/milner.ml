@@ -34,13 +34,7 @@ let init_table contents placeholder =
 (* Generate types and conforming expressions for all placeholders in the
    template *)
 let generate_tables template =
-  let mk_type () =
-    Gen.Type.mk
-      ~for_option:false
-      ~for_reified:false
-      ~for_alias:false
-      ~depth:None
-  in
+  let mk_type () = Gen.Type.mk Gen.Environment.default ~depth:None in
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
   let ty_table = Hashtbl.map ty_table ~f:mk_type in

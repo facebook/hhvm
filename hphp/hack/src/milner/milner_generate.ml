@@ -79,7 +79,51 @@ module Container = struct
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 end
 
-module Kind = struct
+module rec Environment : sig
+  type t = {
+    for_option: bool;
+    for_reified: bool;
+    for_alias: bool;
+  }
+
+  val default : t
+end = struct
+  type t = {
+    for_option: bool;
+    for_reified: bool;
+    for_alias: bool;
+  }
+
+  let default = { for_option = false; for_reified = false; for_alias = false }
+end
+
+and Kind : sig
+  type t =
+    | Mixed
+    | Primitive
+    | Option
+    | Classish
+    | Alias
+    | Newtype
+    | TypeConst
+    | Case
+    | Enum
+    | Container
+    | Tuple
+    | Shape
+    | Awaitable
+    | Function
+
+  val pick : Environment.t -> t
+
+  type classish =
+    | Class
+    | Interface
+    | AbstractClass
+  [@@deriving eq, ord]
+
+  val pick_classish : unit -> classish
+end = struct
   type t =
     | Mixed
     | Primitive
@@ -97,25 +141,25 @@ module Kind = struct
     | Function
   [@@deriving enum, eq]
 
-  let pick ~for_option ~for_reified ~for_alias =
+  let pick env =
     let kinds =
       List.range ~start:`inclusive ~stop:`inclusive min max
       |> List.map ~f:(fun i -> of_enum i |> Option.value_exn)
     in
     let kinds =
-      if for_alias then
+      if env.Environment.for_alias then
         List.filter ~f:(fun k -> not @@ equal k TypeConst) kinds
       else
         kinds
     in
     let kinds =
-      if for_reified then
+      if env.Environment.for_reified then
         List.filter ~f:(fun k -> not @@ equal k Function) kinds
       else
         kinds
     in
     let kinds =
-      if for_option then
+      if env.Environment.for_option then
         List.filter ~f:(fun k -> not @@ equal k Case) kinds
       else
         kinds
@@ -134,7 +178,7 @@ module Kind = struct
     |> Option.value_exn
 end
 
-module rec Definition : sig
+and Definition : sig
   type t
 
   val show : t -> string
@@ -261,12 +305,7 @@ and Type : sig
 
   val inhabitant_of : t -> string
 
-  val mk :
-    for_option:bool ->
-    for_reified:bool ->
-    for_alias:bool ->
-    depth:int option ->
-    t * Definition.t list
+  val mk : Environment.t -> depth:int option -> t * Definition.t list
 end = struct
   type field = {
     key: string;
@@ -743,7 +782,7 @@ end = struct
     subtypes_of ~pick:true (Primitive Primitive.Arraykey) |> List.hd_exn
 
   let rec mk_classish
-      ~for_reified
+      env
       ~(parent : (Kind.classish * string * generic option) option)
       ~(depth : int) =
     let kind =
@@ -758,8 +797,7 @@ end = struct
           Kind.pick_classish ()
     in
     let gen_children ~parent n =
-      List.init n ~f:(fun _ ->
-          mk_classish ~for_reified ~parent ~depth:(depth + 1))
+      List.init n ~f:(fun _ -> mk_classish env ~parent ~depth:(depth + 1))
       |> map_and_collect ~f:Fn.id
     in
     let (name, num_of_children) =
@@ -792,11 +830,15 @@ end = struct
           (not Kind.(equal_classish kind Interface)) && Random.bool ()
         in
         let (instantiation, defs) =
-          mk
-            ~for_option:false
-            ~for_reified:(is_reified || for_reified)
-            ~for_alias:false
-            ~depth:(Some depth)
+          let env =
+            Environment.
+              {
+                for_option = false;
+                for_reified = is_reified || env.Environment.for_reified;
+                for_alias = false;
+              }
+          in
+          mk env ~depth:(Some depth)
         in
         (Some { instantiation; is_reified }, defs)
       else
@@ -808,17 +850,17 @@ end = struct
     let def = Definition.classish kind ~name ~parent ~generic ~members:[] in
     (Classish { name; kind; children; generic }, def :: (generic_defs @ defs))
 
-  and mk ~for_option ~for_reified ~for_alias ~(depth : int option) =
+  and mk (env : Environment.t) ~(depth : int option) =
     let depth = Option.value ~default:0 depth in
-    let mk ~for_option ?(for_alias = false) () =
-      mk ~for_option ~for_reified ~for_alias ~depth:(Some depth)
+    let mk ?(for_alias = false) env =
+      mk Environment.{ env with for_alias } ~depth:(Some depth)
     in
-    match Kind.pick ~for_option ~for_alias ~for_reified with
+    match Kind.pick env with
     | Kind.Mixed -> (Mixed, [])
     | Kind.Primitive -> (Primitive (Primitive.pick ()), [])
     | Kind.Option ->
       let rec candidate () =
-        match mk ~for_option:true () with
+        match mk Environment.{ env with for_option = true } with
         | (Mixed, _) -> candidate ()
         | (Option _, _) as res ->
           res
@@ -828,23 +870,24 @@ end = struct
       in
       candidate ()
     | Kind.Awaitable ->
-      let (ty, defs) = mk ~for_option:false () in
+      let (ty, defs) = mk Environment.{ env with for_option = false } in
       (Awaitable ty, defs)
-    | Kind.Classish -> mk_classish ~for_reified ~parent:None ~depth
+    | Kind.Classish -> mk_classish env ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
-      let (aliased, defs) = mk ~for_option ~for_alias:true () in
+      let (aliased, defs) = mk env ~for_alias:true in
       (Alias { name; aliased }, Definition.alias ~name aliased :: defs)
     | Kind.Newtype ->
       let name = fresh "N" in
       let producer = fresh ("mk" ^ name) in
+      let mk = mk ~for_alias:true in
       let (aliased, bound, defs) =
         if Random.bool () then
-          let (bound, defs) = mk ~for_option ~for_alias:true () in
+          let (bound, defs) = mk env in
           let aliased = subtypes_of ~pick:true bound |> List.hd_exn in
           (aliased, Some bound, defs)
         else
-          let (aliased, defs) = mk ~for_option ~for_alias:true () in
+          let (aliased, defs) = mk env in
           (aliased, None, defs)
       in
       let newtype_def = Definition.newtype ~name ~bound aliased in
@@ -856,7 +899,7 @@ end = struct
       (ty, newtype_def :: newtype_producer_def :: defs)
     | Kind.TypeConst ->
       let tc_name = fresh "TC" in
-      let (aliased, defs) = mk ~for_option () in
+      let (aliased, defs) = mk env in
       let typeconst_def = Definition.typeconst ~name:tc_name aliased in
       let class_name = fresh "CTC" in
       let class_def =
@@ -871,9 +914,10 @@ end = struct
       (TypeConst { name = qualified_name; aliased }, class_def :: defs)
     | Kind.Case ->
       let name = fresh "CT" in
+      let mk = mk ~for_alias:true in
       let rec add_disjuncts (disjuncts, defs) =
         if Random.bool () then
-          let (disjunct, defs') = mk ~for_option ~for_alias:true () in
+          let (disjunct, defs') = mk env in
           if List.for_all disjuncts ~f:(are_disjoint disjunct) then
             add_disjuncts @@ (disjunct :: disjuncts, defs' @ defs)
           else
@@ -881,7 +925,7 @@ end = struct
         else
           (disjuncts, defs)
       in
-      let (ty, defs) = mk ~for_option ~for_alias:true () in
+      let (ty, defs) = mk env in
       let (disjuncts, defs) = add_disjuncts ([ty], defs) in
       let case_type_def = Definition.case_type ~name disjuncts in
       (Case { name; disjuncts }, case_type_def :: defs)
@@ -900,13 +944,14 @@ end = struct
       let enum_def = Definition.enum ~name ~bound underlying_ty ~value in
       (Enum { name }, [enum_def])
     | Kind.Container -> begin
+      let env = Environment.{ env with for_option = false } in
       match Container.pick () with
       | Container.Vec ->
-        let (ty, defs) = mk ~for_option:false () in
+        let (ty, defs) = mk env in
         (Vec ty, defs)
       | Container.Dict ->
         let key = mk_arraykey () in
-        let (value, defs) = mk ~for_option:false () in
+        let (value, defs) = mk env in
         (Dict { key; value }, defs)
       | Container.Keyset ->
         let ty = mk_arraykey () in
@@ -916,15 +961,15 @@ end = struct
       (* Sadly, although nullary tuples can be generated with an expression,
          there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
+      let env = Environment.{ env with for_option = false } in
       let (conjuncts, defs) =
-        List.init n ~f:(fun _ -> mk ~for_option:false ())
-        |> map_and_collect ~f:Fn.id
+        List.init n ~f:(fun _ -> mk env) |> map_and_collect ~f:Fn.id
       in
       (Tuple { conjuncts; open_ = false }, defs)
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
       let mk_field key =
-        let (ty, defs) = mk ~for_option:false () in
+        let (ty, defs) = mk Environment.{ env with for_option = false } in
         let optional = Random.bool () in
         ({ key; optional; ty }, defs)
       in
@@ -932,16 +977,17 @@ end = struct
       let open_ = Random.bool () in
       (Shape { fields; open_ }, defs)
     | Kind.Function ->
+      let env = Environment.{ env with for_option = false } in
       let (parameters, parameter_defs) =
         List.init (geometric_between 0 3) ~f:(fun _ -> ())
-        |> map_and_collect ~f:(mk ~for_option:false)
+        |> map_and_collect ~f:(fun () -> mk env)
       in
-      let (return_, return_defs) = mk ~for_option:false () in
+      let (return_, return_defs) = mk env in
       let (variadic, variadic_defs) =
         if Random.bool () then
           (None, [])
         else
-          let (ty, defs) = mk ~for_option:false () in
+          let (ty, defs) = mk env in
           (Some ty, defs)
       in
       ( Function { parameters; variadic; return_ },

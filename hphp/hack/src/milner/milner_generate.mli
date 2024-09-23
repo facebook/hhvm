@@ -12,6 +12,12 @@ module Definition : sig
   val show : t -> string
 end
 
+module Environment : sig
+  type t
+
+  val default : t
+end
+
 module Type : sig
   type t
 
@@ -19,10 +25,5 @@ module Type : sig
 
   val show : t -> string
 
-  val mk :
-    for_option:bool ->
-    for_reified:bool ->
-    for_alias:bool ->
-    depth:int option ->
-    t * Definition.t list
+  val mk : Environment.t -> depth:int option -> t * Definition.t list
 end

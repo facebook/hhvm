@@ -68,36 +68,16 @@ namespace HH {
      * key.
      * Attempting to fetch the Implicit Context in this function or a recursive
      * callee will result in an exception.
-     * Calling an "uncategorized" memoized function including one using
-     * #SoftMakeICInaccessible will result in an exception.
      */
     string MakeICInaccessible = 'MakeICInaccessible';
-    /**
-     * Will throw if called with an Implicit Context value.
-     * Do not incorporate the Implicit Context state into the memoization cache
-     * key.
-     * Behaviors that would result in an exception under #MakeICInaccessible
-     * will log instead.
-     */
-    string SoftMakeICInaccessible = 'SoftMakeICInaccessible';
-    /**
-     * Default option for memoization attributes.
-     * Will throw if called with an Implicit Context value.
-     * Do not incorporate the Implicit Context state into the memoization cache
-     * key.
-     */
-    string Uncategorized = 'Uncategorized';
   }
 
   /**
    * States obtainable via get_state_unsafe
    */
   enum State: string as string {
-    NULL = 'NULL';
     VALUE = 'VALUE';
-    SOFT_SET = 'SOFT_SET';
     INACCESSIBLE = 'INACCESSIBLE';
-    SOFT_INACCESSIBLE = 'SOFT_INACCESSIBLE';
   }
 
 } // namespace HH

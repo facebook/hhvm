@@ -77,6 +77,7 @@ module rec Environment : sig
     for_reified: bool;
     for_alias: bool;
     definitions: Definition.t list;
+    subtypes: Type.t list TypeMap.t;
   }
 
   val default : t
@@ -84,12 +85,17 @@ module rec Environment : sig
   val add_definition : t -> Definition.t -> t
 
   val definitions : t -> Definition.t list
+
+  val record_subtype : t -> super:Type.t -> sub:Type.t -> t
+
+  val get_subtypes : t -> Type.t -> Type.t list
 end = struct
   type t = {
     for_option: bool;
     for_reified: bool;
     for_alias: bool;
     definitions: Definition.t list;
+    subtypes: Type.t list TypeMap.t;
   }
 
   let default =
@@ -98,11 +104,22 @@ end = struct
       for_reified = false;
       for_alias = false;
       definitions = [];
+      subtypes = TypeMap.empty;
     }
 
   let add_definition env def = { env with definitions = def :: env.definitions }
 
   let definitions env = env.definitions
+
+  let record_subtype env ~super ~sub =
+    let add = function
+      | None -> Some [sub]
+      | Some subs -> Some (sub :: subs)
+    in
+    { env with subtypes = TypeMap.update super add env.subtypes }
+
+  let get_subtypes env super =
+    Option.value ~default:[] @@ TypeMap.find_opt super env.subtypes
 end
 
 and Kind : sig
@@ -302,7 +319,7 @@ end = struct
 end
 
 and Type : sig
-  type t
+  type t [@@deriving ord]
 
   type generic = {
     instantiation: t;
@@ -311,7 +328,7 @@ and Type : sig
 
   val show : t -> string
 
-  val inhabitant_of : t -> string
+  val inhabitant_of : Environment.t -> t -> string
 
   val mk : Environment.t -> depth:int option -> Environment.t * t
 end = struct
@@ -334,7 +351,6 @@ end = struct
     | Classish of {
         name: string;
         kind: Kind.classish;
-        children: t list;
         generic: generic option;
       }
     | Alias of {
@@ -420,9 +436,9 @@ end = struct
 
       If `pick` is set it curtails field selection to one inhabited subfield for
       efficiency. *)
-  let rec subfields_of ~pick { key; ty; optional } =
+  let rec subfields_of env ~pick { key; ty; optional } =
     let open List.Let_syntax in
-    let* ty = subtypes_of ~pick ty in
+    let* ty = subtypes_of env ~pick ty in
     let+ optional =
       if optional then
         select_or_id ~pick [true; false]
@@ -438,9 +454,9 @@ end = struct
 
       If `pick` is set to true, then we curtail picked types along the way to
       make it efficient to pick an inhabited type. *)
-  and subtypes_of ~pick ty =
-    let subtypes_of = subtypes_of ~pick in
-    let subfields_of = subfields_of ~pick in
+  and subtypes_of env ~pick ty =
+    let subtypes_of = subtypes_of env ~pick in
+    let subfields_of = subfields_of env ~pick in
     let pick_inhabited xs =
       if pick then
         [select @@ List.filter ~f:is_immediately_inhabited xs]
@@ -449,82 +465,86 @@ end = struct
     in
     pick_inhabited
     @@ ty
-       ::
-       (match ty with
-       | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
-       | Primitive prim -> begin
-         let open Primitive in
-         match prim with
-         | Null
-         | Int
-         | String
-         | Float
-         | Bool ->
-           []
-         | Arraykey -> [Primitive Int; Primitive String]
-         | Num -> [Primitive Int; Primitive Float]
-       end
-       | Option ty -> Primitive Primitive.Null :: subtypes_of ty
-       | Awaitable ty ->
-         let open List.Let_syntax in
-         let+ ty = subtypes_of ty in
-         Awaitable ty
-       | Classish info -> List.concat_map ~f:subtypes_of info.children
-       | Alias info -> subtypes_of info.aliased
-       | TypeConst info -> subtypes_of info.aliased
-       | Newtype _ -> []
-       | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
-       | Enum _ -> []
-       | Vec ty ->
-         let open List.Let_syntax in
-         let+ ty = subtypes_of ty in
-         Vec ty
-       | Dict { key; value } ->
-         let open List.Let_syntax in
-         let* key = subtypes_of key in
-         let+ value = subtypes_of value in
-         Dict { key; value }
-       | Keyset ty ->
-         let open List.Let_syntax in
-         let+ ty = subtypes_of ty in
-         Keyset ty
-       | Tuple { conjuncts; open_ } ->
-         let open List.Let_syntax in
-         let* conjuncts =
-           List.map ~f:subtypes_of conjuncts |> List.Cartesian_product.all
-         in
-         let+ open_ =
-           if open_ then
-             (* Here we should be adding new conjuncts, but with the current setup
-                that's too expensive. Need memoization to make it more affordable. *)
-             select_or_id ~pick [true; false]
-           else
-             [false]
-         in
-         Tuple { conjuncts; open_ }
-       | Shape { fields; open_ } ->
-         let open List.Let_syntax in
-         let* fields =
-           List.map ~f:subfields_of fields |> List.Cartesian_product.all
-         in
-         let+ open_ =
-           if open_ then
-             (* Here we should be adding new fields, but with the current setup
-                that's too expensive. Need memoization to make it more affordable. *)
-             select_or_id ~pick [true; false]
-           else
-             [false]
-         in
-         Shape { fields; open_ }
-       | Function { parameters; variadic; return_ } ->
-         let open List.Let_syntax in
-         let* return_ = subtypes_of return_ in
-         let+ variadic =
-           match variadic with
-           | None -> None :: List.map ~f:(fun ty -> Some ty) (subtypes_of Mixed)
-           | Some ty -> [Some ty]
-         in
-         Function { parameters; variadic; return_ })
+       :: begin
+            List.concat_map ~f:subtypes_of (Environment.get_subtypes env ty)
+            @
+            match ty with
+            | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
+            | Primitive prim -> begin
+              let open Primitive in
+              match prim with
+              | Null
+              | Int
+              | String
+              | Float
+              | Bool ->
+                []
+              | Arraykey -> [Primitive Int; Primitive String]
+              | Num -> [Primitive Int; Primitive Float]
+            end
+            | Option ty -> Primitive Primitive.Null :: subtypes_of ty
+            | Awaitable ty ->
+              let open List.Let_syntax in
+              let+ ty = subtypes_of ty in
+              Awaitable ty
+            | Classish _ -> []
+            | Alias info -> subtypes_of info.aliased
+            | TypeConst info -> subtypes_of info.aliased
+            | Newtype _ -> []
+            | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
+            | Enum _ -> []
+            | Vec ty ->
+              let open List.Let_syntax in
+              let+ ty = subtypes_of ty in
+              Vec ty
+            | Dict { key; value } ->
+              let open List.Let_syntax in
+              let* key = subtypes_of key in
+              let+ value = subtypes_of value in
+              Dict { key; value }
+            | Keyset ty ->
+              let open List.Let_syntax in
+              let+ ty = subtypes_of ty in
+              Keyset ty
+            | Tuple { conjuncts; open_ } ->
+              let open List.Let_syntax in
+              let* conjuncts =
+                List.map ~f:subtypes_of conjuncts |> List.Cartesian_product.all
+              in
+              let+ open_ =
+                if open_ then
+                  (* Here we should be adding new conjuncts, but with the current setup
+                     that's too expensive. Need memoization to make it more affordable. *)
+                  select_or_id ~pick [true; false]
+                else
+                  [false]
+              in
+              Tuple { conjuncts; open_ }
+            | Shape { fields; open_ } ->
+              let open List.Let_syntax in
+              let* fields =
+                List.map ~f:subfields_of fields |> List.Cartesian_product.all
+              in
+              let+ open_ =
+                if open_ then
+                  (* Here we should be adding new fields, but with the current setup
+                     that's too expensive. Need memoization to make it more affordable. *)
+                  select_or_id ~pick [true; false]
+                else
+                  [false]
+              in
+              Shape { fields; open_ }
+            | Function { parameters; variadic; return_ } ->
+              let open List.Let_syntax in
+              let* return_ = subtypes_of return_ in
+              let+ variadic =
+                match variadic with
+                | None ->
+                  None :: List.map ~f:(fun ty -> Some ty) (subtypes_of Mixed)
+                | Some ty -> [Some ty]
+              in
+              Function { parameters; variadic; return_ }
+          end
 
   let rec show_field { key; ty; optional } =
     let optional =
@@ -550,7 +570,7 @@ end = struct
     end
     | Option ty -> "?" ^ show ty
     | Awaitable ty -> Format.sprintf "Awaitable<%s>" (show ty)
-    | Classish { name; generic; children = _; kind = _ } ->
+    | Classish { name; generic; kind = _ } ->
       let generic =
         match generic with
         | Some generic -> Format.sprintf "<%s>" (show generic.instantiation)
@@ -607,7 +627,7 @@ end = struct
       let return_ = show return_ in
       Format.sprintf "(function(%s%s): %s)" parameters variadic return_
 
-  let are_disjoint ty ty' =
+  let are_disjoint env ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
        hierarchy so that it is easy to enumerate subtypes. This is fine because
        it can only make disjointness more conservative.
@@ -653,15 +673,7 @@ end = struct
           Dict { key = Primitive Primitive.Arraykey; value = Mixed };
         ]
       | Function _ ->
-        [
-          Classish
-            {
-              kind = Kind.Class;
-              name = "Closure";
-              children = [];
-              generic = None;
-            };
-        ]
+        [Classish { kind = Kind.Class; name = "Closure"; generic = None }]
       | Mixed
       | Primitive _
       | Classish _ ->
@@ -669,7 +681,7 @@ end = struct
     in
     let ordered_subtypes ty =
       weaken_for_disjointness ty
-      |> List.concat_map ~f:(subtypes_of ~pick:false)
+      |> List.concat_map ~f:(subtypes_of env ~pick:false)
       |> List.sort ~compare
     in
     let subtypes = ordered_subtypes ty in
@@ -775,8 +787,8 @@ end = struct
     | Case _ ->
       None
 
-  let inhabitant_of ty =
-    let subtypes = subtypes_of ~pick:true ty in
+  let inhabitant_of env ty =
+    let subtypes = subtypes_of env ~pick:true ty in
     let inhabitants = List.filter_map subtypes ~f:expr_of in
     try select inhabitants with
     | Failure _ ->
@@ -786,8 +798,8 @@ end = struct
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
-  let mk_arraykey () =
-    subtypes_of ~pick:true (Primitive Primitive.Arraykey) |> List.hd_exn
+  let mk_arraykey env =
+    subtypes_of env ~pick:true (Primitive Primitive.Arraykey) |> List.hd_exn
 
   let rec mk_classish
       env
@@ -806,8 +818,15 @@ end = struct
     in
     let gen_children env ~parent n =
       List.init n ~f:(fun _ -> ())
-      |> List.fold_map ~init:env ~f:(fun env _ ->
-             mk_classish env ~parent ~depth:(depth + 1))
+      |> List.fold ~init:env ~f:(fun env _ ->
+             let (env, child) =
+               mk_classish env ~parent:(Some parent) ~depth:(depth + 1)
+             in
+             let (kind, name, generic) = parent in
+             Environment.record_subtype
+               env
+               ~super:(Classish { kind; name; generic })
+               ~sub:child)
     in
     let (name, num_of_children) =
       match kind with
@@ -854,14 +873,12 @@ end = struct
       else
         (env, None)
     in
-    let (env, children) =
-      gen_children env ~parent:(Some (kind, name, generic)) num_of_children
-    in
+    let env = gen_children env ~parent:(kind, name, generic) num_of_children in
     let env =
       Environment.add_definition env
       @@ Definition.classish kind ~name ~parent ~generic ~members:[]
     in
-    (env, Classish { name; kind; children; generic })
+    (env, Classish { kind; name; generic })
 
   and mk (env : Environment.t) ~(depth : int option) : Environment.t * t =
     let depth = Option.value ~default:0 depth in
@@ -900,7 +917,7 @@ end = struct
       let (env, aliased, bound) =
         if Random.bool () then
           let (env, bound) = mk env in
-          let aliased = subtypes_of ~pick:true bound |> List.hd_exn in
+          let aliased = subtypes_of env ~pick:true bound |> List.hd_exn in
           (env, aliased, Some bound)
         else
           let (env, aliased) = mk env in
@@ -910,7 +927,7 @@ end = struct
         Environment.add_definition env
         @@ Definition.newtype ~name ~bound aliased
       in
-      let aliased_expr = inhabitant_of aliased in
+      let aliased_expr = inhabitant_of env aliased in
       let ty = Newtype { name; producer } in
       let env =
         Environment.add_definition env
@@ -939,7 +956,7 @@ end = struct
       let rec add_disjuncts (env, disjuncts) =
         if Random.bool () then
           let (env, disjunct) = mk env in
-          if List.for_all disjuncts ~f:(are_disjoint disjunct) then
+          if List.for_all disjuncts ~f:(are_disjoint env disjunct) then
             add_disjuncts @@ (env, disjunct :: disjuncts)
           else
             add_disjuncts (env, disjuncts)
@@ -956,14 +973,14 @@ end = struct
       let name = fresh "E" in
       let (bound, underlying_ty) =
         if Random.bool () then
-          let bound = mk_arraykey () in
-          let underlying_ty = subtypes_of bound ~pick:true |> List.hd_exn in
+          let bound = mk_arraykey env in
+          let underlying_ty = subtypes_of env bound ~pick:true |> List.hd_exn in
           (Some bound, underlying_ty)
         else
-          let underlying_ty = mk_arraykey () in
+          let underlying_ty = mk_arraykey env in
           (None, underlying_ty)
       in
-      let value = inhabitant_of underlying_ty in
+      let value = inhabitant_of env underlying_ty in
       let env =
         Environment.add_definition env
         @@ Definition.enum ~name ~bound underlying_ty ~value
@@ -976,11 +993,11 @@ end = struct
         let (env, ty) = mk env in
         (env, Vec ty)
       | Container.Dict ->
-        let key = mk_arraykey () in
+        let key = mk_arraykey env in
         let (env, value) = mk env in
         (env, Dict { key; value })
       | Container.Keyset ->
-        let ty = mk_arraykey () in
+        let ty = mk_arraykey env in
         (env, Keyset ty)
     end
     | Kind.Tuple ->
@@ -1019,3 +1036,5 @@ end = struct
       in
       (env, Function { parameters; variadic; return_ })
 end
+
+and TypeMap : (WrappedMap.S with type key = Type.t) = WrappedMap.Make (Type)

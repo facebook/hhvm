@@ -23,7 +23,7 @@ end
 module Type : sig
   type t
 
-  val inhabitant_of : t -> string
+  val inhabitant_of : Environment.t -> t -> string
 
   val show : t -> string
 

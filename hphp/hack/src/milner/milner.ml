@@ -44,10 +44,10 @@ let generate_tables template =
      a random type and use that to generate an expression. *)
   let expr_table = init_table template expr_regexp in
   let gen_expr_from_ty_table ~key ~data:_ =
-    let (_, ty) =
+    let (env, ty) =
       Hashtbl.find ty_table key |> Option.value_or_thunk ~default:mk_type
     in
-    Gen.Type.inhabitant_of ty
+    Gen.Type.inhabitant_of env ty
   in
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
 

@@ -31,8 +31,6 @@ function get_same_random_int(): int {
 }
 ```
 
-There are two options that are compatible with propagating an IC value — `#KeyedByIC` and `#MakeICInaccessible` — and two options that are not — `#SoftMakeICInaccessible` and `#Uncategorized`. Functions with one of the former pair of options are considered “categorized” while functions with one of the latter pair of options is considered “uncategorized.” See below for the treatment of memoized functions that do not pass an argument to the memoize attribute.
-
 * `#KeyedByIC` indicates that the function’s memoization cache should include the IC value in the cache key.
     * Memoized functions that depend on the IC should use this option.
     * Memoized functions with the `[zoned]` context must use this option.
@@ -42,14 +40,7 @@ There are two options that are compatible with propagating an IC value — `#Key
     * Any direct or indirect calls to the builtin function that fetches the IC will result in an exception.
     * Any direct or indirect calls to an uncategorized memoized function will throw.
     * A function must have one of the following contexts to use this option: `defaults` (implicitly or explicitly), `leak_safe_shallow`, `leak_safe_local`
-* `#SoftMakeICInaccessible` is a migration option for functions that are intended to be marked with `#MakeICInaccessible`.
-    * The function’s memoization cache will *not* include the IC value in the cache key.
-    * In circumstances in which using `#MakeICInaccessible` will throw, using `#SoftMakeICInaccessible` instead will result in runtime logs.
-    * Note that functions using this operation are still considered “uncategorized.”
-* `#Uncategorized` is an option that explicitly indicates that a function has not yet described its intended behavior relative to the IC.
-* If no option is provided, the function’s memoization cache will not include the IC value, but whether or not it is considered “categorized” or “uncategorized” will depend on the function’s context list.
-    * If the functions’ context already prevents the function from fetching the IC which requires the `[zoned]` context (i.e. the function is as capable as or less capable than `[leak_safe, globals]`) then no option is allowed and the function is considered categorized.
-    * Otherwise, the function is considered uncategorized.
+
 
 >Note that this syntax uses “[enum class labels](/hack/built-in-types/enum-class-label)” as arguments. Currently, only the memoization attributes are allowed to use labels as arguments.
 
@@ -64,4 +55,4 @@ There are two options that are compatible with propagating an IC value — `#Key
 ```
 
 * Executing code with an IC value and accessing the propagated value is done by extending and using methods of the class `HH\ImplicitContext`.
-* Functions `HH\ImplicitContext\soft_run_with` and `HH\ImplicitContext\soft_run_with_async` are used to execute code in a migratory state ahead of using `HH\ImplicitContext::runWith` or `HH\ImplicitContext::runWithAsync` -- in this migratory state, calls to uncategorized memoized functions produce runtime warnings instead of exceptions.
+* Functions `HH\ImplicitContext\soft_run_with` and `HH\ImplicitContext\soft_run_with_async` are passthrough functions that do not affect the Implicit Context state.

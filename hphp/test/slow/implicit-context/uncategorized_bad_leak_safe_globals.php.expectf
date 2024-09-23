@@ -1,1 +1,0 @@
-Fatal error: functions that can neither directly nor indirectly call a function requiring [zoned] do not need to and cannot pass arguments to __Memoize or __MemoizeLSB in %s on line %d

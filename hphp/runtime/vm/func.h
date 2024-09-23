@@ -731,7 +731,6 @@ public:
     NoIC = 0,
     KeyedByIC = 1,
     MakeICInaccessible = 2,
-    SoftMakeICInaccessible = 3,
   };
 
   MemoizeICType memoizeICType() const;
@@ -741,8 +740,6 @@ public:
   bool isKeyedByImplicitContextMemoize() const;
 
   bool isMakeICInaccessibleMemoize() const;
-
-  bool isSoftMakeICInaccessibleMemoize() const;
 
   /*
    * Is this string the name of a memoize implementation.

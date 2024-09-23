@@ -6,7 +6,3 @@ enum class label (#MakeICInaccessible)
 string(18) "MakeICInaccessible"
 enum class label (#MakeICInaccessible)
 string(18) "MakeICInaccessible"
-enum class label (#SoftMakeICInaccessible)
-string(22) "SoftMakeICInaccessible"
-enum class label (#SoftMakeICInaccessible)
-string(22) "SoftMakeICInaccessible"

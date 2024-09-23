@@ -377,16 +377,7 @@ pub mod memoize_option {
 
     pub const MAKE_IC_INACCESSSIBLE: &str = "MakeICInaccessible";
 
-    pub const SOFT_MAKE_IC_INACCESSSIBLE: &str = "SoftMakeICInaccessible";
-
-    pub const UNCATEGORIZED: &str = "Uncategorized";
-
-    pub static _ALL: &[&str] = &[
-        KEYED_BY_IC,
-        MAKE_IC_INACCESSSIBLE,
-        SOFT_MAKE_IC_INACCESSSIBLE,
-        UNCATEGORIZED,
-    ];
+    pub static _ALL: &[&str] = &[KEYED_BY_IC, MAKE_IC_INACCESSSIBLE];
 
     lazy_static! {
         static ref VALID_SET: HashSet<&'static str> = _ALL.iter().copied().collect();

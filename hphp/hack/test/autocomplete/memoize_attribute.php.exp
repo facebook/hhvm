@@ -1,11 +1,3 @@
-Uncategorized
-  INSERT Uncategorized
-  ~string
-SORT TEXT: none
-SoftMakeICInaccessible
-  INSERT SoftMakeICInaccessible
-  ~string
-SORT TEXT: none
 MakeICInaccessible
   INSERT MakeICInaccessible
   ~string

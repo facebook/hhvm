@@ -22,18 +22,11 @@ function memo_ic_inaccessible() :mixed{
   echo var_dump($hash) . "\n";
 }
 
-<<__Memoize(#SoftMakeICInaccessible)>>
-function memo_soft_ic_inaccessible() :mixed{
-  $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
-  echo var_dump($hash) . "\n";
-}
-
 function f(bool $has_ctx) :mixed{
   $v = vec[
     "memo_normal",
     "memo_keyed",
     "memo_ic_inaccessible",
-    "memo_soft_ic_inaccessible",
   ];
   foreach ($v as $f) {
     try {

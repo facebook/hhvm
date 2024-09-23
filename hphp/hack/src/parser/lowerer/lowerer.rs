@@ -4487,27 +4487,11 @@ fn process_attribute_constructor_call<'a>(
 
         if list.len() > 1 {
             let ast::Id(_, first) = pos_name(list[0], env)?;
-            let ast::Id(_, second) = pos_name(list[1], env)?;
-
-            if first == "#SoftMakeICInaccessible" {
-                if list.len() > 2 {
-                    raise_parsing_error(
-                        list[2],
-                        env,
-                        &syntax_error::memoize_invalid_arity(&name.1, 2, &first),
-                    );
-                }
-
-                if second.parse::<u32>().is_err() {
-                    raise_parsing_error(list[1], env, &syntax_error::memoize_invalid_sample_rate);
-                }
-            } else {
-                raise_parsing_error(
-                    list[1],
-                    env,
-                    &syntax_error::memoize_invalid_arity(&name.1, 1, &first),
-                );
-            }
+            raise_parsing_error(
+                list[1],
+                env,
+                &syntax_error::memoize_invalid_arity(&name.1, 1, &first),
+            );
         }
     }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
@@ -5626,10 +5610,6 @@ fn check_effect_memoized<'a>(
     // #(Soft)?MakeICInaccessible can only be used on functions with defaults
     if let Some(u) = user_attributes.iter().find(|u| {
         is_memoize_attribute_with_flavor(u, Some(sn::memoize_option::MAKE_IC_INACCESSSIBLE))
-            || is_memoize_attribute_with_flavor(
-                u,
-                Some(sn::memoize_option::SOFT_MAKE_IC_INACCESSSIBLE),
-            )
     }) {
         if !has_any_context(
             contexts,

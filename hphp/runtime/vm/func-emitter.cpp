@@ -208,8 +208,6 @@ const StaticString
   s_MemoizeLSB("__MemoizeLSB"),
   s_KeyedByIC("KeyedByIC"),
   s_MakeICInaccessible("MakeICInaccessible"),
-  s_SoftMakeICInaccessible("SoftMakeICInaccessible"),
-  s_Uncategorized("Uncategorized"),
   s_SoftInternal("__SoftInternal");
 
 namespace {
@@ -299,32 +297,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       assertx(tvIsVec(tv));
       IterateV(tv.m_data.parr, [&](TypedValue elem) {
         if (tvIsString(elem)) {
-          /*
-           * TODO: simplify this into a 2 state if else once Soft states are
-           * entirely removed
-          */
+          assertx(tv.m_data.parr->size() == 1);
           if (elem.m_data.pstr->same(s_KeyedByIC.get())) {
-            assertx(tv.m_data.parr->size() == 1);
             icType = Func::MemoizeICType::KeyedByIC;
           } else if (elem.m_data.pstr->same(s_MakeICInaccessible.get())) {
-            assertx(tv.m_data.parr->size() == 1);
-            icType = Func::MemoizeICType::MakeICInaccessible;
-          } else if (elem.m_data.pstr->same(s_SoftMakeICInaccessible.get())) {
-            assertx(tv.m_data.parr->size() <= 2);
-            icType = Func::MemoizeICType::MakeICInaccessible;
-          } else if (elem.m_data.pstr->same(s_Uncategorized.get())) {
             icType = Func::MemoizeICType::MakeICInaccessible;
           } else {
             assertx(false && "invalid string");
           }
-        } else if (tvIsInt(elem)) {
-          /*
-           * This would be the sample rate, we don't use it
-           * this branch will be removed once the SoftMakeICInaccessible
-           * is removed from www
-           * for now assert that the SoftMakeICInaccessible was mapped to non-soft
-          */
-          assertx(icType == Func::MemoizeICType::MakeICInaccessible);
         } else {
           assertx(false && "invalid input");
         }

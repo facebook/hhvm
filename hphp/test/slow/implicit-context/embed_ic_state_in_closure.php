@@ -24,13 +24,6 @@ function get_closure_from_backdoor(): (function (): void) {
   );
 }
 
-<<__Memoize(#SoftMakeICInaccessible)>>
-function get_closure_from_soft_mici(): (function (): void) {
-  return HH\ImplicitContext\embed_implicit_context_state_in_closure(
-    () ==> memo(),
-  );
-}
-
 <<__Memoize(#MakeICInaccessible)>>
 function get_closure_from_mici(): (function (): void) {
   return HH\ImplicitContext\embed_implicit_context_state_in_closure(
@@ -63,13 +56,6 @@ function get_async_closure_from_backdoor(): (function (): Awaitable<void>) {
     () ==> HH\ImplicitContext\embed_implicit_context_state_in_async_closure(
       async () ==> { memo(); echo "(no warning expected)"; },
     ),
-  );
-}
-
-<<__Memoize(#SoftMakeICInaccessible)>>
-function get_async_closure_from_soft_mici(): (function (): Awaitable<void>) {
-  return HH\ImplicitContext\embed_implicit_context_state_in_async_closure(
-    async () ==> { memo(); },
   );
 }
 
@@ -106,7 +92,6 @@ async function main(): Awaitable<void> {
     () ==> get_closure_from_backdoor()(),
     'This one happens via soft_run_with to distinguish null state',
   );
-  get_closure_from_soft_mici()();
   try {
     get_closure_from_mici()();
   } catch (Exception $e) {
@@ -119,7 +104,6 @@ async function main(): Awaitable<void> {
     async () ==> await get_closure_from_backdoor()(),
     'This one happens via soft_run_with to distinguish null state',
   );
-  await get_async_closure_from_soft_mici()();
   try {
     await get_async_closure_from_mici()();
   } catch (Exception $e) {

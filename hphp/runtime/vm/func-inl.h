@@ -597,9 +597,6 @@ inline bool Func::isMakeICInaccessibleMemoize() const {
   return memoizeICType() == MemoizeICType::MakeICInaccessible;
 }
 
-inline bool Func::isSoftMakeICInaccessibleMemoize() const {
-  return memoizeICType() == MemoizeICType::SoftMakeICInaccessible;
-}
 
 inline bool Func::isMemoizeImpl() const {
   return isMemoizeImplName(name());

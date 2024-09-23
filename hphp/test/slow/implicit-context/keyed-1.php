@@ -58,11 +58,6 @@ function ic_inaccessible() :mixed{
   f();
 }
 
-<<__Memoize(#SoftMakeICInaccessible)>>
-function soft_ic_inaccessible() :mixed{
-  f();
-}
-
 function p($text) :mixed{
   echo ">>>>> " . $text . "\n";
 }
@@ -76,8 +71,6 @@ function main() :mixed{
   ClassContext::start(new C, f<>);
   p("from inaccessible");
   ic_inaccessible();
-  p("from soft inaccessible");
-  soft_ic_inaccessible();
   p("from soft run with");
   HH\ImplicitContext\soft_run_with(f<>, "SOFT_KEY");
   p("final report");

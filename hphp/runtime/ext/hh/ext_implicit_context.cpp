@@ -47,11 +47,8 @@ const StaticString
   s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData"),
   s_ICAgnostic("%MemoAgnostic%"),
   // matches HH\ImplicitContext\State
-  s_ICStateNull("NULL"),
   s_ICStateValue("VALUE"),
-  s_ICStateSoftSet("SOFT_SET"),
-  s_ICStateInaccessible("INACCESSIBLE"),
-  s_ICStateSoftInaccessible("SOFT_INACCESSIBLE");
+  s_ICStateInaccessible("INACCESSIBLE");
 
 RDS_LOCAL(int64_t, rl_nextMemoKey);
 // key 0 reserved for all agnostic and empty ICs

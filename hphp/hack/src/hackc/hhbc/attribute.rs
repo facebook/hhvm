@@ -90,10 +90,6 @@ pub fn is_make_ic_inaccessible_memoize(attrs: impl AsRef<[Attribute]>) -> bool {
     is_memoize_with(attrs, "MakeICInaccessible")
 }
 
-pub fn is_soft_make_ic_inaccessible_memoize(attrs: impl AsRef<[Attribute]>) -> bool {
-    is_memoize_with(attrs, "SoftMakeICInaccessible")
-}
-
 fn is_foldable(attr: &Attribute) -> bool {
     is(ua::IS_FOLDABLE, attr)
 }
@@ -204,6 +200,7 @@ mod tests {
             name: ClassName::intern(name),
             arguments: vec![].into(),
         };
+        #[allow(clippy::useless_vec)]
         let attrs = vec![mk_attr(ua::CONST), mk_attr(ua::DYNAMICALLY_CALLABLE)];
         let has_result = attrs
             .iter()

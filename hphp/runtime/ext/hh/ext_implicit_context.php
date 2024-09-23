@@ -18,9 +18,6 @@ function soft_run_with<Tout>(
   return $f();
 }
 
-const string RUN_WITH_SOFT_INACCESSIBLE_KEY_PREFIX = 'nonfunction/';
-
-
 function embed_implicit_context_state_in_closure<T>(
   (function ()[defaults]: T) $f,
 )[zoned]: (function ()[defaults]: T) {
@@ -53,11 +50,8 @@ function embed_implicit_context_state_in_async_closure<T>(
 }
 
 enum State: string as string {
-  NULL = 'NULL';
   VALUE = 'VALUE';
-  SOFT_SET = 'SOFT_SET';
   INACCESSIBLE = 'INACCESSIBLE';
-  SOFT_INACCESSIBLE = 'SOFT_INACCESSIBLE';
 }
 
 /**
@@ -181,8 +175,6 @@ abstract class ImplicitContext {
 enum class MemoizeOption: string {
   string KeyedByIC = 'KeyedByIC';
   string MakeICInaccessible = 'MakeICInaccessible';
-  string SoftMakeICInaccessible = 'SoftMakeICInaccessible';
-  string Uncategorized = 'Uncategorized';
 }
 
 } // namespace HH

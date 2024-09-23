@@ -32,11 +32,6 @@ function ic_inaccessible() :mixed{
   f();
 }
 
-<<__Memoize(#SoftMakeICInaccessible)>>
-function soft_ic_inaccessible() :mixed{
-  f();
-}
-
 <<__EntryPoint>>
 function main() :mixed{
   include 'implicit.inc';
@@ -44,7 +39,6 @@ function main() :mixed{
     f();
     ClassContext::start(new C, f<>);
     ic_inaccessible();
-    soft_ic_inaccessible();
     HH\ImplicitContext\soft_run_with(f<>, "SOFT_KEY");
   }
   echo "No arg ran: " . Counter::$noArg . " times\n";

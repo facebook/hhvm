@@ -45,15 +45,6 @@ memoNoArg passed
 memoWithArg passed
   After: Implicit context is set to inaccessible
 ------------------------
->>>>> from soft inaccessible
-  Before: Implicit context is set to inaccessible
-memoNoArg passed
-  After: Implicit context is set to inaccessible
-------------------------
-  Before: Implicit context is set to inaccessible
-memoWithArg passed
-  After: Implicit context is set to inaccessible
-------------------------
 >>>>> from soft run with
   Before: Implicit context is set to inaccessible
 memoNoArg passed

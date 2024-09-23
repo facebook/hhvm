@@ -1189,6 +1189,18 @@ struct ValidateAnnotationPositions {
         assert(false && "Unknown container type");
     }
   }
+  void operator()(sema_context& ctx, const t_field& node) {
+    if (ctx.sema_parameters().forbid_unstructured_annotations_on_field_types &&
+        owns_annotations(node.type()) &&
+        std::any_of(
+            node.type()->annotations().begin(),
+            node.type()->annotations().end(),
+            [](const auto& pair) {
+              return pair.second.src_range.begin != source_location{};
+            })) {
+      err(ctx);
+    }
+  }
 
  private:
   static void err(sema_context& ctx) {
@@ -1375,6 +1387,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_required_field);
   validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
   validator.add_field_visitor(&validate_field_name);
+  validator.add_field_visitor(ValidateAnnotationPositions{});
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);

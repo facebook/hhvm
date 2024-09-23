@@ -90,6 +90,10 @@ class node_metadata_cache {
   }
 };
 
+struct sema_params {
+  bool forbid_unstructured_annotations_on_field_types = false;
+};
+
 // An AST visitor context for semantic analysis. It combines diagnostics
 // reporting and node metadata cache.
 class sema_context : public diagnostics_engine, public const_visitor_context {
@@ -125,8 +129,12 @@ class sema_context : public diagnostics_engine, public const_visitor_context {
 
   using diagnostics_engine::report;
 
+  const sema_params& sema_parameters() const { return params_; }
+  sema_params& sema_parameters() { return params_; }
+
  private:
   node_metadata_cache cache_;
+  sema_params params_;
 };
 
 } // namespace compiler

@@ -693,13 +693,30 @@ TEST(CompilerTest, mixin_field_name_uniqueness) {
 
 TEST(CompilerTest, annotation_positions) {
   check_compile(R"(
+    struct Type {1: string name} (thrift.uri = "facebook.com/thrift/annotation/Type") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     typedef set<set<i32> (annot)> T # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     const i32 (annot) C = 42 # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     service S {
       i32 (annot) foo() # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       void bar(1: i32 (annot) p) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     }
+    struct Foo {
+      1: i32 (annot) f
+      @Type{name="foo"}
+      2: i32 g
+    }
   )");
+}
+
+TEST(CompilerTest, annotation_positions_field) {
+  check_compile(
+      R"(
+    struct Foo {
+      1: i32 (annot) f # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+      2: i32 g
+    }
+  )",
+      {"--extra-validation", "unstructured_annotations_on_field_type"});
 }
 
 TEST(CompilerTest, performs_in_interaction) {

@@ -135,6 +135,9 @@ void usage() {
   fprintf(
       stderr,
       "  --inject-schema-const  Inject generated schema constant (must use thrift2ast)\n");
+  fprintf(
+      stderr,
+      "  --extra-validation  Comma-separated list of opt-in validators to run\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Available generators (and options):\n");
 
@@ -277,7 +280,8 @@ std::string parse_args(
     const std::vector<std::string>& arguments,
     parsing_params& pparams,
     gen_params& gparams,
-    diagnostic_params& dparams) {
+    diagnostic_params& dparams,
+    sema_params& sparams) {
   // Check for necessary arguments, you gotta have at least a filename and
   // an output language flag.
   if (arguments.size() < 3 && gparams.targets.empty()) {
@@ -374,6 +378,24 @@ std::string parse_args(
       gparams.add_gen_dir = (flag == "o");
     } else if (flag == "inject-schema-const") {
       gparams.inject_schema_const = true;
+    } else if (flag == "extra-validation") {
+      const std::string* arg = consume_arg("extra validation");
+      if (arg == nullptr) {
+        return {};
+      }
+      std::vector<std::string> validators;
+      boost::algorithm::split(
+          validators, *arg, [](char c) { return c == ','; });
+      for (const auto& validator : validators) {
+        if (validator == "unstructured_annotations_on_field_type") {
+          sparams.forbid_unstructured_annotations_on_field_types = true;
+        } else {
+          fprintf(
+              stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());
+          usage();
+          return {};
+        }
+      }
     } else {
       fprintf(
           stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());
@@ -825,8 +847,10 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
   pparams.allow_missing_includes = true;
   gen_params gparams;
   diagnostic_params dparams;
+  sema_params sparams;
   gparams.targets.push_back(""); // Avoid needing to pass --gen
-  std::string filename = parse_args(arguments, pparams, gparams, dparams);
+  std::string filename =
+      parse_args(arguments, pparams, gparams, dparams, sparams);
   if (filename.empty()) {
     return {};
   }
@@ -835,6 +859,7 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
       sm,
       [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
       diagnostic_params::only_errors());
+  ctx.sema_parameters() = std::move(sparams);
   return parse_ast(sm, ctx, filename, std::move(pparams));
 }
 
@@ -846,11 +871,14 @@ compile_result compile(
   parsing_params pparams;
   gen_params gparams;
   diagnostic_params dparams;
-  std::string input_filename = parse_args(arguments, pparams, gparams, dparams);
+  sema_params sparams;
+  std::string input_filename =
+      parse_args(arguments, pparams, gparams, dparams, sparams);
   if (input_filename.empty()) {
     return result;
   }
   sema_context ctx(source_mgr, result.detail, std::move(dparams));
+  ctx.sema_parameters() = std::move(sparams);
 
   std::unique_ptr<t_program_bundle> program_bundle =
       parse_and_mutate(source_mgr, ctx, input_filename, pparams, gparams);

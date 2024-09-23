@@ -25,5 +25,5 @@ module Type : sig
 
   val show : t -> string
 
-  val mk : Environment.t -> depth:int option -> t * Definition.t list
+  val mk : Environment.t -> depth:int option -> Definition.t list * t
 end

@@ -44,7 +44,7 @@ let generate_tables template =
      a random type and use that to generate an expression. *)
   let expr_table = init_table template expr_regexp in
   let gen_expr_from_ty_table ~key ~data:_ =
-    let (ty, _) =
+    let (_, ty) =
       Hashtbl.find ty_table key |> Option.value_or_thunk ~default:mk_type
     in
     Gen.Type.inhabitant_of ty
@@ -52,13 +52,13 @@ let generate_tables template =
   let expr_table = Hashtbl.mapi expr_table ~f:gen_expr_from_ty_table in
 
   let defs =
-    let get_defs (_, (_, defs)) = defs in
+    let get_defs (_, (defs, _)) = defs in
     let ty_defs = Hashtbl.to_alist ty_table |> List.map ~f:get_defs in
     List.concat ty_defs
   in
-  let ty_table = Hashtbl.map ty_table ~f:(fun (ty, _) -> ty) in
+  let ty_table = Hashtbl.map ty_table ~f:(fun (_, ty) -> ty) in
 
-  (ty_table, expr_table, defs)
+  (defs, ty_table, expr_table)
 
 (* Add generated types and expressions back in the template *)
 let fill_in_template ty_table expr_table template =
@@ -95,7 +95,7 @@ let milner verbose seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let (ty_table, expr_table, defs) = generate_tables template in
+  let (defs, ty_table, expr_table) = generate_tables template in
   let output =
     fill_in_template ty_table expr_table template
     |> add_missing_definitions defs

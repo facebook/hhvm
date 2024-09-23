@@ -796,6 +796,17 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
         }
     }
     match &node.children {
+        NameofExpression(n) => {
+            let cls_name = pos_name(&n.target, env)?;
+            if string_utils::class_id_is_dynamic(&cls_name.1) {
+                raise_parsing_error(
+                    node,
+                    env,
+                    &syntax_error::invalid_lazy_class_shape_field(&cls_name.1),
+                );
+            };
+            Ok(SFclassname(cls_name))
+        }
         ScopeResolutionExpression(c) => {
             let cls_name = pos_name(&c.qualifier, env)?;
             let const_name = p_pstring(&c.name, env)?;

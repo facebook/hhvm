@@ -9027,17 +9027,6 @@ end = struct
           (ty, id))
     in
 
-    (* Ensure that variadic parameter has a name *)
-    (if get_ft_variadic declared_ft then
-      match List.last declared_ft.ft_params with
-      | Some { fp_name = None; _ } ->
-        Typing_error_utils.add_typing_error
-          ~env
-          Typing_error.(
-            primary
-            @@ Primary.Ellipsis_strict_mode { require = `Param_name; pos = p })
-      | _ -> ());
-
     (* Is the return type declared? *)
     let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
     let check_body_under_known_params

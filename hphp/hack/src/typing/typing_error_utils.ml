@@ -4503,19 +4503,6 @@ end = struct
       [],
       User_error_flags.empty )
 
-  let ellipsis_strict_mode pos require =
-    let claim =
-      lazy
-        ( pos,
-          match require with
-          | `Param_name ->
-            "Variadic function arguments require a name in strict mode, e.g. `...$args`."
-          | `Type_and_param_name ->
-            "Variadic function arguments require a name and type in strict mode, e.g. `int ...$args`."
-        )
-    in
-    (Error_code.EllipsisStrictMode, claim, lazy [], [], User_error_flags.empty)
-
   let object_string pos1 pos2 =
     ( Error_code.ObjectString,
       lazy (pos1, "You cannot use this object as a string"),
@@ -5451,7 +5438,6 @@ end = struct
         member_kind
         member_name
     | Generic_static { pos; typaram_name } -> generic_static pos typaram_name
-    | Ellipsis_strict_mode { pos; require } -> ellipsis_strict_mode pos require
     | Object_string { pos; decl_pos } -> object_string pos decl_pos
     | Cyclic_typedef { def_pos; use_pos } -> cyclic_typedef def_pos use_pos
     | Require_args_reify { pos; decl_pos } -> require_args_reify pos decl_pos

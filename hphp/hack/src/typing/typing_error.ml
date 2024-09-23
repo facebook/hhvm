@@ -1179,10 +1179,6 @@ module Primary = struct
         pos: Pos.t;
         typaram_name: string;
       }
-    | Ellipsis_strict_mode of {
-        pos: Pos.t;
-        require: [ `Param_name | `Type_and_param_name ];
-      }
     | Object_string of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;

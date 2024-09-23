@@ -103,7 +103,6 @@ cdef class InitialResponse(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline content_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().value()).decode('UTF-8')
 
     @property
@@ -220,7 +219,6 @@ cdef class FinalResponse(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline content_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().value()).decode('UTF-8')
 
     @property
@@ -337,7 +335,6 @@ cdef class SinkPayload(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline content_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().value()).decode('UTF-8')
 
     @property
@@ -454,7 +451,6 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline sink_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sink_ref().value()).decode('UTF-8')
 
     @property
@@ -562,7 +558,6 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
         return __fbthrift_inst
 
     cdef inline reason_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().value()).decode('UTF-8')
 
     @property
@@ -670,7 +665,6 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
         return __fbthrift_inst
 
     cdef inline reason_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().value()).decode('UTF-8')
 
     @property
@@ -778,7 +772,6 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
         return __fbthrift_inst
 
     cdef inline reason_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().value()
 
     @property

@@ -164,7 +164,6 @@ cdef class Color(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline red_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).red_ref().value()
 
     @property
@@ -172,7 +171,6 @@ cdef class Color(thrift.py3.types.Struct):
         return self.red_impl()
 
     cdef inline green_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).green_ref().value()
 
     @property
@@ -180,7 +178,6 @@ cdef class Color(thrift.py3.types.Struct):
         return self.green_impl()
 
     cdef inline blue_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).blue_ref().value()
 
     @property
@@ -188,7 +185,6 @@ cdef class Color(thrift.py3.types.Struct):
         return self.blue_impl()
 
     cdef inline alpha_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).alpha_ref().value()
 
     @property
@@ -309,7 +305,6 @@ cdef class Vehicle(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline color_impl(self):
-
         if self.__fbthrift_cached_color is None:
             self.__fbthrift_cached_color = Color._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).color_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_color
@@ -321,7 +316,6 @@ cdef class Vehicle(thrift.py3.types.Struct):
     cdef inline licensePlate_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).licensePlate_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).licensePlate_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -331,7 +325,6 @@ cdef class Vehicle(thrift.py3.types.Struct):
     cdef inline description_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).description_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).description_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -341,7 +334,6 @@ cdef class Vehicle(thrift.py3.types.Struct):
     cdef inline name_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -349,7 +341,6 @@ cdef class Vehicle(thrift.py3.types.Struct):
         return self.name_impl()
 
     cdef inline hasAC_impl(self):
-
         return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).hasAC_ref().value_unchecked()
 
     @property
@@ -475,7 +466,6 @@ cdef class Person(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline id_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).id_ref().value()
 
     @property
@@ -483,7 +473,6 @@ cdef class Person(thrift.py3.types.Struct):
         return self.id_impl()
 
     cdef inline name_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().value()).decode('UTF-8')
 
     @property
@@ -493,7 +482,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline age_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).age_ref().has_value():
             return None
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).age_ref().value_unchecked()
 
     @property
@@ -503,7 +491,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline address_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).address_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).address_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -513,7 +500,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline favoriteColor_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).favoriteColor_ref().has_value():
             return None
-
         if self.__fbthrift_cached_favoriteColor is None:
             self.__fbthrift_cached_favoriteColor = Color._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).favoriteColor_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_favoriteColor
@@ -525,7 +511,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline friends_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).friends_ref().has_value():
             return None
-
         if self.__fbthrift_cached_friends is None:
             self.__fbthrift_cached_friends = Set__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).friends_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_friends
@@ -537,7 +522,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline bestFriend_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bestFriend_ref().has_value():
             return None
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bestFriend_ref().value_unchecked()
 
     @property
@@ -547,7 +531,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline petNames_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).petNames_ref().has_value():
             return None
-
         if self.__fbthrift_cached_petNames is None:
             self.__fbthrift_cached_petNames = Map__Animal_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).petNames_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_petNames
@@ -559,7 +542,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline afraidOfAnimal_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).afraidOfAnimal_ref().has_value():
             return None
-
         if self.__fbthrift_cached_afraidOfAnimal is None:
             self.__fbthrift_cached_afraidOfAnimal = translate_cpp_enum_to_python(Animal, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).afraidOfAnimal_ref().value_unchecked()))
         return self.__fbthrift_cached_afraidOfAnimal
@@ -571,7 +553,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef inline vehicles_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).vehicles_ref().has_value():
             return None
-
         if self.__fbthrift_cached_vehicles is None:
             self.__fbthrift_cached_vehicles = List__Vehicle__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).vehicles_ref().ref_unchecked())
         return self.__fbthrift_cached_vehicles

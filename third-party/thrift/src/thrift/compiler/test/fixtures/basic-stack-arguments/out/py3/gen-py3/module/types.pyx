@@ -159,7 +159,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline MyIntField_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().value()
 
     @property
@@ -167,7 +166,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.MyIntField_impl()
 
     cdef inline MyStringField_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().value()).decode('UTF-8')
 
     @property

@@ -110,7 +110,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline myInteger_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myInteger_ref().value()
 
     @property
@@ -120,7 +119,6 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline myString_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myString_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myString_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -128,7 +126,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.myString_impl()
 
     cdef inline myBools_impl(self):
-
         if self.__fbthrift_cached_myBools is None:
             self.__fbthrift_cached_myBools = List__bool__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myBools_ref().ref())
         return self.__fbthrift_cached_myBools
@@ -138,7 +135,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.myBools_impl()
 
     cdef inline myNumbers_impl(self):
-
         if self.__fbthrift_cached_myNumbers is None:
             self.__fbthrift_cached_myNumbers = List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myNumbers_ref().ref())
         return self.__fbthrift_cached_myNumbers

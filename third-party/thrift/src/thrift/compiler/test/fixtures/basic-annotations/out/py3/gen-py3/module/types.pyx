@@ -161,7 +161,6 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline name_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().value()).decode('UTF-8')
 
     @property
@@ -279,7 +278,6 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline id_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).id_ref().value()
 
     @property
@@ -287,7 +285,6 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         return self.id_impl()
 
     cdef inline password_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).password_ref().value()).decode('UTF-8')
 
     @property

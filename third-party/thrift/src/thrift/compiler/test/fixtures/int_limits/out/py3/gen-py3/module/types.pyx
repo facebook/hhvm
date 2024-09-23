@@ -110,7 +110,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline max_i64_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i64_field_ref().value()
 
     @property
@@ -118,7 +117,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return self.max_i64_field_impl()
 
     cdef inline min_i64_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i64_field_ref().value()
 
     @property
@@ -126,7 +124,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return self.min_i64_field_impl()
 
     cdef inline max_i32_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i32_field_ref().value()
 
     @property
@@ -134,7 +131,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return self.max_i32_field_impl()
 
     cdef inline min_i32_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i32_field_ref().value()
 
     @property
@@ -142,7 +138,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return self.min_i32_field_impl()
 
     cdef inline max_i16_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_i16_field_ref().value()
 
     @property
@@ -150,7 +145,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return self.max_i16_field_impl()
 
     cdef inline min_i16_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_i16_field_ref().value()
 
     @property
@@ -158,7 +152,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return self.min_i16_field_impl()
 
     cdef inline max_byte_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_byte_field_ref().value()
 
     @property
@@ -166,7 +159,6 @@ cdef class Limits(thrift.py3.types.Struct):
         return self.max_byte_field_impl()
 
     cdef inline min_byte_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_byte_field_ref().value()
 
     @property

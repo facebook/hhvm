@@ -103,7 +103,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline a_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).a_ref().value()
 
     @property

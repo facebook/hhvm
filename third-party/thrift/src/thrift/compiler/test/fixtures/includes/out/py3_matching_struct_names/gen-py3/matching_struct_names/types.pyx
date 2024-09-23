@@ -111,7 +111,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline field_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().value()).decode('UTF-8')
 
     @property
@@ -231,7 +230,6 @@ cdef class Combo(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline listOfOurMyStructLists_impl(self):
-
         if self.__fbthrift_cached_listOfOurMyStructLists is None:
             self.__fbthrift_cached_listOfOurMyStructLists = List__List__MyStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).listOfOurMyStructLists_ref().ref())
         return self.__fbthrift_cached_listOfOurMyStructLists
@@ -241,7 +239,6 @@ cdef class Combo(thrift.py3.types.Struct):
         return self.listOfOurMyStructLists_impl()
 
     cdef inline theirMyStructList_impl(self):
-
         if self.__fbthrift_cached_theirMyStructList is None:
             self.__fbthrift_cached_theirMyStructList = List__module_MyStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).theirMyStructList_ref().ref())
         return self.__fbthrift_cached_theirMyStructList
@@ -251,7 +248,6 @@ cdef class Combo(thrift.py3.types.Struct):
         return self.theirMyStructList_impl()
 
     cdef inline ourMyStructList_impl(self):
-
         if self.__fbthrift_cached_ourMyStructList is None:
             self.__fbthrift_cached_ourMyStructList = List__MyStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ourMyStructList_ref().ref())
         return self.__fbthrift_cached_ourMyStructList
@@ -261,7 +257,6 @@ cdef class Combo(thrift.py3.types.Struct):
         return self.ourMyStructList_impl()
 
     cdef inline listOfTheirMyStructList_impl(self):
-
         if self.__fbthrift_cached_listOfTheirMyStructList is None:
             self.__fbthrift_cached_listOfTheirMyStructList = List__List__module_MyStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).listOfTheirMyStructList_ref().ref())
         return self.__fbthrift_cached_listOfTheirMyStructList

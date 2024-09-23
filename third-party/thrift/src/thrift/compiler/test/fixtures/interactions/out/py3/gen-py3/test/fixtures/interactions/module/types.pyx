@@ -98,7 +98,6 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
         return __fbthrift_inst
 
     cdef inline message_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).message_ref().value()).decode('UTF-8')
 
     @property

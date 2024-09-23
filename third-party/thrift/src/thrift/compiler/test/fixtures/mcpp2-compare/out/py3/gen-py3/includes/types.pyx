@@ -158,7 +158,6 @@ cdef class AStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline FieldA_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).FieldA_ref().value()
 
     @property
@@ -274,7 +273,6 @@ cdef class AStructB(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline FieldA_impl(self):
-
         if self.__fbthrift_cached_FieldA is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).FieldA_ref():
                 return None

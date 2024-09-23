@@ -107,7 +107,6 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline value_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).value_ref().has_value():
             return None
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).value_ref().value_unchecked()
 
     @property

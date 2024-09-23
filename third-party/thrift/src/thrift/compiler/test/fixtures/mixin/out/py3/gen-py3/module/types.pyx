@@ -103,7 +103,6 @@ cdef class Mixin1(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline field1_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().value()).decode('UTF-8')
 
     @property
@@ -221,7 +220,6 @@ cdef class Mixin2(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline m1_impl(self):
-
         if self.__fbthrift_cached_m1 is None:
             self.__fbthrift_cached_m1 = Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).m1_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_m1
@@ -233,7 +231,6 @@ cdef class Mixin2(thrift.py3.types.Struct):
     cdef inline field2_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -241,7 +238,6 @@ cdef class Mixin2(thrift.py3.types.Struct):
         return self.field2_impl()
 
     cdef inline field1_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().value()).decode('UTF-8')
 
     @property
@@ -358,7 +354,6 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline field3_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field3_ref().value()).decode('UTF-8')
 
     @property
@@ -477,7 +472,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline field4_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field4_ref().value()).decode('UTF-8')
 
     @property
@@ -485,7 +479,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.field4_impl()
 
     cdef inline m2_impl(self):
-
         if self.__fbthrift_cached_m2 is None:
             self.__fbthrift_cached_m2 = Mixin2._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).m2_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_m2
@@ -495,7 +488,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.m2_impl()
 
     cdef inline m3_impl(self):
-
         if self.__fbthrift_cached_m3 is None:
             self.__fbthrift_cached_m3 = Mixin3Base._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).m3_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_m3
@@ -505,7 +497,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.m3_impl()
 
     cdef inline m1_impl(self):
-
         if self.__fbthrift_cached_m1 is None:
             self.__fbthrift_cached_m1 = Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).m1_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_m1
@@ -517,7 +508,6 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef inline field2_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -525,7 +515,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.field2_impl()
 
     cdef inline field1_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().value()).decode('UTF-8')
 
     @property
@@ -533,7 +522,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.field1_impl()
 
     cdef inline field3_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field3_ref().value()).decode('UTF-8')
 
     @property

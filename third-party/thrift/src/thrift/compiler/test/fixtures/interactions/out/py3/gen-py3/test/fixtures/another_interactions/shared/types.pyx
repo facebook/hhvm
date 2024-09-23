@@ -104,7 +104,6 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline s_res_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).s_res_ref().value()).decode('UTF-8')
 
     @property
@@ -112,7 +111,6 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
         return self.s_res_impl()
 
     cdef inline i_res_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).i_res_ref().value()
 
     @property

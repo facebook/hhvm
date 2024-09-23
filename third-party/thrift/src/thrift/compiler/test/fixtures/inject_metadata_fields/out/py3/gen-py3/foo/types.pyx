@@ -105,7 +105,6 @@ cdef class Fields(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline injected_field_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().value()).decode('UTF-8')
 
     @property
@@ -115,7 +114,6 @@ cdef class Fields(thrift.py3.types.Struct):
     cdef inline injected_structured_annotation_field_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_structured_annotation_field_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_structured_annotation_field_ref().value()).decode('UTF-8')
 
     @property
@@ -125,7 +123,6 @@ cdef class Fields(thrift.py3.types.Struct):
     cdef inline injected_unstructured_annotation_field_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_unstructured_annotation_field_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_unstructured_annotation_field_ref().value()).decode('UTF-8')
 
     @property

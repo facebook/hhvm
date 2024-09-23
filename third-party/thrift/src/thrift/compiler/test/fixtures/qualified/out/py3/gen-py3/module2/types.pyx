@@ -108,7 +108,6 @@ cdef class Struct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline first_impl(self):
-
         if self.__fbthrift_cached_first is None:
             self.__fbthrift_cached_first = _module0_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).first_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_first
@@ -118,7 +117,6 @@ cdef class Struct(thrift.py3.types.Struct):
         return self.first_impl()
 
     cdef inline second_impl(self):
-
         if self.__fbthrift_cached_second is None:
             self.__fbthrift_cached_second = _module1_types.Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).second_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_second
@@ -238,7 +236,6 @@ cdef class BigStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline s_impl(self):
-
         if self.__fbthrift_cached_s is None:
             self.__fbthrift_cached_s = Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).s_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_s
@@ -248,7 +245,6 @@ cdef class BigStruct(thrift.py3.types.Struct):
         return self.s_impl()
 
     cdef inline id_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).id_ref().value()
 
     @property

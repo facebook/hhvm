@@ -347,7 +347,6 @@ cdef class Internship(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline weeks_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).weeks_ref().value()
 
     @property
@@ -355,7 +354,6 @@ cdef class Internship(thrift.py3.types.Struct):
         return self.weeks_impl()
 
     cdef inline title_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).title_ref().value()).decode('UTF-8')
 
     @property
@@ -365,7 +363,6 @@ cdef class Internship(thrift.py3.types.Struct):
     cdef inline employer_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).employer_ref().has_value():
             return None
-
         if self.__fbthrift_cached_employer is None:
             self.__fbthrift_cached_employer = translate_cpp_enum_to_python(Company, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).employer_ref().value_unchecked()))
         return self.__fbthrift_cached_employer
@@ -377,7 +374,6 @@ cdef class Internship(thrift.py3.types.Struct):
     cdef inline compensation_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).compensation_ref().has_value():
             return None
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).compensation_ref().value_unchecked()
 
     @property
@@ -387,7 +383,6 @@ cdef class Internship(thrift.py3.types.Struct):
     cdef inline school_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).school_ref().has_value():
             return None
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).school_ref().value_unchecked()).decode('UTF-8')
 
     @property
@@ -505,7 +500,6 @@ cdef class Range(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline min_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).min_ref().value()
 
     @property
@@ -513,7 +507,6 @@ cdef class Range(thrift.py3.types.Struct):
         return self.min_impl()
 
     cdef inline max_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).max_ref().value()
 
     @property
@@ -631,7 +624,6 @@ cdef class struct1(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline a_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).a_ref().value()
 
     @property
@@ -639,7 +631,6 @@ cdef class struct1(thrift.py3.types.Struct):
         return self.a_impl()
 
     cdef inline b_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().value()).decode('UTF-8')
 
     @property
@@ -759,7 +750,6 @@ cdef class struct2(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline a_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).a_ref().value()
 
     @property
@@ -767,7 +757,6 @@ cdef class struct2(thrift.py3.types.Struct):
         return self.a_impl()
 
     cdef inline b_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().value()).decode('UTF-8')
 
     @property
@@ -775,7 +764,6 @@ cdef class struct2(thrift.py3.types.Struct):
         return self.b_impl()
 
     cdef inline c_impl(self):
-
         if self.__fbthrift_cached_c is None:
             self.__fbthrift_cached_c = struct1._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).c_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_c
@@ -785,7 +773,6 @@ cdef class struct2(thrift.py3.types.Struct):
         return self.c_impl()
 
     cdef inline d_impl(self):
-
         if self.__fbthrift_cached_d is None:
             self.__fbthrift_cached_d = List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).d_ref().ref())
         return self.__fbthrift_cached_d
@@ -906,7 +893,6 @@ cdef class struct3(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline a_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).a_ref().value()).decode('UTF-8')
 
     @property
@@ -914,7 +900,6 @@ cdef class struct3(thrift.py3.types.Struct):
         return self.a_impl()
 
     cdef inline b_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().value()
 
     @property
@@ -922,7 +907,6 @@ cdef class struct3(thrift.py3.types.Struct):
         return self.b_impl()
 
     cdef inline c_impl(self):
-
         if self.__fbthrift_cached_c is None:
             self.__fbthrift_cached_c = struct2._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).c_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_c
@@ -1043,7 +1027,6 @@ cdef class struct4(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline a_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).a_ref().value()
 
     @property
@@ -1053,7 +1036,6 @@ cdef class struct4(thrift.py3.types.Struct):
     cdef inline b_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().has_value():
             return None
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().value_unchecked()
 
     @property
@@ -1063,7 +1045,6 @@ cdef class struct4(thrift.py3.types.Struct):
     cdef inline c_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).c_ref().has_value():
             return None
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).c_ref().value_unchecked()
 
     @property

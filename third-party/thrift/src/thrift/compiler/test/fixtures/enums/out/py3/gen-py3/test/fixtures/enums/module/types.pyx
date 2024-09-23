@@ -491,7 +491,6 @@ cdef class SomeStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline reasonable_impl(self):
-
         if self.__fbthrift_cached_reasonable is None:
             self.__fbthrift_cached_reasonable = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reasonable_ref().value()))
         return self.__fbthrift_cached_reasonable
@@ -501,7 +500,6 @@ cdef class SomeStruct(thrift.py3.types.Struct):
         return self.reasonable_impl()
 
     cdef inline fine_impl(self):
-
         if self.__fbthrift_cached_fine is None:
             self.__fbthrift_cached_fine = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fine_ref().value()))
         return self.__fbthrift_cached_fine
@@ -511,7 +509,6 @@ cdef class SomeStruct(thrift.py3.types.Struct):
         return self.fine_impl()
 
     cdef inline questionable_impl(self):
-
         if self.__fbthrift_cached_questionable is None:
             self.__fbthrift_cached_questionable = translate_cpp_enum_to_python(Metasyntactic, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).questionable_ref().value()))
         return self.__fbthrift_cached_questionable
@@ -521,7 +518,6 @@ cdef class SomeStruct(thrift.py3.types.Struct):
         return self.questionable_impl()
 
     cdef inline tags_impl(self):
-
         if self.__fbthrift_cached_tags is None:
             self.__fbthrift_cached_tags = Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).tags_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_tags
@@ -643,7 +639,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline me2_3_impl(self):
-
         if self.__fbthrift_cached_me2_3 is None:
             self.__fbthrift_cached_me2_3 = translate_cpp_enum_to_python(MyEnum2, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me2_3_ref().value()))
         return self.__fbthrift_cached_me2_3
@@ -653,7 +648,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.me2_3_impl()
 
     cdef inline me3_n3_impl(self):
-
         if self.__fbthrift_cached_me3_n3 is None:
             self.__fbthrift_cached_me3_n3 = translate_cpp_enum_to_python(MyEnum3, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me3_n3_ref().value()))
         return self.__fbthrift_cached_me3_n3
@@ -663,7 +657,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.me3_n3_impl()
 
     cdef inline me1_t1_impl(self):
-
         if self.__fbthrift_cached_me1_t1 is None:
             self.__fbthrift_cached_me1_t1 = translate_cpp_enum_to_python(MyEnum1, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t1_ref().value()))
         return self.__fbthrift_cached_me1_t1
@@ -673,7 +666,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.me1_t1_impl()
 
     cdef inline me1_t2_impl(self):
-
         if self.__fbthrift_cached_me1_t2 is None:
             self.__fbthrift_cached_me1_t2 = translate_cpp_enum_to_python(MyEnum1, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t2_ref().value()))
         return self.__fbthrift_cached_me1_t2

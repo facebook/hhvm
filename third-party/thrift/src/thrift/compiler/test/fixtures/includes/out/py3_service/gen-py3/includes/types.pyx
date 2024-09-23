@@ -106,7 +106,6 @@ cdef class Included(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline MyIntField_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().value()
 
     @property
@@ -114,7 +113,6 @@ cdef class Included(thrift.py3.types.Struct):
         return self.MyIntField_impl()
 
     cdef inline MyTransitiveField_impl(self):
-
         if self.__fbthrift_cached_MyTransitiveField is None:
             self.__fbthrift_cached_MyTransitiveField = _transitive_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyTransitiveField_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_MyTransitiveField

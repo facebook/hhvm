@@ -105,7 +105,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline field1_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().value()
 
     @property
@@ -113,7 +112,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.field1_impl()
 
     cdef inline field2_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().value()
 
     @property
@@ -121,7 +119,6 @@ cdef class Foo(thrift.py3.types.Struct):
         return self.field2_impl()
 
     cdef inline field3_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field3_ref().value()
 
     @property
@@ -240,7 +237,6 @@ cdef class Foo2(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline field1_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().value()
 
     @property
@@ -248,7 +244,6 @@ cdef class Foo2(thrift.py3.types.Struct):
         return self.field1_impl()
 
     cdef inline field2_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().value()
 
     @property
@@ -256,7 +251,6 @@ cdef class Foo2(thrift.py3.types.Struct):
         return self.field2_impl()
 
     cdef inline field3_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field3_ref().value()
 
     @property

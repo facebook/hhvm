@@ -292,7 +292,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline MyIntField_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().value()
 
     @property
@@ -300,7 +299,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.MyIntField_impl()
 
     cdef inline MyStringField_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().value()).decode('UTF-8')
 
     @property
@@ -308,7 +306,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.MyStringField_impl()
 
     cdef inline MyDataField_impl(self):
-
         if self.__fbthrift_cached_MyDataField is None:
             self.__fbthrift_cached_MyDataField = MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyDataField_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_MyDataField
@@ -318,7 +315,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.MyDataField_impl()
 
     cdef inline myEnum_impl(self):
-
         if self.__fbthrift_cached_myEnum is None:
             self.__fbthrift_cached_myEnum = translate_cpp_enum_to_python(MyEnum, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myEnum_ref().value()))
         return self.__fbthrift_cached_myEnum
@@ -328,7 +324,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.myEnum_impl()
 
     cdef inline oneway_impl(self):
-
         return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).oneway_ref().value()
 
     @property
@@ -336,7 +331,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.oneway_impl()
 
     cdef inline readonly_impl(self):
-
         return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).readonly_ref().value()
 
     @property
@@ -344,7 +338,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.readonly_impl()
 
     cdef inline idempotent_impl(self):
-
         return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).idempotent_ref().value()
 
     @property
@@ -352,7 +345,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.idempotent_impl()
 
     cdef inline floatSet_impl(self):
-
         if self.__fbthrift_cached_floatSet is None:
             self.__fbthrift_cached_floatSet = Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).floatSet_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_floatSet
@@ -362,7 +354,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return self.floatSet_impl()
 
     cdef inline no_hack_codegen_field_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).no_hack_codegen_field_ref().value()).decode('UTF-8')
 
     @property
@@ -481,7 +472,6 @@ cdef class Containers(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline I32List_impl(self):
-
         if self.__fbthrift_cached_I32List is None:
             self.__fbthrift_cached_I32List = List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).I32List_ref().ref())
         return self.__fbthrift_cached_I32List
@@ -491,7 +481,6 @@ cdef class Containers(thrift.py3.types.Struct):
         return self.I32List_impl()
 
     cdef inline StringSet_impl(self):
-
         if self.__fbthrift_cached_StringSet is None:
             self.__fbthrift_cached_StringSet = Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).StringSet_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_StringSet
@@ -501,7 +490,6 @@ cdef class Containers(thrift.py3.types.Struct):
         return self.StringSet_impl()
 
     cdef inline StringToI64Map_impl(self):
-
         if self.__fbthrift_cached_StringToI64Map is None:
             self.__fbthrift_cached_StringToI64Map = Map__string_i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).StringToI64Map_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_StringToI64Map
@@ -903,7 +891,6 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
         return __fbthrift_inst
 
     cdef inline MyIntField_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().value()
 
     @property
@@ -911,7 +898,6 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
         return self.MyIntField_impl()
 
     cdef inline MyStringField_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().value()).decode('UTF-8')
 
     @property
@@ -919,7 +905,6 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
         return self.MyStringField_impl()
 
     cdef inline myStruct_impl(self):
-
         if self.__fbthrift_cached_myStruct is None:
             self.__fbthrift_cached_myStruct = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myStruct_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_myStruct
@@ -929,7 +914,6 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
         return self.myStruct_impl()
 
     cdef inline myUnion_impl(self):
-
         if self.__fbthrift_cached_myUnion is None:
             self.__fbthrift_cached_myUnion = MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myUnion_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_myUnion
@@ -1042,7 +1026,6 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
         return __fbthrift_inst
 
     cdef inline MyIntField_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().value()
 
     @property
@@ -1050,7 +1033,6 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
         return self.MyIntField_impl()
 
     cdef inline MyStringField_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().value()).decode('UTF-8')
 
     @property
@@ -1058,7 +1040,6 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
         return self.MyStringField_impl()
 
     cdef inline myStruct_impl(self):
-
         if self.__fbthrift_cached_myStruct is None:
             self.__fbthrift_cached_myStruct = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myStruct_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_myStruct
@@ -1068,7 +1049,6 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
         return self.myStruct_impl()
 
     cdef inline myUnion_impl(self):
-
         if self.__fbthrift_cached_myUnion is None:
             self.__fbthrift_cached_myUnion = MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myUnion_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_myUnion
@@ -1190,7 +1170,6 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline reserved_field_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reserved_field_ref().value()
 
     @property

@@ -855,7 +855,6 @@ cdef class Val(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline strVal_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).strVal_ref().value()).decode('UTF-8')
 
     @property
@@ -863,7 +862,6 @@ cdef class Val(thrift.py3.types.Struct):
         return self.strVal_impl()
 
     cdef inline intVal_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).intVal_ref().value()
 
     @property
@@ -871,7 +869,6 @@ cdef class Val(thrift.py3.types.Struct):
         return self.intVal_impl()
 
     cdef inline typedefValue_impl(self):
-
         if self.__fbthrift_cached_typedefValue is None:
             self.__fbthrift_cached_typedefValue = Map__i16_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).typedefValue_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_typedefValue
@@ -1284,7 +1281,6 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline num_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).num_ref().value()
 
     @property

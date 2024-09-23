@@ -190,7 +190,6 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
         {{/field:hasDefaultValue?}}
         {{/field:optional?}}
         {{#field:type}}
-
         {{> types/cython_struct_getter}}
 
         {{/field:type}}

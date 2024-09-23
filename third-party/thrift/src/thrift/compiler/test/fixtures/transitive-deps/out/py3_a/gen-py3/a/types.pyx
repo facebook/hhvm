@@ -112,7 +112,6 @@ cdef class A(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline b_impl(self):
-
         if self.__fbthrift_cached_b is None:
             self.__fbthrift_cached_b = List__List__c_C__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).b_ref().ref())
         return self.__fbthrift_cached_b
@@ -122,7 +121,6 @@ cdef class A(thrift.py3.types.Struct):
         return self.b_impl()
 
     cdef inline other_impl(self):
-
         if self.__fbthrift_cached_other is None:
             self.__fbthrift_cached_other = List__c_C__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).other_ref().ref())
         return self.__fbthrift_cached_other

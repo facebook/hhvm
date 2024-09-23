@@ -312,7 +312,6 @@ cdef class SimpleException(thrift.py3.exceptions.GeneratedError):
         return __fbthrift_inst
 
     cdef inline err_code_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).err_code_ref().value()
 
     @property
@@ -431,7 +430,6 @@ cdef class OptionalRefStruct(thrift.py3.types.Struct):
     cdef inline optional_blob_impl(self):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).optional_blob_ref().has_value():
             return None
-
         if self.__fbthrift_cached_optional_blob is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).optional_blob_ref().value_unchecked():
                 return None
@@ -558,7 +556,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline is_on_impl(self):
-
         return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).is_on_ref().value()
 
     @property
@@ -566,7 +563,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return self.is_on_impl()
 
     cdef inline tiny_int_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).tiny_int_ref().value()
 
     @property
@@ -574,7 +570,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return self.tiny_int_impl()
 
     cdef inline small_int_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).small_int_ref().value()
 
     @property
@@ -582,7 +577,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return self.small_int_impl()
 
     cdef inline nice_sized_int_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).nice_sized_int_ref().value()
 
     @property
@@ -590,7 +584,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return self.nice_sized_int_impl()
 
     cdef inline big_int_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).big_int_ref().value()
 
     @property
@@ -598,7 +591,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return self.big_int_impl()
 
     cdef inline real_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).real_ref().value()
 
     @property
@@ -606,7 +598,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return self.real_impl()
 
     cdef inline smaller_real_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).smaller_real_ref().value()
 
     @property
@@ -847,7 +838,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline structOne_impl(self):
-
         if self.__fbthrift_cached_structOne is None:
             self.__fbthrift_cached_structOne = SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).structOne_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_structOne
@@ -857,7 +847,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.structOne_impl()
 
     cdef inline structTwo_impl(self):
-
         if self.__fbthrift_cached_structTwo is None:
             self.__fbthrift_cached_structTwo = SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).structTwo_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_structTwo
@@ -867,7 +856,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.structTwo_impl()
 
     cdef inline an_integer_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).an_integer_ref().value()
 
     @property
@@ -875,7 +863,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.an_integer_impl()
 
     cdef inline name_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().value()).decode('UTF-8')
 
     @property
@@ -883,7 +870,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.name_impl()
 
     cdef inline an_enum_impl(self):
-
         if self.__fbthrift_cached_an_enum is None:
             self.__fbthrift_cached_an_enum = translate_cpp_enum_to_python(AnEnum, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).an_enum_ref().value()))
         return self.__fbthrift_cached_an_enum
@@ -893,7 +879,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.an_enum_impl()
 
     cdef inline some_bytes_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).some_bytes_ref().value()
 
     @property
@@ -901,7 +886,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.some_bytes_impl()
 
     cdef inline sender_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sender_ref().value()).decode('UTF-8')
 
     @property
@@ -909,7 +893,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.sender_impl()
 
     cdef inline cdef__impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cdef__ref().value()).decode('UTF-8')
 
     @property
@@ -917,7 +900,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         return self.cdef__impl()
 
     cdef inline bytes_with_cpp_type_impl(self):
-
         return (<const char*>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bytes_with_cpp_type_ref().value().data())[:deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bytes_with_cpp_type_ref().value().size()]
 
     @property
@@ -1171,7 +1153,6 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline u_impl(self):
-
         if self.__fbthrift_cached_u is None:
             self.__fbthrift_cached_u = BinaryUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).u_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_u

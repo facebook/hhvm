@@ -162,7 +162,6 @@ cdef class Struct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline first_impl(self):
-
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).first_ref().value()
 
     @property
@@ -170,7 +169,6 @@ cdef class Struct(thrift.py3.types.Struct):
         return self.first_impl()
 
     cdef inline second_impl(self):
-
         return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).second_ref().value()).decode('UTF-8')
 
     @property

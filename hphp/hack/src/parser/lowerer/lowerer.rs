@@ -923,6 +923,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             let mut set = HashSet::default();
             for f in field_map.iter() {
                 if !set.insert(f.name.get_name()) {
+                    // This check is sketchy. It considers only the const names in class const cases
                     raise_hh_error(env, Naming::fd_name_already_bound(f.name.get_pos().clone()));
                 }
             }

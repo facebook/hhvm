@@ -507,10 +507,10 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
         sfn: &mut ShapeFieldName,
     ) -> Result<(), ()> {
         match sfn {
-            ShapeFieldName::SFclassConst(id, _) => {
+            ShapeFieldName::SFregexGroup(_) | ShapeFieldName::SFlitStr(_) => {}
+            ShapeFieldName::SFclassname(id) | ShapeFieldName::SFclassConst(id, _) => {
                 env.elaborate_type_name(id);
             }
-            _ => {}
         }
         sfn.recurse(env, self.object())
     }

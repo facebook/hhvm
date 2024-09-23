@@ -487,7 +487,8 @@ let to_dict env pos shape_ty res =
 
 let shape_field_pos = function
   | Ast_defs.SFregex_group (p, _)
-  | Ast_defs.SFlit_str (p, _) ->
+  | Ast_defs.SFlit_str (p, _)
+  | Ast_defs.SFclassname (p, _) ->
     p
   | Ast_defs.SFclass_const ((cls_pos, _), (mem_pos, _)) ->
     Pos.btw cls_pos mem_pos
@@ -508,6 +509,7 @@ let check_shape_keys_validity env keys =
              @@ Primary.Shape.Invalid_shape_field_name
                   { pos = key_pos; is_empty = true }));
       (env, key_pos, None)
+    | Ast_defs.SFclassname (_, _cls) -> (env, key_pos, None)
     | Ast_defs.SFclass_const ((_p, cls), (p, y)) -> begin
       match Env.get_class env cls with
       | Decl_entry.DoesNotExist

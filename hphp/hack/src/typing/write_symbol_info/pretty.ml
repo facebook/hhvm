@@ -185,6 +185,7 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
   and parse_shape_field_name = function
     | Ast_defs.SFregex_group (_, s) -> append s
     | Ast_defs.SFlit_str (_, s) -> append ("'" ^ s ^ "'")
+    | Ast_defs.SFclassname (_, c) -> append ("nameof " ^ Typing_print.strip_ns c)
     | Ast_defs.SFclass_const ((pos, c), (_, s)) ->
       append ~annot:pos (Typing_print.strip_ns c);
       append "::";
@@ -290,6 +291,10 @@ let rec hint_to_angle h =
     let shape_field_name_to_hint = function
       | Ast_defs.SFregex_group (_, s) -> ShapeKV.Sf_regex_group s
       | Ast_defs.SFlit_str (_, s) -> ShapeKV.Sf_lit_string s
+      | Ast_defs.SFclassname (_, c) ->
+        ShapeKV.Sf_class_const
+          FieldClassConst.
+            { container = Util.make_qname c; name = Name.Key "class" }
       | Ast_defs.SFclass_const ((_pos, c), (_, s)) ->
         ShapeKV.Sf_class_const
           FieldClassConst.{ container = Util.make_qname c; name = Name.Key s }

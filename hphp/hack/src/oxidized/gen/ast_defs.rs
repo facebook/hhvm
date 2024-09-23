@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9669d8c9f36e810b8520c70b7e94ca8>>
+// @generated SignedSource<<3262343f5c6503149944fd9ffc2754f2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -78,6 +78,7 @@ pub enum ShapeFieldName {
     SFregexGroup(Pstring),
     #[rust_to_ocaml(name = "SFlit_str")]
     SFlitStr(PositionedByteString),
+    SFclassname(Id),
     #[rust_to_ocaml(name = "SFclass_const")]
     SFclassConst(Id, Pstring),
 }

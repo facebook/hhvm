@@ -12,7 +12,9 @@ impl<'a> ShapeFieldName<'a> {
     pub fn get_name(&self) -> &'a BStr {
         use ShapeFieldName::*;
         match self {
-            SFregexGroup((_, name)) | SFclassConst((_, (_, name))) => name.as_bytes().into(),
+            SFregexGroup((_, name)) | SFclassname(Id(_, name)) | SFclassConst((_, (_, name))) => {
+                name.as_bytes().into()
+            }
             SFlitStr((_, name)) => name,
         }
     }
@@ -20,7 +22,10 @@ impl<'a> ShapeFieldName<'a> {
     pub fn get_pos(&self) -> &'a Pos<'_> {
         use ShapeFieldName::*;
         match self {
-            SFregexGroup((p, _)) | SFlitStr((p, _)) | SFclassConst((_, (p, _))) => p,
+            SFregexGroup((p, _))
+            | SFlitStr((p, _))
+            | SFclassname(Id(p, _))
+            | SFclassConst((_, (p, _))) => p,
         }
     }
 }

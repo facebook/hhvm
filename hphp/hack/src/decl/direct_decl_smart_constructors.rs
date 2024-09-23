@@ -2224,6 +2224,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             ShapeFieldName::SFlitStr(&(pos, x)) => {
                 TshapeFieldName::TSFlitStr(self.alloc(PosByteString(pos, x)))
             }
+            ShapeFieldName::SFclassname(&id) => {
+                TshapeFieldName::TSFclassConst(self.alloc((id.into(), PosString(id.0, "class"))))
+            }
             ShapeFieldName::SFclassConst(&(id, &(pos, x))) => {
                 TshapeFieldName::TSFclassConst(self.alloc((id.into(), PosString(pos, x))))
             }

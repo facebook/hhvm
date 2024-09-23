@@ -82,6 +82,8 @@ module TShapeField = struct
    fun convert_pos -> function
     | Ast_defs.SFregex_group (p, s) -> TSFregex_group (convert_pos p, s)
     | Ast_defs.SFlit_str (p, s) -> TSFlit_str (convert_pos p, s)
+    | Ast_defs.SFclassname (p, cls) ->
+      TSFclass_const ((convert_pos p, cls), (convert_pos p, "class"))
     | Ast_defs.SFclass_const ((pcls, cls), (pconst, const)) ->
       TSFclass_const ((convert_pos pcls, cls), (convert_pos pconst, const))
 

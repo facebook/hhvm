@@ -160,20 +160,6 @@ fn print_expr_varray(
     })
 }
 
-fn print_shape_field_name(
-    _: &Context<'_>,
-    w: &mut dyn Write,
-    _: &ExprEnv<'_>,
-    field: &ast::ShapeFieldName,
-) -> Result<()> {
-    use ast::ShapeFieldName as S;
-    match field {
-        S::SFregexGroup((_, s)) => print_expr_int(w, s.as_ref()),
-        S::SFlitStr((_, s)) => print_expr_string(w, s),
-        S::SFclassConst(_, (_, s)) => print_expr_string(w, s.as_bytes()),
-    }
-}
-
 fn print_expr_int(w: &mut dyn Write, i: &str) -> Result<()> {
     match integer::to_decimal(i) {
         Ok(s) => w.write_all(s.as_bytes()),
@@ -298,6 +284,21 @@ fn print_expr(
                 print_expr_string(w, s1.as_bytes())?
             })),
             _ => Ok(None),
+        }
+    }
+    fn print_shape_field_name(
+        _: &Context<'_>,
+        w: &mut dyn Write,
+        env: &ExprEnv<'_>,
+        field: &ast::ShapeFieldName,
+    ) -> Result<()> {
+        use ast::ShapeFieldName as S;
+        match field {
+            S::SFregexGroup((_, s)) => print_expr_int(w, s.as_ref()),
+            S::SFlitStr((_, s)) => print_expr_string(w, s),
+            S::SFclassname(id) => print_expr_id(w, env, id.1.as_ref()),
+            // This is broken, it loses info about the class
+            S::SFclassConst(_, (_, s)) => print_expr_string(w, s.as_bytes()),
         }
     }
     use ast::Expr_;

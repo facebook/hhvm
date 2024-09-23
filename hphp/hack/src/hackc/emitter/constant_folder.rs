@@ -233,6 +233,11 @@ fn shape_to_typed_value(
                     }
                 }
                 ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::intern_string(&id.1),
+                ast_defs::ShapeFieldName::SFclassname(class_id) => nameof_to_typed_value(
+                    emitter,
+                    scope,
+                    &ast::ClassId((), Pos::NONE, ast::ClassId_::CI(class_id.clone())),
+                )?,
                 ast_defs::ShapeFieldName::SFclassConst(class_id, id) => class_const_to_typed_value(
                     emitter,
                     scope,

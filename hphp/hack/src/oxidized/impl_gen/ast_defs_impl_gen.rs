@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3d85895cae35cc169d59920c98b86bf3>>
+// @generated SignedSource<<eb58bbf819f9bda11df8aef0a869d60b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -17,6 +17,9 @@ impl ShapeFieldName {
     pub fn mk_sflit_str(p0: PositionedByteString) -> Self {
         ShapeFieldName::SFlitStr(p0)
     }
+    pub fn mk_sfclassname(p0: Id) -> Self {
+        ShapeFieldName::SFclassname(p0)
+    }
     pub fn mk_sfclass_const(p0: Id, p1: Pstring) -> Self {
         ShapeFieldName::SFclassConst(p0, p1)
     }
@@ -29,6 +32,12 @@ impl ShapeFieldName {
     pub fn is_sflit_str(&self) -> bool {
         match self {
             ShapeFieldName::SFlitStr(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_sfclassname(&self) -> bool {
+        match self {
+            ShapeFieldName::SFclassname(..) => true,
             _ => false,
         }
     }
@@ -50,6 +59,12 @@ impl ShapeFieldName {
             _ => None,
         }
     }
+    pub fn as_sfclassname(&self) -> Option<&Id> {
+        match self {
+            ShapeFieldName::SFclassname(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_sfclass_const(&self) -> Option<(&Id, &Pstring)> {
         match self {
             ShapeFieldName::SFclassConst(p0, p1) => Some((p0, p1)),
@@ -68,6 +83,12 @@ impl ShapeFieldName {
             _ => None,
         }
     }
+    pub fn as_sfclassname_mut(&mut self) -> Option<&mut Id> {
+        match self {
+            ShapeFieldName::SFclassname(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_sfclass_const_mut(&mut self) -> Option<(&mut Id, &mut Pstring)> {
         match self {
             ShapeFieldName::SFclassConst(p0, p1) => Some((p0, p1)),
@@ -83,6 +104,12 @@ impl ShapeFieldName {
     pub fn as_sflit_str_into(self) -> Option<PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sfclassname_into(self) -> Option<Id> {
+        match self {
+            ShapeFieldName::SFclassname(p0) => Some(p0),
             _ => None,
         }
     }

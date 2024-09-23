@@ -81,6 +81,7 @@ let pos_of_shape_field_name =
     function
     | SFregex_group (pos, _) -> pos
     | SFlit_str (pos, _) -> pos
+    | SFclassname (pos, _) -> pos
     | SFclass_const (_, (pos, _)) -> pos)
 
 let pos_of_type_hint : 'a Aast_defs.type_hint -> Pos.t = function

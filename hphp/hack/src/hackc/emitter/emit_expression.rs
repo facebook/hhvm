@@ -1099,6 +1099,9 @@ fn emit_shape<'a, 'd>(
         Ok(match field {
             SF::SFregexGroup(s) => ast::Expr_::mk_int(s.1.clone()),
             SF::SFlitStr(s) => ast::Expr_::mk_string(s.1.clone()),
+            SF::SFclassname(id) => {
+                ast::Expr_::mk_nameof(ast::ClassId((), pos.clone(), ast::ClassId_::CI(id.clone())))
+            }
             SF::SFclassConst(id, p) => {
                 if ClassExpr::is_reified_tparam(&env.scope, &id.1) {
                     return Err(Error::fatal_parse(

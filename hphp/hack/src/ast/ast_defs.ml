@@ -34,7 +34,8 @@ and shape_field_name =
        * is conjured by typing for inference of Shapes::idx for regex results,
        * but is otherwise never emitted. *)
   | SFlit_str of positioned_byte_string
-  | SFclass_const of id * pstring
+  | SFclassname of id (* nameof C *)
+  | SFclass_const of id * pstring (* C::X *)
 [@@transform.opaque]
 
 and variance =
@@ -350,16 +351,37 @@ module ShapeField = struct
     match (x, y) with
     | (SFregex_group (_, s1), SFregex_group (_, s2)) -> String.compare s1 s2
     | (SFlit_str (_, s1), SFlit_str (_, s2)) -> String.compare s1 s2
+    | (SFclassname (_, s1), SFclassname (_, s2)) -> String.compare s1 s2
     | (SFclass_const ((_, s1), (_, s1')), SFclass_const ((_, s2), (_, s2'))) ->
       Core.Tuple.T2.compare
         ~cmp1:String.compare
         ~cmp2:String.compare
         (s1, s1')
         (s2, s2')
-    | (SFregex_group _, _) -> -1
+    (* Cross-variant order: SFregex_group, SFlit_str, SFclassname, SFclass_const
+     *
+     * This can be derived provided that we validate a deriver in Rust that is
+     * synced to this. Rust also does not have facilities like [@compare.ignore]
+     * so we need a special Pos that always compares to 0. *)
+    | (SFregex_group _, SFlit_str _)
+    | (SFregex_group _, SFclassname _)
+    | (SFregex_group _, SFclass_const _) ->
+      -1
+    (* spacing *)
     | (SFlit_str _, SFregex_group _) -> 1
-    | (SFlit_str _, _) -> -1
-    | (SFclass_const _, _) -> 1
+    | (SFlit_str _, SFclassname _)
+    | (SFlit_str _, SFclass_const _) ->
+      -1
+    (* spacing *)
+    | (SFclassname _, SFregex_group _)
+    | (SFclassname _, SFlit_str _) ->
+      1
+    | (SFclassname _, SFclass_const _) -> -1
+    (* spacing *)
+    | (SFclass_const _, SFregex_group _)
+    | (SFclass_const _, SFlit_str _)
+    | (SFclass_const _, SFclassname _) ->
+      1
 
   let equal x y = Core.Int.equal 0 (compare x y)
 end

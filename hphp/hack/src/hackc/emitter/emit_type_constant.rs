@@ -112,6 +112,10 @@ fn shape_field_name(sf: &ShapeFieldName) -> (String, bool) {
                 false,
             )
         }
+        ShapeFieldName::SFclassname(Id(_, cname)) => (
+            hhbc::ClassName::from_ast_name_and_mangle(cname).to_string(),
+            false,
+        ),
         ShapeFieldName::SFclassConst(Id(_, cname), (_, s)) => {
             let id = hhbc::ClassName::from_ast_name_and_mangle(cname);
             (format!("{}::{}", id.as_str(), s), true)

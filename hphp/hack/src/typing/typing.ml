@@ -8403,15 +8403,11 @@ end = struct
     in
     List.map_env env (List.zip_exn param_tys params) ~f:bind_param_and_check
 
-  and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
-    match !params with
-    | [] ->
-      (* This code cannot be executed normally, because the arity is wrong
-       * and it will error later. Bind as many parameters as we can and carry
-       * on. *)
-      (env, t_params)
+  and closure_bind_param (env, t_params, params) ty :
+      env * Tast.fun_param list * _ =
+    match params with
+    | [] -> (env, t_params, params)
     | param :: paraml ->
-      params := paraml;
       (match hint_of_type_hint param.param_type_hint with
       | Some h ->
         let decl_ty = Decl_hint.hint env.decl_env h in
@@ -8434,13 +8430,13 @@ end = struct
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
         let (env, t_param) = bind_param env (Some h, param) in
-        (env, t_params @ [t_param])
+        (env, t_params @ [t_param], paraml)
       | None ->
         let ty =
           mk (Reason.lambda_param (param.param_pos, get_reason ty), get_node ty)
         in
         let (env, t_param) = bind_param env (Some ty, param) in
-        (env, t_params @ [t_param]))
+        (env, t_params @ [t_param], paraml))
 
   and closure_bind_variadic env vparam variadic_ty =
     let ((env, ty_err_opt), ty, pos) =
@@ -8458,19 +8454,6 @@ end = struct
     let ty = MakeType.vec r arr_values in
     let (env, t_variadic) = bind_param env (Some ty, vparam) in
     (env, t_variadic)
-
-  and closure_bind_opt_param env param : env =
-    match Aast_utils.get_param_default param with
-    | None ->
-      let (env, _) = bind_param env (None, param) in
-      env
-    | Some default ->
-      let (env, _te, ty) =
-        Expr.expr ~expected:None ~ctxt:Expr.Context.default env default
-      in
-      Typing_sequencing.sequence_check_expr default;
-      let (env, _) = bind_param env (Some ty, param) in
-      env
 
   let fun_
       ?(abstract = false)
@@ -8798,14 +8781,12 @@ end = struct
     let non_variadic_params =
       List.filter f.f_params ~f:(fun p -> not (Aast_utils.is_param_variadic p))
     in
-    let params = ref non_variadic_params in
-    let (env, t_params) =
+    let (env, t_params, _) =
       List.fold_left
-        ~f:(closure_bind_param params)
-        ~init:(env, [])
+        ~f:closure_bind_param
+        ~init:(env, [], non_variadic_params)
         (List.map non_variadic_ft_params ~f:(fun x -> x.fp_type))
     in
-    let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
     let env =
       match el with
       | None -> env

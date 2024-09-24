@@ -719,6 +719,10 @@ std::unique_ptr<MysqlResult> SyncMysqlConnection::getResult() const {
   MYSQL_RES* res = mysql_store_result(mysql_);
   VLOG(4) << fmt::format(
       "mysql_store_result({}) returned {}", (void*)mysql_, (void*)res);
+  if (!res) {
+    return {};
+  }
+
   return std::make_unique<SyncMysqlResult>(res);
 }
 
@@ -728,6 +732,10 @@ std::unique_ptr<MysqlResult> AsyncMysqlConnection::getResult() const {
   MYSQL_RES* res = mysql_use_result(mysql_);
   VLOG(4) << fmt::format(
       "mysql_use_result({}) returned {}", (void*)mysql_, (void*)res);
+  if (!res) {
+    return {};
+  }
+
   return std::make_unique<AsyncMysqlResult>(res);
 }
 

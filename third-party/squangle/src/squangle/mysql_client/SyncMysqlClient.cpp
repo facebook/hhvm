@@ -17,12 +17,17 @@
 
 namespace facebook::common::mysql_client {
 
-// namespace {
-// folly::Singleton<SyncMysqlClient> client([]() { return new SyncMysqlClient;
-// }); } // namespace
+namespace detail {
+
+struct SyncMysqlClientSingletonTag {};
+
+folly::Singleton<SyncMysqlClient, SyncMysqlClientSingletonTag>
+    defaultSyncMysqlClientSingleton;
+
+} // namespace detail
 
 std::shared_ptr<SyncMysqlClient> SyncMysqlClient::defaultClient() {
-  return folly::Singleton<SyncMysqlClient>::try_get();
+  return detail::defaultSyncMysqlClientSingleton.try_get();
 }
 
 std::unique_ptr<ConnectOperationImpl>

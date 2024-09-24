@@ -21,19 +21,30 @@
 
 namespace apache::thrift::rocket {
 
-// TODO rroeser - right now this is a no-op, but will be used for adding support
-// for checksum and compression, and other features that don't delegate to the
-// PayloadUtils.h header free functions.
+/**
+ * Port of PayloadUtils.h header free functions into a strategy class.
+ */
 class DefaultPayloadSerializerStrategy final
     : public PayloadSerializerStrategy<DefaultPayloadSerializerStrategy> {
  public:
   DefaultPayloadSerializerStrategy() : PayloadSerializerStrategy(*this) {}
 
   template <class T>
-  folly::Try<T> unpackAsCompressed(rocket::Payload&& payload, bool useBinary);
+  folly::Try<T> unpackAsCompressed(rocket::Payload&& payload) {
+    return folly::makeTryWith([&]() {
+      T t = unpackImpl<T>(std::move(payload));
+      if (auto compression = t.metadata.compression()) {
+        t.payload = uncompressBuffer(std::move(t.payload), *compression);
+      }
+      return std::move(t);
+    });
+  }
 
   template <class T>
-  folly::Try<T> unpack(rocket::Payload&& payload, bool useBinary);
+  folly::Try<T> unpack(rocket::Payload&& payload) {
+    return folly::makeTryWith(
+        [&]() { return unpackImpl<T>(std::move(payload)); });
+  }
 
   template <typename Metadata>
   rocket::Payload packWithFds(
@@ -43,12 +54,88 @@ class DefaultPayloadSerializerStrategy final
       folly::AsyncTransport* transport);
 
   template <typename T>
-  size_t unpackCompact(T&, const folly::IOBuf*) {
-    throw std::runtime_error("not implemented");
+  std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
+    CompactProtocolWriter writer;
+    folly::IOBufQueue queue;
+    writer.setOutput(&queue);
+    data.write(&writer);
+    return queue.move();
+  }
+
+  template <typename T>
+  size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
+    if (FOLLY_UNLIKELY(!buffer)) {
+      folly::throw_exception<std::runtime_error>("Underflow");
+    }
+    CompactProtocolReader reader;
+    reader.setInput(buffer);
+    output.read(&reader);
+    return reader.getCursorPosition();
   }
 
   template <class PayloadType>
-  Payload pack(PayloadType&& payload, folly::AsyncTransport* transport);
+  rocket::Payload pack(
+      PayloadType&& payload, folly::AsyncTransport* transport) {
+    auto metadata = std::forward<PayloadType>(payload).metadata;
+    return packWithFds(
+        &metadata,
+        std::forward<PayloadType>(payload).payload,
+        std::forward<PayloadType>(payload).fds,
+        transport);
+  }
+
+ private:
+  static constexpr size_t kHeadroomBytes = 16;
+
+  template <typename Metadata>
+  rocket::Payload finalizePayload(
+      std::unique_ptr<folly::IOBuf>&& payload,
+      Metadata* metadata,
+      folly::SocketFds fds);
+
+  bool canSerializeMetadataIntoDataBufferHeadroom(
+      const std::unique_ptr<folly::IOBuf>& data, const size_t serSize) const;
+
+  template <class Metadata, class ProtocolWriter>
+  Payload makePayloadWithHeadroom(
+      ProtocolWriter& writer,
+      const Metadata& metadata,
+      std::unique_ptr<folly::IOBuf> data);
+
+  template <class Metadata, class ProtocolWriter>
+  Payload makePayloadWithoutHeadroom(
+      size_t serSize,
+      ProtocolWriter& writer,
+      const Metadata& metadata,
+      std::unique_ptr<folly::IOBuf> data);
+
+  template <class Metadata, class ProtocolWriter>
+  Payload makePayload(
+      const Metadata& metadata, std::unique_ptr<folly::IOBuf> data);
+
+  void verifyMetadataSize(size_t metadataSize, size_t expectedSize) {
+    if (metadataSize != expectedSize) {
+      folly::throw_exception<std::out_of_range>("metadata size mismatch");
+    }
+  }
+
+  template <typename T>
+  T unpackImpl(rocket::Payload&& payload) {
+    T t{{}, {}};
+    unpackPayloadMetadata(t, payload);
+    t.payload = std::move(payload).data();
+    return t;
+  }
+
+  template <typename T>
+  void unpackPayloadMetadata(T& t, rocket::Payload& payload) {
+    if (payload.hasNonemptyMetadata()) {
+      if (unpackCompact(t.metadata, payload.buffer()) !=
+          payload.metadataSize()) {
+        folly::throw_exception<std::out_of_range>("metadata size mismatch");
+      }
+    }
+  }
 };
 
 } // namespace apache::thrift::rocket

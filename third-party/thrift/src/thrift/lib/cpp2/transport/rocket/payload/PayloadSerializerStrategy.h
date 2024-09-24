@@ -29,14 +29,13 @@ template <typename Child>
 class PayloadSerializerStrategy {
  public:
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpackAsCompressed(
-      Payload&& payload, bool useBinary) {
-    return child_.unpackAsCompressed(std::move(payload), useBinary);
+  FOLLY_ERASE folly::Try<T> unpackAsCompressed(Payload&& payload) {
+    return child_.unpackAsCompressed(std::move(payload));
   }
 
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpack(Payload&& payload, bool useBinary) {
-    return child_.unpack(std::move(payload), useBinary);
+  FOLLY_ERASE folly::Try<T> unpack(Payload&& payload) {
+    return child_.unpack(std::move(payload));
   }
 
   template <typename T>
@@ -61,7 +60,7 @@ class PayloadSerializerStrategy {
   }
 
   template <typename T>
-  size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
+  FOLLY_ERASE size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
     return child_.unpackCompact(output, buffer);
   }
 

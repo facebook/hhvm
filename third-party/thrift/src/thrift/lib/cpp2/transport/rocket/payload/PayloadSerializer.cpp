@@ -16,41 +16,67 @@
 
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 
-#include <folly/Singleton.h>
-
 namespace apache::thrift::rocket {
 
-namespace {
-auto initializationLock = folly::Singleton<std::mutex>().shouldEagerInit();
-static folly::Indestructible<std::optional<PayloadSerializer>> serializer;
-} // namespace
-
-bool isSerializerInitialized() {
-  return serializer->has_value();
-}
-
-void PayloadSerializer::tryInitialize(PayloadSerializer&& src) {
-  std::lock_guard<std::mutex> lock(*initializationLock.try_get());
-  if (!isSerializerInitialized()) {
-    serializer->emplace(std::move(src));
+PayloadSerializer::PayloadSerializerHolder::~PayloadSerializerHolder() {
+  PayloadSerializer* serializer = serializer_;
+  if (serializer) {
+    delete serializer;
   }
 }
 
-void PayloadSerializer::tryInitializeDefault() {
-  tryInitializeEmplace(PayloadSerializer(LegacyPayloadSerializerStrategy()));
+PayloadSerializer& PayloadSerializer::PayloadSerializerHolder::get() {
+  auto* serializer = serializer_.load(std::memory_order_relaxed);
+
+  // Fast path when the serializer is already initialized
+  if (FOLLY_LIKELY(serializer != nullptr)) {
+    return *serializer;
+  } else {
+    // Slow path when the serializer is not initialized yet that
+    // uses a compare-and-swap to initialize it. Avoids the need for a lock.
+    auto* newSerializer =
+        new PayloadSerializer(LegacyPayloadSerializerStrategy());
+    for (;;) {
+      // Load the current serializer
+      auto* expected = serializer_.load(std::memory_order_relaxed);
+
+      // Check if the serializer is already initialized
+      if (expected == nullptr) {
+        // Try to initialize the serializer
+        if (serializer_.compare_exchange_strong(
+                expected, newSerializer, std::memory_order_release)) {
+          return *newSerializer;
+        }
+      } else {
+        // The serializer is already initialized, return it and clean up.
+        delete newSerializer;
+        return *expected;
+      }
+    }
+  }
+}
+
+void PayloadSerializer::PayloadSerializerHolder::reset() {
+  auto* serializer = serializer_.exchange(nullptr);
+  if (serializer) {
+    delete serializer;
+  }
+}
+
+PayloadSerializer::PayloadSerializerHolder&
+PayloadSerializer::getPayloadSerializerHolder() {
+  static folly::Indestructible<PayloadSerializer::PayloadSerializerHolder>
+      holder;
+
+  return *holder;
 }
 
 PayloadSerializer& PayloadSerializer::getInstance() {
-  if (!FOLLY_UNLIKELY(isSerializerInitialized())) {
-    tryInitializeDefault();
-  }
-  std::optional<PayloadSerializer>& opt = *serializer;
-  return *opt;
+  return getPayloadSerializerHolder().get();
 }
 
 void PayloadSerializer::reset() {
-  std::lock_guard<std::mutex> lock(*initializationLock.try_get());
-  serializer->reset();
+  getPayloadSerializerHolder().reset();
 }
 
 } // namespace apache::thrift::rocket

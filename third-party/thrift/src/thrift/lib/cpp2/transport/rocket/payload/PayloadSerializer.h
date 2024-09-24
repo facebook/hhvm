@@ -18,6 +18,7 @@
 
 #include <variant>
 #include <folly/Overload.h>
+#include <folly/SpinLock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/DefaultPayloadSerializerStrategy.h>
@@ -40,20 +41,43 @@ class PayloadSerializer {
       variant<DefaultPayloadSerializerStrategy, LegacyPayloadSerializerStrategy>
           strategy_;
 
-  template <typename Strategy>
-  explicit PayloadSerializer(Strategy s) : strategy_(std::move(s)) {}
+  struct PayloadSerializerHolder {
+    PayloadSerializerHolder() {}
+    ~PayloadSerializerHolder();
+
+    PayloadSerializer& get();
+
+    template <typename Strategy>
+    void initialize(Strategy&& strategy) {
+      auto* serializer =
+          new PayloadSerializer(std::forward<Strategy>(strategy));
+      auto* other = serializer_.exchange(serializer);
+      if (other) {
+        delete other;
+      }
+    }
+
+    void reset();
+
+   private:
+    std::atomic<PayloadSerializer*> serializer_{nullptr};
+  };
 
  public:
+  template <
+      typename Strategy,
+      typename = std::enable_if_t<
+          std::is_base_of_v<PayloadSerializerStrategy<Strategy>, Strategy>>>
+  explicit PayloadSerializer(Strategy s) : strategy_(std::move(s)) {}
   /**
    * Lets you override the strategy to one of the supported strategies instead
    * of the default. Must be called before the getInstance() method is called
    * for the first time to take effect. Otherwise, it will be ignored.
    */
   template <typename Strategy>
-  static void initialize(Strategy strategy) {
-    tryInitialize(PayloadSerializer(std::move(strategy)));
+  static void initialize(Strategy&& strategy) {
+    getPayloadSerializerHolder().initialize(std::forward<Strategy>(strategy));
   }
-
   /**
    * Returns the singleton instance of the PayloadSerializer. Either returns
    * the default strategy or the one that was overridden by the initialize()
@@ -62,27 +86,23 @@ class PayloadSerializer {
   static PayloadSerializer& getInstance();
 
   template <class T>
-  folly::Try<T> unpackAsCompressed(Payload&& payload, bool useBinary) {
+  FOLLY_ERASE folly::Try<T> unpackAsCompressed(Payload&& payload) {
     return folly::variant_match(
-        strategy_,
-        [payload = std::move(payload), useBinary](auto& strategy) mutable {
-          return strategy.template unpackAsCompressed<T>(
-              std::move(payload), useBinary);
+        strategy_, [payload = std::move(payload)](auto& strategy) mutable {
+          return strategy.template unpackAsCompressed<T>(std::move(payload));
         });
   }
 
   template <class T>
-  folly::Try<T> unpack(rocket::Payload&& payload, bool useBinary) {
+  FOLLY_ERASE folly::Try<T> unpack(rocket::Payload&& payload) {
     return folly::variant_match(
-        strategy_,
-        [payload = std::move(payload),
-         useBinary = useBinary](auto& strategy) mutable {
-          return strategy.template pack<T>(std::move(payload), useBinary);
+        strategy_, [payload = std::move(payload)](auto& strategy) mutable {
+          return strategy.template unpack<T>(std::move(payload));
         });
   }
 
   template <typename T>
-  std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
+  FOLLY_ERASE std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
     return folly::variant_match(
         strategy_, [data = std::forward<T>(data)](auto& strategy) mutable {
           return strategy.packCompact(std::forward<T>(data));
@@ -90,7 +110,7 @@ class PayloadSerializer {
   }
 
   template <typename T>
-  size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
+  FOLLY_ERASE size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
     return folly::variant_match(
         strategy_, [&output, buffer](auto& strategy) mutable {
           return strategy.unpackCompact(output, buffer);
@@ -98,7 +118,7 @@ class PayloadSerializer {
   }
 
   template <typename Metadata>
-  rocket::Payload packWithFds(
+  FOLLY_ERASE rocket::Payload packWithFds(
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
@@ -115,13 +135,14 @@ class PayloadSerializer {
   }
 
   template <class PayloadType>
-  Payload pack(PayloadType&& payload, folly::AsyncTransport* transport) {
+  FOLLY_ERASE Payload
+  pack(PayloadType&& payload, folly::AsyncTransport* transport) {
     return folly::variant_match(
         strategy_,
         [payload = std::forward<PayloadType>(payload),
          transport](auto& strategy) mutable {
           return strategy.template pack<PayloadType>(
-              std::forward<PayloadType>(payload));
+              std::forward<PayloadType>(payload), transport);
         });
   }
 
@@ -132,14 +153,7 @@ class PayloadSerializer {
    */
   static void reset();
 
-  static void tryInitialize(PayloadSerializer&& src);
-
-  template <typename... Args>
-  static void tryInitializeEmplace(Args&&... args) {
-    tryInitialize(std::forward<Args>(args)...);
-  }
-
-  static void tryInitializeDefault();
+  static PayloadSerializerHolder& getPayloadSerializerHolder();
 
   FRIEND_TEST(PayloadSerializerTest, TestPackWithLegacyStrategy);
   FRIEND_TEST(PayloadSerializerTest, TestPackWitDefaultyStrategy);

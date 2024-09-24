@@ -31,6 +31,7 @@ void testPackAndUnpackWithCompactProtocol(PayloadSerializer& serializer) {
   RequestRpcMetadata other;
   serializer.unpackCompact<RequestRpcMetadata>(other, payload.get());
   EXPECT_EQ(other, metadata);
+  EXPECT_EQ(other.protocol(), ProtocolId::COMPACT);
 }
 
 TEST(PayloadSerializerTest, TestPackWithLegacyStrategy) {
@@ -42,6 +43,7 @@ TEST(PayloadSerializerTest, TestPackWithLegacyStrategy) {
 
 TEST(PayloadSerializerTest, TestPackWitDefaultyStrategy) {
   PayloadSerializer::reset();
+  PayloadSerializer::initialize(DefaultPayloadSerializerStrategy());
   auto& serializer = PayloadSerializer::getInstance();
   testPackAndUnpackWithCompactProtocol(serializer);
 }

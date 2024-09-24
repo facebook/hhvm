@@ -37,8 +37,8 @@ class LegacyPayloadSerializerStrategy final
   }
 
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpack(rocket::Payload&& payload, bool useBinary) {
-    return ::apache::thrift::rocket::unpack<T>(std::move(payload), useBinary);
+  FOLLY_ERASE folly::Try<T> unpack(rocket::Payload&& payload) {
+    return ::apache::thrift::rocket::unpack<T>(std::move(payload));
   }
 
   template <typename T>
@@ -56,6 +56,16 @@ class LegacyPayloadSerializerStrategy final
       PayloadType&& payload, folly::AsyncTransport* transport) {
     return ::apache::thrift::rocket::pack(
         std::forward<PayloadType>(payload), transport);
+  }
+
+  template <typename Metadata>
+  FOLLY_ERASE rocket::Payload packWithFds(
+      Metadata* metadata,
+      std::unique_ptr<folly::IOBuf>&& payload,
+      folly::SocketFds fds,
+      folly::AsyncTransport* transport) {
+    return ::apache::thrift::rocket::packWithFds(
+        metadata, std::move(payload), std::move(fds), transport);
   }
 };
 

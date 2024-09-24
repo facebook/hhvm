@@ -8408,52 +8408,36 @@ end = struct
     match params with
     | [] -> (env, t_params, params)
     | param :: paraml ->
-      (match hint_of_type_hint param.param_type_hint with
-      | Some h ->
-        let decl_ty = Decl_hint.hint env.decl_env h in
-        (match
-           Typing_enforceability.get_enforcement
-             ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
-             env
-             decl_ty
-         with
-        | Unenforced ->
-          Typing_log.log_pessimise_param
-            env
-            ~is_promoted_property:false
-            param.param_pos
-            param.param_callconv
-            param.param_name
-        | Enforced -> ());
-        let ((env, ty_err_opt1), h) =
-          Phase.localize_no_subst env ~ignore_errors:false decl_ty
-        in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-        let (env, t_param) = bind_param env (Some h, param) in
-        (env, t_params @ [t_param], paraml)
-      | None ->
-        let ty =
-          mk (Reason.lambda_param (param.param_pos, get_reason ty), get_node ty)
-        in
-        let (env, t_param) = bind_param env (Some ty, param) in
-        (env, t_params @ [t_param], paraml))
+      let ty =
+        match hint_of_type_hint param.param_type_hint with
+        | Some h ->
+          let decl_ty = Decl_hint.hint env.decl_env h in
+          (match
+             Typing_enforceability.get_enforcement
+               ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
+               env
+               decl_ty
+           with
+          | Unenforced ->
+            Typing_log.log_pessimise_param
+              env
+              ~is_promoted_property:false
+              param.param_pos
+              param.param_callconv
+              param.param_name
+          | Enforced -> ());
+          ty
+        | None ->
+          with_reason ty (Reason.lambda_param (param.param_pos, get_reason ty))
+      in
+      let (env, t_param) = bind_param env (Some ty, param) in
+      (env, t_params @ [t_param], paraml)
 
   and closure_bind_variadic env vparam variadic_ty =
-    let ((env, ty_err_opt), ty, pos) =
-      match hint_of_type_hint vparam.param_type_hint with
-      | None ->
-        (* if the hint is missing, use the type we expect *)
-        ((env, None), variadic_ty, get_pos variadic_ty)
-      | Some hint ->
-        let ((env, ty_err_opt1), h) = Phase.localize_hint_for_lambda env hint in
-        ((env, ty_err_opt1), h, Pos_or_decl.of_raw_pos vparam.param_pos)
-    in
-    Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-    let r = Reason.var_param_from_decl pos in
-    let arr_values = mk (r, get_node ty) in
+    let r = Reason.var_param_from_decl (get_pos variadic_ty) in
+    let arr_values = with_reason variadic_ty r in
     let ty = MakeType.vec r arr_values in
-    let (env, t_variadic) = bind_param env (Some ty, vparam) in
-    (env, t_variadic)
+    bind_param env (Some ty, vparam)
 
   let fun_
       ?(abstract = false)

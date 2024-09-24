@@ -31,9 +31,9 @@ var _ thrift.Struct = (*MyStruct)(nil)
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetMyIncludedFieldNonCompat(
-              *includes.ExampleIncluded,
+              includes.ExampleIncluded,
           ).
-        SetMyOtherIncludedFieldNonCompat(*includes.NewIncluded()).
+        SetMyOtherIncludedFieldNonCompat(includes.NewIncluded()).
         SetMyIncludedIntNonCompat(42)
 }
 
@@ -57,8 +57,8 @@ func (x *MyStruct) GetMyIncludedInt() includes.IncludedInt64 {
     return x.MyIncludedInt
 }
 
-func (x *MyStruct) SetMyIncludedFieldNonCompat(value includes.Included) *MyStruct {
-    x.MyIncludedField = &value
+func (x *MyStruct) SetMyIncludedFieldNonCompat(value *includes.Included) *MyStruct {
+    x.MyIncludedField = value
     return x
 }
 
@@ -67,8 +67,8 @@ func (x *MyStruct) SetMyIncludedField(value *includes.Included) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMyOtherIncludedFieldNonCompat(value includes.Included) *MyStruct {
-    x.MyOtherIncludedField = &value
+func (x *MyStruct) SetMyOtherIncludedFieldNonCompat(value *includes.Included) *MyStruct {
+    x.MyOtherIncludedField = value
     return x
 }
 
@@ -153,24 +153,24 @@ if err != nil {
 }
 
 func (x *MyStruct) readField1(p thrift.Decoder) error {  // MyIncludedField
-    result := *includes.NewIncluded()
+    result := includes.NewIncluded()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyIncludedField = &result
+    x.MyIncludedField = result
     return nil
 }
 
 func (x *MyStruct) readField2(p thrift.Decoder) error {  // MyOtherIncludedField
-    result := *includes.NewIncluded()
+    result := includes.NewIncluded()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyOtherIncludedField = &result
+    x.MyOtherIncludedField = result
     return nil
 }
 

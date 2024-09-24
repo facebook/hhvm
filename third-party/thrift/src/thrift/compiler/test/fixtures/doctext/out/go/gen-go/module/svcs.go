@@ -600,8 +600,8 @@ func (x *respCThing) SetSuccess(value *string) *respCThing {
     return x
 }
 
-func (x *respCThing) SetBangNonCompat(value Bang) *respCThing {
-    x.Bang = &value
+func (x *respCThing) SetBangNonCompat(value *Bang) *respCThing {
+    x.Bang = value
     return x
 }
 
@@ -669,13 +669,13 @@ if err != nil {
 }
 
 func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
-    result := *NewBang()
+    result := NewBang()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Bang = &result
+    x.Bang = result
     return nil
 }
 

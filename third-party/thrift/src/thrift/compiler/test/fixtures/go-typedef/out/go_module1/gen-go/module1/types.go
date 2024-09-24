@@ -168,10 +168,10 @@ func WriteAccessory(item *Accessory, p thrift.Encoder) error {
     return nil
 }
 
-func ReadAccessory(p thrift.Decoder) (Accessory, error) {
-    var decodeResult Accessory
+func ReadAccessory(p thrift.Decoder) (*Accessory, error) {
+    var decodeResult *Accessory
     decodeErr := func() error {
-        result := *module0.NewAccessory()
+        result := module0.NewAccessory()
 err := result.Read(p)
 if err != nil {
     return err
@@ -195,10 +195,10 @@ func WriteCarPartName(item *CarPartName, p thrift.Encoder) error {
     return nil
 }
 
-func ReadCarPartName(p thrift.Decoder) (CarPartName, error) {
-    var decodeResult CarPartName
+func ReadCarPartName(p thrift.Decoder) (*CarPartName, error) {
+    var decodeResult *CarPartName
     decodeErr := func() error {
-        result := *module0.NewPartName()
+        result := module0.NewPartName()
 err := result.Read(p)
 if err != nil {
     return err
@@ -266,10 +266,10 @@ func WriteCar(item *Car, p thrift.Encoder) error {
     return nil
 }
 
-func ReadCar(p thrift.Decoder) (Car, error) {
-    var decodeResult Car
+func ReadCar(p thrift.Decoder) (*Car, error) {
+    var decodeResult *Car
     decodeErr := func() error {
-        result := *NewAutomobile()
+        result := NewAutomobile()
 err := result.Read(p)
 if err != nil {
     return err
@@ -654,7 +654,7 @@ if err != nil {
 
 listResult := make([]*Accessory, 0, size)
 for i := 0; i < size; i++ {
-    var elem Accessory
+    var elem *Accessory
     {
         result, err := ReadAccessory(p)
 if err != nil {
@@ -662,7 +662,7 @@ if err != nil {
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {
@@ -697,7 +697,7 @@ if err != nil {
 if err != nil {
     return err
 }
-        value = &result
+        value = result
     }
 
     mapResult[key] = value
@@ -1123,12 +1123,12 @@ mapResult := make(map[MapKey]string, size)
 for i := 0; i < size; i++ {
     var key MapKey
     {
-        result := *NewMapKey()
+        result := NewMapKey()
 err := result.Read(p)
 if err != nil {
     return err
 }
-        key = result
+        key = *result
     }
 
     var value string
@@ -1239,8 +1239,8 @@ var _ thrift.Struct = (*Pair)(nil)
 
 func NewPair() *Pair {
     return (&Pair{}).
-        SetAutomobileNonCompat(*NewAutomobile()).
-        SetCarNonCompat(*NewCar())
+        SetAutomobileNonCompat(NewAutomobile()).
+        SetCarNonCompat(NewCar())
 }
 
 func (x *Pair) GetAutomobile() *Automobile {
@@ -1259,8 +1259,8 @@ func (x *Pair) GetCar() *Car {
     return x.Car
 }
 
-func (x *Pair) SetAutomobileNonCompat(value Automobile) *Pair {
-    x.Automobile = &value
+func (x *Pair) SetAutomobileNonCompat(value *Automobile) *Pair {
+    x.Automobile = value
     return x
 }
 
@@ -1269,8 +1269,8 @@ func (x *Pair) SetAutomobile(value *Automobile) *Pair {
     return x
 }
 
-func (x *Pair) SetCarNonCompat(value Car) *Pair {
-    x.Car = &value
+func (x *Pair) SetCarNonCompat(value *Car) *Pair {
+    x.Car = value
     return x
 }
 
@@ -1329,13 +1329,13 @@ if err != nil {
 }
 
 func (x *Pair) readField1(p thrift.Decoder) error {  // Automobile
-    result := *NewAutomobile()
+    result := NewAutomobile()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Automobile = &result
+    x.Automobile = result
     return nil
 }
 
@@ -1345,7 +1345,7 @@ if err != nil {
     return err
 }
 
-    x.Car = &result
+    x.Car = result
     return nil
 }
 
@@ -1574,16 +1574,16 @@ if err != nil {
 
 listResult := make([]*Automobile, 0, size)
 for i := 0; i < size; i++ {
-    var elem Automobile
+    var elem *Automobile
     {
-        result := *NewAutomobile()
+        result := NewAutomobile()
 err := result.Read(p)
 if err != nil {
     return err
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {
@@ -1603,7 +1603,7 @@ if err != nil {
 
 listResult := make([]*Car, 0, size)
 for i := 0; i < size; i++ {
-    var elem Car
+    var elem *Car
     {
         result, err := ReadCar(p)
 if err != nil {
@@ -1611,7 +1611,7 @@ if err != nil {
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {

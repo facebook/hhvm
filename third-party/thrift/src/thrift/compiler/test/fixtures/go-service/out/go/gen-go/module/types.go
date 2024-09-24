@@ -478,12 +478,12 @@ mapResult := make(map[*NonComparableStruct]int64, size)
 for i := 0; i < size; i++ {
     var key *NonComparableStruct
     {
-        result := *NewNonComparableStruct()
+        result := NewNonComparableStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
-        key = &result
+        key = result
     }
 
     var value int64

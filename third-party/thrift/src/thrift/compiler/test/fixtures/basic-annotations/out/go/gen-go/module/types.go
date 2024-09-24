@@ -31,10 +31,10 @@ func WriteIncredibleStruct(item *IncredibleStruct, p thrift.Encoder) error {
     return nil
 }
 
-func ReadIncredibleStruct(p thrift.Decoder) (IncredibleStruct, error) {
-    var decodeResult IncredibleStruct
+func ReadIncredibleStruct(p thrift.Decoder) (*IncredibleStruct, error) {
+    var decodeResult *IncredibleStruct
     decodeErr := func() error {
-        result := *NewMyStruct()
+        result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
@@ -58,10 +58,10 @@ func WriteBrilliantStruct(item *BrilliantStruct, p thrift.Encoder) error {
     return nil
 }
 
-func ReadBrilliantStruct(p thrift.Decoder) (BrilliantStruct, error) {
-    var decodeResult BrilliantStruct
+func ReadBrilliantStruct(p thrift.Decoder) (*BrilliantStruct, error) {
+    var decodeResult *BrilliantStruct
     decodeErr := func() error {
-        result := *NewMyStruct()
+        result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
@@ -490,7 +490,7 @@ func NewMyStruct() *MyStruct {
         SetEmptyAnnotationsNonCompat("").
         SetMyEnumNonCompat(0).
         SetCppTypeAnnotationNonCompat(NewListString_6884()).
-        SetMyUnionNonCompat(*NewMyUnion())
+        SetMyUnionNonCompat(NewMyUnion())
 }
 
 func (x *MyStruct) GetAbstractName() string {
@@ -617,8 +617,8 @@ func (x *MyStruct) SetCppTypeAnnotation(value ListString_6884) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMyUnionNonCompat(value MyUnion) *MyStruct {
-    x.MyUnion = &value
+func (x *MyStruct) SetMyUnionNonCompat(value *MyUnion) *MyStruct {
+    x.MyUnion = value
     return x
 }
 
@@ -866,13 +866,13 @@ if err != nil {
 }
 
 func (x *MyStruct) readField9(p thrift.Decoder) error {  // MyUnion
-    result := *NewMyUnion()
+    result := NewMyUnion()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyUnion = &result
+    x.MyUnion = result
     return nil
 }
 

@@ -35,10 +35,10 @@ func WriteIncludesIncluded(item *IncludesIncluded, p thrift.Encoder) error {
     return nil
 }
 
-func ReadIncludesIncluded(p thrift.Decoder) (IncludesIncluded, error) {
-    var decodeResult IncludesIncluded
+func ReadIncludesIncluded(p thrift.Decoder) (*IncludesIncluded, error) {
+    var decodeResult *IncludesIncluded
     decodeErr := func() error {
-        result := *includes.NewIncluded()
+        result := includes.NewIncluded()
 err := result.Read(p)
 if err != nil {
     return err
@@ -63,8 +63,8 @@ if err != nil {
     return nil
 }
 
-func ReadIncludesTransitiveFoo(p thrift.Decoder) (IncludesTransitiveFoo, error) {
-    var decodeResult IncludesTransitiveFoo
+func ReadIncludesTransitiveFoo(p thrift.Decoder) (*IncludesTransitiveFoo, error) {
+    var decodeResult *IncludesTransitiveFoo
     decodeErr := func() error {
         result, err := includes.ReadTransitiveFoo(p)
 if err != nil {

@@ -332,8 +332,8 @@ func (x *respMyServicePing) GetMyExcept() *MyException {
     return x.MyExcept
 }
 
-func (x *respMyServicePing) SetMyExceptNonCompat(value MyException) *respMyServicePing {
-    x.MyExcept = &value
+func (x *respMyServicePing) SetMyExceptNonCompat(value *MyException) *respMyServicePing {
+    x.MyExcept = value
     return x
 }
 
@@ -367,13 +367,13 @@ func (x *respMyServicePing) writeField1(p thrift.Encoder) error {  // MyExcept
 }
 
 func (x *respMyServicePing) readField1(p thrift.Decoder) error {  // MyExcept
-    result := *NewMyException()
+    result := NewMyException()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyExcept = &result
+    x.MyExcept = result
     return nil
 }
 

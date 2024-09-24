@@ -454,8 +454,8 @@ func (x *respRaiserDoRaise) GetS() *Serious {
     return x.S
 }
 
-func (x *respRaiserDoRaise) SetBNonCompat(value Banal) *respRaiserDoRaise {
-    x.B = &value
+func (x *respRaiserDoRaise) SetBNonCompat(value *Banal) *respRaiserDoRaise {
+    x.B = value
     return x
 }
 
@@ -464,8 +464,8 @@ func (x *respRaiserDoRaise) SetB(value *Banal) *respRaiserDoRaise {
     return x
 }
 
-func (x *respRaiserDoRaise) SetFNonCompat(value Fiery) *respRaiserDoRaise {
-    x.F = &value
+func (x *respRaiserDoRaise) SetFNonCompat(value *Fiery) *respRaiserDoRaise {
+    x.F = value
     return x
 }
 
@@ -474,8 +474,8 @@ func (x *respRaiserDoRaise) SetF(value *Fiery) *respRaiserDoRaise {
     return x
 }
 
-func (x *respRaiserDoRaise) SetSNonCompat(value Serious) *respRaiserDoRaise {
-    x.S = &value
+func (x *respRaiserDoRaise) SetSNonCompat(value *Serious) *respRaiserDoRaise {
+    x.S = value
     return x
 }
 
@@ -557,35 +557,35 @@ func (x *respRaiserDoRaise) writeField3(p thrift.Encoder) error {  // S
 }
 
 func (x *respRaiserDoRaise) readField1(p thrift.Decoder) error {  // B
-    result := *NewBanal()
+    result := NewBanal()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.B = &result
+    x.B = result
     return nil
 }
 
 func (x *respRaiserDoRaise) readField2(p thrift.Decoder) error {  // F
-    result := *NewFiery()
+    result := NewFiery()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.F = &result
+    x.F = result
     return nil
 }
 
 func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
-    result := *NewSerious()
+    result := NewSerious()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.S = &result
+    x.S = result
     return nil
 }
 
@@ -1091,8 +1091,8 @@ func (x *respRaiserGet500) SetSuccess(value *string) *respRaiserGet500 {
     return x
 }
 
-func (x *respRaiserGet500) SetFNonCompat(value Fiery) *respRaiserGet500 {
-    x.F = &value
+func (x *respRaiserGet500) SetFNonCompat(value *Fiery) *respRaiserGet500 {
+    x.F = value
     return x
 }
 
@@ -1101,8 +1101,8 @@ func (x *respRaiserGet500) SetF(value *Fiery) *respRaiserGet500 {
     return x
 }
 
-func (x *respRaiserGet500) SetBNonCompat(value Banal) *respRaiserGet500 {
-    x.B = &value
+func (x *respRaiserGet500) SetBNonCompat(value *Banal) *respRaiserGet500 {
+    x.B = value
     return x
 }
 
@@ -1111,8 +1111,8 @@ func (x *respRaiserGet500) SetB(value *Banal) *respRaiserGet500 {
     return x
 }
 
-func (x *respRaiserGet500) SetSNonCompat(value Serious) *respRaiserGet500 {
-    x.S = &value
+func (x *respRaiserGet500) SetSNonCompat(value *Serious) *respRaiserGet500 {
+    x.S = value
     return x
 }
 
@@ -1228,35 +1228,35 @@ if err != nil {
 }
 
 func (x *respRaiserGet500) readField1(p thrift.Decoder) error {  // F
-    result := *NewFiery()
+    result := NewFiery()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.F = &result
+    x.F = result
     return nil
 }
 
 func (x *respRaiserGet500) readField2(p thrift.Decoder) error {  // B
-    result := *NewBanal()
+    result := NewBanal()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.B = &result
+    x.B = result
     return nil
 }
 
 func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
-    result := *NewSerious()
+    result := NewSerious()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.S = &result
+    x.S = result
     return nil
 }
 

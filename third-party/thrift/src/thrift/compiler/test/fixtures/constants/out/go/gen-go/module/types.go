@@ -1077,7 +1077,7 @@ func NewStruct2() *Struct2 {
     return (&Struct2{}).
         SetANonCompat(0).
         SetBNonCompat("").
-        SetCNonCompat(*NewStruct1()).
+        SetCNonCompat(NewStruct1()).
         SetDNonCompat(make([]int32, 0))
 }
 
@@ -1125,8 +1125,8 @@ func (x *Struct2) SetB(value string) *Struct2 {
     return x
 }
 
-func (x *Struct2) SetCNonCompat(value Struct1) *Struct2 {
-    x.C = &value
+func (x *Struct2) SetCNonCompat(value *Struct1) *Struct2 {
+    x.C = value
     return x
 }
 
@@ -1253,13 +1253,13 @@ if err != nil {
 }
 
 func (x *Struct2) readField3(p thrift.Decoder) error {  // C
-    result := *NewStruct1()
+    result := NewStruct1()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.C = &result
+    x.C = result
     return nil
 }
 
@@ -1422,7 +1422,7 @@ func NewStruct3() *Struct3 {
     return (&Struct3{}).
         SetANonCompat("").
         SetBNonCompat(0).
-        SetCNonCompat(*NewStruct2())
+        SetCNonCompat(NewStruct2())
 }
 
 func (x *Struct3) GetA() string {
@@ -1461,8 +1461,8 @@ func (x *Struct3) SetB(value int32) *Struct3 {
     return x
 }
 
-func (x *Struct3) SetCNonCompat(value Struct2) *Struct3 {
-    x.C = &value
+func (x *Struct3) SetCNonCompat(value *Struct2) *Struct3 {
+    x.C = value
     return x
 }
 
@@ -1548,13 +1548,13 @@ if err != nil {
 }
 
 func (x *Struct3) readField3(p thrift.Decoder) error {  // C
-    result := *NewStruct2()
+    result := NewStruct2()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.C = &result
+    x.C = result
     return nil
 }
 
@@ -2227,8 +2227,8 @@ func (x *Union2) SetD(value *float64) *Union2 {
     return x
 }
 
-func (x *Union2) SetSNonCompat(value Struct1) *Union2 {
-    x.S = &value
+func (x *Union2) SetSNonCompat(value *Struct1) *Union2 {
+    x.S = value
     return x
 }
 
@@ -2237,8 +2237,8 @@ func (x *Union2) SetS(value *Struct1) *Union2 {
     return x
 }
 
-func (x *Union2) SetUNonCompat(value Union1) *Union2 {
-    x.U = &value
+func (x *Union2) SetUNonCompat(value *Union1) *Union2 {
+    x.U = value
     return x
 }
 
@@ -2364,24 +2364,24 @@ if err != nil {
 }
 
 func (x *Union2) readField3(p thrift.Decoder) error {  // S
-    result := *NewStruct1()
+    result := NewStruct1()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.S = &result
+    x.S = result
     return nil
 }
 
 func (x *Union2) readField4(p thrift.Decoder) error {  // U
-    result := *NewUnion1()
+    result := NewUnion1()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.U = &result
+    x.U = result
     return nil
 }
 

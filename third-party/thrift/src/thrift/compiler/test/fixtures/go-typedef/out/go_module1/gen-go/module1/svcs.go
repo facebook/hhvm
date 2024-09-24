@@ -302,8 +302,8 @@ func (x *respFinderByPlate) GetSuccess() *Automobile {
     return x.Success
 }
 
-func (x *respFinderByPlate) SetSuccessNonCompat(value Automobile) *respFinderByPlate {
-    x.Success = &value
+func (x *respFinderByPlate) SetSuccessNonCompat(value *Automobile) *respFinderByPlate {
+    x.Success = value
     return x
 }
 
@@ -337,13 +337,13 @@ func (x *respFinderByPlate) writeField0(p thrift.Encoder) error {  // Success
 }
 
 func (x *respFinderByPlate) readField0(p thrift.Decoder) error {  // Success
-    result := *NewAutomobile()
+    result := NewAutomobile()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Success = &result
+    x.Success = result
     return nil
 }
 
@@ -590,8 +590,8 @@ func (x *respFinderAliasByPlate) GetSuccess() *Car {
     return x.Success
 }
 
-func (x *respFinderAliasByPlate) SetSuccessNonCompat(value Car) *respFinderAliasByPlate {
-    x.Success = &value
+func (x *respFinderAliasByPlate) SetSuccessNonCompat(value *Car) *respFinderAliasByPlate {
+    x.Success = value
     return x
 }
 
@@ -631,7 +631,7 @@ if err != nil {
     return err
 }
 
-    x.Success = &result
+    x.Success = result
     return nil
 }
 

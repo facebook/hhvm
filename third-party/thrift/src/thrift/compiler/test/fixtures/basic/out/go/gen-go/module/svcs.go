@@ -584,8 +584,8 @@ func (x *respFB303ServiceSimpleRPC) GetSuccess() *ReservedKeyword {
     return x.Success
 }
 
-func (x *respFB303ServiceSimpleRPC) SetSuccessNonCompat(value ReservedKeyword) *respFB303ServiceSimpleRPC {
-    x.Success = &value
+func (x *respFB303ServiceSimpleRPC) SetSuccessNonCompat(value *ReservedKeyword) *respFB303ServiceSimpleRPC {
+    x.Success = value
     return x
 }
 
@@ -619,13 +619,13 @@ func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Encoder) error {  // Su
 }
 
 func (x *respFB303ServiceSimpleRPC) readField0(p thrift.Decoder) error {  // Success
-    result := *NewReservedKeyword()
+    result := NewReservedKeyword()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Success = &result
+    x.Success = result
     return nil
 }
 

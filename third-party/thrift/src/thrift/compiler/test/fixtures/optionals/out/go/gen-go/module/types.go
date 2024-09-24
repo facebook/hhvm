@@ -387,7 +387,7 @@ var _ thrift.Struct = (*Vehicle)(nil)
 
 func NewVehicle() *Vehicle {
     return (&Vehicle{}).
-        SetColorNonCompat(*NewColor()).
+        SetColorNonCompat(NewColor()).
         SetHasACNonCompat(false)
 }
 
@@ -431,8 +431,8 @@ func (x *Vehicle) GetHasAC() bool {
     return *x.HasAC
 }
 
-func (x *Vehicle) SetColorNonCompat(value Color) *Vehicle {
-    x.Color = &value
+func (x *Vehicle) SetColorNonCompat(value *Color) *Vehicle {
+    x.Color = value
     return x
 }
 
@@ -602,13 +602,13 @@ func (x *Vehicle) writeField5(p thrift.Encoder) error {  // HasAC
 }
 
 func (x *Vehicle) readField1(p thrift.Decoder) error {  // Color
-    result := *NewColor()
+    result := NewColor()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Color = &result
+    x.Color = result
     return nil
 }
 
@@ -931,8 +931,8 @@ func (x *Person) SetAddress(value *string) *Person {
     return x
 }
 
-func (x *Person) SetFavoriteColorNonCompat(value Color) *Person {
-    x.FavoriteColor = &value
+func (x *Person) SetFavoriteColorNonCompat(value *Color) *Person {
+    x.FavoriteColor = value
     return x
 }
 
@@ -1299,13 +1299,13 @@ if err != nil {
 }
 
 func (x *Person) readField5(p thrift.Decoder) error {  // FavoriteColor
-    result := *NewColor()
+    result := NewColor()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.FavoriteColor = &result
+    x.FavoriteColor = result
     return nil
 }
 
@@ -1405,16 +1405,16 @@ if err != nil {
 
 listResult := make([]*Vehicle, 0, size)
 for i := 0; i < size; i++ {
-    var elem Vehicle
+    var elem *Vehicle
     {
-        result := *NewVehicle()
+        result := NewVehicle()
 err := result.Read(p)
 if err != nil {
     return err
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {

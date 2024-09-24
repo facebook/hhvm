@@ -19,8 +19,8 @@
   This template creates a Set* method for a field in a Thrift struct.
 
 }}
-func (x *{{struct:go_name}}) {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}(value {{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
-    x.{{field:go_name}} = {{#field:pointer?}}&{{/field:pointer?}}value
+func (x *{{struct:go_name}}) {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}(value {{#field:type}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
+    x.{{field:go_name}} = {{#field:non_struct_pointer?}}&{{/field:non_struct_pointer?}}value
     return x
 }
 {{#program:compat_setters?}}

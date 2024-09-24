@@ -123,7 +123,7 @@ type ExtendTestServiceCheckArgsDeprecated = reqExtendTestServiceCheck
 
 func newReqExtendTestServiceCheck() *reqExtendTestServiceCheck {
     return (&reqExtendTestServiceCheck{}).
-        SetStruct1NonCompat(*test0.NewHsFoo())
+        SetStruct1NonCompat(test0.NewHsFoo())
 }
 
 func (x *reqExtendTestServiceCheck) GetStruct1() *test0.HsFoo {
@@ -134,8 +134,8 @@ func (x *reqExtendTestServiceCheck) GetStruct1() *test0.HsFoo {
     return x.Struct1
 }
 
-func (x *reqExtendTestServiceCheck) SetStruct1NonCompat(value test0.HsFoo) *reqExtendTestServiceCheck {
-    x.Struct1 = &value
+func (x *reqExtendTestServiceCheck) SetStruct1NonCompat(value *test0.HsFoo) *reqExtendTestServiceCheck {
+    x.Struct1 = value
     return x
 }
 
@@ -169,13 +169,13 @@ func (x *reqExtendTestServiceCheck) writeField1(p thrift.Encoder) error {  // St
 }
 
 func (x *reqExtendTestServiceCheck) readField1(p thrift.Decoder) error {  // Struct1
-    result := *test0.NewHsFoo()
+    result := test0.NewHsFoo()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Struct1 = &result
+    x.Struct1 = result
     return nil
 }
 

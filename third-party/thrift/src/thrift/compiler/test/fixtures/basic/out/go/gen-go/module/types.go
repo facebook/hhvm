@@ -74,10 +74,10 @@ func WriteMyDataItemAlias(item *MyDataItemAlias, p thrift.Encoder) error {
     return nil
 }
 
-func ReadMyDataItemAlias(p thrift.Decoder) (MyDataItemAlias, error) {
-    var decodeResult MyDataItemAlias
+func ReadMyDataItemAlias(p thrift.Decoder) (*MyDataItemAlias, error) {
+    var decodeResult *MyDataItemAlias
     decodeErr := func() error {
-        result := *NewMyDataItem()
+        result := NewMyDataItem()
 err := result.Read(p)
 if err != nil {
     return err
@@ -186,7 +186,7 @@ func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetMyIntFieldNonCompat(0).
         SetMyStringFieldNonCompat("").
-        SetMyDataFieldNonCompat(*NewMyDataItemAlias()).
+        SetMyDataFieldNonCompat(NewMyDataItemAlias()).
         SetMyEnumNonCompat(0).
         SetOnewayNonCompat(false).
         SetReadonlyNonCompat(false).
@@ -259,8 +259,8 @@ func (x *MyStruct) SetMyStringField(value string) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMyDataFieldNonCompat(value MyDataItemAlias) *MyStruct {
-    x.MyDataField = &value
+func (x *MyStruct) SetMyDataFieldNonCompat(value *MyDataItemAlias) *MyStruct {
+    x.MyDataField = value
     return x
 }
 
@@ -523,7 +523,7 @@ if err != nil {
     return err
 }
 
-    x.MyDataField = &result
+    x.MyDataField = result
     return nil
 }
 
@@ -1274,8 +1274,8 @@ func (x *MyUnion) SetMyEnum(value *MyEnumAlias) *MyUnion {
     return x
 }
 
-func (x *MyUnion) SetMyStructNonCompat(value MyStruct) *MyUnion {
-    x.MyStruct = &value
+func (x *MyUnion) SetMyStructNonCompat(value *MyStruct) *MyUnion {
+    x.MyStruct = value
     return x
 }
 
@@ -1284,8 +1284,8 @@ func (x *MyUnion) SetMyStruct(value *MyStruct) *MyUnion {
     return x
 }
 
-func (x *MyUnion) SetMyDataItemNonCompat(value MyDataItem) *MyUnion {
-    x.MyDataItem = &value
+func (x *MyUnion) SetMyDataItemNonCompat(value *MyDataItem) *MyUnion {
+    x.MyDataItem = value
     return x
 }
 
@@ -1423,24 +1423,24 @@ if err != nil {
 }
 
 func (x *MyUnion) readField2(p thrift.Decoder) error {  // MyStruct
-    result := *NewMyStruct()
+    result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyStruct = &result
+    x.MyStruct = result
     return nil
 }
 
 func (x *MyUnion) readField3(p thrift.Decoder) error {  // MyDataItem
-    result := *NewMyDataItem()
+    result := NewMyDataItem()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyDataItem = &result
+    x.MyDataItem = result
     return nil
 }
 
@@ -1640,8 +1640,8 @@ func NewMyException() *MyException {
     return (&MyException{}).
         SetMyIntFieldNonCompat(0).
         SetMyStringFieldNonCompat("").
-        SetMyStructNonCompat(*NewMyStruct()).
-        SetMyUnionNonCompat(*NewMyUnion())
+        SetMyStructNonCompat(NewMyStruct()).
+        SetMyUnionNonCompat(NewMyUnion())
 }
 
 func (x *MyException) GetMyIntField() int64 {
@@ -1688,8 +1688,8 @@ func (x *MyException) SetMyStringField(value string) *MyException {
     return x
 }
 
-func (x *MyException) SetMyStructNonCompat(value MyStruct) *MyException {
-    x.MyStruct = &value
+func (x *MyException) SetMyStructNonCompat(value *MyStruct) *MyException {
+    x.MyStruct = value
     return x
 }
 
@@ -1698,8 +1698,8 @@ func (x *MyException) SetMyStruct(value *MyStruct) *MyException {
     return x
 }
 
-func (x *MyException) SetMyUnionNonCompat(value MyUnion) *MyException {
-    x.MyUnion = &value
+func (x *MyException) SetMyUnionNonCompat(value *MyUnion) *MyException {
+    x.MyUnion = value
     return x
 }
 
@@ -1809,24 +1809,24 @@ if err != nil {
 }
 
 func (x *MyException) readField3(p thrift.Decoder) error {  // MyStruct
-    result := *NewMyStruct()
+    result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyStruct = &result
+    x.MyStruct = result
     return nil
 }
 
 func (x *MyException) readField4(p thrift.Decoder) error {  // MyUnion
-    result := *NewMyUnion()
+    result := NewMyUnion()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyUnion = &result
+    x.MyUnion = result
     return nil
 }
 
@@ -1973,8 +1973,8 @@ func NewMyExceptionWithMessage() *MyExceptionWithMessage {
     return (&MyExceptionWithMessage{}).
         SetMyIntFieldNonCompat(0).
         SetMyStringFieldNonCompat("").
-        SetMyStructNonCompat(*NewMyStruct()).
-        SetMyUnionNonCompat(*NewMyUnion())
+        SetMyStructNonCompat(NewMyStruct()).
+        SetMyUnionNonCompat(NewMyUnion())
 }
 
 func (x *MyExceptionWithMessage) GetMyIntField() int64 {
@@ -2021,8 +2021,8 @@ func (x *MyExceptionWithMessage) SetMyStringField(value string) *MyExceptionWith
     return x
 }
 
-func (x *MyExceptionWithMessage) SetMyStructNonCompat(value MyStruct) *MyExceptionWithMessage {
-    x.MyStruct = &value
+func (x *MyExceptionWithMessage) SetMyStructNonCompat(value *MyStruct) *MyExceptionWithMessage {
+    x.MyStruct = value
     return x
 }
 
@@ -2031,8 +2031,8 @@ func (x *MyExceptionWithMessage) SetMyStruct(value *MyStruct) *MyExceptionWithMe
     return x
 }
 
-func (x *MyExceptionWithMessage) SetMyUnionNonCompat(value MyUnion) *MyExceptionWithMessage {
-    x.MyUnion = &value
+func (x *MyExceptionWithMessage) SetMyUnionNonCompat(value *MyUnion) *MyExceptionWithMessage {
+    x.MyUnion = value
     return x
 }
 
@@ -2142,24 +2142,24 @@ if err != nil {
 }
 
 func (x *MyExceptionWithMessage) readField3(p thrift.Decoder) error {  // MyStruct
-    result := *NewMyStruct()
+    result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyStruct = &result
+    x.MyStruct = result
     return nil
 }
 
 func (x *MyExceptionWithMessage) readField4(p thrift.Decoder) error {  // MyUnion
-    result := *NewMyUnion()
+    result := NewMyUnion()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyUnion = &result
+    x.MyUnion = result
     return nil
 }
 

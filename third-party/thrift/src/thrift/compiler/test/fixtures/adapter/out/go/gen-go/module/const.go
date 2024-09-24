@@ -45,7 +45,7 @@ var PersonNoTransitive *Person2 = NewPerson2().
 const TypeAdapted AdaptedBool = true
 var NestedAdapted *MoveOnly = NewMoveOnly().
     SetPtrNonCompat(
-        *NewHeapAllocated(),
+        NewHeapAllocated(),
     )
 var ContainerOfAdapted []AdaptedByte = []AdaptedByte{
     1,

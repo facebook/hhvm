@@ -2236,7 +2236,7 @@ func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
     return (&TrivialNestedWithDefault{}).
         SetZNonCompat(4).
         SetNNonCompat(
-              *NewTrivialNumeric().
+              NewTrivialNumeric().
     SetANonCompat(3).
     SetBNonCompat(true),
           )
@@ -2264,8 +2264,8 @@ func (x *TrivialNestedWithDefault) SetZ(value int32) *TrivialNestedWithDefault {
     return x
 }
 
-func (x *TrivialNestedWithDefault) SetNNonCompat(value TrivialNumeric) *TrivialNestedWithDefault {
-    x.N = &value
+func (x *TrivialNestedWithDefault) SetNNonCompat(value *TrivialNumeric) *TrivialNestedWithDefault {
+    x.N = value
     return x
 }
 
@@ -2325,13 +2325,13 @@ if err != nil {
 }
 
 func (x *TrivialNestedWithDefault) readField2(p thrift.Decoder) error {  // N
-    result := *NewTrivialNumeric()
+    result := NewTrivialNumeric()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.N = &result
+    x.N = result
     return nil
 }
 
@@ -2679,7 +2679,7 @@ func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
     return (&ComplexNestedWithDefault{}).
         SetZNonCompat("4").
         SetNNonCompat(
-              *NewComplexString().
+              NewComplexString().
     SetANonCompat("3").
     SetBNonCompat(
         map[string]int32{
@@ -2711,8 +2711,8 @@ func (x *ComplexNestedWithDefault) SetZ(value string) *ComplexNestedWithDefault 
     return x
 }
 
-func (x *ComplexNestedWithDefault) SetNNonCompat(value ComplexString) *ComplexNestedWithDefault {
-    x.N = &value
+func (x *ComplexNestedWithDefault) SetNNonCompat(value *ComplexString) *ComplexNestedWithDefault {
+    x.N = value
     return x
 }
 
@@ -2772,13 +2772,13 @@ if err != nil {
 }
 
 func (x *ComplexNestedWithDefault) readField2(p thrift.Decoder) error {  // N
-    result := *NewComplexString()
+    result := NewComplexString()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.N = &result
+    x.N = result
     return nil
 }
 
@@ -3579,7 +3579,7 @@ func NewMyStruct() *MyStruct {
         SetMyIntFieldNonCompat(0).
         SetMyStringFieldNonCompat("").
         SetMajorVerNonCompat(0).
-        SetDataNonCompat(*NewMyDataItem())
+        SetDataNonCompat(NewMyDataItem())
 }
 
 func (x *MyStruct) GetMyIntField() int64 {
@@ -3632,8 +3632,8 @@ func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetDataNonCompat(value MyDataItem) *MyStruct {
-    x.Data = &value
+func (x *MyStruct) SetDataNonCompat(value *MyDataItem) *MyStruct {
+    x.Data = value
     return x
 }
 
@@ -3745,13 +3745,13 @@ if err != nil {
 }
 
 func (x *MyStruct) readField4(p thrift.Decoder) error {  // Data
-    result := *NewMyDataItem()
+    result := NewMyDataItem()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Data = &result
+    x.Data = result
     return nil
 }
 
@@ -4306,8 +4306,8 @@ func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
     return x.ForwardUsageByRef
 }
 
-func (x *ForwardUsageRoot) SetForwardUsageStructNonCompat(value ForwardUsageStruct) *ForwardUsageRoot {
-    x.ForwardUsageStruct = &value
+func (x *ForwardUsageRoot) SetForwardUsageStructNonCompat(value *ForwardUsageStruct) *ForwardUsageRoot {
+    x.ForwardUsageStruct = value
     return x
 }
 
@@ -4316,8 +4316,8 @@ func (x *ForwardUsageRoot) SetForwardUsageStruct(value *ForwardUsageStruct) *For
     return x
 }
 
-func (x *ForwardUsageRoot) SetForwardUsageByRefNonCompat(value ForwardUsageByRef) *ForwardUsageRoot {
-    x.ForwardUsageByRef = &value
+func (x *ForwardUsageRoot) SetForwardUsageByRefNonCompat(value *ForwardUsageByRef) *ForwardUsageRoot {
+    x.ForwardUsageByRef = value
     return x
 }
 
@@ -4375,24 +4375,24 @@ func (x *ForwardUsageRoot) writeField2(p thrift.Encoder) error {  // ForwardUsag
 }
 
 func (x *ForwardUsageRoot) readField1(p thrift.Decoder) error {  // ForwardUsageStruct
-    result := *NewForwardUsageStruct()
+    result := NewForwardUsageStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.ForwardUsageStruct = &result
+    x.ForwardUsageStruct = result
     return nil
 }
 
 func (x *ForwardUsageRoot) readField2(p thrift.Decoder) error {  // ForwardUsageByRef
-    result := *NewForwardUsageByRef()
+    result := NewForwardUsageByRef()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.ForwardUsageByRef = &result
+    x.ForwardUsageByRef = result
     return nil
 }
 
@@ -4519,8 +4519,8 @@ func (x *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
 
-func (x *ForwardUsageStruct) SetFooNonCompat(value ForwardUsageRoot) *ForwardUsageStruct {
-    x.Foo = &value
+func (x *ForwardUsageStruct) SetFooNonCompat(value *ForwardUsageRoot) *ForwardUsageStruct {
+    x.Foo = value
     return x
 }
 
@@ -4554,13 +4554,13 @@ func (x *ForwardUsageStruct) writeField1(p thrift.Encoder) error {  // Foo
 }
 
 func (x *ForwardUsageStruct) readField1(p thrift.Decoder) error {  // Foo
-    result := *NewForwardUsageRoot()
+    result := NewForwardUsageRoot()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Foo = &result
+    x.Foo = result
     return nil
 }
 
@@ -4668,8 +4668,8 @@ func (x *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
 
-func (x *ForwardUsageByRef) SetFooNonCompat(value ForwardUsageRoot) *ForwardUsageByRef {
-    x.Foo = &value
+func (x *ForwardUsageByRef) SetFooNonCompat(value *ForwardUsageRoot) *ForwardUsageByRef {
+    x.Foo = value
     return x
 }
 
@@ -4703,13 +4703,13 @@ func (x *ForwardUsageByRef) writeField1(p thrift.Encoder) error {  // Foo
 }
 
 func (x *ForwardUsageByRef) readField1(p thrift.Decoder) error {  // Foo
-    result := *NewForwardUsageRoot()
+    result := NewForwardUsageRoot()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Foo = &result
+    x.Foo = result
     return nil
 }
 
@@ -4888,12 +4888,12 @@ if err != nil {
 
     var value *IncompleteMapDep
     {
-        result := *NewIncompleteMapDep()
+        result := NewIncompleteMapDep()
 err := result.Read(p)
 if err != nil {
     return err
 }
-        value = &result
+        value = result
     }
 
     mapResult[key] = value
@@ -5151,12 +5151,12 @@ if err != nil {
 
     var value *CompleteMapDep
     {
-        result := *NewCompleteMapDep()
+        result := NewCompleteMapDep()
 err := result.Read(p)
 if err != nil {
     return err
 }
-        value = &result
+        value = result
     }
 
     mapResult[key] = value
@@ -5396,16 +5396,16 @@ if err != nil {
 
 listResult := make([]*IncompleteListDep, 0, size)
 for i := 0; i < size; i++ {
-    var elem IncompleteListDep
+    var elem *IncompleteListDep
     {
-        result := *NewIncompleteListDep()
+        result := NewIncompleteListDep()
 err := result.Read(p)
 if err != nil {
     return err
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {
@@ -5642,16 +5642,16 @@ if err != nil {
 
 listResult := make([]*CompleteListDep, 0, size)
 for i := 0; i < size; i++ {
-    var elem CompleteListDep
+    var elem *CompleteListDep
     {
-        result := *NewCompleteListDep()
+        result := NewCompleteListDep()
 err := result.Read(p)
 if err != nil {
     return err
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {
@@ -5888,16 +5888,16 @@ if err != nil {
 
 listResult := make([]*AdaptedListDep, 0, size)
 for i := 0; i < size; i++ {
-    var elem AdaptedListDep
+    var elem *AdaptedListDep
     {
-        result := *NewAdaptedListDep()
+        result := NewAdaptedListDep()
 err := result.Read(p)
 if err != nil {
     return err
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {
@@ -5995,7 +5995,7 @@ var _ thrift.Struct = (*AdaptedListDep)(nil)
 
 func NewAdaptedListDep() *AdaptedListDep {
     return (&AdaptedListDep{}).
-        SetFieldNonCompat(*NewAdaptedList())
+        SetFieldNonCompat(NewAdaptedList())
 }
 
 func (x *AdaptedListDep) GetField() *AdaptedList {
@@ -6006,8 +6006,8 @@ func (x *AdaptedListDep) GetField() *AdaptedList {
     return x.Field
 }
 
-func (x *AdaptedListDep) SetFieldNonCompat(value AdaptedList) *AdaptedListDep {
-    x.Field = &value
+func (x *AdaptedListDep) SetFieldNonCompat(value *AdaptedList) *AdaptedListDep {
+    x.Field = value
     return x
 }
 
@@ -6041,13 +6041,13 @@ func (x *AdaptedListDep) writeField1(p thrift.Encoder) error {  // Field
 }
 
 func (x *AdaptedListDep) readField1(p thrift.Decoder) error {  // Field
-    result := *NewAdaptedList()
+    result := NewAdaptedList()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Field = &result
+    x.Field = result
     return nil
 }
 
@@ -6208,16 +6208,16 @@ if err != nil {
 
 listResult := make([]*DependentAdaptedListDep, 0, size)
 for i := 0; i < size; i++ {
-    var elem DependentAdaptedListDep
+    var elem *DependentAdaptedListDep
     {
-        result := *NewDependentAdaptedListDep()
+        result := NewDependentAdaptedListDep()
 err := result.Read(p)
 if err != nil {
     return err
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {

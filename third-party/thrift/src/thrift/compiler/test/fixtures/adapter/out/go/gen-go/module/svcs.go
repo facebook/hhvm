@@ -115,7 +115,7 @@ func newReqServiceFunc() *reqServiceFunc {
     return (&reqServiceFunc{}).
         SetArg1NonCompat(NewStringWithAdapter_7208()).
         SetArg2NonCompat("").
-        SetArg3NonCompat(*NewFoo())
+        SetArg3NonCompat(NewFoo())
 }
 
 func (x *reqServiceFunc) GetArg1() StringWithAdapter_7208 {
@@ -154,8 +154,8 @@ func (x *reqServiceFunc) SetArg2(value string) *reqServiceFunc {
     return x
 }
 
-func (x *reqServiceFunc) SetArg3NonCompat(value Foo) *reqServiceFunc {
-    x.Arg3 = &value
+func (x *reqServiceFunc) SetArg3NonCompat(value *Foo) *reqServiceFunc {
+    x.Arg3 = value
     return x
 }
 
@@ -242,13 +242,13 @@ if err != nil {
 }
 
 func (x *reqServiceFunc) readField3(p thrift.Decoder) error {  // Arg3
-    result := *NewFoo()
+    result := NewFoo()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Arg3 = &result
+    x.Arg3 = result
     return nil
 }
 
@@ -808,8 +808,8 @@ func (x *respAdapterServiceCount) GetSuccess() *CountingStruct {
     return x.Success
 }
 
-func (x *respAdapterServiceCount) SetSuccessNonCompat(value CountingStruct) *respAdapterServiceCount {
-    x.Success = &value
+func (x *respAdapterServiceCount) SetSuccessNonCompat(value *CountingStruct) *respAdapterServiceCount {
+    x.Success = value
     return x
 }
 
@@ -843,13 +843,13 @@ func (x *respAdapterServiceCount) writeField0(p thrift.Encoder) error {  // Succ
 }
 
 func (x *respAdapterServiceCount) readField0(p thrift.Decoder) error {  // Success
-    result := *NewCountingStruct()
+    result := NewCountingStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Success = &result
+    x.Success = result
     return nil
 }
 
@@ -953,7 +953,7 @@ type AdapterServiceAdaptedTypesArgsDeprecated = reqAdapterServiceAdaptedTypes
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{}).
-        SetArgNonCompat(*NewHeapAllocated())
+        SetArgNonCompat(NewHeapAllocated())
 }
 
 func (x *reqAdapterServiceAdaptedTypes) GetArg() *HeapAllocated {
@@ -964,8 +964,8 @@ func (x *reqAdapterServiceAdaptedTypes) GetArg() *HeapAllocated {
     return x.Arg
 }
 
-func (x *reqAdapterServiceAdaptedTypes) SetArgNonCompat(value HeapAllocated) *reqAdapterServiceAdaptedTypes {
-    x.Arg = &value
+func (x *reqAdapterServiceAdaptedTypes) SetArgNonCompat(value *HeapAllocated) *reqAdapterServiceAdaptedTypes {
+    x.Arg = value
     return x
 }
 
@@ -999,13 +999,13 @@ func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Encoder) error {  /
 }
 
 func (x *reqAdapterServiceAdaptedTypes) readField1(p thrift.Decoder) error {  // Arg
-    result := *NewHeapAllocated()
+    result := NewHeapAllocated()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Arg = &result
+    x.Arg = result
     return nil
 }
 
@@ -1116,8 +1116,8 @@ func (x *respAdapterServiceAdaptedTypes) GetSuccess() *HeapAllocated {
     return x.Success
 }
 
-func (x *respAdapterServiceAdaptedTypes) SetSuccessNonCompat(value HeapAllocated) *respAdapterServiceAdaptedTypes {
-    x.Success = &value
+func (x *respAdapterServiceAdaptedTypes) SetSuccessNonCompat(value *HeapAllocated) *respAdapterServiceAdaptedTypes {
+    x.Success = value
     return x
 }
 
@@ -1151,13 +1151,13 @@ func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Encoder) error {  
 }
 
 func (x *respAdapterServiceAdaptedTypes) readField0(p thrift.Decoder) error {  // Success
-    result := *NewHeapAllocated()
+    result := NewHeapAllocated()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Success = &result
+    x.Success = result
     return nil
 }
 

@@ -1198,8 +1198,8 @@ func (x *respInteractWithSharedDoSomeSimilarThings) GetSuccess() *shared.DoSomet
     return x.Success
 }
 
-func (x *respInteractWithSharedDoSomeSimilarThings) SetSuccessNonCompat(value shared.DoSomethingResult) *respInteractWithSharedDoSomeSimilarThings {
-    x.Success = &value
+func (x *respInteractWithSharedDoSomeSimilarThings) SetSuccessNonCompat(value *shared.DoSomethingResult) *respInteractWithSharedDoSomeSimilarThings {
+    x.Success = value
     return x
 }
 
@@ -1233,13 +1233,13 @@ func (x *respInteractWithSharedDoSomeSimilarThings) writeField0(p thrift.Encoder
 }
 
 func (x *respInteractWithSharedDoSomeSimilarThings) readField0(p thrift.Decoder) error {  // Success
-    result := *shared.NewDoSomethingResult()
+    result := shared.NewDoSomethingResult()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Success = &result
+    x.Success = result
     return nil
 }
 

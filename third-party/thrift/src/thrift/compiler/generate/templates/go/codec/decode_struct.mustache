@@ -19,7 +19,7 @@
   This file defines the decoding/read code for a struct type.
 
 }}
-result := *{{struct:go_qualified_new_func}}()
+result := {{struct:go_qualified_new_func}}()
 err := result.Read(p)
 if err != nil {
     return err

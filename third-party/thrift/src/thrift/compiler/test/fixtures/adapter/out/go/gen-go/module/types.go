@@ -274,10 +274,10 @@ func WriteFooWithAdapter(item *FooWithAdapter, p thrift.Encoder) error {
     return nil
 }
 
-func ReadFooWithAdapter(p thrift.Decoder) (FooWithAdapter, error) {
-    var decodeResult FooWithAdapter
+func ReadFooWithAdapter(p thrift.Decoder) (*FooWithAdapter, error) {
+    var decodeResult *FooWithAdapter
     decodeErr := func() error {
-        result := *NewFoo()
+        result := NewFoo()
 err := result.Read(p)
 if err != nil {
     return err
@@ -301,10 +301,10 @@ func WriteStructWithAdapter(item *StructWithAdapter, p thrift.Encoder) error {
     return nil
 }
 
-func ReadStructWithAdapter(p thrift.Decoder) (StructWithAdapter, error) {
-    var decodeResult StructWithAdapter
+func ReadStructWithAdapter(p thrift.Decoder) (*StructWithAdapter, error) {
+    var decodeResult *StructWithAdapter
     decodeErr := func() error {
-        result := *NewBar()
+        result := NewBar()
 err := result.Read(p)
 if err != nil {
     return err
@@ -328,10 +328,10 @@ func WriteUnionWithAdapter(item *UnionWithAdapter, p thrift.Encoder) error {
     return nil
 }
 
-func ReadUnionWithAdapter(p thrift.Decoder) (UnionWithAdapter, error) {
-    var decodeResult UnionWithAdapter
+func ReadUnionWithAdapter(p thrift.Decoder) (*UnionWithAdapter, error) {
+    var decodeResult *UnionWithAdapter
     decodeErr := func() error {
-        result := *NewBaz()
+        result := NewBaz()
 err := result.Read(p)
 if err != nil {
     return err
@@ -355,10 +355,10 @@ func WriteAdaptedA(item *AdaptedA, p thrift.Encoder) error {
     return nil
 }
 
-func ReadAdaptedA(p thrift.Decoder) (AdaptedA, error) {
-    var decodeResult AdaptedA
+func ReadAdaptedA(p thrift.Decoder) (*AdaptedA, error) {
+    var decodeResult *AdaptedA
     decodeErr := func() error {
-        result := *NewA()
+        result := NewA()
 err := result.Read(p)
 if err != nil {
     return err
@@ -740,10 +740,10 @@ func WriteAdaptedTypedef(item *AdaptedTypedef, p thrift.Encoder) error {
     return nil
 }
 
-func ReadAdaptedTypedef(p thrift.Decoder) (AdaptedTypedef, error) {
-    var decodeResult AdaptedTypedef
+func ReadAdaptedTypedef(p thrift.Decoder) (*AdaptedTypedef, error) {
+    var decodeResult *AdaptedTypedef
     decodeErr := func() error {
-        result := *NewAdaptedStruct()
+        result := NewAdaptedStruct()
 err := result.Read(p)
 if err != nil {
     return err
@@ -767,10 +767,10 @@ func WriteTypedefOfDirect(item *TypedefOfDirect, p thrift.Encoder) error {
     return nil
 }
 
-func ReadTypedefOfDirect(p thrift.Decoder) (TypedefOfDirect, error) {
-    var decodeResult TypedefOfDirect
+func ReadTypedefOfDirect(p thrift.Decoder) (*TypedefOfDirect, error) {
+    var decodeResult *TypedefOfDirect
     decodeErr := func() error {
-        result := *NewDirectlyAdaptedStruct()
+        result := NewDirectlyAdaptedStruct()
 err := result.Read(p)
 if err != nil {
     return err
@@ -794,10 +794,10 @@ func WriteAdaptedCircularAdaptee(item *AdaptedCircularAdaptee, p thrift.Encoder)
     return nil
 }
 
-func ReadAdaptedCircularAdaptee(p thrift.Decoder) (AdaptedCircularAdaptee, error) {
-    var decodeResult AdaptedCircularAdaptee
+func ReadAdaptedCircularAdaptee(p thrift.Decoder) (*AdaptedCircularAdaptee, error) {
+    var decodeResult *AdaptedCircularAdaptee
     decodeErr := func() error {
-        result := *NewCircularAdaptee()
+        result := NewCircularAdaptee()
 err := result.Read(p)
 if err != nil {
     return err
@@ -848,8 +848,8 @@ if err != nil {
     return nil
 }
 
-func ReadFooWithAdapter_9317(p thrift.Decoder) (FooWithAdapter_9317, error) {
-    var decodeResult FooWithAdapter_9317
+func ReadFooWithAdapter_9317(p thrift.Decoder) (*FooWithAdapter_9317, error) {
+    var decodeResult *FooWithAdapter_9317
     decodeErr := func() error {
         result, err := ReadFooWithAdapter(p)
 if err != nil {
@@ -955,10 +955,10 @@ func WriteBaz_7352(item *Baz_7352, p thrift.Encoder) error {
     return nil
 }
 
-func ReadBaz_7352(p thrift.Decoder) (Baz_7352, error) {
-    var decodeResult Baz_7352
+func ReadBaz_7352(p thrift.Decoder) (*Baz_7352, error) {
+    var decodeResult *Baz_7352
     decodeErr := func() error {
-        result := *NewBaz()
+        result := NewBaz()
 err := result.Read(p)
 if err != nil {
     return err
@@ -982,10 +982,10 @@ func WriteFoo_3943(item *Foo_3943, p thrift.Encoder) error {
     return nil
 }
 
-func ReadFoo_3943(p thrift.Decoder) (Foo_3943, error) {
-    var decodeResult Foo_3943
+func ReadFoo_3943(p thrift.Decoder) (*Foo_3943, error) {
+    var decodeResult *Foo_3943
     decodeErr := func() error {
-        result := *NewFoo()
+        result := NewFoo()
 err := result.Read(p)
 if err != nil {
     return err
@@ -1009,10 +1009,10 @@ func WriteFoo_6868(item *Foo_6868, p thrift.Encoder) error {
     return nil
 }
 
-func ReadFoo_6868(p thrift.Decoder) (Foo_6868, error) {
-    var decodeResult Foo_6868
+func ReadFoo_6868(p thrift.Decoder) (*Foo_6868, error) {
+    var decodeResult *Foo_6868
     decodeErr := func() error {
-        result := *NewFoo()
+        result := NewFoo()
 err := result.Read(p)
 if err != nil {
     return err
@@ -2600,10 +2600,10 @@ var _ thrift.Struct = (*Bar)(nil)
 
 func NewBar() *Bar {
     return (&Bar{}).
-        SetStructFieldNonCompat(*NewFoo_6868()).
+        SetStructFieldNonCompat(NewFoo_6868()).
         SetStructListFieldNonCompat(make([]*FooWithAdapter_9317, 0)).
-        SetUnionFieldNonCompat(*NewBaz_7352()).
-        SetAdaptedStructFieldNonCompat(*NewDirectlyAdapted())
+        SetUnionFieldNonCompat(NewBaz_7352()).
+        SetAdaptedStructFieldNonCompat(NewDirectlyAdapted())
 }
 
 func (x *Bar) GetStructField() *Foo_6868 {
@@ -2662,8 +2662,8 @@ func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
     return x.AdaptedStructField
 }
 
-func (x *Bar) SetStructFieldNonCompat(value Foo_6868) *Bar {
-    x.StructField = &value
+func (x *Bar) SetStructFieldNonCompat(value *Foo_6868) *Bar {
+    x.StructField = value
     return x
 }
 
@@ -2672,8 +2672,8 @@ func (x *Bar) SetStructField(value *Foo_6868) *Bar {
     return x
 }
 
-func (x *Bar) SetOptionalStructFieldNonCompat(value Foo_3943) *Bar {
-    x.OptionalStructField = &value
+func (x *Bar) SetOptionalStructFieldNonCompat(value *Foo_3943) *Bar {
+    x.OptionalStructField = value
     return x
 }
 
@@ -2702,8 +2702,8 @@ func (x *Bar) SetOptionalStructListField(value []*FooWithAdapter_9317) *Bar {
     return x
 }
 
-func (x *Bar) SetUnionFieldNonCompat(value Baz_7352) *Bar {
-    x.UnionField = &value
+func (x *Bar) SetUnionFieldNonCompat(value *Baz_7352) *Bar {
+    x.UnionField = value
     return x
 }
 
@@ -2712,8 +2712,8 @@ func (x *Bar) SetUnionField(value *Baz_7352) *Bar {
     return x
 }
 
-func (x *Bar) SetOptionalUnionFieldNonCompat(value Baz_7352) *Bar {
-    x.OptionalUnionField = &value
+func (x *Bar) SetOptionalUnionFieldNonCompat(value *Baz_7352) *Bar {
+    x.OptionalUnionField = value
     return x
 }
 
@@ -2722,8 +2722,8 @@ func (x *Bar) SetOptionalUnionField(value *Baz_7352) *Bar {
     return x
 }
 
-func (x *Bar) SetAdaptedStructFieldNonCompat(value DirectlyAdapted) *Bar {
-    x.AdaptedStructField = &value
+func (x *Bar) SetAdaptedStructFieldNonCompat(value *DirectlyAdapted) *Bar {
+    x.AdaptedStructField = value
     return x
 }
 
@@ -2930,7 +2930,7 @@ if err != nil {
     return err
 }
 
-    x.StructField = &result
+    x.StructField = result
     return nil
 }
 
@@ -2940,7 +2940,7 @@ if err != nil {
     return err
 }
 
-    x.OptionalStructField = &result
+    x.OptionalStructField = result
     return nil
 }
 
@@ -2952,7 +2952,7 @@ if err != nil {
 
 listResult := make([]*FooWithAdapter_9317, 0, size)
 for i := 0; i < size; i++ {
-    var elem FooWithAdapter_9317
+    var elem *FooWithAdapter_9317
     {
         result, err := ReadFooWithAdapter_9317(p)
 if err != nil {
@@ -2960,7 +2960,7 @@ if err != nil {
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {
@@ -2980,7 +2980,7 @@ if err != nil {
 
 listResult := make([]*FooWithAdapter_9317, 0, size)
 for i := 0; i < size; i++ {
-    var elem FooWithAdapter_9317
+    var elem *FooWithAdapter_9317
     {
         result, err := ReadFooWithAdapter_9317(p)
 if err != nil {
@@ -2988,7 +2988,7 @@ if err != nil {
 }
         elem = result
     }
-    listResult = append(listResult, &elem)
+    listResult = append(listResult, elem)
 }
 
 if err := p.ReadListEnd(); err != nil {
@@ -3006,7 +3006,7 @@ if err != nil {
     return err
 }
 
-    x.UnionField = &result
+    x.UnionField = result
     return nil
 }
 
@@ -3016,18 +3016,18 @@ if err != nil {
     return err
 }
 
-    x.OptionalUnionField = &result
+    x.OptionalUnionField = result
     return nil
 }
 
 func (x *Bar) readField7(p thrift.Decoder) error {  // AdaptedStructField
-    result := *NewDirectlyAdapted()
+    result := NewDirectlyAdapted()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.AdaptedStructField = &result
+    x.AdaptedStructField = result
     return nil
 }
 
@@ -4071,7 +4071,7 @@ var _ thrift.Struct = (*B)(nil)
 
 func NewB() *B {
     return (&B{}).
-        SetANonCompat(*NewAdaptedA())
+        SetANonCompat(NewAdaptedA())
 }
 
 func (x *B) GetA() *AdaptedA {
@@ -4082,8 +4082,8 @@ func (x *B) GetA() *AdaptedA {
     return x.A
 }
 
-func (x *B) SetANonCompat(value AdaptedA) *B {
-    x.A = &value
+func (x *B) SetANonCompat(value *AdaptedA) *B {
+    x.A = value
     return x
 }
 
@@ -4123,7 +4123,7 @@ if err != nil {
     return err
 }
 
-    x.A = &result
+    x.A = result
     return nil
 }
 
@@ -6778,7 +6778,7 @@ var _ thrift.Struct = (*AdaptTemplatedNestedTestStruct)(nil)
 
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
     return (&AdaptTemplatedNestedTestStruct{}).
-        SetAdaptedStructNonCompat(*NewAdaptTemplatedTestStruct())
+        SetAdaptedStructNonCompat(NewAdaptTemplatedTestStruct())
 }
 
 func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestStruct {
@@ -6789,8 +6789,8 @@ func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestS
     return x.AdaptedStruct
 }
 
-func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStructNonCompat(value AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStruct {
-    x.AdaptedStruct = &value
+func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStructNonCompat(value *AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStruct {
+    x.AdaptedStruct = value
     return x
 }
 
@@ -6824,13 +6824,13 @@ func (x *AdaptTemplatedNestedTestStruct) writeField1(p thrift.Encoder) error {  
 }
 
 func (x *AdaptTemplatedNestedTestStruct) readField1(p thrift.Decoder) error {  // AdaptedStruct
-    result := *NewAdaptTemplatedTestStruct()
+    result := NewAdaptTemplatedTestStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.AdaptedStruct = &result
+    x.AdaptedStruct = result
     return nil
 }
 
@@ -7417,10 +7417,10 @@ var _ thrift.Struct = (*StructFieldAdaptedStruct)(nil)
 
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
     return (&StructFieldAdaptedStruct{}).
-        SetAdaptedStructNonCompat(*NewAdaptedStruct()).
-        SetAdaptedTypedefNonCompat(*NewAdaptedTypedef()).
-        SetDirectlyAdaptedNonCompat(*NewDirectlyAdaptedStruct()).
-        SetTypedefOfAdaptedNonCompat(*NewTypedefOfDirect())
+        SetAdaptedStructNonCompat(NewAdaptedStruct()).
+        SetAdaptedTypedefNonCompat(NewAdaptedTypedef()).
+        SetDirectlyAdaptedNonCompat(NewDirectlyAdaptedStruct()).
+        SetTypedefOfAdaptedNonCompat(NewTypedefOfDirect())
 }
 
 func (x *StructFieldAdaptedStruct) GetAdaptedStruct() *AdaptedStruct {
@@ -7455,8 +7455,8 @@ func (x *StructFieldAdaptedStruct) GetTypedefOfAdapted() *TypedefOfDirect {
     return x.TypedefOfAdapted
 }
 
-func (x *StructFieldAdaptedStruct) SetAdaptedStructNonCompat(value AdaptedStruct) *StructFieldAdaptedStruct {
-    x.AdaptedStruct = &value
+func (x *StructFieldAdaptedStruct) SetAdaptedStructNonCompat(value *AdaptedStruct) *StructFieldAdaptedStruct {
+    x.AdaptedStruct = value
     return x
 }
 
@@ -7465,8 +7465,8 @@ func (x *StructFieldAdaptedStruct) SetAdaptedStruct(value *AdaptedStruct) *Struc
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetAdaptedTypedefNonCompat(value AdaptedTypedef) *StructFieldAdaptedStruct {
-    x.AdaptedTypedef = &value
+func (x *StructFieldAdaptedStruct) SetAdaptedTypedefNonCompat(value *AdaptedTypedef) *StructFieldAdaptedStruct {
+    x.AdaptedTypedef = value
     return x
 }
 
@@ -7475,8 +7475,8 @@ func (x *StructFieldAdaptedStruct) SetAdaptedTypedef(value *AdaptedTypedef) *Str
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetDirectlyAdaptedNonCompat(value DirectlyAdaptedStruct) *StructFieldAdaptedStruct {
-    x.DirectlyAdapted = &value
+func (x *StructFieldAdaptedStruct) SetDirectlyAdaptedNonCompat(value *DirectlyAdaptedStruct) *StructFieldAdaptedStruct {
+    x.DirectlyAdapted = value
     return x
 }
 
@@ -7485,8 +7485,8 @@ func (x *StructFieldAdaptedStruct) SetDirectlyAdapted(value *DirectlyAdaptedStru
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetTypedefOfAdaptedNonCompat(value TypedefOfDirect) *StructFieldAdaptedStruct {
-    x.TypedefOfAdapted = &value
+func (x *StructFieldAdaptedStruct) SetTypedefOfAdaptedNonCompat(value *TypedefOfDirect) *StructFieldAdaptedStruct {
+    x.TypedefOfAdapted = value
     return x
 }
 
@@ -7594,13 +7594,13 @@ if err != nil {
 }
 
 func (x *StructFieldAdaptedStruct) readField1(p thrift.Decoder) error {  // AdaptedStruct
-    result := *NewAdaptedStruct()
+    result := NewAdaptedStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.AdaptedStruct = &result
+    x.AdaptedStruct = result
     return nil
 }
 
@@ -7610,18 +7610,18 @@ if err != nil {
     return err
 }
 
-    x.AdaptedTypedef = &result
+    x.AdaptedTypedef = result
     return nil
 }
 
 func (x *StructFieldAdaptedStruct) readField3(p thrift.Decoder) error {  // DirectlyAdapted
-    result := *NewDirectlyAdaptedStruct()
+    result := NewDirectlyAdaptedStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.DirectlyAdapted = &result
+    x.DirectlyAdapted = result
     return nil
 }
 
@@ -7631,7 +7631,7 @@ if err != nil {
     return err
 }
 
-    x.TypedefOfAdapted = &result
+    x.TypedefOfAdapted = result
     return nil
 }
 
@@ -7786,7 +7786,7 @@ var _ thrift.Struct = (*CircularAdaptee)(nil)
 
 func NewCircularAdaptee() *CircularAdaptee {
     return (&CircularAdaptee{}).
-        SetFieldNonCompat(*NewCircularStruct())
+        SetFieldNonCompat(NewCircularStruct())
 }
 
 func (x *CircularAdaptee) GetField() *CircularStruct {
@@ -7797,8 +7797,8 @@ func (x *CircularAdaptee) GetField() *CircularStruct {
     return x.Field
 }
 
-func (x *CircularAdaptee) SetFieldNonCompat(value CircularStruct) *CircularAdaptee {
-    x.Field = &value
+func (x *CircularAdaptee) SetFieldNonCompat(value *CircularStruct) *CircularAdaptee {
+    x.Field = value
     return x
 }
 
@@ -7832,13 +7832,13 @@ func (x *CircularAdaptee) writeField1(p thrift.Encoder) error {  // Field
 }
 
 func (x *CircularAdaptee) readField1(p thrift.Decoder) error {  // Field
-    result := *NewCircularStruct()
+    result := NewCircularStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Field = &result
+    x.Field = result
     return nil
 }
 
@@ -7946,8 +7946,8 @@ func (x *CircularStruct) GetField() *AdaptedCircularAdaptee {
     return x.Field
 }
 
-func (x *CircularStruct) SetFieldNonCompat(value AdaptedCircularAdaptee) *CircularStruct {
-    x.Field = &value
+func (x *CircularStruct) SetFieldNonCompat(value *AdaptedCircularAdaptee) *CircularStruct {
+    x.Field = value
     return x
 }
 
@@ -7987,7 +7987,7 @@ if err != nil {
     return err
 }
 
-    x.Field = &result
+    x.Field = result
     return nil
 }
 
@@ -8085,7 +8085,7 @@ var _ thrift.Struct = (*ReorderedStruct)(nil)
 
 func NewReorderedStruct() *ReorderedStruct {
     return (&ReorderedStruct{}).
-        SetReorderedDependentAdaptedNonCompat(*NewDeclaredAfterStruct())
+        SetReorderedDependentAdaptedNonCompat(NewDeclaredAfterStruct())
 }
 
 func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
@@ -8096,8 +8096,8 @@ func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
     return x.ReorderedDependentAdapted
 }
 
-func (x *ReorderedStruct) SetReorderedDependentAdaptedNonCompat(value DeclaredAfterStruct) *ReorderedStruct {
-    x.ReorderedDependentAdapted = &value
+func (x *ReorderedStruct) SetReorderedDependentAdaptedNonCompat(value *DeclaredAfterStruct) *ReorderedStruct {
+    x.ReorderedDependentAdapted = value
     return x
 }
 
@@ -8131,13 +8131,13 @@ func (x *ReorderedStruct) writeField1(p thrift.Encoder) error {  // ReorderedDep
 }
 
 func (x *ReorderedStruct) readField1(p thrift.Decoder) error {  // ReorderedDependentAdapted
-    result := *NewDeclaredAfterStruct()
+    result := NewDeclaredAfterStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.ReorderedDependentAdapted = &result
+    x.ReorderedDependentAdapted = result
     return nil
 }
 
@@ -8645,7 +8645,7 @@ var _ thrift.Struct = (*MoveOnly)(nil)
 
 func NewMoveOnly() *MoveOnly {
     return (&MoveOnly{}).
-        SetPtrNonCompat(*NewHeapAllocated())
+        SetPtrNonCompat(NewHeapAllocated())
 }
 
 func (x *MoveOnly) GetPtr() *HeapAllocated {
@@ -8656,8 +8656,8 @@ func (x *MoveOnly) GetPtr() *HeapAllocated {
     return x.Ptr
 }
 
-func (x *MoveOnly) SetPtrNonCompat(value HeapAllocated) *MoveOnly {
-    x.Ptr = &value
+func (x *MoveOnly) SetPtrNonCompat(value *HeapAllocated) *MoveOnly {
+    x.Ptr = value
     return x
 }
 
@@ -8691,13 +8691,13 @@ func (x *MoveOnly) writeField1(p thrift.Encoder) error {  // Ptr
 }
 
 func (x *MoveOnly) readField1(p thrift.Decoder) error {  // Ptr
-    result := *NewHeapAllocated()
+    result := NewHeapAllocated()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Ptr = &result
+    x.Ptr = result
     return nil
 }
 

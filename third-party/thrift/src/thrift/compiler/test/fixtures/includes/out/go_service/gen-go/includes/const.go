@@ -19,6 +19,6 @@ var GoUnusedProtection__ int
 var ExampleIncluded *Included = NewIncluded().
     SetMyIntFieldNonCompat(2).
     SetMyTransitiveFieldNonCompat(
-        *transitive.ExampleFoo,
+        transitive.ExampleFoo,
     )
 const IncludedConstant int64 = 42

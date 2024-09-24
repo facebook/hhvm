@@ -59,10 +59,10 @@ func WriteTransitiveFoo(item *TransitiveFoo, p thrift.Encoder) error {
     return nil
 }
 
-func ReadTransitiveFoo(p thrift.Decoder) (TransitiveFoo, error) {
-    var decodeResult TransitiveFoo
+func ReadTransitiveFoo(p thrift.Decoder) (*TransitiveFoo, error) {
+    var decodeResult *TransitiveFoo
     decodeErr := func() error {
-        result := *transitive.NewFoo()
+        result := transitive.NewFoo()
 err := result.Read(p)
 if err != nil {
     return err
@@ -84,7 +84,7 @@ func NewIncluded() *Included {
     return (&Included{}).
         SetMyIntFieldNonCompat(0).
         SetMyTransitiveFieldNonCompat(
-              *transitive.ExampleFoo,
+              transitive.ExampleFoo,
           )
 }
 
@@ -110,8 +110,8 @@ func (x *Included) SetMyIntField(value int64) *Included {
     return x
 }
 
-func (x *Included) SetMyTransitiveFieldNonCompat(value transitive.Foo) *Included {
-    x.MyTransitiveField = &value
+func (x *Included) SetMyTransitiveFieldNonCompat(value *transitive.Foo) *Included {
+    x.MyTransitiveField = value
     return x
 }
 
@@ -171,13 +171,13 @@ if err != nil {
 }
 
 func (x *Included) readField2(p thrift.Decoder) error {  // MyTransitiveField
-    result := *transitive.NewFoo()
+    result := transitive.NewFoo()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.MyTransitiveField = &result
+    x.MyTransitiveField = result
     return nil
 }
 

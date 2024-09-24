@@ -29,7 +29,7 @@ func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
         {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
           }}{{#field:type}}{{!
           }}{{^type:base?}}
-              {{#type:struct?}}*{{/type:struct?}}{{> const/value}},
+              {{> const/value}},
           {{/type:base?}}{{!
           }}{{#type:base?}}{{!
               }}{{> const/value}}{{!
@@ -42,7 +42,7 @@ func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
         }}{{^field:optional?}}.
         {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
           }}{{#field:type}}{{!
-            }}{{#type:struct?}}*{{/type:struct?}}{{> common/natural_default_value}}{{!
+            }}{{> common/natural_default_value}}{{!
           }}{{/field:type}}{{!
         }}){{/field:optional?}}{{!
         }}{{/field:value}}{{!

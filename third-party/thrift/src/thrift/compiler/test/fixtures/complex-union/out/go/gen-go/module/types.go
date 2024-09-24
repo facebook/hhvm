@@ -1428,8 +1428,8 @@ func (x *ValUnion) GetV2() *Val {
     return x.V2
 }
 
-func (x *ValUnion) SetV1NonCompat(value Val) *ValUnion {
-    x.V1 = &value
+func (x *ValUnion) SetV1NonCompat(value *Val) *ValUnion {
+    x.V1 = value
     return x
 }
 
@@ -1438,8 +1438,8 @@ func (x *ValUnion) SetV1(value *Val) *ValUnion {
     return x
 }
 
-func (x *ValUnion) SetV2NonCompat(value Val) *ValUnion {
-    x.V2 = &value
+func (x *ValUnion) SetV2NonCompat(value *Val) *ValUnion {
+    x.V2 = value
     return x
 }
 
@@ -1497,24 +1497,24 @@ func (x *ValUnion) writeField2(p thrift.Encoder) error {  // V2
 }
 
 func (x *ValUnion) readField1(p thrift.Decoder) error {  // V1
-    result := *NewVal()
+    result := NewVal()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.V1 = &result
+    x.V1 = result
     return nil
 }
 
 func (x *ValUnion) readField2(p thrift.Decoder) error {  // V2
-    result := *NewVal()
+    result := NewVal()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.V2 = &result
+    x.V2 = result
     return nil
 }
 
@@ -2018,8 +2018,8 @@ func (x *NonCopyableUnion) GetS() *NonCopyableStruct {
     return x.S
 }
 
-func (x *NonCopyableUnion) SetSNonCompat(value NonCopyableStruct) *NonCopyableUnion {
-    x.S = &value
+func (x *NonCopyableUnion) SetSNonCompat(value *NonCopyableStruct) *NonCopyableUnion {
+    x.S = value
     return x
 }
 
@@ -2053,13 +2053,13 @@ func (x *NonCopyableUnion) writeField1(p thrift.Encoder) error {  // S
 }
 
 func (x *NonCopyableUnion) readField1(p thrift.Decoder) error {  // S
-    result := *NewNonCopyableStruct()
+    result := NewNonCopyableStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.S = &result
+    x.S = result
     return nil
 }
 

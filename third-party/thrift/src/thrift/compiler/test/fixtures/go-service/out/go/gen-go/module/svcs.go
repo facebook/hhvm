@@ -587,7 +587,7 @@ type GetEntityGetEntityArgsDeprecated = reqGetEntityGetEntity
 
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
     return (&reqGetEntityGetEntity{}).
-        SetRNonCompat(*NewGetEntityRequest())
+        SetRNonCompat(NewGetEntityRequest())
 }
 
 func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
@@ -598,8 +598,8 @@ func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     return x.R
 }
 
-func (x *reqGetEntityGetEntity) SetRNonCompat(value GetEntityRequest) *reqGetEntityGetEntity {
-    x.R = &value
+func (x *reqGetEntityGetEntity) SetRNonCompat(value *GetEntityRequest) *reqGetEntityGetEntity {
+    x.R = value
     return x
 }
 
@@ -633,13 +633,13 @@ func (x *reqGetEntityGetEntity) writeField1(p thrift.Encoder) error {  // R
 }
 
 func (x *reqGetEntityGetEntity) readField1(p thrift.Decoder) error {  // R
-    result := *NewGetEntityRequest()
+    result := NewGetEntityRequest()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.R = &result
+    x.R = result
     return nil
 }
 
@@ -750,8 +750,8 @@ func (x *respGetEntityGetEntity) GetSuccess() *GetEntityResponse {
     return x.Success
 }
 
-func (x *respGetEntityGetEntity) SetSuccessNonCompat(value GetEntityResponse) *respGetEntityGetEntity {
-    x.Success = &value
+func (x *respGetEntityGetEntity) SetSuccessNonCompat(value *GetEntityResponse) *respGetEntityGetEntity {
+    x.Success = value
     return x
 }
 
@@ -785,13 +785,13 @@ func (x *respGetEntityGetEntity) writeField0(p thrift.Encoder) error {  // Succe
 }
 
 func (x *respGetEntityGetEntity) readField0(p thrift.Decoder) error {  // Success
-    result := *NewGetEntityResponse()
+    result := NewGetEntityResponse()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Success = &result
+    x.Success = result
     return nil
 }
 

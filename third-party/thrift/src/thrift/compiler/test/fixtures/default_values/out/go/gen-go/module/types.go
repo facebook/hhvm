@@ -162,8 +162,8 @@ func NewStructWithNoCustomDefaultValues() *StructWithNoCustomDefaultValues {
     return (&StructWithNoCustomDefaultValues{}).
         SetUnqualifiedIntegerNonCompat(0).
         SetRequiredIntegerNonCompat(0).
-        SetUnqualifiedStructNonCompat(*NewTrivialStruct()).
-        SetRequiredStructNonCompat(*NewTrivialStruct())
+        SetUnqualifiedStructNonCompat(NewTrivialStruct()).
+        SetRequiredStructNonCompat(NewTrivialStruct())
 }
 
 func (x *StructWithNoCustomDefaultValues) GetUnqualifiedInteger() int32 {
@@ -236,8 +236,8 @@ func (x *StructWithNoCustomDefaultValues) SetRequiredInteger(value int32) *Struc
     return x
 }
 
-func (x *StructWithNoCustomDefaultValues) SetUnqualifiedStructNonCompat(value TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.UnqualifiedStruct = &value
+func (x *StructWithNoCustomDefaultValues) SetUnqualifiedStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.UnqualifiedStruct = value
     return x
 }
 
@@ -246,8 +246,8 @@ func (x *StructWithNoCustomDefaultValues) SetUnqualifiedStruct(value *TrivialStr
     return x
 }
 
-func (x *StructWithNoCustomDefaultValues) SetOptionalStructNonCompat(value TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.OptionalStruct = &value
+func (x *StructWithNoCustomDefaultValues) SetOptionalStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.OptionalStruct = value
     return x
 }
 
@@ -256,8 +256,8 @@ func (x *StructWithNoCustomDefaultValues) SetOptionalStruct(value *TrivialStruct
     return x
 }
 
-func (x *StructWithNoCustomDefaultValues) SetRequiredStructNonCompat(value TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.RequiredStruct = &value
+func (x *StructWithNoCustomDefaultValues) SetRequiredStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.RequiredStruct = value
     return x
 }
 
@@ -425,35 +425,35 @@ if err != nil {
 }
 
 func (x *StructWithNoCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
-    result := *NewTrivialStruct()
+    result := NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.UnqualifiedStruct = &result
+    x.UnqualifiedStruct = result
     return nil
 }
 
 func (x *StructWithNoCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
-    result := *NewTrivialStruct()
+    result := NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.OptionalStruct = &result
+    x.OptionalStruct = result
     return nil
 }
 
 func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Decoder) error {  // RequiredStruct
-    result := *NewTrivialStruct()
+    result := NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.RequiredStruct = &result
+    x.RequiredStruct = result
     return nil
 }
 
@@ -635,15 +635,15 @@ func NewStructWithCustomDefaultValues() *StructWithCustomDefaultValues {
         SetOptionalIntegerNonCompat(43).
         SetRequiredIntegerNonCompat(44).
         SetUnqualifiedStructNonCompat(
-              *NewTrivialStruct().
+              NewTrivialStruct().
     SetIntValueNonCompat(123),
           ).
         SetOptionalStructNonCompat(
-              *NewTrivialStruct().
+              NewTrivialStruct().
     SetIntValueNonCompat(456),
           ).
         SetRequiredStructNonCompat(
-              *NewTrivialStruct().
+              NewTrivialStruct().
     SetIntValueNonCompat(789),
           )
 }
@@ -718,8 +718,8 @@ func (x *StructWithCustomDefaultValues) SetRequiredInteger(value int32) *StructW
     return x
 }
 
-func (x *StructWithCustomDefaultValues) SetUnqualifiedStructNonCompat(value TrivialStruct) *StructWithCustomDefaultValues {
-    x.UnqualifiedStruct = &value
+func (x *StructWithCustomDefaultValues) SetUnqualifiedStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.UnqualifiedStruct = value
     return x
 }
 
@@ -728,8 +728,8 @@ func (x *StructWithCustomDefaultValues) SetUnqualifiedStruct(value *TrivialStruc
     return x
 }
 
-func (x *StructWithCustomDefaultValues) SetOptionalStructNonCompat(value TrivialStruct) *StructWithCustomDefaultValues {
-    x.OptionalStruct = &value
+func (x *StructWithCustomDefaultValues) SetOptionalStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.OptionalStruct = value
     return x
 }
 
@@ -738,8 +738,8 @@ func (x *StructWithCustomDefaultValues) SetOptionalStruct(value TrivialStruct) *
     return x
 }
 
-func (x *StructWithCustomDefaultValues) SetRequiredStructNonCompat(value TrivialStruct) *StructWithCustomDefaultValues {
-    x.RequiredStruct = &value
+func (x *StructWithCustomDefaultValues) SetRequiredStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.RequiredStruct = value
     return x
 }
 
@@ -907,35 +907,35 @@ if err != nil {
 }
 
 func (x *StructWithCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
-    result := *NewTrivialStruct()
+    result := NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.UnqualifiedStruct = &result
+    x.UnqualifiedStruct = result
     return nil
 }
 
 func (x *StructWithCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
-    result := *NewTrivialStruct()
+    result := NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.OptionalStruct = &result
+    x.OptionalStruct = result
     return nil
 }
 
 func (x *StructWithCustomDefaultValues) readField6(p thrift.Decoder) error {  // RequiredStruct
-    result := *NewTrivialStruct()
+    result := NewTrivialStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.RequiredStruct = &result
+    x.RequiredStruct = result
     return nil
 }
 

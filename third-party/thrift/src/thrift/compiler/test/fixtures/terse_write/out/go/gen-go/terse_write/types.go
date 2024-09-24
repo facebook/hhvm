@@ -425,8 +425,8 @@ func (x *MyUnion) SetMapField(value map[int16]int16) *MyUnion {
     return x
 }
 
-func (x *MyUnion) SetStructFieldNonCompat(value MyStruct) *MyUnion {
-    x.StructField = &value
+func (x *MyUnion) SetStructFieldNonCompat(value *MyStruct) *MyUnion {
+    x.StructField = value
     return x
 }
 
@@ -1008,13 +1008,13 @@ result := mapResult
 }
 
 func (x *MyUnion) readField14(p thrift.Decoder) error {  // StructField
-    result := *NewMyStruct()
+    result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.StructField = &result
+    x.StructField = result
     return nil
 }
 
@@ -1501,8 +1501,8 @@ func NewStructLevelTerseStruct() *StructLevelTerseStruct {
         SetListFieldNonCompat(make([]int16, 0)).
         SetSetFieldNonCompat(make([]int16, 0)).
         SetMapFieldNonCompat(make(map[int16]int16)).
-        SetStructFieldNonCompat(*NewMyStruct()).
-        SetUnionFieldNonCompat(*NewMyUnion())
+        SetStructFieldNonCompat(NewMyStruct()).
+        SetUnionFieldNonCompat(NewMyUnion())
 }
 
 func (x *StructLevelTerseStruct) GetBoolField() bool {
@@ -1719,8 +1719,8 @@ func (x *StructLevelTerseStruct) SetMapField(value map[int16]int16) *StructLevel
     return x
 }
 
-func (x *StructLevelTerseStruct) SetStructFieldNonCompat(value MyStruct) *StructLevelTerseStruct {
-    x.StructField = &value
+func (x *StructLevelTerseStruct) SetStructFieldNonCompat(value *MyStruct) *StructLevelTerseStruct {
+    x.StructField = value
     return x
 }
 
@@ -1729,8 +1729,8 @@ func (x *StructLevelTerseStruct) SetStructField(value *MyStruct) *StructLevelTer
     return x
 }
 
-func (x *StructLevelTerseStruct) SetUnionFieldNonCompat(value MyUnion) *StructLevelTerseStruct {
-    x.UnionField = &value
+func (x *StructLevelTerseStruct) SetUnionFieldNonCompat(value *MyUnion) *StructLevelTerseStruct {
+    x.UnionField = value
     return x
 }
 
@@ -2248,24 +2248,24 @@ result := mapResult
 }
 
 func (x *StructLevelTerseStruct) readField14(p thrift.Decoder) error {  // StructField
-    result := *NewMyStruct()
+    result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.StructField = &result
+    x.StructField = result
     return nil
 }
 
 func (x *StructLevelTerseStruct) readField15(p thrift.Decoder) error {  // UnionField
-    result := *NewMyUnion()
+    result := NewMyUnion()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.UnionField = &result
+    x.UnionField = result
     return nil
 }
 
@@ -2567,7 +2567,7 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetTerseListFieldNonCompat(make([]int16, 0)).
         SetTerseSetFieldNonCompat(make([]int16, 0)).
         SetTerseMapFieldNonCompat(make(map[int16]int16)).
-        SetTerseStructFieldNonCompat(*NewMyStruct()).
+        SetTerseStructFieldNonCompat(NewMyStruct()).
         SetBoolFieldNonCompat(false).
         SetByteFieldNonCompat(0).
         SetShortFieldNonCompat(0).
@@ -2581,9 +2581,9 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetListFieldNonCompat(make([]int16, 0)).
         SetSetFieldNonCompat(make([]int16, 0)).
         SetMapFieldNonCompat(make(map[int16]int16)).
-        SetStructFieldNonCompat(*NewMyStruct()).
-        SetTerseUnionFieldNonCompat(*NewMyUnion()).
-        SetUnionFieldNonCompat(*NewMyUnion())
+        SetStructFieldNonCompat(NewMyStruct()).
+        SetTerseUnionFieldNonCompat(NewMyUnion()).
+        SetUnionFieldNonCompat(NewMyUnion())
 }
 
 func (x *FieldLevelTerseStruct) GetTerseBoolField() bool {
@@ -2884,8 +2884,8 @@ func (x *FieldLevelTerseStruct) SetTerseMapField(value map[int16]int16) *FieldLe
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseStructFieldNonCompat(value MyStruct) *FieldLevelTerseStruct {
-    x.TerseStructField = &value
+func (x *FieldLevelTerseStruct) SetTerseStructFieldNonCompat(value *MyStruct) *FieldLevelTerseStruct {
+    x.TerseStructField = value
     return x
 }
 
@@ -3024,8 +3024,8 @@ func (x *FieldLevelTerseStruct) SetMapField(value map[int16]int16) *FieldLevelTe
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetStructFieldNonCompat(value MyStruct) *FieldLevelTerseStruct {
-    x.StructField = &value
+func (x *FieldLevelTerseStruct) SetStructFieldNonCompat(value *MyStruct) *FieldLevelTerseStruct {
+    x.StructField = value
     return x
 }
 
@@ -3034,8 +3034,8 @@ func (x *FieldLevelTerseStruct) SetStructField(value *MyStruct) *FieldLevelTerse
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseUnionFieldNonCompat(value MyUnion) *FieldLevelTerseStruct {
-    x.TerseUnionField = &value
+func (x *FieldLevelTerseStruct) SetTerseUnionFieldNonCompat(value *MyUnion) *FieldLevelTerseStruct {
+    x.TerseUnionField = value
     return x
 }
 
@@ -3044,8 +3044,8 @@ func (x *FieldLevelTerseStruct) SetTerseUnionField(value *MyUnion) *FieldLevelTe
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetUnionFieldNonCompat(value MyUnion) *FieldLevelTerseStruct {
-    x.UnionField = &value
+func (x *FieldLevelTerseStruct) SetUnionFieldNonCompat(value *MyUnion) *FieldLevelTerseStruct {
+    x.UnionField = value
     return x
 }
 
@@ -3875,13 +3875,13 @@ result := mapResult
 }
 
 func (x *FieldLevelTerseStruct) readField14(p thrift.Decoder) error {  // TerseStructField
-    result := *NewMyStruct()
+    result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.TerseStructField = &result
+    x.TerseStructField = result
     return nil
 }
 
@@ -4082,35 +4082,35 @@ result := mapResult
 }
 
 func (x *FieldLevelTerseStruct) readField28(p thrift.Decoder) error {  // StructField
-    result := *NewMyStruct()
+    result := NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.StructField = &result
+    x.StructField = result
     return nil
 }
 
 func (x *FieldLevelTerseStruct) readField29(p thrift.Decoder) error {  // TerseUnionField
-    result := *NewMyUnion()
+    result := NewMyUnion()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.TerseUnionField = &result
+    x.TerseUnionField = result
     return nil
 }
 
 func (x *FieldLevelTerseStruct) readField30(p thrift.Decoder) error {  // UnionField
-    result := *NewMyUnion()
+    result := NewMyUnion()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.UnionField = &result
+    x.UnionField = result
     return nil
 }
 
@@ -4591,7 +4591,7 @@ func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
     1: 1,
 },
           ).
-        SetStructFieldNonCompat(*NewMyStructWithCustomDefault())
+        SetStructFieldNonCompat(NewMyStructWithCustomDefault())
 }
 
 func (x *TerseStructWithCustomDefault) GetBoolField() bool {
@@ -4806,8 +4806,8 @@ func (x *TerseStructWithCustomDefault) SetMapField(value map[int16]int16) *Terse
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetStructFieldNonCompat(value MyStructWithCustomDefault) *TerseStructWithCustomDefault {
-    x.StructField = &value
+func (x *TerseStructWithCustomDefault) SetStructFieldNonCompat(value *MyStructWithCustomDefault) *TerseStructWithCustomDefault {
+    x.StructField = value
     return x
 }
 
@@ -5301,13 +5301,13 @@ result := mapResult
 }
 
 func (x *TerseStructWithCustomDefault) readField14(p thrift.Decoder) error {  // StructField
-    result := *NewMyStructWithCustomDefault()
+    result := NewMyStructWithCustomDefault()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.StructField = &result
+    x.StructField = result
     return nil
 }
 

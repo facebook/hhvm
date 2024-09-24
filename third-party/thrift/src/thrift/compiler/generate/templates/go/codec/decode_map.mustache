@@ -31,7 +31,16 @@ for i := 0; i < size; i++ {
     var key {{^type:go_comparable?}}*{{/type:go_comparable?}}{{> common/type}}
     {
         {{> codec/decode}}
-        key = {{^type:go_comparable?}}&{{/type:go_comparable?}}result
+        key = {{#type:go_comparable?}}{{
+                }}{{#type:struct?}}{{
+                  }}*{{  <- Dereference if 'result' is a comparable struct.
+                }}{{/type:struct?}}{{
+              }}{{/type:go_comparable?}}{{
+              }}{{^type:go_comparable?}}{{
+                }}{{^type:struct?}}{{
+                  }}&{{  <- Take address if 'result' is non-comparable and not a struct.
+                }}{{/type:struct?}}{{
+              }}{{/type:go_comparable?}}result
     }
     {{/type:key_type}}
 
@@ -39,7 +48,7 @@ for i := 0; i < size; i++ {
     var value {{#type:struct?}}*{{/type:struct?}}{{> common/type}}
     {
         {{> codec/decode}}
-        value = {{#type:struct?}}&{{/type:struct?}}result
+        value = result
     }
     {{/type:value_type}}
 

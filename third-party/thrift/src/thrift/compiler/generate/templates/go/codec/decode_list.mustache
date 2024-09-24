@@ -27,13 +27,13 @@ if err != nil {
 listResult := make({{> common/type}}, 0, size)
 for i := 0; i < size; i++ {
     {{#type:list_elem_type}}
-    var elem {{> common/type}}
+    var elem {{#type:struct?}}*{{/type:struct?}}{{> common/type}}
     {{! Use scope to avoid multiple 'result' variable collisions }}
     {
         {{> codec/decode}}
         elem = result
     }
-    listResult = append(listResult, {{#type:struct?}}&{{/type:struct?}}elem)
+    listResult = append(listResult, elem)
     {{/type:list_elem_type}}
 }
 

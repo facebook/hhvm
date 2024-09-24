@@ -28,7 +28,7 @@ var _ thrift.Struct = (*IncludesAlso)(nil)
 
 func NewIncludesAlso() *IncludesAlso {
     return (&IncludesAlso{}).
-        SetAlsoNonCompat(*includesAlso.NewAlso())
+        SetAlsoNonCompat(includesAlso.NewAlso())
 }
 
 func (x *IncludesAlso) GetAlso() *includesAlso.Also {
@@ -39,8 +39,8 @@ func (x *IncludesAlso) GetAlso() *includesAlso.Also {
     return x.Also
 }
 
-func (x *IncludesAlso) SetAlsoNonCompat(value includesAlso.Also) *IncludesAlso {
-    x.Also = &value
+func (x *IncludesAlso) SetAlsoNonCompat(value *includesAlso.Also) *IncludesAlso {
+    x.Also = value
     return x
 }
 
@@ -74,13 +74,13 @@ func (x *IncludesAlso) writeField1(p thrift.Encoder) error {  // Also
 }
 
 func (x *IncludesAlso) readField1(p thrift.Decoder) error {  // Also
-    result := *includesAlso.NewAlso()
+    result := includesAlso.NewAlso()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.Also = &result
+    x.Also = result
     return nil
 }
 

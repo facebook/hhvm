@@ -139,8 +139,8 @@ type MyServiceQueryArgsDeprecated = reqMyServiceQuery
 
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
-        SetSNonCompat(*module.NewMyStruct()).
-        SetINonCompat(*includes.NewIncluded())
+        SetSNonCompat(module.NewMyStruct()).
+        SetINonCompat(includes.NewIncluded())
 }
 
 func (x *reqMyServiceQuery) GetS() *module.MyStruct {
@@ -159,8 +159,8 @@ func (x *reqMyServiceQuery) GetI() *includes.Included {
     return x.I
 }
 
-func (x *reqMyServiceQuery) SetSNonCompat(value module.MyStruct) *reqMyServiceQuery {
-    x.S = &value
+func (x *reqMyServiceQuery) SetSNonCompat(value *module.MyStruct) *reqMyServiceQuery {
+    x.S = value
     return x
 }
 
@@ -169,8 +169,8 @@ func (x *reqMyServiceQuery) SetS(value *module.MyStruct) *reqMyServiceQuery {
     return x
 }
 
-func (x *reqMyServiceQuery) SetINonCompat(value includes.Included) *reqMyServiceQuery {
-    x.I = &value
+func (x *reqMyServiceQuery) SetINonCompat(value *includes.Included) *reqMyServiceQuery {
+    x.I = value
     return x
 }
 
@@ -228,24 +228,24 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
 }
 
 func (x *reqMyServiceQuery) readField1(p thrift.Decoder) error {  // S
-    result := *module.NewMyStruct()
+    result := module.NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.S = &result
+    x.S = result
     return nil
 }
 
 func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
-    result := *includes.NewIncluded()
+    result := includes.NewIncluded()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.I = &result
+    x.I = result
     return nil
 }
 
@@ -448,8 +448,8 @@ type MyServiceHasArgDocsArgsDeprecated = reqMyServiceHasArgDocs
 
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
     return (&reqMyServiceHasArgDocs{}).
-        SetSNonCompat(*module.NewMyStruct()).
-        SetINonCompat(*includes.NewIncluded())
+        SetSNonCompat(module.NewMyStruct()).
+        SetINonCompat(includes.NewIncluded())
 }
 
 func (x *reqMyServiceHasArgDocs) GetS() *module.MyStruct {
@@ -468,8 +468,8 @@ func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
     return x.I
 }
 
-func (x *reqMyServiceHasArgDocs) SetSNonCompat(value module.MyStruct) *reqMyServiceHasArgDocs {
-    x.S = &value
+func (x *reqMyServiceHasArgDocs) SetSNonCompat(value *module.MyStruct) *reqMyServiceHasArgDocs {
+    x.S = value
     return x
 }
 
@@ -478,8 +478,8 @@ func (x *reqMyServiceHasArgDocs) SetS(value *module.MyStruct) *reqMyServiceHasAr
     return x
 }
 
-func (x *reqMyServiceHasArgDocs) SetINonCompat(value includes.Included) *reqMyServiceHasArgDocs {
-    x.I = &value
+func (x *reqMyServiceHasArgDocs) SetINonCompat(value *includes.Included) *reqMyServiceHasArgDocs {
+    x.I = value
     return x
 }
 
@@ -537,24 +537,24 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
 }
 
 func (x *reqMyServiceHasArgDocs) readField1(p thrift.Decoder) error {  // S
-    result := *module.NewMyStruct()
+    result := module.NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.S = &result
+    x.S = result
     return nil
 }
 
 func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
-    result := *includes.NewIncluded()
+    result := includes.NewIncluded()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.I = &result
+    x.I = result
     return nil
 }
 

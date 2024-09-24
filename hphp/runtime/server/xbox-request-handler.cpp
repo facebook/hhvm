@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -37,6 +38,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 
@@ -256,12 +258,53 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
     transport->sendString("Not Found", 404);
   }
 
+  StructuredLogEntry* entry = nullptr;
+  if (RuntimeOption::EvalProfileHWStructLog) {
+    entry = transport->createStructuredLogEntry();
+    entry->setInt("response_code", code);
+    auto queueBegin = transport->getQueueTime();
+    auto const queueTimeUs = gettime_diff_us(queueBegin, transport->getWallTime());
+    entry->setInt("queue-time-us", queueTimeUs);
+    StructuredLog::recordRequestGlobals(*entry);
+    tl_heap->recordStats(*entry);
+    entry->setInt("uptime", HHVM_FN(server_uptime)());
+  }
+  HardwareCounter::UpdateServiceData(transport->getCpuTime(),
+                                     transport->getWallTime(),
+                                     entry,
+                                     false /*psp*/);
+  if (entry) {
+    StructuredLog::log("hhvm_request_perf", *entry);
+  }
   params.reset();
 
   transport->onSendEnd();
-  ServerStats::LogPage(rpcFunc, code);
 
   m_context->onShutdownPostSend();
+
+  if (RuntimeOption::EvalProfileHWStructLog) {
+    // We now reuse the same entry created previously for non-psp, with updates
+    // on certain metrics (memory and hardware counters).
+    entry->setInt("response_code", transport->getResponseCode());
+    entry->setInt("response_size", transport->getResponseSize());
+    tl_heap->recordStats(*entry);
+    entry->setInt("uptime", HHVM_FN(server_uptime)());
+    entry->setInt("rss", ProcStatus::adjustedRssKb());
+    if (use_lowptr) {
+      entry->setInt("low_mem", alloc::getLowMapped());
+    }
+  }
+  HardwareCounter::UpdateServiceData(transport->getCpuTime(),
+                                     transport->getWallTime(),
+                                     entry,
+                                     true /*psp*/);
+
+  if (entry) {
+    StructuredLog::log("hhvm_request_perf", *entry);
+    transport->resetStructuredLogEntry();
+  }
+
+  ServerStats::LogPage(rpcFunc, code);
   // in case postsend/cleanup output something
   // PHP5 always provides _START.
   m_context->obClean(k_PHP_OUTPUT_HANDLER_START |

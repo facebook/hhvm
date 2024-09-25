@@ -161,7 +161,7 @@ func newServer(processor thrift.Processor, addr string) (thrift.Server, net.Addr
 	if err != nil {
 		return nil, nil, err
 	}
-	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDHeader), socket.Addr(), nil
+	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDUpgradeToRocket), socket.Addr(), nil
 }
 
 type dataConformanceServiceHandler struct {

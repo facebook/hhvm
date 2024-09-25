@@ -797,7 +797,7 @@ struct RuntimeOption {
   /*                                                                    \
    * Enforce deployment boundaries.                                     \
    */                                                                   \
-  F(bool, EnforceDeployment, true)                                     \
+  F(bool, EnforceDeployment, false)                                     \
   F(uint32_t, DeploymentViolationWarningSampleRate, 1)                  \
   /*
    * Enforce top level and method level internal keyword                \

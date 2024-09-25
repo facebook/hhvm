@@ -75,12 +75,6 @@ type ServerStats struct {
 	// response is finished being written out.
 	TotalResponseTime *TimingSeries
 
-	// loadShedding defines a server event where thwork decides to loadshed a
-	// request.
-	LoadShedding *TimingSeries
-	// connectionLoadShedding defines a server event where thwork decides to loadshed
-	// a request due to high load on the connection. This can signal that we should
-	ConnectionLoadShedding *TimingSeries
 	// workersBusy defines a server event where no workers are available to accept
 	// available work. This can signal that we should increase # workers (in the case
 	// that workers are all blocking) or that the server is overloaded
@@ -125,7 +119,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 
 		ProtocolError:               NewTimingSeries(cfg),
 		PanicCount:                  NewTimingSeries(cfg),
-		LoadShedding:                NewTimingSeries(cfg),
 		WorkersBusy:                 NewTimingSeries(cfg),
 		NotListening:                NewTimingSeries(cfg),
 		PipeliningUnsupportedClient: NewTimingSeries(cfg),
@@ -172,8 +165,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["connections.connection_preempted_work."+periodStr] = int64(s.Count)
 	s = stats.ProtocolError.MustSummarize(stats.statsPeriod)
 	ints["connections.protocol_error."+periodStr] = int64(s.Count)
-	s = stats.LoadShedding.MustSummarize(stats.statsPeriod)
-	ints["requests.loadshed."+periodStr] = int64(s.Count)
 	s = stats.WorkersBusy.MustSummarize(stats.statsPeriod)
 	ints["requests.workers_busy."+periodStr] = int64(s.Count)
 	s = stats.PipeliningUnsupportedClient.MustSummarize(stats.statsPeriod)

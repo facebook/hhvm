@@ -867,9 +867,7 @@ void RocketClientChannel::sendRequestStream(
       *header);
 
   std::chrono::milliseconds firstResponseTimeout;
-  if (!preSendValidation(metadata, rpcOptions, firstResponseTimeout)) {
-    return;
-  }
+  preSendValidation(metadata, rpcOptions, firstResponseTimeout);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -913,9 +911,7 @@ void RocketClientChannel::sendRequestSink(
       *header);
 
   std::chrono::milliseconds firstResponseTimeout;
-  if (!preSendValidation(metadata, rpcOptions, firstResponseTimeout)) {
-    return;
-  }
+  preSendValidation(metadata, rpcOptions, firstResponseTimeout);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -961,9 +957,7 @@ void RocketClientChannel::sendThriftRequest(
   header.reset();
 
   std::chrono::milliseconds timeout;
-  if (!preSendValidation(metadata, rpcOptions, timeout)) {
-    return;
-  }
+  preSendValidation(metadata, rpcOptions, timeout);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -1099,7 +1093,7 @@ bool RocketClientChannel::canHandleRequest(CallbackPtr& cb) {
   return true;
 }
 
-bool RocketClientChannel::preSendValidation(
+void RocketClientChannel::preSendValidation(
     RequestRpcMetadata& metadata,
     const RpcOptions& rpcOptions,
     std::chrono::milliseconds& firstResponseTimeout) {
@@ -1124,8 +1118,6 @@ bool RocketClientChannel::preSendValidation(
       metadata.interactionId_ref() = interactionId;
     }
   }
-
-  return true;
 }
 
 ClientChannel::SaturationStatus RocketClientChannel::getSaturationStatus() {

@@ -184,7 +184,7 @@ class RocketClientChannel final : public ClientChannel,
   template <typename CallbackPtr>
   bool canHandleRequest(CallbackPtr& cb);
 
-  bool preSendValidation(
+  void preSendValidation(
       RequestRpcMetadata& metadata,
       const RpcOptions& rpcOptions,
       std::chrono::milliseconds& firstResponseTimeout);

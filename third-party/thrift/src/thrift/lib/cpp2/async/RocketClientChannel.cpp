@@ -853,7 +853,9 @@ void RocketClientChannel::sendRequestStream(
     std::shared_ptr<THeader> header,
     StreamClientCallback* clientCallback) {
   DestructorGuard dg(this);
-
+  if (!canHandleRequest(clientCallback)) {
+    return;
+  }
   preprocessHeader(header.get());
 
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
@@ -865,8 +867,7 @@ void RocketClientChannel::sendRequestStream(
       *header);
 
   std::chrono::milliseconds firstResponseTimeout;
-  if (!preSendValidation(
-          metadata, rpcOptions, clientCallback, firstResponseTimeout)) {
+  if (!preSendValidation(metadata, rpcOptions, firstResponseTimeout)) {
     return;
   }
 
@@ -898,7 +899,9 @@ void RocketClientChannel::sendRequestSink(
     std::shared_ptr<transport::THeader> header,
     SinkClientCallback* clientCallback) {
   DestructorGuard dg(this);
-
+  if (!canHandleRequest(clientCallback)) {
+    return;
+  }
   preprocessHeader(header.get());
 
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
@@ -910,8 +913,7 @@ void RocketClientChannel::sendRequestSink(
       *header);
 
   std::chrono::milliseconds firstResponseTimeout;
-  if (!preSendValidation(
-          metadata, rpcOptions, clientCallback, firstResponseTimeout)) {
+  if (!preSendValidation(metadata, rpcOptions, firstResponseTimeout)) {
     return;
   }
 
@@ -942,9 +944,11 @@ void RocketClientChannel::sendThriftRequest(
     apache::thrift::ManagedStringView&& methodName,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cb) {
+    RequestClientCallback::Ptr clientCallback) {
   DestructorGuard dg(this);
-
+  if (!canHandleRequest(clientCallback)) {
+    return;
+  }
   preprocessHeader(header.get());
 
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
@@ -957,7 +961,7 @@ void RocketClientChannel::sendThriftRequest(
   header.reset();
 
   std::chrono::milliseconds timeout;
-  if (!preSendValidation(metadata, rpcOptions, cb, timeout)) {
+  if (!preSendValidation(metadata, rpcOptions, timeout)) {
     return;
   }
 
@@ -967,7 +971,10 @@ void RocketClientChannel::sendThriftRequest(
   switch (kind) {
     case RpcKind::SINGLE_REQUEST_NO_RESPONSE:
       sendSingleRequestNoResponse(
-          rpcOptions, std::move(metadata), std::move(buf), std::move(cb));
+          rpcOptions,
+          std::move(metadata),
+          std::move(buf),
+          std::move(clientCallback));
       break;
 
     case RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
@@ -976,7 +983,7 @@ void RocketClientChannel::sendThriftRequest(
           std::move(metadata),
           timeout,
           std::move(buf),
-          std::move(cb));
+          std::move(clientCallback));
       break;
 
     case RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
@@ -1065,13 +1072,7 @@ void onResponseError(SinkClientCallback* cb, folly::exception_wrapper ew) {
 }
 
 template <typename CallbackPtr>
-bool RocketClientChannel::preSendValidation(
-    RequestRpcMetadata& metadata,
-    const RpcOptions& rpcOptions,
-    CallbackPtr& cb,
-    std::chrono::milliseconds& firstResponseTimeout) {
-  DCHECK(metadata.kind_ref().has_value());
-
+bool RocketClientChannel::canHandleRequest(CallbackPtr& cb) {
   if (!isAlive()) {
     // Channel is not in connected state due to some pre-existing transport
     // exception, pass it back for some breadcrumbs.
@@ -1094,6 +1095,15 @@ bool RocketClientChannel::preSendValidation(
     onResponseError(cb, std::move(ex));
     return false;
   }
+
+  return true;
+}
+
+bool RocketClientChannel::preSendValidation(
+    RequestRpcMetadata& metadata,
+    const RpcOptions& rpcOptions,
+    std::chrono::milliseconds& firstResponseTimeout) {
+  DCHECK(metadata.kind_ref().has_value());
 
   firstResponseTimeout =
       std::chrono::milliseconds(metadata.clientTimeoutMs_ref().value_or(0));

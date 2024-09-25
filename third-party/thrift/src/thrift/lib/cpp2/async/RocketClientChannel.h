@@ -182,10 +182,11 @@ class RocketClientChannel final : public ClientChannel,
       RequestClientCallback::Ptr cb);
 
   template <typename CallbackPtr>
+  bool canHandleRequest(CallbackPtr& cb);
+
   bool preSendValidation(
       RequestRpcMetadata& metadata,
       const RpcOptions& rpcOptions,
-      CallbackPtr& cb,
       std::chrono::milliseconds& firstResponseTimeout);
 
   rocket::SetupFrame makeSetupFrame(RequestSetupMetadata meta);

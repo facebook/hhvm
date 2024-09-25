@@ -304,7 +304,15 @@ Clusterizer::Clusterizer(Vunit& unit, const Scale& scale)
   sortClusters();
   if (Cfg::Jit::PGOLayoutSplitHotCold) {
     splitHotColdClusters();
+  } else {
+    for (auto b : m_blocks) {
+      if (unit.blocks[b].area_idx != AreaIndex::Frozen ||
+          Cfg::Jit::PGOLayoutResplitFrozen) {
+        unit.blocks[b].area_idx = AreaIndex::Main;
+      }
+    }
   }
+
   FTRACE(1, "{}", toString());
 }
 
@@ -616,15 +624,6 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
   assertx(labels[0] == unit.entry);
   assertx(!RuntimeOption::EvalReusableTCPadding ||
           unit.blocks[unit.entry].area_idx == AreaIndex::Main);
-
-  if (!Cfg::Jit::PGOLayoutSplitHotCold) {
-    for (auto b : labels) {
-      if (unit.blocks[b].area_idx != AreaIndex::Frozen ||
-          Cfg::Jit::PGOLayoutResplitFrozen) {
-        unit.blocks[b].area_idx = AreaIndex::Main;
-      }
-    }
-  }
 
   if (Trace::moduleEnabled(Trace::layout, 1)) {
     FTRACE(1, "pgoLayout: final block list: ");

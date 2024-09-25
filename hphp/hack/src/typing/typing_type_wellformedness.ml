@@ -587,8 +587,7 @@ let expr tenv ((), _p, e) =
   (* We don't recurse on expressions here because this is called by Typing.expr *)
   match e with
   | Is (_, h)
-  | As { expr = _; hint = h; is_nullable = _; enforce_deep = _ } ->
-    hint tenv h ~ignore_package_errors:true
+  | As { expr = _; hint = h; is_nullable = _; enforce_deep = _ }
   | Upcast (_, h)
   | Cast (h, _) ->
     hint tenv h

@@ -185,7 +185,11 @@ template <typename VTag>
 struct NativeTypes<type::list<VTag>> : parameterized_type<std::vector, VTag> {};
 
 template <typename T, bool GuessStringTag>
-struct InferTag<std::vector<T>, GuessStringTag> {
+struct InferTag<
+    std::vector<T>,
+    GuessStringTag,
+    // Make InferTag SFINAE-friendly
+    folly::void_t<typename InferTag<T, GuessStringTag>::type>> {
   using type = type::list<typename InferTag<T, GuessStringTag>::type>;
 };
 
@@ -193,7 +197,11 @@ struct InferTag<std::vector<T>, GuessStringTag> {
 template <typename KTag>
 struct NativeTypes<set<KTag>> : parameterized_type<std::set, KTag> {};
 template <typename T, bool GuessStringTag>
-struct InferTag<std::set<T>, GuessStringTag> {
+struct InferTag<
+    std::set<T>,
+    GuessStringTag,
+    // Make InferTag SFINAE-friendly
+    folly::void_t<typename InferTag<T, GuessStringTag>::type>> {
   using type = type::set<typename InferTag<T, GuessStringTag>::type>;
 };
 
@@ -202,7 +210,13 @@ template <typename KTag, typename VTag>
 struct NativeTypes<map<KTag, VTag>> : parameterized_type<std::map, KTag, VTag> {
 };
 template <typename K, typename V, bool GuessStringTag>
-struct InferTag<std::map<K, V>, GuessStringTag> {
+struct InferTag<
+    std::map<K, V>,
+    GuessStringTag,
+    folly::void_t<
+        // Make InferTag SFINAE-friendly
+        typename InferTag<K, GuessStringTag>::type,
+        typename InferTag<V, GuessStringTag>::type>> {
   using type = type::map<
       typename InferTag<K, GuessStringTag>::type,
       typename InferTag<V, GuessStringTag>::type>;

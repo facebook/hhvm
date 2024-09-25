@@ -89,5 +89,22 @@ TEST(StdSerializerTest, PrimaryTypes) {
   FBTHRIFT_SCOPED_CHECK((testRoundTrip<std::string, type::binary_t>("hi")));
 }
 
+TEST(StdSerializerTest, ContainerWithString) {
+  using namespace type;
+  using Tag = map<string_t, list<set<string_t>>>;
+  apache::thrift::op::
+      StdSerializer<Tag, apache::thrift::type::StandardProtocol::Compact>
+          serializer;
+  auto& registry = apache::thrift::type::detail::getGeneratedTypeRegistry();
+  registry.registerSerializer(serializer, Tag{});
+  std::map<std::string, std::vector<std::set<std::string>>> myData;
+  myData["foo"] = {{"1"}, {"2"}};
+  auto anyData =
+      registry.store<apache::thrift::type::StandardProtocol::Compact>(
+          apache::thrift::type::ConstRef(Tag{}, myData));
+  auto myData2 = registry.load(anyData).as<Tag>();
+  EXPECT_EQ(myData, myData2);
+}
+
 } // namespace
 } // namespace apache::thrift::op

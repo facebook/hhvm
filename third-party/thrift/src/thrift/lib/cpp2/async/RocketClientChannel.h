@@ -181,13 +181,14 @@ class RocketClientChannel final : public ClientChannel,
       std::unique_ptr<folly::IOBuf> buf,
       RequestClientCallback::Ptr cb);
 
+  std::optional<std::chrono::milliseconds> getClientTimeout(
+      const RpcOptions& rpcOptions) const;
+
   template <typename CallbackPtr>
   bool canHandleRequest(CallbackPtr& cb);
 
   void preSendValidation(
-      RequestRpcMetadata& metadata,
-      const RpcOptions& rpcOptions,
-      std::chrono::milliseconds& firstResponseTimeout);
+      RequestRpcMetadata& metadata, const RpcOptions& rpcOptions);
 
   rocket::SetupFrame makeSetupFrame(RequestSetupMetadata meta);
 

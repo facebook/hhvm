@@ -857,17 +857,17 @@ void RocketClientChannel::sendRequestStream(
     return;
   }
   preprocessHeader(header.get());
+  auto firstResponseTimeout = getClientTimeout(rpcOptions);
 
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
       static_cast<ProtocolId>(header->getProtocolId()),
       methodMetadata.name_managed(),
-      timeout_,
+      firstResponseTimeout,
       *header);
 
-  std::chrono::milliseconds firstResponseTimeout;
-  preSendValidation(metadata, rpcOptions, firstResponseTimeout);
+  preSendValidation(metadata, rpcOptions);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -880,7 +880,7 @@ void RocketClientChannel::sendRequestStream(
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestStream(
       std::move(payload),
-      firstResponseTimeout,
+      firstResponseTimeout.value_or(std::chrono::milliseconds::zero()),
       rpcOptions.getChunkTimeout(),
       rpcOptions.getChunkBufferSize(),
       new FirstRequestProcessorStream(
@@ -902,16 +902,16 @@ void RocketClientChannel::sendRequestSink(
   }
   preprocessHeader(header.get());
 
+  auto firstResponseTimeout = getClientTimeout(rpcOptions);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINK,
       static_cast<ProtocolId>(header->getProtocolId()),
       methodMetadata.name_managed(),
-      timeout_,
+      firstResponseTimeout,
       *header);
 
-  std::chrono::milliseconds firstResponseTimeout;
-  preSendValidation(metadata, rpcOptions, firstResponseTimeout);
+  preSendValidation(metadata, rpcOptions);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -924,7 +924,7 @@ void RocketClientChannel::sendRequestSink(
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestSink(
       std::move(payload),
-      firstResponseTimeout,
+      firstResponseTimeout.value_or(std::chrono::milliseconds(0)),
       new FirstRequestProcessorSink(
           header->getProtocolId(),
           std::move(*metadata.name_ref()),
@@ -947,17 +947,17 @@ void RocketClientChannel::sendThriftRequest(
   }
   preprocessHeader(header.get());
 
+  auto timeout = getClientTimeout(rpcOptions);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       kind,
       static_cast<ProtocolId>(header->getProtocolId()),
       std::move(methodName),
-      timeout_,
+      timeout,
       *header);
   header.reset();
 
-  std::chrono::milliseconds timeout;
-  preSendValidation(metadata, rpcOptions, timeout);
+  preSendValidation(metadata, rpcOptions);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -975,7 +975,7 @@ void RocketClientChannel::sendThriftRequest(
       sendSingleRequestSingleResponse(
           rpcOptions,
           std::move(metadata),
-          timeout,
+          timeout.value_or(std::chrono::milliseconds(0)),
           std::move(buf),
           std::move(clientCallback));
       break;
@@ -1093,18 +1093,19 @@ bool RocketClientChannel::canHandleRequest(CallbackPtr& cb) {
   return true;
 }
 
-void RocketClientChannel::preSendValidation(
-    RequestRpcMetadata& metadata,
-    const RpcOptions& rpcOptions,
-    std::chrono::milliseconds& firstResponseTimeout) {
-  DCHECK(metadata.kind_ref().has_value());
-
-  firstResponseTimeout =
-      std::chrono::milliseconds(metadata.clientTimeoutMs_ref().value_or(0));
-  if (rpcOptions.getClientOnlyTimeouts()) {
-    metadata.clientTimeoutMs_ref().reset();
-    metadata.queueTimeoutMs_ref().reset();
+std::optional<std::chrono::milliseconds> RocketClientChannel::getClientTimeout(
+    const RpcOptions& rpcOptions) const {
+  if (rpcOptions.getTimeout() > std::chrono::milliseconds::zero()) {
+    return rpcOptions.getTimeout();
+  } else if (timeout_ > std::chrono::milliseconds::zero()) {
+    return timeout_;
   }
+  return std::nullopt;
+}
+
+void RocketClientChannel::preSendValidation(
+    RequestRpcMetadata& metadata, const RpcOptions& rpcOptions) {
+  DCHECK(metadata.kind_ref().has_value());
 
   if (auto interactionId = rpcOptions.getInteractionId()) {
     evb_->dcheckIsInEventBaseThread();

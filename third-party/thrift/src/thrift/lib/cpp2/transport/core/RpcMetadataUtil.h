@@ -55,7 +55,7 @@ RequestRpcMetadata makeRequestRpcMetadata(
     RpcKind kind,
     ProtocolId protocolId,
     ManagedStringView&& methodName,
-    std::chrono::milliseconds defaultChannelTimeout,
+    std::optional<std::chrono::milliseconds> clientTimeout,
     transport::THeader& header);
 
 void fillTHeaderFromResponseRpcMetadata(

@@ -38,20 +38,22 @@ RequestRpcMetadata makeRequestRpcMetadata(
     RpcKind kind,
     ProtocolId protocolId,
     ManagedStringView&& methodName,
-    std::chrono::milliseconds defaultChannelTimeout,
+    std::optional<std::chrono::milliseconds> clientTimeout,
     transport::THeader& header) {
   RequestRpcMetadata metadata;
   metadata.protocol_ref() = protocolId;
   metadata.kind_ref() = kind;
   metadata.name_ref() = ManagedStringViewWithConversions(std::move(methodName));
-  if (rpcOptions.getTimeout() > std::chrono::milliseconds::zero()) {
-    metadata.clientTimeoutMs_ref() = rpcOptions.getTimeout().count();
-  } else if (defaultChannelTimeout > std::chrono::milliseconds::zero()) {
-    metadata.clientTimeoutMs_ref() = defaultChannelTimeout.count();
+
+  if (!rpcOptions.getClientOnlyTimeouts()) {
+    if (clientTimeout.has_value()) {
+      metadata.clientTimeoutMs_ref() = clientTimeout->count();
+    }
+    if (rpcOptions.getQueueTimeout() > std::chrono::milliseconds::zero()) {
+      metadata.queueTimeoutMs_ref() = rpcOptions.getQueueTimeout().count();
+    }
   }
-  if (rpcOptions.getQueueTimeout() > std::chrono::milliseconds::zero()) {
-    metadata.queueTimeoutMs_ref() = rpcOptions.getQueueTimeout().count();
-  }
+
   if (rpcOptions.getPriority() < concurrency::N_PRIORITIES) {
     metadata.priority_ref() =
         static_cast<RpcPriority>(rpcOptions.getPriority());

@@ -41,11 +41,19 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
   auto protocolId = ProtocolId::COMPACT;
   std::string methodName = "foo";
   std::chrono::milliseconds timeout(100);
+  std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle =
+      std::monostate{};
   transport::THeader header;
 
   rpcOptions.setShardId("123");
   auto requestRpcMetadata = makeRequestRpcMetadata(
-      rpcOptions, kind, protocolId, methodName, timeout, header);
+      rpcOptions,
+      kind,
+      protocolId,
+      methodName,
+      timeout,
+      interactionHandle,
+      header);
   const auto& buf = **requestRpcMetadata.frameworkMetadata_ref();
   std::string content(reinterpret_cast<const char*>(buf.data()), buf.length());
   EXPECT_EQ(content, "linked");

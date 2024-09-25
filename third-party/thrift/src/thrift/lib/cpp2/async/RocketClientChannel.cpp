@@ -857,17 +857,16 @@ void RocketClientChannel::sendRequestStream(
     return;
   }
   preprocessHeader(header.get());
-  auto firstResponseTimeout = getClientTimeout(rpcOptions);
 
+  auto firstResponseTimeout = getClientTimeout(rpcOptions);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
       static_cast<ProtocolId>(header->getProtocolId()),
       methodMetadata.name_managed(),
       firstResponseTimeout,
+      getInteractionHandle(rpcOptions),
       *header);
-
-  preSendValidation(metadata, rpcOptions);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -908,9 +907,8 @@ void RocketClientChannel::sendRequestSink(
       static_cast<ProtocolId>(header->getProtocolId()),
       methodMetadata.name_managed(),
       firstResponseTimeout,
+      getInteractionHandle(rpcOptions),
       *header);
-
-  preSendValidation(metadata, rpcOptions);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -952,10 +950,9 @@ void RocketClientChannel::sendThriftRequest(
       static_cast<ProtocolId>(header->getProtocolId()),
       std::move(methodName),
       timeout,
+      getInteractionHandle(rpcOptions),
       *header);
   header.reset();
-
-  preSendValidation(metadata, rpcOptions);
 
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
@@ -1099,20 +1096,22 @@ std::optional<std::chrono::milliseconds> RocketClientChannel::getClientTimeout(
   return std::nullopt;
 }
 
-void RocketClientChannel::preSendValidation(
-    RequestRpcMetadata& metadata, const RpcOptions& rpcOptions) {
+std::variant<InteractionCreate, int64_t, std::monostate>
+RocketClientChannel::getInteractionHandle(const RpcOptions& rpcOptions) {
   if (auto interactionId = rpcOptions.getInteractionId()) {
     evb_->dcheckIsInEventBaseThread();
     if (auto* name = folly::get_ptr(pendingInteractions_, interactionId)) {
       InteractionCreate create;
       create.interactionId_ref() = interactionId;
       create.interactionName_ref() = std::move(*name).str();
-      metadata.interactionCreate_ref() = std::move(create);
       pendingInteractions_.erase(interactionId);
+      return create;
     } else {
-      metadata.interactionId_ref() = interactionId;
+      return interactionId;
     }
   }
+
+  return std::monostate{};
 }
 
 ClientChannel::SaturationStatus RocketClientChannel::getSaturationStatus() {

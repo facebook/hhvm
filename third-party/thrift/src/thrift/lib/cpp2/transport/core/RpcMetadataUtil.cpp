@@ -39,6 +39,7 @@ RequestRpcMetadata makeRequestRpcMetadata(
     ProtocolId protocolId,
     ManagedStringView&& methodName,
     std::optional<std::chrono::milliseconds> clientTimeout,
+    std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
     transport::THeader& header) {
   RequestRpcMetadata metadata;
   metadata.protocol_ref() = protocolId;
@@ -113,6 +114,13 @@ RequestRpcMetadata makeRequestRpcMetadata(
 
   if (const auto& loggingContext = header.loggingContext()) {
     metadata.loggingContext() = *loggingContext;
+  }
+
+  if (std::holds_alternative<InteractionCreate>(interactionHandle)) {
+    metadata.interactionCreate() =
+        std::get<InteractionCreate>(interactionHandle);
+  } else if (std::holds_alternative<int64_t>(interactionHandle)) {
+    metadata.interactionId() = std::get<int64_t>(interactionHandle);
   }
 
   return metadata;

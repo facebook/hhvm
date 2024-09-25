@@ -56,6 +56,7 @@ RequestRpcMetadata makeRequestRpcMetadata(
     ProtocolId protocolId,
     ManagedStringView&& methodName,
     std::optional<std::chrono::milliseconds> clientTimeout,
+    std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
     transport::THeader& header);
 
 void fillTHeaderFromResponseRpcMetadata(

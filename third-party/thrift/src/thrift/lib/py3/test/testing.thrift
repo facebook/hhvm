@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 
@@ -49,20 +50,24 @@ typedef double Double
 typedef list<easy> EasyList
 typedef set<easy> EasySet
 typedef map<string, easy> StrEasyMap
-// @lint-ignore THRIFTFORMAT (for autodeps)
-typedef map<string, string> (
-  cpp.type = "folly::F14FastMap<std::string, folly::fbstring>",
-) F14MapFollyString
-typedef list<i32> (cpp2.type = "std::vector<uint32_t>") Uint32List
+
+@cpp.Type{name = "uint32_t"}
+typedef i32 ui32
+@cpp.Type{name = "folly::F14FastMap<std::string, folly::fbstring>"}
+typedef map<string, string> F14MapFollyString
+@cpp.Type{name = "std::vector<uint32_t>"}
+typedef list<i32> Uint32List
 
 exception UnusedError {
+  @thrift.ExceptionMessage
   1: string message;
-} (message = "message")
+}
 
 exception HardError {
+  @thrift.ExceptionMessage
   1: string errortext;
   2: i32 code;
-} (message = "errortext")
+}
 
 exception UnfriendlyError {
   1: string errortext;
@@ -86,6 +91,7 @@ enum Perm {
   execute = 1,
 }
 
+@cpp.Name{value = "Kind_"}
 enum Kind {
   None = 0,
   REGULAR = 8,
@@ -94,12 +100,15 @@ enum Kind {
   FIFO = 1,
   CHAR = 2,
   BLOCK = 6,
-  SOCK = 12 (cpp.name = "SOCKET"),
-} (cpp.name = "Kind_")
+  @cpp.Name{value = "SOCKET"}
+  SOCK = 12,
+}
 
 enum BadMembers {
-  name = 1 (py3.name = "name_"),
-  value = 2 (py3.name = "value_"),
+  @python.Name{name = "name_"}
+  name = 1,
+  @python.Name{name = "value_"}
+  value = 2,
 }
 
 enum EmptyEnum {
@@ -141,12 +150,15 @@ union Integers {
   3: i32 medium;
   4: i64 large;
   5: string unbounded;
-  6: string name (py3.name = "name_");
-  7: Digits digits (cpp.ref = "True");
+  @python.Name{name = "name_"}
+  6: string name;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  7: Digits digits;
 }
 
 union ValueOrError {
-  1: File value (py3.name = "value_");
+  @python.Name{name = "value_"}
+  1: File value;
   3: HardError error;
 }
 
@@ -161,12 +173,15 @@ struct easy {
 
 struct PrivateCppRefField {
   # (cpp.experimental.lazy) field is always private
-  1: optional easy field1 (cpp.ref, cpp.experimental.lazy);
-  2: optional easy field2 (cpp.ref_type = "shared", cpp.experimental.lazy);
-  3: optional easy field3 (
-    cpp.ref_type = "shared_const",
-    cpp.experimental.lazy,
-  );
+  @cpp.Lazy
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional easy field1;
+  @cpp.Lazy
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional easy field2;
+  @cpp.Lazy
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: optional easy field3;
 }
 
 struct Nested3 {
@@ -220,8 +235,10 @@ struct Runtime {
 struct mixed {
   1: optional string opt_field = "optional";
   3: string unq_field = "unqualified";
-  4: optional easy opt_easy_ref (cpp.ref = "True");
-  6: list<string> const_container_ref (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: optional easy opt_easy_ref;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: list<string> const_container_ref;
   @python.Name{name = "some_field_"}
   7: optional string some_field;
 }
@@ -246,32 +263,43 @@ struct OptionalColorGroups {
   3: optional map<i32, i32> color_map;
 }
 
-typedef list<i32> (cpp.type = "std::deque<int>") list_typedef
-typedef set<i32> (cpp.type = "std::unordered_set<int>") set_typedef
-typedef map<i32, i32> (
-  cpp.type = "std::unordered_map<int,
+@cpp.Type{name = "std::deque<int>"}
+typedef list<i32> list_typedef
+@cpp.Type{name = "std::unordered_set<int>"}
+typedef set<i32> set_typedef
+@cpp.Type{
+  name = "std::unordered_map<int,
     // comments
     int /* inline comments */>",
-) map_typedef
-typedef string (cpp.type = "folly::fbstring") string_typedef
+}
+typedef map<i32, i32> map_typedef
+@cpp.Type{name = "folly::fbstring"}
+typedef string string_typedef
 
 struct customized {
-  1: list_i32_2242 list_template;
-  2: set_i32_3833 set_template;
-  3: map_i32_i32_907 map_template;
+  @cpp.Type{template = "std::deque"}
+  1: list<i32> list_template;
+  @cpp.Type{template = "std::unordered_set"}
+  2: set<i32> set_template;
+  @cpp.Type{template = "std::unordered_map"}
+  3: map<i32, i32> map_template;
   4: list_typedef list_type;
   5: set_typedef set_type;
   6: map_typedef map_type;
   7: string_typedef string_type;
-  8: i32 foo (cpp.name = "bar");
-  9: list<i32_2395> list_of_uint32;
+  @cpp.Name{value = "bar"}
+  8: i32 foo;
+  9: list<ui32> list_of_uint32;
 }
 
 struct Reserved {
-  1: string from (py3.name = "from_"); // named with a python keyword (which is not a C++ keyword)
-  2: i32 nonlocal (py3.name = "nonlocal_"); // ditto
+  @python.Name{name = "from_"}
+  1: string from; // named with a python keyword (which is not a C++ keyword)
+  @python.Name{name = "nonlocal_"}
+  2: i32 nonlocal; // ditto
   3: string ok; // not a keyword
-  4: bool cpdef (py3.name = 'is_cpdef');
+  @python.Name{name = "is_cpdef"}
+  4: bool cpdef;
   5: string move; // not a keyword
   6: string inst; // not a keyword
   7: string changes; // not a keyword
@@ -287,7 +315,8 @@ struct __Reserved {
 union ReservedUnion {
   @python.Name{name = "from_"}
   1: string from;
-  2: i32 nonlocal (py3.name = "nonlocal_");
+  @python.Name{name = "nonlocal_"}
+  2: i32 nonlocal;
   3: string ok;
 }
 
@@ -317,18 +346,26 @@ struct Messy {
 
 struct ComplexRef {
   1: string name;
-  2: optional ComplexRef ref (cpp2.ref = "true");
-  3: optional list<i16> list_basetype_ref (cpp2.ref = "true");
-  4: optional list<ComplexRef> list_recursive_ref (cpp2.ref = "true");
-  5: optional set<i16> set_basetype_ref (cpp2.ref = "true");
-  6: optional set<ComplexRef> set_recursive_ref (cpp2.ref = "true");
-  7: optional map<i16, i16> map_basetype_ref (cpp2.ref = "true");
-  8: optional map<i16, ComplexRef> map_recursive_ref (cpp2.ref = "true");
-  9: optional list<ComplexRef> list_shared_ref (cpp2.ref_type = "shared");
-  10: optional set<ComplexRef> set_const_shared_ref (
-    cpp2.ref_type = "shared_const",
-  );
-  11: optional ComplexRef recursive (thrift.box);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional ComplexRef ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: optional list<i16> list_basetype_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: optional list<ComplexRef> list_recursive_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional set<i16> set_basetype_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: optional set<ComplexRef> set_recursive_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  7: optional map<i16, i16> map_basetype_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  8: optional map<i16, ComplexRef> map_recursive_ref;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: optional list<ComplexRef> list_shared_ref;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: optional set<ComplexRef> set_const_shared_ref;
+  @thrift.Box
+  11: optional ComplexRef recursive;
 }
 
 struct Complex {
@@ -367,7 +404,8 @@ struct StructuredAnnotation {
   2: map<double, i64> first;
   3: i64 second;
   4: list<string> third;
-  5: optional StructuredAnnotation recurse (cpp.ref = "True");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: optional StructuredAnnotation recurse;
 }
 
 @StructuredAnnotation{
@@ -399,13 +437,15 @@ service TestingService {
   void int_sizes(1: byte one, 2: i16 two, 3: i32 three, 4: i64 four);
 
   void hard_error(1: bool valid) throws (1: HardError e);
-  bool renamed_func(1: bool ret) (cpp.name = "renamed_func_in_cpp");
+  @cpp.Name{value = "renamed_func_in_cpp"}
+  bool renamed_func(1: bool ret);
   i32 getPriority();
 } (fun_times = "yes", single_quote = "'", double_quotes = '"""')
 
+@cpp.Name{value = "TestingServiceChildRenamed"}
 service TestingServiceChild extends TestingService {
   stream<i32> stream_func();
-} (cpp.name = "TestingServiceChildRenamed")
+}
 
 struct ListNode {
   1: i32 value;
@@ -444,13 +484,5 @@ service ClientMetadataTestingService {
   string getMetadaField(1: string key);
 }
 
-// The following were automatically generated and may benefit from renaming.
-typedef i32 (cpp.type = "uint32_t") i32_2395
-
 struct EmptyStruct {}
 exception EmptyError {}
-
-// The following were automatically generated and may benefit from renaming.
-typedef list<i32> (cpp.template = "std::deque") list_i32_2242
-typedef map<i32, i32> (cpp.template = "std::unordered_map") map_i32_i32_907
-typedef set<i32> (cpp.template = "std::unordered_set") set_i32_3833

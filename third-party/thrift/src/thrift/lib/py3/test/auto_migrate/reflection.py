@@ -340,7 +340,7 @@ class ReflectionTests(unittest.TestCase):
                 result=bool,
                 result_kind=NumberType.NOT_A_NUMBER,
                 exceptions=[],
-                annotations={"cpp.name": "renamed_func_in_cpp"},
+                annotations={},
             ),
             MethodSpec(
                 name="getPriority",

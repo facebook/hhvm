@@ -1055,7 +1055,10 @@ let set_valid_rvalue
     match hint_ty with
     | None -> (env, None, ty)
     | Some hty ->
-      let (env, err) =
+      let ((env, err1), hty) =
+        Phase.localize_hint_no_subst env ~ignore_errors:false hty
+      in
+      let (env, err2) =
         Typing_subtype.sub_type
           env
           ty
@@ -1072,7 +1075,8 @@ let set_valid_rvalue
                       reasons_opt = None;
                     }))
       in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
+      let ty_err_opt = Option.merge err1 err2 ~f:Typing_error.both in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       (env, Some hty, hty)
   in
   let (env, new_bound_ty, new_ty) =
@@ -7813,10 +7817,6 @@ end = struct
         else
           hint
       in
-      let ((env, err), hty) =
-        Phase.localize_hint_no_subst env ~ignore_errors:false hint
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
       let (is_defined, env, te, ety) =
         match exp with
         | None -> (false, env, None, Typing_make_type.nothing (Reason.witness p))
@@ -7826,7 +7826,7 @@ end = struct
           in
           (true, env, Some te, ety)
       in
-      let env = set_valid_rvalue ~is_defined p env lvar (Some hty) ety in
+      let env = set_valid_rvalue ~is_defined p env lvar (Some hint) ety in
       (env, Aast.Declare_local ((p, lvar), hint, te))
     | Awaitall _
     | Block _
@@ -9130,6 +9130,9 @@ end = struct
             FL.Lambda.no_params
           else
             FL.Lambda.explicit_params);
+        let env =
+          Env.set_tyvar_variance env (mk (Reason.none, Tfun declared_ft))
+        in
         check_body_under_known_params
           ~ty_mismatch_opt:None
           ~supportdyn:false

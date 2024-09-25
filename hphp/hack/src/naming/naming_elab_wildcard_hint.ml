@@ -49,6 +49,9 @@ let on_expr_ expr_ ~ctx =
     | Aast.Cast _ -> Env.incr_tp_depth ctx
     | Aast.(Is _ | As _) -> Env.set_allow_wildcard ctx ~allow_wildcard:true
     | Aast.Upcast _ -> Env.set_allow_wildcard ctx ~allow_wildcard:false
+    | Aast.Lfun _
+    | Aast.Efun _ ->
+      Env.set_allow_wildcard ctx ~allow_wildcard:true
     | _ -> ctx
   in
   (ctx, Ok expr_)
@@ -95,6 +98,10 @@ let on_hint on_error hint ~ctx =
 let on_ty_pat_refinement pr ~ctx =
   (Env.set_allow_wildcard ctx ~allow_wildcard:true, Ok pr)
 
+(* Reset flag on entering a lambda body *)
+let on_ty_func_body body ~ctx =
+  (Env.set_allow_wildcard ctx ~allow_wildcard:false, Ok body)
+
 let pass on_error =
   let id = Aast.Pass.identity () in
   Naming_phase_pass.top_down
@@ -103,6 +110,7 @@ let pass on_error =
         id with
         on_ty_expr_ = Some on_expr_;
         on_ty_shape_field_info = Some on_shape_field_info;
+        on_ty_func_body = Some on_ty_func_body;
         on_ty_targ = Some on_targ;
         on_ty_context = Some (fun elem ~ctx -> on_context on_error elem ~ctx);
         on_ty_hint_ = Some on_hint_;

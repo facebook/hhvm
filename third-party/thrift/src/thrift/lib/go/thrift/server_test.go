@@ -133,7 +133,7 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 		t.Fatalf("could not create client socket: %s", err)
 	}
 	// Sets the client serialization format to a non default.
-	proto, err := NewClient(WithConn(conn), WithProtocolID(types.ProtocolIDBinary))
+	proto, err := NewClient(WithHeader(), WithConn(conn), WithProtocolID(types.ProtocolIDBinary))
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

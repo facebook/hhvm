@@ -69,7 +69,7 @@ func connectTestHeaderServer(
 	if err != nil {
 		return nil, err
 	}
-	prot, err := thrift.NewClient(thrift.WithConn(conn), thrift.WithTimeout(localConnTimeout))
+	prot, err := thrift.NewClient(thrift.WithHeader(), thrift.WithConn(conn), thrift.WithTimeout(localConnTimeout))
 	if err != nil {
 		return nil, err
 	}

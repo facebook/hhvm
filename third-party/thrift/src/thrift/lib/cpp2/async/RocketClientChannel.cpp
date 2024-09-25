@@ -877,7 +877,6 @@ void RocketClientChannel::sendRequestStream(
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
       getTransportWrapper());
-  assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestStream(
       std::move(payload),
       firstResponseTimeout.value_or(std::chrono::milliseconds::zero()),
@@ -921,7 +920,6 @@ void RocketClientChannel::sendRequestSink(
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
       getTransportWrapper());
-  assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestSink(
       std::move(payload),
       firstResponseTimeout.value_or(std::chrono::milliseconds(0)),
@@ -1029,8 +1027,6 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
   const auto requestMetadataAndPayloadSize =
       requestPayload.metadataAndDataSize();
   const bool isSync = cb->isSync();
-  assert(metadata.protocol_ref());
-  assert(metadata.name_ref());
   SingleRequestSingleResponseCallback callback(
       std::move(cb),
       static_cast<uint16_t>(*metadata.protocol_ref()),
@@ -1105,8 +1101,6 @@ std::optional<std::chrono::milliseconds> RocketClientChannel::getClientTimeout(
 
 void RocketClientChannel::preSendValidation(
     RequestRpcMetadata& metadata, const RpcOptions& rpcOptions) {
-  DCHECK(metadata.kind_ref().has_value());
-
   if (auto interactionId = rpcOptions.getInteractionId()) {
     evb_->dcheckIsInEventBaseThread();
     if (auto* name = folly::get_ptr(pendingInteractions_, interactionId)) {

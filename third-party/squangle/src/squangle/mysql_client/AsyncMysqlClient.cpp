@@ -15,6 +15,7 @@
 #include <gflags/gflags.h>
 #include <mysql.h>
 #include <unistd.h>
+#include <vector>
 
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
@@ -27,19 +28,14 @@
 
 namespace facebook::common::mysql_client {
 
-namespace detail {
-
-struct AsyncMysqlClientSingletonTag {};
-
-folly::Singleton<AsyncMysqlClient, AsyncMysqlClientSingletonTag>
-    defaultAsyncMysqlClientSingleton(
-        [] { return new AsyncMysqlClient; },
-        AsyncMysqlClient::deleter);
-
-} // namespace detail
+namespace {
+folly::Singleton<AsyncMysqlClient> client(
+    []() { return new AsyncMysqlClient; },
+    AsyncMysqlClient::deleter);
+} // namespace
 
 std::shared_ptr<AsyncMysqlClient> AsyncMysqlClient::defaultClient() {
-  return detail::defaultAsyncMysqlClientSingleton.try_get();
+  return folly::Singleton<AsyncMysqlClient>::try_get();
 }
 
 AsyncMysqlClient::AsyncMysqlClient(

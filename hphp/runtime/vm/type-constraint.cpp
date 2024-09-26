@@ -129,14 +129,13 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
     // checkable so just return mixed.
     return TypeConstraint{
       AnnotType::Mixed,
-      TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+      TypeConstraintFlags::Resolved,
       ClassConstraint { m_typeName }
     };
   }
 
   // Copy over common flags.
   m_flags |= tc.flags() & (TypeConstraintFlags::Nullable
-                           | TypeConstraintFlags::ExtendedHint
                            | TypeConstraintFlags::TypeVar
                            | TypeConstraintFlags::Soft
                            | TypeConstraintFlags::TypeConstant
@@ -148,7 +147,7 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
       // Canonicalization: If we have a mixed then we're just mixed.
       return TypeConstraint{
         AnnotType::Mixed,
-        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        TypeConstraintFlags::Resolved,
         ClassConstraint { m_typeName }
       };
     }
@@ -286,13 +285,13 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
     if (contains(m_flags, TypeConstraintFlags::Nullable)) {
       return TypeConstraint{
         AnnotType::Mixed,
-        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        TypeConstraintFlags::Resolved,
         ClassConstraint { m_typeName }
       };
     } else {
       return TypeConstraint{
         AnnotType::Nonnull,
-        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        TypeConstraintFlags::Resolved,
         ClassConstraint { m_typeName }
       };
     }
@@ -306,13 +305,13 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
     if (contains(m_flags, TypeConstraintFlags::Nullable)) {
       return TypeConstraint{
         AnnotType::Null,
-        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        TypeConstraintFlags::Resolved,
         ClassConstraint { m_typeName }
       };
     } else {
       return TypeConstraint{
         AnnotType::Nothing,
-        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        TypeConstraintFlags::Resolved,
         ClassConstraint { m_typeName }
       };
     }
@@ -662,7 +661,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   if (isSoft()) {
     name += '@';
   }
-  if (contains(m_flags, TypeConstraintFlags::DisplayNullable) && isExtended()) {
+  if (isDisplayNullable()) {
     name += '?';
   }
 
@@ -788,7 +787,6 @@ std::string showUnionTypeMask(UnionTypeMask mask) {
 std::string show(TypeConstraintFlags flags) {
   std::string res;
   bitName(res, flags, TypeConstraintFlags::Nullable, "Nullable");
-  bitName(res, flags, TypeConstraintFlags::ExtendedHint, "ExtendedHint");
   bitName(res, flags, TypeConstraintFlags::TypeVar, "TypeVar");
   bitName(res, flags, TypeConstraintFlags::Soft, "Soft");
   bitName(res, flags, TypeConstraintFlags::TypeConstant, "TypeConstant");
@@ -1800,8 +1798,7 @@ void TypeConstraint::verifyParamFail(tv_lval c,
 
   // Handle parameter type constraint failures
   if (isSoftOrBuiltinSoft(func)) {
-    // Soft extended type hints raise warnings instead of recoverable
-    // errors, to ease migration.
+    // Soft type hints raise warnings instead of recoverable errors
     raise_warning_unsampled(
       folly::format(
         "Argument {} to {}() must be {} {}, {} given",
@@ -1810,7 +1807,7 @@ void TypeConstraint::verifyParamFail(tv_lval c,
         name, givenType
       ).str()
     );
-  } else if (isExtended() && isNullable()) {
+  } else if (isDisplayNullable()) {
     raise_typehint_error(
       folly::format(
         "Argument {} to {}() must be {} {}, {} given",
@@ -2019,7 +2016,6 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
   using CC = ClassConstraint;
 
   auto flags = m_flags & (TypeConstraintFlags::Nullable
-                          | TypeConstraintFlags::ExtendedHint
                           | TypeConstraintFlags::TypeVar
                           | TypeConstraintFlags::Soft
                           | TypeConstraintFlags::TypeConstant

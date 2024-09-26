@@ -7,5 +7,5 @@
 }
 
 .class [enum final is_const no_dynamic_props "__Const"("""y:0:{}""")] E {
-  .enum_ty <"HH\\int" extended_hint >;
+  .enum_ty <"HH\\int" >;
 }

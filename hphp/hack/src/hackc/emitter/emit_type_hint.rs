@@ -201,18 +201,15 @@ fn hint_to_type_constraint(
         Hdynamic | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed | Hwildcard => {
             Constraint::default()
         }
-        Haccess(_, _) => Constraint::intern(
-            "",
-            TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeConstant,
-        ),
-        Hshape(_) => Constraint::intern("HH\\darray", TypeConstraintFlags::ExtendedHint),
-        Htuple(_) => Constraint::intern("HH\\varray", TypeConstraintFlags::ExtendedHint),
+        Haccess(_, _) => Constraint::intern("", TypeConstraintFlags::TypeConstant),
+        Hshape(_) => Constraint::intern("HH\\darray", TypeConstraintFlags::NoFlags),
+        Htuple(_) => Constraint::intern("HH\\varray", TypeConstraintFlags::NoFlags),
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
             kind,
             tparams,
             skipawaitable,
             t,
-            TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
+            TypeConstraintFlags::Soft,
         )?,
         Hlike(h) => hint_to_type_constraint(kind, tparams, skipawaitable, h)?,
         Hoption(t) => {
@@ -233,7 +230,7 @@ fn hint_to_type_constraint(
                                 tparams,
                                 skipawaitable,
                                 h,
-                                TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
+                                TypeConstraintFlags::Soft,
                             );
                         }
                     }
@@ -244,9 +241,7 @@ fn hint_to_type_constraint(
                 tparams,
                 skipawaitable,
                 t,
-                TypeConstraintFlags::Nullable
-                    | TypeConstraintFlags::DisplayNullable
-                    | TypeConstraintFlags::ExtendedHint,
+                TypeConstraintFlags::Nullable | TypeConstraintFlags::DisplayNullable,
             )?
         }
         Happly(Id(_, s), hs) => {
@@ -318,7 +313,7 @@ fn type_application_helper(tparams: &[&str], kind: &Kind, name: &str) -> Result<
         };
         Ok(Constraint {
             name: tc_name,
-            flags: TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeVar,
+            flags: TypeConstraintFlags::TypeVar,
         })
     } else {
         let name = ClassName::mangle(name);
@@ -409,9 +404,6 @@ pub fn hint_to_type_info(
     };
     let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     let flags = match kind {
-        Kind::Return | Kind::Property if tc.name.is_just() => {
-            TypeConstraintFlags::ExtendedHint | tc.flags
-        }
         Kind::UpperBound => TypeConstraintFlags::UpperBound | tc.flags,
         _ => tc.flags,
     };
@@ -475,14 +467,14 @@ pub fn emit_type_constraint_for_native_function(
     ti: TypeInfo,
 ) -> TypeInfo {
     let (name, flags) = match (&ti.user_type, ret_opt) {
-        (_, None) | (Nothing, _) => (Just("HH\\void"), TypeConstraintFlags::ExtendedHint),
+        (_, None) | (Nothing, _) => (Just("HH\\void"), TypeConstraintFlags::NoFlags),
         (Just(t), _) => match t.as_str() {
             "HH\\mixed" | "callable" => (Nothing, TypeConstraintFlags::default()),
             "HH\\void" => {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
                 (
                     Just("HH\\void"),
-                    get_flags(tparams, TypeConstraintFlags::ExtendedHint, h),
+                    get_flags(tparams, TypeConstraintFlags::NoFlags, h),
                 )
             }
             _ => return ti,

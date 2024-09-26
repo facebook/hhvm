@@ -34,12 +34,6 @@ enum class TypeConstraintFlags : uint16_t {
   Union = 0x2,
 
   /*
-   * Extended hints are hints that do not apply to normal, vanilla
-   * php.  For example "?Foo".
-   */
-  ExtendedHint = 0x4,
-
-  /*
    * Indicates that a type constraint is a type variable. For example,
    * the constraint on $x is a TypeVar.
    * class Foo<T> {

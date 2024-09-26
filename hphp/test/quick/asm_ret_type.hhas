@@ -2,7 +2,7 @@
 
 .adata A_0 = """D:0:{}""";
 
-.function "HH\\int" <"HH\\int" extended_hint> fail() {
+.function "HH\\int" <"HH\\int" > fail() {
   Dict @A_0
   VerifyRetTypeC
   RetC

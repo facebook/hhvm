@@ -327,11 +327,13 @@ struct TypeConstraint {
    */
   bool isNullable() const { return contains(m_flags, TypeConstraintFlags::Nullable); }
   bool isSoft()     const { return contains(m_flags, TypeConstraintFlags::Soft); }
-  bool isExtended() const { return contains(m_flags, TypeConstraintFlags::ExtendedHint); }
   bool isTypeVar()  const { return contains(m_flags, TypeConstraintFlags::TypeVar); }
   bool isTypeConstant() const { return contains(m_flags, TypeConstraintFlags::TypeConstant); }
   bool isUpperBound() const { return contains(m_flags, TypeConstraintFlags::UpperBound); }
   bool isUnion() const { return contains(m_flags, TypeConstraintFlags::Union); }
+  bool isDisplayNullable() const {
+    return contains(m_flags, TypeConstraintFlags::DisplayNullable);
+  }
 
   bool isPrecise()  const { return !isUnion() && metaType() == MetaType::Precise; }
   bool isMixed()    const { return !isUnion() && m_u.single.type == Type::Mixed; }

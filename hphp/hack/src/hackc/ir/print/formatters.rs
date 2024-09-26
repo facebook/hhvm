@@ -811,7 +811,6 @@ impl<'a> Display for FmtTypeInfo<'a> {
         let mut mods = ti.type_constraint.flags;
         [
             get_bit(&mut mods, TCF::DisplayNullable, "display_nullable"),
-            get_bit(&mut mods, TCF::ExtendedHint, "extended"),
             get_bit(&mut mods, TCF::Nullable, "nullable"),
             get_bit(&mut mods, TCF::Resolved, "resolved"),
             get_bit(&mut mods, TCF::Soft, "soft"),

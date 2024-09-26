@@ -63,9 +63,9 @@
 }
 
 .class Foo1 (3,8) {
-  .property [public readonly] "HH\\vec<HH\\vec<HH\\int>>" <"HH\\vec" extended_hint > b =
+  .property [public readonly] "HH\\vec<HH\\vec<HH\\int>>" <"HH\\vec" > b =
     """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
-  .property [public deep_init readonly] "HH\\vec<HH\\Vector<HH\\vec<HH\\int>>>" <"HH\\vec" extended_hint > bad_b =
+  .property [public deep_init readonly] "HH\\vec<HH\\Vector<HH\\vec<HH\\int>>>" <"HH\\vec" > bad_b =
     uninit;
   .method [private static no_injection] (3,8) N 86pinit() {
     .coeffects_static pure;
@@ -86,11 +86,11 @@
 }
 
 .class Foo (10,12) {
-  .property [public sys_initial_val] "HH\\vec<Foo1>" <"HH\\vec" extended_hint > c =
+  .property [public sys_initial_val] "HH\\vec<Foo1>" <"HH\\vec" > c =
     """N;""";
 }
 
 .class Bar (14,16) {
-  .property [public sys_initial_val] "Foo" <"Foo" extended_hint > myFoo =
+  .property [public sys_initial_val] "Foo" <"Foo" > myFoo =
     """N;""";
 }

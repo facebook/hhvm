@@ -473,7 +473,7 @@ fn assemble_const_or_type_const(
 }
 
 /// Ex:
-/// .method {}{} [public abstract] (15,15) <"" N > a(<"?HH\\varray" "HH\\varray" nullable extended_hint display_nullable> $a1 = DV1("""NULL"""), <"HH\\varray" "HH\\varray" > $a2 = DV2("""varray[]""")) {
+/// .method {}{} [public abstract] (15,15) <"" N > a(<"?HH\\varray" "HH\\varray" nullable display_nullable> $a1 = DV1("""NULL"""), <"HH\\varray" "HH\\varray" > $a2 = DV2("""varray[]""")) {
 ///    ...
 /// }
 fn assemble_method(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<hhbc::Method> {
@@ -1294,7 +1294,6 @@ fn assemble_type_constraint(
         b"type_constant" => Ok(TypeConstraintFlags::TypeConstant),
         b"soft" => Ok(TypeConstraintFlags::Soft),
         b"type_var" => Ok(TypeConstraintFlags::TypeVar),
-        b"extended_hint" => Ok(TypeConstraintFlags::ExtendedHint),
         b"nullable" => Ok(TypeConstraintFlags::Nullable),
         _ => Err(tok.error("Unknown type constraint flag")),
     }

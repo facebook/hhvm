@@ -7,6 +7,6 @@
 }
 
 .class C {
-  .property [public is_const sys_initial_val late_init "__Const"("""y:0:{}""") "__LateInit"("""y:0:{}""")] "HH\\int" <"HH\\int" extended_hint > p =
+  .property [public is_const sys_initial_val late_init "__Const"("""y:0:{}""") "__LateInit"("""y:0:{}""")] "HH\\int" <"HH\\int" > p =
     uninit;
 }

@@ -3,17 +3,17 @@
 .adata A_0 = """D:0:{}""";
 
 
-.function N use_class("@C" <"C" extended_hint soft> $x) {
+.function N use_class("@C" <"C" soft> $x) {
   Null
   RetC
 }
 
-.function N use_int_soft("@HH\\int" <"HH\\int" extended_hint soft> $x) {
+.function N use_int_soft("@HH\\int" <"HH\\int" soft> $x) {
   Null
   RetC
 }
 
-.function N use_int_nullable("?HH\\int" <"HH\\int" nullable extended_hint> $x) {
+.function N use_int_nullable("?HH\\int" <"HH\\int" nullable > $x) {
   Null
   RetC
 }
@@ -90,7 +90,7 @@
 }
 
 .class C {
-  .method [public static] "HH\\int" <"HH\\int" extended_hint> test() {
+  .method [public static] "HH\\int" <"HH\\int" > test() {
     Int 42
     RetC
   }

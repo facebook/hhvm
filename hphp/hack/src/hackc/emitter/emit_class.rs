@@ -316,7 +316,7 @@ fn from_enum_type(opt: Option<&ast::Enum_>) -> Result<Option<TypeInfo>> {
     use hhbc::Constraint;
     opt.map(|e| {
         let type_info_user_type = Just(hhbc::intern(emit_type_hint::fmt_hint(&[], true, &e.base)?));
-        let type_info_type_constraint = Constraint::new(Nothing, TypeConstraintFlags::ExtendedHint);
+        let type_info_type_constraint = Constraint::new(Nothing, TypeConstraintFlags::NoFlags);
         Ok(TypeInfo::new(
             type_info_user_type,
             type_info_type_constraint,

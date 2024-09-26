@@ -756,7 +756,8 @@ static Array get_function_param_info(const Func* func) {
 
     auto const nonExtendedConstraint =
       fpi.typeConstraint.hasConstraint() &&
-      !fpi.typeConstraint.isExtended();
+      !fpi.typeConstraint.isDisplayNullable() &&
+      !fpi.typeConstraint.isSoft();
     auto const type = nonExtendedConstraint
       ? fpi.typeConstraint.typeName()
       : staticEmptyString();

@@ -15,8 +15,6 @@ pub(crate) fn convert_ty(ty: &EnforceableType) -> textual::Ty {
 
     let mut modifiers = ty.modifiers;
 
-    // ExtendedHint does nothing interesting.
-    modifiers -= TypeConstraintFlags::ExtendedHint;
     // DisplayNullable does nothing interesting.
     modifiers -= TypeConstraintFlags::DisplayNullable;
     // TypeVar doesn't add any interesting context.

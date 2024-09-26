@@ -89,12 +89,12 @@ impl BaseType {
 ///   Shapes are only enforcable as a darray - so a parameter which is specified
 ///   as "shape('a' => int)" would have:
 ///       ty: BaseType::Darray,
-///       modifiers: TypeConstraintFlags::ExtendedHint
+///       modifiers: TypeConstraintFlags::NoFlags
 ///
 ///   Nullable and int are fully enforcable - so a parameter which is specified
 ///   as "?int" would have:
 ///       ty: BaseType::Int,
-///       modifiers: TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Nullable
+///       modifiers: TypeConstraintFlags::DisplayNullable | TypeConstraintFlags::Nullable
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct EnforceableType {
     pub ty: BaseType,

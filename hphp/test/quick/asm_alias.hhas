@@ -1,22 +1,22 @@
 # Test declaring type aliases
 
 
-.function N foo("@Foo" <"Foo" extended_hint soft > $x) {
+.function N foo("@Foo" <"Foo" soft > $x) {
   Null
   RetC
 }
 
-.function N bar("@Bar" <"Bar" extended_hint soft > $x) {
+.function N bar("@Bar" <"Bar" soft > $x) {
   Null
   RetC
 }
 
-.function N baz("@Baz" <"Baz" extended_hint soft > $x) {
+.function N baz("@Baz" <"Baz" soft > $x) {
   Null
   RetC
 }
 
-.function N quux("@Quux" <"Quux" extended_hint soft > $x) {
+.function N quux("@Quux" <"Quux" soft > $x) {
   Null
   RetC
 }

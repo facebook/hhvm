@@ -689,7 +689,6 @@ fn parse_type_constraint_flag(
 ) -> Result<Option<TypeConstraintFlags>> {
     parse_opt_enum(tokenizer, |id| {
         Some(match id {
-            "extended" => TypeConstraintFlags::ExtendedHint,
             "nullable" => TypeConstraintFlags::Nullable,
             "type_var" => TypeConstraintFlags::TypeVar,
             "soft" => TypeConstraintFlags::Soft,

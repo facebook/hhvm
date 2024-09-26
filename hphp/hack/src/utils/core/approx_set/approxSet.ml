@@ -105,9 +105,11 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
           { left = right; relation = SetRelation.flip relation; right = left }
 
     let disjoint_atom atom1 atom2 ~ctx =
-      match relate ctx (Set atom1) (Set atom2) with
-      | SetRelation.Disjoint -> Sat
-      | relation -> Unsat { left = atom1.elt; relation; right = atom2.elt }
+      let relation = relate ctx (Set atom1) (Set atom2) in
+      if SetRelation.is_disjoint relation then
+        Sat
+      else
+        Unsat { left = atom1.elt; relation; right = atom2.elt }
 
     let rec disjoint ctx set1 set2 =
       match (set1, set2) with
@@ -189,9 +191,10 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
 
   let relate ctx set1 set2 =
     match (set1, set2) with
-    | (None, None) -> SetRelation.Equal
-    | (None, Some _)
+    | (None, None) -> SetRelation.all
+    | (None, Some _) ->
+      SetRelation.make ~subset:true ~superset:false ~disjoint:true
     | (Some _, None) ->
-      SetRelation.Disjoint
+      SetRelation.make ~subset:false ~superset:true ~disjoint:true
     | (Some set1, Some set2) -> relate ctx set1 set2
 end

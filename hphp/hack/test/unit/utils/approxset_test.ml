@@ -23,17 +23,10 @@ module Atom = struct
   type ctx = unit
 
   let relation set1 ~ctx:_ set2 =
-    let open SetRelation in
-    if Char.Set.equal set1 set2 then
-      Equal
-    else if Set.is_subset set1 ~of_:set2 then
-      Subset
-    else if Set.is_subset set2 ~of_:set1 then
-      Superset
-    else if Set.are_disjoint set1 set2 then
-      Disjoint
-    else
-      Unknown
+    let subset = Set.is_subset set1 ~of_:set2 in
+    let superset = Set.is_subset set2 ~of_:set1 in
+    let disjoint = Set.are_disjoint set1 set2 in
+    SetRelation.make ~subset ~superset ~disjoint
 end
 
 module ASet = struct
@@ -251,21 +244,22 @@ let test_quick_relate _ =
            s
            s
     in
-    let open SetRelation in
-    match ASet.relate set1 set2 with
-    | Equal ->
-      if not @@ Set.equal set1.ASet.expected set2.ASet.expected then
-        fail "equal"
-    | Subset ->
-      if not @@ Set.is_subset set1.ASet.expected ~of_:set2.ASet.expected then
-        fail "subset"
-    | Superset ->
-      if not @@ Set.is_subset set2.ASet.expected ~of_:set1.ASet.expected then
-        fail "superset"
-    | Disjoint ->
-      if not @@ Set.are_disjoint set1.ASet.expected set2.ASet.expected then
-        fail "disjoint"
-    | Unknown -> ()
+    let relation = ASet.relate set1 set2 in
+    if
+      SetRelation.is_subset relation
+      && (not @@ Set.is_subset set1.ASet.expected ~of_:set2.ASet.expected)
+    then
+      fail "subset";
+    if
+      SetRelation.is_superset relation
+      && (not @@ Set.is_subset set2.ASet.expected ~of_:set1.ASet.expected)
+    then
+      fail "superset";
+    if
+      SetRelation.is_disjoint relation
+      && (not @@ Set.are_disjoint set1.ASet.expected set2.ASet.expected)
+    then
+      fail "disjoint"
   in
 
   Quickcheck.test

@@ -73,7 +73,6 @@ module Tag = struct
     | BuiltInData -> "built-in values"
 
   let relation tag1 ~ctx:env tag2 =
-    let open SetRelation in
     match (tag1, tag2) with
     (* Built-in data can be any value made exclusively by the runtime.
        It includes some tags that aren't able to be tested for within the surface language.
@@ -86,20 +85,20 @@ module Tag = struct
        between the set of values that are built-in and objects *)
     | (BuiltInData, ObjectData)
     | (ObjectData, BuiltInData) ->
-      Unknown
+      SetRelation.none
     (* Shapes are represented imprecisely so do not consider them as equal *)
     | (ShapeData, ShapeData)
     | (DictData, ShapeData)
     | (ShapeData, DictData) ->
-      Unknown
+      SetRelation.none
     (* Tuples are represented imprecisely so do not consider them as equal *)
     | (TupleData, TupleData)
     | (VecData, TupleData)
     | (TupleData, VecData) ->
-      Unknown
-    | (tag1, tag2) when equal tag1 tag2 -> Equal
-    | (ObjectData, InstanceOf _) -> Superset
-    | (InstanceOf _, ObjectData) -> Subset
+      SetRelation.none
+    | (tag1, tag2) when equal tag1 tag2 -> SetRelation.equivalent
+    | (ObjectData, InstanceOf _) -> SetRelation.superset
+    | (InstanceOf _, ObjectData) -> SetRelation.subset
     | ( InstanceOf { name = cls1; kind = kind1 },
         InstanceOf { name = cls2; kind = kind2 } ) ->
       let open Option.Let_syntax in
@@ -109,31 +108,31 @@ module Tag = struct
       in
       let is_instance_of_closure cls = String.equal cls SN.Classes.cClosure in
 
-      Option.value ~default:Unknown
+      Option.value ~default:SetRelation.none
       @@ let* cls1_instance_of_cls2 = is_instance_of cls1 cls2 in
          if cls1_instance_of_cls2 then
-           return Subset
+           return SetRelation.subset
          else
            let* cls2_instance_of_cls1 = is_instance_of cls2 cls1 in
            if cls2_instance_of_cls1 then
-             return Superset
+             return SetRelation.superset
            else (
              match (kind1, kind2) with
              | (FinalClass, _)
              | (_, FinalClass) ->
-               return Disjoint
+               return SetRelation.disjoint
              | (Interface, _)
              | (_, Interface) ->
                (* Closures cannot be implemented in user-land so we assume
                   it is disjoint from any user specified interface *)
                if is_instance_of_closure cls1 || is_instance_of_closure cls2
                then
-                 return Disjoint
+                 return SetRelation.disjoint
                else
-                 return Unknown
-             | (Class, Class) -> return Disjoint
+                 return SetRelation.none
+             | (Class, Class) -> return SetRelation.disjoint
            )
-    | _ -> Disjoint
+    | _ -> SetRelation.disjoint
 
   let all_nonnull_tags =
     [
@@ -781,35 +780,22 @@ let check_overlapping env ~pos ~name (ty1, data_type1) (ty2, data_type2) =
                 (ty_str ty2) );
         ]
       in
-      let open SetRelation in
-      match relation with
-      | Superset ->
-        primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")
-        @ secondary_why ~f:(Printf.sprintf "Because %s contains %s")
-      | Equal ->
+      if SetRelation.is_equivalent relation then
         primary_why
           ~f:(Printf.sprintf "It overlaps with `%s`, which also includes ")
-      | Subset ->
+      else if SetRelation.is_superset relation then
+        primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")
+        @ secondary_why ~f:(Printf.sprintf "Because %s contains %s")
+      else if SetRelation.is_subset relation then
         primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")
         @ secondary_why ~f:(Printf.sprintf "Because %s are also %s")
-      | Unknown ->
+      else
         primary_why
           ~f:(Printf.sprintf "It may overlap with `%s`, which includes ")
         @ secondary_why
             ~f:
               (Printf.sprintf
                  "Because it is possible for values to be both %s and %s")
-      (* Disjoint will only occur here if one of the types involved was a negated type.
-         These types cannot appear inside case type declarations and thus should never
-         hit this code path. If negated types every become denotable this code will
-         need to change. *)
-      | Disjoint ->
-        let desc = "Reporting a case type is disjoint when it should not be" in
-        let telemetry =
-          Telemetry.(create () |> string_ ~key:"casetype name" ~value:name)
-        in
-        Errors.invariant_violation pos telemetry desc ~report_to_user:false;
-        []
     in
 
     let err =

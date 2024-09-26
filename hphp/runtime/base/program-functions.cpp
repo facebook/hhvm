@@ -51,6 +51,7 @@
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/verify-types.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
@@ -1528,6 +1529,8 @@ static int execute_program_impl(int argc, char** argv) {
     ("show,w", value<std::string>(&po.show),
      "output specified file and do nothing else")
     ("check-repo", "attempt to load repo and then exit")
+    ("verify-resolutions", "check that resolved type constraints and constants "
+                           "in an hhbc file match a source repo on disk")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -2023,6 +2026,19 @@ static int execute_program_impl(int argc, char** argv) {
     init_repo_file();
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
+    return 0;
+  }
+
+  if (vm.count("verify-resolutions")) {
+    if (po.args.size() < 2) {
+      fprintf(stderr,
+              "Usage: %s --verify-resolutions [hhbc-repo] [src-root]\n",
+              argv[0]);
+      exit(HPHP_EXIT_FAILURE);
+    }
+    std::vector<std::string> paths;
+    for (size_t i = 2; i < po.args.size(); ++i) paths.emplace_back(po.args[i]);
+    compare_resolved_types(po.args[0], po.args[1], paths);
     return 0;
   }
 

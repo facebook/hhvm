@@ -384,6 +384,13 @@ void mergePersistentUnits() {
   }
 }
 
+Unit* findPersistentUnit(const StringData* name) {
+  for (auto unit : s_persistent_units) {
+    if (unit->filepath() == name) return unit;
+  }
+  return nullptr;
+}
+
 namespace {
 
 Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {

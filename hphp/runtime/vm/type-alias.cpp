@@ -48,6 +48,12 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    * autoloader.
    */
   TypeAlias req(thisType);
+
+  if (!thisType->value.isUnresolved()) {
+    req.value = thisType->value;
+    return req;
+  }
+
   TypeConstraintFlags flags =
     thisType->value.flags() & (TypeConstraintFlags::Nullable
                                | TypeConstraintFlags::TypeVar
@@ -234,7 +240,7 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
       }
       return current;
     }
-    if (!current->compat(*thisType)) {
+    if (current->preTypeAlias() != thisType && !current->compat(*thisType)) {
       if (!failIsFatal) return nullptr;
       raiseIncompatible();
     }

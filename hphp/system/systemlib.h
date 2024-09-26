@@ -195,6 +195,11 @@ Func* getNull86reifiedinit(Class* cls);
 Func* funcLoad(const StringData* name, Func*& cache);
 Class* classLoad(const StringData* name, Class*& cache);
 
+/*
+ * Find a systemlib unit with 'name' filepath.
+ */
+Unit* findPersistentUnit(const StringData* name);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

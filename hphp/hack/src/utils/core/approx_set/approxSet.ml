@@ -6,168 +6,12 @@
  *
  *)
 
-module Set_relation = struct
-  type t =
-    | Equal
-    | Subset
-    | Superset
-    | Disjoint
-    | Unknown
-
-  let flip = function
-    | Subset -> Superset
-    | Superset -> Subset
-    | r -> r
-
-  (* Derived from Alloy model. See wellformed_set.als *)
-
-  (** Let rel be the relation between the sets A and B.
-    [complement] determines what a safe approximation of
-    !A rel B, given we know A rel B
-   *)
-  let complement = function
-    (* A = B => !A disj B *)
-    | Equal -> Disjoint
-    (* A ⊇ B => !A disj B *)
-    | Superset -> Disjoint
-    (* A disj B => !A ⊇ B *)
-    | Disjoint -> Superset
-    (* Otherwise we cannot assume anything *)
-    | Subset
-    | Unknown ->
-      Unknown
-
-  (** Let rel be the relation between sets A and B.
-    [union] determines what a safe approximation of
-    (L ∪ R) rel A, given we know L rel A and R rel A
-   *)
-  let rec union l r =
-    match (l, r) with
-    | (Equal, rel)
-    | (rel, Equal) -> begin
-      match rel with
-      (* L = A && R ⊆ A => (L ∪ R) = A *)
-      | Equal
-      | Subset ->
-        Equal
-      (* L = A => (L ∪ R) ⊇ A for any R *)
-      | Superset
-      | Disjoint
-      | Unknown ->
-        Superset
-    end
-    | (Subset, rel)
-    | (rel, Subset) -> begin
-      match rel with
-      (* (L ∪ R) = (R ∪ L) so it is ok to flip query *)
-      | Equal -> union r l
-      (* L ⊆ A && R ⊆ A => (L ∪ R) ⊆ A *)
-      | Subset -> Subset
-      (* L ⊆ A && R ⊇ A => (L ∪ R) ⊇ A *)
-      | Superset -> Superset
-      (* Otherwise we cannot assume anything *)
-      | Disjoint
-      | Unknown ->
-        Unknown
-    end
-    | (Superset, rel)
-    | (rel, Superset) -> begin
-      match rel with
-      (* (L ∪ R) = (R ∪ L) so it is ok to flip query *)
-      | Equal
-      | Subset ->
-        union r l
-      (* L ⊇ A => (L ∪ R) ⊇ A for any R *)
-      | Superset
-      | Disjoint
-      | Unknown ->
-        Superset
-    end
-    | (Disjoint, rel)
-    | (rel, Disjoint) -> begin
-      match rel with
-      (* (L ∪ R) = (R ∪ L) so it is ok to flip query *)
-      | Equal
-      | Subset
-      | Superset ->
-        union r l
-      (* L disj A && R disj A => (L ∪ R) disj A *)
-      | Disjoint -> Disjoint
-      (* Otherwise we cannot assume anything *)
-      | Unknown -> Unknown
-    end
-    (* Otherwise we cannot assume anything *)
-    | (Unknown, Unknown) -> Unknown
-
-  (** Let rel be the relation between sets A and B.
-    [inter] determines what a safe approximation of
-    (L ∩ R) rel A, given we know L rel A and R rel A
-   *)
-  let rec inter l r =
-    match (l, r) with
-    | (Equal, rel)
-    | (rel, Equal) -> begin
-      match rel with
-      (* L = A && R ⊇ A => (L ∩ R) = A *)
-      | Equal
-      | Superset ->
-        Equal
-      (* L = A && R disj A => (L ∩ R) disj A *)
-      | Disjoint -> Disjoint
-      (* L = A => (L ∩ R) ⊆ A for any R *)
-      | Subset
-      | Unknown ->
-        Subset
-    end
-    | (Subset, rel)
-    | (rel, Subset) -> begin
-      match rel with
-      (* (L ∩ R) = (R ∩ L) so it is ok to flip query *)
-      | Equal -> inter r l
-      (* L ⊆ A && R disj A => (L ∩ R) disj A *)
-      | Disjoint -> Disjoint
-      (* L ⊆ A => (L ∩ R) ⊆ A for any R *)
-      | Subset
-      | Superset
-      | Unknown ->
-        Subset
-    end
-    | (Superset, rel)
-    | (rel, Superset) -> begin
-      match rel with
-      (* (L ∩ R) = (R ∩ L) so it is ok to flip query *)
-      | Equal
-      | Subset ->
-        inter r l
-      (* L ⊇ A && R ⊇ A => (L ∩ R) ⊇ A *)
-      | Superset -> Superset
-      (* L ⊇ A && R disj A => (L ∩ R) disj A *)
-      | Disjoint -> Disjoint
-      (* Otherwise we cannot assume anything *)
-      | Unknown -> Unknown
-    end
-    | (Disjoint, rel)
-    | (rel, Disjoint) -> begin
-      match rel with
-      (* (L ∩ R) = (R ∩ L) so it is ok to flip query *)
-      | Equal
-      | Subset
-      | Superset ->
-        inter r l
-      (* L disj A => (L ∩ R) disj A for any R *)
-      | Disjoint -> Disjoint
-      | Unknown -> Disjoint
-    end
-    (* Otherwise we cannot assume anything *)
-    | (Unknown, Unknown) -> Unknown
-end
-
 module type DomainType = sig
   type t
 
   type ctx
 
-  val relation : t -> ctx:ctx -> t -> Set_relation.t
+  val relation : t -> ctx:ctx -> t -> SetRelation.t
 end
 
 module type S = sig
@@ -191,7 +35,7 @@ module type S = sig
     | Sat
     | Unsat of {
         left: Domain.t;
-        relation: Set_relation.t;
+        relation: SetRelation.t;
         right: Domain.t;
       }
 
@@ -199,7 +43,7 @@ module type S = sig
 
   val are_disjoint : Domain.ctx -> t -> t -> bool
 
-  val relate : Domain.ctx -> t -> t -> Set_relation.t
+  val relate : Domain.ctx -> t -> t -> SetRelation.t
 end
 
 module Make (Domain : DomainType) : S with module Domain := Domain = struct
@@ -207,7 +51,7 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
     | Sat
     | Unsat of {
         left: Domain.t;
-        relation: Set_relation.t;
+        relation: SetRelation.t;
         right: Domain.t;
       }
 
@@ -245,24 +89,24 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
       | (Set { comp = false; elt = elt1 }, Set { comp = false; elt = elt2 }) ->
         Domain.relation ~ctx elt1 elt2
       | (Union (left, right), set) ->
-        Set_relation.union (relate ctx left set) (relate ctx right set)
+        SetRelation.union (relate ctx left set) (relate ctx right set)
       | (Inter (left, right), set) ->
-        Set_relation.inter (relate ctx left set) (relate ctx right set)
+        SetRelation.inter (relate ctx left set) (relate ctx right set)
       | (Set { comp = true; elt }, set) ->
-        Set_relation.complement (relate ctx (singleton elt) set)
+        SetRelation.complement (relate ctx (singleton elt) set)
       | ( Set { comp = false; elt },
           ((Union _ | Inter _ | Set { comp = true; elt = _ }) as set) ) ->
-        Set_relation.flip (relate ctx set (singleton elt))
+        SetRelation.flip (relate ctx set (singleton elt))
 
     let flip_unsat = function
       | Sat -> Sat
       | Unsat { left; relation; right } ->
         Unsat
-          { left = right; relation = Set_relation.flip relation; right = left }
+          { left = right; relation = SetRelation.flip relation; right = left }
 
     let disjoint_atom atom1 atom2 ~ctx =
       match relate ctx (Set atom1) (Set atom2) with
-      | Set_relation.Disjoint -> Sat
+      | SetRelation.Disjoint -> Sat
       | relation -> Unsat { left = atom1.elt; relation; right = atom2.elt }
 
     let rec disjoint ctx set1 set2 =
@@ -345,9 +189,9 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
 
   let relate ctx set1 set2 =
     match (set1, set2) with
-    | (None, None) -> Set_relation.Equal
+    | (None, None) -> SetRelation.Equal
     | (None, Some _)
     | (Some _, None) ->
-      Set_relation.Disjoint
+      SetRelation.Disjoint
     | (Some set1, Some set2) -> relate ctx set1 set2
 end

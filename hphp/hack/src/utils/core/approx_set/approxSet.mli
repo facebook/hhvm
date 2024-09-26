@@ -6,16 +6,6 @@
  *
  *)
 
-(** The relationship between atomic elements in the set *)
-module Set_relation : sig
-  type t =
-    | Equal
-    | Subset
-    | Superset
-    | Disjoint
-    | Unknown
-end
-
 (** Specifies the domain that the set will range over. Individual
     members of the domain can be related to one another via the [relation]
     function. *)
@@ -24,11 +14,11 @@ module type DomainType = sig
   type t
 
   (** Contextual data that will be provided to [relation] when determining
-      [set_relation] between atomic elements of the domain *)
+      [SetRelation] between atomic elements of the domain *)
   type ctx
 
   (** Determines between atomic elements of the domain based on the given context *)
-  val relation : t -> ctx:ctx -> t -> Set_relation.t
+  val relation : t -> ctx:ctx -> t -> SetRelation.t
 end
 
 (** An abstract representation of a set, designed specifically to determine if two
@@ -67,7 +57,7 @@ module type S = sig
     | Sat  (** The two sets are definitely disjoint *)
     | Unsat of {
         left: Domain.t;
-        relation: Set_relation.t;
+        relation: SetRelation.t;
         right: Domain.t;
       }
         (** The two sets are not disjoint because of the relation between
@@ -80,7 +70,7 @@ module type S = sig
 
   val are_disjoint : Domain.ctx -> t -> t -> bool
 
-  val relate : Domain.ctx -> t -> t -> Set_relation.t
+  val relate : Domain.ctx -> t -> t -> SetRelation.t
 end
 
 (** Constructs an approximate set representation over the given [Domain] *)

@@ -23,7 +23,7 @@ module Atom = struct
   type ctx = unit
 
   let relation set1 ~ctx:_ set2 =
-    let open ApproxSet.Set_relation in
+    let open SetRelation in
     if Char.Set.equal set1 set2 then
       Equal
     else if Set.is_subset set1 ~of_:set2 then
@@ -251,7 +251,7 @@ let test_quick_relate _ =
            s
            s
     in
-    let open ApproxSet.Set_relation in
+    let open SetRelation in
     match ASet.relate set1 set2 with
     | Equal ->
       if not @@ Set.equal set1.ASet.expected set2.ASet.expected then

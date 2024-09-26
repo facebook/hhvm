@@ -73,7 +73,7 @@ module Tag = struct
     | BuiltInData -> "built-in values"
 
   let relation tag1 ~ctx:env tag2 =
-    let open ApproxSet.Set_relation in
+    let open SetRelation in
     match (tag1, tag2) with
     (* Built-in data can be any value made exclusively by the runtime.
        It includes some tags that aren't able to be tested for within the surface language.
@@ -781,7 +781,7 @@ let check_overlapping env ~pos ~name (ty1, data_type1) (ty2, data_type2) =
                 (ty_str ty2) );
         ]
       in
-      let open ApproxSet.Set_relation in
+      let open SetRelation in
       match relation with
       | Superset ->
         primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")

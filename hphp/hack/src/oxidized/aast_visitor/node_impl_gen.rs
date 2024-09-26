@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6f81e450a8a5f22d5479a4c2c6689b25>>
+// @generated SignedSource<<b86c5ef75d618971d038cb5feb2c4533>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1213,6 +1213,7 @@ impl<P: Params> Node<P> for FunParam<P::Ex, P::En> {
         self.name.accept(c, v)?;
         self.info.accept(c, v)?;
         self.readonly.accept(c, v)?;
+        self.splat.accept(c, v)?;
         self.callconv.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.visibility.accept(c, v)
@@ -1343,7 +1344,8 @@ impl<P: Params> Node<P> for HfParamInfo {
     ) -> Result<(), P::Error> {
         self.kind.accept(c, v)?;
         self.readonlyness.accept(c, v)?;
-        self.optional.accept(c, v)
+        self.optional.accept(c, v)?;
+        self.splat.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for Hint {
@@ -1921,6 +1923,24 @@ impl<P: Params> Node<P> for ShapeFieldName {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }
+        }
+    }
+}
+impl<P: Params> Node<P> for SplatKind {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_splat_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            SplatKind::Splat => Ok(()),
         }
     }
 }

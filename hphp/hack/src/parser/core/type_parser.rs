@@ -610,19 +610,26 @@ where
         let optional = self.parse_optional_opt();
         let callconv = self.parse_call_convention_opt();
         let readonly = self.parse_readonly_opt();
-        let token = self.peek_token();
-        let ts = match token.kind() {
-            TokenKind::DotDotDot => {
-                let pos = self.pos();
-                self.sc_mut().make_missing(pos)
-            }
-            _ => {
-                self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ true)
-            }
+        let ellipsis1 = self.parse_ellipsis_opt();
+        let ts =
+            self.parse_type_specifier_opt(/* allow_var = */ false, /* allow_attr */ true);
+        let (pre_ellipsis, ellipsis) = if ts.is_missing() {
+            let pos = self.pos();
+            (self.sc_mut().make_missing(pos), ellipsis1)
+        } else {
+            let ellipsis = self.parse_ellipsis_opt();
+            (ellipsis1, ellipsis)
         };
-        let ellipsis = self.parse_ellipsis_opt();
-        self.sc_mut()
-            .make_closure_parameter_type_specifier(optional, callconv, readonly, ts, ellipsis)
+
+        let sc_mut = &mut self.sc_mut();
+        sc_mut.make_closure_parameter_type_specifier(
+            optional,
+            callconv,
+            readonly,
+            pre_ellipsis,
+            ts,
+            ellipsis,
+        )
     }
 
     fn parse_tuple_or_union_or_intersection_element_type(&mut self) -> S::Output {

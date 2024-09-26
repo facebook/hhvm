@@ -201,6 +201,7 @@ pub fn desugar(
         info: ast::FunParamInfo::ParamRequired,
         callconv: ParamKind::Pnormal,
         readonly: None,
+        splat: None,
         user_attributes: Default::default(),
         visibility: None,
     };
@@ -1849,6 +1850,7 @@ fn immediately_invoked_lambda(
                 info: ast::FunParamInfo::ParamRequired,
                 callconv: ParamKind::Pnormal,
                 readonly: None,
+                splat: None,
                 user_attributes: Default::default(),
                 visibility: None,
             }

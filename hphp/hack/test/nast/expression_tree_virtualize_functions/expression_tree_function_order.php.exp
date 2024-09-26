@@ -227,6 +227,7 @@
                                                                  param_name = "$0v"; 
                                                                  param_info = Param_required; 
                                                                  param_readonly = None; 
+                                                                 param_splat = None; 
                                                                  param_callconv = Pnormal; 
                                                                  param_user_attributes = []; 
                                                                  param_visibility = None }

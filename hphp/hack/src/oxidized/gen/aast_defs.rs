@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<953ec23cddf9a3fe14ac712f9ae914e1>>
+// @generated SignedSource<<67cbccb8828762a1f39b1eee011f13fa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1402,6 +1402,8 @@ pub struct FunParam<Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly: Option<ast_defs::ReadonlyKind>,
     #[rust_to_ocaml(attr = "transform.opaque")]
+    pub splat: Option<ast_defs::SplatKind>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub callconv: ast_defs::ParamKind,
     pub user_attributes: UserAttributes<Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
@@ -2517,6 +2519,7 @@ pub struct HfParamInfo {
     pub kind: ast_defs::ParamKind,
     pub readonlyness: Option<ast_defs::ReadonlyKind>,
     pub optional: Option<ast_defs::OptionalKind>,
+    pub splat: Option<ast_defs::SplatKind>,
 }
 
 #[derive(

@@ -444,6 +444,7 @@ struct
         parameter_optional: t;
         parameter_call_convention: t;
         parameter_readonly: t;
+        parameter_pre_ellipsis: t;
         parameter_type: t;
         parameter_ellipsis: t;
         parameter_name: t;
@@ -1069,6 +1070,7 @@ struct
         closure_parameter_optional: t;
         closure_parameter_call_convention: t;
         closure_parameter_readonly: t;
+        closure_parameter_pre_ellipsis: t;
         closure_parameter_type: t;
         closure_parameter_ellipsis: t;
       }

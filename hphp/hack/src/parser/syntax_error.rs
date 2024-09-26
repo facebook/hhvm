@@ -615,8 +615,28 @@ pub fn error2074(call_modifier: &str) -> Error {
         call_modifier
     ))
 }
+
 pub const error2077: Error = Cow::Borrowed("Cannot use empty list");
 pub const error2078: Error = Cow::Borrowed("An expression cannot start with `=`");
+
+pub const error2079: Error = Cow::Borrowed(concat!("A splat parameter cannot also be variadic.",));
+
+pub const error2080: Error = Cow::Borrowed(concat!("A splat parameter cannot also be optional.",));
+
+pub const error2081: Error = Cow::Borrowed(concat!(
+    "A splat parameter `...` may only appear at the end of ",
+    "a parameter list."
+));
+
+pub const error2082: Error =
+    Cow::Borrowed("A splat parameter `...` must not have a default value.");
+
+pub const error2083: Error = Cow::Borrowed(concat!(
+    "A splat parameter `...` cannot have a modifier ",
+    "that changes the calling convention, like `inout`.",
+));
+
+pub const splat_readonly_param: Error = Cow::Borrowed("Splat parameters cannot be marked readonly");
 
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 

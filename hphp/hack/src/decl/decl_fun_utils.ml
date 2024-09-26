@@ -67,7 +67,8 @@ let make_param_ty env param =
         ~is_optional:(Option.is_some (Aast_utils.get_param_default param))
         ~readonly:(Option.is_some param.param_readonly)
         ~ignore_readonly_error:
-          (has_ignore_readonly_error_attribute param.param_user_attributes);
+          (has_ignore_readonly_error_attribute param.param_user_attributes)
+        ~splat:(Option.is_some param.param_splat);
     fp_def_value = None;
   }
 

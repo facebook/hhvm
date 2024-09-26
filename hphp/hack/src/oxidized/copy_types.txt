@@ -14,6 +14,7 @@ aast_defs::PropOrMethod
 aast_defs::ReadonlyKind
 aast_defs::ReifyKind
 aast_defs::RequireKind
+aast_defs::SplatKind
 aast_defs::Tprim
 aast_defs::TypedefVisibility
 aast_defs::Uop
@@ -38,6 +39,7 @@ aast::PropOrMethod
 aast::ReadonlyKind
 aast::ReifyKind
 aast::RequireKind
+aast::SplatKind
 aast::TypedefVisibility
 aast::Uop
 aast::Variance
@@ -54,6 +56,7 @@ ast_defs::OptionalKind
 ast_defs::PropOrMethod
 ast_defs::ReadonlyKind
 ast_defs::ReifyKind
+ast_defs::SplatKind
 ast_defs::Tprim
 ast_defs::TypedefVisibility
 ast_defs::Uop

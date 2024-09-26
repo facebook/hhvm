@@ -480,12 +480,15 @@ module Flags : sig
 
   val get_fp_readonly : 'a fun_param -> bool
 
+  val get_fp_splat : 'a fun_param -> bool
+
   val make_fp_flags :
     mode:param_mode ->
     accept_disposable:bool ->
     is_optional:bool ->
     readonly:bool ->
     ignore_readonly_error:bool ->
+    splat:bool ->
     Typing_defs_flags.FunParam.t
 
   val get_fp_accept_disposable : 'a fun_param -> bool

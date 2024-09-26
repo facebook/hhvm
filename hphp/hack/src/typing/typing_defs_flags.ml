@@ -157,6 +157,7 @@ module FunParam = struct
     is_optional: bool;
     readonly: bool;
     ignore_readonly_error: bool;
+    splat: bool;
   }
   [@@deriving show]
 
@@ -170,6 +171,8 @@ module FunParam = struct
 
   let ignore_readonly_error_mask = 1 lsl 3
 
+  let splat_mask = 1 lsl 9
+
   let accept_disposable = is_set accept_disposable_mask
 
   let inout = is_set inout_mask
@@ -179,6 +182,8 @@ module FunParam = struct
   let readonly = is_set readonly_mask
 
   let ignore_readonly_error = is_set ignore_readonly_error_mask
+
+  let splat = is_set splat_mask
 
   let set_accept_disposable = set_bit accept_disposable_mask
 
@@ -190,14 +195,22 @@ module FunParam = struct
 
   let set_ignore_readonly_error = set_bit ignore_readonly_error_mask
 
+  let set_splat = set_bit splat_mask
+
   let make
-      ~inout ~accept_disposable ~is_optional ~readonly ~ignore_readonly_error =
+      ~inout
+      ~accept_disposable
+      ~is_optional
+      ~readonly
+      ~ignore_readonly_error
+      ~splat =
     0x0
     |> set_inout inout
     |> set_accept_disposable accept_disposable
     |> set_is_optional is_optional
     |> set_readonly readonly
     |> set_ignore_readonly_error ignore_readonly_error
+    |> set_splat splat
 
   let as_record t =
     {
@@ -206,6 +219,7 @@ module FunParam = struct
       is_optional = is_optional t;
       readonly = readonly t;
       ignore_readonly_error = ignore_readonly_error t;
+      splat = splat t;
     }
 
   let default = 0

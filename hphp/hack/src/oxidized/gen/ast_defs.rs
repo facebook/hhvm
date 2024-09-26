@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3262343f5c6503149944fd9ffc2754f2>>
+// @generated SignedSource<<b13c1bbe878ad5c90eb69d07d09c8dc2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -282,6 +282,32 @@ pub enum OptionalKind {
 }
 impl TrivialDrop for OptionalKind {}
 arena_deserializer::impl_deserialize_in_arena!(OptionalKind);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
+#[repr(u8)]
+pub enum SplatKind {
+    Splat,
+}
+impl TrivialDrop for SplatKind {}
+arena_deserializer::impl_deserialize_in_arena!(SplatKind);
 
 #[derive(
     Clone,

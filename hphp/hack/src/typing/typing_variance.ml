@@ -759,6 +759,7 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
     param_annotation = _;
     param_info = _;
     param_readonly = _;
+    param_splat;
     param_callconv;
     param_user_attributes = _;
     param_visibility = _;
@@ -777,6 +778,7 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
                 hfparam_kind = param_callconv;
                 hfparam_readonlyness = None;
                 hfparam_optional = None;
+                hfparam_splat = param_splat;
               }))
 
 let fun_where_constraint : Env.t -> Aast.where_constraint_hint -> unit =
@@ -986,6 +988,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
                param_annotation = ();
                param_readonly;
                param_info = _;
+               param_splat = _;
                param_callconv = _;
                param_user_attributes;
                param_visibility;

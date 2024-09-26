@@ -313,6 +313,7 @@ module type Syntax_S = sig
         parameter_optional: t;
         parameter_call_convention: t;
         parameter_readonly: t;
+        parameter_pre_ellipsis: t;
         parameter_type: t;
         parameter_ellipsis: t;
         parameter_name: t;
@@ -938,6 +939,7 @@ module type Syntax_S = sig
         closure_parameter_optional: t;
         closure_parameter_call_convention: t;
         closure_parameter_readonly: t;
+        closure_parameter_pre_ellipsis: t;
         closure_parameter_type: t;
         closure_parameter_ellipsis: t;
       }
@@ -1258,7 +1260,7 @@ module type Syntax_S = sig
   val make_decorated_expression : t -> t -> t
 
   val make_parameter_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_old_attribute_specification : t -> t -> t -> t
 
@@ -1477,7 +1479,7 @@ module type Syntax_S = sig
   val make_closure_type_specifier :
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
-  val make_closure_parameter_type_specifier : t -> t -> t -> t -> t -> t
+  val make_closure_parameter_type_specifier : t -> t -> t -> t -> t -> t -> t
 
   val make_tuple_or_union_or_intersection_element_type_specifier :
     t -> t -> t -> t

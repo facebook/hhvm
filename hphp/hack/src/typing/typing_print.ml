@@ -389,6 +389,7 @@ module Full = struct
       is_optional;
       readonly;
       ignore_readonly_error = _;
+      splat;
     } =
       Typing_defs_flags.FunParam.as_record fp_flags
     in
@@ -421,6 +422,10 @@ module Full = struct
             Nothing);
           (if readonly then
             text "readonly" ^^ Space
+          else
+            Nothing);
+          (if splat then
+            text "..."
           else
             Nothing);
           d;
@@ -2243,7 +2248,8 @@ module Json = struct
                         ~accept_disposable:false
                         ~is_optional:optional
                         ~readonly:false
-                        ~ignore_readonly_error:false;
+                        ~ignore_readonly_error:false
+                        ~splat:false;
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos_or_decl.none;
                     fp_name = None;

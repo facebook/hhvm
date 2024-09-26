@@ -53,6 +53,7 @@ type feature_name =
   | SealedMethods
   | AwaitInSplice
   | OpenTuples
+  | TypeSplat
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

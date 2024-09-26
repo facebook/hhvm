@@ -822,6 +822,7 @@ and ('ex, 'en) fun_param = {
   param_name: string;
   param_info: ('ex, 'en) fun_param_info;
   param_readonly: Ast_defs.readonly_kind option; [@transform.opaque]
+  param_splat: Ast_defs.splat_kind option; [@transform.opaque]
   param_callconv: Ast_defs.param_kind; [@transform.opaque]
   param_user_attributes: ('ex, 'en) user_attributes;
   param_visibility: visibility option; [@transform.opaque]
@@ -1201,6 +1202,7 @@ and hf_param_info = {
   hfparam_kind: Ast_defs.param_kind;
   hfparam_readonlyness: Ast_defs.readonly_kind option;
   hfparam_optional: Ast_defs.optional_kind option;
+  hfparam_splat: Ast_defs.splat_kind option;
 }
 [@@transform.opaque]
 

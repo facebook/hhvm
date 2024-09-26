@@ -38,6 +38,7 @@ bitflags! {
         const IS_OPTIONAL            = 1 << 2;
         const READONLY               = 1 << 8;
         const IGNORE_READONLY_ERROR  = 1 << 3;
+        const SPLAT                  = 1 << 9;
     }
 }
 
@@ -354,6 +355,9 @@ impl FunParamFlags {
     }
     pub fn is_readonly(&self) -> bool {
         self.contains(Self::READONLY)
+    }
+    pub fn is_splat(&self) -> bool {
+        self.contains(Self::SPLAT)
     }
 }
 

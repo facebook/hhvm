@@ -919,6 +919,7 @@
         { "field_name" : "optional" },
         { "field_name" : "call_convention" },
         { "field_name" : "readonly" },
+        { "field_name" : "pre_ellipsis" },
         { "field_name" : "type" },
         { "field_name" : "ellipsis" },
         { "field_name" : "name" },
@@ -1982,6 +1983,7 @@
         { "field_name" : "optional" },
         { "field_name" : "call_convention" },
         { "field_name" : "readonly" },
+        { "field_name" : "pre_ellipsis" },
         { "field_name" : "type" },
         { "field_name" : "ellipsis" }
       ] },

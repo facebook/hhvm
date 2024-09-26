@@ -59,6 +59,7 @@ type feature_name =
   | SealedMethods
   | AwaitInSplice
   | OpenTuples
+  | TypeSplat
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -94,6 +95,7 @@ let feature_name_map =
       ("sealed_methods", SealedMethods);
       ("await_in_splice", AwaitInSplice);
       ("open_tuples", OpenTuples);
+      ("type_splat", TypeSplat);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

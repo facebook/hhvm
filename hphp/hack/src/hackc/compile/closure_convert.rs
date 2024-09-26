@@ -730,6 +730,7 @@ pub fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool)
             ParamKind::Pnormal
         },
         readonly: None, // TODO
+        splat: None,    // TODO
         user_attributes: Default::default(),
         visibility: None,
     }

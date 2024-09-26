@@ -12,7 +12,7 @@
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
                   inout = false; is_optional = false; readonly = false;
-                  ignore_readonly_error = false };
+                  ignore_readonly_error = false; splat = false };
                 fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-13]) };
@@ -41,7 +41,7 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
-                   ignore_readonly_error = false };
+                   ignore_readonly_error = false; splat = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [6:10-13]) };
@@ -91,7 +91,8 @@
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; is_optional = false;
-                           readonly = false; ignore_readonly_error = false };
+                           readonly = false; ignore_readonly_error = false;
+                           splat = false };
                          fp_def_value = None }
                         ];
                       ft_implicit_params =

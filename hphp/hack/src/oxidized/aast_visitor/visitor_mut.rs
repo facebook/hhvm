@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55c07dbf5fbb762df0fca14e61fd620b>>
+// @generated SignedSource<<ec36522f418201d28505f842fe4b4095>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -578,6 +578,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut ShapeFieldName,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_splat_kind(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut SplatKind,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

@@ -546,13 +546,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, optional: Self, call_convention: Self, readonly: Self, type_: Self, ellipsis: Self, name: Self, default_value: Self, parameter_end: Self) -> Self {
+    fn make_parameter_declaration(ctx: &C, attribute: Self, visibility: Self, optional: Self, call_convention: Self, readonly: Self, pre_ellipsis: Self, type_: Self, ellipsis: Self, name: Self, default_value: Self, parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(ctx.get_arena().alloc(ParameterDeclarationChildren {
             attribute,
             visibility,
             optional,
             call_convention,
             readonly,
+            pre_ellipsis,
             type_,
             ellipsis,
             name,
@@ -1719,11 +1720,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_parameter_type_specifier(ctx: &C, optional: Self, call_convention: Self, readonly: Self, type_: Self, ellipsis: Self) -> Self {
+    fn make_closure_parameter_type_specifier(ctx: &C, optional: Self, call_convention: Self, readonly: Self, pre_ellipsis: Self, type_: Self, ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::ClosureParameterTypeSpecifier(ctx.get_arena().alloc(ClosureParameterTypeSpecifierChildren {
             optional,
             call_convention,
             readonly,
+            pre_ellipsis,
             type_,
             ellipsis,
         }));

@@ -366,6 +366,7 @@
                           "parameter_optional":{"kind":"missing"},
                           "parameter_call_convention":{"kind":"missing"},
                           "parameter_readonly":{"kind":"missing"},
+                          "parameter_pre_ellipsis":{"kind":"missing"},
                           "parameter_type":{
                             "kind":"simple_type_specifier",
                             "simple_type_specifier":{
@@ -708,6 +709,7 @@
                           "parameter_optional":{"kind":"missing"},
                           "parameter_call_convention":{"kind":"missing"},
                           "parameter_readonly":{"kind":"missing"},
+                          "parameter_pre_ellipsis":{"kind":"missing"},
                           "parameter_type":{
                             "kind":"simple_type_specifier",
                             "simple_type_specifier":{

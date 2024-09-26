@@ -186,6 +186,10 @@ impl<'a, T: LexableToken, V> Syntax<'a, T, V> {
         self.is_specific_token(TokenKind::Readonly)
     }
 
+    pub fn is_optional(&self) -> bool {
+        self.is_specific_token(TokenKind::Optional)
+    }
+
     pub fn is_namespace_empty_body(&self) -> bool {
         self.kind() == SyntaxKind::NamespaceEmptyBody
     }
@@ -281,7 +285,7 @@ where
             Self::make_missing(offset)
         } else {
             let mut list = Vec::with_capacity_in(arg.len(), ctx.get_arena());
-            list.extend(arg.into_iter());
+            list.extend(arg);
             let list = list.into_bump_slice();
             let nodes = list.iter().map(|x| &x.value);
             let value = V::from_children(SyntaxKind::SyntaxList, offset, nodes);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8db4c3392f9d6533d2eeb4fab1c92a2c>>
+// @generated SignedSource<<0d3826fb4781ea3d5d467c6c2f723e87>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -994,7 +994,7 @@ impl Transform for FunParam {
                 type_hint: ref mut __binding_1,
                 name: ref mut __binding_3,
                 info: ref mut __binding_4,
-                user_attributes: ref mut __binding_7,
+                user_attributes: ref mut __binding_8,
                 ..
             } => {
                 {
@@ -1009,7 +1009,7 @@ impl Transform for FunParam {
                 {
                     __binding_4.transform(env, &mut pass.clone())
                 }
-                { __binding_7.transform(env, &mut pass.clone()) }
+                { __binding_8.transform(env, &mut pass.clone()) }
             }
         }
     }
@@ -2636,6 +2636,9 @@ const _: () = {
 };
 const _: () = {
     impl Transform for OptionalKind {}
+};
+const _: () = {
+    impl Transform for SplatKind {}
 };
 const _: () = {
     impl Transform for OgNullFlavor {}

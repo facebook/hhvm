@@ -729,10 +729,12 @@ fn p_closure_parameter<'a>(
             let optional = map_optional(&c.optional, env, p_optional)?;
             let kind = p_param_kind(&c.call_convention, env)?;
             let readonlyness = map_optional(&c.readonly, env, p_readonly)?;
+            let splat = map_optional(&c.pre_ellipsis, env, p_splat)?;
             let info = Some(ast::HfParamInfo {
                 kind,
                 readonlyness,
                 optional,
+                splat,
             });
             let hint = p_hint(&c.type_, env)?;
             Ok((hint, info))
@@ -1834,6 +1836,7 @@ fn p_lambda_expression<'a>(
                     info: ast::FunParamInfo::ParamRequired,
                     callconv: ast::ParamKind::Pnormal,
                     readonly: None,
+                    splat: None,
                     user_attributes: Default::default(),
                     visibility: None,
                 }],
@@ -4015,6 +4018,13 @@ fn p_readonly<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ReadonlyKind> {
     }
 }
 
+fn p_splat<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::SplatKind> {
+    match token_kind(node) {
+        Some(TK::DotDotDot) => Ok(ast::SplatKind::Splat),
+        _ => missing_syntax("...", node, env),
+    }
+}
+
 fn p_optional<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OptionalKind> {
     match token_kind(node) {
         Some(TK::Optional) => Ok(ast::OptionalKind::Optional),
@@ -4032,6 +4042,7 @@ fn param_template<'a>(node: S<'a>, env: &Env<'_>) -> ast::FunParam {
         info: ast::FunParamInfo::ParamRequired,
         callconv: ast::ParamKind::Pnormal,
         readonly: None,
+        splat: None,
         user_attributes: Default::default(),
         visibility: None,
     }
@@ -4045,6 +4056,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
             optional,
             call_convention,
             readonly,
+            pre_ellipsis,
             type_,
             ellipsis,
             name,
@@ -4092,6 +4104,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                 _ => ast::FunParamInfo::ParamRequired,
             };
 
+            let splat = map_optional(pre_ellipsis, env, p_splat)?;
             Ok(ast::FunParam {
                 annotation: (),
                 type_hint: ast::TypeHint((), hint),
@@ -4101,6 +4114,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                 info,
                 callconv,
                 readonly: map_optional(readonly, env, p_readonly)?,
+                splat,
                 /* implicit field via constructor parameter.
                  * This is always None except for constructors and the modifier
                  * can be only Public or Protected or Private.

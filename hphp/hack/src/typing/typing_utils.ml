@@ -649,7 +649,8 @@ let default_fun_param ~readonly ?(pos = Pos_or_decl.none) ty : 'a fun_param =
         ~accept_disposable:false
         ~is_optional:false
         ~readonly
-        ~ignore_readonly_error:false;
+        ~ignore_readonly_error:false
+        ~splat:false;
     fp_def_value = None;
   }
 

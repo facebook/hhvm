@@ -275,9 +275,9 @@ where
         Self::Output::make_decorated_expression(self.state_mut(), arg0, arg1)
     }
 
-    fn make_parameter_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output, arg9 : Self::Output) -> Self::Output {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9]);
-        Self::Output::make_parameter_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    fn make_parameter_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output, arg9 : Self::Output, arg10 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10]);
+        Self::Output::make_parameter_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     }
 
     fn make_old_attribute_specification(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
@@ -815,9 +815,9 @@ where
         Self::Output::make_closure_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     }
 
-    fn make_closure_parameter_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
-        Self::Output::make_closure_parameter_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
+    fn make_closure_parameter_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
+        Self::Output::make_closure_parameter_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
     fn make_tuple_or_union_or_intersection_element_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {

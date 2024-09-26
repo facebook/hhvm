@@ -12,8 +12,8 @@
          [{ param_annotation = ((int, int));
             param_type_hint = (((int, int)), (Some ([4:21-31], (Htuple { tup_required = [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
             param_pos = [4:32-34]; param_name = "$a"; param_info = Param_required; 
-            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-            param_visibility = None }
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -41,8 +41,8 @@
          [{ param_annotation = ((int, int));
             param_type_hint = (((int, int)), (Some ([7:12-22], (Htuple { tup_required = [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
             param_pos = [7:23-25]; param_name = "$a"; param_info = Param_required; 
-            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-            param_visibility = None }
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -61,13 +61,13 @@
          [{ param_annotation = ((int, bool));
             param_type_hint = (((int, bool)), (Some ([10:3-14], (Htuple { tup_required = [([10:4-7], (Hprim Tint)); ([10:9-13], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }))));
             param_pos = [10:15-18]; param_name = "$a1"; param_info = Param_required; 
-            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-            param_visibility = None };
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
            { param_annotation = ((bool, int));
              param_type_hint = (((bool, int)), (Some ([11:3-14], (Htuple { tup_required = [([11:4-8], (Hprim Tbool)); ([11:10-13], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
              param_pos = [11:15-18]; param_name = "$a2"; param_info = Param_required; 
-             param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-             param_visibility = None }
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -128,13 +128,13 @@
          [{ param_annotation = ((int, bool));
             param_type_hint = (((int, bool)), (Some ([27:3-14], (Htuple { tup_required = [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }))));
             param_pos = [27:15-18]; param_name = "$a1"; param_info = Param_required; 
-            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-            param_visibility = None };
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
            { param_annotation = ((bool, int));
              param_type_hint = (((bool, int)), (Some ([28:3-14], (Htuple { tup_required = [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
              param_pos = [28:15-18]; param_name = "$a2"; param_info = Param_required; 
-             param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-             param_visibility = None }
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -232,8 +232,8 @@
           [{ param_annotation = (dynamic);
              param_type_hint = ((dynamic), (Some ([4:21-31], (Htuple { tup_required = [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
              param_pos = [4:32-34]; param_name = "$a"; param_info = Param_required; 
-             param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-             param_visibility = None }
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -261,8 +261,8 @@
          [{ param_annotation = (dynamic);
             param_type_hint = ((dynamic), (Some ([7:12-22], (Htuple { tup_required = [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
             param_pos = [7:23-25]; param_name = "$a"; param_info = Param_required; 
-            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-            param_visibility = None }
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -281,13 +281,13 @@
          [{ param_annotation = (dynamic);
             param_type_hint = ((dynamic), (Some ([27:3-14], (Htuple { tup_required = [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }))));
             param_pos = [27:15-18]; param_name = "$a1"; param_info = Param_required; 
-            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-            param_visibility = None };
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
            { param_annotation = (dynamic);
              param_type_hint = ((dynamic), (Some ([28:3-14], (Htuple { tup_required = [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
              param_pos = [28:15-18]; param_name = "$a2"; param_info = Param_required; 
-             param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
-             param_visibility = None }
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

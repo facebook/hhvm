@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e5d3ce47d6c342fa6a18d722932f3ff>>
+// @generated SignedSource<<c965574b67b0b4c732f79edc9596c4ca>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -137,6 +137,7 @@ pub use oxidized::ast_defs::OgNullFlavor;
 pub use oxidized::ast_defs::OptionalKind;
 pub use oxidized::ast_defs::PropOrMethod;
 pub use oxidized::ast_defs::ReadonlyKind;
+pub use oxidized::ast_defs::SplatKind;
 
 #[derive(
     Clone,

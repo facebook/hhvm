@@ -775,6 +775,7 @@ pub struct FunParamDecl<'a> {
     pos: &'a Pos<'a>,
     name: Option<&'a str>,
     variadic: bool,
+    splat: bool,
     initializer: Node<'a>,
     parameter_end: Node<'a>,
 }
@@ -2052,6 +2053,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             pos,
                             name,
                             variadic,
+                            splat,
                             initializer,
                             parameter_end,
                         }) => {
@@ -2116,6 +2118,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             }
                             if readonly {
                                 flags |= FunParamFlags::READONLY
+                            }
+                            if splat {
+                                flags |= FunParamFlags::SPLAT
                             }
                             match kind {
                                 ParamMode::FPinout => {
@@ -3897,6 +3902,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         optional: Self::Output,
         inout: Self::Output,
         readonly: Self::Output,
+        pre_ellipsis: Self::Output,
         hint: Self::Output,
         ellipsis: Self::Output,
         name: Self::Output,
@@ -3912,6 +3918,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             None if variadic => (self.get_pos(ellipsis), None),
             None => return Node::Ignored(SK::ParameterDeclaration),
         };
+        let is_splat = pre_ellipsis.is_token(TokenKind::DotDotDot);
         let kind = if inout.is_token(TokenKind::Inout) {
             ParamMode::FPinout
         } else {
@@ -3941,6 +3948,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             pos,
             name,
             variadic,
+            splat: is_splat,
             initializer,
             parameter_end,
         }))
@@ -5931,6 +5939,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             if fp.variadic {
                 ft_variadic = true;
             }
+            if fp.splat {
+                flags |= FunParamFlags::SPLAT;
+            }
 
             self.alloc(FunParam {
                 pos,
@@ -5994,6 +6005,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         optional: Self::Output,
         inout: Self::Output,
         readonly: Self::Output,
+        pre_ellipsis: Self::Output,
         hint: Self::Output,
         ellipsis: Self::Output,
     ) -> Self::Output {
@@ -6012,6 +6024,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             pos: self.get_pos(hint),
             name: Some(""),
             variadic: ellipsis.is_token(TokenKind::DotDotDot),
+            splat: pre_ellipsis.is_token(TokenKind::DotDotDot),
             initializer: Node::Ignored(SK::Missing),
             parameter_end: Node::Ignored(SK::Missing),
         }))

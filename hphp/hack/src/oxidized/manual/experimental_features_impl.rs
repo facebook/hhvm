@@ -44,6 +44,7 @@ impl FeatureName {
             SealedMethods => Unstable,
             AwaitInSplice => OngoingRelease,
             OpenTuples => Unstable,
+            TypeSplat => Unstable,
         }
     }
 

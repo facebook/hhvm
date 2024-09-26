@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb58bbf819f9bda11df8aef0a869d60b>>
+// @generated SignedSource<<bc182a2574d73591dd3f8a2e3bf2b522>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -332,6 +332,14 @@ impl OptionalKind {
         OptionalKind::Optional
     }
     pub fn is_optional(&self) -> bool {
+        true
+    }
+}
+impl SplatKind {
+    pub fn mk_splat() -> Self {
+        SplatKind::Splat
+    }
+    pub fn is_splat(&self) -> bool {
         true
     }
 }

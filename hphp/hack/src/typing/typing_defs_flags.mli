@@ -98,6 +98,7 @@ module FunParam : sig
     is_optional: bool;  (** Parameter is marked optional in function type *)
     readonly: bool;  (** Parameter is marked readonly in function type *)
     ignore_readonly_error: bool;
+    splat: bool;
   }
 
   val accept_disposable : t -> bool
@@ -110,6 +111,8 @@ module FunParam : sig
 
   val ignore_readonly_error : t -> bool
 
+  val splat : t -> bool
+
   val set_accept_disposable : bool -> t -> t
 
   val set_inout : bool -> t -> t
@@ -120,12 +123,15 @@ module FunParam : sig
 
   val set_ignore_readonly_error : bool -> t -> t
 
+  val set_splat : bool -> t -> t
+
   val make :
     inout:bool ->
     accept_disposable:bool ->
     is_optional:bool ->
     readonly:bool ->
     ignore_readonly_error:bool ->
+    splat:bool ->
     t
 
   val as_record : t -> record

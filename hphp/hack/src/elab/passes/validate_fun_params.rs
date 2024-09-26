@@ -131,6 +131,7 @@ mod tests {
             pos: Pos::NONE,
             info: nast::FunParamInfo::ParamRequired,
             readonly: None,
+            splat: None,
             callconv: ParamKind::Pnormal,
             user_attributes: UserAttributes(Vec::default()),
             visibility: Some(Visibility::Public),

@@ -704,7 +704,10 @@ let schema : schema_node list =
           ("optional", ZeroOrOne Token);
           ("call_convention", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
+          (* This is for type splats e.g. ...Targs $x *)
+          ("pre_ellipsis", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
+          (* This is for variadics e.g. mixed... $v *)
           ("ellipsis", ZeroOrOne Token);
           ("name", Aggregate Expression);
           ("default_value", ZeroOrOne (Just "SimpleInitializer"));
@@ -2186,6 +2189,7 @@ let schema : schema_node list =
           ("optional", ZeroOrOne Token);
           ("call_convention", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
+          ("pre_ellipsis", ZeroOrOne Token);
           ("type", Aggregate Specifier);
           ("ellipsis", ZeroOrOne Token);
         ];

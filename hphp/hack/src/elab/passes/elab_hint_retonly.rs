@@ -215,6 +215,7 @@ mod tests {
                 name: Default::default(),
                 info: nast::FunParamInfo::ParamRequired,
                 readonly: Default::default(),
+                splat: Default::default(),
                 callconv: ParamKind::Pnormal,
                 user_attributes: Default::default(),
                 visibility: Default::default(),

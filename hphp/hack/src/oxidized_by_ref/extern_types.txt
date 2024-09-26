@@ -25,6 +25,7 @@ oxidized::aast_defs::PropOrMethod
 oxidized::aast_defs::ReadonlyKind
 oxidized::aast_defs::ReifyKind
 oxidized::aast_defs::RequireKind
+oxidized::aast_defs::SplatKind
 oxidized::aast_defs::Tprim
 oxidized::aast_defs::TypedefVisibility
 oxidized::aast_defs::Uop
@@ -50,6 +51,7 @@ oxidized::aast::PropOrMethod
 oxidized::aast::ReadonlyKind
 oxidized::aast::ReifyKind
 oxidized::aast::RequireKind
+oxidized::aast::SplatKind
 oxidized::aast::TypedefVisibility
 oxidized::aast::Uop
 oxidized::aast::UseAsVisibility
@@ -68,6 +70,7 @@ oxidized::ast_defs::PropOrMethod
 oxidized::ast_defs::ReadonlyKind
 oxidized::ast_defs::Reified
 oxidized::ast_defs::ReifyKind
+oxidized::ast_defs::SplatKind
 oxidized::ast_defs::Tprim
 oxidized::ast_defs::TypedefVisibility
 oxidized::ast_defs::Uop

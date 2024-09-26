@@ -485,8 +485,32 @@ fn is_variadic_parameter_declaration(node: S<'_>) -> bool {
         _ => false,
     }
 }
+fn is_readonly_parameter_declaration(node: S<'_>) -> bool {
+    match &node.children {
+        ParameterDeclaration(x) => x.readonly.is_readonly(),
+        ClosureParameterTypeSpecifier(x) => x.readonly.is_readonly(),
+        _ => false,
+    }
+}
+fn is_optional_parameter_declaration(node: S<'_>) -> bool {
+    match &node.children {
+        ParameterDeclaration(x) => x.optional.is_optional(),
+        ClosureParameterTypeSpecifier(x) => x.optional.is_optional(),
+        _ => false,
+    }
+}
+fn is_splat_parameter_declaration(node: S<'_>) -> bool {
+    match &node.children {
+        ParameterDeclaration(x) => x.pre_ellipsis.is_ellipsis(),
+        ClosureParameterTypeSpecifier(x) => x.pre_ellipsis.is_ellipsis(),
+        _ => false,
+    }
+}
 fn misplaced_variadic_param<'a>(param: S<'a>) -> Option<S<'a>> {
     assert_last_in_list(is_variadic_parameter_declaration, param)
+}
+fn misplaced_splat_param<'a>(param: S<'a>) -> Option<S<'a>> {
+    assert_last_in_list(is_splat_parameter_declaration, param)
 }
 fn misplaced_variadic_arg<'a>(args: S<'a>) -> Option<S<'a>> {
     assert_last_in_list(is_variadic_expression, args)
@@ -505,6 +529,11 @@ fn ends_with_variadic_comma<'a>(params: S<'a>) -> Option<S<'a>> {
 // Extract variadic parameter from a parameter list
 fn variadic_param<'a>(params: S<'a>) -> Option<S<'a>> {
     syntax_to_list_with_separators(params).find(|&x| is_variadic_parameter_declaration(x))
+}
+
+// Extract splat parameter from a parameter list
+fn splat_param<'a>(params: S<'a>) -> Option<S<'a>> {
+    syntax_to_list_with_separators(params).find(|&x| is_splat_parameter_declaration(x))
 }
 
 fn is_parameter_with_default_value(param: S<'_>) -> bool {
@@ -789,16 +818,33 @@ fn variadic_param_with_default_value<'a>(params: S<'a>) -> Option<S<'a>> {
     variadic_param(params).filter(|x| is_parameter_with_default_value(x))
 }
 
+fn splat_param_with_default_value<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_parameter_with_default_value(x))
+}
+
 // If a variadic parameter is marked inout, return it
 fn variadic_param_with_callconv<'a>(params: S<'a>) -> Option<S<'a>> {
     variadic_param(params).filter(|x| is_parameter_with_callconv(x))
 }
 
+fn splat_param_with_callconv<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_parameter_with_callconv(x))
+}
+
+fn splat_param_with_variadic<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_variadic_parameter_declaration(x))
+}
+
 fn variadic_param_with_readonly<'a>(params: S<'a>) -> Option<S<'a>> {
-    variadic_param(params).filter(|x| match &x.children {
-        ParameterDeclaration(x) => x.readonly.is_readonly(),
-        _ => false,
-    })
+    variadic_param(params).filter(|x| is_readonly_parameter_declaration(x))
+}
+
+fn splat_param_with_readonly<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_readonly_parameter_declaration(x))
+}
+
+fn splat_param_with_optional<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_optional_parameter_declaration(x))
 }
 
 // If an inout parameter has a default, return the default
@@ -2194,14 +2240,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn params_errors(&mut self, params: S<'a>) {
         self.produce_error_from_check(ends_with_variadic_comma, params, || errors::error2022);
         self.produce_error_from_check(misplaced_variadic_param, params, || errors::error2021);
+        self.produce_error_from_check(misplaced_splat_param, params, || errors::error2081);
 
         self.produce_error_from_check(variadic_param_with_default_value, params, || {
             errors::error2065
         });
 
+        self.produce_error_from_check(splat_param_with_default_value, params, || errors::error2082);
+
         self.produce_error_from_check(variadic_param_with_callconv, params, || errors::error2073);
+        self.produce_error_from_check(splat_param_with_callconv, params, || errors::error2083);
+        self.produce_error_from_check(splat_param_with_variadic, params, || errors::error2079);
+        self.produce_error_from_check(splat_param_with_optional, params, || errors::error2080);
         self.produce_error_from_check(variadic_param_with_readonly, params, || {
             errors::variadic_readonly_param
+        });
+        self.produce_error_from_check(splat_param_with_readonly, params, || {
+            errors::splat_readonly_param
         });
     }
 
@@ -2278,6 +2333,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
                 self.check_type_hint(&p.type_);
                 self.check_parameter_readonly(node);
+
+                if !p.pre_ellipsis.is_missing() {
+                    self.check_can_use_feature(node, &FeatureName::TypeSplat);
+                }
 
                 if let Some(inout_modifier) = parameter_callconv(node) {
                     if self.is_inside_async_method() {
@@ -5466,6 +5525,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let has_ellipsis = !c.ellipsis.is_missing();
                 if has_optional || has_ellipsis {
                     self.check_can_use_feature(node, &FeatureName::OpenTuples);
+                }
+            }
+            ClosureParameterTypeSpecifier(x) => {
+                if !x.pre_ellipsis.is_missing() {
+                    self.check_can_use_feature(node, &FeatureName::TypeSplat);
                 }
             }
             _ => {}

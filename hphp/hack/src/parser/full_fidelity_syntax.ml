@@ -1270,6 +1270,7 @@ module WithToken (Token : TokenType) = struct
             parameter_optional;
             parameter_call_convention;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
             parameter_ellipsis;
             parameter_name;
@@ -1281,6 +1282,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc parameter_optional in
         let acc = f acc parameter_call_convention in
         let acc = f acc parameter_readonly in
+        let acc = f acc parameter_pre_ellipsis in
         let acc = f acc parameter_type in
         let acc = f acc parameter_ellipsis in
         let acc = f acc parameter_name in
@@ -2349,12 +2351,14 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
             closure_parameter_ellipsis;
           } ->
         let acc = f acc closure_parameter_optional in
         let acc = f acc closure_parameter_call_convention in
         let acc = f acc closure_parameter_readonly in
+        let acc = f acc closure_parameter_pre_ellipsis in
         let acc = f acc closure_parameter_type in
         let acc = f acc closure_parameter_ellipsis in
         acc
@@ -3126,6 +3130,7 @@ module WithToken (Token : TokenType) = struct
             parameter_optional;
             parameter_call_convention;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
             parameter_ellipsis;
             parameter_name;
@@ -3138,6 +3143,7 @@ module WithToken (Token : TokenType) = struct
           parameter_optional;
           parameter_call_convention;
           parameter_readonly;
+          parameter_pre_ellipsis;
           parameter_type;
           parameter_ellipsis;
           parameter_name;
@@ -4140,6 +4146,7 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
             closure_parameter_ellipsis;
           } ->
@@ -4147,6 +4154,7 @@ module WithToken (Token : TokenType) = struct
           closure_parameter_optional;
           closure_parameter_call_convention;
           closure_parameter_readonly;
+          closure_parameter_pre_ellipsis;
           closure_parameter_type;
           closure_parameter_ellipsis;
         ]
@@ -4910,6 +4918,7 @@ module WithToken (Token : TokenType) = struct
             parameter_optional;
             parameter_call_convention;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
             parameter_ellipsis;
             parameter_name;
@@ -4922,6 +4931,7 @@ module WithToken (Token : TokenType) = struct
           "parameter_optional";
           "parameter_call_convention";
           "parameter_readonly";
+          "parameter_pre_ellipsis";
           "parameter_type";
           "parameter_ellipsis";
           "parameter_name";
@@ -5941,6 +5951,7 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
             closure_parameter_ellipsis;
           } ->
@@ -5948,6 +5959,7 @@ module WithToken (Token : TokenType) = struct
           "closure_parameter_optional";
           "closure_parameter_call_convention";
           "closure_parameter_readonly";
+          "closure_parameter_pre_ellipsis";
           "closure_parameter_type";
           "closure_parameter_ellipsis";
         ]
@@ -6837,6 +6849,7 @@ module WithToken (Token : TokenType) = struct
             parameter_optional;
             parameter_call_convention;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
             parameter_ellipsis;
             parameter_name;
@@ -6850,6 +6863,7 @@ module WithToken (Token : TokenType) = struct
             parameter_optional;
             parameter_call_convention;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
             parameter_ellipsis;
             parameter_name;
@@ -7954,6 +7968,7 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
             closure_parameter_ellipsis;
           ] ) ->
@@ -7962,6 +7977,7 @@ module WithToken (Token : TokenType) = struct
             closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
             closure_parameter_ellipsis;
           }
@@ -8984,6 +9000,7 @@ module WithToken (Token : TokenType) = struct
           parameter_optional
           parameter_call_convention
           parameter_readonly
+          parameter_pre_ellipsis
           parameter_type
           parameter_ellipsis
           parameter_name
@@ -8997,6 +9014,7 @@ module WithToken (Token : TokenType) = struct
               parameter_optional;
               parameter_call_convention;
               parameter_readonly;
+              parameter_pre_ellipsis;
               parameter_type;
               parameter_ellipsis;
               parameter_name;
@@ -10474,6 +10492,7 @@ module WithToken (Token : TokenType) = struct
           closure_parameter_optional
           closure_parameter_call_convention
           closure_parameter_readonly
+          closure_parameter_pre_ellipsis
           closure_parameter_type
           closure_parameter_ellipsis =
         let syntax =
@@ -10482,6 +10501,7 @@ module WithToken (Token : TokenType) = struct
               closure_parameter_optional;
               closure_parameter_call_convention;
               closure_parameter_readonly;
+              closure_parameter_pre_ellipsis;
               closure_parameter_type;
               closure_parameter_ellipsis;
             }

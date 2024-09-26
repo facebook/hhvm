@@ -939,6 +939,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           parameter_optional = optional;
           parameter_call_convention = callconv;
           parameter_readonly = readonly;
+          parameter_pre_ellipsis = pre_ellipsis;
           parameter_type = param_type;
           parameter_ellipsis = ellipsis;
           parameter_name = name;
@@ -957,6 +958,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present callconv space;
           t env readonly;
           when_present readonly space;
+          t env pre_ellipsis;
+          when_present pre_ellipsis space;
           t env param_type;
           (if
            Syntax.is_missing visibility
@@ -2326,6 +2329,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           closure_parameter_optional = optional;
           closure_parameter_call_convention = callconv;
           closure_parameter_readonly = readonly;
+          closure_parameter_pre_ellipsis = pre_ellipsis;
           closure_parameter_type = cp_type;
           closure_parameter_ellipsis = ellipsis;
         } ->
@@ -2337,6 +2341,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present callconv space;
           t env readonly;
           when_present readonly space;
+          t env pre_ellipsis;
           t env cp_type;
           t env ellipsis;
         ]

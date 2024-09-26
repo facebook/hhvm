@@ -465,14 +465,15 @@ SyntaxVariant::DecoratedExpression (DecoratedExpressionChildren{decorator,expres
 ss.serialize_field("decorated_expression_expression", &self.with(expression))?;
       ss.end()
 } 
-SyntaxVariant::ParameterDeclaration (ParameterDeclarationChildren{attribute,visibility,optional,call_convention,readonly,type_,ellipsis,name,default_value,parameter_end} ) => {
-      let mut ss = s.serialize_struct("", 11)?;
+SyntaxVariant::ParameterDeclaration (ParameterDeclarationChildren{attribute,visibility,optional,call_convention,readonly,pre_ellipsis,type_,ellipsis,name,default_value,parameter_end} ) => {
+      let mut ss = s.serialize_struct("", 12)?;
       ss.serialize_field("kind", "parameter_declaration")?;
       ss.serialize_field("parameter_attribute", &self.with(attribute))?;
 ss.serialize_field("parameter_visibility", &self.with(visibility))?;
 ss.serialize_field("parameter_optional", &self.with(optional))?;
 ss.serialize_field("parameter_call_convention", &self.with(call_convention))?;
 ss.serialize_field("parameter_readonly", &self.with(readonly))?;
+ss.serialize_field("parameter_pre_ellipsis", &self.with(pre_ellipsis))?;
 ss.serialize_field("parameter_type", &self.with(type_))?;
 ss.serialize_field("parameter_ellipsis", &self.with(ellipsis))?;
 ss.serialize_field("parameter_name", &self.with(name))?;
@@ -1422,12 +1423,13 @@ ss.serialize_field("closure_return_type", &self.with(return_type))?;
 ss.serialize_field("closure_outer_right_paren", &self.with(outer_right_paren))?;
       ss.end()
 } 
-SyntaxVariant::ClosureParameterTypeSpecifier (ClosureParameterTypeSpecifierChildren{optional,call_convention,readonly,type_,ellipsis} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
+SyntaxVariant::ClosureParameterTypeSpecifier (ClosureParameterTypeSpecifierChildren{optional,call_convention,readonly,pre_ellipsis,type_,ellipsis} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
       ss.serialize_field("kind", "closure_parameter_type_specifier")?;
       ss.serialize_field("closure_parameter_optional", &self.with(optional))?;
 ss.serialize_field("closure_parameter_call_convention", &self.with(call_convention))?;
 ss.serialize_field("closure_parameter_readonly", &self.with(readonly))?;
+ss.serialize_field("closure_parameter_pre_ellipsis", &self.with(pre_ellipsis))?;
 ss.serialize_field("closure_parameter_type", &self.with(type_))?;
 ss.serialize_field("closure_parameter_ellipsis", &self.with(ellipsis))?;
       ss.end()

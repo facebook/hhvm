@@ -18,7 +18,7 @@ let format_msg file_clr err_clr ((p, s) : Pos.absolute * string) =
     else
       Pos.filename p
   in
-  let line_clr = Tty.Normal Tty.Yellow in
+  let line_clr = Tty.Normal Tty.Green in
   let col_clr = Tty.Normal Tty.Cyan in
   let default_clr = Tty.Normal Tty.Default in
   [
@@ -36,7 +36,7 @@ let format_msg file_clr err_clr ((p, s) : Pos.absolute * string) =
 let format_error_code code =
   [
     (Tty.Normal Tty.Default, " (");
-    (Tty.Normal Tty.Yellow, User_error.error_code_to_string code);
+    (Tty.Normal Tty.Green, User_error.error_code_to_string code);
     (Tty.Normal Tty.Default, ")");
   ]
 
@@ -60,9 +60,10 @@ let to_string (error : Errors.finalized_error) : string =
     error
   in
   let newline = (Tty.Normal Tty.Default, "\n") in
-  let severity = format_severity severity in
+  let severity_txt = format_severity severity in
+  let color = User_error.Severity.tty_color severity in
   let claim =
-    format_msg (Tty.Bold Tty.Red) (Tty.Bold Tty.Red) claim
+    format_msg (Tty.Bold color) (Tty.Bold Tty.Default) claim
     @ format_error_code code
     @ [newline]
   in
@@ -70,7 +71,7 @@ let to_string (error : Errors.finalized_error) : string =
     let indent = (Tty.Normal Tty.Default, "  ") in
     List.concat_map
       ~f:(fun msg ->
-        (indent :: format_msg (Tty.Normal Tty.Red) (Tty.Normal Tty.Green) msg)
+        (indent :: format_msg (Tty.Normal color) (Tty.Normal Tty.Default) msg)
         @ [newline])
       reasons
   in
@@ -79,9 +80,9 @@ let to_string (error : Errors.finalized_error) : string =
     | [] -> []
     | msgs ->
       (Tty.Normal Tty.Default, "\n")
-      :: List.map ~f:(fun msg -> (Tty.Normal Tty.Yellow, msg)) msgs
+      :: List.map ~f:(fun msg -> (Tty.Normal Tty.Cyan, msg)) msgs
   in
-  let to_print = severity @ claim @ reasons @ custom_msgs in
+  let to_print = severity_txt @ claim @ reasons @ custom_msgs in
   if Unix.isatty Unix.stdout then
     List.map to_print ~f:(fun (c, s) -> Tty.apply_color c s) |> String.concat
   else

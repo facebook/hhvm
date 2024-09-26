@@ -255,6 +255,24 @@ struct Builder {
     return *this;
   }
 
+  Builder& remove(const StaticString& key) {
+    assertx(IMPLIES(r.type.is(BBottom), r.mightFail));
+    assertx(r.type.subtypeOf(BDict));
+
+    if (r.type.is(BBottom)) return *this;
+
+    if (auto const t = tv(r.type)) {
+      auto arr = Array::attach(val(*t).parr);
+      arr.remove(key);
+      arr.setEvalScalar();
+      r.type = dict_val(arr.get());
+    } else if (!array_like_elem(r.type, sval(key.get())).first.is(BBottom)) {
+      r.type = TDictN;
+    }
+
+    return *this;
+  }
+
   Builder& usedThis(bool used = true) {
     if (used) r.contextSensitive = true;
     return *this;
@@ -885,33 +903,35 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     auto b = [&, typeAlias=typeAlias] {
       assertx(typeAlias->typeStructure);
 
+      auto const adjustTS = [&] (Builder&& b) -> Builder {
+        auto const tv = ts->get(s_typevars);
+        if (tv.is_init()) b.set(s_typevars, tv);
+        else b.remove(s_typevars);
+
+        return b
+          .optCopy(s_alias, ts)
+          .optCopy(s_case_type, ts);
+      };
+
       if (typeAlias->resolvedTypeStructure) {
         assertx(typeAlias->resolvedTypeStructure->isStatic());
         assertx(typeAlias->resolvedTypeStructure->isDictType());
         if (!typeAlias->resolvedLocally) {
-          return Builder::attach(
+          return adjustTS(Builder::attach(
             Resolution { dict_val(typeAlias->resolvedTypeStructure), false }
-          );
+          ));
         }
       }
 
       ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache, ctx.resolving};
       newCtx.generics = &g;
 
-      auto const toResolve = [&] () -> SArray {
-        if (!typevarTypes) return typeAlias->typeStructure;
-        auto removed =
-          Array::attach(const_cast<ArrayData*>(typeAlias->typeStructure));
-        removed.remove(s_typevars);
-        removed.setEvalScalar();
-        return removed.get();
-      }();
-
       const StaticString& key = key_for_alias_kind(typeAlias->kind);
-      auto r = resolve(newCtx, toResolve);
+      auto r = resolve(newCtx, typeAlias->typeStructure);
       assertx(!r.contextSensitive);
-      return Builder::attach(std::move(r))
+      auto b = Builder::attach(std::move(r))
         .set(key, make_tv<KindOfPersistentString>(clsName));
+      return adjustTS(std::move(b));
     }();
 
     if (typevarTypes) {

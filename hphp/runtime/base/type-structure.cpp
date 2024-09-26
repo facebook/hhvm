@@ -802,6 +802,12 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
           always_assert(inserted);
           auto resolved = resolveTS(env, newCtx, ts, generics);
+
+          // Hack should disallow a situation where an alias is bound with free
+          // type variables but there are a few situations where we may trigger
+          // this in the frontend compiler.
+          resolved.remove(s_typevars);
+
           assertx(!resolved.isNull());
           env.resolving.erase(clsName);
           return resolved;
@@ -812,7 +818,6 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
           // we need to convert them over.
           std::vector<std::string> typevars;
           folly::split(',', ts[s_typevars].asCStrRef().data(), typevars);
-          ts.remove(s_typevars);
 
           auto generic_types = resolveGenerics(env, ctx, arr);
 

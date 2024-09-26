@@ -1,0 +1,46 @@
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+string(2) "Tq"
+string(5) "Tr,Ts"
+string(13) "TClass,TValue"
+NULL
+string(2) "Tq"
+string(5) "Tr,Ts"
+string(13) "TClass,TValue"
+string(5) "Tr,Th"
+string(2) "Tz"
+string(8) "Tx,Ty,Tz"
+string(5) "Tq,Tu"
+string(2) "Tv"
+NULL
+string(1) "T"
+string(5) "Tr,Th"
+string(2) "Tz"
+string(8) "Tx,Ty,Tz"
+string(5) "Tq,Tu"
+string(2) "Tv"
+NULL
+string(1) "T"
+string(2) "Ta"
+NULL
+string(2) "Tb"
+string(2) "Ta"
+NULL
+string(5) "Tnone"
+NULL
+dict(3) {
+  ["kind"]=>
+  int(13)
+  ["name"]=>
+  string(5) "Tnone"
+  ["alias"]=>
+  string(8) "Ttheheck"
+}

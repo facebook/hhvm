@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77f6a8adb4a83aec208ba4b5d6133861>>
+// @generated SignedSource<<bfe876d4fe8706c3beef0e267c89b67e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -130,6 +130,7 @@ pub enum NoneOrAllExcept<A> {
 #[repr(C, u8)]
 pub enum ExtendedReasonsConfig {
     Extended(isize),
+    Legacy,
     Debug,
 }
 

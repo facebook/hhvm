@@ -5826,6 +5826,7 @@ end = struct
          Option.value_map
            ~default:[]
            ~f:(function
+             | GlobalOptions.Legacy -> []
              | GlobalOptions.Extended complexity ->
                Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity)
              | GlobalOptions.Debug ->
@@ -5943,6 +5944,7 @@ end = struct
         :: Option.value_map
              ~default:[]
              ~f:(function
+               | GlobalOptions.Legacy -> []
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
                    explain ~sub:reason_sub ~super:reason_super ~complexity)
@@ -6088,6 +6090,7 @@ end = struct
         :: Option.value_map
              ~default:[]
              ~f:(function
+               | GlobalOptions.Legacy -> []
                | GlobalOptions.Extended complexity ->
                  Typing_reason.(
                    explain ~sub:reason_sub ~super:reason_super ~complexity)

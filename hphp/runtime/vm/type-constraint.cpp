@@ -962,9 +962,7 @@ TypeConstraint TypeConstraint::resolvedWithAutoload() const {
     // Enum.
     [this](FoundClass cls) -> Optional<TypeConstraint> {
       if (isEnum(cls.value)) {
-        auto const type = cls.value->enumBaseTy()
-          ? enumDataTypeToAnnotType(*cls.value->enumBaseTy())
-          : AnnotType::ArrayKey;
+        auto const type = cls.value->enumBaseTy().type();
         auto copy = *this;
         copy.resolveType(type, false, nullptr);
         return copy;
@@ -1106,10 +1104,14 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
   return simplify(resolved0) == simplify(resolved1);
 }
 
-template <bool Assert, bool ForProp>
-bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
+template <TypeConstraint::CheckMode Mode>
+bool TypeConstraint::checkNamedTypeNonObj(tv_rval val,
+                                          const Class* context) const {
   assertx(val.type() != KindOfObject);
   assertx(isUnresolved());
+
+  constexpr auto Assert  = Mode == CheckMode::Assert;
+  constexpr auto ForProp = Mode == CheckMode::ExactProp;
 
   auto const p = [&]() -> NamedTypeValue {
     if (!Assert) {
@@ -1180,14 +1182,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       // constraint if it is. We only need to do this when the underlying
       // type is not an object, since only int and string can be enums.
       if (isEnum(c.value)) {
-        auto dt = c.value->enumBaseTy();
-        // For an enum, if the underlying type is mixed, we still require
-        // it is either an int or a string!
-        if (dt) {
-          return equivDataTypes(*dt, val.type());
-        } else {
-          return isIntType(val.type()) || isStringType(val.type());
-        }
+        return c.value->enumBaseTy().checkImpl<Mode>(val, context);
       }
       return false;
     },
@@ -1256,9 +1251,9 @@ bool TypeConstraint::checkImpl(tv_rval val,
   assertx(isCheckable());
   assertx(tvIsPlausible(*val));
 
-  auto const isAssert = Mode == CheckMode::Assert;
-  auto const isPasses = Mode == CheckMode::AlwaysPasses;
-  auto const isProp   = Mode == CheckMode::ExactProp;
+  auto const isAssert          = Mode == CheckMode::Assert;
+  auto const isPasses          = Mode == CheckMode::AlwaysPasses;
+  auto const isProp DEBUG_ONLY = Mode == CheckMode::ExactProp;
 
   // We shouldn't provide a context for the conservative checks.
   assertx(!isAssert || !context);
@@ -1358,7 +1353,9 @@ bool TypeConstraint::checkImpl(tv_rval val,
       case AnnotAction::Fallback:
       case AnnotAction::FallbackCoerce:
         assertx(tc.isUnresolved());
-        if (!isPasses && tc.checkNamedTypeNonObj<isAssert, isProp>(val)) return true;
+        if (!isPasses && tc.checkNamedTypeNonObj<Mode>(val, context)) {
+          return true;
+        }
         break;
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
@@ -1661,11 +1658,7 @@ bool TypeConstraint::checkStringCompatible() const {
       return false;
     },
     [&](FoundClass c) {
-      if (isEnum(c.value)) {
-        auto dt = c.value->enumBaseTy();
-        return !dt || isStringType(dt);
-      }
-      return false;
+      return isEnum(c.value) && c.value->enumBaseTy().checkStringCompatible();
     },
     [&](NotFound) {
       return false;

@@ -1049,8 +1049,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     if (cls) {
       if (isEnum(cls)) {
         assertx(tc.isUnresolved());
-        if (auto const dt = cls->enumBaseTy()) return Type{*dt};
-        return TInt | TStr;
+        return atToType(cls->enumBaseTy().type());
       }
       return Type::SubObj(cls);
     }

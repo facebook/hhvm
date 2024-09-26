@@ -1436,7 +1436,7 @@ public:
    *
    * A return of std::nullopt represents the `mixed' type.
    */
-  MaybeDataType enumBaseTy() const;
+  TypeConstraint enumBaseTy() const;
 
   /*
    * Returns whether this class has reified generics
@@ -1688,6 +1688,8 @@ private:
      * prior to the ObjectData structure itself.
      */
     const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
+
+    TypeConstraint m_enumBaseTy;
 
     /*
      * Cache of persistent enum values, managed by EnumCache.
@@ -2059,7 +2061,6 @@ private:
    */
   mutable PropInitVec m_declPropInit;
 
-  MaybeDataType m_enumBaseTy;
   /*
    * Whether this is a subclass of Closure whose m_invoke->m_cls has been set
    * to the closure's context class.

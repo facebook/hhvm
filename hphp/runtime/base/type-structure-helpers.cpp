@@ -687,9 +687,12 @@ bool checkTypeStructureMatchesTVImpl(
       assertx(ts.exists(s_classname));
       auto const cls = Class::load(ts[s_classname].asCStrRef().get());
       if (!isOrAsOp) {
-        if (auto const dt = cls ? cls->enumBaseTy() : std::nullopt) {
-          return equivDataTypes(*dt, type);
-        }
+        // N.B. This is currently broken for enums declared with the underlying
+        //      type classname<T>, where it will cause us to accept both int and
+        //      string.
+        auto const dt = cls ? cls->enumBaseTy().underlyingDataType()
+                            : std::nullopt;
+        if (dt) return equivDataTypes(*dt, type);
         return isIntType(type) || isStringType(type);
       }
       return cls && enumHasValue(cls, &c1);

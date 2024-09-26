@@ -130,7 +130,7 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   auto values = EnumCache::getValuesBuiltin(self_);
   if (!values->names.exists(res)) {
     res = init_null();
-  } else if (auto base = self_->enumBaseTy()) {
+  } else if (auto base = self_->enumBaseTy().underlyingDataType()) {
     if (isStringType(*base) && res.isInteger()) {
       res = Variant(res.toString());
     }

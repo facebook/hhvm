@@ -1214,7 +1214,8 @@ SSATmp* opt_enum_coerce(IRGS& env, const ParamPrep& params) {
       // We never need to coerce strs to ints here, but we may need to coerce
       // ints to strs if the enum is a string type with intish values.
       auto const value = params[0].value;
-      auto const isstr = isStringType(params.ctx->clsVal()->enumBaseTy());
+      auto const isstr = isStringType(
+        params.ctx->clsVal()->enumBaseTy().underlyingDataType());
       if (value->isA(TInt) && isstr) return gen(env, ConvIntToStr, value);
       gen(env, IncRef, value);
       return value;

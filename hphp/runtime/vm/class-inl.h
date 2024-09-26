@@ -727,8 +727,8 @@ inline std::pair<Slot, bool> Class::memoSlotForFunc(FuncId func) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
-inline MaybeDataType Class::enumBaseTy() const {
-  return m_enumBaseTy;
+inline TypeConstraint Class::enumBaseTy() const {
+  return m_extra->m_enumBaseTy;
 }
 
 inline EnumValues* Class::getEnumValues() const {

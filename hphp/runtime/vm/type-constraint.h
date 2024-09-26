@@ -557,8 +557,8 @@ private:
   template <CheckMode>
   bool checkImpl(tv_rval val, const Class* context) const;
 
-  template <bool, bool>
-  bool checkNamedTypeNonObj(tv_rval val) const;
+  template <CheckMode>
+  bool checkNamedTypeNonObj(tv_rval val, const Class* context) const;
 
   template <bool> static bool checkTypeAliasImpl(const ClassConstraint& oc, const Class* type);
 

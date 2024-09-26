@@ -58,14 +58,11 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   std::vector<TypeConstraint> parts;
   auto const typeAliasFromClass = [&](Class* klass) {
     if (isEnum(klass)) {
-      // If the class is an enum, pull out the actual base type.
-      if (auto const enumType = klass->enumBaseTy()) {
-        auto t = enumDataTypeToAnnotType(*enumType);
-        assertx(t != AnnotType::SubObject);
-        parts.emplace_back(t, flags);
-      } else {
-        parts.emplace_back(AnnotType::ArrayKey, flags);
-      }
+      auto enumType = klass->enumBaseTy();
+      assertx(enumType.validForEnumBase());
+
+      enumType.addFlags(flags);
+      parts.emplace_back(std::move(enumType));
     } else {
       parts.emplace_back(
         AnnotType::SubObject, flags, TypeConstraint::ClassConstraint{*klass});

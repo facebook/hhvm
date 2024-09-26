@@ -4142,12 +4142,13 @@ void Class::setRequirements() {
 
 void Class::setEnumType() {
   if (attrs() & AttrEnum) {
-    m_enumBaseTy = m_preClass->enumBaseTy().underlyingDataTypeResolved();
+    allocExtraData();
+    auto const resolved = m_preClass->enumBaseTy().resolvedWithAutoload();
+    m_extra.raw()->m_enumBaseTy = resolved;
 
     // Make sure we've loaded a valid underlying type.
-    if (!m_preClass->enumBaseTy().validForEnumBase()) {
-      raise_error("Invalid base type for enum %s",
-                  m_preClass->name()->data());
+    if (!resolved.validForEnumBase()) {
+      raise_error("Invalid base type for enum %s", m_preClass->name()->data());
     }
   }
 }
@@ -4176,11 +4177,17 @@ void Class::setIncludedEnums() {
     }
     declIncludedEnums.emplace_back(cp);
     m_preClass->enforceInMaybeSealedParentWhitelist(cp->preClass());
-    auto cp_baseType = cp->m_enumBaseTy;
-    if (m_enumBaseTy &&
+
+    // N.B. This will check for int and string type compatibility, but not for
+    //      classname<T> which is also an allowed enum type. The type checker
+    //      currently does this and it could be added to HHVM as well.
+    auto my_enumBaseTy = enumBaseTy().underlyingDataType();
+    auto cp_baseType = cp->enumBaseTy().underlyingDataType();
+
+    if (my_enumBaseTy &&
         (!cp_baseType ||
-         isIntType(*cp_baseType) != isIntType(*m_enumBaseTy) ||
-         isStringType(*cp_baseType) != isStringType(*m_enumBaseTy))) {
+         isIntType(*cp_baseType) != isIntType(*my_enumBaseTy) ||
+         isStringType(*cp_baseType) != isStringType(*my_enumBaseTy))) {
       raise_error("%s cannot include %s - base type mismatch",
                   m_preClass->name()->data(), cp->name()->data());
     }

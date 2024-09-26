@@ -88,8 +88,10 @@ FOLLY_GFLAGS_DEFINE_bool(
     "Do not register a TransportRoutingHandler that can handle the legacy transports: header, framed, and unframed (default: false)");
 
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
+
 THRIFT_FLAG_DEFINE_bool(enable_mrl_check_for_thrift_server, false);
 THRIFT_FLAG_DEFINE_bool(enforce_mrl_check_for_thrift_server, false);
+THRIFT_FLAG_DEFINE_bool(migrate_mrl_initializer_for_thrift_server, false);
 
 THRIFT_FLAG_DEFINE_bool(dump_snapshot_on_long_shutdown, true);
 
@@ -2200,6 +2202,11 @@ folly::observer::Observer<bool> ThriftServer::enableTLSCertRevocation() {
 
 folly::observer::Observer<bool> ThriftServer::enforceTLSCertRevocation() {
   return THRIFT_FLAG_OBSERVE(enforce_mrl_check_for_thrift_server);
+}
+
+folly::observer::Observer<bool>
+ThriftServer::migrateTLSCertRevocationInitializer() {
+  return THRIFT_FLAG_OBSERVE(migrate_mrl_initializer_for_thrift_server);
 }
 
 folly::observer::Observer<bool> ThriftServer::enableReceivingDelegatedCreds() {

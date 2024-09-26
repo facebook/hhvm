@@ -141,6 +141,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   using Base::apply;
   using Base::Base;
   using Base::operator=;
+  using Base::assign;
   using Base::clear;
 
   /// @copybrief AssignPatch::customVisit
@@ -248,6 +249,20 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     ensureAny(std::move(ensure));
     patchIfTypeIsImpl(std::move(type), std::move(patch), true);
   }
+
+  // Interop with AnyData
+  // TODO(pranavtbhat): Replace with actual adapter/typedef support in patch
+  void assign(const type::AnyData& val) { assign(val.toThrift()); }
+  void assign(type::AnyData&& val) { assign(std::move(val).toThrift()); }
+
+  AnyPatch& operator=(const type::AnyData& val) {
+    return this->operator=(val.toThrift());
+  }
+  AnyPatch& operator=(type::AnyData&& val) {
+    return this->operator=(std::move(val).toThrift());
+  }
+
+  void apply(type::AnyData& val) const { apply(val.toThrift()); }
 
  private:
   using Base::assignOr;

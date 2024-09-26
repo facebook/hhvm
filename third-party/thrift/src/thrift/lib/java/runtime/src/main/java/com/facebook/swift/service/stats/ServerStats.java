@@ -17,14 +17,16 @@
 package com.facebook.swift.service.stats;
 
 import com.facebook.nifty.core.NiftyMetrics;
-import io.airlift.stats.DecayCounter;
-import io.airlift.stats.Distribution;
-import io.airlift.stats.ExponentialDecay;
+import com.facebook.thrift.metrics.distribution.MultiWindowDistribution;
+import com.facebook.thrift.metrics.distribution.Quantile;
+import com.facebook.thrift.metrics.rate.ExpMovingAverageRate;
+import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Implemetation of StatsSource to capture Thrift Server Counters. It tracks following counters:
@@ -34,45 +36,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * counters and queued_requests, we need to pass instance of ThriftServer to this object.
  */
 public class ServerStats {
-
-  // Counter properties
-  private final AtomicLong receivedRequests;
-
-  /**
-   * DecayCounters decays exponentially using a formula to calculate counts in a rolling time window
-   * https://github.com/airlift/airlift/blob/master/stats/src/main/java/io/airlift/stats/DecayCounter.java
-   * DecayCounters are used for 1 minute and 1 hour count of various counters.
-   */
-  private final DecayCounter receivedRequestsOneMin;
-
-  private final DecayCounter receivedRequestsOneHour;
-
-  private final AtomicLong sentReplies;
-  private final DecayCounter sentRepliesOneMin;
-  private final DecayCounter sentRepliesOneHour;
-
-  private final AtomicLong activeRequests;
-  private final DecayCounter activeRequestsOneMin;
-  private final DecayCounter activeRequestsOneHour;
-
-  private final Distribution processTime;
-  private final Distribution processTimeOneMin;
-  private final Distribution processTimeOneHour;
-
-  private final Distribution readTime;
-  private final Distribution readTimeOneMin;
-  private final Distribution readTimeOneHour;
-
-  private final Distribution writeTime;
-  private final Distribution writeTimeOneMin;
-  private final Distribution writeTimeOneHour;
-
-  private final AtomicLong outOfDirectMemroyErrors;
-
-  private final ConcurrentHashMap<String, AtomicLong> methodCounters = new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, DecayCounter> methodDecayCounters =
+  private final ConcurrentHashMap<String, ExpMovingAverageRate> movingAverages =
       new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, Distribution> methodDurations = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, SlidingTimeWindowMovingCounter> counters =
+      new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, MultiWindowDistribution> distributions =
+      new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, LongAdder> allTimeCounters = new ConcurrentHashMap<>();
 
   // Thrift Server properties
   private NiftyMetrics niftyMetrics;
@@ -97,45 +67,20 @@ public class ServerStats {
   private static final String METHOD_NUM_CALLS = ".num_calls.sum";
   private static final String METHOD_NUM_PROCESSED = ".num_processed.sum";
   private static final String METHOD_NUM_EXCEPTIONS = ".num_exceptions.sum";
-  private static final String METHOD_PROCESS_TIME = ".time_process_us.avg";
+  private static final String METHOD_PROCESS_TIME = ".time_process_us";
 
   // Common Key Prefix/Suffixes
   private static final String THRIFT = "thrift.";
-  private static final String P99 = ".p99";
-  private static final String P95 = ".p95";
-  private static final String AVG = ".avg";
+
   private static final String ONE_MINUTE = ".60";
   private static final String ONE_HOUR = ".3600";
 
   private static final Map<String, String> ATTRIBUTE_MAP = new HashMap<>();
 
-  public ServerStats() {
-    // Initializing all counters
-    this.receivedRequests = new AtomicLong(0);
-    this.receivedRequestsOneMin = new DecayCounter(ExponentialDecay.oneMinute());
-    this.receivedRequestsOneHour = new DecayCounter(ExponentialDecay.seconds(3600));
+  public ServerStats() {}
 
-    this.sentReplies = new AtomicLong(0);
-    this.sentRepliesOneMin = new DecayCounter(ExponentialDecay.oneMinute());
-    this.sentRepliesOneHour = new DecayCounter(ExponentialDecay.seconds(3600));
-
-    this.activeRequests = new AtomicLong(0);
-    this.activeRequestsOneMin = new DecayCounter(ExponentialDecay.oneMinute());
-    this.activeRequestsOneHour = new DecayCounter(ExponentialDecay.seconds(3600));
-
-    this.processTime = new Distribution();
-    this.processTimeOneMin = new Distribution(ExponentialDecay.oneMinute());
-    this.processTimeOneHour = new Distribution(ExponentialDecay.seconds(3600));
-
-    this.readTime = new Distribution();
-    this.readTimeOneMin = new Distribution(ExponentialDecay.oneMinute());
-    this.readTimeOneHour = new Distribution(ExponentialDecay.seconds(3600));
-
-    this.writeTime = new Distribution();
-    this.writeTimeOneMin = new Distribution(ExponentialDecay.oneMinute());
-    this.writeTimeOneHour = new Distribution(ExponentialDecay.seconds(3600));
-
-    this.outOfDirectMemroyErrors = new AtomicLong(0);
+  public void markDirectOomError() {
+    incrementCounter(OUT_OF_DIRECT_MEMORY_EXCEPTIONS_KEY, 1);
   }
 
   public void setNiftyMetrics(NiftyMetrics niftyMetrics) {
@@ -147,165 +92,108 @@ public class ServerStats {
   }
 
   public void requestReceived(long readTimeDuration, String methodName) {
-    receivedRequests.incrementAndGet();
-    receivedRequestsOneMin.add(1);
-    receivedRequestsOneHour.add(1);
+    incrementCounter(RECEIVED_REQUESTS_KEY, 1);
 
-    activeRequests.incrementAndGet();
-    activeRequestsOneMin.add(1);
-    activeRequestsOneHour.add(1);
+    incrementAverages(ACTIVE_REQUESTS_KEY, 1);
 
-    readTime.add(readTimeDuration);
-    readTimeOneMin.add(readTimeDuration);
-    readTimeOneHour.add(readTimeDuration);
+    updateDistribution(READ_TIME_KEY, readTimeDuration);
 
-    incrementCounterValues(methodName + METHOD_NUM_CALLS);
+    incrementCounter(THRIFT + methodName + METHOD_NUM_CALLS, 1);
   }
 
   public void publishWriteTime(long writeTimeDuration) {
-    writeTime.add(writeTimeDuration);
-    writeTimeOneMin.add(writeTimeDuration);
-    writeTimeOneHour.add(writeTimeDuration);
+    updateDistribution(WRITE_TIME_KEY, writeTimeDuration);
   }
 
   public void replySent(long processTimeDuration, String methodName) {
-    sentReplies.incrementAndGet();
-    sentRepliesOneMin.add(1);
-    sentRepliesOneHour.add(1);
+    incrementCounter(SENT_REPLIES_KEY, 1);
+    incrementAverages(ACTIVE_REQUESTS_KEY, 1);
+    incrementCounter(THRIFT + methodName + METHOD_NUM_PROCESSED, 1);
 
-    activeRequests.decrementAndGet();
-    activeRequestsOneMin.add(-1);
-    activeRequestsOneHour.add(-1);
-
-    processTime.add(processTimeDuration);
-    processTimeOneMin.add(processTimeDuration);
-    processTimeOneHour.add(processTimeDuration);
-
-    incrementCounterValues(methodName + METHOD_NUM_PROCESSED);
-    addHistogramValue(methodName + METHOD_PROCESS_TIME, processTimeDuration);
+    updateDistribution(PROCESS_TIME_KEY, processTimeDuration);
+    updateDistribution(THRIFT + methodName + METHOD_PROCESS_TIME, processTimeDuration);
   }
 
   public void error(String methodName) {
-    incrementCounterValues(methodName + METHOD_NUM_EXCEPTIONS);
+    incrementCounter(THRIFT + methodName + METHOD_NUM_EXCEPTIONS, 1);
   }
 
   public Map<String, Long> getCounters() {
-    Map<String, Long> counters = new HashMap<>();
-    counters.put(RECEIVED_REQUESTS_KEY, receivedRequests.get());
-    counters.put(RECEIVED_REQUESTS_KEY + ONE_MINUTE, Math.round(receivedRequestsOneMin.getCount()));
-    counters.put(RECEIVED_REQUESTS_KEY + ONE_HOUR, Math.round(receivedRequestsOneHour.getCount()));
+    Map<String, Long> resultCounters = new HashMap<>(64);
 
-    counters.put(SENT_REPLIES_KEY, sentReplies.get());
-    counters.put(SENT_REPLIES_KEY + ONE_MINUTE, Math.round(sentRepliesOneMin.getCount()));
-    counters.put(SENT_REPLIES_KEY + ONE_HOUR, Math.round(sentRepliesOneHour.getCount()));
+    allTimeCounters.forEach((key, counter) -> resultCounters.put(key, counter.sum()));
 
-    counters.put(ACTIVE_REQUESTS_KEY, activeRequests.get());
-    counters.put(ACTIVE_REQUESTS_KEY + ONE_MINUTE, Math.round(activeRequestsOneMin.getCount()));
-    counters.put(ACTIVE_REQUESTS_KEY + ONE_HOUR, Math.round(activeRequestsOneHour.getCount()));
+    counters.forEach(
+        (key, counter) -> {
+          resultCounters.put(key + ONE_MINUTE, counter.oneMinuteRate());
+          resultCounters.put(key + ONE_HOUR, counter.oneHourRate());
+        });
 
-    counters.put(READ_TIME_KEY + AVG, Math.round(readTime.getAvg()));
-    counters.put(READ_TIME_KEY + AVG + ONE_MINUTE, Math.round(readTimeOneMin.getAvg()));
-    counters.put(READ_TIME_KEY + AVG + ONE_HOUR, Math.round(readTimeOneHour.getAvg()));
+    movingAverages.forEach(
+        (key, counter) -> {
+          resultCounters.put(key + ONE_MINUTE, counter.oneMinuteRate());
+          resultCounters.put(key + ONE_HOUR, counter.oneHourRate());
+        });
 
-    counters.put(READ_TIME_KEY + P95, Math.round(readTime.getP95()));
-    counters.put(READ_TIME_KEY + P95 + ONE_MINUTE, Math.round(readTimeOneMin.getP95()));
-    counters.put(READ_TIME_KEY + P95 + ONE_HOUR, Math.round(readTimeOneHour.getP95()));
-
-    counters.put(READ_TIME_KEY + P99, Math.round(readTime.getP99()));
-    counters.put(READ_TIME_KEY + P99 + ONE_MINUTE, Math.round(readTimeOneMin.getP99()));
-    counters.put(READ_TIME_KEY + P99 + ONE_HOUR, Math.round(readTimeOneHour.getP99()));
-
-    counters.put(PROCESS_TIME_KEY + AVG, Math.round(processTime.getAvg()));
-    counters.put(PROCESS_TIME_KEY + AVG + ONE_MINUTE, Math.round(processTimeOneMin.getAvg()));
-    counters.put(PROCESS_TIME_KEY + AVG + ONE_HOUR, Math.round(processTimeOneHour.getAvg()));
-
-    counters.put(PROCESS_TIME_KEY + P95, Math.round(processTime.getP95()));
-    counters.put(PROCESS_TIME_KEY + P95 + ONE_MINUTE, Math.round(processTimeOneMin.getP95()));
-    counters.put(PROCESS_TIME_KEY + P95 + ONE_HOUR, Math.round(processTimeOneHour.getP95()));
-
-    counters.put(PROCESS_TIME_KEY + P99, Math.round(processTime.getP99()));
-    counters.put(PROCESS_TIME_KEY + P99 + ONE_MINUTE, Math.round(processTimeOneMin.getP99()));
-    counters.put(PROCESS_TIME_KEY + P99 + ONE_HOUR, Math.round(processTimeOneHour.getP99()));
-
-    counters.put(WRITE_TIME_KEY + AVG, Math.round(writeTime.getAvg()));
-    counters.put(WRITE_TIME_KEY + AVG + ONE_MINUTE, Math.round(writeTimeOneMin.getAvg()));
-    counters.put(WRITE_TIME_KEY + AVG + ONE_HOUR, Math.round(writeTimeOneHour.getAvg()));
-
-    counters.put(WRITE_TIME_KEY + P95, Math.round(writeTime.getP95()));
-    counters.put(WRITE_TIME_KEY + P95 + ONE_MINUTE, Math.round(writeTimeOneMin.getP95()));
-    counters.put(WRITE_TIME_KEY + P95 + ONE_HOUR, Math.round(writeTimeOneHour.getP95()));
-
-    counters.put(OUT_OF_DIRECT_MEMORY_EXCEPTIONS_KEY, outOfDirectMemroyErrors.get());
-
-    counters.put(WRITE_TIME_KEY + P99, Math.round(writeTime.getP99()));
-    counters.put(WRITE_TIME_KEY + P99 + ONE_MINUTE, Math.round(writeTimeOneMin.getP99()));
-    counters.put(WRITE_TIME_KEY + P99 + ONE_HOUR, Math.round(writeTimeOneHour.getP99()));
+    distributions.forEach(
+        (key, dist) -> {
+          addQuantilesToCounters(key, ONE_MINUTE, resultCounters, dist.getOneMinuteQuantiles());
+          addQuantilesToCounters(key, ONE_HOUR, resultCounters, dist.getOneHourQuantiles());
+          addQuantilesToCounters(key, "", resultCounters, dist.getAllTimeQuantiles());
+        });
 
     if (threadPoolExecutor != null && threadPoolExecutor.getQueue() != null) {
-      counters.put(QUEUED_REQUESTS_KEY, (long) threadPoolExecutor.getQueue().size());
+      resultCounters.put(QUEUED_REQUESTS_KEY, (long) threadPoolExecutor.getQueue().size());
     }
     if (niftyMetrics != null) {
-      counters.put(ACCEPTED_CONNS_KEY, niftyMetrics.getAcceptedConnections());
-      counters.put(ACCEPTED_CONNS_KEY + ONE_MINUTE, niftyMetrics.getAcceptedConnectionsOneMin());
-      counters.put(ACCEPTED_CONNS_KEY + ONE_HOUR, niftyMetrics.getAcceptedConnectionsOneHour());
+      resultCounters.put(ACCEPTED_CONNS_KEY, niftyMetrics.getAcceptedConnections());
+      resultCounters.put(
+          ACCEPTED_CONNS_KEY + ONE_MINUTE, niftyMetrics.getAcceptedConnectionsOneMin());
+      resultCounters.put(
+          ACCEPTED_CONNS_KEY + ONE_HOUR, niftyMetrics.getAcceptedConnectionsOneHour());
 
-      counters.put(DROPPED_CONNS_KEY, niftyMetrics.getDroppedConnections());
-      counters.put(DROPPED_CONNS_KEY + ONE_MINUTE, niftyMetrics.getDroppedConnectionsOneMin());
-      counters.put(DROPPED_CONNS_KEY + ONE_HOUR, niftyMetrics.getDroppedConnectionsOneHour());
+      resultCounters.put(DROPPED_CONNS_KEY, niftyMetrics.getDroppedConnections());
+      resultCounters.put(
+          DROPPED_CONNS_KEY + ONE_MINUTE, niftyMetrics.getDroppedConnectionsOneMin());
+      resultCounters.put(DROPPED_CONNS_KEY + ONE_HOUR, niftyMetrics.getDroppedConnectionsOneHour());
 
-      counters.put(REJECTED_CONNS_KEY, niftyMetrics.getRejectedConnections());
-      counters.put(REJECTED_CONNS_KEY + ONE_MINUTE, niftyMetrics.getRejectedConnectionsOneMin());
-      counters.put(REJECTED_CONNS_KEY + ONE_HOUR, niftyMetrics.getRejectedConnectionsOneHour());
+      resultCounters.put(REJECTED_CONNS_KEY, niftyMetrics.getRejectedConnections());
+      resultCounters.put(
+          REJECTED_CONNS_KEY + ONE_MINUTE, niftyMetrics.getRejectedConnectionsOneMin());
+      resultCounters.put(
+          REJECTED_CONNS_KEY + ONE_HOUR, niftyMetrics.getRejectedConnectionsOneHour());
     }
 
-    methodCounters.forEach(
-        (key, value) -> {
-          counters.put(THRIFT + key, value.get());
-        });
-    methodDecayCounters.forEach(
-        (key, value) -> {
-          counters.put(THRIFT + key, Math.round(value.getCount()));
-        });
-    methodDurations.forEach(
-        (key, value) -> {
-          counters.put(THRIFT + key, Math.round(value.getAvg()));
-        });
-    return counters;
+    return resultCounters;
+  }
+
+  private void addQuantilesToCounters(
+      String baseKey, String windowKey, Map<String, Long> counters, Map<Quantile, Long> quantiles) {
+    for (Map.Entry<Quantile, Long> entry : quantiles.entrySet()) {
+      counters.put(baseKey + "." + entry.getKey().getKey() + windowKey, entry.getValue());
+    }
   }
 
   public Map<String, String> getAttributes() {
     return ATTRIBUTE_MAP;
   }
 
-  public void markDirectOomError() {
-    this.outOfDirectMemroyErrors.incrementAndGet();
+  private void incrementAverages(String key, int value) {
+    movingAverages.computeIfAbsent(key, k -> new ExpMovingAverageRate()).add(value);
   }
 
-  private void incrementCounterValues(String key) {
-    AtomicLong counter = methodCounters.computeIfAbsent(key, k -> new AtomicLong(0));
-    DecayCounter counterOneMin =
-        methodDecayCounters.computeIfAbsent(
-            key + ONE_MINUTE, k -> new DecayCounter(ExponentialDecay.oneMinute()));
-    DecayCounter counterOneHour =
-        methodDecayCounters.computeIfAbsent(
-            key + ONE_HOUR, k -> new DecayCounter(ExponentialDecay.oneMinute()));
-
-    counter.incrementAndGet();
-    counterOneMin.add(1);
-    counterOneHour.add(1);
+  private void incrementCounter(String key, int value) {
+    allTimeCounters.computeIfAbsent(key, k -> new LongAdder()).add(value);
+    counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter()).add(value);
   }
 
-  private void addHistogramValue(String key, long value) {
-    Distribution duration = methodDurations.computeIfAbsent(key, k -> new Distribution());
-    Distribution durationOneMin =
-        methodDurations.computeIfAbsent(
-            key + ONE_MINUTE, k -> new Distribution(ExponentialDecay.oneMinute()));
-    Distribution durationOneHour =
-        methodDurations.computeIfAbsent(
-            key + ONE_HOUR, k -> new Distribution(ExponentialDecay.seconds(3600)));
-
-    duration.add(value);
-    durationOneMin.add(value);
-    durationOneHour.add(value);
+  private void updateDistribution(String key, long value) {
+    distributions
+        .computeIfAbsent(
+            key,
+            k ->
+                new MultiWindowDistribution(
+                    Arrays.asList(Quantile.AVG, Quantile.P95, Quantile.P99)))
+        .add(value);
   }
 }

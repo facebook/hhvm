@@ -65,6 +65,10 @@ public class MultiWindowDistribution extends AbstractDistribution {
         Arrays.asList(P50, P75, P90, P95, P99, AVG, MIN, MAX, SUM));
   }
 
+  public MultiWindowDistribution(List<Quantile> quantiles) {
+    this(Utils.getExecutorService(), Utils.getClock(), quantiles);
+  }
+
   public MultiWindowDistribution(ScheduledExecutorService executorService, Clock clock) {
     this(executorService, clock, Arrays.asList(P50, P75, P90, P95, P99, AVG, MIN, MAX, SUM));
   }

@@ -6,7 +6,7 @@ File "refinement_equal.php", line 12, character 10 - line 12, character 11:
  12 |   return »$z«;
  13 | }
 
-Expected `C`
+Expected `~C` because the type of this return is implicitly a like-type
 
 File "refinement_equal.php", line 6, character 36 - line 6, character 36:
 
@@ -14,7 +14,7 @@ File "refinement_equal.php", line 6, character 36 - line 6, character 36:
  7 |   if($a == null) {
  8 |     $z = $a;
 
-But got `null`
+But got `?C`
 
 File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
@@ -129,132 +129,7 @@ Derivation:
         ],
         "super":[
           {
-            "Def":[
-              {"filename":"refinement_equal.php","line":4,"char_start":7,"char_end":7},
-              [
-                {
-                  "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
-                }
-              ]
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "Step":{
-        "rule":{"Using_prj_sub":"Prj_asymm_nullable"},
-        "on_":"Subtype",
-        "sub":[
-          {
-            "Flow":{
-              "from":[
-                {
-                  "Solved":{
-                    "solution":[
-                      {
-                        "Lower_bound":{
-                          "bound":[
-                            {
-                              "Flow":{
-                                "from":[
-                                  {
-                                    "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
-                                  }
-                                ],
-                                "kind":"Flow_param_hint",
-                                "into":[
-                                  {
-                                    "Flow":{
-                                      "from":[
-                                        {
-                                          "Witness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
-                                        }
-                                      ],
-                                      "kind":"Flow_local",
-                                      "into":[
-                                        {
-                                          "Witness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
-                                        }
-                                      ]
-                                    }
-                                  }
-                                ]
-                              }
-                            }
-                          ],
-                          "of":[
-                            {
-                              "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
-                            }
-                          ]
-                        }
-                      }
-                    ],
-                    "of_":"0",
-                    "in_":[
-                      {
-                        "Flow":{
-                          "from":[
-                            {
-                              "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
-                            }
-                          ],
-                          "kind":"Flow_local",
-                          "into":[
-                            {
-                              "Flow":{
-                                "from":[
-                                  {
-                                    "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
-                                  }
-                                ],
-                                "kind":"Flow_assign",
-                                "into":[
-                                  {
-                                    "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
-                                  }
-                                ]
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              ],
-              "kind":"Flow_local",
-              "into":[
-                {
-                  "Flow":{
-                    "from":[
-                      {
-                        "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
-                      }
-                    ],
-                    "kind":"Flow_return_expr",
-                    "into":[
-                      {
-                        "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ],
-        "super":[
-          {
-            "Def":[
-              {"filename":"refinement_equal.php","line":4,"char_start":7,"char_end":7},
-              [
-                {
-                  "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
-                }
-              ]
-            ]
+            "Pessimised_return":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
           }
         ]
       }
@@ -270,75 +145,34 @@ Reason:
   "Subtype":{
     "sub":[
       {
-        "Prj_one":{
-          "part":[
+        "Flow":{
+          "from":[
             {
-              "Flow":{
-                "from":[
+              "Solved":{
+                "solution":[
                   {
-                    "Solved":{
-                      "solution":[
-                        {
-                          "Lower_bound":{
-                            "bound":[
-                              {
-                                "Flow":{
-                                  "from":[
-                                    {
-                                      "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
-                                    }
-                                  ],
-                                  "kind":"Flow_param_hint",
-                                  "into":[
-                                    {
-                                      "Flow":{
-                                        "from":[
-                                          {
-                                            "Witness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
-                                          }
-                                        ],
-                                        "kind":"Flow_local",
-                                        "into":[
-                                          {
-                                            "Witness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              }
-                            ],
-                            "of":[
-                              {
-                                "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
-                              }
-                            ]
-                          }
-                        }
-                      ],
-                      "of_":"0",
-                      "in_":[
+                    "Lower_bound":{
+                      "bound":[
                         {
                           "Flow":{
                             "from":[
                               {
-                                "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
+                                "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
                               }
                             ],
-                            "kind":"Flow_local",
+                            "kind":"Flow_param_hint",
                             "into":[
                               {
                                 "Flow":{
                                   "from":[
                                     {
-                                      "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
+                                      "Witness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
                                     }
                                   ],
-                                  "kind":"Flow_assign",
+                                  "kind":"Flow_local",
                                   "into":[
                                     {
-                                      "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
+                                      "Witness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
                                     }
                                   ]
                                 }
@@ -346,23 +180,40 @@ Reason:
                             ]
                           }
                         }
+                      ],
+                      "of":[
+                        {
+                          "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
+                        }
                       ]
                     }
                   }
                 ],
-                "kind":"Flow_local",
-                "into":[
+                "of_":"0",
+                "in_":[
                   {
                     "Flow":{
                       "from":[
                         {
-                          "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
+                          "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
                         }
                       ],
-                      "kind":"Flow_return_expr",
+                      "kind":"Flow_local",
                       "into":[
                         {
-                          "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
+                          "Flow":{
+                            "from":[
+                              {
+                                "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
+                              }
+                            ],
+                            "kind":"Flow_assign",
+                            "into":[
+                              {
+                                "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
@@ -371,102 +222,19 @@ Reason:
               }
             }
           ],
-          "prj":"Prj_asymm_nullable",
-          "whole":[
+          "kind":"Flow_local",
+          "into":[
             {
               "Flow":{
                 "from":[
                   {
-                    "Solved":{
-                      "solution":[
-                        {
-                          "Lower_bound":{
-                            "bound":[
-                              {
-                                "Flow":{
-                                  "from":[
-                                    {
-                                      "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":22,"char_end":23}]
-                                    }
-                                  ],
-                                  "kind":"Flow_param_hint",
-                                  "into":[
-                                    {
-                                      "Flow":{
-                                        "from":[
-                                          {
-                                            "Witness":[{"filename":"refinement_equal.php","line":6,"char_start":25,"char_end":26}]
-                                          }
-                                        ],
-                                        "kind":"Flow_local",
-                                        "into":[
-                                          {
-                                            "Witness":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":7}]
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              }
-                            ],
-                            "of":[
-                              {
-                                "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
-                              }
-                            ]
-                          }
-                        }
-                      ],
-                      "of_":"0",
-                      "in_":[
-                        {
-                          "Flow":{
-                            "from":[
-                              {
-                                "Type_variable":[{"filename":"refinement_equal.php","line":7,"char_start":6,"char_end":15},"0"]
-                              }
-                            ],
-                            "kind":"Flow_local",
-                            "into":[
-                              {
-                                "Flow":{
-                                  "from":[
-                                    {
-                                      "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":10,"char_end":11}]
-                                    }
-                                  ],
-                                  "kind":"Flow_assign",
-                                  "into":[
-                                    {
-                                      "Witness":[{"filename":"refinement_equal.php","line":8,"char_start":5,"char_end":6}]
-                                    }
-                                  ]
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    }
+                    "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
                   }
                 ],
-                "kind":"Flow_local",
+                "kind":"Flow_return_expr",
                 "into":[
                   {
-                    "Flow":{
-                      "from":[
-                        {
-                          "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":10,"char_end":11}]
-                        }
-                      ],
-                      "kind":"Flow_return_expr",
-                      "into":[
-                        {
-                          "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
-                        }
-                      ]
-                    }
+                    "Witness":[{"filename":"refinement_equal.php","line":12,"char_start":3,"char_end":12}]
                   }
                 ]
               }
@@ -477,14 +245,7 @@ Reason:
     ],
     "super":[
       {
-        "Def":[
-          {"filename":"refinement_equal.php","line":4,"char_start":7,"char_end":7},
-          [
-            {
-              "Hint":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
-            }
-          ]
-        ]
+        "Pessimised_return":[{"filename":"refinement_equal.php","line":6,"char_start":36,"char_end":36}]
       }
     ]
   }

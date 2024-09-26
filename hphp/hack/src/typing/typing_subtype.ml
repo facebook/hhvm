@@ -1030,10 +1030,7 @@ end = struct
           ~lhs:{ sub_supportdyn = None; ty_sub = MakeType.mixed r }
           ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
       in
-      if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-        prop env
-      else
-        if_unsat (invalid ~fail) @@ prop env
+      if_unsat (invalid ~fail) @@ prop env
     | (_, Tany _) ->
       if subtype_env.Subtype_env.no_top_bottom then
         mk_issubtype_prop
@@ -3436,11 +3433,8 @@ end = struct
               ~lhs:{ sub_supportdyn; ty_sub = ty_null }
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
           in
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            prop
-          else
-            fun env ->
-          if_unsat (invalid ~fail) @@ prop env
+
+          (fun env -> if_unsat (invalid ~fail) @@ prop env)
         in
         let ty =
           Typing_env.update_reason env ty ~f:(fun r_sub_prj ->
@@ -4757,11 +4751,7 @@ end = struct
               ~lhs:{ sub_supportdyn; ty_sub = ty_null }
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
           in
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            prop
-          else
-            fun env ->
-          if_unsat (invalid ~fail) @@ prop env
+          (fun env -> if_unsat (invalid ~fail) @@ prop env)
         in
         let ty_sub =
           Typing_env.update_reason env ty_sub ~f:(fun r_sub_prj ->
@@ -4795,10 +4785,7 @@ end = struct
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
         in
         (* Use `if_unsat` so we report arraykey in the error *)
-        if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-          prop env
-        else
-          if_unsat (invalid ~fail) @@ prop env
+        if_unsat (invalid ~fail) @@ prop env
       | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
         default_subtype
           ~subtype_env
@@ -7233,10 +7220,8 @@ end = struct
               (sub_supportdyn, ty)
               rhs
       in
-      if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-        prop env
-      else
-        if_unsat (invalid ~fail) @@ prop env
+
+      if_unsat (invalid ~fail) @@ prop env
     | (r_sub, Tintersection ty_subs) ->
       let mk_prop_intersection
           ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =

@@ -254,7 +254,6 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
 let process_file
     (ctx : Provider_context.t)
     (file : check_file_workitem)
-    ~(log_errors : bool)
     ~(decl_cap_mb : int option) : process_file_results =
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
@@ -283,21 +282,6 @@ let process_file
       in
       match result with
       | Ok (file_errors, tasts) ->
-        if log_errors then
-          List.iter (Errors.get_error_list file_errors) ~f:(fun error ->
-              let { User_error.severity; claim; code; _ } = error in
-              let (pos, msg) = claim in
-              let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
-              Hh_logger.log
-                "%s: %s(%d:%d-%d:%d) [%d] %s"
-                (User_error.Severity.to_all_caps_string severity)
-                (Relative_path.suffix fn)
-                l1
-                c1
-                l2
-                c2
-                code
-                msg);
         {
           file_errors;
           deferred_decls = [];
@@ -404,7 +388,6 @@ let process_one_workitem
     ~batch_info
     ~memory_cap
     ~longlived_workers
-    ~error_count_at_start_of_batch
     (fn : workitem)
     ({ errors; map_reduce_data; tally; stats } : workitem_accumulator) :
     TypingProgress.progress_outcome * workitem_accumulator =
@@ -424,15 +407,8 @@ let process_one_workitem
         tally ) =
     match fn with
     | Check file ->
-      (* We'll show at least the first five errors in the project. Maybe more,
-         if this file has more in it, or if other concurrent workers race to print
-         the first five errors before us. *)
-      let log_errors =
-        check_info.log_errors
-        && error_count_at_start_of_batch + Errors.count errors < 5
-      in
       let { file_errors; file_map_reduce_data; deferred_decls } =
-        process_file ctx file ~decl_cap_mb ~log_errors
+        process_file ctx file ~decl_cap_mb
       in
       let map_reduce_data =
         Map_reduce.reduce map_reduce_data file_map_reduce_data
@@ -446,7 +422,7 @@ let process_one_workitem
       begin
         if type_check_twice then
           let (_ignored : process_file_results) =
-            process_file ctx file ~decl_cap_mb ~log_errors:false
+            process_file ctx file ~decl_cap_mb
           in
           ()
       end;
@@ -529,7 +505,6 @@ let process_workitems
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
-    ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * TypingProgress.t =
   Decl_counters.set_mode
@@ -566,7 +541,6 @@ let process_workitems
          ~ctx
          ~check_info
          ~batch_info
-         ~error_count_at_start_of_batch
          ~memory_cap
          ~longlived_workers
   in
@@ -606,7 +580,6 @@ let load_and_process_workitems
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
-    ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * TypingProgress.t =
   Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
@@ -628,7 +601,6 @@ let load_and_process_workitems
     ~check_info
     ~worker_id
     ~batch_number
-    ~error_count_at_start_of_batch
     ~typecheck_info
 
 (*****************************************************************************)
@@ -677,16 +649,40 @@ module Merge : sig
     typing_result ->
     typing_result
 end = struct
-  let process_errors errors error_stats ~stream_errors : unit =
+  let process_errors errors error_stats ~stream_errors ~log_errors : unit =
     error_stats := ErrorStats.update errors !error_stats;
-    (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
-    if stream_errors then Server_progress.ErrorsWrite.report errors
+    if log_errors then (
+      let max_errors = 5 in
+      Hh_logger.log
+        "%d errors in batch. Showing first %d:"
+        (Errors.count errors)
+        max_errors;
+      List.iter
+        (List.take (Errors.get_error_list errors) max_errors)
+        ~f:(fun error ->
+          let { User_error.severity; claim; code; _ } = error in
+          let (pos, msg) = claim in
+          let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
+          Hh_logger.log
+            "%s: %s(%d:%d-%d:%d) [%d] %s"
+            (User_error.Severity.to_all_caps_string severity)
+            (Relative_path.suffix @@ Pos.filename pos)
+            l1
+            c1
+            l2
+            c2
+            code
+            msg);
+      (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
+      if stream_errors then Server_progress.ErrorsWrite.report errors
+    )
 
   let process_and_merge_typing_results
       (produced_by_job : Typing_service_types.typing_result)
       ~(acc : Typing_service_types.typing_result)
       (mergebase_warning_hashes : Warnings_saved_state.t option)
       ~(stream_errors : bool)
+      ~log_errors
       (error_stats : ErrorStats.t ref) : Typing_service_types.typing_result =
     let produced_by_job =
       {
@@ -697,7 +693,7 @@ end = struct
             produced_by_job.errors;
       }
     in
-    process_errors produced_by_job.errors error_stats ~stream_errors;
+    process_errors produced_by_job.errors error_stats ~stream_errors ~log_errors;
 
     Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
     Typing_deps.register_discovered_dep_edges acc.dep_edges;
@@ -743,6 +739,7 @@ end = struct
       ~acc
       warnings_saved_state
       ~stream_errors:check_info.log_errors
+      ~log_errors:check_info.log_errors
       error_stats
 end
 
@@ -992,7 +989,6 @@ let process_in_parallel
         ~check_info
         ~typecheck_info
         ~worker_id
-        ~error_count_at_start_of_batch:!error_stats.ErrorStats.total_error_count
         ~batch_number:
           (SMap.find_opt worker_id !batch_counts_by_worker_id
           |> Option.value ~default:0)

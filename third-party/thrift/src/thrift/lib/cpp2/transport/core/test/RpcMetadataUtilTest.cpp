@@ -53,6 +53,8 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
       methodName,
       timeout,
       interactionHandle,
+      false,
+      3000,
       header);
   const auto& buf = **requestRpcMetadata.frameworkMetadata_ref();
   std::string content(reinterpret_cast<const char*>(buf.data()), buf.length());

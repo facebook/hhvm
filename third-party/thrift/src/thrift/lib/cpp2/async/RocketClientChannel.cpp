@@ -540,32 +540,6 @@ class FirstRequestProcessorSink : public SinkClientCallback,
 };
 } // namespace
 
-void RocketClientChannel::setCompression(
-    RequestRpcMetadata& metadata, ssize_t payloadSize) {
-  if (auto compressionConfig = metadata.compressionConfig_ref()) {
-    if (auto codecRef = compressionConfig->codecConfig_ref()) {
-      if (codecRef->getType() ==
-              apache::thrift::CodecConfig::Type::zlibConfig &&
-          getServerZstdSupported()) {
-        codecRef->zstdConfig_ref().emplace();
-      }
-      if (payloadSize >
-          compressionConfig->compressionSizeLimit_ref().value_or(0)) {
-        switch (codecRef->getType()) {
-          case CodecConfig::Type::zlibConfig:
-            metadata.compression_ref() = CompressionAlgorithm::ZLIB;
-            break;
-          case CodecConfig::Type::zstdConfig:
-            metadata.compression_ref() = CompressionAlgorithm::ZSTD;
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  }
-}
-
 class RocketClientChannel::SingleRequestSingleResponseCallback final
     : public rocket::RocketClient::RequestResponseCallback {
   using clock = std::chrono::steady_clock;
@@ -859,6 +833,7 @@ void RocketClientChannel::sendRequestStream(
   preprocessHeader(header.get());
 
   auto firstResponseTimeout = getClientTimeout(rpcOptions);
+  auto buf = std::move(request.buffer);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
@@ -866,10 +841,9 @@ void RocketClientChannel::sendRequestStream(
       methodMetadata.name_managed(),
       firstResponseTimeout,
       getInteractionHandle(rpcOptions),
+      getServerZstdSupported(),
+      buf->computeChainDataLength(),
       *header);
-
-  auto buf = std::move(request.buffer);
-  setCompression(metadata, buf->computeChainDataLength());
 
   auto payload = rocket::packWithFds(
       &metadata,
@@ -901,6 +875,7 @@ void RocketClientChannel::sendRequestSink(
   preprocessHeader(header.get());
 
   auto firstResponseTimeout = getClientTimeout(rpcOptions);
+  auto buf = std::move(request.buffer);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINK,
@@ -908,10 +883,9 @@ void RocketClientChannel::sendRequestSink(
       methodMetadata.name_managed(),
       firstResponseTimeout,
       getInteractionHandle(rpcOptions),
+      getServerZstdSupported(),
+      buf->computeChainDataLength(),
       *header);
-
-  auto buf = std::move(request.buffer);
-  setCompression(metadata, buf->computeChainDataLength());
 
   auto payload = rocket::packWithFds(
       &metadata,
@@ -944,6 +918,7 @@ void RocketClientChannel::sendThriftRequest(
   preprocessHeader(header.get());
 
   auto timeout = getClientTimeout(rpcOptions);
+  auto buf = std::move(request.buffer);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       kind,
@@ -951,11 +926,10 @@ void RocketClientChannel::sendThriftRequest(
       std::move(methodName),
       timeout,
       getInteractionHandle(rpcOptions),
+      getServerZstdSupported(),
+      buf->computeChainDataLength(),
       *header);
   header.reset();
-
-  auto buf = std::move(request.buffer);
-  setCompression(metadata, buf->computeChainDataLength());
 
   switch (kind) {
     case RpcKind::SINGLE_REQUEST_NO_RESPONSE:

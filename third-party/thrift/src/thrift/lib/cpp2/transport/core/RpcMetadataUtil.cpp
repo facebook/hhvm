@@ -40,6 +40,8 @@ RequestRpcMetadata makeRequestRpcMetadata(
     ManagedStringView&& methodName,
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
+    bool serverZstdSupported,
+    ssize_t payloadSize,
     transport::THeader& header) {
   RequestRpcMetadata metadata;
   metadata.protocol() = protocolId;
@@ -63,7 +65,27 @@ RequestRpcMetadata makeRequestRpcMetadata(
   }
   // add user specified compression settings to metadata
   if (auto compressionConfig = header.getDesiredCompressionConfig()) {
-    metadata.compressionConfig() = *compressionConfig;
+    if (auto codec = compressionConfig->codecConfig()) {
+      if (codec->getType() == CodecConfig::Type::zlibConfig &&
+          serverZstdSupported) {
+        codec->zstdConfig_ref().emplace();
+      }
+
+      if (payloadSize > compressionConfig->compressionSizeLimit().value_or(0)) {
+        switch (codec->getType()) {
+          case CodecConfig::Type::zlibConfig:
+            metadata.compression() = CompressionAlgorithm::ZLIB;
+            break;
+          case CodecConfig::Type::zstdConfig:
+            metadata.compression() = CompressionAlgorithm::ZSTD;
+            break;
+          case CodecConfig::Type::__EMPTY__:
+            break;
+        }
+      }
+
+      metadata.compressionConfig() = *compressionConfig;
+    }
   }
 
   auto writeHeaders = header.releaseWriteHeaders();

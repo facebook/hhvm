@@ -57,6 +57,8 @@ RequestRpcMetadata makeRequestRpcMetadata(
     ManagedStringView&& methodName,
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
+    bool serverZstdSupported,
+    ssize_t payloadSize,
     transport::THeader& header);
 
 void fillTHeaderFromResponseRpcMetadata(

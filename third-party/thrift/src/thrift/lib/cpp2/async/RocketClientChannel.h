@@ -194,8 +194,6 @@ class RocketClientChannel final : public ClientChannel,
 
   int32_t getServerVersion() const;
 
-  void setCompression(RequestRpcMetadata& metadata, ssize_t payloadSize);
-
   class SingleRequestSingleResponseCallback;
   class SingleRequestNoResponseCallback;
 };

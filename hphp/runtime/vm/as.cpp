@@ -3064,6 +3064,18 @@ void parse_alias(AsmState& as, AliasKind kind) {
     return TypeConstraint::makeUnion(namestr, tis);
   }();
 
+  Array resolvedTypeStructure;
+  as.in.skipWhitespace();
+  if (as.in.tryConsume('=')) {
+    as.in.expect('>');
+    auto rts = parse_php_serialized(as);
+    if (!rts.isInitialized() || !rts.isDict() || rts.asCArrRef().empty()) {
+      as.error(".alias has an invalided resolved type structure");
+    }
+    resolvedTypeStructure =
+      Array::attach(ArrayData::GetScalarArray(std::move(rts)));
+  }
+
   auto te = as.ue->newTypeAliasEmitter(name);
   te->init(
     line0,
@@ -3072,7 +3084,7 @@ void parse_alias(AsmState& as, AliasKind kind) {
     value,
     kind,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
-    Array{}
+    resolvedTypeStructure
   );
   te->setUserAttributes(userAttrs);
 

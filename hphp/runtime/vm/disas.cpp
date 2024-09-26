@@ -834,14 +834,22 @@ void print_alias(Output& out, const PreTypeAlias& alias) {
     }
   }();
 
-  out.fmtln(".{}{} {} = {} ({}, {}) {};",
+  std::string resolved;
+  if (!alias.resolvedTypeStructure.isNull()) {
+    resolved = folly::to<std::string>(
+      " => ", escaped_long(alias.resolvedTypeStructure.get())
+    );
+  }
+
+  out.fmtln(".{}{} {} = {} ({}, {}) {}{};",
             kind,
             opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
             type_constraints,
             alias.line0,
             alias.line1,
-            escaped_long(alias.typeStructure.get()));
+            escaped_long(alias.typeStructure.get()),
+            resolved);
 }
 
 void print_constant(Output& out, const Constant& cns) {

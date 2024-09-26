@@ -21,21 +21,15 @@ class MysqlRow : public InternalRow {
     DCHECK(lengths_);
   }
 
-  [[nodiscard]] folly::StringPiece columnString(size_t col) const override {
+  [[nodiscard]] bool isNull(size_t col) const override {
+    DCHECK_LT(col, numCols_);
+    return !row_[col];
+  }
+
+  [[nodiscard]] folly::StringPiece column(size_t col) const override {
     DCHECK_LT(col, numCols_);
     DCHECK(row_[col]);
     return folly::StringPiece(row_[col], lengths_[col]);
-  }
-
-  [[nodiscard]] InternalRow::Type columnType(size_t col) const override {
-    DCHECK_LT(col, numCols_);
-    if (!row_[col]) {
-      return InternalRow::Type::Null;
-    }
-
-    // MySQL returns all data as strings - note this is NOT the column type -
-    // just the type of the data returned via this protocol
-    return InternalRow::Type::String;
   }
 
   [[nodiscard]] size_t columnLength(size_t col) const override {

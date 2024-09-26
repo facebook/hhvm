@@ -557,8 +557,6 @@ class StreamedQueryResult {
 
   folly::Optional<EphemeralRow> nextRow();
 
-  bool hasDataInNativeFormat() const;
-
  private:
   friend class Iterator;
   friend class MultiQueryStreamHandler;
@@ -650,8 +648,6 @@ class MultiQueryStreamHandler {
 
   unsigned int mysql_errno() const;
   const std::string& mysql_error() const;
-
-  bool hasDataInNativeFormat() const;
 
  private:
   friend class Connection;

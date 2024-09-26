@@ -32,43 +32,11 @@ enum InternalStatus {
 
 class InternalRow {
  public:
-  enum class Type {
-    Null,
-    Bool,
-    Int64,
-    UInt64,
-    Double,
-    String,
-  };
-
   virtual ~InternalRow() = default;
 
-  virtual folly::StringPiece columnString(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return folly::StringPiece();
-  }
+  virtual bool isNull(size_t col) const = 0;
 
-  virtual bool columnBool(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return false;
-  }
-
-  virtual int64_t columnInt64(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return 0;
-  }
-
-  virtual uint64_t columnUInt64(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return 0;
-  }
-
-  virtual double columnDouble(size_t /*col*/) const {
-    DCHECK(false) << "Not implemented";
-    return 0.0;
-  }
-
-  virtual Type columnType(size_t col) const = 0;
+  virtual folly::StringPiece column(size_t col) const = 0;
 
   virtual size_t columnLength(size_t col) const = 0;
 };

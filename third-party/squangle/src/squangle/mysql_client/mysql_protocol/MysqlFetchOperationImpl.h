@@ -39,10 +39,6 @@ class MysqlFetchOperationImpl : public MysqlOperationImpl,
     setFetchAction(FetchAction::CompleteQuery);
   }
 
-  bool hasDataInNativeFormat() const override {
-    return false;
-  }
-
   void pauseForConsumer() override;
   void resume() override;
   bool isPaused() const override;

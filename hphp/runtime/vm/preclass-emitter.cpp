@@ -377,7 +377,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       const_.name(),
       PreClass::Const(
         const_.name(),
-        const_.cls(),
+        const_.cls() ? const_.cls() : m_name.get(),
         tvaux,
         const_.resolvedTypeStructure(),
         const_.invariance(),
@@ -391,7 +391,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       tvCopy(cnsMap.second, tvaux);
       tvaux.constModifiers() = {};
       constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
-                                                   nullptr,
+                                                   m_name,
                                                    tvaux,
                                                    Array{},
                                                    Const::Invariance::None,

@@ -101,10 +101,14 @@ fn from_ast<'a, 'd>(
         a::FunParamInfo::ParamRequired => false,
         a::FunParamInfo::ParamOptional(_) => false,
     };
+    let is_splat = param.splat.is_some();
     if is_variadic && param.name == "..." {
         return Ok(None);
     }
-    if is_variadic {
+    // Variadic and splat parameters are treated the same by HackC and HHVM
+    // The former is a vec (represented by an array) all of whose elements are the same type
+    // The latter is a tuple (represented by an array) whose elements many vary in type
+    if is_variadic || is_splat {
         tparams.push("array");
     }
     let type_info = {
@@ -174,7 +178,7 @@ fn from_ast<'a, 'd>(
     Ok(Some((
         Param {
             name: hhbc::intern(&param.name),
-            is_variadic,
+            is_variadic: is_variadic || is_splat,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
             is_optional,

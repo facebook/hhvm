@@ -1,0 +1,30 @@
+string(1) "A"
+vec(1) {
+  int(1)
+}
+string(1) "B"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(1) "C"
+vec(2) {
+  int(2)
+  bool(false)
+}
+string(1) "D"
+vec(2) {
+  int(3)
+  bool(true)
+}
+string(1) "D"
+vec(2) {
+  float(1.2)
+  int(3)
+}
+string(1) "D"
+vec(2) {
+  int(3)
+  bool(true)
+}

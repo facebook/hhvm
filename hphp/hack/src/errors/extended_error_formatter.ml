@@ -179,9 +179,21 @@ let to_string User_error.{ code; claim = (pos, msg); reasons; severity; _ } =
   in
   let (_ : unit) =
     List.iter reasons ~f:(fun (pos, msg) ->
+        let pos_string =
+          let fn = Pos.filename pos in
+          if String.is_suffix fn ~suffix:".hhi" then
+            let pos_str = Pos.multiline_string_no_file pos in
+            match String.split fn ~on:'/' with
+            | _ :: "tmp" :: _ :: rest ->
+              let nm = String.concat ~sep:"/" rest in
+              Format.sprintf {|File "%s", %s:|} nm pos_str
+            | _ -> Format.sprintf "%s:" pos_str
+          else
+            Pos.multiline_string pos
+        in
         Buffer.add_string buf msg;
         Buffer.add_string buf "\n\n";
-        Buffer.add_string buf (Pos.multiline_string pos);
+        Buffer.add_string buf pos_string;
         Buffer.add_string buf "\n\n";
         mark_with_context pos ~buf ~spans;
         Buffer.add_string buf "\n")

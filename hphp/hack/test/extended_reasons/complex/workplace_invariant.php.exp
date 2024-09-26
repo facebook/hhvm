@@ -38,7 +38,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/mfsyHOOCGr/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -199,7 +199,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/mfsyHOOCGr/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -340,7 +340,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/mfsyHOOCGr/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;

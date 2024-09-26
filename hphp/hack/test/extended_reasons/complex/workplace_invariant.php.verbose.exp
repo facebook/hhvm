@@ -38,7 +38,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -63,7 +63,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -216,7 +216,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -241,7 +241,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -374,7 +374,7 @@ File "workplace_invariant.php", line 8, character 13 - line 8, character 15:
 
 which is defined here
 
-File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
@@ -399,7 +399,7 @@ File "workplace_invariant.php", line 15, character 33 - line 15, character 50:
 
 which is defined here
 
-File "/tmp/7j2GTLdgfA/classname.hhi", line 19, character 42 - line 19, character 52:
+File "classname.hhi", line 19, character 42 - line 19, character 52:
 
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;

@@ -33,12 +33,7 @@ Derivation:
               "from":[
                 {
                   "Def":[
-                    {
-                      "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                      "line":19,
-                      "char_start":42,
-                      "char_end":52
-                    },
+                    {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                     [
                       {
                         "Class_class":[
@@ -62,12 +57,7 @@ Derivation:
         "super":[
           {
             "Def":[
-              {
-                "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                "line":19,
-                "char_start":42,
-                "char_end":52
-              },
+              {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
               [
                 {
                   "Hint":[
@@ -250,12 +240,7 @@ Reason:
                                   "from":[
                                     {
                                       "Def":[
-                                        {
-                                          "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                                          "line":19,
-                                          "char_start":42,
-                                          "char_end":52
-                                        },
+                                        {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                                         [
                                           {
                                             "Class_class":[
@@ -279,12 +264,7 @@ Reason:
                             "super":[
                               {
                                 "Def":[
-                                  {
-                                    "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                                    "line":19,
-                                    "char_start":42,
-                                    "char_end":52
-                                  },
+                                  {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                                   [
                                     {
                                       "Hint":[
@@ -388,12 +368,7 @@ Derivation:
               "from":[
                 {
                   "Def":[
-                    {
-                      "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                      "line":19,
-                      "char_start":42,
-                      "char_end":52
-                    },
+                    {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                     [
                       {
                         "Class_class":[
@@ -417,12 +392,7 @@ Derivation:
         "super":[
           {
             "Def":[
-              {
-                "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                "line":19,
-                "char_start":42,
-                "char_end":52
-              },
+              {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
               [
                 {
                   "Hint":[
@@ -584,12 +554,7 @@ Reason:
                             "from":[
                               {
                                 "Def":[
-                                  {
-                                    "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                                    "line":19,
-                                    "char_start":42,
-                                    "char_end":52
-                                  },
+                                  {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                                   [
                                     {
                                       "Class_class":[
@@ -613,12 +578,7 @@ Reason:
                       "super":[
                         {
                           "Def":[
-                            {
-                              "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                              "line":19,
-                              "char_start":42,
-                              "char_end":52
-                            },
+                            {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                             [
                               {
                                 "Hint":[
@@ -711,12 +671,7 @@ Derivation:
               "from":[
                 {
                   "Def":[
-                    {
-                      "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                      "line":19,
-                      "char_start":42,
-                      "char_end":52
-                    },
+                    {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                     [
                       {
                         "Class_class":[
@@ -740,12 +695,7 @@ Derivation:
         "super":[
           {
             "Def":[
-              {
-                "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                "line":19,
-                "char_start":42,
-                "char_end":52
-              },
+              {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
               [
                 {
                   "Hint":[
@@ -905,12 +855,7 @@ Reason:
                             "from":[
                               {
                                 "Def":[
-                                  {
-                                    "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                                    "line":19,
-                                    "char_start":42,
-                                    "char_end":52
-                                  },
+                                  {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                                   [
                                     {
                                       "Class_class":[
@@ -934,12 +879,7 @@ Reason:
                       "super":[
                         {
                           "Def":[
-                            {
-                              "filename":"/tmp/UmoN6jpUid/classname.hhi",
-                              "line":19,
-                              "char_start":42,
-                              "char_end":52
-                            },
+                            {"filename":"classname.hhi","line":19,"char_start":42,"char_end":52},
                             [
                               {
                                 "Hint":[

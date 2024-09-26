@@ -146,12 +146,7 @@ Derivation:
         "sub":[
           {
             "Def":[
-              {
-                "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                "line":6,
-                "char_start":33,
-                "char_end":45
-              },
+              {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
               [
                 {
                   "Hint":[
@@ -200,12 +195,7 @@ Derivation:
         "sub":[
           {
             "Def":[
-              {
-                "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                "line":6,
-                "char_start":33,
-                "char_end":45
-              },
+              {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
               [
                 {
                   "Hint":[
@@ -347,12 +337,7 @@ Reason:
                 "next":[
                   {
                     "Def":[
-                      {
-                        "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                        "line":6,
-                        "char_start":33,
-                        "char_end":45
-                      },
+                      {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
                       [
                         {
                           "Hint":[
@@ -375,12 +360,7 @@ Reason:
           "next":[
             {
               "Def":[
-                {
-                  "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                  "line":6,
-                  "char_start":33,
-                  "char_end":45
-                },
+                {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
                 [
                   {
                     "Hint":[

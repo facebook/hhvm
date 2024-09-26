@@ -66,12 +66,7 @@ Derivation:
               "from":[
                 {
                   "Def":[
-                    {
-                      "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                      "line":6,
-                      "char_start":33,
-                      "char_end":45
-                    },
+                    {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
                     [
                       {
                         "Hint":[
@@ -125,12 +120,7 @@ Derivation:
         "super":[
           {
             "Def":[
-              {
-                "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                "line":6,
-                "char_start":33,
-                "char_end":45
-              },
+              {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
               [
                 {
                   "Hint":[
@@ -289,12 +279,7 @@ Reason:
                             "from":[
                               {
                                 "Def":[
-                                  {
-                                    "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                                    "line":6,
-                                    "char_start":33,
-                                    "char_end":45
-                                  },
+                                  {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
                                   [
                                     {
                                       "Hint":[
@@ -376,12 +361,7 @@ Reason:
                 "super":[
                   {
                     "Def":[
-                      {
-                        "filename":"/tmp/YhjIpTuVwW/supportdynamic.hhi",
-                        "line":6,
-                        "char_start":33,
-                        "char_end":45
-                      },
+                      {"filename":"supportdynamic.hhi","line":6,"char_start":33,"char_end":45},
                       [
                         {
                           "Hint":[

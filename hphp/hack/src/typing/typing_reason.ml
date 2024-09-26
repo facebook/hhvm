@@ -1794,6 +1794,37 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
 
+let pos_or_decl_to_json pos_or_decl =
+  if Pos_or_decl.is_hhi pos_or_decl then
+    let pos = Pos_or_decl.unsafe_to_raw_pos pos_or_decl in
+
+    let (line_start, char_start, line_end, char_end) = Pos.destruct_range pos in
+    let fn =
+      let raw = Pos.filename @@ Pos.to_relative_string pos in
+      match String.split raw ~on:'/' with
+      | _ :: "tmp" :: _ :: rest -> String.concat ~sep:"/" rest
+      | _ -> raw
+    in
+    if line_end = line_start then
+      Hh_json.JSON_Object
+        [
+          ("filename", Hh_json.JSON_String fn);
+          ("line", Hh_json.int_ line_start);
+          ("char_start", Hh_json.int_ char_start);
+          ("char_end", Hh_json.int_ (char_end - 1));
+        ]
+    else
+      Hh_json.JSON_Object
+        [
+          ("filename", Hh_json.JSON_String fn);
+          ("line_start", Hh_json.int_ line_start);
+          ("char_start", Hh_json.int_ char_start);
+          ("line_end", Hh_json.int_ line_end);
+          ("char_end", Hh_json.int_ (char_end - 1));
+        ]
+  else
+    Pos_or_decl.json pos_or_decl
+
 let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
  fun t acc ->
   match t with
@@ -1994,7 +2025,7 @@ let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
     :: acc
   | Def (def, r) ->
     Hh_json.(
-      JSON_Object [("Def", JSON_Array [Pos_or_decl.json def; to_json r])])
+      JSON_Object [("Def", JSON_Array [pos_or_decl_to_json def; to_json r])])
     :: acc
   | Prj_both { sub_prj; prj; sub; super } ->
     Hh_json.(

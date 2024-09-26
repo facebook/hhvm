@@ -802,27 +802,49 @@ void Func::def(Func* func) {
 
   Func* f = ne->getCachedFunc();
   if (f == nullptr) {
-    std::unique_lock<Mutex> l(g_funcsMutex);
-    f = ne->getCachedFunc();
-    if (f == nullptr) {
+    if (Cfg::Eval::LockFreeFuncDef) {
       auto const persistent = func->isPersistent();
-      assertx(!persistent || (RuntimeOption::RepoAuthoritative || func->unit()->isSystemLib()));
+      assertx(!persistent ||
+              (RuntimeOption::RepoAuthoritative || func->unit()->isSystemLib()));
 
-      if (!ne->m_cachedFunc.bound()) {
-        ne->m_cachedFunc.bind(
-          persistent ? rds::Mode::Persistent : rds::Mode::Normal,
-          rds::LinkName{"Func", func->name()}
-        );
-      }
-      ne->m_cachedFunc.initWith(func);
-      ne->setFunc(func);
-      l.unlock();
+      // Binding an RDS handle is an atomic operation. For persistent handles an
+      // initial value can ve specified when binding succeeds which is also
+      // atomically assigned. For normal handles the initial value is ignored.
+      LowPtr<Func> init = func;
+      ne->m_cachedFunc.bind(
+        persistent ? rds::Mode::Persistent : rds::Mode::Normal,
+        rds::LinkName{"Func", func->name()},
+        &init
+      );
+
+      f = ne->getCachedFunc();
+      if (!f) ne->m_cachedFunc.initWith(func);
+      if (!f || f == func) ne->setFunc(func);
 
       DEBUGGER_ATTACHED_ONLY(phpDebuggerDefFuncHook(func));
+    } else {
+      std::unique_lock<Mutex> l(g_funcsMutex);
+      f = ne->getCachedFunc();
+      if (f == nullptr) {
+        auto const persistent = func->isPersistent();
+        assertx(!persistent || (RuntimeOption::RepoAuthoritative || func->unit()->isSystemLib()));
+
+        if (!ne->m_cachedFunc.bound()) {
+          ne->m_cachedFunc.bind(
+            persistent ? rds::Mode::Persistent : rds::Mode::Normal,
+            rds::LinkName{"Func", func->name()}
+          );
+        }
+        ne->m_cachedFunc.initWith(func);
+        ne->setFunc(func);
+        l.unlock();
+
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefFuncHook(func));
+      }
     }
   }
 
-  // If the function didn't exists before we are good
+  // If the function didn't exist before we are good
   if (f == nullptr) {
     return;
   }

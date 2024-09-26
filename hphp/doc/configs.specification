@@ -254,6 +254,10 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
 - bool Eval.EmitNativeEnumClassLabels = true, UNKNOWN, unitcacheflag|hackc(hhbc)
 
+- bool Eval.LockFreeFuncDef = true, paulbiss
+
+  Remove locking from Func::def()
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

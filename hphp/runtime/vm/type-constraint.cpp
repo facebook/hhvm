@@ -947,15 +947,26 @@ TypeConstraint TypeConstraint::resolvedWithAutoload() const {
     p,
     // Type alias.
     [this](FoundTypeAlias td) -> Optional<TypeConstraint> {
-      std::vector<TypeConstraint> parts;
-      for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
+      if (!td.value->value.isUnion()) {
+        auto const& tc = td.value->value;
         auto type = tc.type();
         auto klass = type == AnnotType::SubObject
           ? tc.clsNamedType()->getCachedClass() : nullptr;
         auto copy = *this;
         auto const typeName = klass ? klass->name() : nullptr;
         copy.resolveType(type, td.value->value.isNullable(), typeName);
-        parts.push_back(copy);
+        return copy;
+      }
+      std::vector<TypeConstraint> parts;
+      auto const flags = m_flags & (TypeConstraintFlags::Nullable
+                                    | TypeConstraintFlags::TypeVar
+                                    | TypeConstraintFlags::Soft
+                                    | TypeConstraintFlags::TypeConstant
+                                    | TypeConstraintFlags::DisplayNullable
+                                    | TypeConstraintFlags::UpperBound);
+      for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
+        parts.push_back(tc);
+        parts.back().addFlags(flags);
       }
       return makeUnion(typeName(), parts);
     },

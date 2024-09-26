@@ -263,17 +263,22 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
   using Base::resetAnd;
   ~BaseClearPatch() = default;
 
-  template <typename Visitor>
-  bool customVisitAssignAndClear(Visitor&& v) const {
-    if (hasAssign()) {
-      std::forward<Visitor>(v).assign(*data_.assign());
+ private:
+  template <typename Self, typename Visitor>
+  static bool customVisitAssignAndClearImpl(Self&& self, Visitor&& v) {
+    if (std::forward<Self>(self).hasAssign()) {
+      std::forward<Visitor>(v).assign(*std::forward<Self>(self).data_.assign());
       return true;
     }
-    if (data_.clear() == true) {
+    if (std::forward<Self>(self).data_.clear() == true) {
       std::forward<Visitor>(v).clear();
     }
     return false;
   }
+
+ protected:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisitAssignAndClear, customVisitAssignAndClearImpl);
 
   /// Clears the value.
   void clear() { resetAnd().clear() = true; }

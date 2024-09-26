@@ -234,6 +234,7 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
     return derived();
   }
 
+ private:
   /// @copybrief AssignPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
@@ -254,8 +255,8 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
   ///
   ///     v.prepend("(");
   ///     v.append(")");
-  template <class Visitor>
-  void customVisit(Visitor&& v) const {
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&& self, Visitor&& v) {
     if (false) {
       // Test whether the required methods exist in Visitor
       v.assign(T{});
@@ -263,11 +264,17 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
       v.prepend(T{});
       v.append(T{});
     }
-    if (!Base::template customVisitAssignAndClear(std::forward<Visitor>(v))) {
-      std::forward<Visitor>(v).prepend(*data_.prepend());
-      std::forward<Visitor>(v).append(*data_.append());
+    if (!std::forward<Self>(self).customVisitAssignAndClear(
+            std::forward<Visitor>(v))) {
+      std::forward<Visitor>(v).prepend(
+          *std::forward<Self>(self).data_.prepend());
+      std::forward<Visitor>(v).append(*std::forward<Self>(self).data_.append());
     }
   }
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
 
  protected:
   using Base::assignOr;
@@ -319,18 +326,25 @@ class StringPatch : public BaseStringPatch<Patch, StringPatch<Patch>> {
     cur = std::forward<U>(val) + std::move(cur);
   }
 
-  void apply(T& val) const {
+ private:
+  template <class Self>
+  static void applyImpl(Self&& self, T& val) {
     struct Visitor {
       T& v;
       void assign(const T& t) { v = t; }
-      void clear() { v = ""; }
-      // TODO: Optimize this
+      void assign(T&& t) { v = std::move(t); }
+      void clear() { v.clear(); }
       void prepend(const T& t) { v = t + v; }
+      void prepend(T&& t) { v = std::move(t) + v; }
       void append(const T& t) { v += t; }
+      void append(T&& t) { v += std::move(t); }
     };
 
-    return Base::customVisit(Visitor{val});
+    return std::forward<Self>(self).customVisit(Visitor{val});
   }
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(apply, applyImpl);
 
  private:
   using Base::assignOr;

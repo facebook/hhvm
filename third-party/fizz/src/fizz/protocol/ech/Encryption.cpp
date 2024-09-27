@@ -187,6 +187,7 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
 }
 
 static hpke::SetupParam getSetupParam(
+    const fizz::Factory& factory,
     std::unique_ptr<DHKEM> dhkem,
     std::unique_ptr<folly::IOBuf> prefix,
     hpke::KEMId kemId,
@@ -201,13 +202,14 @@ static hpke::SetupParam getSetupParam(
 
   return hpke::SetupParam{
       std::move(dhkem),
-      makeCipher(cipherSuite.aead_id),
+      factory.makeAead(getCipherSuite(cipherSuite.aead_id)),
       std::move(hkdf),
       std::move(suiteId),
       0};
 }
 
 hpke::SetupResult constructHpkeSetupResult(
+    const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
     const SupportedECHConfig& supportedConfig) {
   const std::unique_ptr<folly::IOBuf> prefix =
@@ -232,6 +234,7 @@ hpke::SetupResult constructHpkeSetupResult(
       std::move(info),
       folly::none,
       getSetupParam(
+          factory,
           std::move(dhkem),
           prefix->clone(),
           config.key_config.kem_id,
@@ -652,6 +655,7 @@ ClientHello decryptECHWithContext(
 }
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
+    const fizz::Factory& factory,
     const ECHConfig& echConfig,
     HpkeSymmetricCipherSuite cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
@@ -675,7 +679,7 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
 
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      makeCipher(aeadId),
+      factory.makeAead(getCipherSuite(aeadId)),
       hpke::makeHpkeHkdf(prefix->clone(), kdfId),
       std::move(suiteId),
       seqNum};

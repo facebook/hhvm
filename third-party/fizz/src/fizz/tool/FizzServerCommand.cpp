@@ -582,7 +582,8 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
     return nullptr;
   }
 
-  auto decrypter = std::make_shared<ech::ECHConfigManager>();
+  auto decrypter = std::make_shared<ech::ECHConfigManager>(
+      std::make_shared<fizz::DefaultFactory>());
 
   // If more that 1 ECH config is provided, we use the first one.
   ech::ECHConfig gotConfig = gotECHConfigs.value().configs[0];
@@ -621,7 +622,8 @@ std::shared_ptr<ech::Decrypter> setupDefaultDecrypter() {
   kex->setPrivateKey(std::move(defaultPrivateKey));
 
   // Configure ECH decrpyter to be used server side.
-  auto decrypter = std::make_shared<ech::ECHConfigManager>();
+  auto decrypter = std::make_shared<ech::ECHConfigManager>(
+      std::make_shared<fizz::DefaultFactory>());
   decrypter->addDecryptionConfig(
       ech::DecrypterParams{chosenConfig, std::move(kex)});
 

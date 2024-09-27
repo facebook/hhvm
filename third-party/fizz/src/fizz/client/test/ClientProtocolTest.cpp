@@ -3005,7 +3005,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
 
   // Make dummy payload.
   size_t payloadSize = encodedClientHelloInnerAad->computeChainDataLength() +
-      hpke::makeCipher(echExtension.cipher_suite.aead_id)->getCipherOverhead();
+      hpke::getCipherOverhead(echExtension.cipher_suite.aead_id);
   echExtension.payload = folly::IOBuf::create(payloadSize);
   memset(echExtension.payload->writableData(), 0, payloadSize);
   echExtension.payload->append(payloadSize);
@@ -3276,7 +3276,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
 
   // Make dummy payload.
   size_t payloadSize = encodedClientHelloInnerAad->computeChainDataLength() +
-      hpke::makeCipher(echExtension.cipher_suite.aead_id)->getCipherOverhead();
+      hpke::getCipherOverhead(echExtension.cipher_suite.aead_id);
   echExtension.payload = folly::IOBuf::create(payloadSize);
   memset(echExtension.payload->writableData(), 0, payloadSize);
   echExtension.payload->append(payloadSize);

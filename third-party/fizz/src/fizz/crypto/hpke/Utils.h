@@ -212,18 +212,5 @@ inline size_t getCipherOverhead(AeadId aeadId) {
   }
   throw std::runtime_error("invalid aead");
 }
-
-/**
- * fizz::hpke::makeCipher constructs a `fizz::Aead` instance given an HPKE
- * aead code point.
- *
- * The cipher instance does *not* have the keys set.
- *
- * @param aeadId   An HPKE aead code point.
- *
- * @return An instance of a `fizz::Aead` without keying parameters.
- * @throws std::runtime_error     On invalid aead code point.
- */
-std::unique_ptr<Aead> makeCipher(AeadId aeadId);
 } // namespace hpke
 } // namespace fizz

@@ -698,7 +698,7 @@ static folly::Optional<ECHParams> setupECH(
   auto kex =
       factory.makeKeyExchange(getKexGroup(kemId), KeyExchangeRole::Client);
   auto setupResult =
-      constructHpkeSetupResult(std::move(kex), supportedECHConfig);
+      constructHpkeSetupResult(factory, std::move(kex), supportedECHConfig);
 
   return ECHParams{
       std::move(setupResult),

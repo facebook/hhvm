@@ -133,7 +133,7 @@ var _ thrift.Struct = (*reqCF)(nil)
 type CFArgsDeprecated = reqCF
 
 func newReqCF() *reqCF {
-    return (&reqCF{})
+    return (&reqCF{}).setDefaults()
 }
 
 
@@ -142,6 +142,7 @@ func (x *reqCF) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -202,6 +203,10 @@ func (x *reqCF) String() string {
 
     return sb.String()
 }
+func (x *reqCF) setDefaults() *reqCF {
+    return x
+}
+
 type respCF struct {
 }
 // Compile time interface enforcer
@@ -212,7 +217,7 @@ var _ thrift.WritableResult = (*respCF)(nil)
 type CFResultDeprecated = respCF
 
 func newRespCF() *respCF {
-    return (&respCF{})
+    return (&respCF{}).setDefaults()
 }
 
 
@@ -225,6 +230,7 @@ func (x *respCF) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -285,6 +291,10 @@ func (x *respCF) String() string {
 
     return sb.String()
 }
+func (x *respCF) setDefaults() *respCF {
+    return x
+}
+
 type reqCThing struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B string `thrift:"b,2" json:"b" db:"b"`
@@ -297,10 +307,7 @@ var _ thrift.Struct = (*reqCThing)(nil)
 type CThingArgsDeprecated = reqCThing
 
 func newReqCThing() *reqCThing {
-    return (&reqCThing{}).
-        SetANonCompat(0).
-        SetBNonCompat("").
-        SetCNonCompat(make([]int32, 0))
+    return (&reqCThing{}).setDefaults()
 }
 
 func (x *reqCThing) GetA() int32 {
@@ -315,7 +322,6 @@ func (x *reqCThing) GetC() []int32 {
     if !x.IsSetC() {
         return make([]int32, 0)
     }
-
     return x.C
 }
 
@@ -482,11 +488,9 @@ func (x *reqCThing) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -559,6 +563,13 @@ func (x *reqCThing) String() string {
 
     return sb.String()
 }
+func (x *reqCThing) setDefaults() *reqCThing {
+    return x.
+        SetANonCompat(0).
+        SetBNonCompat("").
+        SetCNonCompat(make([]int32, 0))
+}
+
 type respCThing struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
     Bang *Bang `thrift:"bang,1,optional" json:"bang,omitempty" db:"bang"`
@@ -571,14 +582,13 @@ var _ thrift.WritableResult = (*respCThing)(nil)
 type CThingResultDeprecated = respCThing
 
 func newRespCThing() *respCThing {
-    return (&respCThing{})
+    return (&respCThing{}).setDefaults()
 }
 
 func (x *respCThing) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
-
     return *x.Success
 }
 
@@ -586,7 +596,6 @@ func (x *respCThing) GetBang() *Bang {
     if !x.IsSetBang() {
         return nil
     }
-
     return x.Bang
 }
 
@@ -716,7 +725,6 @@ func (x *respCThing) Write(p thrift.Encoder) error {
     if err := x.writeField0(p); err != nil {
         return err
     }
-
     if err := x.writeField1(p); err != nil {
         return err
     }
@@ -786,6 +794,10 @@ func (x *respCThing) String() string {
 
     return sb.String()
 }
+func (x *respCThing) setDefaults() *respCThing {
+    return x
+}
+
 
 
 type CProcessor struct {

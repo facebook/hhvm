@@ -26,9 +26,7 @@ type DoSomethingResult struct {
 var _ thrift.Struct = (*DoSomethingResult)(nil)
 
 func NewDoSomethingResult() *DoSomethingResult {
-    return (&DoSomethingResult{}).
-        SetSResNonCompat("").
-        SetIResNonCompat(0)
+    return (&DoSomethingResult{}).setDefaults()
 }
 
 func (x *DoSomethingResult) GetSRes() string {
@@ -129,7 +127,6 @@ func (x *DoSomethingResult) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -199,6 +196,12 @@ func (x *DoSomethingResult) String() string {
 
     return sb.String()
 }
+func (x *DoSomethingResult) setDefaults() *DoSomethingResult {
+    return x.
+        SetSResNonCompat("").
+        SetIResNonCompat(0)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

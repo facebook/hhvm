@@ -24,7 +24,7 @@ type Empty struct {
 var _ thrift.Struct = (*Empty)(nil)
 
 func NewEmpty() *Empty {
-    return (&Empty{})
+    return (&Empty{}).setDefaults()
 }
 
 
@@ -33,6 +33,7 @@ func (x *Empty) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -93,6 +94,10 @@ func (x *Empty) String() string {
 
     return sb.String()
 }
+func (x *Empty) setDefaults() *Empty {
+    return x
+}
+
 
 type Nada struct {
 }
@@ -100,7 +105,7 @@ type Nada struct {
 var _ thrift.Struct = (*Nada)(nil)
 
 func NewNada() *Nada {
-    return (&Nada{})
+    return (&Nada{}).setDefaults()
 }
 
 func (x *Nada) countSetFields() int {
@@ -121,6 +126,7 @@ func (x *Nada) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Nada"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -181,6 +187,10 @@ func (x *Nada) String() string {
 
     return sb.String()
 }
+func (x *Nada) setDefaults() *Nada {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

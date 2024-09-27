@@ -183,16 +183,7 @@ type MyStruct struct {
 var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{}).
-        SetMyIntFieldNonCompat(0).
-        SetMyStringFieldNonCompat("").
-        SetMyDataFieldNonCompat(NewMyDataItemAlias()).
-        SetMyEnumNonCompat(0).
-        SetOnewayNonCompat(false).
-        SetReadonlyNonCompat(false).
-        SetIdempotentNonCompat(false).
-        SetFloatSetNonCompat(make([]float32, 0)).
-        SetNoHackCodegenFieldNonCompat("")
+    return (&MyStruct{}).setDefaults()
 }
 
 func (x *MyStruct) GetMyIntField() int64 {
@@ -207,7 +198,6 @@ func (x *MyStruct) GetMyDataField() *MyDataItemAlias {
     if !x.IsSetMyDataField() {
         return nil
     }
-
     return x.MyDataField
 }
 
@@ -231,7 +221,6 @@ func (x *MyStruct) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
         return make([]float32, 0)
     }
-
     return x.FloatSet
 }
 
@@ -660,35 +649,27 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
@@ -779,6 +760,19 @@ func (x *MyStruct) String() string {
 
     return sb.String()
 }
+func (x *MyStruct) setDefaults() *MyStruct {
+    return x.
+        SetMyIntFieldNonCompat(0).
+        SetMyStringFieldNonCompat("").
+        SetMyDataFieldNonCompat(NewMyDataItemAlias()).
+        SetMyEnumNonCompat(0).
+        SetOnewayNonCompat(false).
+        SetReadonlyNonCompat(false).
+        SetIdempotentNonCompat(false).
+        SetFloatSetNonCompat(make([]float32, 0)).
+        SetNoHackCodegenFieldNonCompat("")
+}
+
 
 type Containers struct {
     I32List []int32 `thrift:"I32List,1" json:"I32List" db:"I32List"`
@@ -789,17 +783,13 @@ type Containers struct {
 var _ thrift.Struct = (*Containers)(nil)
 
 func NewContainers() *Containers {
-    return (&Containers{}).
-        SetI32ListNonCompat(make([]int32, 0)).
-        SetStringSetNonCompat(make([]string, 0)).
-        SetStringToI64MapNonCompat(make(map[string]int64))
+    return (&Containers{}).setDefaults()
 }
 
 func (x *Containers) GetI32List() []int32 {
     if !x.IsSetI32List() {
         return make([]int32, 0)
     }
-
     return x.I32List
 }
 
@@ -807,7 +797,6 @@ func (x *Containers) GetStringSet() []string {
     if !x.IsSetStringSet() {
         return make([]string, 0)
     }
-
     return x.StringSet
 }
 
@@ -815,7 +804,6 @@ func (x *Containers) GetStringToI64Map() map[string]int64 {
     if !x.IsSetStringToI64Map() {
         return make(map[string]int64)
     }
-
     return x.StringToI64Map
 }
 
@@ -1065,11 +1053,9 @@ func (x *Containers) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -1142,6 +1128,13 @@ func (x *Containers) String() string {
 
     return sb.String()
 }
+func (x *Containers) setDefaults() *Containers {
+    return x.
+        SetI32ListNonCompat(make([]int32, 0)).
+        SetStringSetNonCompat(make([]string, 0)).
+        SetStringToI64MapNonCompat(make(map[string]int64))
+}
+
 
 type MyDataItem struct {
 }
@@ -1149,7 +1142,7 @@ type MyDataItem struct {
 var _ thrift.Struct = (*MyDataItem)(nil)
 
 func NewMyDataItem() *MyDataItem {
-    return (&MyDataItem{})
+    return (&MyDataItem{}).setDefaults()
 }
 
 
@@ -1158,6 +1151,7 @@ func (x *MyDataItem) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1218,6 +1212,10 @@ func (x *MyDataItem) String() string {
 
     return sb.String()
 }
+func (x *MyDataItem) setDefaults() *MyDataItem {
+    return x
+}
+
 
 type MyUnion struct {
     MyEnum *MyEnumAlias `thrift:"myEnum,1" json:"myEnum,omitempty" db:"myEnum"`
@@ -1229,14 +1227,13 @@ type MyUnion struct {
 var _ thrift.Struct = (*MyUnion)(nil)
 
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{})
+    return (&MyUnion{}).setDefaults()
 }
 
 func (x *MyUnion) GetMyEnum() MyEnumAlias {
     if !x.IsSetMyEnum() {
         return NewMyEnumAlias()
     }
-
     return *x.MyEnum
 }
 
@@ -1244,7 +1241,6 @@ func (x *MyUnion) GetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
         return nil
     }
-
     return x.MyStruct
 }
 
@@ -1252,7 +1248,6 @@ func (x *MyUnion) GetMyDataItem() *MyDataItem {
     if !x.IsSetMyDataItem() {
         return nil
     }
-
     return x.MyDataItem
 }
 
@@ -1260,7 +1255,6 @@ func (x *MyUnion) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
         return make([]float32, 0)
     }
-
     return x.FloatSet
 }
 
@@ -1542,15 +1536,12 @@ func (x *MyUnion) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -1626,6 +1617,10 @@ func (x *MyUnion) String() string {
 
     return sb.String()
 }
+func (x *MyUnion) setDefaults() *MyUnion {
+    return x
+}
+
 
 type MyException struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
@@ -1637,11 +1632,7 @@ type MyException struct {
 var _ thrift.Struct = (*MyException)(nil)
 
 func NewMyException() *MyException {
-    return (&MyException{}).
-        SetMyIntFieldNonCompat(0).
-        SetMyStringFieldNonCompat("").
-        SetMyStructNonCompat(NewMyStruct()).
-        SetMyUnionNonCompat(NewMyUnion())
+    return (&MyException{}).setDefaults()
 }
 
 func (x *MyException) GetMyIntField() int64 {
@@ -1656,7 +1647,6 @@ func (x *MyException) GetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
         return nil
     }
-
     return x.MyStruct
 }
 
@@ -1664,7 +1654,6 @@ func (x *MyException) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
         return nil
     }
-
     return x.MyUnion
 }
 
@@ -1872,15 +1861,12 @@ func (x *MyException) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -1956,6 +1942,14 @@ func (x *MyException) String() string {
 
     return sb.String()
 }
+func (x *MyException) setDefaults() *MyException {
+    return x.
+        SetMyIntFieldNonCompat(0).
+        SetMyStringFieldNonCompat("").
+        SetMyStructNonCompat(NewMyStruct()).
+        SetMyUnionNonCompat(NewMyUnion())
+}
+
 func (x *MyException) Error() string {
     return x.String()
 }
@@ -1970,11 +1964,7 @@ type MyExceptionWithMessage struct {
 var _ thrift.Struct = (*MyExceptionWithMessage)(nil)
 
 func NewMyExceptionWithMessage() *MyExceptionWithMessage {
-    return (&MyExceptionWithMessage{}).
-        SetMyIntFieldNonCompat(0).
-        SetMyStringFieldNonCompat("").
-        SetMyStructNonCompat(NewMyStruct()).
-        SetMyUnionNonCompat(NewMyUnion())
+    return (&MyExceptionWithMessage{}).setDefaults()
 }
 
 func (x *MyExceptionWithMessage) GetMyIntField() int64 {
@@ -1989,7 +1979,6 @@ func (x *MyExceptionWithMessage) GetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
         return nil
     }
-
     return x.MyStruct
 }
 
@@ -1997,7 +1986,6 @@ func (x *MyExceptionWithMessage) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
         return nil
     }
-
     return x.MyUnion
 }
 
@@ -2205,15 +2193,12 @@ func (x *MyExceptionWithMessage) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -2289,6 +2274,14 @@ func (x *MyExceptionWithMessage) String() string {
 
     return sb.String()
 }
+func (x *MyExceptionWithMessage) setDefaults() *MyExceptionWithMessage {
+    return x.
+        SetMyIntFieldNonCompat(0).
+        SetMyStringFieldNonCompat("").
+        SetMyStructNonCompat(NewMyStruct()).
+        SetMyUnionNonCompat(NewMyUnion())
+}
+
 func (x *MyExceptionWithMessage) Error() string {
     return x.String()
 }
@@ -2300,8 +2293,7 @@ type ReservedKeyword struct {
 var _ thrift.Struct = (*ReservedKeyword)(nil)
 
 func NewReservedKeyword() *ReservedKeyword {
-    return (&ReservedKeyword{}).
-        SetReservedFieldNonCompat(0)
+    return (&ReservedKeyword{}).setDefaults()
 }
 
 func (x *ReservedKeyword) GetReservedField() int32 {
@@ -2421,6 +2413,11 @@ func (x *ReservedKeyword) String() string {
 
     return sb.String()
 }
+func (x *ReservedKeyword) setDefaults() *ReservedKeyword {
+    return x.
+        SetReservedFieldNonCompat(0)
+}
+
 
 type UnionToBeRenamed struct {
     ReservedField *int32 `thrift:"reserved_field,1" json:"reserved_field,omitempty" db:"reserved_field"`
@@ -2429,14 +2426,13 @@ type UnionToBeRenamed struct {
 var _ thrift.Struct = (*UnionToBeRenamed)(nil)
 
 func NewUnionToBeRenamed() *UnionToBeRenamed {
-    return (&UnionToBeRenamed{})
+    return (&UnionToBeRenamed{}).setDefaults()
 }
 
 func (x *UnionToBeRenamed) GetReservedField() int32 {
     if !x.IsSetReservedField() {
         return 0
     }
-
     return *x.ReservedField
 }
 
@@ -2580,6 +2576,10 @@ func (x *UnionToBeRenamed) String() string {
 
     return sb.String()
 }
+func (x *UnionToBeRenamed) setDefaults() *UnionToBeRenamed {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

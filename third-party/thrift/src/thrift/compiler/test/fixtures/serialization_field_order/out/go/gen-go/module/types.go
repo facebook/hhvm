@@ -27,10 +27,7 @@ type Foo struct {
 var _ thrift.Struct = (*Foo)(nil)
 
 func NewFoo() *Foo {
-    return (&Foo{}).
-        SetField2NonCompat(0).
-        SetField3NonCompat(0).
-        SetField1NonCompat(0)
+    return (&Foo{}).setDefaults()
 }
 
 func (x *Foo) GetField2() int32 {
@@ -175,11 +172,9 @@ func (x *Foo) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -252,6 +247,13 @@ func (x *Foo) String() string {
 
     return sb.String()
 }
+func (x *Foo) setDefaults() *Foo {
+    return x.
+        SetField2NonCompat(0).
+        SetField3NonCompat(0).
+        SetField1NonCompat(0)
+}
+
 
 type Foo2 struct {
     Field2 int32 `thrift:"field2,1" json:"field2" db:"field2"`
@@ -262,10 +264,7 @@ type Foo2 struct {
 var _ thrift.Struct = (*Foo2)(nil)
 
 func NewFoo2() *Foo2 {
-    return (&Foo2{}).
-        SetField2NonCompat(0).
-        SetField3NonCompat(0).
-        SetField1NonCompat(0)
+    return (&Foo2{}).setDefaults()
 }
 
 func (x *Foo2) GetField2() int32 {
@@ -410,11 +409,9 @@ func (x *Foo2) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -487,6 +484,13 @@ func (x *Foo2) String() string {
 
     return sb.String()
 }
+func (x *Foo2) setDefaults() *Foo2 {
+    return x.
+        SetField2NonCompat(0).
+        SetField3NonCompat(0).
+        SetField1NonCompat(0)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -122,15 +122,13 @@ var _ thrift.Struct = (*reqExtendTestServiceCheck)(nil)
 type ExtendTestServiceCheckArgsDeprecated = reqExtendTestServiceCheck
 
 func newReqExtendTestServiceCheck() *reqExtendTestServiceCheck {
-    return (&reqExtendTestServiceCheck{}).
-        SetStruct1NonCompat(test0.NewHsFoo())
+    return (&reqExtendTestServiceCheck{}).setDefaults()
 }
 
 func (x *reqExtendTestServiceCheck) GetStruct1() *test0.HsFoo {
     if !x.IsSetStruct1() {
         return nil
     }
-
     return x.Struct1
 }
 
@@ -264,6 +262,11 @@ func (x *reqExtendTestServiceCheck) String() string {
 
     return sb.String()
 }
+func (x *reqExtendTestServiceCheck) setDefaults() *reqExtendTestServiceCheck {
+    return x.
+        SetStruct1NonCompat(test0.NewHsFoo())
+}
+
 type respExtendTestServiceCheck struct {
     Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -275,14 +278,13 @@ var _ thrift.WritableResult = (*respExtendTestServiceCheck)(nil)
 type ExtendTestServiceCheckResultDeprecated = respExtendTestServiceCheck
 
 func newRespExtendTestServiceCheck() *respExtendTestServiceCheck {
-    return (&respExtendTestServiceCheck{})
+    return (&respExtendTestServiceCheck{}).setDefaults()
 }
 
 func (x *respExtendTestServiceCheck) GetSuccess() bool {
     if !x.IsSetSuccess() {
         return false
     }
-
     return *x.Success
 }
 
@@ -415,6 +417,10 @@ func (x *respExtendTestServiceCheck) String() string {
 
     return sb.String()
 }
+func (x *respExtendTestServiceCheck) setDefaults() *respExtendTestServiceCheck {
+    return x
+}
+
 
 
 type ExtendTestServiceProcessor struct {

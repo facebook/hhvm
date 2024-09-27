@@ -25,8 +25,7 @@ type FieldWrapper struct {
 var _ thrift.Struct = (*FieldWrapper)(nil)
 
 func NewFieldWrapper() *FieldWrapper {
-    return (&FieldWrapper{}).
-        SetNameNonCompat("")
+    return (&FieldWrapper{}).setDefaults()
 }
 
 func (x *FieldWrapper) GetName() string {
@@ -146,6 +145,11 @@ func (x *FieldWrapper) String() string {
 
     return sb.String()
 }
+func (x *FieldWrapper) setDefaults() *FieldWrapper {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Wrapper struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -156,10 +160,7 @@ type Wrapper struct {
 var _ thrift.Struct = (*Wrapper)(nil)
 
 func NewWrapper() *Wrapper {
-    return (&Wrapper{}).
-        SetNameNonCompat("").
-        SetUnderlyingNameNonCompat("").
-        SetExtraNamespaceNonCompat("thrift_adapted_types")
+    return (&Wrapper{}).setDefaults()
 }
 
 func (x *Wrapper) GetName() string {
@@ -304,11 +305,9 @@ func (x *Wrapper) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -381,6 +380,13 @@ func (x *Wrapper) String() string {
 
     return sb.String()
 }
+func (x *Wrapper) setDefaults() *Wrapper {
+    return x.
+        SetNameNonCompat("").
+        SetUnderlyingNameNonCompat("").
+        SetExtraNamespaceNonCompat("thrift_adapted_types")
+}
+
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -389,8 +395,7 @@ type Adapter struct {
 var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
-    return (&Adapter{}).
-        SetNameNonCompat("")
+    return (&Adapter{}).setDefaults()
 }
 
 func (x *Adapter) GetName() string {
@@ -510,6 +515,11 @@ func (x *Adapter) String() string {
 
     return sb.String()
 }
+func (x *Adapter) setDefaults() *Adapter {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type SkipCodegen struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
@@ -518,8 +528,7 @@ type SkipCodegen struct {
 var _ thrift.Struct = (*SkipCodegen)(nil)
 
 func NewSkipCodegen() *SkipCodegen {
-    return (&SkipCodegen{}).
-        SetReasonNonCompat("")
+    return (&SkipCodegen{}).setDefaults()
 }
 
 func (x *SkipCodegen) GetReason() string {
@@ -639,6 +648,11 @@ func (x *SkipCodegen) String() string {
 
     return sb.String()
 }
+func (x *SkipCodegen) setDefaults() *SkipCodegen {
+    return x.
+        SetReasonNonCompat("")
+}
+
 
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -648,9 +662,7 @@ type Name struct {
 var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
-    return (&Name{}).
-        SetNameNonCompat("").
-        SetReasonNonCompat("")
+    return (&Name{}).setDefaults()
 }
 
 func (x *Name) GetName() string {
@@ -751,7 +763,6 @@ func (x *Name) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -821,6 +832,12 @@ func (x *Name) String() string {
 
     return sb.String()
 }
+func (x *Name) setDefaults() *Name {
+    return x.
+        SetNameNonCompat("").
+        SetReasonNonCompat("")
+}
+
 
 type UnionEnumAttributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
@@ -829,15 +846,13 @@ type UnionEnumAttributes struct {
 var _ thrift.Struct = (*UnionEnumAttributes)(nil)
 
 func NewUnionEnumAttributes() *UnionEnumAttributes {
-    return (&UnionEnumAttributes{}).
-        SetAttributesNonCompat(make([]string, 0))
+    return (&UnionEnumAttributes{}).setDefaults()
 }
 
 func (x *UnionEnumAttributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
         return make([]string, 0)
     }
-
     return x.Attributes
 }
 
@@ -987,6 +1002,11 @@ func (x *UnionEnumAttributes) String() string {
 
     return sb.String()
 }
+func (x *UnionEnumAttributes) setDefaults() *UnionEnumAttributes {
+    return x.
+        SetAttributesNonCompat(make([]string, 0))
+}
+
 
 type StructTrait struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -995,8 +1015,7 @@ type StructTrait struct {
 var _ thrift.Struct = (*StructTrait)(nil)
 
 func NewStructTrait() *StructTrait {
-    return (&StructTrait{}).
-        SetNameNonCompat("")
+    return (&StructTrait{}).setDefaults()
 }
 
 func (x *StructTrait) GetName() string {
@@ -1116,6 +1135,11 @@ func (x *StructTrait) String() string {
 
     return sb.String()
 }
+func (x *StructTrait) setDefaults() *StructTrait {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Attributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
@@ -1124,15 +1148,13 @@ type Attributes struct {
 var _ thrift.Struct = (*Attributes)(nil)
 
 func NewAttributes() *Attributes {
-    return (&Attributes{}).
-        SetAttributesNonCompat(make([]string, 0))
+    return (&Attributes{}).setDefaults()
 }
 
 func (x *Attributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
         return make([]string, 0)
     }
-
     return x.Attributes
 }
 
@@ -1282,6 +1304,11 @@ func (x *Attributes) String() string {
 
     return sb.String()
 }
+func (x *Attributes) setDefaults() *Attributes {
+    return x.
+        SetAttributesNonCompat(make([]string, 0))
+}
+
 
 type StructAsTrait struct {
 }
@@ -1289,7 +1316,7 @@ type StructAsTrait struct {
 var _ thrift.Struct = (*StructAsTrait)(nil)
 
 func NewStructAsTrait() *StructAsTrait {
-    return (&StructAsTrait{})
+    return (&StructAsTrait{}).setDefaults()
 }
 
 
@@ -1298,6 +1325,7 @@ func (x *StructAsTrait) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("StructAsTrait"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1358,6 +1386,10 @@ func (x *StructAsTrait) String() string {
 
     return sb.String()
 }
+func (x *StructAsTrait) setDefaults() *StructAsTrait {
+    return x
+}
+
 
 type ModuleInternal struct {
 }
@@ -1365,7 +1397,7 @@ type ModuleInternal struct {
 var _ thrift.Struct = (*ModuleInternal)(nil)
 
 func NewModuleInternal() *ModuleInternal {
-    return (&ModuleInternal{})
+    return (&ModuleInternal{}).setDefaults()
 }
 
 
@@ -1374,6 +1406,7 @@ func (x *ModuleInternal) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ModuleInternal"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1434,6 +1467,10 @@ func (x *ModuleInternal) String() string {
 
     return sb.String()
 }
+func (x *ModuleInternal) setDefaults() *ModuleInternal {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

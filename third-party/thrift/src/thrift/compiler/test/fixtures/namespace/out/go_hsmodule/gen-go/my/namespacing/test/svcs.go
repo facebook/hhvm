@@ -108,8 +108,7 @@ var _ thrift.Struct = (*reqHsTestServiceInit)(nil)
 type HsTestServiceInitArgsDeprecated = reqHsTestServiceInit
 
 func newReqHsTestServiceInit() *reqHsTestServiceInit {
-    return (&reqHsTestServiceInit{}).
-        SetInt1NonCompat(0)
+    return (&reqHsTestServiceInit{}).setDefaults()
 }
 
 func (x *reqHsTestServiceInit) GetInt1() int64 {
@@ -229,6 +228,11 @@ func (x *reqHsTestServiceInit) String() string {
 
     return sb.String()
 }
+func (x *reqHsTestServiceInit) setDefaults() *reqHsTestServiceInit {
+    return x.
+        SetInt1NonCompat(0)
+}
+
 type respHsTestServiceInit struct {
     Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -240,14 +244,13 @@ var _ thrift.WritableResult = (*respHsTestServiceInit)(nil)
 type HsTestServiceInitResultDeprecated = respHsTestServiceInit
 
 func newRespHsTestServiceInit() *respHsTestServiceInit {
-    return (&respHsTestServiceInit{})
+    return (&respHsTestServiceInit{}).setDefaults()
 }
 
 func (x *respHsTestServiceInit) GetSuccess() int64 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -380,6 +383,10 @@ func (x *respHsTestServiceInit) String() string {
 
     return sb.String()
 }
+func (x *respHsTestServiceInit) setDefaults() *respHsTestServiceInit {
+    return x
+}
+
 
 
 type HsTestServiceProcessor struct {

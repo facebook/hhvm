@@ -353,20 +353,7 @@ type SomeStruct struct {
 var _ thrift.Struct = (*SomeStruct)(nil)
 
 func NewSomeStruct() *SomeStruct {
-    return (&SomeStruct{}).
-        SetReasonableNonCompat(
-              Metasyntactic_FOO,
-          ).
-        SetFineNonCompat(
-              Metasyntactic_BAR,
-          ).
-        SetQuestionableNonCompat(
-              Metasyntactic(-1),
-          ).
-        SetTagsNonCompat(
-              []int32{
-},
-          )
+    return (&SomeStruct{}).setDefaults()
 }
 
 func (x *SomeStruct) GetReasonable() Metasyntactic {
@@ -386,7 +373,6 @@ func (x *SomeStruct) GetTags() []int32 {
         return []int32{
 }
     }
-
     return x.Tags
 }
 
@@ -596,15 +582,12 @@ func (x *SomeStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -680,6 +663,23 @@ func (x *SomeStruct) String() string {
 
     return sb.String()
 }
+func (x *SomeStruct) setDefaults() *SomeStruct {
+    return x.
+        SetReasonableNonCompat(
+              Metasyntactic_FOO,
+          ).
+        SetFineNonCompat(
+              Metasyntactic_BAR,
+          ).
+        SetQuestionableNonCompat(
+              Metasyntactic(-1),
+          ).
+        SetTagsNonCompat(
+              []int32{
+},
+          )
+}
+
 
 type MyStruct struct {
     Me2_3 MyEnum2 `thrift:"me2_3,1" json:"me2_3" db:"me2_3"`
@@ -691,19 +691,7 @@ type MyStruct struct {
 var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{}).
-        SetMe2_3NonCompat(
-              MyEnum2(3),
-          ).
-        SetMe3N3NonCompat(
-              MyEnum3(-3),
-          ).
-        SetMe1T1NonCompat(
-              MyEnum1_ME1_1,
-          ).
-        SetMe1T2NonCompat(
-              MyEnum1_ME1_1,
-          )
+    return (&MyStruct{}).setDefaults()
 }
 
 func (x *MyStruct) GetMe2_3() MyEnum2 {
@@ -896,15 +884,12 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
@@ -980,6 +965,22 @@ func (x *MyStruct) String() string {
 
     return sb.String()
 }
+func (x *MyStruct) setDefaults() *MyStruct {
+    return x.
+        SetMe2_3NonCompat(
+              MyEnum2(3),
+          ).
+        SetMe3N3NonCompat(
+              MyEnum3(-3),
+          ).
+        SetMe1T1NonCompat(
+              MyEnum1_ME1_1,
+          ).
+        SetMe1T2NonCompat(
+              MyEnum1_ME1_1,
+          )
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

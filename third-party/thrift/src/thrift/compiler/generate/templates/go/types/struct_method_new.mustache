@@ -20,34 +20,6 @@
 
 }}
 func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
-    return (&{{struct:go_name}}{}){{!
-      }}{{^struct:union?}}{{!
-      }}{{#struct:fields_sorted}}{{!
-
-        // Fields with given default values.
-        }}{{#field:value}}.
-        {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
-          }}{{#field:type}}{{!
-          }}{{^type:base?}}
-              {{> const/value}},
-          {{/type:base?}}{{!
-          }}{{#type:base?}}{{!
-              }}{{> const/value}}{{!
-          }}{{/type:base?}}{{!
-          }}{{/field:type}}{{!
-        }}){{/field:value}}{{!
-
-        // Non-optional fields without given default values.
-        }}{{^field:value}}{{!
-        }}{{^field:optional?}}.
-        {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
-          }}{{#field:type}}{{!
-            }}{{> common/natural_default_value}}{{!
-          }}{{/field:type}}{{!
-        }}){{/field:optional?}}{{!
-        }}{{/field:value}}{{!
-
-      }}{{/struct:fields_sorted}}{{!
-      }}{{/struct:union?}}
+    return (&{{struct:go_name}}{}).setDefaults()
 }
 {{!newline}}

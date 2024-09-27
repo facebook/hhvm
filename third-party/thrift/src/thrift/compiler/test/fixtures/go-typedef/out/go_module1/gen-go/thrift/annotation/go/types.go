@@ -25,8 +25,7 @@ type Name struct {
 var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
-    return (&Name{}).
-        SetNameNonCompat("")
+    return (&Name{}).setDefaults()
 }
 
 func (x *Name) GetName() string {
@@ -146,6 +145,11 @@ func (x *Name) String() string {
 
     return sb.String()
 }
+func (x *Name) setDefaults() *Name {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Tag struct {
     Tag string `thrift:"tag,1" json:"tag" db:"tag"`
@@ -154,8 +158,7 @@ type Tag struct {
 var _ thrift.Struct = (*Tag)(nil)
 
 func NewTag() *Tag {
-    return (&Tag{}).
-        SetTagNonCompat("")
+    return (&Tag{}).setDefaults()
 }
 
 func (x *Tag) GetTag() string {
@@ -275,6 +278,11 @@ func (x *Tag) String() string {
 
     return sb.String()
 }
+func (x *Tag) setDefaults() *Tag {
+    return x.
+        SetTagNonCompat("")
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

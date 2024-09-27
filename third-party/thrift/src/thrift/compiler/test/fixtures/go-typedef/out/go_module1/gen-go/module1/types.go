@@ -293,13 +293,7 @@ type Automobile struct {
 var _ thrift.Struct = (*Automobile)(nil)
 
 func NewAutomobile() *Automobile {
-    return (&Automobile{}).
-        SetPlateNonCompat(NewPlate()).
-        SetFirstPlateNonCompat("0000").
-        SetYearNonCompat(NewYear()).
-        SetDriversNonCompat(NewDrivers()).
-        SetAccessoriesNonCompat(make([]*Accessory, 0)).
-        SetPartNamesNonCompat(make(map[int32]*CarPartName))
+    return (&Automobile{}).setDefaults()
 }
 
 func (x *Automobile) GetPlate() Plate {
@@ -310,7 +304,6 @@ func (x *Automobile) GetPreviousPlate() Plate {
     if !x.IsSetPreviousPlate() {
         return NewPlate()
     }
-
     return *x.PreviousPlate
 }
 
@@ -318,7 +311,6 @@ func (x *Automobile) GetFirstPlate() Plate {
     if !x.IsSetFirstPlate() {
         return "0000"
     }
-
     return *x.FirstPlate
 }
 
@@ -330,7 +322,6 @@ func (x *Automobile) GetDrivers() Drivers {
     if !x.IsSetDrivers() {
         return NewDrivers()
     }
-
     return x.Drivers
 }
 
@@ -338,7 +329,6 @@ func (x *Automobile) GetAccessories() []*Accessory {
     if !x.IsSetAccessories() {
         return make([]*Accessory, 0)
     }
-
     return x.Accessories
 }
 
@@ -346,7 +336,6 @@ func (x *Automobile) GetPartNames() map[int32]*CarPartName {
     if !x.IsSetPartNames() {
         return make(map[int32]*CarPartName)
     }
-
     return x.PartNames
 }
 
@@ -758,27 +747,21 @@ func (x *Automobile) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
@@ -863,6 +846,16 @@ func (x *Automobile) String() string {
 
     return sb.String()
 }
+func (x *Automobile) setDefaults() *Automobile {
+    return x.
+        SetPlateNonCompat(NewPlate()).
+        SetFirstPlateNonCompat("0000").
+        SetYearNonCompat(NewYear()).
+        SetDriversNonCompat(NewDrivers()).
+        SetAccessoriesNonCompat(make([]*Accessory, 0)).
+        SetPartNamesNonCompat(make(map[int32]*CarPartName))
+}
+
 
 type MapKey struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
@@ -872,9 +865,7 @@ type MapKey struct {
 var _ thrift.Struct = (*MapKey)(nil)
 
 func NewMapKey() *MapKey {
-    return (&MapKey{}).
-        SetNumNonCompat(0).
-        SetStrvalNonCompat("")
+    return (&MapKey{}).setDefaults()
 }
 
 func (x *MapKey) GetNum() int64 {
@@ -975,7 +966,6 @@ func (x *MapKey) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1045,6 +1035,12 @@ func (x *MapKey) String() string {
 
     return sb.String()
 }
+func (x *MapKey) setDefaults() *MapKey {
+    return x.
+        SetNumNonCompat(0).
+        SetStrvalNonCompat("")
+}
+
 
 type MapContainer struct {
     Mapval map[MapKey]string `thrift:"mapval,1" json:"mapval" db:"mapval"`
@@ -1053,15 +1049,13 @@ type MapContainer struct {
 var _ thrift.Struct = (*MapContainer)(nil)
 
 func NewMapContainer() *MapContainer {
-    return (&MapContainer{}).
-        SetMapvalNonCompat(make(map[MapKey]string))
+    return (&MapContainer{}).setDefaults()
 }
 
 func (x *MapContainer) GetMapval() map[MapKey]string {
     if !x.IsSetMapval() {
         return make(map[MapKey]string)
     }
-
     return x.Mapval
 }
 
@@ -1229,6 +1223,11 @@ func (x *MapContainer) String() string {
 
     return sb.String()
 }
+func (x *MapContainer) setDefaults() *MapContainer {
+    return x.
+        SetMapvalNonCompat(make(map[MapKey]string))
+}
+
 
 type Pair struct {
     Automobile *Automobile `thrift:"automobile,1" json:"automobile" db:"automobile"`
@@ -1238,16 +1237,13 @@ type Pair struct {
 var _ thrift.Struct = (*Pair)(nil)
 
 func NewPair() *Pair {
-    return (&Pair{}).
-        SetAutomobileNonCompat(NewAutomobile()).
-        SetCarNonCompat(NewCar())
+    return (&Pair{}).setDefaults()
 }
 
 func (x *Pair) GetAutomobile() *Automobile {
     if !x.IsSetAutomobile() {
         return nil
     }
-
     return x.Automobile
 }
 
@@ -1255,7 +1251,6 @@ func (x *Pair) GetCar() *Car {
     if !x.IsSetCar() {
         return nil
     }
-
     return x.Car
 }
 
@@ -1383,7 +1378,6 @@ func (x *Pair) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1453,6 +1447,12 @@ func (x *Pair) String() string {
 
     return sb.String()
 }
+func (x *Pair) setDefaults() *Pair {
+    return x.
+        SetAutomobileNonCompat(NewAutomobile()).
+        SetCarNonCompat(NewCar())
+}
+
 
 type Collection struct {
     Automobiles []*Automobile `thrift:"automobiles,1" json:"automobiles" db:"automobiles"`
@@ -1462,16 +1462,13 @@ type Collection struct {
 var _ thrift.Struct = (*Collection)(nil)
 
 func NewCollection() *Collection {
-    return (&Collection{}).
-        SetAutomobilesNonCompat(make([]*Automobile, 0)).
-        SetCarsNonCompat(make([]*Car, 0))
+    return (&Collection{}).setDefaults()
 }
 
 func (x *Collection) GetAutomobiles() []*Automobile {
     if !x.IsSetAutomobiles() {
         return make([]*Automobile, 0)
     }
-
     return x.Automobiles
 }
 
@@ -1479,7 +1476,6 @@ func (x *Collection) GetCars() []*Car {
     if !x.IsSetCars() {
         return make([]*Car, 0)
     }
-
     return x.Cars
 }
 
@@ -1641,7 +1637,6 @@ func (x *Collection) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1711,6 +1706,12 @@ func (x *Collection) String() string {
 
     return sb.String()
 }
+func (x *Collection) setDefaults() *Collection {
+    return x.
+        SetAutomobilesNonCompat(make([]*Automobile, 0)).
+        SetCarsNonCompat(make([]*Car, 0))
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

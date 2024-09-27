@@ -26,9 +26,7 @@ type Accessory struct {
 var _ thrift.Struct = (*Accessory)(nil)
 
 func NewAccessory() *Accessory {
-    return (&Accessory{}).
-        SetInventoryIdNonCompat(0).
-        SetNameNonCompat("")
+    return (&Accessory{}).setDefaults()
 }
 
 func (x *Accessory) GetInventoryId() int32 {
@@ -129,7 +127,6 @@ func (x *Accessory) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -199,6 +196,12 @@ func (x *Accessory) String() string {
 
     return sb.String()
 }
+func (x *Accessory) setDefaults() *Accessory {
+    return x.
+        SetInventoryIdNonCompat(0).
+        SetNameNonCompat("")
+}
+
 
 type PartName struct {
     InventoryId int32 `thrift:"InventoryId,1" json:"InventoryId" db:"InventoryId"`
@@ -208,9 +211,7 @@ type PartName struct {
 var _ thrift.Struct = (*PartName)(nil)
 
 func NewPartName() *PartName {
-    return (&PartName{}).
-        SetInventoryIdNonCompat(0).
-        SetNameNonCompat("")
+    return (&PartName{}).setDefaults()
 }
 
 func (x *PartName) GetInventoryId() int32 {
@@ -311,7 +312,6 @@ func (x *PartName) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -381,6 +381,12 @@ func (x *PartName) String() string {
 
     return sb.String()
 }
+func (x *PartName) setDefaults() *PartName {
+    return x.
+        SetInventoryIdNonCompat(0).
+        SetNameNonCompat("")
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

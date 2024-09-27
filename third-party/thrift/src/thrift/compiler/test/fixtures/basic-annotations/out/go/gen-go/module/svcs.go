@@ -241,7 +241,7 @@ var _ thrift.Struct = (*reqMyServicePing)(nil)
 type MyServicePingArgsDeprecated = reqMyServicePing
 
 func newReqMyServicePing() *reqMyServicePing {
-    return (&reqMyServicePing{})
+    return (&reqMyServicePing{}).setDefaults()
 }
 
 
@@ -250,6 +250,7 @@ func (x *reqMyServicePing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -310,6 +311,10 @@ func (x *reqMyServicePing) String() string {
 
     return sb.String()
 }
+func (x *reqMyServicePing) setDefaults() *reqMyServicePing {
+    return x
+}
+
 type respMyServicePing struct {
     MyExcept *MyException `thrift:"myExcept,1,optional" json:"myExcept,omitempty" db:"myExcept"`
 }
@@ -321,14 +326,13 @@ var _ thrift.WritableResult = (*respMyServicePing)(nil)
 type MyServicePingResultDeprecated = respMyServicePing
 
 func newRespMyServicePing() *respMyServicePing {
-    return (&respMyServicePing{})
+    return (&respMyServicePing{}).setDefaults()
 }
 
 func (x *respMyServicePing) GetMyExcept() *MyException {
     if !x.IsSetMyExcept() {
         return nil
     }
-
     return x.MyExcept
 }
 
@@ -469,6 +473,10 @@ func (x *respMyServicePing) String() string {
 
     return sb.String()
 }
+func (x *respMyServicePing) setDefaults() *respMyServicePing {
+    return x
+}
+
 type reqMyServiceGetRandomData struct {
 }
 // Compile time interface enforcer
@@ -478,7 +486,7 @@ var _ thrift.Struct = (*reqMyServiceGetRandomData)(nil)
 type MyServiceGetRandomDataArgsDeprecated = reqMyServiceGetRandomData
 
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
-    return (&reqMyServiceGetRandomData{})
+    return (&reqMyServiceGetRandomData{}).setDefaults()
 }
 
 
@@ -487,6 +495,7 @@ func (x *reqMyServiceGetRandomData) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceGetRandomData"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -547,6 +556,10 @@ func (x *reqMyServiceGetRandomData) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceGetRandomData) setDefaults() *reqMyServiceGetRandomData {
+    return x
+}
+
 type respMyServiceGetRandomData struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -558,14 +571,13 @@ var _ thrift.WritableResult = (*respMyServiceGetRandomData)(nil)
 type MyServiceGetRandomDataResultDeprecated = respMyServiceGetRandomData
 
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
-    return (&respMyServiceGetRandomData{})
+    return (&respMyServiceGetRandomData{}).setDefaults()
 }
 
 func (x *respMyServiceGetRandomData) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
-
     return *x.Success
 }
 
@@ -698,6 +710,10 @@ func (x *respMyServiceGetRandomData) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceGetRandomData) setDefaults() *respMyServiceGetRandomData {
+    return x
+}
+
 type reqMyServiceHasDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
 }
@@ -708,8 +724,7 @@ var _ thrift.Struct = (*reqMyServiceHasDataById)(nil)
 type MyServiceHasDataByIdArgsDeprecated = reqMyServiceHasDataById
 
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
-    return (&reqMyServiceHasDataById{}).
-        SetIdNonCompat(0)
+    return (&reqMyServiceHasDataById{}).setDefaults()
 }
 
 func (x *reqMyServiceHasDataById) GetId() int64 {
@@ -829,6 +844,11 @@ func (x *reqMyServiceHasDataById) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceHasDataById) setDefaults() *reqMyServiceHasDataById {
+    return x.
+        SetIdNonCompat(0)
+}
+
 type respMyServiceHasDataById struct {
     Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -840,14 +860,13 @@ var _ thrift.WritableResult = (*respMyServiceHasDataById)(nil)
 type MyServiceHasDataByIdResultDeprecated = respMyServiceHasDataById
 
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
-    return (&respMyServiceHasDataById{})
+    return (&respMyServiceHasDataById{}).setDefaults()
 }
 
 func (x *respMyServiceHasDataById) GetSuccess() bool {
     if !x.IsSetSuccess() {
         return false
     }
-
     return *x.Success
 }
 
@@ -980,6 +999,10 @@ func (x *respMyServiceHasDataById) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceHasDataById) setDefaults() *respMyServiceHasDataById {
+    return x
+}
+
 type reqMyServiceGoGetDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
 }
@@ -990,8 +1013,7 @@ var _ thrift.Struct = (*reqMyServiceGoGetDataById)(nil)
 type MyServiceGoGetDataByIdArgsDeprecated = reqMyServiceGoGetDataById
 
 func newReqMyServiceGoGetDataById() *reqMyServiceGoGetDataById {
-    return (&reqMyServiceGoGetDataById{}).
-        SetIdNonCompat(0)
+    return (&reqMyServiceGoGetDataById{}).setDefaults()
 }
 
 func (x *reqMyServiceGoGetDataById) GetId() int64 {
@@ -1111,6 +1133,11 @@ func (x *reqMyServiceGoGetDataById) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceGoGetDataById) setDefaults() *reqMyServiceGoGetDataById {
+    return x.
+        SetIdNonCompat(0)
+}
+
 type respMyServiceGoGetDataById struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -1122,14 +1149,13 @@ var _ thrift.WritableResult = (*respMyServiceGoGetDataById)(nil)
 type MyServiceGoGetDataByIdResultDeprecated = respMyServiceGoGetDataById
 
 func newRespMyServiceGoGetDataById() *respMyServiceGoGetDataById {
-    return (&respMyServiceGoGetDataById{})
+    return (&respMyServiceGoGetDataById{}).setDefaults()
 }
 
 func (x *respMyServiceGoGetDataById) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
-
     return *x.Success
 }
 
@@ -1262,6 +1288,10 @@ func (x *respMyServiceGoGetDataById) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceGoGetDataById) setDefaults() *respMyServiceGoGetDataById {
+    return x
+}
+
 type reqMyServicePutDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
     Data string `thrift:"data,2" json:"data" db:"data"`
@@ -1273,9 +1303,7 @@ var _ thrift.Struct = (*reqMyServicePutDataById)(nil)
 type MyServicePutDataByIdArgsDeprecated = reqMyServicePutDataById
 
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
-    return (&reqMyServicePutDataById{}).
-        SetIdNonCompat(0).
-        SetDataNonCompat("")
+    return (&reqMyServicePutDataById{}).setDefaults()
 }
 
 func (x *reqMyServicePutDataById) GetId() int64 {
@@ -1376,7 +1404,6 @@ func (x *reqMyServicePutDataById) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1446,6 +1473,12 @@ func (x *reqMyServicePutDataById) String() string {
 
     return sb.String()
 }
+func (x *reqMyServicePutDataById) setDefaults() *reqMyServicePutDataById {
+    return x.
+        SetIdNonCompat(0).
+        SetDataNonCompat("")
+}
+
 type respMyServicePutDataById struct {
 }
 // Compile time interface enforcer
@@ -1456,7 +1489,7 @@ var _ thrift.WritableResult = (*respMyServicePutDataById)(nil)
 type MyServicePutDataByIdResultDeprecated = respMyServicePutDataById
 
 func newRespMyServicePutDataById() *respMyServicePutDataById {
-    return (&respMyServicePutDataById{})
+    return (&respMyServicePutDataById{}).setDefaults()
 }
 
 
@@ -1469,6 +1502,7 @@ func (x *respMyServicePutDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServicePutDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1529,6 +1563,10 @@ func (x *respMyServicePutDataById) String() string {
 
     return sb.String()
 }
+func (x *respMyServicePutDataById) setDefaults() *respMyServicePutDataById {
+    return x
+}
+
 type reqMyServiceLobDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
     Data string `thrift:"data,2" json:"data" db:"data"`
@@ -1540,9 +1578,7 @@ var _ thrift.Struct = (*reqMyServiceLobDataById)(nil)
 type MyServiceLobDataByIdArgsDeprecated = reqMyServiceLobDataById
 
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
-    return (&reqMyServiceLobDataById{}).
-        SetIdNonCompat(0).
-        SetDataNonCompat("")
+    return (&reqMyServiceLobDataById{}).setDefaults()
 }
 
 func (x *reqMyServiceLobDataById) GetId() int64 {
@@ -1643,7 +1679,6 @@ func (x *reqMyServiceLobDataById) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1713,6 +1748,12 @@ func (x *reqMyServiceLobDataById) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceLobDataById) setDefaults() *reqMyServiceLobDataById {
+    return x.
+        SetIdNonCompat(0).
+        SetDataNonCompat("")
+}
+
 type respMyServiceLobDataById struct {
 }
 // Compile time interface enforcer
@@ -1723,7 +1764,7 @@ var _ thrift.WritableResult = (*respMyServiceLobDataById)(nil)
 type MyServiceLobDataByIdResultDeprecated = respMyServiceLobDataById
 
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
-    return (&respMyServiceLobDataById{})
+    return (&respMyServiceLobDataById{}).setDefaults()
 }
 
 
@@ -1736,6 +1777,7 @@ func (x *respMyServiceLobDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceLobDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1796,6 +1838,10 @@ func (x *respMyServiceLobDataById) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceLobDataById) setDefaults() *respMyServiceLobDataById {
+    return x
+}
+
 type reqMyServiceGoDoNothing struct {
 }
 // Compile time interface enforcer
@@ -1805,7 +1851,7 @@ var _ thrift.Struct = (*reqMyServiceGoDoNothing)(nil)
 type MyServiceGoDoNothingArgsDeprecated = reqMyServiceGoDoNothing
 
 func newReqMyServiceGoDoNothing() *reqMyServiceGoDoNothing {
-    return (&reqMyServiceGoDoNothing{})
+    return (&reqMyServiceGoDoNothing{}).setDefaults()
 }
 
 
@@ -1814,6 +1860,7 @@ func (x *reqMyServiceGoDoNothing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceGoDoNothing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1874,6 +1921,10 @@ func (x *reqMyServiceGoDoNothing) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceGoDoNothing) setDefaults() *reqMyServiceGoDoNothing {
+    return x
+}
+
 type respMyServiceGoDoNothing struct {
 }
 // Compile time interface enforcer
@@ -1884,7 +1935,7 @@ var _ thrift.WritableResult = (*respMyServiceGoDoNothing)(nil)
 type MyServiceGoDoNothingResultDeprecated = respMyServiceGoDoNothing
 
 func newRespMyServiceGoDoNothing() *respMyServiceGoDoNothing {
-    return (&respMyServiceGoDoNothing{})
+    return (&respMyServiceGoDoNothing{}).setDefaults()
 }
 
 
@@ -1897,6 +1948,7 @@ func (x *respMyServiceGoDoNothing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceGoDoNothing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1957,6 +2009,10 @@ func (x *respMyServiceGoDoNothing) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceGoDoNothing) setDefaults() *respMyServiceGoDoNothing {
+    return x
+}
+
 
 
 type MyServiceProcessor struct {
@@ -2488,7 +2544,7 @@ var _ thrift.Struct = (*reqMyServicePrioParentPing)(nil)
 type MyServicePrioParentPingArgsDeprecated = reqMyServicePrioParentPing
 
 func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
-    return (&reqMyServicePrioParentPing{})
+    return (&reqMyServicePrioParentPing{}).setDefaults()
 }
 
 
@@ -2497,6 +2553,7 @@ func (x *reqMyServicePrioParentPing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePrioParentPing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2557,6 +2614,10 @@ func (x *reqMyServicePrioParentPing) String() string {
 
     return sb.String()
 }
+func (x *reqMyServicePrioParentPing) setDefaults() *reqMyServicePrioParentPing {
+    return x
+}
+
 type respMyServicePrioParentPing struct {
 }
 // Compile time interface enforcer
@@ -2567,7 +2628,7 @@ var _ thrift.WritableResult = (*respMyServicePrioParentPing)(nil)
 type MyServicePrioParentPingResultDeprecated = respMyServicePrioParentPing
 
 func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
-    return (&respMyServicePrioParentPing{})
+    return (&respMyServicePrioParentPing{}).setDefaults()
 }
 
 
@@ -2580,6 +2641,7 @@ func (x *respMyServicePrioParentPing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServicePrioParentPing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2640,6 +2702,10 @@ func (x *respMyServicePrioParentPing) String() string {
 
     return sb.String()
 }
+func (x *respMyServicePrioParentPing) setDefaults() *respMyServicePrioParentPing {
+    return x
+}
+
 type reqMyServicePrioParentPong struct {
 }
 // Compile time interface enforcer
@@ -2649,7 +2715,7 @@ var _ thrift.Struct = (*reqMyServicePrioParentPong)(nil)
 type MyServicePrioParentPongArgsDeprecated = reqMyServicePrioParentPong
 
 func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
-    return (&reqMyServicePrioParentPong{})
+    return (&reqMyServicePrioParentPong{}).setDefaults()
 }
 
 
@@ -2658,6 +2724,7 @@ func (x *reqMyServicePrioParentPong) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePrioParentPong"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2718,6 +2785,10 @@ func (x *reqMyServicePrioParentPong) String() string {
 
     return sb.String()
 }
+func (x *reqMyServicePrioParentPong) setDefaults() *reqMyServicePrioParentPong {
+    return x
+}
+
 type respMyServicePrioParentPong struct {
 }
 // Compile time interface enforcer
@@ -2728,7 +2799,7 @@ var _ thrift.WritableResult = (*respMyServicePrioParentPong)(nil)
 type MyServicePrioParentPongResultDeprecated = respMyServicePrioParentPong
 
 func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
-    return (&respMyServicePrioParentPong{})
+    return (&respMyServicePrioParentPong{}).setDefaults()
 }
 
 
@@ -2741,6 +2812,7 @@ func (x *respMyServicePrioParentPong) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServicePrioParentPong"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2801,6 +2873,10 @@ func (x *respMyServicePrioParentPong) String() string {
 
     return sb.String()
 }
+func (x *respMyServicePrioParentPong) setDefaults() *respMyServicePrioParentPong {
+    return x
+}
+
 
 
 type MyServicePrioParentProcessor struct {
@@ -3046,7 +3122,7 @@ var _ thrift.Struct = (*reqMyServicePrioChildPang)(nil)
 type MyServicePrioChildPangArgsDeprecated = reqMyServicePrioChildPang
 
 func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
-    return (&reqMyServicePrioChildPang{})
+    return (&reqMyServicePrioChildPang{}).setDefaults()
 }
 
 
@@ -3055,6 +3131,7 @@ func (x *reqMyServicePrioChildPang) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePrioChildPang"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3115,6 +3192,10 @@ func (x *reqMyServicePrioChildPang) String() string {
 
     return sb.String()
 }
+func (x *reqMyServicePrioChildPang) setDefaults() *reqMyServicePrioChildPang {
+    return x
+}
+
 type respMyServicePrioChildPang struct {
 }
 // Compile time interface enforcer
@@ -3125,7 +3206,7 @@ var _ thrift.WritableResult = (*respMyServicePrioChildPang)(nil)
 type MyServicePrioChildPangResultDeprecated = respMyServicePrioChildPang
 
 func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
-    return (&respMyServicePrioChildPang{})
+    return (&respMyServicePrioChildPang{}).setDefaults()
 }
 
 
@@ -3138,6 +3219,7 @@ func (x *respMyServicePrioChildPang) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServicePrioChildPang"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3198,6 +3280,10 @@ func (x *respMyServicePrioChildPang) String() string {
 
     return sb.String()
 }
+func (x *respMyServicePrioChildPang) setDefaults() *respMyServicePrioChildPang {
+    return x
+}
+
 
 
 type MyServicePrioChildProcessor struct {
@@ -3356,7 +3442,7 @@ var _ thrift.Struct = (*reqBadServiceBar)(nil)
 type BadServiceBarArgsDeprecated = reqBadServiceBar
 
 func newReqBadServiceBar() *reqBadServiceBar {
-    return (&reqBadServiceBar{})
+    return (&reqBadServiceBar{}).setDefaults()
 }
 
 
@@ -3365,6 +3451,7 @@ func (x *reqBadServiceBar) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqBadServiceBar"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3425,6 +3512,10 @@ func (x *reqBadServiceBar) String() string {
 
     return sb.String()
 }
+func (x *reqBadServiceBar) setDefaults() *reqBadServiceBar {
+    return x
+}
+
 type respBadServiceBar struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -3436,14 +3527,13 @@ var _ thrift.WritableResult = (*respBadServiceBar)(nil)
 type BadServiceBarResultDeprecated = respBadServiceBar
 
 func newRespBadServiceBar() *respBadServiceBar {
-    return (&respBadServiceBar{})
+    return (&respBadServiceBar{}).setDefaults()
 }
 
 func (x *respBadServiceBar) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -3576,6 +3666,10 @@ func (x *respBadServiceBar) String() string {
 
     return sb.String()
 }
+func (x *respBadServiceBar) setDefaults() *respBadServiceBar {
+    return x
+}
+
 
 
 type BadServiceProcessor struct {
@@ -3802,7 +3896,7 @@ var _ thrift.Struct = (*reqFooBarBazServiceFooStructured)(nil)
 type FooBarBazServiceFooStructuredArgsDeprecated = reqFooBarBazServiceFooStructured
 
 func newReqFooBarBazServiceFooStructured() *reqFooBarBazServiceFooStructured {
-    return (&reqFooBarBazServiceFooStructured{})
+    return (&reqFooBarBazServiceFooStructured{}).setDefaults()
 }
 
 
@@ -3811,6 +3905,7 @@ func (x *reqFooBarBazServiceFooStructured) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooBarBazServiceFooStructured"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3871,6 +3966,10 @@ func (x *reqFooBarBazServiceFooStructured) String() string {
 
     return sb.String()
 }
+func (x *reqFooBarBazServiceFooStructured) setDefaults() *reqFooBarBazServiceFooStructured {
+    return x
+}
+
 type respFooBarBazServiceFooStructured struct {
 }
 // Compile time interface enforcer
@@ -3881,7 +3980,7 @@ var _ thrift.WritableResult = (*respFooBarBazServiceFooStructured)(nil)
 type FooBarBazServiceFooStructuredResultDeprecated = respFooBarBazServiceFooStructured
 
 func newRespFooBarBazServiceFooStructured() *respFooBarBazServiceFooStructured {
-    return (&respFooBarBazServiceFooStructured{})
+    return (&respFooBarBazServiceFooStructured{}).setDefaults()
 }
 
 
@@ -3894,6 +3993,7 @@ func (x *respFooBarBazServiceFooStructured) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFooBarBazServiceFooStructured"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3954,6 +4054,10 @@ func (x *respFooBarBazServiceFooStructured) String() string {
 
     return sb.String()
 }
+func (x *respFooBarBazServiceFooStructured) setDefaults() *respFooBarBazServiceFooStructured {
+    return x
+}
+
 type reqFooBarBazServiceBarNonStructured struct {
 }
 // Compile time interface enforcer
@@ -3963,7 +4067,7 @@ var _ thrift.Struct = (*reqFooBarBazServiceBarNonStructured)(nil)
 type FooBarBazServiceBarNonStructuredArgsDeprecated = reqFooBarBazServiceBarNonStructured
 
 func newReqFooBarBazServiceBarNonStructured() *reqFooBarBazServiceBarNonStructured {
-    return (&reqFooBarBazServiceBarNonStructured{})
+    return (&reqFooBarBazServiceBarNonStructured{}).setDefaults()
 }
 
 
@@ -3972,6 +4076,7 @@ func (x *reqFooBarBazServiceBarNonStructured) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooBarBazServiceBarNonStructured"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -4032,6 +4137,10 @@ func (x *reqFooBarBazServiceBarNonStructured) String() string {
 
     return sb.String()
 }
+func (x *reqFooBarBazServiceBarNonStructured) setDefaults() *reqFooBarBazServiceBarNonStructured {
+    return x
+}
+
 type respFooBarBazServiceBarNonStructured struct {
 }
 // Compile time interface enforcer
@@ -4042,7 +4151,7 @@ var _ thrift.WritableResult = (*respFooBarBazServiceBarNonStructured)(nil)
 type FooBarBazServiceBarNonStructuredResultDeprecated = respFooBarBazServiceBarNonStructured
 
 func newRespFooBarBazServiceBarNonStructured() *respFooBarBazServiceBarNonStructured {
-    return (&respFooBarBazServiceBarNonStructured{})
+    return (&respFooBarBazServiceBarNonStructured{}).setDefaults()
 }
 
 
@@ -4055,6 +4164,7 @@ func (x *respFooBarBazServiceBarNonStructured) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFooBarBazServiceBarNonStructured"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -4115,6 +4225,10 @@ func (x *respFooBarBazServiceBarNonStructured) String() string {
 
     return sb.String()
 }
+func (x *respFooBarBazServiceBarNonStructured) setDefaults() *respFooBarBazServiceBarNonStructured {
+    return x
+}
+
 type reqFooBarBazServiceBaz struct {
 }
 // Compile time interface enforcer
@@ -4124,7 +4238,7 @@ var _ thrift.Struct = (*reqFooBarBazServiceBaz)(nil)
 type FooBarBazServiceBazArgsDeprecated = reqFooBarBazServiceBaz
 
 func newReqFooBarBazServiceBaz() *reqFooBarBazServiceBaz {
-    return (&reqFooBarBazServiceBaz{})
+    return (&reqFooBarBazServiceBaz{}).setDefaults()
 }
 
 
@@ -4133,6 +4247,7 @@ func (x *reqFooBarBazServiceBaz) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooBarBazServiceBaz"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -4193,6 +4308,10 @@ func (x *reqFooBarBazServiceBaz) String() string {
 
     return sb.String()
 }
+func (x *reqFooBarBazServiceBaz) setDefaults() *reqFooBarBazServiceBaz {
+    return x
+}
+
 type respFooBarBazServiceBaz struct {
 }
 // Compile time interface enforcer
@@ -4203,7 +4322,7 @@ var _ thrift.WritableResult = (*respFooBarBazServiceBaz)(nil)
 type FooBarBazServiceBazResultDeprecated = respFooBarBazServiceBaz
 
 func newRespFooBarBazServiceBaz() *respFooBarBazServiceBaz {
-    return (&respFooBarBazServiceBaz{})
+    return (&respFooBarBazServiceBaz{}).setDefaults()
 }
 
 
@@ -4216,6 +4335,7 @@ func (x *respFooBarBazServiceBaz) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFooBarBazServiceBaz"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -4276,6 +4396,10 @@ func (x *respFooBarBazServiceBaz) String() string {
 
     return sb.String()
 }
+func (x *respFooBarBazServiceBaz) setDefaults() *respFooBarBazServiceBaz {
+    return x
+}
+
 
 
 type FooBarBazServiceProcessor struct {

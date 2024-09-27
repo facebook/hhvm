@@ -29,19 +29,13 @@ type MyStruct struct {
 var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{}).
-        SetMyIncludedFieldNonCompat(
-              includes.ExampleIncluded,
-          ).
-        SetMyOtherIncludedFieldNonCompat(includes.NewIncluded()).
-        SetMyIncludedIntNonCompat(42)
+    return (&MyStruct{}).setDefaults()
 }
 
 func (x *MyStruct) GetMyIncludedField() *includes.Included {
     if !x.IsSetMyIncludedField() {
         return nil
     }
-
     return x.MyIncludedField
 }
 
@@ -49,7 +43,6 @@ func (x *MyStruct) GetMyOtherIncludedField() *includes.Included {
     if !x.IsSetMyOtherIncludedField() {
         return nil
     }
-
     return x.MyOtherIncludedField
 }
 
@@ -222,11 +215,9 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -299,6 +290,15 @@ func (x *MyStruct) String() string {
 
     return sb.String()
 }
+func (x *MyStruct) setDefaults() *MyStruct {
+    return x.
+        SetMyIncludedFieldNonCompat(
+              includes.ExampleIncluded,
+          ).
+        SetMyOtherIncludedFieldNonCompat(includes.NewIncluded()).
+        SetMyIncludedIntNonCompat(42)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

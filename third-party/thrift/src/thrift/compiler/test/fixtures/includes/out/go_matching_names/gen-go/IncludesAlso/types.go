@@ -24,7 +24,7 @@ type Also struct {
 var _ thrift.Struct = (*Also)(nil)
 
 func NewAlso() *Also {
-    return (&Also{})
+    return (&Also{}).setDefaults()
 }
 
 
@@ -33,6 +33,7 @@ func (x *Also) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Also"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -93,6 +94,10 @@ func (x *Also) String() string {
 
     return sb.String()
 }
+func (x *Also) setDefaults() *Also {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

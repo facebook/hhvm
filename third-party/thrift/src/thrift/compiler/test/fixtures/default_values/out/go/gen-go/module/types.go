@@ -25,8 +25,7 @@ type TrivialStruct struct {
 var _ thrift.Struct = (*TrivialStruct)(nil)
 
 func NewTrivialStruct() *TrivialStruct {
-    return (&TrivialStruct{}).
-        SetIntValueNonCompat(0)
+    return (&TrivialStruct{}).setDefaults()
 }
 
 func (x *TrivialStruct) GetIntValue() int32 {
@@ -146,6 +145,11 @@ func (x *TrivialStruct) String() string {
 
     return sb.String()
 }
+func (x *TrivialStruct) setDefaults() *TrivialStruct {
+    return x.
+        SetIntValueNonCompat(0)
+}
+
 
 type StructWithNoCustomDefaultValues struct {
     UnqualifiedInteger int32 `thrift:"unqualified_integer,1" json:"unqualified_integer" db:"unqualified_integer"`
@@ -159,11 +163,7 @@ type StructWithNoCustomDefaultValues struct {
 var _ thrift.Struct = (*StructWithNoCustomDefaultValues)(nil)
 
 func NewStructWithNoCustomDefaultValues() *StructWithNoCustomDefaultValues {
-    return (&StructWithNoCustomDefaultValues{}).
-        SetUnqualifiedIntegerNonCompat(0).
-        SetRequiredIntegerNonCompat(0).
-        SetUnqualifiedStructNonCompat(NewTrivialStruct()).
-        SetRequiredStructNonCompat(NewTrivialStruct())
+    return (&StructWithNoCustomDefaultValues{}).setDefaults()
 }
 
 func (x *StructWithNoCustomDefaultValues) GetUnqualifiedInteger() int32 {
@@ -174,7 +174,6 @@ func (x *StructWithNoCustomDefaultValues) GetOptionalInteger() int32 {
     if !x.IsSetOptionalInteger() {
         return 0
     }
-
     return *x.OptionalInteger
 }
 
@@ -186,7 +185,6 @@ func (x *StructWithNoCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct 
     if !x.IsSetUnqualifiedStruct() {
         return nil
     }
-
     return x.UnqualifiedStruct
 }
 
@@ -194,7 +192,6 @@ func (x *StructWithNoCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
     if !x.IsSetOptionalStruct() {
         return nil
     }
-
     return x.OptionalStruct
 }
 
@@ -202,7 +199,6 @@ func (x *StructWithNoCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
     if !x.IsSetRequiredStruct() {
         return nil
     }
-
     return x.RequiredStruct
 }
 
@@ -519,23 +515,18 @@ func (x *StructWithNoCustomDefaultValues) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
@@ -617,6 +608,14 @@ func (x *StructWithNoCustomDefaultValues) String() string {
 
     return sb.String()
 }
+func (x *StructWithNoCustomDefaultValues) setDefaults() *StructWithNoCustomDefaultValues {
+    return x.
+        SetUnqualifiedIntegerNonCompat(0).
+        SetRequiredIntegerNonCompat(0).
+        SetUnqualifiedStructNonCompat(NewTrivialStruct()).
+        SetRequiredStructNonCompat(NewTrivialStruct())
+}
+
 
 type StructWithCustomDefaultValues struct {
     UnqualifiedInteger int32 `thrift:"unqualified_integer,1" json:"unqualified_integer" db:"unqualified_integer"`
@@ -630,22 +629,7 @@ type StructWithCustomDefaultValues struct {
 var _ thrift.Struct = (*StructWithCustomDefaultValues)(nil)
 
 func NewStructWithCustomDefaultValues() *StructWithCustomDefaultValues {
-    return (&StructWithCustomDefaultValues{}).
-        SetUnqualifiedIntegerNonCompat(42).
-        SetOptionalIntegerNonCompat(43).
-        SetRequiredIntegerNonCompat(44).
-        SetUnqualifiedStructNonCompat(
-              NewTrivialStruct().
-    SetIntValueNonCompat(123),
-          ).
-        SetOptionalStructNonCompat(
-              NewTrivialStruct().
-    SetIntValueNonCompat(456),
-          ).
-        SetRequiredStructNonCompat(
-              NewTrivialStruct().
-    SetIntValueNonCompat(789),
-          )
+    return (&StructWithCustomDefaultValues{}).setDefaults()
 }
 
 func (x *StructWithCustomDefaultValues) GetUnqualifiedInteger() int32 {
@@ -656,7 +640,6 @@ func (x *StructWithCustomDefaultValues) GetOptionalInteger() int32 {
     if !x.IsSetOptionalInteger() {
         return 43
     }
-
     return *x.OptionalInteger
 }
 
@@ -668,7 +651,6 @@ func (x *StructWithCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
     if !x.IsSetUnqualifiedStruct() {
         return nil
     }
-
     return x.UnqualifiedStruct
 }
 
@@ -676,7 +658,6 @@ func (x *StructWithCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
     if !x.IsSetOptionalStruct() {
         return nil
     }
-
     return x.OptionalStruct
 }
 
@@ -684,7 +665,6 @@ func (x *StructWithCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
     if !x.IsSetRequiredStruct() {
         return nil
     }
-
     return x.RequiredStruct
 }
 
@@ -1001,23 +981,18 @@ func (x *StructWithCustomDefaultValues) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
@@ -1099,6 +1074,25 @@ func (x *StructWithCustomDefaultValues) String() string {
 
     return sb.String()
 }
+func (x *StructWithCustomDefaultValues) setDefaults() *StructWithCustomDefaultValues {
+    return x.
+        SetUnqualifiedIntegerNonCompat(42).
+        SetOptionalIntegerNonCompat(43).
+        SetRequiredIntegerNonCompat(44).
+        SetUnqualifiedStructNonCompat(
+              NewTrivialStruct().
+    SetIntValueNonCompat(123),
+          ).
+        SetOptionalStructNonCompat(
+              NewTrivialStruct().
+    SetIntValueNonCompat(456),
+          ).
+        SetRequiredStructNonCompat(
+              NewTrivialStruct().
+    SetIntValueNonCompat(789),
+          )
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

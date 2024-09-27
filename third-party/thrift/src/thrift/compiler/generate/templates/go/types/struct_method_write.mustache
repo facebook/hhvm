@@ -33,8 +33,8 @@ func (x *{{struct:go_name}}) Write(p thrift.Encoder) error {
     if err := x.writeField{{field:key_str}}(p); err != nil {
         return err
     }
-
     {{/struct:fields_sorted}}
+
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
     }

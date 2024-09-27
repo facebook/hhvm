@@ -114,8 +114,7 @@ type A struct {
 var _ thrift.Struct = (*A)(nil)
 
 func NewA() *A {
-    return (&A{}).
-        SetUselessFieldNonCompat(0)
+    return (&A{}).setDefaults()
 }
 
 func (x *A) GetUselessField() int32 {
@@ -235,6 +234,11 @@ func (x *A) String() string {
 
     return sb.String()
 }
+func (x *A) setDefaults() *A {
+    return x.
+        SetUselessFieldNonCompat(0)
+}
+
 
 type U struct {
     I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
@@ -244,14 +248,13 @@ type U struct {
 var _ thrift.Struct = (*U)(nil)
 
 func NewU() *U {
-    return (&U{})
+    return (&U{}).setDefaults()
 }
 
 func (x *U) GetI() int32 {
     if !x.IsSetI() {
         return 0
     }
-
     return *x.I
 }
 
@@ -259,7 +262,6 @@ func (x *U) GetS() string {
     if !x.IsSetS() {
         return ""
     }
-
     return *x.S
 }
 
@@ -395,7 +397,6 @@ func (x *U) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -465,6 +466,10 @@ func (x *U) String() string {
 
     return sb.String()
 }
+func (x *U) setDefaults() *U {
+    return x
+}
+
 
 type Bang struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
@@ -473,8 +478,7 @@ type Bang struct {
 var _ thrift.Struct = (*Bang)(nil)
 
 func NewBang() *Bang {
-    return (&Bang{}).
-        SetMessageNonCompat("")
+    return (&Bang{}).setDefaults()
 }
 
 func (x *Bang) GetMessage() string {
@@ -594,6 +598,11 @@ func (x *Bang) String() string {
 
     return sb.String()
 }
+func (x *Bang) setDefaults() *Bang {
+    return x.
+        SetMessageNonCompat("")
+}
+
 func (x *Bang) Error() string {
     return x.String()
 }

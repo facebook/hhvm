@@ -649,7 +649,7 @@ type EmptyStruct struct {
 var _ thrift.Struct = (*EmptyStruct)(nil)
 
 func NewEmptyStruct() *EmptyStruct {
-    return (&EmptyStruct{})
+    return (&EmptyStruct{}).setDefaults()
 }
 
 
@@ -658,6 +658,7 @@ func (x *EmptyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("empty_struct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -718,6 +719,10 @@ func (x *EmptyStruct) String() string {
 
     return sb.String()
 }
+func (x *EmptyStruct) setDefaults() *EmptyStruct {
+    return x
+}
+
 
 type DecoratedStruct struct {
     Field string `thrift:"field,1" json:"field" db:"field"`
@@ -726,8 +731,7 @@ type DecoratedStruct struct {
 var _ thrift.Struct = (*DecoratedStruct)(nil)
 
 func NewDecoratedStruct() *DecoratedStruct {
-    return (&DecoratedStruct{}).
-        SetFieldNonCompat("")
+    return (&DecoratedStruct{}).setDefaults()
 }
 
 func (x *DecoratedStruct) GetField() string {
@@ -847,6 +851,11 @@ func (x *DecoratedStruct) String() string {
 
     return sb.String()
 }
+func (x *DecoratedStruct) setDefaults() *DecoratedStruct {
+    return x.
+        SetFieldNonCompat("")
+}
+
 
 type ContainerStruct struct {
     FieldB []int32 `thrift:"fieldB,2" json:"fieldB" db:"fieldB"`
@@ -862,22 +871,13 @@ type ContainerStruct struct {
 var _ thrift.Struct = (*ContainerStruct)(nil)
 
 func NewContainerStruct() *ContainerStruct {
-    return (&ContainerStruct{}).
-        SetFieldBNonCompat(make([]int32, 0)).
-        SetFieldCNonCompat(make([]int32, 0)).
-        SetFieldDNonCompat(make([]int32, 0)).
-        SetFieldENonCompat(make([]int32, 0)).
-        SetFieldFNonCompat(NewSetI32_7194()).
-        SetFieldGNonCompat(NewMapI32String_1261()).
-        SetFieldHNonCompat(included.NewSomeMap()).
-        SetFieldANonCompat(make([]int32, 0))
+    return (&ContainerStruct{}).setDefaults()
 }
 
 func (x *ContainerStruct) GetFieldB() []int32 {
     if !x.IsSetFieldB() {
         return make([]int32, 0)
     }
-
     return x.FieldB
 }
 
@@ -885,7 +885,6 @@ func (x *ContainerStruct) GetFieldC() []int32 {
     if !x.IsSetFieldC() {
         return make([]int32, 0)
     }
-
     return x.FieldC
 }
 
@@ -893,7 +892,6 @@ func (x *ContainerStruct) GetFieldD() []int32 {
     if !x.IsSetFieldD() {
         return make([]int32, 0)
     }
-
     return x.FieldD
 }
 
@@ -901,7 +899,6 @@ func (x *ContainerStruct) GetFieldE() []int32 {
     if !x.IsSetFieldE() {
         return make([]int32, 0)
     }
-
     return x.FieldE
 }
 
@@ -909,7 +906,6 @@ func (x *ContainerStruct) GetFieldF() SetI32_7194 {
     if !x.IsSetFieldF() {
         return NewSetI32_7194()
     }
-
     return x.FieldF
 }
 
@@ -917,7 +913,6 @@ func (x *ContainerStruct) GetFieldG() MapI32String_1261 {
     if !x.IsSetFieldG() {
         return NewMapI32String_1261()
     }
-
     return x.FieldG
 }
 
@@ -925,7 +920,6 @@ func (x *ContainerStruct) GetFieldH() included.SomeMap {
     if !x.IsSetFieldH() {
         return included.NewSomeMap()
     }
-
     return x.FieldH
 }
 
@@ -933,7 +927,6 @@ func (x *ContainerStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
         return make([]int32, 0)
     }
-
     return x.FieldA
 }
 
@@ -1447,31 +1440,24 @@ func (x *ContainerStruct) Write(p thrift.Encoder) error {
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField12(p); err != nil {
         return err
     }
@@ -1559,6 +1545,18 @@ func (x *ContainerStruct) String() string {
 
     return sb.String()
 }
+func (x *ContainerStruct) setDefaults() *ContainerStruct {
+    return x.
+        SetFieldBNonCompat(make([]int32, 0)).
+        SetFieldCNonCompat(make([]int32, 0)).
+        SetFieldDNonCompat(make([]int32, 0)).
+        SetFieldENonCompat(make([]int32, 0)).
+        SetFieldFNonCompat(NewSetI32_7194()).
+        SetFieldGNonCompat(NewMapI32String_1261()).
+        SetFieldHNonCompat(included.NewSomeMap()).
+        SetFieldANonCompat(make([]int32, 0))
+}
+
 
 type CppTypeStruct struct {
     FieldA []int32 `thrift:"fieldA,1" json:"fieldA" db:"fieldA"`
@@ -1567,15 +1565,13 @@ type CppTypeStruct struct {
 var _ thrift.Struct = (*CppTypeStruct)(nil)
 
 func NewCppTypeStruct() *CppTypeStruct {
-    return (&CppTypeStruct{}).
-        SetFieldANonCompat(make([]int32, 0))
+    return (&CppTypeStruct{}).setDefaults()
 }
 
 func (x *CppTypeStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
         return make([]int32, 0)
     }
-
     return x.FieldA
 }
 
@@ -1725,6 +1721,11 @@ func (x *CppTypeStruct) String() string {
 
     return sb.String()
 }
+func (x *CppTypeStruct) setDefaults() *CppTypeStruct {
+    return x.
+        SetFieldANonCompat(make([]int32, 0))
+}
+
 
 type VirtualStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
@@ -1733,8 +1734,7 @@ type VirtualStruct struct {
 var _ thrift.Struct = (*VirtualStruct)(nil)
 
 func NewVirtualStruct() *VirtualStruct {
-    return (&VirtualStruct{}).
-        SetMyIntFieldNonCompat(0)
+    return (&VirtualStruct{}).setDefaults()
 }
 
 func (x *VirtualStruct) GetMyIntField() int64 {
@@ -1854,6 +1854,11 @@ func (x *VirtualStruct) String() string {
 
     return sb.String()
 }
+func (x *VirtualStruct) setDefaults() *VirtualStruct {
+    return x.
+        SetMyIntFieldNonCompat(0)
+}
+
 
 type MyStructWithForwardRefEnum struct {
     A MyForwardRefEnum `thrift:"a,1" json:"a" db:"a"`
@@ -1863,13 +1868,7 @@ type MyStructWithForwardRefEnum struct {
 var _ thrift.Struct = (*MyStructWithForwardRefEnum)(nil)
 
 func NewMyStructWithForwardRefEnum() *MyStructWithForwardRefEnum {
-    return (&MyStructWithForwardRefEnum{}).
-        SetANonCompat(
-              MyForwardRefEnum_NONZERO,
-          ).
-        SetBNonCompat(
-              MyForwardRefEnum_NONZERO,
-          )
+    return (&MyStructWithForwardRefEnum{}).setDefaults()
 }
 
 func (x *MyStructWithForwardRefEnum) GetA() MyForwardRefEnum {
@@ -1972,7 +1971,6 @@ func (x *MyStructWithForwardRefEnum) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -2042,6 +2040,16 @@ func (x *MyStructWithForwardRefEnum) String() string {
 
     return sb.String()
 }
+func (x *MyStructWithForwardRefEnum) setDefaults() *MyStructWithForwardRefEnum {
+    return x.
+        SetANonCompat(
+              MyForwardRefEnum_NONZERO,
+          ).
+        SetBNonCompat(
+              MyForwardRefEnum_NONZERO,
+          )
+}
+
 
 type TrivialNumeric struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -2051,9 +2059,7 @@ type TrivialNumeric struct {
 var _ thrift.Struct = (*TrivialNumeric)(nil)
 
 func NewTrivialNumeric() *TrivialNumeric {
-    return (&TrivialNumeric{}).
-        SetANonCompat(0).
-        SetBNonCompat(false)
+    return (&TrivialNumeric{}).setDefaults()
 }
 
 func (x *TrivialNumeric) GetA() int32 {
@@ -2154,7 +2160,6 @@ func (x *TrivialNumeric) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -2224,6 +2229,12 @@ func (x *TrivialNumeric) String() string {
 
     return sb.String()
 }
+func (x *TrivialNumeric) setDefaults() *TrivialNumeric {
+    return x.
+        SetANonCompat(0).
+        SetBNonCompat(false)
+}
+
 
 type TrivialNestedWithDefault struct {
     Z int32 `thrift:"z,1" json:"z" db:"z"`
@@ -2233,13 +2244,7 @@ type TrivialNestedWithDefault struct {
 var _ thrift.Struct = (*TrivialNestedWithDefault)(nil)
 
 func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
-    return (&TrivialNestedWithDefault{}).
-        SetZNonCompat(4).
-        SetNNonCompat(
-              NewTrivialNumeric().
-    SetANonCompat(3).
-    SetBNonCompat(true),
-          )
+    return (&TrivialNestedWithDefault{}).setDefaults()
 }
 
 func (x *TrivialNestedWithDefault) GetZ() int32 {
@@ -2250,7 +2255,6 @@ func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
     if !x.IsSetN() {
         return nil
     }
-
     return x.N
 }
 
@@ -2361,7 +2365,6 @@ func (x *TrivialNestedWithDefault) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -2431,6 +2434,16 @@ func (x *TrivialNestedWithDefault) String() string {
 
     return sb.String()
 }
+func (x *TrivialNestedWithDefault) setDefaults() *TrivialNestedWithDefault {
+    return x.
+        SetZNonCompat(4).
+        SetNNonCompat(
+              NewTrivialNumeric().
+    SetANonCompat(3).
+    SetBNonCompat(true),
+          )
+}
+
 
 type ComplexString struct {
     A string `thrift:"a,1" json:"a" db:"a"`
@@ -2440,9 +2453,7 @@ type ComplexString struct {
 var _ thrift.Struct = (*ComplexString)(nil)
 
 func NewComplexString() *ComplexString {
-    return (&ComplexString{}).
-        SetANonCompat("").
-        SetBNonCompat(make(map[string]int32))
+    return (&ComplexString{}).setDefaults()
 }
 
 func (x *ComplexString) GetA() string {
@@ -2453,7 +2464,6 @@ func (x *ComplexString) GetB() map[string]int32 {
     if !x.IsSetB() {
         return make(map[string]int32)
     }
-
     return x.B
 }
 
@@ -2597,7 +2607,6 @@ func (x *ComplexString) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -2667,6 +2676,12 @@ func (x *ComplexString) String() string {
 
     return sb.String()
 }
+func (x *ComplexString) setDefaults() *ComplexString {
+    return x.
+        SetANonCompat("").
+        SetBNonCompat(make(map[string]int32))
+}
+
 
 type ComplexNestedWithDefault struct {
     Z string `thrift:"z,1" json:"z" db:"z"`
@@ -2676,17 +2691,7 @@ type ComplexNestedWithDefault struct {
 var _ thrift.Struct = (*ComplexNestedWithDefault)(nil)
 
 func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
-    return (&ComplexNestedWithDefault{}).
-        SetZNonCompat("4").
-        SetNNonCompat(
-              NewComplexString().
-    SetANonCompat("3").
-    SetBNonCompat(
-        map[string]int32{
-    "a": 3,
-},
-    ),
-          )
+    return (&ComplexNestedWithDefault{}).setDefaults()
 }
 
 func (x *ComplexNestedWithDefault) GetZ() string {
@@ -2697,7 +2702,6 @@ func (x *ComplexNestedWithDefault) GetN() *ComplexString {
     if !x.IsSetN() {
         return nil
     }
-
     return x.N
 }
 
@@ -2808,7 +2812,6 @@ func (x *ComplexNestedWithDefault) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -2878,6 +2881,20 @@ func (x *ComplexNestedWithDefault) String() string {
 
     return sb.String()
 }
+func (x *ComplexNestedWithDefault) setDefaults() *ComplexNestedWithDefault {
+    return x.
+        SetZNonCompat("4").
+        SetNNonCompat(
+              NewComplexString().
+    SetANonCompat("3").
+    SetBNonCompat(
+        map[string]int32{
+    "a": 3,
+},
+    ),
+          )
+}
+
 
 type MinPadding struct {
     Small int8 `thrift:"small,1,required" json:"small" db:"small"`
@@ -2890,12 +2907,7 @@ type MinPadding struct {
 var _ thrift.Struct = (*MinPadding)(nil)
 
 func NewMinPadding() *MinPadding {
-    return (&MinPadding{}).
-        SetSmallNonCompat(0).
-        SetBigNonCompat(0).
-        SetMediumNonCompat(0).
-        SetBiggishNonCompat(0).
-        SetTinyNonCompat(0)
+    return (&MinPadding{}).setDefaults()
 }
 
 func (x *MinPadding) GetSmall() int8 {
@@ -3130,19 +3142,15 @@ func (x *MinPadding) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
@@ -3221,6 +3229,15 @@ func (x *MinPadding) String() string {
 
     return sb.String()
 }
+func (x *MinPadding) setDefaults() *MinPadding {
+    return x.
+        SetSmallNonCompat(0).
+        SetBigNonCompat(0).
+        SetMediumNonCompat(0).
+        SetBiggishNonCompat(0).
+        SetTinyNonCompat(0)
+}
+
 
 type MinPaddingWithCustomType struct {
     Small int8 `thrift:"small,1" json:"small" db:"small"`
@@ -3233,12 +3250,7 @@ type MinPaddingWithCustomType struct {
 var _ thrift.Struct = (*MinPaddingWithCustomType)(nil)
 
 func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
-    return (&MinPaddingWithCustomType{}).
-        SetSmallNonCompat(0).
-        SetBigNonCompat(0).
-        SetMediumNonCompat(0).
-        SetBiggishNonCompat(0).
-        SetTinyNonCompat(0)
+    return (&MinPaddingWithCustomType{}).setDefaults()
 }
 
 func (x *MinPaddingWithCustomType) GetSmall() int8 {
@@ -3473,19 +3485,15 @@ func (x *MinPaddingWithCustomType) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
@@ -3564,6 +3572,15 @@ func (x *MinPaddingWithCustomType) String() string {
 
     return sb.String()
 }
+func (x *MinPaddingWithCustomType) setDefaults() *MinPaddingWithCustomType {
+    return x.
+        SetSmallNonCompat(0).
+        SetBigNonCompat(0).
+        SetMediumNonCompat(0).
+        SetBiggishNonCompat(0).
+        SetTinyNonCompat(0)
+}
+
 
 type MyStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
@@ -3575,11 +3592,7 @@ type MyStruct struct {
 var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{}).
-        SetMyIntFieldNonCompat(0).
-        SetMyStringFieldNonCompat("").
-        SetMajorVerNonCompat(0).
-        SetDataNonCompat(NewMyDataItem())
+    return (&MyStruct{}).setDefaults()
 }
 
 func (x *MyStruct) GetMyIntField() int64 {
@@ -3598,7 +3611,6 @@ func (x *MyStruct) GetData() *MyDataItem {
     if !x.IsSetData() {
         return nil
     }
-
     return x.Data
 }
 
@@ -3789,15 +3801,12 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -3873,6 +3882,14 @@ func (x *MyStruct) String() string {
 
     return sb.String()
 }
+func (x *MyStruct) setDefaults() *MyStruct {
+    return x.
+        SetMyIntFieldNonCompat(0).
+        SetMyStringFieldNonCompat("").
+        SetMajorVerNonCompat(0).
+        SetDataNonCompat(NewMyDataItem())
+}
+
 
 type MyDataItem struct {
 }
@@ -3880,7 +3897,7 @@ type MyDataItem struct {
 var _ thrift.Struct = (*MyDataItem)(nil)
 
 func NewMyDataItem() *MyDataItem {
-    return (&MyDataItem{})
+    return (&MyDataItem{}).setDefaults()
 }
 
 
@@ -3889,6 +3906,7 @@ func (x *MyDataItem) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3949,6 +3967,10 @@ func (x *MyDataItem) String() string {
 
     return sb.String()
 }
+func (x *MyDataItem) setDefaults() *MyDataItem {
+    return x
+}
+
 
 type Renaming struct {
     Foo int64 `thrift:"foo,1" json:"foo" db:"foo"`
@@ -3957,8 +3979,7 @@ type Renaming struct {
 var _ thrift.Struct = (*Renaming)(nil)
 
 func NewRenaming() *Renaming {
-    return (&Renaming{}).
-        SetFooNonCompat(0)
+    return (&Renaming{}).setDefaults()
 }
 
 func (x *Renaming) GetFoo() int64 {
@@ -4078,6 +4099,11 @@ func (x *Renaming) String() string {
 
     return sb.String()
 }
+func (x *Renaming) setDefaults() *Renaming {
+    return x.
+        SetFooNonCompat(0)
+}
+
 
 type AnnotatedTypes struct {
     BinaryField TBinary_8623 `thrift:"binary_field,1" json:"binary_field" db:"binary_field"`
@@ -4087,16 +4113,13 @@ type AnnotatedTypes struct {
 var _ thrift.Struct = (*AnnotatedTypes)(nil)
 
 func NewAnnotatedTypes() *AnnotatedTypes {
-    return (&AnnotatedTypes{}).
-        SetBinaryFieldNonCompat(NewTBinary_8623()).
-        SetListFieldNonCompat(NewSomeListOfTypeMap_2468())
+    return (&AnnotatedTypes{}).setDefaults()
 }
 
 func (x *AnnotatedTypes) GetBinaryField() TBinary_8623 {
     if !x.IsSetBinaryField() {
         return NewTBinary_8623()
     }
-
     return x.BinaryField
 }
 
@@ -4104,7 +4127,6 @@ func (x *AnnotatedTypes) GetListField() SomeListOfTypeMap_2468 {
     if !x.IsSetListField() {
         return NewSomeListOfTypeMap_2468()
     }
-
     return x.ListField
 }
 
@@ -4208,7 +4230,6 @@ func (x *AnnotatedTypes) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -4278,6 +4299,12 @@ func (x *AnnotatedTypes) String() string {
 
     return sb.String()
 }
+func (x *AnnotatedTypes) setDefaults() *AnnotatedTypes {
+    return x.
+        SetBinaryFieldNonCompat(NewTBinary_8623()).
+        SetListFieldNonCompat(NewSomeListOfTypeMap_2468())
+}
+
 
 type ForwardUsageRoot struct {
     ForwardUsageStruct *ForwardUsageStruct `thrift:"ForwardUsageStruct,1,optional" json:"ForwardUsageStruct,omitempty" db:"ForwardUsageStruct"`
@@ -4287,14 +4314,13 @@ type ForwardUsageRoot struct {
 var _ thrift.Struct = (*ForwardUsageRoot)(nil)
 
 func NewForwardUsageRoot() *ForwardUsageRoot {
-    return (&ForwardUsageRoot{})
+    return (&ForwardUsageRoot{}).setDefaults()
 }
 
 func (x *ForwardUsageRoot) GetForwardUsageStruct() *ForwardUsageStruct {
     if !x.IsSetForwardUsageStruct() {
         return nil
     }
-
     return x.ForwardUsageStruct
 }
 
@@ -4302,7 +4328,6 @@ func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
     if !x.IsSetForwardUsageByRef() {
         return nil
     }
-
     return x.ForwardUsageByRef
 }
 
@@ -4430,7 +4455,6 @@ func (x *ForwardUsageRoot) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -4500,6 +4524,10 @@ func (x *ForwardUsageRoot) String() string {
 
     return sb.String()
 }
+func (x *ForwardUsageRoot) setDefaults() *ForwardUsageRoot {
+    return x
+}
+
 
 type ForwardUsageStruct struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
@@ -4508,14 +4536,13 @@ type ForwardUsageStruct struct {
 var _ thrift.Struct = (*ForwardUsageStruct)(nil)
 
 func NewForwardUsageStruct() *ForwardUsageStruct {
-    return (&ForwardUsageStruct{})
+    return (&ForwardUsageStruct{}).setDefaults()
 }
 
 func (x *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
     if !x.IsSetFoo() {
         return nil
     }
-
     return x.Foo
 }
 
@@ -4649,6 +4676,10 @@ func (x *ForwardUsageStruct) String() string {
 
     return sb.String()
 }
+func (x *ForwardUsageStruct) setDefaults() *ForwardUsageStruct {
+    return x
+}
+
 
 type ForwardUsageByRef struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
@@ -4657,14 +4688,13 @@ type ForwardUsageByRef struct {
 var _ thrift.Struct = (*ForwardUsageByRef)(nil)
 
 func NewForwardUsageByRef() *ForwardUsageByRef {
-    return (&ForwardUsageByRef{})
+    return (&ForwardUsageByRef{}).setDefaults()
 }
 
 func (x *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
     if !x.IsSetFoo() {
         return nil
     }
-
     return x.Foo
 }
 
@@ -4798,6 +4828,10 @@ func (x *ForwardUsageByRef) String() string {
 
     return sb.String()
 }
+func (x *ForwardUsageByRef) setDefaults() *ForwardUsageByRef {
+    return x
+}
+
 
 type IncompleteMap struct {
     Field map[int32]*IncompleteMapDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -4806,14 +4840,13 @@ type IncompleteMap struct {
 var _ thrift.Struct = (*IncompleteMap)(nil)
 
 func NewIncompleteMap() *IncompleteMap {
-    return (&IncompleteMap{})
+    return (&IncompleteMap{}).setDefaults()
 }
 
 func (x *IncompleteMap) GetField() map[int32]*IncompleteMapDep {
     if !x.IsSetField() {
         return make(map[int32]*IncompleteMapDep)
     }
-
     return x.Field
 }
 
@@ -4985,6 +5018,10 @@ func (x *IncompleteMap) String() string {
 
     return sb.String()
 }
+func (x *IncompleteMap) setDefaults() *IncompleteMap {
+    return x
+}
+
 
 type IncompleteMapDep struct {
 }
@@ -4992,7 +5029,7 @@ type IncompleteMapDep struct {
 var _ thrift.Struct = (*IncompleteMapDep)(nil)
 
 func NewIncompleteMapDep() *IncompleteMapDep {
-    return (&IncompleteMapDep{})
+    return (&IncompleteMapDep{}).setDefaults()
 }
 
 
@@ -5001,6 +5038,7 @@ func (x *IncompleteMapDep) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncompleteMapDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -5061,6 +5099,10 @@ func (x *IncompleteMapDep) String() string {
 
     return sb.String()
 }
+func (x *IncompleteMapDep) setDefaults() *IncompleteMapDep {
+    return x
+}
+
 
 type CompleteMap struct {
     Field map[int32]*CompleteMapDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5069,14 +5111,13 @@ type CompleteMap struct {
 var _ thrift.Struct = (*CompleteMap)(nil)
 
 func NewCompleteMap() *CompleteMap {
-    return (&CompleteMap{})
+    return (&CompleteMap{}).setDefaults()
 }
 
 func (x *CompleteMap) GetField() map[int32]*CompleteMapDep {
     if !x.IsSetField() {
         return make(map[int32]*CompleteMapDep)
     }
-
     return x.Field
 }
 
@@ -5248,6 +5289,10 @@ func (x *CompleteMap) String() string {
 
     return sb.String()
 }
+func (x *CompleteMap) setDefaults() *CompleteMap {
+    return x
+}
+
 
 type CompleteMapDep struct {
 }
@@ -5255,7 +5300,7 @@ type CompleteMapDep struct {
 var _ thrift.Struct = (*CompleteMapDep)(nil)
 
 func NewCompleteMapDep() *CompleteMapDep {
-    return (&CompleteMapDep{})
+    return (&CompleteMapDep{}).setDefaults()
 }
 
 
@@ -5264,6 +5309,7 @@ func (x *CompleteMapDep) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CompleteMapDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -5324,6 +5370,10 @@ func (x *CompleteMapDep) String() string {
 
     return sb.String()
 }
+func (x *CompleteMapDep) setDefaults() *CompleteMapDep {
+    return x
+}
+
 
 type IncompleteList struct {
     Field []*IncompleteListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5332,14 +5382,13 @@ type IncompleteList struct {
 var _ thrift.Struct = (*IncompleteList)(nil)
 
 func NewIncompleteList() *IncompleteList {
-    return (&IncompleteList{})
+    return (&IncompleteList{}).setDefaults()
 }
 
 func (x *IncompleteList) GetField() []*IncompleteListDep {
     if !x.IsSetField() {
         return make([]*IncompleteListDep, 0)
     }
-
     return x.Field
 }
 
@@ -5494,6 +5543,10 @@ func (x *IncompleteList) String() string {
 
     return sb.String()
 }
+func (x *IncompleteList) setDefaults() *IncompleteList {
+    return x
+}
+
 
 type IncompleteListDep struct {
 }
@@ -5501,7 +5554,7 @@ type IncompleteListDep struct {
 var _ thrift.Struct = (*IncompleteListDep)(nil)
 
 func NewIncompleteListDep() *IncompleteListDep {
-    return (&IncompleteListDep{})
+    return (&IncompleteListDep{}).setDefaults()
 }
 
 
@@ -5510,6 +5563,7 @@ func (x *IncompleteListDep) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncompleteListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -5570,6 +5624,10 @@ func (x *IncompleteListDep) String() string {
 
     return sb.String()
 }
+func (x *IncompleteListDep) setDefaults() *IncompleteListDep {
+    return x
+}
+
 
 type CompleteList struct {
     Field []*CompleteListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5578,14 +5636,13 @@ type CompleteList struct {
 var _ thrift.Struct = (*CompleteList)(nil)
 
 func NewCompleteList() *CompleteList {
-    return (&CompleteList{})
+    return (&CompleteList{}).setDefaults()
 }
 
 func (x *CompleteList) GetField() []*CompleteListDep {
     if !x.IsSetField() {
         return make([]*CompleteListDep, 0)
     }
-
     return x.Field
 }
 
@@ -5740,6 +5797,10 @@ func (x *CompleteList) String() string {
 
     return sb.String()
 }
+func (x *CompleteList) setDefaults() *CompleteList {
+    return x
+}
+
 
 type CompleteListDep struct {
 }
@@ -5747,7 +5808,7 @@ type CompleteListDep struct {
 var _ thrift.Struct = (*CompleteListDep)(nil)
 
 func NewCompleteListDep() *CompleteListDep {
-    return (&CompleteListDep{})
+    return (&CompleteListDep{}).setDefaults()
 }
 
 
@@ -5756,6 +5817,7 @@ func (x *CompleteListDep) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CompleteListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -5816,6 +5878,10 @@ func (x *CompleteListDep) String() string {
 
     return sb.String()
 }
+func (x *CompleteListDep) setDefaults() *CompleteListDep {
+    return x
+}
+
 
 type AdaptedList struct {
     Field []*AdaptedListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5824,14 +5890,13 @@ type AdaptedList struct {
 var _ thrift.Struct = (*AdaptedList)(nil)
 
 func NewAdaptedList() *AdaptedList {
-    return (&AdaptedList{})
+    return (&AdaptedList{}).setDefaults()
 }
 
 func (x *AdaptedList) GetField() []*AdaptedListDep {
     if !x.IsSetField() {
         return make([]*AdaptedListDep, 0)
     }
-
     return x.Field
 }
 
@@ -5986,6 +6051,10 @@ func (x *AdaptedList) String() string {
 
     return sb.String()
 }
+func (x *AdaptedList) setDefaults() *AdaptedList {
+    return x
+}
+
 
 type AdaptedListDep struct {
     Field *AdaptedList `thrift:"field,1" json:"field" db:"field"`
@@ -5994,15 +6063,13 @@ type AdaptedListDep struct {
 var _ thrift.Struct = (*AdaptedListDep)(nil)
 
 func NewAdaptedListDep() *AdaptedListDep {
-    return (&AdaptedListDep{}).
-        SetFieldNonCompat(NewAdaptedList())
+    return (&AdaptedListDep{}).setDefaults()
 }
 
 func (x *AdaptedListDep) GetField() *AdaptedList {
     if !x.IsSetField() {
         return nil
     }
-
     return x.Field
 }
 
@@ -6136,6 +6203,11 @@ func (x *AdaptedListDep) String() string {
 
     return sb.String()
 }
+func (x *AdaptedListDep) setDefaults() *AdaptedListDep {
+    return x.
+        SetFieldNonCompat(NewAdaptedList())
+}
+
 
 type DependentAdaptedList struct {
     Field []*DependentAdaptedListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -6144,14 +6216,13 @@ type DependentAdaptedList struct {
 var _ thrift.Struct = (*DependentAdaptedList)(nil)
 
 func NewDependentAdaptedList() *DependentAdaptedList {
-    return (&DependentAdaptedList{})
+    return (&DependentAdaptedList{}).setDefaults()
 }
 
 func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
     if !x.IsSetField() {
         return make([]*DependentAdaptedListDep, 0)
     }
-
     return x.Field
 }
 
@@ -6306,6 +6377,10 @@ func (x *DependentAdaptedList) String() string {
 
     return sb.String()
 }
+func (x *DependentAdaptedList) setDefaults() *DependentAdaptedList {
+    return x
+}
+
 
 type DependentAdaptedListDep struct {
     Field *int16 `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -6314,14 +6389,13 @@ type DependentAdaptedListDep struct {
 var _ thrift.Struct = (*DependentAdaptedListDep)(nil)
 
 func NewDependentAdaptedListDep() *DependentAdaptedListDep {
-    return (&DependentAdaptedListDep{})
+    return (&DependentAdaptedListDep{}).setDefaults()
 }
 
 func (x *DependentAdaptedListDep) GetField() int16 {
     if !x.IsSetField() {
         return 0
     }
-
     return *x.Field
 }
 
@@ -6450,6 +6524,10 @@ func (x *DependentAdaptedListDep) String() string {
 
     return sb.String()
 }
+func (x *DependentAdaptedListDep) setDefaults() *DependentAdaptedListDep {
+    return x
+}
+
 
 type AllocatorAware struct {
     AaList ListI32_9187 `thrift:"aa_list,1" json:"aa_list" db:"aa_list"`
@@ -6464,21 +6542,13 @@ type AllocatorAware struct {
 var _ thrift.Struct = (*AllocatorAware)(nil)
 
 func NewAllocatorAware() *AllocatorAware {
-    return (&AllocatorAware{}).
-        SetAaListNonCompat(NewListI32_9187()).
-        SetAaSetNonCompat(NewSetI32_7070()).
-        SetAaMapNonCompat(NewMapI32I32_9565()).
-        SetAaStringNonCompat(NewString_5252()).
-        SetNotAContainerNonCompat(0).
-        SetAaUniqueNonCompat(NewI32_9314()).
-        SetAaSharedNonCompat(NewI32_9314())
+    return (&AllocatorAware{}).setDefaults()
 }
 
 func (x *AllocatorAware) GetAaList() ListI32_9187 {
     if !x.IsSetAaList() {
         return NewListI32_9187()
     }
-
     return x.AaList
 }
 
@@ -6486,7 +6556,6 @@ func (x *AllocatorAware) GetAaSet() SetI32_7070 {
     if !x.IsSetAaSet() {
         return NewSetI32_7070()
     }
-
     return x.AaSet
 }
 
@@ -6494,7 +6563,6 @@ func (x *AllocatorAware) GetAaMap() MapI32I32_9565 {
     if !x.IsSetAaMap() {
         return NewMapI32I32_9565()
     }
-
     return x.AaMap
 }
 
@@ -6822,27 +6890,21 @@ func (x *AllocatorAware) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
@@ -6927,6 +6989,17 @@ func (x *AllocatorAware) String() string {
 
     return sb.String()
 }
+func (x *AllocatorAware) setDefaults() *AllocatorAware {
+    return x.
+        SetAaListNonCompat(NewListI32_9187()).
+        SetAaSetNonCompat(NewSetI32_7070()).
+        SetAaMapNonCompat(NewMapI32I32_9565()).
+        SetAaStringNonCompat(NewString_5252()).
+        SetNotAContainerNonCompat(0).
+        SetAaUniqueNonCompat(NewI32_9314()).
+        SetAaSharedNonCompat(NewI32_9314())
+}
+
 
 type AllocatorAware2 struct {
     NotAContainer int32 `thrift:"not_a_container,1" json:"not_a_container" db:"not_a_container"`
@@ -6936,8 +7009,7 @@ type AllocatorAware2 struct {
 var _ thrift.Struct = (*AllocatorAware2)(nil)
 
 func NewAllocatorAware2() *AllocatorAware2 {
-    return (&AllocatorAware2{}).
-        SetNotAContainerNonCompat(0)
+    return (&AllocatorAware2{}).setDefaults()
 }
 
 func (x *AllocatorAware2) GetNotAContainer() int32 {
@@ -6948,7 +7020,6 @@ func (x *AllocatorAware2) GetBoxField() int32 {
     if !x.IsSetBoxField() {
         return 0
     }
-
     return *x.BoxField
 }
 
@@ -7054,7 +7125,6 @@ func (x *AllocatorAware2) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -7124,6 +7194,11 @@ func (x *AllocatorAware2) String() string {
 
     return sb.String()
 }
+func (x *AllocatorAware2) setDefaults() *AllocatorAware2 {
+    return x.
+        SetNotAContainerNonCompat(0)
+}
+
 
 type TypedefStruct struct {
     I32Field int32 `thrift:"i32_field,1" json:"i32_field" db:"i32_field"`
@@ -7134,10 +7209,7 @@ type TypedefStruct struct {
 var _ thrift.Struct = (*TypedefStruct)(nil)
 
 func NewTypedefStruct() *TypedefStruct {
-    return (&TypedefStruct{}).
-        SetI32FieldNonCompat(0).
-        SetIntTypedefFieldNonCompat(NewIntTypedef()).
-        SetUintTypedefFieldNonCompat(NewUintTypedef())
+    return (&TypedefStruct{}).setDefaults()
 }
 
 func (x *TypedefStruct) GetI32Field() int32 {
@@ -7284,11 +7356,9 @@ func (x *TypedefStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -7361,6 +7431,13 @@ func (x *TypedefStruct) String() string {
 
     return sb.String()
 }
+func (x *TypedefStruct) setDefaults() *TypedefStruct {
+    return x.
+        SetI32FieldNonCompat(0).
+        SetIntTypedefFieldNonCompat(NewIntTypedef()).
+        SetUintTypedefFieldNonCompat(NewUintTypedef())
+}
+
 
 type StructWithDoubleUnderscores struct {
     _Field int32 `thrift:"__field,1" json:"__field" db:"__field"`
@@ -7369,8 +7446,7 @@ type StructWithDoubleUnderscores struct {
 var _ thrift.Struct = (*StructWithDoubleUnderscores)(nil)
 
 func NewStructWithDoubleUnderscores() *StructWithDoubleUnderscores {
-    return (&StructWithDoubleUnderscores{}).
-        Set_FieldNonCompat(0)
+    return (&StructWithDoubleUnderscores{}).setDefaults()
 }
 
 func (x *StructWithDoubleUnderscores) Get_Field() int32 {
@@ -7490,6 +7566,11 @@ func (x *StructWithDoubleUnderscores) String() string {
 
     return sb.String()
 }
+func (x *StructWithDoubleUnderscores) setDefaults() *StructWithDoubleUnderscores {
+    return x.
+        Set_FieldNonCompat(0)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -108,7 +108,7 @@ var _ thrift.Struct = (*reqMyServiceFoo)(nil)
 type MyServiceFooArgsDeprecated = reqMyServiceFoo
 
 func newReqMyServiceFoo() *reqMyServiceFoo {
-    return (&reqMyServiceFoo{})
+    return (&reqMyServiceFoo{}).setDefaults()
 }
 
 
@@ -117,6 +117,7 @@ func (x *reqMyServiceFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -177,6 +178,10 @@ func (x *reqMyServiceFoo) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceFoo) setDefaults() *reqMyServiceFoo {
+    return x
+}
+
 type respMyServiceFoo struct {
 }
 // Compile time interface enforcer
@@ -187,7 +192,7 @@ var _ thrift.WritableResult = (*respMyServiceFoo)(nil)
 type MyServiceFooResultDeprecated = respMyServiceFoo
 
 func newRespMyServiceFoo() *respMyServiceFoo {
-    return (&respMyServiceFoo{})
+    return (&respMyServiceFoo{}).setDefaults()
 }
 
 
@@ -200,6 +205,7 @@ func (x *respMyServiceFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -260,6 +266,10 @@ func (x *respMyServiceFoo) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceFoo) setDefaults() *respMyServiceFoo {
+    return x
+}
+
 
 
 type MyServiceProcessor struct {
@@ -441,7 +451,7 @@ var _ thrift.Struct = (*reqFactoriesFoo)(nil)
 type FactoriesFooArgsDeprecated = reqFactoriesFoo
 
 func newReqFactoriesFoo() *reqFactoriesFoo {
-    return (&reqFactoriesFoo{})
+    return (&reqFactoriesFoo{}).setDefaults()
 }
 
 
@@ -450,6 +460,7 @@ func (x *reqFactoriesFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFactoriesFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -510,6 +521,10 @@ func (x *reqFactoriesFoo) String() string {
 
     return sb.String()
 }
+func (x *reqFactoriesFoo) setDefaults() *reqFactoriesFoo {
+    return x
+}
+
 type respFactoriesFoo struct {
 }
 // Compile time interface enforcer
@@ -520,7 +535,7 @@ var _ thrift.WritableResult = (*respFactoriesFoo)(nil)
 type FactoriesFooResultDeprecated = respFactoriesFoo
 
 func newRespFactoriesFoo() *respFactoriesFoo {
-    return (&respFactoriesFoo{})
+    return (&respFactoriesFoo{}).setDefaults()
 }
 
 
@@ -533,6 +548,7 @@ func (x *respFactoriesFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFactoriesFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -593,6 +609,10 @@ func (x *respFactoriesFoo) String() string {
 
     return sb.String()
 }
+func (x *respFactoriesFoo) setDefaults() *respFactoriesFoo {
+    return x
+}
+
 
 
 type FactoriesProcessor struct {
@@ -774,7 +794,7 @@ var _ thrift.Struct = (*reqPerformFoo)(nil)
 type PerformFooArgsDeprecated = reqPerformFoo
 
 func newReqPerformFoo() *reqPerformFoo {
-    return (&reqPerformFoo{})
+    return (&reqPerformFoo{}).setDefaults()
 }
 
 
@@ -783,6 +803,7 @@ func (x *reqPerformFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPerformFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -843,6 +864,10 @@ func (x *reqPerformFoo) String() string {
 
     return sb.String()
 }
+func (x *reqPerformFoo) setDefaults() *reqPerformFoo {
+    return x
+}
+
 type respPerformFoo struct {
 }
 // Compile time interface enforcer
@@ -853,7 +878,7 @@ var _ thrift.WritableResult = (*respPerformFoo)(nil)
 type PerformFooResultDeprecated = respPerformFoo
 
 func newRespPerformFoo() *respPerformFoo {
-    return (&respPerformFoo{})
+    return (&respPerformFoo{}).setDefaults()
 }
 
 
@@ -866,6 +891,7 @@ func (x *respPerformFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPerformFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -926,6 +952,10 @@ func (x *respPerformFoo) String() string {
 
     return sb.String()
 }
+func (x *respPerformFoo) setDefaults() *respPerformFoo {
+    return x
+}
+
 
 
 type PerformProcessor struct {
@@ -1107,7 +1137,7 @@ var _ thrift.Struct = (*reqInteractWithSharedDoSomeSimilarThings)(nil)
 type InteractWithSharedDoSomeSimilarThingsArgsDeprecated = reqInteractWithSharedDoSomeSimilarThings
 
 func newReqInteractWithSharedDoSomeSimilarThings() *reqInteractWithSharedDoSomeSimilarThings {
-    return (&reqInteractWithSharedDoSomeSimilarThings{})
+    return (&reqInteractWithSharedDoSomeSimilarThings{}).setDefaults()
 }
 
 
@@ -1116,6 +1146,7 @@ func (x *reqInteractWithSharedDoSomeSimilarThings) Write(p thrift.Encoder) error
     if err := p.WriteStructBegin("reqInteractWithSharedDoSomeSimilarThings"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1176,6 +1207,10 @@ func (x *reqInteractWithSharedDoSomeSimilarThings) String() string {
 
     return sb.String()
 }
+func (x *reqInteractWithSharedDoSomeSimilarThings) setDefaults() *reqInteractWithSharedDoSomeSimilarThings {
+    return x
+}
+
 type respInteractWithSharedDoSomeSimilarThings struct {
     Success *shared.DoSomethingResult `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -1187,14 +1222,13 @@ var _ thrift.WritableResult = (*respInteractWithSharedDoSomeSimilarThings)(nil)
 type InteractWithSharedDoSomeSimilarThingsResultDeprecated = respInteractWithSharedDoSomeSimilarThings
 
 func newRespInteractWithSharedDoSomeSimilarThings() *respInteractWithSharedDoSomeSimilarThings {
-    return (&respInteractWithSharedDoSomeSimilarThings{})
+    return (&respInteractWithSharedDoSomeSimilarThings{}).setDefaults()
 }
 
 func (x *respInteractWithSharedDoSomeSimilarThings) GetSuccess() *shared.DoSomethingResult {
     if !x.IsSetSuccess() {
         return nil
     }
-
     return x.Success
 }
 
@@ -1332,6 +1366,10 @@ func (x *respInteractWithSharedDoSomeSimilarThings) String() string {
 
     return sb.String()
 }
+func (x *respInteractWithSharedDoSomeSimilarThings) setDefaults() *respInteractWithSharedDoSomeSimilarThings {
+    return x
+}
+
 
 
 type InteractWithSharedProcessor struct {

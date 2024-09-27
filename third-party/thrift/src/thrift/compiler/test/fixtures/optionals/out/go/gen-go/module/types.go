@@ -97,11 +97,7 @@ type Color struct {
 var _ thrift.Struct = (*Color)(nil)
 
 func NewColor() *Color {
-    return (&Color{}).
-        SetRedNonCompat(0.0).
-        SetGreenNonCompat(0.0).
-        SetBlueNonCompat(0.0).
-        SetAlphaNonCompat(0.0)
+    return (&Color{}).setDefaults()
 }
 
 func (x *Color) GetRed() float64 {
@@ -290,15 +286,12 @@ func (x *Color) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -374,6 +367,14 @@ func (x *Color) String() string {
 
     return sb.String()
 }
+func (x *Color) setDefaults() *Color {
+    return x.
+        SetRedNonCompat(0.0).
+        SetGreenNonCompat(0.0).
+        SetBlueNonCompat(0.0).
+        SetAlphaNonCompat(0.0)
+}
+
 
 type Vehicle struct {
     Color *Color `thrift:"color,1" json:"color" db:"color"`
@@ -386,16 +387,13 @@ type Vehicle struct {
 var _ thrift.Struct = (*Vehicle)(nil)
 
 func NewVehicle() *Vehicle {
-    return (&Vehicle{}).
-        SetColorNonCompat(NewColor()).
-        SetHasACNonCompat(false)
+    return (&Vehicle{}).setDefaults()
 }
 
 func (x *Vehicle) GetColor() *Color {
     if !x.IsSetColor() {
         return nil
     }
-
     return x.Color
 }
 
@@ -403,7 +401,6 @@ func (x *Vehicle) GetLicensePlate() string {
     if !x.IsSetLicensePlate() {
         return ""
     }
-
     return *x.LicensePlate
 }
 
@@ -411,7 +408,6 @@ func (x *Vehicle) GetDescription() string {
     if !x.IsSetDescription() {
         return ""
     }
-
     return *x.Description
 }
 
@@ -419,7 +415,6 @@ func (x *Vehicle) GetName() string {
     if !x.IsSetName() {
         return ""
     }
-
     return *x.Name
 }
 
@@ -427,7 +422,6 @@ func (x *Vehicle) GetHasAC() bool {
     if !x.IsSetHasAC() {
         return false
     }
-
     return *x.HasAC
 }
 
@@ -706,19 +700,15 @@ func (x *Vehicle) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
@@ -797,6 +787,12 @@ func (x *Vehicle) String() string {
 
     return sb.String()
 }
+func (x *Vehicle) setDefaults() *Vehicle {
+    return x.
+        SetColorNonCompat(NewColor()).
+        SetHasACNonCompat(false)
+}
+
 
 type Person struct {
     Id PersonID `thrift:"id,1" json:"id" db:"id"`
@@ -814,9 +810,7 @@ type Person struct {
 var _ thrift.Struct = (*Person)(nil)
 
 func NewPerson() *Person {
-    return (&Person{}).
-        SetIdNonCompat(NewPersonID()).
-        SetNameNonCompat("")
+    return (&Person{}).setDefaults()
 }
 
 func (x *Person) GetId() PersonID {
@@ -831,7 +825,6 @@ func (x *Person) GetAge() int16 {
     if !x.IsSetAge() {
         return 0
     }
-
     return *x.Age
 }
 
@@ -839,7 +832,6 @@ func (x *Person) GetAddress() string {
     if !x.IsSetAddress() {
         return ""
     }
-
     return *x.Address
 }
 
@@ -847,7 +839,6 @@ func (x *Person) GetFavoriteColor() *Color {
     if !x.IsSetFavoriteColor() {
         return nil
     }
-
     return x.FavoriteColor
 }
 
@@ -855,7 +846,6 @@ func (x *Person) GetFriends() []PersonID {
     if !x.IsSetFriends() {
         return make([]PersonID, 0)
     }
-
     return x.Friends
 }
 
@@ -863,7 +853,6 @@ func (x *Person) GetBestFriend() PersonID {
     if !x.IsSetBestFriend() {
         return NewPersonID()
     }
-
     return *x.BestFriend
 }
 
@@ -871,7 +860,6 @@ func (x *Person) GetPetNames() map[Animal]string {
     if !x.IsSetPetNames() {
         return make(map[Animal]string)
     }
-
     return x.PetNames
 }
 
@@ -879,7 +867,6 @@ func (x *Person) GetAfraidOfAnimal() Animal {
     if !x.IsSetAfraidOfAnimal() {
         return 0
     }
-
     return *x.AfraidOfAnimal
 }
 
@@ -887,7 +874,6 @@ func (x *Person) GetVehicles() []*Vehicle {
     if !x.IsSetVehicles() {
         return make([]*Vehicle, 0)
     }
-
     return x.Vehicles
 }
 
@@ -1500,39 +1486,30 @@ func (x *Person) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
@@ -1626,6 +1603,12 @@ func (x *Person) String() string {
 
     return sb.String()
 }
+func (x *Person) setDefaults() *Person {
+    return x.
+        SetIdNonCompat(NewPersonID()).
+        SetNameNonCompat("")
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

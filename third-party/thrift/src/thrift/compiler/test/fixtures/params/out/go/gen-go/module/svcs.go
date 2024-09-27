@@ -200,15 +200,13 @@ var _ thrift.Struct = (*reqNestedContainersMapList)(nil)
 type NestedContainersMapListArgsDeprecated = reqNestedContainersMapList
 
 func newReqNestedContainersMapList() *reqNestedContainersMapList {
-    return (&reqNestedContainersMapList{}).
-        SetFooNonCompat(make(map[int32][]int32))
+    return (&reqNestedContainersMapList{}).setDefaults()
 }
 
 func (x *reqNestedContainersMapList) GetFoo() map[int32][]int32 {
     if !x.IsSetFoo() {
         return make(map[int32][]int32)
     }
-
     return x.Foo
 }
 
@@ -404,6 +402,11 @@ func (x *reqNestedContainersMapList) String() string {
 
     return sb.String()
 }
+func (x *reqNestedContainersMapList) setDefaults() *reqNestedContainersMapList {
+    return x.
+        SetFooNonCompat(make(map[int32][]int32))
+}
+
 type respNestedContainersMapList struct {
 }
 // Compile time interface enforcer
@@ -414,7 +417,7 @@ var _ thrift.WritableResult = (*respNestedContainersMapList)(nil)
 type NestedContainersMapListResultDeprecated = respNestedContainersMapList
 
 func newRespNestedContainersMapList() *respNestedContainersMapList {
-    return (&respNestedContainersMapList{})
+    return (&respNestedContainersMapList{}).setDefaults()
 }
 
 
@@ -427,6 +430,7 @@ func (x *respNestedContainersMapList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersMapList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -487,6 +491,10 @@ func (x *respNestedContainersMapList) String() string {
 
     return sb.String()
 }
+func (x *respNestedContainersMapList) setDefaults() *respNestedContainersMapList {
+    return x
+}
+
 type reqNestedContainersMapSet struct {
     Foo map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -497,15 +505,13 @@ var _ thrift.Struct = (*reqNestedContainersMapSet)(nil)
 type NestedContainersMapSetArgsDeprecated = reqNestedContainersMapSet
 
 func newReqNestedContainersMapSet() *reqNestedContainersMapSet {
-    return (&reqNestedContainersMapSet{}).
-        SetFooNonCompat(make(map[int32][]int32))
+    return (&reqNestedContainersMapSet{}).setDefaults()
 }
 
 func (x *reqNestedContainersMapSet) GetFoo() map[int32][]int32 {
     if !x.IsSetFoo() {
         return make(map[int32][]int32)
     }
-
     return x.Foo
 }
 
@@ -701,6 +707,11 @@ func (x *reqNestedContainersMapSet) String() string {
 
     return sb.String()
 }
+func (x *reqNestedContainersMapSet) setDefaults() *reqNestedContainersMapSet {
+    return x.
+        SetFooNonCompat(make(map[int32][]int32))
+}
+
 type respNestedContainersMapSet struct {
 }
 // Compile time interface enforcer
@@ -711,7 +722,7 @@ var _ thrift.WritableResult = (*respNestedContainersMapSet)(nil)
 type NestedContainersMapSetResultDeprecated = respNestedContainersMapSet
 
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
-    return (&respNestedContainersMapSet{})
+    return (&respNestedContainersMapSet{}).setDefaults()
 }
 
 
@@ -724,6 +735,7 @@ func (x *respNestedContainersMapSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersMapSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -784,6 +796,10 @@ func (x *respNestedContainersMapSet) String() string {
 
     return sb.String()
 }
+func (x *respNestedContainersMapSet) setDefaults() *respNestedContainersMapSet {
+    return x
+}
+
 type reqNestedContainersListMap struct {
     Foo []map[int32]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -794,15 +810,13 @@ var _ thrift.Struct = (*reqNestedContainersListMap)(nil)
 type NestedContainersListMapArgsDeprecated = reqNestedContainersListMap
 
 func newReqNestedContainersListMap() *reqNestedContainersListMap {
-    return (&reqNestedContainersListMap{}).
-        SetFooNonCompat(make([]map[int32]int32, 0))
+    return (&reqNestedContainersListMap{}).setDefaults()
 }
 
 func (x *reqNestedContainersListMap) GetFoo() []map[int32]int32 {
     if !x.IsSetFoo() {
         return make([]map[int32]int32, 0)
     }
-
     return x.Foo
 }
 
@@ -998,6 +1012,11 @@ func (x *reqNestedContainersListMap) String() string {
 
     return sb.String()
 }
+func (x *reqNestedContainersListMap) setDefaults() *reqNestedContainersListMap {
+    return x.
+        SetFooNonCompat(make([]map[int32]int32, 0))
+}
+
 type respNestedContainersListMap struct {
 }
 // Compile time interface enforcer
@@ -1008,7 +1027,7 @@ var _ thrift.WritableResult = (*respNestedContainersListMap)(nil)
 type NestedContainersListMapResultDeprecated = respNestedContainersListMap
 
 func newRespNestedContainersListMap() *respNestedContainersListMap {
-    return (&respNestedContainersListMap{})
+    return (&respNestedContainersListMap{}).setDefaults()
 }
 
 
@@ -1021,6 +1040,7 @@ func (x *respNestedContainersListMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersListMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1081,6 +1101,10 @@ func (x *respNestedContainersListMap) String() string {
 
     return sb.String()
 }
+func (x *respNestedContainersListMap) setDefaults() *respNestedContainersListMap {
+    return x
+}
+
 type reqNestedContainersListSet struct {
     Foo [][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -1091,15 +1115,13 @@ var _ thrift.Struct = (*reqNestedContainersListSet)(nil)
 type NestedContainersListSetArgsDeprecated = reqNestedContainersListSet
 
 func newReqNestedContainersListSet() *reqNestedContainersListSet {
-    return (&reqNestedContainersListSet{}).
-        SetFooNonCompat(make([][]int32, 0))
+    return (&reqNestedContainersListSet{}).setDefaults()
 }
 
 func (x *reqNestedContainersListSet) GetFoo() [][]int32 {
     if !x.IsSetFoo() {
         return make([][]int32, 0)
     }
-
     return x.Foo
 }
 
@@ -1278,6 +1300,11 @@ func (x *reqNestedContainersListSet) String() string {
 
     return sb.String()
 }
+func (x *reqNestedContainersListSet) setDefaults() *reqNestedContainersListSet {
+    return x.
+        SetFooNonCompat(make([][]int32, 0))
+}
+
 type respNestedContainersListSet struct {
 }
 // Compile time interface enforcer
@@ -1288,7 +1315,7 @@ var _ thrift.WritableResult = (*respNestedContainersListSet)(nil)
 type NestedContainersListSetResultDeprecated = respNestedContainersListSet
 
 func newRespNestedContainersListSet() *respNestedContainersListSet {
-    return (&respNestedContainersListSet{})
+    return (&respNestedContainersListSet{}).setDefaults()
 }
 
 
@@ -1301,6 +1328,7 @@ func (x *respNestedContainersListSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersListSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1361,6 +1389,10 @@ func (x *respNestedContainersListSet) String() string {
 
     return sb.String()
 }
+func (x *respNestedContainersListSet) setDefaults() *respNestedContainersListSet {
+    return x
+}
+
 type reqNestedContainersTurtles struct {
     Foo [][]map[int32]map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -1371,15 +1403,13 @@ var _ thrift.Struct = (*reqNestedContainersTurtles)(nil)
 type NestedContainersTurtlesArgsDeprecated = reqNestedContainersTurtles
 
 func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
-    return (&reqNestedContainersTurtles{}).
-        SetFooNonCompat(make([][]map[int32]map[int32][]int32, 0))
+    return (&reqNestedContainersTurtles{}).setDefaults()
 }
 
 func (x *reqNestedContainersTurtles) GetFoo() [][]map[int32]map[int32][]int32 {
     if !x.IsSetFoo() {
         return make([][]map[int32]map[int32][]int32, 0)
     }
-
     return x.Foo
 }
 
@@ -1679,6 +1709,11 @@ func (x *reqNestedContainersTurtles) String() string {
 
     return sb.String()
 }
+func (x *reqNestedContainersTurtles) setDefaults() *reqNestedContainersTurtles {
+    return x.
+        SetFooNonCompat(make([][]map[int32]map[int32][]int32, 0))
+}
+
 type respNestedContainersTurtles struct {
 }
 // Compile time interface enforcer
@@ -1689,7 +1724,7 @@ var _ thrift.WritableResult = (*respNestedContainersTurtles)(nil)
 type NestedContainersTurtlesResultDeprecated = respNestedContainersTurtles
 
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
-    return (&respNestedContainersTurtles{})
+    return (&respNestedContainersTurtles{}).setDefaults()
 }
 
 
@@ -1702,6 +1737,7 @@ func (x *respNestedContainersTurtles) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respNestedContainersTurtles"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1762,6 +1798,10 @@ func (x *respNestedContainersTurtles) String() string {
 
     return sb.String()
 }
+func (x *respNestedContainersTurtles) setDefaults() *respNestedContainersTurtles {
+    return x
+}
+
 
 
 type NestedContainersProcessor struct {

@@ -27,8 +27,7 @@ type CustomException struct {
 var _ thrift.Struct = (*CustomException)(nil)
 
 func NewCustomException() *CustomException {
-    return (&CustomException{}).
-        SetMessageNonCompat("")
+    return (&CustomException{}).setDefaults()
 }
 
 func (x *CustomException) GetMessage() string {
@@ -148,6 +147,11 @@ func (x *CustomException) String() string {
 
     return sb.String()
 }
+func (x *CustomException) setDefaults() *CustomException {
+    return x.
+        SetMessageNonCompat("")
+}
+
 func (x *CustomException) Error() string {
     return x.String()
 }

@@ -25,8 +25,7 @@ type Foo struct {
 var _ thrift.Struct = (*Foo)(nil)
 
 func NewFoo() *Foo {
-    return (&Foo{}).
-        SetMyIntNonCompat(0)
+    return (&Foo{}).setDefaults()
 }
 
 func (x *Foo) GetMyInt() int64 {
@@ -146,6 +145,11 @@ func (x *Foo) String() string {
 
     return sb.String()
 }
+func (x *Foo) setDefaults() *Foo {
+    return x.
+        SetMyIntNonCompat(0)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

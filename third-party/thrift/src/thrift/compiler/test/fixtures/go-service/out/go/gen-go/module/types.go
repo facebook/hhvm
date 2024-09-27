@@ -25,8 +25,7 @@ type GetEntityRequest struct {
 var _ thrift.Struct = (*GetEntityRequest)(nil)
 
 func NewGetEntityRequest() *GetEntityRequest {
-    return (&GetEntityRequest{}).
-        SetIdNonCompat("")
+    return (&GetEntityRequest{}).setDefaults()
 }
 
 func (x *GetEntityRequest) GetId() string {
@@ -146,6 +145,11 @@ func (x *GetEntityRequest) String() string {
 
     return sb.String()
 }
+func (x *GetEntityRequest) setDefaults() *GetEntityRequest {
+    return x.
+        SetIdNonCompat("")
+}
+
 
 type GetEntityResponse struct {
     Entity string `thrift:"entity,1" json:"entity" db:"entity"`
@@ -154,8 +158,7 @@ type GetEntityResponse struct {
 var _ thrift.Struct = (*GetEntityResponse)(nil)
 
 func NewGetEntityResponse() *GetEntityResponse {
-    return (&GetEntityResponse{}).
-        SetEntityNonCompat("")
+    return (&GetEntityResponse{}).setDefaults()
 }
 
 func (x *GetEntityResponse) GetEntity() string {
@@ -275,6 +278,11 @@ func (x *GetEntityResponse) String() string {
 
     return sb.String()
 }
+func (x *GetEntityResponse) setDefaults() *GetEntityResponse {
+    return x.
+        SetEntityNonCompat("")
+}
+
 
 type NonComparableStruct struct {
     Foo string `thrift:"foo,1" json:"foo" db:"foo"`
@@ -285,10 +293,7 @@ type NonComparableStruct struct {
 var _ thrift.Struct = (*NonComparableStruct)(nil)
 
 func NewNonComparableStruct() *NonComparableStruct {
-    return (&NonComparableStruct{}).
-        SetFooNonCompat("").
-        SetBarNonCompat(make([]string, 0)).
-        SetBazNonCompat(make(map[*NonComparableStruct]int64))
+    return (&NonComparableStruct{}).setDefaults()
 }
 
 func (x *NonComparableStruct) GetFoo() string {
@@ -299,7 +304,6 @@ func (x *NonComparableStruct) GetBar() []string {
     if !x.IsSetBar() {
         return make([]string, 0)
     }
-
     return x.Bar
 }
 
@@ -307,7 +311,6 @@ func (x *NonComparableStruct) GetBaz() map[*NonComparableStruct]int64 {
     if !x.IsSetBaz() {
         return make(map[*NonComparableStruct]int64)
     }
-
     return x.Baz
 }
 
@@ -529,11 +532,9 @@ func (x *NonComparableStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -606,6 +607,13 @@ func (x *NonComparableStruct) String() string {
 
     return sb.String()
 }
+func (x *NonComparableStruct) setDefaults() *NonComparableStruct {
+    return x.
+        SetFooNonCompat("").
+        SetBarNonCompat(make([]string, 0)).
+        SetBazNonCompat(make(map[*NonComparableStruct]int64))
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

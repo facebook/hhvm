@@ -24,7 +24,7 @@ type Py3Hidden struct {
 var _ thrift.Struct = (*Py3Hidden)(nil)
 
 func NewPy3Hidden() *Py3Hidden {
-    return (&Py3Hidden{})
+    return (&Py3Hidden{}).setDefaults()
 }
 
 
@@ -33,6 +33,7 @@ func (x *Py3Hidden) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Py3Hidden"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -93,6 +94,10 @@ func (x *Py3Hidden) String() string {
 
     return sb.String()
 }
+func (x *Py3Hidden) setDefaults() *Py3Hidden {
+    return x
+}
+
 
 type PyDeprecatedHidden struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
@@ -101,8 +106,7 @@ type PyDeprecatedHidden struct {
 var _ thrift.Struct = (*PyDeprecatedHidden)(nil)
 
 func NewPyDeprecatedHidden() *PyDeprecatedHidden {
-    return (&PyDeprecatedHidden{}).
-        SetReasonNonCompat("")
+    return (&PyDeprecatedHidden{}).setDefaults()
 }
 
 func (x *PyDeprecatedHidden) GetReason() string {
@@ -222,6 +226,11 @@ func (x *PyDeprecatedHidden) String() string {
 
     return sb.String()
 }
+func (x *PyDeprecatedHidden) setDefaults() *PyDeprecatedHidden {
+    return x.
+        SetReasonNonCompat("")
+}
+
 
 type Flags struct {
 }
@@ -229,7 +238,7 @@ type Flags struct {
 var _ thrift.Struct = (*Flags)(nil)
 
 func NewFlags() *Flags {
-    return (&Flags{})
+    return (&Flags{}).setDefaults()
 }
 
 
@@ -238,6 +247,7 @@ func (x *Flags) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Flags"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -298,6 +308,10 @@ func (x *Flags) String() string {
 
     return sb.String()
 }
+func (x *Flags) setDefaults() *Flags {
+    return x
+}
+
 
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -306,8 +320,7 @@ type Name struct {
 var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
-    return (&Name{}).
-        SetNameNonCompat("")
+    return (&Name{}).setDefaults()
 }
 
 func (x *Name) GetName() string {
@@ -427,6 +440,11 @@ func (x *Name) String() string {
 
     return sb.String()
 }
+func (x *Name) setDefaults() *Name {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -436,9 +454,7 @@ type Adapter struct {
 var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
-    return (&Adapter{}).
-        SetNameNonCompat("").
-        SetTypeHintNonCompat("")
+    return (&Adapter{}).setDefaults()
 }
 
 func (x *Adapter) GetName() string {
@@ -539,7 +555,6 @@ func (x *Adapter) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -609,6 +624,12 @@ func (x *Adapter) String() string {
 
     return sb.String()
 }
+func (x *Adapter) setDefaults() *Adapter {
+    return x.
+        SetNameNonCompat("").
+        SetTypeHintNonCompat("")
+}
+
 
 type UseCAPI struct {
     Serialize bool `thrift:"serialize,1" json:"serialize" db:"serialize"`
@@ -617,8 +638,7 @@ type UseCAPI struct {
 var _ thrift.Struct = (*UseCAPI)(nil)
 
 func NewUseCAPI() *UseCAPI {
-    return (&UseCAPI{}).
-        SetSerializeNonCompat(false)
+    return (&UseCAPI{}).setDefaults()
 }
 
 func (x *UseCAPI) GetSerialize() bool {
@@ -738,6 +758,11 @@ func (x *UseCAPI) String() string {
 
     return sb.String()
 }
+func (x *UseCAPI) setDefaults() *UseCAPI {
+    return x.
+        SetSerializeNonCompat(false)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

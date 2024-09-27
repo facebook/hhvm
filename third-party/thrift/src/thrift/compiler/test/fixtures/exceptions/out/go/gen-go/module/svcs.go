@@ -184,7 +184,7 @@ var _ thrift.Struct = (*reqRaiserDoBland)(nil)
 type RaiserDoBlandArgsDeprecated = reqRaiserDoBland
 
 func newReqRaiserDoBland() *reqRaiserDoBland {
-    return (&reqRaiserDoBland{})
+    return (&reqRaiserDoBland{}).setDefaults()
 }
 
 
@@ -193,6 +193,7 @@ func (x *reqRaiserDoBland) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -253,6 +254,10 @@ func (x *reqRaiserDoBland) String() string {
 
     return sb.String()
 }
+func (x *reqRaiserDoBland) setDefaults() *reqRaiserDoBland {
+    return x
+}
+
 type respRaiserDoBland struct {
 }
 // Compile time interface enforcer
@@ -263,7 +268,7 @@ var _ thrift.WritableResult = (*respRaiserDoBland)(nil)
 type RaiserDoBlandResultDeprecated = respRaiserDoBland
 
 func newRespRaiserDoBland() *respRaiserDoBland {
-    return (&respRaiserDoBland{})
+    return (&respRaiserDoBland{}).setDefaults()
 }
 
 
@@ -276,6 +281,7 @@ func (x *respRaiserDoBland) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -336,6 +342,10 @@ func (x *respRaiserDoBland) String() string {
 
     return sb.String()
 }
+func (x *respRaiserDoBland) setDefaults() *respRaiserDoBland {
+    return x
+}
+
 type reqRaiserDoRaise struct {
 }
 // Compile time interface enforcer
@@ -345,7 +355,7 @@ var _ thrift.Struct = (*reqRaiserDoRaise)(nil)
 type RaiserDoRaiseArgsDeprecated = reqRaiserDoRaise
 
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
-    return (&reqRaiserDoRaise{})
+    return (&reqRaiserDoRaise{}).setDefaults()
 }
 
 
@@ -354,6 +364,7 @@ func (x *reqRaiserDoRaise) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -414,6 +425,10 @@ func (x *reqRaiserDoRaise) String() string {
 
     return sb.String()
 }
+func (x *reqRaiserDoRaise) setDefaults() *reqRaiserDoRaise {
+    return x
+}
+
 type respRaiserDoRaise struct {
     B *Banal `thrift:"b,1,optional" json:"b,omitempty" db:"b"`
     F *Fiery `thrift:"f,2,optional" json:"f,omitempty" db:"f"`
@@ -427,14 +442,13 @@ var _ thrift.WritableResult = (*respRaiserDoRaise)(nil)
 type RaiserDoRaiseResultDeprecated = respRaiserDoRaise
 
 func newRespRaiserDoRaise() *respRaiserDoRaise {
-    return (&respRaiserDoRaise{})
+    return (&respRaiserDoRaise{}).setDefaults()
 }
 
 func (x *respRaiserDoRaise) GetB() *Banal {
     if !x.IsSetB() {
         return nil
     }
-
     return x.B
 }
 
@@ -442,7 +456,6 @@ func (x *respRaiserDoRaise) GetF() *Fiery {
     if !x.IsSetF() {
         return nil
     }
-
     return x.F
 }
 
@@ -450,7 +463,6 @@ func (x *respRaiserDoRaise) GetS() *Serious {
     if !x.IsSetS() {
         return nil
     }
-
     return x.S
 }
 
@@ -648,11 +660,9 @@ func (x *respRaiserDoRaise) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -725,6 +735,10 @@ func (x *respRaiserDoRaise) String() string {
 
     return sb.String()
 }
+func (x *respRaiserDoRaise) setDefaults() *respRaiserDoRaise {
+    return x
+}
+
 type reqRaiserGet200 struct {
 }
 // Compile time interface enforcer
@@ -734,7 +748,7 @@ var _ thrift.Struct = (*reqRaiserGet200)(nil)
 type RaiserGet200ArgsDeprecated = reqRaiserGet200
 
 func newReqRaiserGet200() *reqRaiserGet200 {
-    return (&reqRaiserGet200{})
+    return (&reqRaiserGet200{}).setDefaults()
 }
 
 
@@ -743,6 +757,7 @@ func (x *reqRaiserGet200) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -803,6 +818,10 @@ func (x *reqRaiserGet200) String() string {
 
     return sb.String()
 }
+func (x *reqRaiserGet200) setDefaults() *reqRaiserGet200 {
+    return x
+}
+
 type respRaiserGet200 struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -814,14 +833,13 @@ var _ thrift.WritableResult = (*respRaiserGet200)(nil)
 type RaiserGet200ResultDeprecated = respRaiserGet200
 
 func newRespRaiserGet200() *respRaiserGet200 {
-    return (&respRaiserGet200{})
+    return (&respRaiserGet200{}).setDefaults()
 }
 
 func (x *respRaiserGet200) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
-
     return *x.Success
 }
 
@@ -954,6 +972,10 @@ func (x *respRaiserGet200) String() string {
 
     return sb.String()
 }
+func (x *respRaiserGet200) setDefaults() *respRaiserGet200 {
+    return x
+}
+
 type reqRaiserGet500 struct {
 }
 // Compile time interface enforcer
@@ -963,7 +985,7 @@ var _ thrift.Struct = (*reqRaiserGet500)(nil)
 type RaiserGet500ArgsDeprecated = reqRaiserGet500
 
 func newReqRaiserGet500() *reqRaiserGet500 {
-    return (&reqRaiserGet500{})
+    return (&reqRaiserGet500{}).setDefaults()
 }
 
 
@@ -972,6 +994,7 @@ func (x *reqRaiserGet500) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserGet500"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1032,6 +1055,10 @@ func (x *reqRaiserGet500) String() string {
 
     return sb.String()
 }
+func (x *reqRaiserGet500) setDefaults() *reqRaiserGet500 {
+    return x
+}
+
 type respRaiserGet500 struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
     F *Fiery `thrift:"f,1,optional" json:"f,omitempty" db:"f"`
@@ -1046,14 +1073,13 @@ var _ thrift.WritableResult = (*respRaiserGet500)(nil)
 type RaiserGet500ResultDeprecated = respRaiserGet500
 
 func newRespRaiserGet500() *respRaiserGet500 {
-    return (&respRaiserGet500{})
+    return (&respRaiserGet500{}).setDefaults()
 }
 
 func (x *respRaiserGet500) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
-
     return *x.Success
 }
 
@@ -1061,7 +1087,6 @@ func (x *respRaiserGet500) GetF() *Fiery {
     if !x.IsSetF() {
         return nil
     }
-
     return x.F
 }
 
@@ -1069,7 +1094,6 @@ func (x *respRaiserGet500) GetB() *Banal {
     if !x.IsSetB() {
         return nil
     }
-
     return x.B
 }
 
@@ -1077,7 +1101,6 @@ func (x *respRaiserGet500) GetS() *Serious {
     if !x.IsSetS() {
         return nil
     }
-
     return x.S
 }
 
@@ -1327,15 +1350,12 @@ func (x *respRaiserGet500) Write(p thrift.Encoder) error {
     if err := x.writeField0(p); err != nil {
         return err
     }
-
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -1411,6 +1431,10 @@ func (x *respRaiserGet500) String() string {
 
     return sb.String()
 }
+func (x *respRaiserGet500) setDefaults() *respRaiserGet500 {
+    return x
+}
+
 
 
 type RaiserProcessor struct {

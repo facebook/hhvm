@@ -90,7 +90,7 @@ type MyStruct struct {
 var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{})
+    return (&MyStruct{}).setDefaults()
 }
 
 
@@ -99,6 +99,7 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -159,6 +160,10 @@ func (x *MyStruct) String() string {
 
     return sb.String()
 }
+func (x *MyStruct) setDefaults() *MyStruct {
+    return x
+}
+
 
 type MyUnion struct {
     BoolField *bool `thrift:"bool_field,1" json:"bool_field,omitempty" db:"bool_field"`
@@ -180,14 +185,13 @@ type MyUnion struct {
 var _ thrift.Struct = (*MyUnion)(nil)
 
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{})
+    return (&MyUnion{}).setDefaults()
 }
 
 func (x *MyUnion) GetBoolField() bool {
     if !x.IsSetBoolField() {
         return false
     }
-
     return *x.BoolField
 }
 
@@ -195,7 +199,6 @@ func (x *MyUnion) GetByteField() int8 {
     if !x.IsSetByteField() {
         return 0
     }
-
     return *x.ByteField
 }
 
@@ -203,7 +206,6 @@ func (x *MyUnion) GetShortField() int16 {
     if !x.IsSetShortField() {
         return 0
     }
-
     return *x.ShortField
 }
 
@@ -211,7 +213,6 @@ func (x *MyUnion) GetIntField() int32 {
     if !x.IsSetIntField() {
         return 0
     }
-
     return *x.IntField
 }
 
@@ -219,7 +220,6 @@ func (x *MyUnion) GetLongField() int64 {
     if !x.IsSetLongField() {
         return 0
     }
-
     return *x.LongField
 }
 
@@ -227,7 +227,6 @@ func (x *MyUnion) GetFloatField() float32 {
     if !x.IsSetFloatField() {
         return 0.0
     }
-
     return *x.FloatField
 }
 
@@ -235,7 +234,6 @@ func (x *MyUnion) GetDoubleField() float64 {
     if !x.IsSetDoubleField() {
         return 0.0
     }
-
     return *x.DoubleField
 }
 
@@ -243,7 +241,6 @@ func (x *MyUnion) GetStringField() string {
     if !x.IsSetStringField() {
         return ""
     }
-
     return *x.StringField
 }
 
@@ -251,7 +248,6 @@ func (x *MyUnion) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
         return []byte("")
     }
-
     return x.BinaryField
 }
 
@@ -259,7 +255,6 @@ func (x *MyUnion) GetEnumField() MyEnum {
     if !x.IsSetEnumField() {
         return 0
     }
-
     return *x.EnumField
 }
 
@@ -267,7 +262,6 @@ func (x *MyUnion) GetListField() []int16 {
     if !x.IsSetListField() {
         return make([]int16, 0)
     }
-
     return x.ListField
 }
 
@@ -275,7 +269,6 @@ func (x *MyUnion) GetSetField() []int16 {
     if !x.IsSetSetField() {
         return make([]int16, 0)
     }
-
     return x.SetField
 }
 
@@ -283,7 +276,6 @@ func (x *MyUnion) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
         return make(map[int16]int16)
     }
-
     return x.MapField
 }
 
@@ -291,7 +283,6 @@ func (x *MyUnion) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
         return nil
     }
-
     return x.StructField
 }
 
@@ -1182,55 +1173,42 @@ func (x *MyUnion) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
-
     if err := x.writeField11(p); err != nil {
         return err
     }
-
     if err := x.writeField12(p); err != nil {
         return err
     }
-
     if err := x.writeField13(p); err != nil {
         return err
     }
-
     if err := x.writeField14(p); err != nil {
         return err
     }
@@ -1336,6 +1314,10 @@ func (x *MyUnion) String() string {
 
     return sb.String()
 }
+func (x *MyUnion) setDefaults() *MyUnion {
+    return x
+}
+
 
 type MyStructWithCustomDefault struct {
     Field1 int64 `thrift:"field1,1" json:"field1" db:"field1"`
@@ -1344,8 +1326,7 @@ type MyStructWithCustomDefault struct {
 var _ thrift.Struct = (*MyStructWithCustomDefault)(nil)
 
 func NewMyStructWithCustomDefault() *MyStructWithCustomDefault {
-    return (&MyStructWithCustomDefault{}).
-        SetField1NonCompat(1)
+    return (&MyStructWithCustomDefault{}).setDefaults()
 }
 
 func (x *MyStructWithCustomDefault) GetField1() int64 {
@@ -1465,6 +1446,11 @@ func (x *MyStructWithCustomDefault) String() string {
 
     return sb.String()
 }
+func (x *MyStructWithCustomDefault) setDefaults() *MyStructWithCustomDefault {
+    return x.
+        SetField1NonCompat(1)
+}
+
 
 type StructLevelTerseStruct struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -1487,22 +1473,7 @@ type StructLevelTerseStruct struct {
 var _ thrift.Struct = (*StructLevelTerseStruct)(nil)
 
 func NewStructLevelTerseStruct() *StructLevelTerseStruct {
-    return (&StructLevelTerseStruct{}).
-        SetBoolFieldNonCompat(false).
-        SetByteFieldNonCompat(0).
-        SetShortFieldNonCompat(0).
-        SetIntFieldNonCompat(0).
-        SetLongFieldNonCompat(0).
-        SetFloatFieldNonCompat(0.0).
-        SetDoubleFieldNonCompat(0.0).
-        SetStringFieldNonCompat("").
-        SetBinaryFieldNonCompat([]byte("")).
-        SetEnumFieldNonCompat(0).
-        SetListFieldNonCompat(make([]int16, 0)).
-        SetSetFieldNonCompat(make([]int16, 0)).
-        SetMapFieldNonCompat(make(map[int16]int16)).
-        SetStructFieldNonCompat(NewMyStruct()).
-        SetUnionFieldNonCompat(NewMyUnion())
+    return (&StructLevelTerseStruct{}).setDefaults()
 }
 
 func (x *StructLevelTerseStruct) GetBoolField() bool {
@@ -1541,7 +1512,6 @@ func (x *StructLevelTerseStruct) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
         return []byte("")
     }
-
     return x.BinaryField
 }
 
@@ -1553,7 +1523,6 @@ func (x *StructLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
         return make([]int16, 0)
     }
-
     return x.ListField
 }
 
@@ -1561,7 +1530,6 @@ func (x *StructLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
         return make([]int16, 0)
     }
-
     return x.SetField
 }
 
@@ -1569,7 +1537,6 @@ func (x *StructLevelTerseStruct) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
         return make(map[int16]int16)
     }
-
     return x.MapField
 }
 
@@ -1577,7 +1544,6 @@ func (x *StructLevelTerseStruct) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
         return nil
     }
-
     return x.StructField
 }
 
@@ -1585,7 +1551,6 @@ func (x *StructLevelTerseStruct) GetUnionField() *MyUnion {
     if !x.IsSetUnionField() {
         return nil
     }
-
     return x.UnionField
 }
 
@@ -2355,59 +2320,45 @@ func (x *StructLevelTerseStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
-
     if err := x.writeField11(p); err != nil {
         return err
     }
-
     if err := x.writeField12(p); err != nil {
         return err
     }
-
     if err := x.writeField13(p); err != nil {
         return err
     }
-
     if err := x.writeField14(p); err != nil {
         return err
     }
-
     if err := x.writeField15(p); err != nil {
         return err
     }
@@ -2516,6 +2467,25 @@ func (x *StructLevelTerseStruct) String() string {
 
     return sb.String()
 }
+func (x *StructLevelTerseStruct) setDefaults() *StructLevelTerseStruct {
+    return x.
+        SetBoolFieldNonCompat(false).
+        SetByteFieldNonCompat(0).
+        SetShortFieldNonCompat(0).
+        SetIntFieldNonCompat(0).
+        SetLongFieldNonCompat(0).
+        SetFloatFieldNonCompat(0.0).
+        SetDoubleFieldNonCompat(0.0).
+        SetStringFieldNonCompat("").
+        SetBinaryFieldNonCompat([]byte("")).
+        SetEnumFieldNonCompat(0).
+        SetListFieldNonCompat(make([]int16, 0)).
+        SetSetFieldNonCompat(make([]int16, 0)).
+        SetMapFieldNonCompat(make(map[int16]int16)).
+        SetStructFieldNonCompat(NewMyStruct()).
+        SetUnionFieldNonCompat(NewMyUnion())
+}
+
 
 type FieldLevelTerseStruct struct {
     TerseBoolField bool `thrift:"terse_bool_field,1" json:"terse_bool_field" db:"terse_bool_field"`
@@ -2553,37 +2523,7 @@ type FieldLevelTerseStruct struct {
 var _ thrift.Struct = (*FieldLevelTerseStruct)(nil)
 
 func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
-    return (&FieldLevelTerseStruct{}).
-        SetTerseBoolFieldNonCompat(false).
-        SetTerseByteFieldNonCompat(0).
-        SetTerseShortFieldNonCompat(0).
-        SetTerseIntFieldNonCompat(0).
-        SetTerseLongFieldNonCompat(0).
-        SetTerseFloatFieldNonCompat(0.0).
-        SetTerseDoubleFieldNonCompat(0.0).
-        SetTerseStringFieldNonCompat("").
-        SetTerseBinaryFieldNonCompat([]byte("")).
-        SetTerseEnumFieldNonCompat(0).
-        SetTerseListFieldNonCompat(make([]int16, 0)).
-        SetTerseSetFieldNonCompat(make([]int16, 0)).
-        SetTerseMapFieldNonCompat(make(map[int16]int16)).
-        SetTerseStructFieldNonCompat(NewMyStruct()).
-        SetBoolFieldNonCompat(false).
-        SetByteFieldNonCompat(0).
-        SetShortFieldNonCompat(0).
-        SetIntFieldNonCompat(0).
-        SetLongFieldNonCompat(0).
-        SetFloatFieldNonCompat(0.0).
-        SetDoubleFieldNonCompat(0.0).
-        SetStringFieldNonCompat("").
-        SetBinaryFieldNonCompat([]byte("")).
-        SetEnumFieldNonCompat(0).
-        SetListFieldNonCompat(make([]int16, 0)).
-        SetSetFieldNonCompat(make([]int16, 0)).
-        SetMapFieldNonCompat(make(map[int16]int16)).
-        SetStructFieldNonCompat(NewMyStruct()).
-        SetTerseUnionFieldNonCompat(NewMyUnion()).
-        SetUnionFieldNonCompat(NewMyUnion())
+    return (&FieldLevelTerseStruct{}).setDefaults()
 }
 
 func (x *FieldLevelTerseStruct) GetTerseBoolField() bool {
@@ -2622,7 +2562,6 @@ func (x *FieldLevelTerseStruct) GetTerseBinaryField() []byte {
     if !x.IsSetTerseBinaryField() {
         return []byte("")
     }
-
     return x.TerseBinaryField
 }
 
@@ -2634,7 +2573,6 @@ func (x *FieldLevelTerseStruct) GetTerseListField() []int16 {
     if !x.IsSetTerseListField() {
         return make([]int16, 0)
     }
-
     return x.TerseListField
 }
 
@@ -2642,7 +2580,6 @@ func (x *FieldLevelTerseStruct) GetTerseSetField() []int16 {
     if !x.IsSetTerseSetField() {
         return make([]int16, 0)
     }
-
     return x.TerseSetField
 }
 
@@ -2650,7 +2587,6 @@ func (x *FieldLevelTerseStruct) GetTerseMapField() map[int16]int16 {
     if !x.IsSetTerseMapField() {
         return make(map[int16]int16)
     }
-
     return x.TerseMapField
 }
 
@@ -2658,7 +2594,6 @@ func (x *FieldLevelTerseStruct) GetTerseStructField() *MyStruct {
     if !x.IsSetTerseStructField() {
         return nil
     }
-
     return x.TerseStructField
 }
 
@@ -2698,7 +2633,6 @@ func (x *FieldLevelTerseStruct) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
         return []byte("")
     }
-
     return x.BinaryField
 }
 
@@ -2710,7 +2644,6 @@ func (x *FieldLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
         return make([]int16, 0)
     }
-
     return x.ListField
 }
 
@@ -2718,7 +2651,6 @@ func (x *FieldLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
         return make([]int16, 0)
     }
-
     return x.SetField
 }
 
@@ -2726,7 +2658,6 @@ func (x *FieldLevelTerseStruct) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
         return make(map[int16]int16)
     }
-
     return x.MapField
 }
 
@@ -2734,7 +2665,6 @@ func (x *FieldLevelTerseStruct) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
         return nil
     }
-
     return x.StructField
 }
 
@@ -2742,7 +2672,6 @@ func (x *FieldLevelTerseStruct) GetTerseUnionField() *MyUnion {
     if !x.IsSetTerseUnionField() {
         return nil
     }
-
     return x.TerseUnionField
 }
 
@@ -2750,7 +2679,6 @@ func (x *FieldLevelTerseStruct) GetUnionField() *MyUnion {
     if !x.IsSetUnionField() {
         return nil
     }
-
     return x.UnionField
 }
 
@@ -4276,119 +4204,90 @@ func (x *FieldLevelTerseStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
-
     if err := x.writeField11(p); err != nil {
         return err
     }
-
     if err := x.writeField12(p); err != nil {
         return err
     }
-
     if err := x.writeField13(p); err != nil {
         return err
     }
-
     if err := x.writeField14(p); err != nil {
         return err
     }
-
     if err := x.writeField15(p); err != nil {
         return err
     }
-
     if err := x.writeField16(p); err != nil {
         return err
     }
-
     if err := x.writeField17(p); err != nil {
         return err
     }
-
     if err := x.writeField18(p); err != nil {
         return err
     }
-
     if err := x.writeField19(p); err != nil {
         return err
     }
-
     if err := x.writeField20(p); err != nil {
         return err
     }
-
     if err := x.writeField21(p); err != nil {
         return err
     }
-
     if err := x.writeField22(p); err != nil {
         return err
     }
-
     if err := x.writeField23(p); err != nil {
         return err
     }
-
     if err := x.writeField24(p); err != nil {
         return err
     }
-
     if err := x.writeField25(p); err != nil {
         return err
     }
-
     if err := x.writeField26(p); err != nil {
         return err
     }
-
     if err := x.writeField27(p); err != nil {
         return err
     }
-
     if err := x.writeField28(p); err != nil {
         return err
     }
-
     if err := x.writeField29(p); err != nil {
         return err
     }
-
     if err := x.writeField30(p); err != nil {
         return err
     }
@@ -4542,6 +4441,40 @@ func (x *FieldLevelTerseStruct) String() string {
 
     return sb.String()
 }
+func (x *FieldLevelTerseStruct) setDefaults() *FieldLevelTerseStruct {
+    return x.
+        SetTerseBoolFieldNonCompat(false).
+        SetTerseByteFieldNonCompat(0).
+        SetTerseShortFieldNonCompat(0).
+        SetTerseIntFieldNonCompat(0).
+        SetTerseLongFieldNonCompat(0).
+        SetTerseFloatFieldNonCompat(0.0).
+        SetTerseDoubleFieldNonCompat(0.0).
+        SetTerseStringFieldNonCompat("").
+        SetTerseBinaryFieldNonCompat([]byte("")).
+        SetTerseEnumFieldNonCompat(0).
+        SetTerseListFieldNonCompat(make([]int16, 0)).
+        SetTerseSetFieldNonCompat(make([]int16, 0)).
+        SetTerseMapFieldNonCompat(make(map[int16]int16)).
+        SetTerseStructFieldNonCompat(NewMyStruct()).
+        SetBoolFieldNonCompat(false).
+        SetByteFieldNonCompat(0).
+        SetShortFieldNonCompat(0).
+        SetIntFieldNonCompat(0).
+        SetLongFieldNonCompat(0).
+        SetFloatFieldNonCompat(0.0).
+        SetDoubleFieldNonCompat(0.0).
+        SetStringFieldNonCompat("").
+        SetBinaryFieldNonCompat([]byte("")).
+        SetEnumFieldNonCompat(0).
+        SetListFieldNonCompat(make([]int16, 0)).
+        SetSetFieldNonCompat(make([]int16, 0)).
+        SetMapFieldNonCompat(make(map[int16]int16)).
+        SetStructFieldNonCompat(NewMyStruct()).
+        SetTerseUnionFieldNonCompat(NewMyUnion()).
+        SetUnionFieldNonCompat(NewMyUnion())
+}
+
 
 type TerseStructWithCustomDefault struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -4563,35 +4496,7 @@ type TerseStructWithCustomDefault struct {
 var _ thrift.Struct = (*TerseStructWithCustomDefault)(nil)
 
 func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
-    return (&TerseStructWithCustomDefault{}).
-        SetBoolFieldNonCompat(true).
-        SetByteFieldNonCompat(1).
-        SetShortFieldNonCompat(2).
-        SetIntFieldNonCompat(3).
-        SetLongFieldNonCompat(4).
-        SetFloatFieldNonCompat(5).
-        SetDoubleFieldNonCompat(6).
-        SetStringFieldNonCompat("7").
-        SetBinaryFieldNonCompat([]byte("8")).
-        SetEnumFieldNonCompat(
-              MyEnum_ME1,
-          ).
-        SetListFieldNonCompat(
-              []int16{
-    1,
-},
-          ).
-        SetSetFieldNonCompat(
-              []int16{
-    1,
-},
-          ).
-        SetMapFieldNonCompat(
-              map[int16]int16{
-    1: 1,
-},
-          ).
-        SetStructFieldNonCompat(NewMyStructWithCustomDefault())
+    return (&TerseStructWithCustomDefault{}).setDefaults()
 }
 
 func (x *TerseStructWithCustomDefault) GetBoolField() bool {
@@ -4630,7 +4535,6 @@ func (x *TerseStructWithCustomDefault) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
         return []byte("8")
     }
-
     return x.BinaryField
 }
 
@@ -4644,7 +4548,6 @@ func (x *TerseStructWithCustomDefault) GetListField() []int16 {
     1,
 }
     }
-
     return x.ListField
 }
 
@@ -4654,7 +4557,6 @@ func (x *TerseStructWithCustomDefault) GetSetField() []int16 {
     1,
 }
     }
-
     return x.SetField
 }
 
@@ -4664,7 +4566,6 @@ func (x *TerseStructWithCustomDefault) GetMapField() map[int16]int16 {
     1: 1,
 }
     }
-
     return x.MapField
 }
 
@@ -4672,7 +4573,6 @@ func (x *TerseStructWithCustomDefault) GetStructField() *MyStructWithCustomDefau
     if !x.IsSetStructField() {
         return nil
     }
-
     return x.StructField
 }
 
@@ -5385,55 +5285,42 @@ func (x *TerseStructWithCustomDefault) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
-
     if err := x.writeField11(p); err != nil {
         return err
     }
-
     if err := x.writeField12(p); err != nil {
         return err
     }
-
     if err := x.writeField13(p); err != nil {
         return err
     }
-
     if err := x.writeField14(p); err != nil {
         return err
     }
@@ -5539,6 +5426,38 @@ func (x *TerseStructWithCustomDefault) String() string {
 
     return sb.String()
 }
+func (x *TerseStructWithCustomDefault) setDefaults() *TerseStructWithCustomDefault {
+    return x.
+        SetBoolFieldNonCompat(true).
+        SetByteFieldNonCompat(1).
+        SetShortFieldNonCompat(2).
+        SetIntFieldNonCompat(3).
+        SetLongFieldNonCompat(4).
+        SetFloatFieldNonCompat(5).
+        SetDoubleFieldNonCompat(6).
+        SetStringFieldNonCompat("7").
+        SetBinaryFieldNonCompat([]byte("8")).
+        SetEnumFieldNonCompat(
+              MyEnum_ME1,
+          ).
+        SetListFieldNonCompat(
+              []int16{
+    1,
+},
+          ).
+        SetSetFieldNonCompat(
+              []int16{
+    1,
+},
+          ).
+        SetMapFieldNonCompat(
+              map[int16]int16{
+    1: 1,
+},
+          ).
+        SetStructFieldNonCompat(NewMyStructWithCustomDefault())
+}
+
 
 type AdaptedFields struct {
     Field1 MyInteger `thrift:"field1,1" json:"field1" db:"field1"`
@@ -5549,10 +5468,7 @@ type AdaptedFields struct {
 var _ thrift.Struct = (*AdaptedFields)(nil)
 
 func NewAdaptedFields() *AdaptedFields {
-    return (&AdaptedFields{}).
-        SetField1NonCompat(NewMyInteger()).
-        SetField2NonCompat(0).
-        SetField3NonCompat(NewMyInteger())
+    return (&AdaptedFields{}).setDefaults()
 }
 
 func (x *AdaptedFields) GetField1() MyInteger {
@@ -5699,11 +5615,9 @@ func (x *AdaptedFields) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -5776,6 +5690,13 @@ func (x *AdaptedFields) String() string {
 
     return sb.String()
 }
+func (x *AdaptedFields) setDefaults() *AdaptedFields {
+    return x.
+        SetField1NonCompat(NewMyInteger()).
+        SetField2NonCompat(0).
+        SetField3NonCompat(NewMyInteger())
+}
+
 
 type WrappedFields struct {
     Field1 int32 `thrift:"field1,1" json:"field1" db:"field1"`
@@ -5784,8 +5705,7 @@ type WrappedFields struct {
 var _ thrift.Struct = (*WrappedFields)(nil)
 
 func NewWrappedFields() *WrappedFields {
-    return (&WrappedFields{}).
-        SetField1NonCompat(7)
+    return (&WrappedFields{}).setDefaults()
 }
 
 func (x *WrappedFields) GetField1() int32 {
@@ -5905,6 +5825,11 @@ func (x *WrappedFields) String() string {
 
     return sb.String()
 }
+func (x *WrappedFields) setDefaults() *WrappedFields {
+    return x.
+        SetField1NonCompat(7)
+}
+
 
 type TerseException struct {
     Msg string `thrift:"msg,1" json:"msg" db:"msg"`
@@ -5913,8 +5838,7 @@ type TerseException struct {
 var _ thrift.Struct = (*TerseException)(nil)
 
 func NewTerseException() *TerseException {
-    return (&TerseException{}).
-        SetMsgNonCompat("")
+    return (&TerseException{}).setDefaults()
 }
 
 func (x *TerseException) GetMsg() string {
@@ -6034,6 +5958,11 @@ func (x *TerseException) String() string {
 
     return sb.String()
 }
+func (x *TerseException) setDefaults() *TerseException {
+    return x.
+        SetMsgNonCompat("")
+}
+
 func (x *TerseException) Error() string {
     return x.String()
 }

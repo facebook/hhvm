@@ -118,9 +118,7 @@ type Type struct {
 var _ thrift.Struct = (*Type)(nil)
 
 func NewType() *Type {
-    return (&Type{}).
-        SetNameNonCompat("").
-        SetTemplateNonCompat("")
+    return (&Type{}).setDefaults()
 }
 
 func (x *Type) GetName() string {
@@ -221,7 +219,6 @@ func (x *Type) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -291,6 +288,12 @@ func (x *Type) String() string {
 
     return sb.String()
 }
+func (x *Type) setDefaults() *Type {
+    return x.
+        SetNameNonCompat("").
+        SetTemplateNonCompat("")
+}
+
 
 type Ref struct {
     Type RefType `thrift:"type,1" json:"type" db:"type"`
@@ -299,8 +302,7 @@ type Ref struct {
 var _ thrift.Struct = (*Ref)(nil)
 
 func NewRef() *Ref {
-    return (&Ref{}).
-        SetTypeNonCompat(0)
+    return (&Ref{}).setDefaults()
 }
 
 func (x *Ref) GetType() RefType {
@@ -421,6 +423,11 @@ func (x *Ref) String() string {
 
     return sb.String()
 }
+func (x *Ref) setDefaults() *Ref {
+    return x.
+        SetTypeNonCompat(0)
+}
+
 
 type Name struct {
     Value string `thrift:"value,1" json:"value" db:"value"`
@@ -429,8 +436,7 @@ type Name struct {
 var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
-    return (&Name{}).
-        SetValueNonCompat("")
+    return (&Name{}).setDefaults()
 }
 
 func (x *Name) GetValue() string {
@@ -550,6 +556,11 @@ func (x *Name) String() string {
 
     return sb.String()
 }
+func (x *Name) setDefaults() *Name {
+    return x.
+        SetValueNonCompat("")
+}
+
 
 type Lazy struct {
     Ref bool `thrift:"ref,1" json:"ref" db:"ref"`
@@ -558,8 +569,7 @@ type Lazy struct {
 var _ thrift.Struct = (*Lazy)(nil)
 
 func NewLazy() *Lazy {
-    return (&Lazy{}).
-        SetRefNonCompat(false)
+    return (&Lazy{}).setDefaults()
 }
 
 func (x *Lazy) GetRef() bool {
@@ -679,6 +689,11 @@ func (x *Lazy) String() string {
 
     return sb.String()
 }
+func (x *Lazy) setDefaults() *Lazy {
+    return x.
+        SetRefNonCompat(false)
+}
+
 
 type DisableLazyChecksum struct {
 }
@@ -686,7 +701,7 @@ type DisableLazyChecksum struct {
 var _ thrift.Struct = (*DisableLazyChecksum)(nil)
 
 func NewDisableLazyChecksum() *DisableLazyChecksum {
-    return (&DisableLazyChecksum{})
+    return (&DisableLazyChecksum{}).setDefaults()
 }
 
 
@@ -695,6 +710,7 @@ func (x *DisableLazyChecksum) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("DisableLazyChecksum"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -755,6 +771,10 @@ func (x *DisableLazyChecksum) String() string {
 
     return sb.String()
 }
+func (x *DisableLazyChecksum) setDefaults() *DisableLazyChecksum {
+    return x
+}
+
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -767,12 +787,7 @@ type Adapter struct {
 var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
-    return (&Adapter{}).
-        SetNameNonCompat("").
-        SetAdaptedTypeNonCompat("").
-        SetUnderlyingNameNonCompat("").
-        SetExtraNamespaceNonCompat("").
-        SetMoveOnlyNonCompat(false)
+    return (&Adapter{}).setDefaults()
 }
 
 func (x *Adapter) GetName() string {
@@ -1005,19 +1020,15 @@ func (x *Adapter) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
@@ -1096,6 +1107,15 @@ func (x *Adapter) String() string {
 
     return sb.String()
 }
+func (x *Adapter) setDefaults() *Adapter {
+    return x.
+        SetNameNonCompat("").
+        SetAdaptedTypeNonCompat("").
+        SetUnderlyingNameNonCompat("").
+        SetExtraNamespaceNonCompat("").
+        SetMoveOnlyNonCompat(false)
+}
+
 
 type PackIsset struct {
     Atomic bool `thrift:"atomic,1" json:"atomic" db:"atomic"`
@@ -1104,8 +1124,7 @@ type PackIsset struct {
 var _ thrift.Struct = (*PackIsset)(nil)
 
 func NewPackIsset() *PackIsset {
-    return (&PackIsset{}).
-        SetAtomicNonCompat(true)
+    return (&PackIsset{}).setDefaults()
 }
 
 func (x *PackIsset) GetAtomic() bool {
@@ -1225,6 +1244,11 @@ func (x *PackIsset) String() string {
 
     return sb.String()
 }
+func (x *PackIsset) setDefaults() *PackIsset {
+    return x.
+        SetAtomicNonCompat(true)
+}
+
 
 type MinimizePadding struct {
 }
@@ -1232,7 +1256,7 @@ type MinimizePadding struct {
 var _ thrift.Struct = (*MinimizePadding)(nil)
 
 func NewMinimizePadding() *MinimizePadding {
-    return (&MinimizePadding{})
+    return (&MinimizePadding{}).setDefaults()
 }
 
 
@@ -1241,6 +1265,7 @@ func (x *MinimizePadding) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MinimizePadding"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1301,6 +1326,10 @@ func (x *MinimizePadding) String() string {
 
     return sb.String()
 }
+func (x *MinimizePadding) setDefaults() *MinimizePadding {
+    return x
+}
+
 
 type ScopedEnumAsUnionType struct {
 }
@@ -1308,7 +1337,7 @@ type ScopedEnumAsUnionType struct {
 var _ thrift.Struct = (*ScopedEnumAsUnionType)(nil)
 
 func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
-    return (&ScopedEnumAsUnionType{})
+    return (&ScopedEnumAsUnionType{}).setDefaults()
 }
 
 
@@ -1317,6 +1346,7 @@ func (x *ScopedEnumAsUnionType) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ScopedEnumAsUnionType"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1377,6 +1407,10 @@ func (x *ScopedEnumAsUnionType) String() string {
 
     return sb.String()
 }
+func (x *ScopedEnumAsUnionType) setDefaults() *ScopedEnumAsUnionType {
+    return x
+}
+
 
 type FieldInterceptor struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -1386,9 +1420,7 @@ type FieldInterceptor struct {
 var _ thrift.Struct = (*FieldInterceptor)(nil)
 
 func NewFieldInterceptor() *FieldInterceptor {
-    return (&FieldInterceptor{}).
-        SetNameNonCompat("").
-        SetNoinlineNonCompat(false)
+    return (&FieldInterceptor{}).setDefaults()
 }
 
 func (x *FieldInterceptor) GetName() string {
@@ -1489,7 +1521,6 @@ func (x *FieldInterceptor) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1559,6 +1590,12 @@ func (x *FieldInterceptor) String() string {
 
     return sb.String()
 }
+func (x *FieldInterceptor) setDefaults() *FieldInterceptor {
+    return x.
+        SetNameNonCompat("").
+        SetNoinlineNonCompat(false)
+}
+
 
 type UseOpEncode struct {
 }
@@ -1566,7 +1603,7 @@ type UseOpEncode struct {
 var _ thrift.Struct = (*UseOpEncode)(nil)
 
 func NewUseOpEncode() *UseOpEncode {
-    return (&UseOpEncode{})
+    return (&UseOpEncode{}).setDefaults()
 }
 
 
@@ -1575,6 +1612,7 @@ func (x *UseOpEncode) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("UseOpEncode"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1635,6 +1673,10 @@ func (x *UseOpEncode) String() string {
 
     return sb.String()
 }
+func (x *UseOpEncode) setDefaults() *UseOpEncode {
+    return x
+}
+
 
 type EnumType struct {
     Type EnumUnderlyingType `thrift:"type,1" json:"type" db:"type"`
@@ -1643,8 +1685,7 @@ type EnumType struct {
 var _ thrift.Struct = (*EnumType)(nil)
 
 func NewEnumType() *EnumType {
-    return (&EnumType{}).
-        SetTypeNonCompat(0)
+    return (&EnumType{}).setDefaults()
 }
 
 func (x *EnumType) GetType() EnumUnderlyingType {
@@ -1765,6 +1806,11 @@ func (x *EnumType) String() string {
 
     return sb.String()
 }
+func (x *EnumType) setDefaults() *EnumType {
+    return x.
+        SetTypeNonCompat(0)
+}
+
 
 type Frozen2Exclude struct {
 }
@@ -1772,7 +1818,7 @@ type Frozen2Exclude struct {
 var _ thrift.Struct = (*Frozen2Exclude)(nil)
 
 func NewFrozen2Exclude() *Frozen2Exclude {
-    return (&Frozen2Exclude{})
+    return (&Frozen2Exclude{}).setDefaults()
 }
 
 
@@ -1781,6 +1827,7 @@ func (x *Frozen2Exclude) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Frozen2Exclude"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1841,6 +1888,10 @@ func (x *Frozen2Exclude) String() string {
 
     return sb.String()
 }
+func (x *Frozen2Exclude) setDefaults() *Frozen2Exclude {
+    return x
+}
+
 
 type Frozen2RequiresCompleteContainerParams struct {
 }
@@ -1848,7 +1899,7 @@ type Frozen2RequiresCompleteContainerParams struct {
 var _ thrift.Struct = (*Frozen2RequiresCompleteContainerParams)(nil)
 
 func NewFrozen2RequiresCompleteContainerParams() *Frozen2RequiresCompleteContainerParams {
-    return (&Frozen2RequiresCompleteContainerParams{})
+    return (&Frozen2RequiresCompleteContainerParams{}).setDefaults()
 }
 
 
@@ -1857,6 +1908,7 @@ func (x *Frozen2RequiresCompleteContainerParams) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Frozen2RequiresCompleteContainerParams"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1917,6 +1969,10 @@ func (x *Frozen2RequiresCompleteContainerParams) String() string {
 
     return sb.String()
 }
+func (x *Frozen2RequiresCompleteContainerParams) setDefaults() *Frozen2RequiresCompleteContainerParams {
+    return x
+}
+
 
 type ProcessInEbThreadUnsafe struct {
 }
@@ -1924,7 +1980,7 @@ type ProcessInEbThreadUnsafe struct {
 var _ thrift.Struct = (*ProcessInEbThreadUnsafe)(nil)
 
 func NewProcessInEbThreadUnsafe() *ProcessInEbThreadUnsafe {
-    return (&ProcessInEbThreadUnsafe{})
+    return (&ProcessInEbThreadUnsafe{}).setDefaults()
 }
 
 
@@ -1933,6 +1989,7 @@ func (x *ProcessInEbThreadUnsafe) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ProcessInEbThreadUnsafe"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1993,6 +2050,10 @@ func (x *ProcessInEbThreadUnsafe) String() string {
 
     return sb.String()
 }
+func (x *ProcessInEbThreadUnsafe) setDefaults() *ProcessInEbThreadUnsafe {
+    return x
+}
+
 
 type RuntimeAnnotation struct {
 }
@@ -2000,7 +2061,7 @@ type RuntimeAnnotation struct {
 var _ thrift.Struct = (*RuntimeAnnotation)(nil)
 
 func NewRuntimeAnnotation() *RuntimeAnnotation {
-    return (&RuntimeAnnotation{})
+    return (&RuntimeAnnotation{}).setDefaults()
 }
 
 
@@ -2009,6 +2070,7 @@ func (x *RuntimeAnnotation) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("RuntimeAnnotation"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2069,6 +2131,10 @@ func (x *RuntimeAnnotation) String() string {
 
     return sb.String()
 }
+func (x *RuntimeAnnotation) setDefaults() *RuntimeAnnotation {
+    return x
+}
+
 
 type UseCursorSerialization struct {
 }
@@ -2076,7 +2142,7 @@ type UseCursorSerialization struct {
 var _ thrift.Struct = (*UseCursorSerialization)(nil)
 
 func NewUseCursorSerialization() *UseCursorSerialization {
-    return (&UseCursorSerialization{})
+    return (&UseCursorSerialization{}).setDefaults()
 }
 
 
@@ -2085,6 +2151,7 @@ func (x *UseCursorSerialization) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("UseCursorSerialization"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2145,6 +2212,10 @@ func (x *UseCursorSerialization) String() string {
 
     return sb.String()
 }
+func (x *UseCursorSerialization) setDefaults() *UseCursorSerialization {
+    return x
+}
+
 
 type GenerateDeprecatedHeaderClientMethods struct {
 }
@@ -2152,7 +2223,7 @@ type GenerateDeprecatedHeaderClientMethods struct {
 var _ thrift.Struct = (*GenerateDeprecatedHeaderClientMethods)(nil)
 
 func NewGenerateDeprecatedHeaderClientMethods() *GenerateDeprecatedHeaderClientMethods {
-    return (&GenerateDeprecatedHeaderClientMethods{})
+    return (&GenerateDeprecatedHeaderClientMethods{}).setDefaults()
 }
 
 
@@ -2161,6 +2232,7 @@ func (x *GenerateDeprecatedHeaderClientMethods) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("GenerateDeprecatedHeaderClientMethods"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2221,6 +2293,10 @@ func (x *GenerateDeprecatedHeaderClientMethods) String() string {
 
     return sb.String()
 }
+func (x *GenerateDeprecatedHeaderClientMethods) setDefaults() *GenerateDeprecatedHeaderClientMethods {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

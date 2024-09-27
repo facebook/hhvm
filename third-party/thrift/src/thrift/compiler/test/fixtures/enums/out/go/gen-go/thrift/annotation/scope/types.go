@@ -24,7 +24,7 @@ type Transitive struct {
 var _ thrift.Struct = (*Transitive)(nil)
 
 func NewTransitive() *Transitive {
-    return (&Transitive{})
+    return (&Transitive{}).setDefaults()
 }
 
 
@@ -33,6 +33,7 @@ func (x *Transitive) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Transitive"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -93,6 +94,10 @@ func (x *Transitive) String() string {
 
     return sb.String()
 }
+func (x *Transitive) setDefaults() *Transitive {
+    return x
+}
+
 
 type Program struct {
 }
@@ -100,7 +105,7 @@ type Program struct {
 var _ thrift.Struct = (*Program)(nil)
 
 func NewProgram() *Program {
-    return (&Program{})
+    return (&Program{}).setDefaults()
 }
 
 
@@ -109,6 +114,7 @@ func (x *Program) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Program"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -169,6 +175,10 @@ func (x *Program) String() string {
 
     return sb.String()
 }
+func (x *Program) setDefaults() *Program {
+    return x
+}
+
 
 type Struct struct {
 }
@@ -176,7 +186,7 @@ type Struct struct {
 var _ thrift.Struct = (*Struct)(nil)
 
 func NewStruct() *Struct {
-    return (&Struct{})
+    return (&Struct{}).setDefaults()
 }
 
 
@@ -185,6 +195,7 @@ func (x *Struct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Struct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -245,6 +256,10 @@ func (x *Struct) String() string {
 
     return sb.String()
 }
+func (x *Struct) setDefaults() *Struct {
+    return x
+}
+
 
 type Union struct {
 }
@@ -252,7 +267,7 @@ type Union struct {
 var _ thrift.Struct = (*Union)(nil)
 
 func NewUnion() *Union {
-    return (&Union{})
+    return (&Union{}).setDefaults()
 }
 
 
@@ -261,6 +276,7 @@ func (x *Union) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Union"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -321,6 +337,10 @@ func (x *Union) String() string {
 
     return sb.String()
 }
+func (x *Union) setDefaults() *Union {
+    return x
+}
+
 
 type Exception struct {
 }
@@ -328,7 +348,7 @@ type Exception struct {
 var _ thrift.Struct = (*Exception)(nil)
 
 func NewException() *Exception {
-    return (&Exception{})
+    return (&Exception{}).setDefaults()
 }
 
 
@@ -337,6 +357,7 @@ func (x *Exception) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Exception"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -397,6 +418,10 @@ func (x *Exception) String() string {
 
     return sb.String()
 }
+func (x *Exception) setDefaults() *Exception {
+    return x
+}
+
 
 type Field struct {
 }
@@ -404,7 +429,7 @@ type Field struct {
 var _ thrift.Struct = (*Field)(nil)
 
 func NewField() *Field {
-    return (&Field{})
+    return (&Field{}).setDefaults()
 }
 
 
@@ -413,6 +438,7 @@ func (x *Field) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Field"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -473,6 +499,10 @@ func (x *Field) String() string {
 
     return sb.String()
 }
+func (x *Field) setDefaults() *Field {
+    return x
+}
+
 
 type Typedef struct {
 }
@@ -480,7 +510,7 @@ type Typedef struct {
 var _ thrift.Struct = (*Typedef)(nil)
 
 func NewTypedef() *Typedef {
-    return (&Typedef{})
+    return (&Typedef{}).setDefaults()
 }
 
 
@@ -489,6 +519,7 @@ func (x *Typedef) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Typedef"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -549,6 +580,10 @@ func (x *Typedef) String() string {
 
     return sb.String()
 }
+func (x *Typedef) setDefaults() *Typedef {
+    return x
+}
+
 
 type Service struct {
 }
@@ -556,7 +591,7 @@ type Service struct {
 var _ thrift.Struct = (*Service)(nil)
 
 func NewService() *Service {
-    return (&Service{})
+    return (&Service{}).setDefaults()
 }
 
 
@@ -565,6 +600,7 @@ func (x *Service) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Service"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -625,6 +661,10 @@ func (x *Service) String() string {
 
     return sb.String()
 }
+func (x *Service) setDefaults() *Service {
+    return x
+}
+
 
 type Interaction struct {
 }
@@ -632,7 +672,7 @@ type Interaction struct {
 var _ thrift.Struct = (*Interaction)(nil)
 
 func NewInteraction() *Interaction {
-    return (&Interaction{})
+    return (&Interaction{}).setDefaults()
 }
 
 
@@ -641,6 +681,7 @@ func (x *Interaction) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Interaction"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -701,6 +742,10 @@ func (x *Interaction) String() string {
 
     return sb.String()
 }
+func (x *Interaction) setDefaults() *Interaction {
+    return x
+}
+
 
 type Function struct {
 }
@@ -708,7 +753,7 @@ type Function struct {
 var _ thrift.Struct = (*Function)(nil)
 
 func NewFunction() *Function {
-    return (&Function{})
+    return (&Function{}).setDefaults()
 }
 
 
@@ -717,6 +762,7 @@ func (x *Function) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Function"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -777,6 +823,10 @@ func (x *Function) String() string {
 
     return sb.String()
 }
+func (x *Function) setDefaults() *Function {
+    return x
+}
+
 
 type EnumValue struct {
 }
@@ -784,7 +834,7 @@ type EnumValue struct {
 var _ thrift.Struct = (*EnumValue)(nil)
 
 func NewEnumValue() *EnumValue {
-    return (&EnumValue{})
+    return (&EnumValue{}).setDefaults()
 }
 
 
@@ -793,6 +843,7 @@ func (x *EnumValue) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("EnumValue"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -853,6 +904,10 @@ func (x *EnumValue) String() string {
 
     return sb.String()
 }
+func (x *EnumValue) setDefaults() *EnumValue {
+    return x
+}
+
 
 type Const struct {
 }
@@ -860,7 +915,7 @@ type Const struct {
 var _ thrift.Struct = (*Const)(nil)
 
 func NewConst() *Const {
-    return (&Const{})
+    return (&Const{}).setDefaults()
 }
 
 
@@ -869,6 +924,7 @@ func (x *Const) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Const"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -929,6 +985,10 @@ func (x *Const) String() string {
 
     return sb.String()
 }
+func (x *Const) setDefaults() *Const {
+    return x
+}
+
 
 type Enum struct {
 }
@@ -936,7 +996,7 @@ type Enum struct {
 var _ thrift.Struct = (*Enum)(nil)
 
 func NewEnum() *Enum {
-    return (&Enum{})
+    return (&Enum{}).setDefaults()
 }
 
 
@@ -945,6 +1005,7 @@ func (x *Enum) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Enum"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1005,6 +1066,10 @@ func (x *Enum) String() string {
 
     return sb.String()
 }
+func (x *Enum) setDefaults() *Enum {
+    return x
+}
+
 
 type Structured struct {
 }
@@ -1012,7 +1077,7 @@ type Structured struct {
 var _ thrift.Struct = (*Structured)(nil)
 
 func NewStructured() *Structured {
-    return (&Structured{})
+    return (&Structured{}).setDefaults()
 }
 
 
@@ -1021,6 +1086,7 @@ func (x *Structured) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Structured"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1081,6 +1147,10 @@ func (x *Structured) String() string {
 
     return sb.String()
 }
+func (x *Structured) setDefaults() *Structured {
+    return x
+}
+
 
 type Interface struct {
 }
@@ -1088,7 +1158,7 @@ type Interface struct {
 var _ thrift.Struct = (*Interface)(nil)
 
 func NewInterface() *Interface {
-    return (&Interface{})
+    return (&Interface{}).setDefaults()
 }
 
 
@@ -1097,6 +1167,7 @@ func (x *Interface) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Interface"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1157,6 +1228,10 @@ func (x *Interface) String() string {
 
     return sb.String()
 }
+func (x *Interface) setDefaults() *Interface {
+    return x
+}
+
 
 type RootDefinition struct {
 }
@@ -1164,7 +1239,7 @@ type RootDefinition struct {
 var _ thrift.Struct = (*RootDefinition)(nil)
 
 func NewRootDefinition() *RootDefinition {
-    return (&RootDefinition{})
+    return (&RootDefinition{}).setDefaults()
 }
 
 
@@ -1173,6 +1248,7 @@ func (x *RootDefinition) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("RootDefinition"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1233,6 +1309,10 @@ func (x *RootDefinition) String() string {
 
     return sb.String()
 }
+func (x *RootDefinition) setDefaults() *RootDefinition {
+    return x
+}
+
 
 type Definition struct {
 }
@@ -1240,7 +1320,7 @@ type Definition struct {
 var _ thrift.Struct = (*Definition)(nil)
 
 func NewDefinition() *Definition {
-    return (&Definition{})
+    return (&Definition{}).setDefaults()
 }
 
 
@@ -1249,6 +1329,7 @@ func (x *Definition) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Definition"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1309,6 +1390,10 @@ func (x *Definition) String() string {
 
     return sb.String()
 }
+func (x *Definition) setDefaults() *Definition {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

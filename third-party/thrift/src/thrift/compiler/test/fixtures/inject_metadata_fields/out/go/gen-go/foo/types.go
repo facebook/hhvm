@@ -27,8 +27,7 @@ type Fields struct {
 var _ thrift.Struct = (*Fields)(nil)
 
 func NewFields() *Fields {
-    return (&Fields{}).
-        SetInjectedFieldNonCompat("")
+    return (&Fields{}).setDefaults()
 }
 
 func (x *Fields) GetInjectedField() string {
@@ -39,7 +38,6 @@ func (x *Fields) GetInjectedStructuredAnnotationField() string {
     if !x.IsSetInjectedStructuredAnnotationField() {
         return ""
     }
-
     return *x.InjectedStructuredAnnotationField
 }
 
@@ -47,7 +45,6 @@ func (x *Fields) GetInjectedUnstructuredAnnotationField() string {
     if !x.IsSetInjectedUnstructuredAnnotationField() {
         return ""
     }
-
     return *x.InjectedUnstructuredAnnotationField
 }
 
@@ -205,11 +202,9 @@ func (x *Fields) Write(p thrift.Encoder) error {
     if err := x.writeField100(p); err != nil {
         return err
     }
-
     if err := x.writeField101(p); err != nil {
         return err
     }
-
     if err := x.writeField102(p); err != nil {
         return err
     }
@@ -282,6 +277,11 @@ func (x *Fields) String() string {
 
     return sb.String()
 }
+func (x *Fields) setDefaults() *Fields {
+    return x.
+        SetInjectedFieldNonCompat("")
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

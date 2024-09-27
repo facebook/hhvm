@@ -25,8 +25,7 @@ type Name struct {
 var _ thrift.Struct = (*Name)(nil)
 
 func NewName() *Name {
-    return (&Name{}).
-        SetNameNonCompat("")
+    return (&Name{}).setDefaults()
 }
 
 func (x *Name) GetName() string {
@@ -146,6 +145,11 @@ func (x *Name) String() string {
 
     return sb.String()
 }
+func (x *Name) setDefaults() *Name {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Copy struct {
 }
@@ -153,7 +157,7 @@ type Copy struct {
 var _ thrift.Struct = (*Copy)(nil)
 
 func NewCopy() *Copy {
-    return (&Copy{})
+    return (&Copy{}).setDefaults()
 }
 
 
@@ -162,6 +166,7 @@ func (x *Copy) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Copy"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -222,6 +227,10 @@ func (x *Copy) String() string {
 
     return sb.String()
 }
+func (x *Copy) setDefaults() *Copy {
+    return x
+}
+
 
 type RequestContext struct {
 }
@@ -229,7 +238,7 @@ type RequestContext struct {
 var _ thrift.Struct = (*RequestContext)(nil)
 
 func NewRequestContext() *RequestContext {
-    return (&RequestContext{})
+    return (&RequestContext{}).setDefaults()
 }
 
 
@@ -238,6 +247,7 @@ func (x *RequestContext) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("RequestContext"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -298,6 +308,10 @@ func (x *RequestContext) String() string {
 
     return sb.String()
 }
+func (x *RequestContext) setDefaults() *RequestContext {
+    return x
+}
+
 
 type Arc struct {
 }
@@ -305,7 +319,7 @@ type Arc struct {
 var _ thrift.Struct = (*Arc)(nil)
 
 func NewArc() *Arc {
-    return (&Arc{})
+    return (&Arc{}).setDefaults()
 }
 
 
@@ -314,6 +328,7 @@ func (x *Arc) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Arc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -374,6 +389,10 @@ func (x *Arc) String() string {
 
     return sb.String()
 }
+func (x *Arc) setDefaults() *Arc {
+    return x
+}
+
 
 type Box struct {
 }
@@ -381,7 +400,7 @@ type Box struct {
 var _ thrift.Struct = (*Box)(nil)
 
 func NewBox() *Box {
-    return (&Box{})
+    return (&Box{}).setDefaults()
 }
 
 
@@ -390,6 +409,7 @@ func (x *Box) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Box"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -450,6 +470,10 @@ func (x *Box) String() string {
 
     return sb.String()
 }
+func (x *Box) setDefaults() *Box {
+    return x
+}
+
 
 type Exhaustive struct {
 }
@@ -457,7 +481,7 @@ type Exhaustive struct {
 var _ thrift.Struct = (*Exhaustive)(nil)
 
 func NewExhaustive() *Exhaustive {
-    return (&Exhaustive{})
+    return (&Exhaustive{}).setDefaults()
 }
 
 
@@ -466,6 +490,7 @@ func (x *Exhaustive) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Exhaustive"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -526,6 +551,10 @@ func (x *Exhaustive) String() string {
 
     return sb.String()
 }
+func (x *Exhaustive) setDefaults() *Exhaustive {
+    return x
+}
+
 
 type Ord struct {
 }
@@ -533,7 +562,7 @@ type Ord struct {
 var _ thrift.Struct = (*Ord)(nil)
 
 func NewOrd() *Ord {
-    return (&Ord{})
+    return (&Ord{}).setDefaults()
 }
 
 
@@ -542,6 +571,7 @@ func (x *Ord) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Ord"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -602,6 +632,10 @@ func (x *Ord) String() string {
 
     return sb.String()
 }
+func (x *Ord) setDefaults() *Ord {
+    return x
+}
+
 
 type NewType_ struct {
 }
@@ -609,7 +643,7 @@ type NewType_ struct {
 var _ thrift.Struct = (*NewType_)(nil)
 
 func NewNewType_() *NewType_ {
-    return (&NewType_{})
+    return (&NewType_{}).setDefaults()
 }
 
 
@@ -618,6 +652,7 @@ func (x *NewType_) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("NewType"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -678,6 +713,10 @@ func (x *NewType_) String() string {
 
     return sb.String()
 }
+func (x *NewType_) setDefaults() *NewType_ {
+    return x
+}
+
 
 type Type struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -686,8 +725,7 @@ type Type struct {
 var _ thrift.Struct = (*Type)(nil)
 
 func NewType() *Type {
-    return (&Type{}).
-        SetNameNonCompat("")
+    return (&Type{}).setDefaults()
 }
 
 func (x *Type) GetName() string {
@@ -807,6 +845,11 @@ func (x *Type) String() string {
 
     return sb.String()
 }
+func (x *Type) setDefaults() *Type {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Serde struct {
     Enabled bool `thrift:"enabled,1" json:"enabled" db:"enabled"`
@@ -815,8 +858,7 @@ type Serde struct {
 var _ thrift.Struct = (*Serde)(nil)
 
 func NewSerde() *Serde {
-    return (&Serde{}).
-        SetEnabledNonCompat(false)
+    return (&Serde{}).setDefaults()
 }
 
 func (x *Serde) GetEnabled() bool {
@@ -936,6 +978,11 @@ func (x *Serde) String() string {
 
     return sb.String()
 }
+func (x *Serde) setDefaults() *Serde {
+    return x.
+        SetEnabledNonCompat(false)
+}
+
 
 type Mod struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -944,8 +991,7 @@ type Mod struct {
 var _ thrift.Struct = (*Mod)(nil)
 
 func NewMod() *Mod {
-    return (&Mod{}).
-        SetNameNonCompat("")
+    return (&Mod{}).setDefaults()
 }
 
 func (x *Mod) GetName() string {
@@ -1065,6 +1111,11 @@ func (x *Mod) String() string {
 
     return sb.String()
 }
+func (x *Mod) setDefaults() *Mod {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -1073,8 +1124,7 @@ type Adapter struct {
 var _ thrift.Struct = (*Adapter)(nil)
 
 func NewAdapter() *Adapter {
-    return (&Adapter{}).
-        SetNameNonCompat("")
+    return (&Adapter{}).setDefaults()
 }
 
 func (x *Adapter) GetName() string {
@@ -1194,6 +1244,11 @@ func (x *Adapter) String() string {
 
     return sb.String()
 }
+func (x *Adapter) setDefaults() *Adapter {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Derive struct {
     Derives []string `thrift:"derives,1" json:"derives" db:"derives"`
@@ -1202,15 +1257,13 @@ type Derive struct {
 var _ thrift.Struct = (*Derive)(nil)
 
 func NewDerive() *Derive {
-    return (&Derive{}).
-        SetDerivesNonCompat(make([]string, 0))
+    return (&Derive{}).setDefaults()
 }
 
 func (x *Derive) GetDerives() []string {
     if !x.IsSetDerives() {
         return make([]string, 0)
     }
-
     return x.Derives
 }
 
@@ -1360,6 +1413,11 @@ func (x *Derive) String() string {
 
     return sb.String()
 }
+func (x *Derive) setDefaults() *Derive {
+    return x.
+        SetDerivesNonCompat(make([]string, 0))
+}
+
 
 type ServiceExn struct {
     AnyhowToApplicationExn bool `thrift:"anyhow_to_application_exn,1" json:"anyhow_to_application_exn" db:"anyhow_to_application_exn"`
@@ -1368,8 +1426,7 @@ type ServiceExn struct {
 var _ thrift.Struct = (*ServiceExn)(nil)
 
 func NewServiceExn() *ServiceExn {
-    return (&ServiceExn{}).
-        SetAnyhowToApplicationExnNonCompat(false)
+    return (&ServiceExn{}).setDefaults()
 }
 
 func (x *ServiceExn) GetAnyhowToApplicationExn() bool {
@@ -1489,6 +1546,11 @@ func (x *ServiceExn) String() string {
 
     return sb.String()
 }
+func (x *ServiceExn) setDefaults() *ServiceExn {
+    return x.
+        SetAnyhowToApplicationExnNonCompat(false)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

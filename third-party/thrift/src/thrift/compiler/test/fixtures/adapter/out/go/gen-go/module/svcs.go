@@ -112,10 +112,7 @@ var _ thrift.Struct = (*reqServiceFunc)(nil)
 type ServiceFuncArgsDeprecated = reqServiceFunc
 
 func newReqServiceFunc() *reqServiceFunc {
-    return (&reqServiceFunc{}).
-        SetArg1NonCompat(NewStringWithAdapter_7208()).
-        SetArg2NonCompat("").
-        SetArg3NonCompat(NewFoo())
+    return (&reqServiceFunc{}).setDefaults()
 }
 
 func (x *reqServiceFunc) GetArg1() StringWithAdapter_7208 {
@@ -130,7 +127,6 @@ func (x *reqServiceFunc) GetArg3() *Foo {
     if !x.IsSetArg3() {
         return nil
     }
-
     return x.Arg3
 }
 
@@ -282,11 +278,9 @@ func (x *reqServiceFunc) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -359,6 +353,13 @@ func (x *reqServiceFunc) String() string {
 
     return sb.String()
 }
+func (x *reqServiceFunc) setDefaults() *reqServiceFunc {
+    return x.
+        SetArg1NonCompat(NewStringWithAdapter_7208()).
+        SetArg2NonCompat("").
+        SetArg3NonCompat(NewFoo())
+}
+
 type respServiceFunc struct {
     Success *MyI32_4873 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -370,14 +371,13 @@ var _ thrift.WritableResult = (*respServiceFunc)(nil)
 type ServiceFuncResultDeprecated = respServiceFunc
 
 func newRespServiceFunc() *respServiceFunc {
-    return (&respServiceFunc{})
+    return (&respServiceFunc{}).setDefaults()
 }
 
 func (x *respServiceFunc) GetSuccess() MyI32_4873 {
     if !x.IsSetSuccess() {
         return NewMyI32_4873()
     }
-
     return *x.Success
 }
 
@@ -511,6 +511,10 @@ func (x *respServiceFunc) String() string {
 
     return sb.String()
 }
+func (x *respServiceFunc) setDefaults() *respServiceFunc {
+    return x
+}
+
 
 
 type ServiceProcessor struct {
@@ -717,7 +721,7 @@ var _ thrift.Struct = (*reqAdapterServiceCount)(nil)
 type AdapterServiceCountArgsDeprecated = reqAdapterServiceCount
 
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
-    return (&reqAdapterServiceCount{})
+    return (&reqAdapterServiceCount{}).setDefaults()
 }
 
 
@@ -726,6 +730,7 @@ func (x *reqAdapterServiceCount) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -786,6 +791,10 @@ func (x *reqAdapterServiceCount) String() string {
 
     return sb.String()
 }
+func (x *reqAdapterServiceCount) setDefaults() *reqAdapterServiceCount {
+    return x
+}
+
 type respAdapterServiceCount struct {
     Success *CountingStruct `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -797,14 +806,13 @@ var _ thrift.WritableResult = (*respAdapterServiceCount)(nil)
 type AdapterServiceCountResultDeprecated = respAdapterServiceCount
 
 func newRespAdapterServiceCount() *respAdapterServiceCount {
-    return (&respAdapterServiceCount{})
+    return (&respAdapterServiceCount{}).setDefaults()
 }
 
 func (x *respAdapterServiceCount) GetSuccess() *CountingStruct {
     if !x.IsSetSuccess() {
         return nil
     }
-
     return x.Success
 }
 
@@ -942,6 +950,10 @@ func (x *respAdapterServiceCount) String() string {
 
     return sb.String()
 }
+func (x *respAdapterServiceCount) setDefaults() *respAdapterServiceCount {
+    return x
+}
+
 type reqAdapterServiceAdaptedTypes struct {
     Arg *HeapAllocated `thrift:"arg,1" json:"arg" db:"arg"`
 }
@@ -952,15 +964,13 @@ var _ thrift.Struct = (*reqAdapterServiceAdaptedTypes)(nil)
 type AdapterServiceAdaptedTypesArgsDeprecated = reqAdapterServiceAdaptedTypes
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
-    return (&reqAdapterServiceAdaptedTypes{}).
-        SetArgNonCompat(NewHeapAllocated())
+    return (&reqAdapterServiceAdaptedTypes{}).setDefaults()
 }
 
 func (x *reqAdapterServiceAdaptedTypes) GetArg() *HeapAllocated {
     if !x.IsSetArg() {
         return nil
     }
-
     return x.Arg
 }
 
@@ -1094,6 +1104,11 @@ func (x *reqAdapterServiceAdaptedTypes) String() string {
 
     return sb.String()
 }
+func (x *reqAdapterServiceAdaptedTypes) setDefaults() *reqAdapterServiceAdaptedTypes {
+    return x.
+        SetArgNonCompat(NewHeapAllocated())
+}
+
 type respAdapterServiceAdaptedTypes struct {
     Success *HeapAllocated `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -1105,14 +1120,13 @@ var _ thrift.WritableResult = (*respAdapterServiceAdaptedTypes)(nil)
 type AdapterServiceAdaptedTypesResultDeprecated = respAdapterServiceAdaptedTypes
 
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
-    return (&respAdapterServiceAdaptedTypes{})
+    return (&respAdapterServiceAdaptedTypes{}).setDefaults()
 }
 
 func (x *respAdapterServiceAdaptedTypes) GetSuccess() *HeapAllocated {
     if !x.IsSetSuccess() {
         return nil
     }
-
     return x.Success
 }
 
@@ -1250,6 +1264,10 @@ func (x *respAdapterServiceAdaptedTypes) String() string {
 
     return sb.String()
 }
+func (x *respAdapterServiceAdaptedTypes) setDefaults() *respAdapterServiceAdaptedTypes {
+    return x
+}
+
 
 
 type AdapterServiceProcessor struct {

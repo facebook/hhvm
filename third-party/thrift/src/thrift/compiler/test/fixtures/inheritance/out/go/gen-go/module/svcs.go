@@ -106,7 +106,7 @@ var _ thrift.Struct = (*reqMyRootDoRoot)(nil)
 type MyRootDoRootArgsDeprecated = reqMyRootDoRoot
 
 func newReqMyRootDoRoot() *reqMyRootDoRoot {
-    return (&reqMyRootDoRoot{})
+    return (&reqMyRootDoRoot{}).setDefaults()
 }
 
 
@@ -115,6 +115,7 @@ func (x *reqMyRootDoRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -175,6 +176,10 @@ func (x *reqMyRootDoRoot) String() string {
 
     return sb.String()
 }
+func (x *reqMyRootDoRoot) setDefaults() *reqMyRootDoRoot {
+    return x
+}
+
 type respMyRootDoRoot struct {
 }
 // Compile time interface enforcer
@@ -185,7 +190,7 @@ var _ thrift.WritableResult = (*respMyRootDoRoot)(nil)
 type MyRootDoRootResultDeprecated = respMyRootDoRoot
 
 func newRespMyRootDoRoot() *respMyRootDoRoot {
-    return (&respMyRootDoRoot{})
+    return (&respMyRootDoRoot{}).setDefaults()
 }
 
 
@@ -198,6 +203,7 @@ func (x *respMyRootDoRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -258,6 +264,10 @@ func (x *respMyRootDoRoot) String() string {
 
     return sb.String()
 }
+func (x *respMyRootDoRoot) setDefaults() *respMyRootDoRoot {
+    return x
+}
+
 
 
 type MyRootProcessor struct {
@@ -451,7 +461,7 @@ var _ thrift.Struct = (*reqMyNodeDoMid)(nil)
 type MyNodeDoMidArgsDeprecated = reqMyNodeDoMid
 
 func newReqMyNodeDoMid() *reqMyNodeDoMid {
-    return (&reqMyNodeDoMid{})
+    return (&reqMyNodeDoMid{}).setDefaults()
 }
 
 
@@ -460,6 +470,7 @@ func (x *reqMyNodeDoMid) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -520,6 +531,10 @@ func (x *reqMyNodeDoMid) String() string {
 
     return sb.String()
 }
+func (x *reqMyNodeDoMid) setDefaults() *reqMyNodeDoMid {
+    return x
+}
+
 type respMyNodeDoMid struct {
 }
 // Compile time interface enforcer
@@ -530,7 +545,7 @@ var _ thrift.WritableResult = (*respMyNodeDoMid)(nil)
 type MyNodeDoMidResultDeprecated = respMyNodeDoMid
 
 func newRespMyNodeDoMid() *respMyNodeDoMid {
-    return (&respMyNodeDoMid{})
+    return (&respMyNodeDoMid{}).setDefaults()
 }
 
 
@@ -543,6 +558,7 @@ func (x *respMyNodeDoMid) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -603,6 +619,10 @@ func (x *respMyNodeDoMid) String() string {
 
     return sb.String()
 }
+func (x *respMyNodeDoMid) setDefaults() *respMyNodeDoMid {
+    return x
+}
+
 
 
 type MyNodeProcessor struct {
@@ -773,7 +793,7 @@ var _ thrift.Struct = (*reqMyLeafDoLeaf)(nil)
 type MyLeafDoLeafArgsDeprecated = reqMyLeafDoLeaf
 
 func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
-    return (&reqMyLeafDoLeaf{})
+    return (&reqMyLeafDoLeaf{}).setDefaults()
 }
 
 
@@ -782,6 +802,7 @@ func (x *reqMyLeafDoLeaf) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -842,6 +863,10 @@ func (x *reqMyLeafDoLeaf) String() string {
 
     return sb.String()
 }
+func (x *reqMyLeafDoLeaf) setDefaults() *reqMyLeafDoLeaf {
+    return x
+}
+
 type respMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
@@ -852,7 +877,7 @@ var _ thrift.WritableResult = (*respMyLeafDoLeaf)(nil)
 type MyLeafDoLeafResultDeprecated = respMyLeafDoLeaf
 
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
-    return (&respMyLeafDoLeaf{})
+    return (&respMyLeafDoLeaf{}).setDefaults()
 }
 
 
@@ -865,6 +890,7 @@ func (x *respMyLeafDoLeaf) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -925,6 +951,10 @@ func (x *respMyLeafDoLeaf) String() string {
 
     return sb.String()
 }
+func (x *respMyLeafDoLeaf) setDefaults() *respMyLeafDoLeaf {
+    return x
+}
+
 
 
 type MyLeafProcessor struct {

@@ -73,7 +73,7 @@ type Experimental struct {
 var _ thrift.Struct = (*Experimental)(nil)
 
 func NewExperimental() *Experimental {
-    return (&Experimental{})
+    return (&Experimental{}).setDefaults()
 }
 
 
@@ -82,6 +82,7 @@ func (x *Experimental) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Experimental"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -142,6 +143,10 @@ func (x *Experimental) String() string {
 
     return sb.String()
 }
+func (x *Experimental) setDefaults() *Experimental {
+    return x
+}
+
 
 type ReserveIds struct {
     Ids []int32 `thrift:"ids,1" json:"ids" db:"ids"`
@@ -151,16 +156,13 @@ type ReserveIds struct {
 var _ thrift.Struct = (*ReserveIds)(nil)
 
 func NewReserveIds() *ReserveIds {
-    return (&ReserveIds{}).
-        SetIdsNonCompat(make([]int32, 0)).
-        SetIdRangesNonCompat(make(map[int32]int32))
+    return (&ReserveIds{}).setDefaults()
 }
 
 func (x *ReserveIds) GetIds() []int32 {
     if !x.IsSetIds() {
         return make([]int32, 0)
     }
-
     return x.Ids
 }
 
@@ -168,7 +170,6 @@ func (x *ReserveIds) GetIdRanges() map[int32]int32 {
     if !x.IsSetIdRanges() {
         return make(map[int32]int32)
     }
-
     return x.IdRanges
 }
 
@@ -345,7 +346,6 @@ func (x *ReserveIds) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -415,6 +415,12 @@ func (x *ReserveIds) String() string {
 
     return sb.String()
 }
+func (x *ReserveIds) setDefaults() *ReserveIds {
+    return x.
+        SetIdsNonCompat(make([]int32, 0)).
+        SetIdRangesNonCompat(make(map[int32]int32))
+}
+
 
 type RequiresBackwardCompatibility struct {
     FieldName bool `thrift:"field_name,1" json:"field_name" db:"field_name"`
@@ -423,8 +429,7 @@ type RequiresBackwardCompatibility struct {
 var _ thrift.Struct = (*RequiresBackwardCompatibility)(nil)
 
 func NewRequiresBackwardCompatibility() *RequiresBackwardCompatibility {
-    return (&RequiresBackwardCompatibility{}).
-        SetFieldNameNonCompat(false)
+    return (&RequiresBackwardCompatibility{}).setDefaults()
 }
 
 func (x *RequiresBackwardCompatibility) GetFieldName() bool {
@@ -544,6 +549,11 @@ func (x *RequiresBackwardCompatibility) String() string {
 
     return sb.String()
 }
+func (x *RequiresBackwardCompatibility) setDefaults() *RequiresBackwardCompatibility {
+    return x.
+        SetFieldNameNonCompat(false)
+}
+
 
 type TerseWrite struct {
 }
@@ -551,7 +561,7 @@ type TerseWrite struct {
 var _ thrift.Struct = (*TerseWrite)(nil)
 
 func NewTerseWrite() *TerseWrite {
-    return (&TerseWrite{})
+    return (&TerseWrite{}).setDefaults()
 }
 
 
@@ -560,6 +570,7 @@ func (x *TerseWrite) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("TerseWrite"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -620,6 +631,10 @@ func (x *TerseWrite) String() string {
 
     return sb.String()
 }
+func (x *TerseWrite) setDefaults() *TerseWrite {
+    return x
+}
+
 
 type Box struct {
 }
@@ -627,7 +642,7 @@ type Box struct {
 var _ thrift.Struct = (*Box)(nil)
 
 func NewBox() *Box {
-    return (&Box{})
+    return (&Box{}).setDefaults()
 }
 
 
@@ -636,6 +651,7 @@ func (x *Box) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Box"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -696,6 +712,10 @@ func (x *Box) String() string {
 
     return sb.String()
 }
+func (x *Box) setDefaults() *Box {
+    return x
+}
+
 
 type Mixin struct {
 }
@@ -703,7 +723,7 @@ type Mixin struct {
 var _ thrift.Struct = (*Mixin)(nil)
 
 func NewMixin() *Mixin {
-    return (&Mixin{})
+    return (&Mixin{}).setDefaults()
 }
 
 
@@ -712,6 +732,7 @@ func (x *Mixin) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Mixin"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -772,6 +793,10 @@ func (x *Mixin) String() string {
 
     return sb.String()
 }
+func (x *Mixin) setDefaults() *Mixin {
+    return x
+}
+
 
 type SerializeInFieldIdOrder struct {
 }
@@ -779,7 +804,7 @@ type SerializeInFieldIdOrder struct {
 var _ thrift.Struct = (*SerializeInFieldIdOrder)(nil)
 
 func NewSerializeInFieldIdOrder() *SerializeInFieldIdOrder {
-    return (&SerializeInFieldIdOrder{})
+    return (&SerializeInFieldIdOrder{}).setDefaults()
 }
 
 
@@ -788,6 +813,7 @@ func (x *SerializeInFieldIdOrder) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SerializeInFieldIdOrder"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -848,6 +874,10 @@ func (x *SerializeInFieldIdOrder) String() string {
 
     return sb.String()
 }
+func (x *SerializeInFieldIdOrder) setDefaults() *SerializeInFieldIdOrder {
+    return x
+}
+
 
 type BitmaskEnum struct {
 }
@@ -855,7 +885,7 @@ type BitmaskEnum struct {
 var _ thrift.Struct = (*BitmaskEnum)(nil)
 
 func NewBitmaskEnum() *BitmaskEnum {
-    return (&BitmaskEnum{})
+    return (&BitmaskEnum{}).setDefaults()
 }
 
 
@@ -864,6 +894,7 @@ func (x *BitmaskEnum) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("BitmaskEnum"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -924,6 +955,10 @@ func (x *BitmaskEnum) String() string {
 
     return sb.String()
 }
+func (x *BitmaskEnum) setDefaults() *BitmaskEnum {
+    return x
+}
+
 
 type ExceptionMessage struct {
 }
@@ -931,7 +966,7 @@ type ExceptionMessage struct {
 var _ thrift.Struct = (*ExceptionMessage)(nil)
 
 func NewExceptionMessage() *ExceptionMessage {
-    return (&ExceptionMessage{})
+    return (&ExceptionMessage{}).setDefaults()
 }
 
 
@@ -940,6 +975,7 @@ func (x *ExceptionMessage) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ExceptionMessage"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1000,6 +1036,10 @@ func (x *ExceptionMessage) String() string {
 
     return sb.String()
 }
+func (x *ExceptionMessage) setDefaults() *ExceptionMessage {
+    return x
+}
+
 
 type InternBox struct {
 }
@@ -1007,7 +1047,7 @@ type InternBox struct {
 var _ thrift.Struct = (*InternBox)(nil)
 
 func NewInternBox() *InternBox {
-    return (&InternBox{})
+    return (&InternBox{}).setDefaults()
 }
 
 
@@ -1016,6 +1056,7 @@ func (x *InternBox) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("InternBox"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1076,6 +1117,10 @@ func (x *InternBox) String() string {
 
     return sb.String()
 }
+func (x *InternBox) setDefaults() *InternBox {
+    return x
+}
+
 
 type Serial struct {
 }
@@ -1083,7 +1128,7 @@ type Serial struct {
 var _ thrift.Struct = (*Serial)(nil)
 
 func NewSerial() *Serial {
-    return (&Serial{})
+    return (&Serial{}).setDefaults()
 }
 
 
@@ -1092,6 +1137,7 @@ func (x *Serial) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Serial"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1152,6 +1198,10 @@ func (x *Serial) String() string {
 
     return sb.String()
 }
+func (x *Serial) setDefaults() *Serial {
+    return x
+}
+
 
 type Uri struct {
     Value string `thrift:"value,1" json:"value" db:"value"`
@@ -1160,8 +1210,7 @@ type Uri struct {
 var _ thrift.Struct = (*Uri)(nil)
 
 func NewUri() *Uri {
-    return (&Uri{}).
-        SetValueNonCompat("")
+    return (&Uri{}).setDefaults()
 }
 
 func (x *Uri) GetValue() string {
@@ -1281,6 +1330,11 @@ func (x *Uri) String() string {
 
     return sb.String()
 }
+func (x *Uri) setDefaults() *Uri {
+    return x.
+        SetValueNonCompat("")
+}
+
 
 type Priority struct {
     Level RpcPriority `thrift:"level,1" json:"level" db:"level"`
@@ -1289,8 +1343,7 @@ type Priority struct {
 var _ thrift.Struct = (*Priority)(nil)
 
 func NewPriority() *Priority {
-    return (&Priority{}).
-        SetLevelNonCompat(0)
+    return (&Priority{}).setDefaults()
 }
 
 func (x *Priority) GetLevel() RpcPriority {
@@ -1411,6 +1464,11 @@ func (x *Priority) String() string {
 
     return sb.String()
 }
+func (x *Priority) setDefaults() *Priority {
+    return x.
+        SetLevelNonCompat(0)
+}
+
 
 type DeprecatedUnvalidatedAnnotations struct {
     Items map[string]string `thrift:"items,1" json:"items" db:"items"`
@@ -1419,15 +1477,13 @@ type DeprecatedUnvalidatedAnnotations struct {
 var _ thrift.Struct = (*DeprecatedUnvalidatedAnnotations)(nil)
 
 func NewDeprecatedUnvalidatedAnnotations() *DeprecatedUnvalidatedAnnotations {
-    return (&DeprecatedUnvalidatedAnnotations{}).
-        SetItemsNonCompat(make(map[string]string))
+    return (&DeprecatedUnvalidatedAnnotations{}).setDefaults()
 }
 
 func (x *DeprecatedUnvalidatedAnnotations) GetItems() map[string]string {
     if !x.IsSetItems() {
         return make(map[string]string)
     }
-
     return x.Items
 }
 
@@ -1594,6 +1650,11 @@ func (x *DeprecatedUnvalidatedAnnotations) String() string {
 
     return sb.String()
 }
+func (x *DeprecatedUnvalidatedAnnotations) setDefaults() *DeprecatedUnvalidatedAnnotations {
+    return x.
+        SetItemsNonCompat(make(map[string]string))
+}
+
 
 type AllowReservedIdentifier struct {
 }
@@ -1601,7 +1662,7 @@ type AllowReservedIdentifier struct {
 var _ thrift.Struct = (*AllowReservedIdentifier)(nil)
 
 func NewAllowReservedIdentifier() *AllowReservedIdentifier {
-    return (&AllowReservedIdentifier{})
+    return (&AllowReservedIdentifier{}).setDefaults()
 }
 
 
@@ -1610,6 +1671,7 @@ func (x *AllowReservedIdentifier) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AllowReservedIdentifier"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1670,6 +1732,10 @@ func (x *AllowReservedIdentifier) String() string {
 
     return sb.String()
 }
+func (x *AllowReservedIdentifier) setDefaults() *AllowReservedIdentifier {
+    return x
+}
+
 
 type AllowReservedFilename struct {
 }
@@ -1677,7 +1743,7 @@ type AllowReservedFilename struct {
 var _ thrift.Struct = (*AllowReservedFilename)(nil)
 
 func NewAllowReservedFilename() *AllowReservedFilename {
-    return (&AllowReservedFilename{})
+    return (&AllowReservedFilename{}).setDefaults()
 }
 
 
@@ -1686,6 +1752,7 @@ func (x *AllowReservedFilename) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AllowReservedFilename"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1746,6 +1813,10 @@ func (x *AllowReservedFilename) String() string {
 
     return sb.String()
 }
+func (x *AllowReservedFilename) setDefaults() *AllowReservedFilename {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -102,14 +102,13 @@ type ComplexUnion struct {
 var _ thrift.Struct = (*ComplexUnion)(nil)
 
 func NewComplexUnion() *ComplexUnion {
-    return (&ComplexUnion{})
+    return (&ComplexUnion{}).setDefaults()
 }
 
 func (x *ComplexUnion) GetIntValue() int64 {
     if !x.IsSetIntValue() {
         return 0
     }
-
     return *x.IntValue
 }
 
@@ -117,7 +116,6 @@ func (x *ComplexUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
         return make([]int64, 0)
     }
-
     return x.IntListValue
 }
 
@@ -125,7 +123,6 @@ func (x *ComplexUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
         return make([]string, 0)
     }
-
     return x.StringListValue
 }
 
@@ -133,7 +130,6 @@ func (x *ComplexUnion) GetStringValue() string {
     if !x.IsSetStringValue() {
         return ""
     }
-
     return *x.StringValue
 }
 
@@ -141,7 +137,6 @@ func (x *ComplexUnion) GetTypedefValue() ContainerTypedef {
     if !x.IsSetTypedefValue() {
         return NewContainerTypedef()
     }
-
     return x.TypedefValue
 }
 
@@ -149,7 +144,6 @@ func (x *ComplexUnion) GetStringRef() string {
     if !x.IsSetStringRef() {
         return ""
     }
-
     return *x.StringRef
 }
 
@@ -552,23 +546,18 @@ func (x *ComplexUnion) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField14(p); err != nil {
         return err
     }
@@ -650,6 +639,10 @@ func (x *ComplexUnion) String() string {
 
     return sb.String()
 }
+func (x *ComplexUnion) setDefaults() *ComplexUnion {
+    return x
+}
+
 
 type ListUnion struct {
     IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`
@@ -659,14 +652,13 @@ type ListUnion struct {
 var _ thrift.Struct = (*ListUnion)(nil)
 
 func NewListUnion() *ListUnion {
-    return (&ListUnion{})
+    return (&ListUnion{}).setDefaults()
 }
 
 func (x *ListUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
         return make([]int64, 0)
     }
-
     return x.IntListValue
 }
 
@@ -674,7 +666,6 @@ func (x *ListUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
         return make([]string, 0)
     }
-
     return x.StringListValue
 }
 
@@ -860,7 +851,6 @@ func (x *ListUnion) Write(p thrift.Encoder) error {
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -930,6 +920,10 @@ func (x *ListUnion) String() string {
 
     return sb.String()
 }
+func (x *ListUnion) setDefaults() *ListUnion {
+    return x
+}
+
 
 type DataUnion struct {
     BinaryData []byte `thrift:"binaryData,1" json:"binaryData,omitempty" db:"binaryData"`
@@ -939,14 +933,13 @@ type DataUnion struct {
 var _ thrift.Struct = (*DataUnion)(nil)
 
 func NewDataUnion() *DataUnion {
-    return (&DataUnion{})
+    return (&DataUnion{}).setDefaults()
 }
 
 func (x *DataUnion) GetBinaryData() []byte {
     if !x.IsSetBinaryData() {
         return []byte("")
     }
-
     return x.BinaryData
 }
 
@@ -954,7 +947,6 @@ func (x *DataUnion) GetStringData() string {
     if !x.IsSetStringData() {
         return ""
     }
-
     return *x.StringData
 }
 
@@ -1086,7 +1078,6 @@ func (x *DataUnion) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1156,6 +1147,10 @@ func (x *DataUnion) String() string {
 
     return sb.String()
 }
+func (x *DataUnion) setDefaults() *DataUnion {
+    return x
+}
+
 
 type Val struct {
     StrVal string `thrift:"strVal,1" json:"strVal" db:"strVal"`
@@ -1166,10 +1161,7 @@ type Val struct {
 var _ thrift.Struct = (*Val)(nil)
 
 func NewVal() *Val {
-    return (&Val{}).
-        SetStrValNonCompat("").
-        SetIntValNonCompat(0).
-        SetTypedefValueNonCompat(NewContainerTypedef())
+    return (&Val{}).setDefaults()
 }
 
 func (x *Val) GetStrVal() string {
@@ -1184,7 +1176,6 @@ func (x *Val) GetTypedefValue() ContainerTypedef {
     if !x.IsSetTypedefValue() {
         return NewContainerTypedef()
     }
-
     return x.TypedefValue
 }
 
@@ -1323,11 +1314,9 @@ func (x *Val) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
@@ -1400,6 +1389,13 @@ func (x *Val) String() string {
 
     return sb.String()
 }
+func (x *Val) setDefaults() *Val {
+    return x.
+        SetStrValNonCompat("").
+        SetIntValNonCompat(0).
+        SetTypedefValueNonCompat(NewContainerTypedef())
+}
+
 
 type ValUnion struct {
     V1 *Val `thrift:"v1,1" json:"v1,omitempty" db:"v1"`
@@ -1409,14 +1405,13 @@ type ValUnion struct {
 var _ thrift.Struct = (*ValUnion)(nil)
 
 func NewValUnion() *ValUnion {
-    return (&ValUnion{})
+    return (&ValUnion{}).setDefaults()
 }
 
 func (x *ValUnion) GetV1() *Val {
     if !x.IsSetV1() {
         return nil
     }
-
     return x.V1
 }
 
@@ -1424,7 +1419,6 @@ func (x *ValUnion) GetV2() *Val {
     if !x.IsSetV2() {
         return nil
     }
-
     return x.V2
 }
 
@@ -1570,7 +1564,6 @@ func (x *ValUnion) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1640,6 +1633,10 @@ func (x *ValUnion) String() string {
 
     return sb.String()
 }
+func (x *ValUnion) setDefaults() *ValUnion {
+    return x
+}
+
 
 type VirtualComplexUnion struct {
     ThingOne *string `thrift:"thingOne,1" json:"thingOne,omitempty" db:"thingOne"`
@@ -1649,14 +1646,13 @@ type VirtualComplexUnion struct {
 var _ thrift.Struct = (*VirtualComplexUnion)(nil)
 
 func NewVirtualComplexUnion() *VirtualComplexUnion {
-    return (&VirtualComplexUnion{})
+    return (&VirtualComplexUnion{}).setDefaults()
 }
 
 func (x *VirtualComplexUnion) GetThingOne() string {
     if !x.IsSetThingOne() {
         return ""
     }
-
     return *x.ThingOne
 }
 
@@ -1664,7 +1660,6 @@ func (x *VirtualComplexUnion) GetThingTwo() string {
     if !x.IsSetThingTwo() {
         return ""
     }
-
     return *x.ThingTwo
 }
 
@@ -1800,7 +1795,6 @@ func (x *VirtualComplexUnion) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1870,6 +1864,10 @@ func (x *VirtualComplexUnion) String() string {
 
     return sb.String()
 }
+func (x *VirtualComplexUnion) setDefaults() *VirtualComplexUnion {
+    return x
+}
+
 
 type NonCopyableStruct struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
@@ -1878,8 +1876,7 @@ type NonCopyableStruct struct {
 var _ thrift.Struct = (*NonCopyableStruct)(nil)
 
 func NewNonCopyableStruct() *NonCopyableStruct {
-    return (&NonCopyableStruct{}).
-        SetNumNonCompat(0)
+    return (&NonCopyableStruct{}).setDefaults()
 }
 
 func (x *NonCopyableStruct) GetNum() int64 {
@@ -1999,6 +1996,11 @@ func (x *NonCopyableStruct) String() string {
 
     return sb.String()
 }
+func (x *NonCopyableStruct) setDefaults() *NonCopyableStruct {
+    return x.
+        SetNumNonCompat(0)
+}
+
 
 type NonCopyableUnion struct {
     S *NonCopyableStruct `thrift:"s,1" json:"s,omitempty" db:"s"`
@@ -2007,14 +2009,13 @@ type NonCopyableUnion struct {
 var _ thrift.Struct = (*NonCopyableUnion)(nil)
 
 func NewNonCopyableUnion() *NonCopyableUnion {
-    return (&NonCopyableUnion{})
+    return (&NonCopyableUnion{}).setDefaults()
 }
 
 func (x *NonCopyableUnion) GetS() *NonCopyableStruct {
     if !x.IsSetS() {
         return nil
     }
-
     return x.S
 }
 
@@ -2163,6 +2164,10 @@ func (x *NonCopyableUnion) String() string {
 
     return sb.String()
 }
+func (x *NonCopyableUnion) setDefaults() *NonCopyableUnion {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

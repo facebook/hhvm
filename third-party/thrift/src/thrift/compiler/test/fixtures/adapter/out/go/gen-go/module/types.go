@@ -1242,11 +1242,7 @@ type MyAnnotation struct {
 var _ thrift.Struct = (*MyAnnotation)(nil)
 
 func NewMyAnnotation() *MyAnnotation {
-    return (&MyAnnotation{}).
-        SetSignatureNonCompat("").
-        SetColorNonCompat(
-              Color_RED,
-          )
+    return (&MyAnnotation{}).setDefaults()
 }
 
 func (x *MyAnnotation) GetSignature() string {
@@ -1348,7 +1344,6 @@ func (x *MyAnnotation) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1418,6 +1413,14 @@ func (x *MyAnnotation) String() string {
 
     return sb.String()
 }
+func (x *MyAnnotation) setDefaults() *MyAnnotation {
+    return x.
+        SetSignatureNonCompat("").
+        SetColorNonCompat(
+              Color_RED,
+          )
+}
+
 
 type Foo struct {
     IntField I32_5137 `thrift:"intField,1" json:"intField" db:"intField"`
@@ -1436,15 +1439,7 @@ type Foo struct {
 var _ thrift.Struct = (*Foo)(nil)
 
 func NewFoo() *Foo {
-    return (&Foo{}).
-        SetIntFieldNonCompat(NewI32_5137()).
-        SetIntFieldWithDefaultNonCompat(13).
-        SetSetFieldNonCompat(NewSetWithAdapter()).
-        SetMapFieldNonCompat(NewMapString_ListWithElemAdapterWithAdapter_8454()).
-        SetBinaryFieldNonCompat(NewBinary_5673()).
-        SetLongFieldNonCompat(NewMyI64()).
-        SetAdaptedLongFieldNonCompat(NewMyI64()).
-        SetDoubleAdaptedFieldNonCompat(NewDoubleTypedefI64())
+    return (&Foo{}).setDefaults()
 }
 
 func (x *Foo) GetIntField() I32_5137 {
@@ -1455,7 +1450,6 @@ func (x *Foo) GetOptionalIntField() I32_5137 {
     if !x.IsSetOptionalIntField() {
         return NewI32_5137()
     }
-
     return *x.OptionalIntField
 }
 
@@ -1467,7 +1461,6 @@ func (x *Foo) GetSetField() SetWithAdapter {
     if !x.IsSetSetField() {
         return NewSetWithAdapter()
     }
-
     return x.SetField
 }
 
@@ -1475,7 +1468,6 @@ func (x *Foo) GetOptionalSetField() SetWithAdapter {
     if !x.IsSetOptionalSetField() {
         return NewSetWithAdapter()
     }
-
     return x.OptionalSetField
 }
 
@@ -1483,7 +1475,6 @@ func (x *Foo) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     if !x.IsSetMapField() {
         return NewMapString_ListWithElemAdapterWithAdapter_8454()
     }
-
     return x.MapField
 }
 
@@ -1491,7 +1482,6 @@ func (x *Foo) GetOptionalMapField() MapString_ListWithElemAdapterWithAdapter_845
     if !x.IsSetOptionalMapField() {
         return NewMapString_ListWithElemAdapterWithAdapter_8454()
     }
-
     return x.OptionalMapField
 }
 
@@ -1499,7 +1489,6 @@ func (x *Foo) GetBinaryField() Binary_5673 {
     if !x.IsSetBinaryField() {
         return NewBinary_5673()
     }
-
     return x.BinaryField
 }
 
@@ -2016,43 +2005,33 @@ func (x *Foo) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
-
     if err := x.writeField11(p); err != nil {
         return err
     }
@@ -2149,6 +2128,18 @@ func (x *Foo) String() string {
 
     return sb.String()
 }
+func (x *Foo) setDefaults() *Foo {
+    return x.
+        SetIntFieldNonCompat(NewI32_5137()).
+        SetIntFieldWithDefaultNonCompat(13).
+        SetSetFieldNonCompat(NewSetWithAdapter()).
+        SetMapFieldNonCompat(NewMapString_ListWithElemAdapterWithAdapter_8454()).
+        SetBinaryFieldNonCompat(NewBinary_5673()).
+        SetLongFieldNonCompat(NewMyI64()).
+        SetAdaptedLongFieldNonCompat(NewMyI64()).
+        SetDoubleAdaptedFieldNonCompat(NewDoubleTypedefI64())
+}
+
 
 type Baz struct {
     IntField *I32_5137 `thrift:"intField,1" json:"intField,omitempty" db:"intField"`
@@ -2161,14 +2152,13 @@ type Baz struct {
 var _ thrift.Struct = (*Baz)(nil)
 
 func NewBaz() *Baz {
-    return (&Baz{})
+    return (&Baz{}).setDefaults()
 }
 
 func (x *Baz) GetIntField() I32_5137 {
     if !x.IsSetIntField() {
         return NewI32_5137()
     }
-
     return *x.IntField
 }
 
@@ -2176,7 +2166,6 @@ func (x *Baz) GetSetField() SetWithAdapter {
     if !x.IsSetSetField() {
         return NewSetWithAdapter()
     }
-
     return x.SetField
 }
 
@@ -2184,7 +2173,6 @@ func (x *Baz) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     if !x.IsSetMapField() {
         return NewMapString_ListWithElemAdapterWithAdapter_8454()
     }
-
     return x.MapField
 }
 
@@ -2192,7 +2180,6 @@ func (x *Baz) GetBinaryField() Binary_5673 {
     if !x.IsSetBinaryField() {
         return NewBinary_5673()
     }
-
     return x.BinaryField
 }
 
@@ -2200,7 +2187,6 @@ func (x *Baz) GetLongField() MyI64 {
     if !x.IsSetLongField() {
         return NewMyI64()
     }
-
     return *x.LongField
 }
 
@@ -2494,19 +2480,15 @@ func (x *Baz) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
@@ -2585,6 +2567,10 @@ func (x *Baz) String() string {
 
     return sb.String()
 }
+func (x *Baz) setDefaults() *Baz {
+    return x
+}
+
 
 type Bar struct {
     StructField *Foo_6868 `thrift:"structField,1" json:"structField" db:"structField"`
@@ -2599,18 +2585,13 @@ type Bar struct {
 var _ thrift.Struct = (*Bar)(nil)
 
 func NewBar() *Bar {
-    return (&Bar{}).
-        SetStructFieldNonCompat(NewFoo_6868()).
-        SetStructListFieldNonCompat(make([]*FooWithAdapter_9317, 0)).
-        SetUnionFieldNonCompat(NewBaz_7352()).
-        SetAdaptedStructFieldNonCompat(NewDirectlyAdapted())
+    return (&Bar{}).setDefaults()
 }
 
 func (x *Bar) GetStructField() *Foo_6868 {
     if !x.IsSetStructField() {
         return nil
     }
-
     return x.StructField
 }
 
@@ -2618,7 +2599,6 @@ func (x *Bar) GetOptionalStructField() *Foo_3943 {
     if !x.IsSetOptionalStructField() {
         return nil
     }
-
     return x.OptionalStructField
 }
 
@@ -2626,7 +2606,6 @@ func (x *Bar) GetStructListField() []*FooWithAdapter_9317 {
     if !x.IsSetStructListField() {
         return make([]*FooWithAdapter_9317, 0)
     }
-
     return x.StructListField
 }
 
@@ -2634,7 +2613,6 @@ func (x *Bar) GetOptionalStructListField() []*FooWithAdapter_9317 {
     if !x.IsSetOptionalStructListField() {
         return make([]*FooWithAdapter_9317, 0)
     }
-
     return x.OptionalStructListField
 }
 
@@ -2642,7 +2620,6 @@ func (x *Bar) GetUnionField() *Baz_7352 {
     if !x.IsSetUnionField() {
         return nil
     }
-
     return x.UnionField
 }
 
@@ -2650,7 +2627,6 @@ func (x *Bar) GetOptionalUnionField() *Baz_7352 {
     if !x.IsSetOptionalUnionField() {
         return nil
     }
-
     return x.OptionalUnionField
 }
 
@@ -2658,7 +2634,6 @@ func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
     if !x.IsSetAdaptedStructField() {
         return nil
     }
-
     return x.AdaptedStructField
 }
 
@@ -3109,27 +3084,21 @@ func (x *Bar) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
@@ -3214,6 +3183,14 @@ func (x *Bar) String() string {
 
     return sb.String()
 }
+func (x *Bar) setDefaults() *Bar {
+    return x.
+        SetStructFieldNonCompat(NewFoo_6868()).
+        SetStructListFieldNonCompat(make([]*FooWithAdapter_9317, 0)).
+        SetUnionFieldNonCompat(NewBaz_7352()).
+        SetAdaptedStructFieldNonCompat(NewDirectlyAdapted())
+}
+
 
 type DirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -3222,8 +3199,7 @@ type DirectlyAdapted struct {
 var _ thrift.Struct = (*DirectlyAdapted)(nil)
 
 func NewDirectlyAdapted() *DirectlyAdapted {
-    return (&DirectlyAdapted{}).
-        SetFieldNonCompat(0)
+    return (&DirectlyAdapted{}).setDefaults()
 }
 
 func (x *DirectlyAdapted) GetField() int32 {
@@ -3343,6 +3319,11 @@ func (x *DirectlyAdapted) String() string {
 
     return sb.String()
 }
+func (x *DirectlyAdapted) setDefaults() *DirectlyAdapted {
+    return x.
+        SetFieldNonCompat(0)
+}
+
 
 type IndependentDirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -3351,8 +3332,7 @@ type IndependentDirectlyAdapted struct {
 var _ thrift.Struct = (*IndependentDirectlyAdapted)(nil)
 
 func NewIndependentDirectlyAdapted() *IndependentDirectlyAdapted {
-    return (&IndependentDirectlyAdapted{}).
-        SetFieldNonCompat(0)
+    return (&IndependentDirectlyAdapted{}).setDefaults()
 }
 
 func (x *IndependentDirectlyAdapted) GetField() int32 {
@@ -3472,6 +3452,11 @@ func (x *IndependentDirectlyAdapted) String() string {
 
     return sb.String()
 }
+func (x *IndependentDirectlyAdapted) setDefaults() *IndependentDirectlyAdapted {
+    return x.
+        SetFieldNonCompat(0)
+}
+
 
 type StructWithFieldAdapter struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -3483,9 +3468,7 @@ type StructWithFieldAdapter struct {
 var _ thrift.Struct = (*StructWithFieldAdapter)(nil)
 
 func NewStructWithFieldAdapter() *StructWithFieldAdapter {
-    return (&StructWithFieldAdapter{}).
-        SetFieldNonCompat(0).
-        SetSharedFieldNonCompat(0)
+    return (&StructWithFieldAdapter{}).setDefaults()
 }
 
 func (x *StructWithFieldAdapter) GetField() int32 {
@@ -3500,7 +3483,6 @@ func (x *StructWithFieldAdapter) GetOptSharedField() int32 {
     if !x.IsSetOptSharedField() {
         return 0
     }
-
     return *x.OptSharedField
 }
 
@@ -3508,7 +3490,6 @@ func (x *StructWithFieldAdapter) GetOptBoxedField() int32 {
     if !x.IsSetOptBoxedField() {
         return 0
     }
-
     return *x.OptBoxedField
 }
 
@@ -3706,15 +3687,12 @@ func (x *StructWithFieldAdapter) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -3790,6 +3768,12 @@ func (x *StructWithFieldAdapter) String() string {
 
     return sb.String()
 }
+func (x *StructWithFieldAdapter) setDefaults() *StructWithFieldAdapter {
+    return x.
+        SetFieldNonCompat(0).
+        SetSharedFieldNonCompat(0)
+}
+
 
 type TerseAdaptedFields struct {
     IntField int32 `thrift:"int_field,1" json:"int_field" db:"int_field"`
@@ -3800,10 +3784,7 @@ type TerseAdaptedFields struct {
 var _ thrift.Struct = (*TerseAdaptedFields)(nil)
 
 func NewTerseAdaptedFields() *TerseAdaptedFields {
-    return (&TerseAdaptedFields{}).
-        SetIntFieldNonCompat(0).
-        SetStringFieldNonCompat("").
-        SetSetFieldNonCompat(make([]int32, 0))
+    return (&TerseAdaptedFields{}).setDefaults()
 }
 
 func (x *TerseAdaptedFields) GetIntField() int32 {
@@ -3818,7 +3799,6 @@ func (x *TerseAdaptedFields) GetSetField() []int32 {
     if !x.IsSetSetField() {
         return make([]int32, 0)
     }
-
     return x.SetField
 }
 
@@ -3985,11 +3965,9 @@ func (x *TerseAdaptedFields) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -4062,6 +4040,13 @@ func (x *TerseAdaptedFields) String() string {
 
     return sb.String()
 }
+func (x *TerseAdaptedFields) setDefaults() *TerseAdaptedFields {
+    return x.
+        SetIntFieldNonCompat(0).
+        SetStringFieldNonCompat("").
+        SetSetFieldNonCompat(make([]int32, 0))
+}
+
 
 type B struct {
     A *AdaptedA `thrift:"a,1" json:"a" db:"a"`
@@ -4070,15 +4055,13 @@ type B struct {
 var _ thrift.Struct = (*B)(nil)
 
 func NewB() *B {
-    return (&B{}).
-        SetANonCompat(NewAdaptedA())
+    return (&B{}).setDefaults()
 }
 
 func (x *B) GetA() *AdaptedA {
     if !x.IsSetA() {
         return nil
     }
-
     return x.A
 }
 
@@ -4212,6 +4195,11 @@ func (x *B) String() string {
 
     return sb.String()
 }
+func (x *B) setDefaults() *B {
+    return x.
+        SetANonCompat(NewAdaptedA())
+}
+
 
 type A struct {
 }
@@ -4219,7 +4207,7 @@ type A struct {
 var _ thrift.Struct = (*A)(nil)
 
 func NewA() *A {
-    return (&A{})
+    return (&A{}).setDefaults()
 }
 
 
@@ -4228,6 +4216,7 @@ func (x *A) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("A"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -4288,6 +4277,10 @@ func (x *A) String() string {
 
     return sb.String()
 }
+func (x *A) setDefaults() *A {
+    return x
+}
+
 
 type Config struct {
     Path string `thrift:"path,1" json:"path" db:"path"`
@@ -4296,8 +4289,7 @@ type Config struct {
 var _ thrift.Struct = (*Config)(nil)
 
 func NewConfig() *Config {
-    return (&Config{}).
-        SetPathNonCompat("")
+    return (&Config{}).setDefaults()
 }
 
 func (x *Config) GetPath() string {
@@ -4417,6 +4409,11 @@ func (x *Config) String() string {
 
     return sb.String()
 }
+func (x *Config) setDefaults() *Config {
+    return x.
+        SetPathNonCompat("")
+}
+
 
 type MyStruct struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -4426,9 +4423,7 @@ type MyStruct struct {
 var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{}).
-        SetFieldNonCompat(0).
-        SetSetStringNonCompat(NewSetWithAdapter())
+    return (&MyStruct{}).setDefaults()
 }
 
 func (x *MyStruct) GetField() int32 {
@@ -4439,7 +4434,6 @@ func (x *MyStruct) GetSetString() SetWithAdapter {
     if !x.IsSetSetString() {
         return NewSetWithAdapter()
     }
-
     return x.SetString
 }
 
@@ -4538,7 +4532,6 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -4608,6 +4601,12 @@ func (x *MyStruct) String() string {
 
     return sb.String()
 }
+func (x *MyStruct) setDefaults() *MyStruct {
+    return x.
+        SetFieldNonCompat(0).
+        SetSetStringNonCompat(NewSetWithAdapter())
+}
+
 
 type AdaptTestStruct struct {
     Delay DurationMs `thrift:"delay,1" json:"delay" db:"delay"`
@@ -4625,17 +4624,7 @@ type AdaptTestStruct struct {
 var _ thrift.Struct = (*AdaptTestStruct)(nil)
 
 func NewAdaptTestStruct() *AdaptTestStruct {
-    return (&AdaptTestStruct{}).
-        SetDelayNonCompat(NewDurationMs()).
-        SetCustomNonCompat(NewCustomProtocolType()).
-        SetTimeoutNonCompat(0).
-        SetDataNonCompat(0).
-        SetMetaNonCompat("").
-        SetIndirectionStringNonCompat(NewIndirectionString()).
-        SetStringDataNonCompat("").
-        SetDoubleWrappedBoolNonCompat(NewAdaptedBool()).
-        SetDoubleWrappedIntegerNonCompat(NewAdaptedInteger()).
-        SetBinaryDataNonCompat([]byte(""))
+    return (&AdaptTestStruct{}).setDefaults()
 }
 
 func (x *AdaptTestStruct) GetDelay() DurationMs {
@@ -4646,7 +4635,6 @@ func (x *AdaptTestStruct) GetCustom() CustomProtocolType {
     if !x.IsSetCustom() {
         return NewCustomProtocolType()
     }
-
     return x.Custom
 }
 
@@ -4682,7 +4670,6 @@ func (x *AdaptTestStruct) GetBinaryData() []byte {
     if !x.IsSetBinaryData() {
         return []byte("")
     }
-
     return x.BinaryData
 }
 
@@ -5109,39 +5096,30 @@ func (x *AdaptTestStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
@@ -5235,6 +5213,20 @@ func (x *AdaptTestStruct) String() string {
 
     return sb.String()
 }
+func (x *AdaptTestStruct) setDefaults() *AdaptTestStruct {
+    return x.
+        SetDelayNonCompat(NewDurationMs()).
+        SetCustomNonCompat(NewCustomProtocolType()).
+        SetTimeoutNonCompat(0).
+        SetDataNonCompat(0).
+        SetMetaNonCompat("").
+        SetIndirectionStringNonCompat(NewIndirectionString()).
+        SetStringDataNonCompat("").
+        SetDoubleWrappedBoolNonCompat(NewAdaptedBool()).
+        SetDoubleWrappedIntegerNonCompat(NewAdaptedInteger()).
+        SetBinaryDataNonCompat([]byte(""))
+}
+
 
 type AdaptTemplatedTestStruct struct {
     AdaptedBool AdaptedBool `thrift:"adaptedBool,1" json:"adaptedBool" db:"adaptedBool"`
@@ -5264,43 +5256,7 @@ type AdaptTemplatedTestStruct struct {
 var _ thrift.Struct = (*AdaptTemplatedTestStruct)(nil)
 
 func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
-    return (&AdaptTemplatedTestStruct{}).
-        SetAdaptedBoolNonCompat(NewAdaptedBool()).
-        SetAdaptedByteNonCompat(NewAdaptedByte()).
-        SetAdaptedShortNonCompat(NewAdaptedShort()).
-        SetAdaptedIntegerNonCompat(NewAdaptedInteger()).
-        SetAdaptedLongNonCompat(NewAdaptedLong()).
-        SetAdaptedDoubleNonCompat(NewAdaptedDouble()).
-        SetAdaptedStringNonCompat(NewAdaptedString()).
-        SetAdaptedListNonCompat(make([]int64, 0)).
-        SetAdaptedSetNonCompat(make([]int64, 0)).
-        SetAdaptedMapNonCompat(make(map[int64]int64)).
-        SetAdaptedBoolDefaultNonCompat(true).
-        SetAdaptedByteDefaultNonCompat(1).
-        SetAdaptedShortDefaultNonCompat(2).
-        SetAdaptedIntegerDefaultNonCompat(3).
-        SetAdaptedLongDefaultNonCompat(4).
-        SetAdaptedDoubleDefaultNonCompat(5.0).
-        SetAdaptedStringDefaultNonCompat("6").
-        SetAdaptedEnumNonCompat(
-              ThriftAdaptedEnum_One,
-          ).
-        SetAdaptedListDefaultNonCompat(
-              []int64{
-    1,
-},
-          ).
-        SetAdaptedSetDefaultNonCompat(
-              []int64{
-    1,
-},
-          ).
-        SetAdaptedMapDefaultNonCompat(
-              map[int64]int64{
-    1: 1,
-},
-          ).
-        SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())
+    return (&AdaptTemplatedTestStruct{}).setDefaults()
 }
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedBool() AdaptedBool {
@@ -5335,7 +5291,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedList() []int64 {
     if !x.IsSetAdaptedList() {
         return make([]int64, 0)
     }
-
     return x.AdaptedList
 }
 
@@ -5343,7 +5298,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSet() []int64 {
     if !x.IsSetAdaptedSet() {
         return make([]int64, 0)
     }
-
     return x.AdaptedSet
 }
 
@@ -5351,7 +5305,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMap() map[int64]int64 {
     if !x.IsSetAdaptedMap() {
         return make(map[int64]int64)
     }
-
     return x.AdaptedMap
 }
 
@@ -5393,7 +5346,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     1,
 }
     }
-
     return x.AdaptedListDefault
 }
 
@@ -5403,7 +5355,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     1,
 }
     }
-
     return x.AdaptedSetDefault
 }
 
@@ -5413,7 +5364,6 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     1: 1,
 }
     }
-
     return x.AdaptedMapDefault
 }
 
@@ -6559,87 +6509,66 @@ func (x *AdaptTemplatedTestStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
-
     if err := x.writeField10(p); err != nil {
         return err
     }
-
     if err := x.writeField11(p); err != nil {
         return err
     }
-
     if err := x.writeField12(p); err != nil {
         return err
     }
-
     if err := x.writeField13(p); err != nil {
         return err
     }
-
     if err := x.writeField14(p); err != nil {
         return err
     }
-
     if err := x.writeField15(p); err != nil {
         return err
     }
-
     if err := x.writeField16(p); err != nil {
         return err
     }
-
     if err := x.writeField17(p); err != nil {
         return err
     }
-
     if err := x.writeField18(p); err != nil {
         return err
     }
-
     if err := x.writeField19(p); err != nil {
         return err
     }
-
     if err := x.writeField20(p); err != nil {
         return err
     }
-
     if err := x.writeField21(p); err != nil {
         return err
     }
-
     if err := x.writeField22(p); err != nil {
         return err
     }
@@ -6769,6 +6698,46 @@ func (x *AdaptTemplatedTestStruct) String() string {
 
     return sb.String()
 }
+func (x *AdaptTemplatedTestStruct) setDefaults() *AdaptTemplatedTestStruct {
+    return x.
+        SetAdaptedBoolNonCompat(NewAdaptedBool()).
+        SetAdaptedByteNonCompat(NewAdaptedByte()).
+        SetAdaptedShortNonCompat(NewAdaptedShort()).
+        SetAdaptedIntegerNonCompat(NewAdaptedInteger()).
+        SetAdaptedLongNonCompat(NewAdaptedLong()).
+        SetAdaptedDoubleNonCompat(NewAdaptedDouble()).
+        SetAdaptedStringNonCompat(NewAdaptedString()).
+        SetAdaptedListNonCompat(make([]int64, 0)).
+        SetAdaptedSetNonCompat(make([]int64, 0)).
+        SetAdaptedMapNonCompat(make(map[int64]int64)).
+        SetAdaptedBoolDefaultNonCompat(true).
+        SetAdaptedByteDefaultNonCompat(1).
+        SetAdaptedShortDefaultNonCompat(2).
+        SetAdaptedIntegerDefaultNonCompat(3).
+        SetAdaptedLongDefaultNonCompat(4).
+        SetAdaptedDoubleDefaultNonCompat(5.0).
+        SetAdaptedStringDefaultNonCompat("6").
+        SetAdaptedEnumNonCompat(
+              ThriftAdaptedEnum_One,
+          ).
+        SetAdaptedListDefaultNonCompat(
+              []int64{
+    1,
+},
+          ).
+        SetAdaptedSetDefaultNonCompat(
+              []int64{
+    1,
+},
+          ).
+        SetAdaptedMapDefaultNonCompat(
+              map[int64]int64{
+    1: 1,
+},
+          ).
+        SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())
+}
+
 
 type AdaptTemplatedNestedTestStruct struct {
     AdaptedStruct *AdaptTemplatedTestStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
@@ -6777,15 +6746,13 @@ type AdaptTemplatedNestedTestStruct struct {
 var _ thrift.Struct = (*AdaptTemplatedNestedTestStruct)(nil)
 
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
-    return (&AdaptTemplatedNestedTestStruct{}).
-        SetAdaptedStructNonCompat(NewAdaptTemplatedTestStruct())
+    return (&AdaptTemplatedNestedTestStruct{}).setDefaults()
 }
 
 func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestStruct {
     if !x.IsSetAdaptedStruct() {
         return nil
     }
-
     return x.AdaptedStruct
 }
 
@@ -6919,6 +6886,11 @@ func (x *AdaptTemplatedNestedTestStruct) String() string {
 
     return sb.String()
 }
+func (x *AdaptTemplatedNestedTestStruct) setDefaults() *AdaptTemplatedNestedTestStruct {
+    return x.
+        SetAdaptedStructNonCompat(NewAdaptTemplatedTestStruct())
+}
+
 
 type AdaptTestUnion struct {
     Delay *DurationMs `thrift:"delay,1" json:"delay,omitempty" db:"delay"`
@@ -6928,14 +6900,13 @@ type AdaptTestUnion struct {
 var _ thrift.Struct = (*AdaptTestUnion)(nil)
 
 func NewAdaptTestUnion() *AdaptTestUnion {
-    return (&AdaptTestUnion{})
+    return (&AdaptTestUnion{}).setDefaults()
 }
 
 func (x *AdaptTestUnion) GetDelay() DurationMs {
     if !x.IsSetDelay() {
         return NewDurationMs()
     }
-
     return *x.Delay
 }
 
@@ -6943,7 +6914,6 @@ func (x *AdaptTestUnion) GetCustom() CustomProtocolType {
     if !x.IsSetCustom() {
         return NewCustomProtocolType()
     }
-
     return x.Custom
 }
 
@@ -7077,7 +7047,6 @@ func (x *AdaptTestUnion) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -7147,6 +7116,10 @@ func (x *AdaptTestUnion) String() string {
 
     return sb.String()
 }
+func (x *AdaptTestUnion) setDefaults() *AdaptTestUnion {
+    return x
+}
+
 
 type AdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -7155,8 +7128,7 @@ type AdaptedStruct struct {
 var _ thrift.Struct = (*AdaptedStruct)(nil)
 
 func NewAdaptedStruct() *AdaptedStruct {
-    return (&AdaptedStruct{}).
-        SetDataNonCompat(0)
+    return (&AdaptedStruct{}).setDefaults()
 }
 
 func (x *AdaptedStruct) GetData() int64 {
@@ -7276,6 +7248,11 @@ func (x *AdaptedStruct) String() string {
 
     return sb.String()
 }
+func (x *AdaptedStruct) setDefaults() *AdaptedStruct {
+    return x.
+        SetDataNonCompat(0)
+}
+
 
 type DirectlyAdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -7284,8 +7261,7 @@ type DirectlyAdaptedStruct struct {
 var _ thrift.Struct = (*DirectlyAdaptedStruct)(nil)
 
 func NewDirectlyAdaptedStruct() *DirectlyAdaptedStruct {
-    return (&DirectlyAdaptedStruct{}).
-        SetDataNonCompat(0)
+    return (&DirectlyAdaptedStruct{}).setDefaults()
 }
 
 func (x *DirectlyAdaptedStruct) GetData() int64 {
@@ -7405,6 +7381,11 @@ func (x *DirectlyAdaptedStruct) String() string {
 
     return sb.String()
 }
+func (x *DirectlyAdaptedStruct) setDefaults() *DirectlyAdaptedStruct {
+    return x.
+        SetDataNonCompat(0)
+}
+
 
 type StructFieldAdaptedStruct struct {
     AdaptedStruct *AdaptedStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
@@ -7416,18 +7397,13 @@ type StructFieldAdaptedStruct struct {
 var _ thrift.Struct = (*StructFieldAdaptedStruct)(nil)
 
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
-    return (&StructFieldAdaptedStruct{}).
-        SetAdaptedStructNonCompat(NewAdaptedStruct()).
-        SetAdaptedTypedefNonCompat(NewAdaptedTypedef()).
-        SetDirectlyAdaptedNonCompat(NewDirectlyAdaptedStruct()).
-        SetTypedefOfAdaptedNonCompat(NewTypedefOfDirect())
+    return (&StructFieldAdaptedStruct{}).setDefaults()
 }
 
 func (x *StructFieldAdaptedStruct) GetAdaptedStruct() *AdaptedStruct {
     if !x.IsSetAdaptedStruct() {
         return nil
     }
-
     return x.AdaptedStruct
 }
 
@@ -7435,7 +7411,6 @@ func (x *StructFieldAdaptedStruct) GetAdaptedTypedef() *AdaptedTypedef {
     if !x.IsSetAdaptedTypedef() {
         return nil
     }
-
     return x.AdaptedTypedef
 }
 
@@ -7443,7 +7418,6 @@ func (x *StructFieldAdaptedStruct) GetDirectlyAdapted() *DirectlyAdaptedStruct {
     if !x.IsSetDirectlyAdapted() {
         return nil
     }
-
     return x.DirectlyAdapted
 }
 
@@ -7451,7 +7425,6 @@ func (x *StructFieldAdaptedStruct) GetTypedefOfAdapted() *TypedefOfDirect {
     if !x.IsSetTypedefOfAdapted() {
         return nil
     }
-
     return x.TypedefOfAdapted
 }
 
@@ -7693,15 +7666,12 @@ func (x *StructFieldAdaptedStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -7777,6 +7747,14 @@ func (x *StructFieldAdaptedStruct) String() string {
 
     return sb.String()
 }
+func (x *StructFieldAdaptedStruct) setDefaults() *StructFieldAdaptedStruct {
+    return x.
+        SetAdaptedStructNonCompat(NewAdaptedStruct()).
+        SetAdaptedTypedefNonCompat(NewAdaptedTypedef()).
+        SetDirectlyAdaptedNonCompat(NewDirectlyAdaptedStruct()).
+        SetTypedefOfAdaptedNonCompat(NewTypedefOfDirect())
+}
+
 
 type CircularAdaptee struct {
     Field *CircularStruct `thrift:"field,1" json:"field" db:"field"`
@@ -7785,15 +7763,13 @@ type CircularAdaptee struct {
 var _ thrift.Struct = (*CircularAdaptee)(nil)
 
 func NewCircularAdaptee() *CircularAdaptee {
-    return (&CircularAdaptee{}).
-        SetFieldNonCompat(NewCircularStruct())
+    return (&CircularAdaptee{}).setDefaults()
 }
 
 func (x *CircularAdaptee) GetField() *CircularStruct {
     if !x.IsSetField() {
         return nil
     }
-
     return x.Field
 }
 
@@ -7927,6 +7903,11 @@ func (x *CircularAdaptee) String() string {
 
     return sb.String()
 }
+func (x *CircularAdaptee) setDefaults() *CircularAdaptee {
+    return x.
+        SetFieldNonCompat(NewCircularStruct())
+}
+
 
 type CircularStruct struct {
     Field *AdaptedCircularAdaptee `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -7935,14 +7916,13 @@ type CircularStruct struct {
 var _ thrift.Struct = (*CircularStruct)(nil)
 
 func NewCircularStruct() *CircularStruct {
-    return (&CircularStruct{})
+    return (&CircularStruct{}).setDefaults()
 }
 
 func (x *CircularStruct) GetField() *AdaptedCircularAdaptee {
     if !x.IsSetField() {
         return nil
     }
-
     return x.Field
 }
 
@@ -8076,6 +8056,10 @@ func (x *CircularStruct) String() string {
 
     return sb.String()
 }
+func (x *CircularStruct) setDefaults() *CircularStruct {
+    return x
+}
+
 
 type ReorderedStruct struct {
     ReorderedDependentAdapted *DeclaredAfterStruct `thrift:"reordered_dependent_adapted,1" json:"reordered_dependent_adapted" db:"reordered_dependent_adapted"`
@@ -8084,15 +8068,13 @@ type ReorderedStruct struct {
 var _ thrift.Struct = (*ReorderedStruct)(nil)
 
 func NewReorderedStruct() *ReorderedStruct {
-    return (&ReorderedStruct{}).
-        SetReorderedDependentAdaptedNonCompat(NewDeclaredAfterStruct())
+    return (&ReorderedStruct{}).setDefaults()
 }
 
 func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
     if !x.IsSetReorderedDependentAdapted() {
         return nil
     }
-
     return x.ReorderedDependentAdapted
 }
 
@@ -8226,6 +8208,11 @@ func (x *ReorderedStruct) String() string {
 
     return sb.String()
 }
+func (x *ReorderedStruct) setDefaults() *ReorderedStruct {
+    return x.
+        SetReorderedDependentAdaptedNonCompat(NewDeclaredAfterStruct())
+}
+
 
 type DeclaredAfterStruct struct {
 }
@@ -8233,7 +8220,7 @@ type DeclaredAfterStruct struct {
 var _ thrift.Struct = (*DeclaredAfterStruct)(nil)
 
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
-    return (&DeclaredAfterStruct{})
+    return (&DeclaredAfterStruct{}).setDefaults()
 }
 
 
@@ -8242,6 +8229,7 @@ func (x *DeclaredAfterStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("DeclaredAfterStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -8302,6 +8290,10 @@ func (x *DeclaredAfterStruct) String() string {
 
     return sb.String()
 }
+func (x *DeclaredAfterStruct) setDefaults() *DeclaredAfterStruct {
+    return x
+}
+
 
 type RenamedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -8310,8 +8302,7 @@ type RenamedStruct struct {
 var _ thrift.Struct = (*RenamedStruct)(nil)
 
 func NewRenamedStruct() *RenamedStruct {
-    return (&RenamedStruct{}).
-        SetDataNonCompat(0)
+    return (&RenamedStruct{}).setDefaults()
 }
 
 func (x *RenamedStruct) GetData() int64 {
@@ -8431,6 +8422,11 @@ func (x *RenamedStruct) String() string {
 
     return sb.String()
 }
+func (x *RenamedStruct) setDefaults() *RenamedStruct {
+    return x.
+        SetDataNonCompat(0)
+}
+
 
 type SameNamespaceStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -8439,8 +8435,7 @@ type SameNamespaceStruct struct {
 var _ thrift.Struct = (*SameNamespaceStruct)(nil)
 
 func NewSameNamespaceStruct() *SameNamespaceStruct {
-    return (&SameNamespaceStruct{}).
-        SetDataNonCompat(0)
+    return (&SameNamespaceStruct{}).setDefaults()
 }
 
 func (x *SameNamespaceStruct) GetData() int64 {
@@ -8560,6 +8555,11 @@ func (x *SameNamespaceStruct) String() string {
 
     return sb.String()
 }
+func (x *SameNamespaceStruct) setDefaults() *SameNamespaceStruct {
+    return x.
+        SetDataNonCompat(0)
+}
+
 
 type HeapAllocated struct {
 }
@@ -8567,7 +8567,7 @@ type HeapAllocated struct {
 var _ thrift.Struct = (*HeapAllocated)(nil)
 
 func NewHeapAllocated() *HeapAllocated {
-    return (&HeapAllocated{})
+    return (&HeapAllocated{}).setDefaults()
 }
 
 
@@ -8576,6 +8576,7 @@ func (x *HeapAllocated) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("HeapAllocated"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -8636,6 +8637,10 @@ func (x *HeapAllocated) String() string {
 
     return sb.String()
 }
+func (x *HeapAllocated) setDefaults() *HeapAllocated {
+    return x
+}
+
 
 type MoveOnly struct {
     Ptr *HeapAllocated `thrift:"ptr,1" json:"ptr" db:"ptr"`
@@ -8644,15 +8649,13 @@ type MoveOnly struct {
 var _ thrift.Struct = (*MoveOnly)(nil)
 
 func NewMoveOnly() *MoveOnly {
-    return (&MoveOnly{}).
-        SetPtrNonCompat(NewHeapAllocated())
+    return (&MoveOnly{}).setDefaults()
 }
 
 func (x *MoveOnly) GetPtr() *HeapAllocated {
     if !x.IsSetPtr() {
         return nil
     }
-
     return x.Ptr
 }
 
@@ -8786,6 +8789,11 @@ func (x *MoveOnly) String() string {
 
     return sb.String()
 }
+func (x *MoveOnly) setDefaults() *MoveOnly {
+    return x.
+        SetPtrNonCompat(NewHeapAllocated())
+}
+
 
 type AlsoMoveOnly struct {
     Ptr int64 `thrift:"ptr,1" json:"ptr" db:"ptr"`
@@ -8794,8 +8802,7 @@ type AlsoMoveOnly struct {
 var _ thrift.Struct = (*AlsoMoveOnly)(nil)
 
 func NewAlsoMoveOnly() *AlsoMoveOnly {
-    return (&AlsoMoveOnly{}).
-        SetPtrNonCompat(0)
+    return (&AlsoMoveOnly{}).setDefaults()
 }
 
 func (x *AlsoMoveOnly) GetPtr() int64 {
@@ -8915,6 +8922,11 @@ func (x *AlsoMoveOnly) String() string {
 
     return sb.String()
 }
+func (x *AlsoMoveOnly) setDefaults() *AlsoMoveOnly {
+    return x.
+        SetPtrNonCompat(0)
+}
+
 
 type ApplyAdapter struct {
 }
@@ -8922,7 +8934,7 @@ type ApplyAdapter struct {
 var _ thrift.Struct = (*ApplyAdapter)(nil)
 
 func NewApplyAdapter() *ApplyAdapter {
-    return (&ApplyAdapter{})
+    return (&ApplyAdapter{}).setDefaults()
 }
 
 
@@ -8931,6 +8943,7 @@ func (x *ApplyAdapter) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ApplyAdapter"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -8991,6 +9004,10 @@ func (x *ApplyAdapter) String() string {
 
     return sb.String()
 }
+func (x *ApplyAdapter) setDefaults() *ApplyAdapter {
+    return x
+}
+
 
 type TransitiveAdapted struct {
 }
@@ -8998,7 +9015,7 @@ type TransitiveAdapted struct {
 var _ thrift.Struct = (*TransitiveAdapted)(nil)
 
 func NewTransitiveAdapted() *TransitiveAdapted {
-    return (&TransitiveAdapted{})
+    return (&TransitiveAdapted{}).setDefaults()
 }
 
 
@@ -9007,6 +9024,7 @@ func (x *TransitiveAdapted) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("TransitiveAdapted"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -9067,6 +9085,10 @@ func (x *TransitiveAdapted) String() string {
 
     return sb.String()
 }
+func (x *TransitiveAdapted) setDefaults() *TransitiveAdapted {
+    return x
+}
+
 
 type CountingStruct struct {
     RegularInt *int64 `thrift:"regularInt,1,optional" json:"regularInt,omitempty" db:"regularInt"`
@@ -9077,14 +9099,13 @@ type CountingStruct struct {
 var _ thrift.Struct = (*CountingStruct)(nil)
 
 func NewCountingStruct() *CountingStruct {
-    return (&CountingStruct{})
+    return (&CountingStruct{}).setDefaults()
 }
 
 func (x *CountingStruct) GetRegularInt() int64 {
     if !x.IsSetRegularInt() {
         return 0
     }
-
     return *x.RegularInt
 }
 
@@ -9092,7 +9113,6 @@ func (x *CountingStruct) GetCountingInt() CountingInt {
     if !x.IsSetCountingInt() {
         return NewCountingInt()
     }
-
     return *x.CountingInt
 }
 
@@ -9100,7 +9120,6 @@ func (x *CountingStruct) GetRegularString() string {
     if !x.IsSetRegularString() {
         return ""
     }
-
     return *x.RegularString
 }
 
@@ -9271,11 +9290,9 @@ func (x *CountingStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -9348,6 +9365,10 @@ func (x *CountingStruct) String() string {
 
     return sb.String()
 }
+func (x *CountingStruct) setDefaults() *CountingStruct {
+    return x
+}
+
 
 type Person struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -9356,8 +9377,7 @@ type Person struct {
 var _ thrift.Struct = (*Person)(nil)
 
 func NewPerson() *Person {
-    return (&Person{}).
-        SetNameNonCompat("")
+    return (&Person{}).setDefaults()
 }
 
 func (x *Person) GetName() string {
@@ -9477,6 +9497,11 @@ func (x *Person) String() string {
 
     return sb.String()
 }
+func (x *Person) setDefaults() *Person {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type Person2 struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -9485,8 +9510,7 @@ type Person2 struct {
 var _ thrift.Struct = (*Person2)(nil)
 
 func NewPerson2() *Person2 {
-    return (&Person2{}).
-        SetNameNonCompat("")
+    return (&Person2{}).setDefaults()
 }
 
 func (x *Person2) GetName() string {
@@ -9606,6 +9630,11 @@ func (x *Person2) String() string {
 
     return sb.String()
 }
+func (x *Person2) setDefaults() *Person2 {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type RenamedStructWithStructAdapterAndFieldAdapter struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -9614,8 +9643,7 @@ type RenamedStructWithStructAdapterAndFieldAdapter struct {
 var _ thrift.Struct = (*RenamedStructWithStructAdapterAndFieldAdapter)(nil)
 
 func NewRenamedStructWithStructAdapterAndFieldAdapter() *RenamedStructWithStructAdapterAndFieldAdapter {
-    return (&RenamedStructWithStructAdapterAndFieldAdapter{}).
-        SetFieldNonCompat(0)
+    return (&RenamedStructWithStructAdapterAndFieldAdapter{}).setDefaults()
 }
 
 func (x *RenamedStructWithStructAdapterAndFieldAdapter) GetField() int32 {
@@ -9735,6 +9763,11 @@ func (x *RenamedStructWithStructAdapterAndFieldAdapter) String() string {
 
     return sb.String()
 }
+func (x *RenamedStructWithStructAdapterAndFieldAdapter) setDefaults() *RenamedStructWithStructAdapterAndFieldAdapter {
+    return x.
+        SetFieldNonCompat(0)
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -31,7 +31,6 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struc
         {{/type:struct?}}
         {{/field:type}}
     }
-
     {{/field:nilable?}}
     return {{#field:non_struct_pointer?}}*{{/field:non_struct_pointer?}}x.{{field:go_name}}
 }

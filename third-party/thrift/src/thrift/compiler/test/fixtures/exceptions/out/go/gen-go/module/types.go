@@ -25,8 +25,7 @@ type Fiery struct {
 var _ thrift.Struct = (*Fiery)(nil)
 
 func NewFiery() *Fiery {
-    return (&Fiery{}).
-        SetMessageNonCompat("")
+    return (&Fiery{}).setDefaults()
 }
 
 func (x *Fiery) GetMessage() string {
@@ -146,6 +145,11 @@ func (x *Fiery) String() string {
 
     return sb.String()
 }
+func (x *Fiery) setDefaults() *Fiery {
+    return x.
+        SetMessageNonCompat("")
+}
+
 func (x *Fiery) Error() string {
     return x.String()
 }
@@ -157,14 +161,13 @@ type Serious struct {
 var _ thrift.Struct = (*Serious)(nil)
 
 func NewSerious() *Serious {
-    return (&Serious{})
+    return (&Serious{}).setDefaults()
 }
 
 func (x *Serious) GetSonnet() string {
     if !x.IsSetSonnet() {
         return ""
     }
-
     return *x.Sonnet
 }
 
@@ -293,6 +296,10 @@ func (x *Serious) String() string {
 
     return sb.String()
 }
+func (x *Serious) setDefaults() *Serious {
+    return x
+}
+
 func (x *Serious) Error() string {
     return x.String()
 }
@@ -305,9 +312,7 @@ type ComplexFieldNames struct {
 var _ thrift.Struct = (*ComplexFieldNames)(nil)
 
 func NewComplexFieldNames() *ComplexFieldNames {
-    return (&ComplexFieldNames{}).
-        SetErrorMessageNonCompat("").
-        SetInternalErrorMessageNonCompat("")
+    return (&ComplexFieldNames{}).setDefaults()
 }
 
 func (x *ComplexFieldNames) GetErrorMessage() string {
@@ -408,7 +413,6 @@ func (x *ComplexFieldNames) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -478,6 +482,12 @@ func (x *ComplexFieldNames) String() string {
 
     return sb.String()
 }
+func (x *ComplexFieldNames) setDefaults() *ComplexFieldNames {
+    return x.
+        SetErrorMessageNonCompat("").
+        SetInternalErrorMessageNonCompat("")
+}
+
 func (x *ComplexFieldNames) Error() string {
     return x.String()
 }
@@ -490,9 +500,7 @@ type CustomFieldNames struct {
 var _ thrift.Struct = (*CustomFieldNames)(nil)
 
 func NewCustomFieldNames() *CustomFieldNames {
-    return (&CustomFieldNames{}).
-        SetErrorMessageNonCompat("").
-        SetInternalErrorMessageNonCompat("")
+    return (&CustomFieldNames{}).setDefaults()
 }
 
 func (x *CustomFieldNames) GetErrorMessage() string {
@@ -593,7 +601,6 @@ func (x *CustomFieldNames) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -663,6 +670,12 @@ func (x *CustomFieldNames) String() string {
 
     return sb.String()
 }
+func (x *CustomFieldNames) setDefaults() *CustomFieldNames {
+    return x.
+        SetErrorMessageNonCompat("").
+        SetInternalErrorMessageNonCompat("")
+}
+
 func (x *CustomFieldNames) Error() string {
     return x.String()
 }
@@ -675,9 +688,7 @@ type ExceptionWithPrimitiveField struct {
 var _ thrift.Struct = (*ExceptionWithPrimitiveField)(nil)
 
 func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
-    return (&ExceptionWithPrimitiveField{}).
-        SetMessageNonCompat("").
-        SetErrorCodeNonCompat(0)
+    return (&ExceptionWithPrimitiveField{}).setDefaults()
 }
 
 func (x *ExceptionWithPrimitiveField) GetMessage() string {
@@ -778,7 +789,6 @@ func (x *ExceptionWithPrimitiveField) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -848,6 +858,12 @@ func (x *ExceptionWithPrimitiveField) String() string {
 
     return sb.String()
 }
+func (x *ExceptionWithPrimitiveField) setDefaults() *ExceptionWithPrimitiveField {
+    return x.
+        SetMessageNonCompat("").
+        SetErrorCodeNonCompat(0)
+}
+
 func (x *ExceptionWithPrimitiveField) Error() string {
     return x.String()
 }
@@ -860,9 +876,7 @@ type ExceptionWithStructuredAnnotation struct {
 var _ thrift.Struct = (*ExceptionWithStructuredAnnotation)(nil)
 
 func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
-    return (&ExceptionWithStructuredAnnotation{}).
-        SetMessageFieldNonCompat("").
-        SetErrorCodeNonCompat(0)
+    return (&ExceptionWithStructuredAnnotation{}).setDefaults()
 }
 
 func (x *ExceptionWithStructuredAnnotation) GetMessageField() string {
@@ -963,7 +977,6 @@ func (x *ExceptionWithStructuredAnnotation) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1033,6 +1046,12 @@ func (x *ExceptionWithStructuredAnnotation) String() string {
 
     return sb.String()
 }
+func (x *ExceptionWithStructuredAnnotation) setDefaults() *ExceptionWithStructuredAnnotation {
+    return x.
+        SetMessageFieldNonCompat("").
+        SetErrorCodeNonCompat(0)
+}
+
 func (x *ExceptionWithStructuredAnnotation) Error() string {
     return x.String()
 }
@@ -1043,7 +1062,7 @@ type Banal struct {
 var _ thrift.Struct = (*Banal)(nil)
 
 func NewBanal() *Banal {
-    return (&Banal{})
+    return (&Banal{}).setDefaults()
 }
 
 
@@ -1052,6 +1071,7 @@ func (x *Banal) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Banal"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1112,6 +1132,10 @@ func (x *Banal) String() string {
 
     return sb.String()
 }
+func (x *Banal) setDefaults() *Banal {
+    return x
+}
+
 func (x *Banal) Error() string {
     return x.String()
 }

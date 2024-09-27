@@ -81,11 +81,7 @@ type Included struct {
 var _ thrift.Struct = (*Included)(nil)
 
 func NewIncluded() *Included {
-    return (&Included{}).
-        SetMyIntFieldNonCompat(0).
-        SetMyTransitiveFieldNonCompat(
-              transitive.ExampleFoo,
-          )
+    return (&Included{}).setDefaults()
 }
 
 func (x *Included) GetMyIntField() int64 {
@@ -96,7 +92,6 @@ func (x *Included) GetMyTransitiveField() *transitive.Foo {
     if !x.IsSetMyTransitiveField() {
         return nil
     }
-
     return x.MyTransitiveField
 }
 
@@ -207,7 +202,6 @@ func (x *Included) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -277,6 +271,14 @@ func (x *Included) String() string {
 
     return sb.String()
 }
+func (x *Included) setDefaults() *Included {
+    return x.
+        SetMyIntFieldNonCompat(0).
+        SetMyTransitiveFieldNonCompat(
+              transitive.ExampleFoo,
+          )
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

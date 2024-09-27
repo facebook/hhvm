@@ -177,8 +177,7 @@ type MyStructNestedAnnotation struct {
 var _ thrift.Struct = (*MyStructNestedAnnotation)(nil)
 
 func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
-    return (&MyStructNestedAnnotation{}).
-        SetNameNonCompat("")
+    return (&MyStructNestedAnnotation{}).setDefaults()
 }
 
 func (x *MyStructNestedAnnotation) GetName() string {
@@ -298,6 +297,11 @@ func (x *MyStructNestedAnnotation) String() string {
 
     return sb.String()
 }
+func (x *MyStructNestedAnnotation) setDefaults() *MyStructNestedAnnotation {
+    return x.
+        SetNameNonCompat("")
+}
+
 
 type MyUnion struct {
 }
@@ -305,7 +309,7 @@ type MyUnion struct {
 var _ thrift.Struct = (*MyUnion)(nil)
 
 func NewMyUnion() *MyUnion {
-    return (&MyUnion{})
+    return (&MyUnion{}).setDefaults()
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -326,6 +330,7 @@ func (x *MyUnion) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -386,6 +391,10 @@ func (x *MyUnion) String() string {
 
     return sb.String()
 }
+func (x *MyUnion) setDefaults() *MyUnion {
+    return x
+}
+
 
 type MyException struct {
 }
@@ -393,7 +402,7 @@ type MyException struct {
 var _ thrift.Struct = (*MyException)(nil)
 
 func NewMyException() *MyException {
-    return (&MyException{})
+    return (&MyException{}).setDefaults()
 }
 
 
@@ -402,6 +411,7 @@ func (x *MyException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -462,6 +472,10 @@ func (x *MyException) String() string {
 
     return sb.String()
 }
+func (x *MyException) setDefaults() *MyException {
+    return x
+}
+
 func (x *MyException) Error() string {
     return x.String()
 }
@@ -481,16 +495,7 @@ type MyStruct struct {
 var _ thrift.Struct = (*MyStruct)(nil)
 
 func NewMyStruct() *MyStruct {
-    return (&MyStruct{}).
-        SetAbstractNameNonCompat("").
-        SetMajorVerNonCompat(0).
-        SetAnnotationWithQuoteNonCompat("").
-        SetClass_NonCompat("").
-        SetAnnotationWithTrailingCommaNonCompat("").
-        SetEmptyAnnotationsNonCompat("").
-        SetMyEnumNonCompat(0).
-        SetCppTypeAnnotationNonCompat(NewListString_6884()).
-        SetMyUnionNonCompat(NewMyUnion())
+    return (&MyStruct{}).setDefaults()
 }
 
 func (x *MyStruct) GetAbstractName() string {
@@ -525,7 +530,6 @@ func (x *MyStruct) GetCppTypeAnnotation() ListString_6884 {
     if !x.IsSetCppTypeAnnotation() {
         return NewListString_6884()
     }
-
     return x.CppTypeAnnotation
 }
 
@@ -533,7 +537,6 @@ func (x *MyStruct) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
         return nil
     }
-
     return x.MyUnion
 }
 
@@ -930,35 +933,27 @@ func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
-
     if err := x.writeField6(p); err != nil {
         return err
     }
-
     if err := x.writeField7(p); err != nil {
         return err
     }
-
     if err := x.writeField8(p); err != nil {
         return err
     }
-
     if err := x.writeField9(p); err != nil {
         return err
     }
@@ -1049,6 +1044,19 @@ func (x *MyStruct) String() string {
 
     return sb.String()
 }
+func (x *MyStruct) setDefaults() *MyStruct {
+    return x.
+        SetAbstractNameNonCompat("").
+        SetMajorVerNonCompat(0).
+        SetAnnotationWithQuoteNonCompat("").
+        SetClass_NonCompat("").
+        SetAnnotationWithTrailingCommaNonCompat("").
+        SetEmptyAnnotationsNonCompat("").
+        SetMyEnumNonCompat(0).
+        SetCppTypeAnnotationNonCompat(NewListString_6884()).
+        SetMyUnionNonCompat(NewMyUnion())
+}
+
 
 type SecretStruct struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
@@ -1058,9 +1066,7 @@ type SecretStruct struct {
 var _ thrift.Struct = (*SecretStruct)(nil)
 
 func NewSecretStruct() *SecretStruct {
-    return (&SecretStruct{}).
-        SetIdNonCompat(0).
-        SetPasswordNonCompat("")
+    return (&SecretStruct{}).setDefaults()
 }
 
 func (x *SecretStruct) GetId() int64 {
@@ -1161,7 +1167,6 @@ func (x *SecretStruct) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1231,6 +1236,12 @@ func (x *SecretStruct) String() string {
 
     return sb.String()
 }
+func (x *SecretStruct) setDefaults() *SecretStruct {
+    return x.
+        SetIdNonCompat(0).
+        SetPasswordNonCompat("")
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

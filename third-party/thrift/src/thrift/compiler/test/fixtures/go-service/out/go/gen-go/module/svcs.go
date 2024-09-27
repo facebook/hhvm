@@ -586,15 +586,13 @@ var _ thrift.Struct = (*reqGetEntityGetEntity)(nil)
 type GetEntityGetEntityArgsDeprecated = reqGetEntityGetEntity
 
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
-    return (&reqGetEntityGetEntity{}).
-        SetRNonCompat(NewGetEntityRequest())
+    return (&reqGetEntityGetEntity{}).setDefaults()
 }
 
 func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     if !x.IsSetR() {
         return nil
     }
-
     return x.R
 }
 
@@ -728,6 +726,11 @@ func (x *reqGetEntityGetEntity) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetEntity) setDefaults() *reqGetEntityGetEntity {
+    return x.
+        SetRNonCompat(NewGetEntityRequest())
+}
+
 type respGetEntityGetEntity struct {
     Success *GetEntityResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -739,14 +742,13 @@ var _ thrift.WritableResult = (*respGetEntityGetEntity)(nil)
 type GetEntityGetEntityResultDeprecated = respGetEntityGetEntity
 
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
-    return (&respGetEntityGetEntity{})
+    return (&respGetEntityGetEntity{}).setDefaults()
 }
 
 func (x *respGetEntityGetEntity) GetSuccess() *GetEntityResponse {
     if !x.IsSetSuccess() {
         return nil
     }
-
     return x.Success
 }
 
@@ -884,6 +886,10 @@ func (x *respGetEntityGetEntity) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetEntity) setDefaults() *respGetEntityGetEntity {
+    return x
+}
+
 type reqGetEntityGetBool struct {
 }
 // Compile time interface enforcer
@@ -893,7 +899,7 @@ var _ thrift.Struct = (*reqGetEntityGetBool)(nil)
 type GetEntityGetBoolArgsDeprecated = reqGetEntityGetBool
 
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
-    return (&reqGetEntityGetBool{})
+    return (&reqGetEntityGetBool{}).setDefaults()
 }
 
 
@@ -902,6 +908,7 @@ func (x *reqGetEntityGetBool) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetBool"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -962,6 +969,10 @@ func (x *reqGetEntityGetBool) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetBool) setDefaults() *reqGetEntityGetBool {
+    return x
+}
+
 type respGetEntityGetBool struct {
     Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -973,14 +984,13 @@ var _ thrift.WritableResult = (*respGetEntityGetBool)(nil)
 type GetEntityGetBoolResultDeprecated = respGetEntityGetBool
 
 func newRespGetEntityGetBool() *respGetEntityGetBool {
-    return (&respGetEntityGetBool{})
+    return (&respGetEntityGetBool{}).setDefaults()
 }
 
 func (x *respGetEntityGetBool) GetSuccess() bool {
     if !x.IsSetSuccess() {
         return false
     }
-
     return *x.Success
 }
 
@@ -1113,6 +1123,10 @@ func (x *respGetEntityGetBool) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetBool) setDefaults() *respGetEntityGetBool {
+    return x
+}
+
 type reqGetEntityGetByte struct {
 }
 // Compile time interface enforcer
@@ -1122,7 +1136,7 @@ var _ thrift.Struct = (*reqGetEntityGetByte)(nil)
 type GetEntityGetByteArgsDeprecated = reqGetEntityGetByte
 
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
-    return (&reqGetEntityGetByte{})
+    return (&reqGetEntityGetByte{}).setDefaults()
 }
 
 
@@ -1131,6 +1145,7 @@ func (x *reqGetEntityGetByte) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetByte"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1191,6 +1206,10 @@ func (x *reqGetEntityGetByte) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetByte) setDefaults() *reqGetEntityGetByte {
+    return x
+}
+
 type respGetEntityGetByte struct {
     Success *int8 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -1202,14 +1221,13 @@ var _ thrift.WritableResult = (*respGetEntityGetByte)(nil)
 type GetEntityGetByteResultDeprecated = respGetEntityGetByte
 
 func newRespGetEntityGetByte() *respGetEntityGetByte {
-    return (&respGetEntityGetByte{})
+    return (&respGetEntityGetByte{}).setDefaults()
 }
 
 func (x *respGetEntityGetByte) GetSuccess() int8 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -1343,6 +1361,10 @@ func (x *respGetEntityGetByte) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetByte) setDefaults() *respGetEntityGetByte {
+    return x
+}
+
 type reqGetEntityGetI16 struct {
 }
 // Compile time interface enforcer
@@ -1352,7 +1374,7 @@ var _ thrift.Struct = (*reqGetEntityGetI16)(nil)
 type GetEntityGetI16ArgsDeprecated = reqGetEntityGetI16
 
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
-    return (&reqGetEntityGetI16{})
+    return (&reqGetEntityGetI16{}).setDefaults()
 }
 
 
@@ -1361,6 +1383,7 @@ func (x *reqGetEntityGetI16) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetI16"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1421,6 +1444,10 @@ func (x *reqGetEntityGetI16) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetI16) setDefaults() *reqGetEntityGetI16 {
+    return x
+}
+
 type respGetEntityGetI16 struct {
     Success *int16 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -1432,14 +1459,13 @@ var _ thrift.WritableResult = (*respGetEntityGetI16)(nil)
 type GetEntityGetI16ResultDeprecated = respGetEntityGetI16
 
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
-    return (&respGetEntityGetI16{})
+    return (&respGetEntityGetI16{}).setDefaults()
 }
 
 func (x *respGetEntityGetI16) GetSuccess() int16 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -1572,6 +1598,10 @@ func (x *respGetEntityGetI16) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetI16) setDefaults() *respGetEntityGetI16 {
+    return x
+}
+
 type reqGetEntityGetI32 struct {
 }
 // Compile time interface enforcer
@@ -1581,7 +1611,7 @@ var _ thrift.Struct = (*reqGetEntityGetI32)(nil)
 type GetEntityGetI32ArgsDeprecated = reqGetEntityGetI32
 
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
-    return (&reqGetEntityGetI32{})
+    return (&reqGetEntityGetI32{}).setDefaults()
 }
 
 
@@ -1590,6 +1620,7 @@ func (x *reqGetEntityGetI32) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetI32"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1650,6 +1681,10 @@ func (x *reqGetEntityGetI32) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetI32) setDefaults() *reqGetEntityGetI32 {
+    return x
+}
+
 type respGetEntityGetI32 struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -1661,14 +1696,13 @@ var _ thrift.WritableResult = (*respGetEntityGetI32)(nil)
 type GetEntityGetI32ResultDeprecated = respGetEntityGetI32
 
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
-    return (&respGetEntityGetI32{})
+    return (&respGetEntityGetI32{}).setDefaults()
 }
 
 func (x *respGetEntityGetI32) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -1801,6 +1835,10 @@ func (x *respGetEntityGetI32) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetI32) setDefaults() *respGetEntityGetI32 {
+    return x
+}
+
 type reqGetEntityGetI64 struct {
 }
 // Compile time interface enforcer
@@ -1810,7 +1848,7 @@ var _ thrift.Struct = (*reqGetEntityGetI64)(nil)
 type GetEntityGetI64ArgsDeprecated = reqGetEntityGetI64
 
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
-    return (&reqGetEntityGetI64{})
+    return (&reqGetEntityGetI64{}).setDefaults()
 }
 
 
@@ -1819,6 +1857,7 @@ func (x *reqGetEntityGetI64) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetI64"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -1879,6 +1918,10 @@ func (x *reqGetEntityGetI64) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetI64) setDefaults() *reqGetEntityGetI64 {
+    return x
+}
+
 type respGetEntityGetI64 struct {
     Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -1890,14 +1933,13 @@ var _ thrift.WritableResult = (*respGetEntityGetI64)(nil)
 type GetEntityGetI64ResultDeprecated = respGetEntityGetI64
 
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
-    return (&respGetEntityGetI64{})
+    return (&respGetEntityGetI64{}).setDefaults()
 }
 
 func (x *respGetEntityGetI64) GetSuccess() int64 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -2030,6 +2072,10 @@ func (x *respGetEntityGetI64) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetI64) setDefaults() *respGetEntityGetI64 {
+    return x
+}
+
 type reqGetEntityGetDouble struct {
 }
 // Compile time interface enforcer
@@ -2039,7 +2085,7 @@ var _ thrift.Struct = (*reqGetEntityGetDouble)(nil)
 type GetEntityGetDoubleArgsDeprecated = reqGetEntityGetDouble
 
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
-    return (&reqGetEntityGetDouble{})
+    return (&reqGetEntityGetDouble{}).setDefaults()
 }
 
 
@@ -2048,6 +2094,7 @@ func (x *reqGetEntityGetDouble) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetDouble"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2108,6 +2155,10 @@ func (x *reqGetEntityGetDouble) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetDouble) setDefaults() *reqGetEntityGetDouble {
+    return x
+}
+
 type respGetEntityGetDouble struct {
     Success *float64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -2119,14 +2170,13 @@ var _ thrift.WritableResult = (*respGetEntityGetDouble)(nil)
 type GetEntityGetDoubleResultDeprecated = respGetEntityGetDouble
 
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
-    return (&respGetEntityGetDouble{})
+    return (&respGetEntityGetDouble{}).setDefaults()
 }
 
 func (x *respGetEntityGetDouble) GetSuccess() float64 {
     if !x.IsSetSuccess() {
         return 0.0
     }
-
     return *x.Success
 }
 
@@ -2259,6 +2309,10 @@ func (x *respGetEntityGetDouble) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetDouble) setDefaults() *respGetEntityGetDouble {
+    return x
+}
+
 type reqGetEntityGetString struct {
 }
 // Compile time interface enforcer
@@ -2268,7 +2322,7 @@ var _ thrift.Struct = (*reqGetEntityGetString)(nil)
 type GetEntityGetStringArgsDeprecated = reqGetEntityGetString
 
 func newReqGetEntityGetString() *reqGetEntityGetString {
-    return (&reqGetEntityGetString{})
+    return (&reqGetEntityGetString{}).setDefaults()
 }
 
 
@@ -2277,6 +2331,7 @@ func (x *reqGetEntityGetString) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2337,6 +2392,10 @@ func (x *reqGetEntityGetString) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetString) setDefaults() *reqGetEntityGetString {
+    return x
+}
+
 type respGetEntityGetString struct {
     Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -2348,14 +2407,13 @@ var _ thrift.WritableResult = (*respGetEntityGetString)(nil)
 type GetEntityGetStringResultDeprecated = respGetEntityGetString
 
 func newRespGetEntityGetString() *respGetEntityGetString {
-    return (&respGetEntityGetString{})
+    return (&respGetEntityGetString{}).setDefaults()
 }
 
 func (x *respGetEntityGetString) GetSuccess() string {
     if !x.IsSetSuccess() {
         return ""
     }
-
     return *x.Success
 }
 
@@ -2488,6 +2546,10 @@ func (x *respGetEntityGetString) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetString) setDefaults() *respGetEntityGetString {
+    return x
+}
+
 type reqGetEntityGetBinary struct {
 }
 // Compile time interface enforcer
@@ -2497,7 +2559,7 @@ var _ thrift.Struct = (*reqGetEntityGetBinary)(nil)
 type GetEntityGetBinaryArgsDeprecated = reqGetEntityGetBinary
 
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
-    return (&reqGetEntityGetBinary{})
+    return (&reqGetEntityGetBinary{}).setDefaults()
 }
 
 
@@ -2506,6 +2568,7 @@ func (x *reqGetEntityGetBinary) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetBinary"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2566,6 +2629,10 @@ func (x *reqGetEntityGetBinary) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetBinary) setDefaults() *reqGetEntityGetBinary {
+    return x
+}
+
 type respGetEntityGetBinary struct {
     Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -2577,14 +2644,13 @@ var _ thrift.WritableResult = (*respGetEntityGetBinary)(nil)
 type GetEntityGetBinaryResultDeprecated = respGetEntityGetBinary
 
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
-    return (&respGetEntityGetBinary{})
+    return (&respGetEntityGetBinary{}).setDefaults()
 }
 
 func (x *respGetEntityGetBinary) GetSuccess() []byte {
     if !x.IsSetSuccess() {
         return []byte("")
     }
-
     return x.Success
 }
 
@@ -2713,6 +2779,10 @@ func (x *respGetEntityGetBinary) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetBinary) setDefaults() *respGetEntityGetBinary {
+    return x
+}
+
 type reqGetEntityGetMap struct {
 }
 // Compile time interface enforcer
@@ -2722,7 +2792,7 @@ var _ thrift.Struct = (*reqGetEntityGetMap)(nil)
 type GetEntityGetMapArgsDeprecated = reqGetEntityGetMap
 
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
-    return (&reqGetEntityGetMap{})
+    return (&reqGetEntityGetMap{}).setDefaults()
 }
 
 
@@ -2731,6 +2801,7 @@ func (x *reqGetEntityGetMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -2791,6 +2862,10 @@ func (x *reqGetEntityGetMap) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetMap) setDefaults() *reqGetEntityGetMap {
+    return x
+}
+
 type respGetEntityGetMap struct {
     Success map[string]string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -2802,14 +2877,13 @@ var _ thrift.WritableResult = (*respGetEntityGetMap)(nil)
 type GetEntityGetMapResultDeprecated = respGetEntityGetMap
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
-    return (&respGetEntityGetMap{})
+    return (&respGetEntityGetMap{}).setDefaults()
 }
 
 func (x *respGetEntityGetMap) GetSuccess() map[string]string {
     if !x.IsSetSuccess() {
         return make(map[string]string)
     }
-
     return x.Success
 }
 
@@ -2984,6 +3058,10 @@ func (x *respGetEntityGetMap) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetMap) setDefaults() *respGetEntityGetMap {
+    return x
+}
+
 type reqGetEntityGetSet struct {
 }
 // Compile time interface enforcer
@@ -2993,7 +3071,7 @@ var _ thrift.Struct = (*reqGetEntityGetSet)(nil)
 type GetEntityGetSetArgsDeprecated = reqGetEntityGetSet
 
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
-    return (&reqGetEntityGetSet{})
+    return (&reqGetEntityGetSet{}).setDefaults()
 }
 
 
@@ -3002,6 +3080,7 @@ func (x *reqGetEntityGetSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3062,6 +3141,10 @@ func (x *reqGetEntityGetSet) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetSet) setDefaults() *reqGetEntityGetSet {
+    return x
+}
+
 type respGetEntityGetSet struct {
     Success []string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -3073,14 +3156,13 @@ var _ thrift.WritableResult = (*respGetEntityGetSet)(nil)
 type GetEntityGetSetResultDeprecated = respGetEntityGetSet
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
-    return (&respGetEntityGetSet{})
+    return (&respGetEntityGetSet{}).setDefaults()
 }
 
 func (x *respGetEntityGetSet) GetSuccess() []string {
     if !x.IsSetSuccess() {
         return make([]string, 0)
     }
-
     return x.Success
 }
 
@@ -3238,6 +3320,10 @@ func (x *respGetEntityGetSet) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetSet) setDefaults() *respGetEntityGetSet {
+    return x
+}
+
 type reqGetEntityGetList struct {
 }
 // Compile time interface enforcer
@@ -3247,7 +3333,7 @@ var _ thrift.Struct = (*reqGetEntityGetList)(nil)
 type GetEntityGetListArgsDeprecated = reqGetEntityGetList
 
 func newReqGetEntityGetList() *reqGetEntityGetList {
-    return (&reqGetEntityGetList{})
+    return (&reqGetEntityGetList{}).setDefaults()
 }
 
 
@@ -3256,6 +3342,7 @@ func (x *reqGetEntityGetList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -3316,6 +3403,10 @@ func (x *reqGetEntityGetList) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetList) setDefaults() *reqGetEntityGetList {
+    return x
+}
+
 type respGetEntityGetList struct {
     Success []string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -3327,14 +3418,13 @@ var _ thrift.WritableResult = (*respGetEntityGetList)(nil)
 type GetEntityGetListResultDeprecated = respGetEntityGetList
 
 func newRespGetEntityGetList() *respGetEntityGetList {
-    return (&respGetEntityGetList{})
+    return (&respGetEntityGetList{}).setDefaults()
 }
 
 func (x *respGetEntityGetList) GetSuccess() []string {
     if !x.IsSetSuccess() {
         return make([]string, 0)
     }
-
     return x.Success
 }
 
@@ -3492,6 +3582,10 @@ func (x *respGetEntityGetList) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetList) setDefaults() *respGetEntityGetList {
+    return x
+}
+
 type reqGetEntityGetLegacyStuff struct {
     NumNeg2 int64 `thrift:"numNeg2,-2" json:"numNeg2" db:"numNeg2"`
     NumNeg1 int64 `thrift:"numNeg1,-1" json:"numNeg1" db:"numNeg1"`
@@ -3504,10 +3598,7 @@ var _ thrift.Struct = (*reqGetEntityGetLegacyStuff)(nil)
 type GetEntityGetLegacyStuffArgsDeprecated = reqGetEntityGetLegacyStuff
 
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
-    return (&reqGetEntityGetLegacyStuff{}).
-        SetNumNeg2NonCompat(0).
-        SetNumNeg1NonCompat(0).
-        SetNumPosNonCompat(0)
+    return (&reqGetEntityGetLegacyStuff{}).setDefaults()
 }
 
 func (x *reqGetEntityGetLegacyStuff) GetNumNeg2() int64 {
@@ -3652,11 +3743,9 @@ func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Encoder) error {
     if err := x.writeField_2(p); err != nil {
         return err
     }
-
     if err := x.writeField_1(p); err != nil {
         return err
     }
-
     if err := x.writeField1(p); err != nil {
         return err
     }
@@ -3729,6 +3818,13 @@ func (x *reqGetEntityGetLegacyStuff) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetLegacyStuff) setDefaults() *reqGetEntityGetLegacyStuff {
+    return x.
+        SetNumNeg2NonCompat(0).
+        SetNumNeg1NonCompat(0).
+        SetNumPosNonCompat(0)
+}
+
 type respGetEntityGetLegacyStuff struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -3740,14 +3836,13 @@ var _ thrift.WritableResult = (*respGetEntityGetLegacyStuff)(nil)
 type GetEntityGetLegacyStuffResultDeprecated = respGetEntityGetLegacyStuff
 
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
-    return (&respGetEntityGetLegacyStuff{})
+    return (&respGetEntityGetLegacyStuff{}).setDefaults()
 }
 
 func (x *respGetEntityGetLegacyStuff) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -3880,6 +3975,10 @@ func (x *respGetEntityGetLegacyStuff) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetLegacyStuff) setDefaults() *respGetEntityGetLegacyStuff {
+    return x
+}
+
 type reqGetEntityGetCtxCollision struct {
     Ctx int64 `thrift:"ctx,1" json:"ctx" db:"ctx"`
 }
@@ -3890,8 +3989,7 @@ var _ thrift.Struct = (*reqGetEntityGetCtxCollision)(nil)
 type GetEntityGetCtxCollisionArgsDeprecated = reqGetEntityGetCtxCollision
 
 func newReqGetEntityGetCtxCollision() *reqGetEntityGetCtxCollision {
-    return (&reqGetEntityGetCtxCollision{}).
-        SetCtxNonCompat(0)
+    return (&reqGetEntityGetCtxCollision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetCtxCollision) GetCtx() int64 {
@@ -4011,6 +4109,11 @@ func (x *reqGetEntityGetCtxCollision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetCtxCollision) setDefaults() *reqGetEntityGetCtxCollision {
+    return x.
+        SetCtxNonCompat(0)
+}
+
 type respGetEntityGetCtxCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -4022,14 +4125,13 @@ var _ thrift.WritableResult = (*respGetEntityGetCtxCollision)(nil)
 type GetEntityGetCtxCollisionResultDeprecated = respGetEntityGetCtxCollision
 
 func newRespGetEntityGetCtxCollision() *respGetEntityGetCtxCollision {
-    return (&respGetEntityGetCtxCollision{})
+    return (&respGetEntityGetCtxCollision{}).setDefaults()
 }
 
 func (x *respGetEntityGetCtxCollision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -4162,6 +4264,10 @@ func (x *respGetEntityGetCtxCollision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetCtxCollision) setDefaults() *respGetEntityGetCtxCollision {
+    return x
+}
+
 type reqGetEntityGetCtx1Collision struct {
     Ctx int64 `thrift:"ctx,1" json:"ctx" db:"ctx"`
     Ctx1 int64 `thrift:"ctx1,2" json:"ctx1" db:"ctx1"`
@@ -4173,9 +4279,7 @@ var _ thrift.Struct = (*reqGetEntityGetCtx1Collision)(nil)
 type GetEntityGetCtx1CollisionArgsDeprecated = reqGetEntityGetCtx1Collision
 
 func newReqGetEntityGetCtx1Collision() *reqGetEntityGetCtx1Collision {
-    return (&reqGetEntityGetCtx1Collision{}).
-        SetCtxNonCompat(0).
-        SetCtx1NonCompat(0)
+    return (&reqGetEntityGetCtx1Collision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetCtx1Collision) GetCtx() int64 {
@@ -4276,7 +4380,6 @@ func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -4346,6 +4449,12 @@ func (x *reqGetEntityGetCtx1Collision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetCtx1Collision) setDefaults() *reqGetEntityGetCtx1Collision {
+    return x.
+        SetCtxNonCompat(0).
+        SetCtx1NonCompat(0)
+}
+
 type respGetEntityGetCtx1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -4357,14 +4466,13 @@ var _ thrift.WritableResult = (*respGetEntityGetCtx1Collision)(nil)
 type GetEntityGetCtx1CollisionResultDeprecated = respGetEntityGetCtx1Collision
 
 func newRespGetEntityGetCtx1Collision() *respGetEntityGetCtx1Collision {
-    return (&respGetEntityGetCtx1Collision{})
+    return (&respGetEntityGetCtx1Collision{}).setDefaults()
 }
 
 func (x *respGetEntityGetCtx1Collision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -4497,6 +4605,10 @@ func (x *respGetEntityGetCtx1Collision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetCtx1Collision) setDefaults() *respGetEntityGetCtx1Collision {
+    return x
+}
+
 type reqGetEntityGetContextCollision struct {
     Context int64 `thrift:"context,1" json:"context" db:"context"`
 }
@@ -4507,8 +4619,7 @@ var _ thrift.Struct = (*reqGetEntityGetContextCollision)(nil)
 type GetEntityGetContextCollisionArgsDeprecated = reqGetEntityGetContextCollision
 
 func newReqGetEntityGetContextCollision() *reqGetEntityGetContextCollision {
-    return (&reqGetEntityGetContextCollision{}).
-        SetContextNonCompat(0)
+    return (&reqGetEntityGetContextCollision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetContextCollision) GetContext() int64 {
@@ -4628,6 +4739,11 @@ func (x *reqGetEntityGetContextCollision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetContextCollision) setDefaults() *reqGetEntityGetContextCollision {
+    return x.
+        SetContextNonCompat(0)
+}
+
 type respGetEntityGetContextCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -4639,14 +4755,13 @@ var _ thrift.WritableResult = (*respGetEntityGetContextCollision)(nil)
 type GetEntityGetContextCollisionResultDeprecated = respGetEntityGetContextCollision
 
 func newRespGetEntityGetContextCollision() *respGetEntityGetContextCollision {
-    return (&respGetEntityGetContextCollision{})
+    return (&respGetEntityGetContextCollision{}).setDefaults()
 }
 
 func (x *respGetEntityGetContextCollision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -4779,6 +4894,10 @@ func (x *respGetEntityGetContextCollision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetContextCollision) setDefaults() *respGetEntityGetContextCollision {
+    return x
+}
+
 type reqGetEntityGetOutCollision struct {
     Out int64 `thrift:"out,1" json:"out" db:"out"`
 }
@@ -4789,8 +4908,7 @@ var _ thrift.Struct = (*reqGetEntityGetOutCollision)(nil)
 type GetEntityGetOutCollisionArgsDeprecated = reqGetEntityGetOutCollision
 
 func newReqGetEntityGetOutCollision() *reqGetEntityGetOutCollision {
-    return (&reqGetEntityGetOutCollision{}).
-        SetOutNonCompat(0)
+    return (&reqGetEntityGetOutCollision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetOutCollision) GetOut() int64 {
@@ -4910,6 +5028,11 @@ func (x *reqGetEntityGetOutCollision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetOutCollision) setDefaults() *reqGetEntityGetOutCollision {
+    return x.
+        SetOutNonCompat(0)
+}
+
 type respGetEntityGetOutCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -4921,14 +5044,13 @@ var _ thrift.WritableResult = (*respGetEntityGetOutCollision)(nil)
 type GetEntityGetOutCollisionResultDeprecated = respGetEntityGetOutCollision
 
 func newRespGetEntityGetOutCollision() *respGetEntityGetOutCollision {
-    return (&respGetEntityGetOutCollision{})
+    return (&respGetEntityGetOutCollision{}).setDefaults()
 }
 
 func (x *respGetEntityGetOutCollision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -5061,6 +5183,10 @@ func (x *respGetEntityGetOutCollision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetOutCollision) setDefaults() *respGetEntityGetOutCollision {
+    return x
+}
+
 type reqGetEntityGetOut1Collision struct {
     Out int64 `thrift:"out,1" json:"out" db:"out"`
     Out1 int64 `thrift:"out1,2" json:"out1" db:"out1"`
@@ -5072,9 +5198,7 @@ var _ thrift.Struct = (*reqGetEntityGetOut1Collision)(nil)
 type GetEntityGetOut1CollisionArgsDeprecated = reqGetEntityGetOut1Collision
 
 func newReqGetEntityGetOut1Collision() *reqGetEntityGetOut1Collision {
-    return (&reqGetEntityGetOut1Collision{}).
-        SetOutNonCompat(0).
-        SetOut1NonCompat(0)
+    return (&reqGetEntityGetOut1Collision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetOut1Collision) GetOut() int64 {
@@ -5175,7 +5299,6 @@ func (x *reqGetEntityGetOut1Collision) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -5245,6 +5368,12 @@ func (x *reqGetEntityGetOut1Collision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetOut1Collision) setDefaults() *reqGetEntityGetOut1Collision {
+    return x.
+        SetOutNonCompat(0).
+        SetOut1NonCompat(0)
+}
+
 type respGetEntityGetOut1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -5256,14 +5385,13 @@ var _ thrift.WritableResult = (*respGetEntityGetOut1Collision)(nil)
 type GetEntityGetOut1CollisionResultDeprecated = respGetEntityGetOut1Collision
 
 func newRespGetEntityGetOut1Collision() *respGetEntityGetOut1Collision {
-    return (&respGetEntityGetOut1Collision{})
+    return (&respGetEntityGetOut1Collision{}).setDefaults()
 }
 
 func (x *respGetEntityGetOut1Collision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -5396,6 +5524,10 @@ func (x *respGetEntityGetOut1Collision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetOut1Collision) setDefaults() *respGetEntityGetOut1Collision {
+    return x
+}
+
 type reqGetEntityGetInCollision struct {
     In int64 `thrift:"in,1" json:"in" db:"in"`
 }
@@ -5406,8 +5538,7 @@ var _ thrift.Struct = (*reqGetEntityGetInCollision)(nil)
 type GetEntityGetInCollisionArgsDeprecated = reqGetEntityGetInCollision
 
 func newReqGetEntityGetInCollision() *reqGetEntityGetInCollision {
-    return (&reqGetEntityGetInCollision{}).
-        SetInNonCompat(0)
+    return (&reqGetEntityGetInCollision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetInCollision) GetIn() int64 {
@@ -5527,6 +5658,11 @@ func (x *reqGetEntityGetInCollision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetInCollision) setDefaults() *reqGetEntityGetInCollision {
+    return x.
+        SetInNonCompat(0)
+}
+
 type respGetEntityGetInCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -5538,14 +5674,13 @@ var _ thrift.WritableResult = (*respGetEntityGetInCollision)(nil)
 type GetEntityGetInCollisionResultDeprecated = respGetEntityGetInCollision
 
 func newRespGetEntityGetInCollision() *respGetEntityGetInCollision {
-    return (&respGetEntityGetInCollision{})
+    return (&respGetEntityGetInCollision{}).setDefaults()
 }
 
 func (x *respGetEntityGetInCollision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -5678,6 +5813,10 @@ func (x *respGetEntityGetInCollision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetInCollision) setDefaults() *respGetEntityGetInCollision {
+    return x
+}
+
 type reqGetEntityGetIn1Collision struct {
     In int64 `thrift:"in,1" json:"in" db:"in"`
     In1 int64 `thrift:"in1,2" json:"in1" db:"in1"`
@@ -5689,9 +5828,7 @@ var _ thrift.Struct = (*reqGetEntityGetIn1Collision)(nil)
 type GetEntityGetIn1CollisionArgsDeprecated = reqGetEntityGetIn1Collision
 
 func newReqGetEntityGetIn1Collision() *reqGetEntityGetIn1Collision {
-    return (&reqGetEntityGetIn1Collision{}).
-        SetInNonCompat(0).
-        SetIn1NonCompat(0)
+    return (&reqGetEntityGetIn1Collision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetIn1Collision) GetIn() int64 {
@@ -5792,7 +5929,6 @@ func (x *reqGetEntityGetIn1Collision) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -5862,6 +5998,12 @@ func (x *reqGetEntityGetIn1Collision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetIn1Collision) setDefaults() *reqGetEntityGetIn1Collision {
+    return x.
+        SetInNonCompat(0).
+        SetIn1NonCompat(0)
+}
+
 type respGetEntityGetIn1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -5873,14 +6015,13 @@ var _ thrift.WritableResult = (*respGetEntityGetIn1Collision)(nil)
 type GetEntityGetIn1CollisionResultDeprecated = respGetEntityGetIn1Collision
 
 func newRespGetEntityGetIn1Collision() *respGetEntityGetIn1Collision {
-    return (&respGetEntityGetIn1Collision{})
+    return (&respGetEntityGetIn1Collision{}).setDefaults()
 }
 
 func (x *respGetEntityGetIn1Collision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -6013,6 +6154,10 @@ func (x *respGetEntityGetIn1Collision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetIn1Collision) setDefaults() *respGetEntityGetIn1Collision {
+    return x
+}
+
 type reqGetEntityGetErrCollision struct {
     Err int64 `thrift:"err,1" json:"err" db:"err"`
 }
@@ -6023,8 +6168,7 @@ var _ thrift.Struct = (*reqGetEntityGetErrCollision)(nil)
 type GetEntityGetErrCollisionArgsDeprecated = reqGetEntityGetErrCollision
 
 func newReqGetEntityGetErrCollision() *reqGetEntityGetErrCollision {
-    return (&reqGetEntityGetErrCollision{}).
-        SetErrNonCompat(0)
+    return (&reqGetEntityGetErrCollision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetErrCollision) GetErr() int64 {
@@ -6144,6 +6288,11 @@ func (x *reqGetEntityGetErrCollision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetErrCollision) setDefaults() *reqGetEntityGetErrCollision {
+    return x.
+        SetErrNonCompat(0)
+}
+
 type respGetEntityGetErrCollision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -6155,14 +6304,13 @@ var _ thrift.WritableResult = (*respGetEntityGetErrCollision)(nil)
 type GetEntityGetErrCollisionResultDeprecated = respGetEntityGetErrCollision
 
 func newRespGetEntityGetErrCollision() *respGetEntityGetErrCollision {
-    return (&respGetEntityGetErrCollision{})
+    return (&respGetEntityGetErrCollision{}).setDefaults()
 }
 
 func (x *respGetEntityGetErrCollision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -6295,6 +6443,10 @@ func (x *respGetEntityGetErrCollision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetErrCollision) setDefaults() *respGetEntityGetErrCollision {
+    return x
+}
+
 type reqGetEntityGetErr1Collision struct {
     Err int64 `thrift:"err,1" json:"err" db:"err"`
     Err1 int64 `thrift:"err1,2" json:"err1" db:"err1"`
@@ -6306,9 +6458,7 @@ var _ thrift.Struct = (*reqGetEntityGetErr1Collision)(nil)
 type GetEntityGetErr1CollisionArgsDeprecated = reqGetEntityGetErr1Collision
 
 func newReqGetEntityGetErr1Collision() *reqGetEntityGetErr1Collision {
-    return (&reqGetEntityGetErr1Collision{}).
-        SetErrNonCompat(0).
-        SetErr1NonCompat(0)
+    return (&reqGetEntityGetErr1Collision{}).setDefaults()
 }
 
 func (x *reqGetEntityGetErr1Collision) GetErr() int64 {
@@ -6409,7 +6559,6 @@ func (x *reqGetEntityGetErr1Collision) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -6479,6 +6628,12 @@ func (x *reqGetEntityGetErr1Collision) String() string {
 
     return sb.String()
 }
+func (x *reqGetEntityGetErr1Collision) setDefaults() *reqGetEntityGetErr1Collision {
+    return x.
+        SetErrNonCompat(0).
+        SetErr1NonCompat(0)
+}
+
 type respGetEntityGetErr1Collision struct {
     Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -6490,14 +6645,13 @@ var _ thrift.WritableResult = (*respGetEntityGetErr1Collision)(nil)
 type GetEntityGetErr1CollisionResultDeprecated = respGetEntityGetErr1Collision
 
 func newRespGetEntityGetErr1Collision() *respGetEntityGetErr1Collision {
-    return (&respGetEntityGetErr1Collision{})
+    return (&respGetEntityGetErr1Collision{}).setDefaults()
 }
 
 func (x *respGetEntityGetErr1Collision) GetSuccess() int32 {
     if !x.IsSetSuccess() {
         return 0
     }
-
     return *x.Success
 }
 
@@ -6630,6 +6784,10 @@ func (x *respGetEntityGetErr1Collision) String() string {
 
     return sb.String()
 }
+func (x *respGetEntityGetErr1Collision) setDefaults() *respGetEntityGetErr1Collision {
+    return x
+}
+
 
 
 type GetEntityProcessor struct {

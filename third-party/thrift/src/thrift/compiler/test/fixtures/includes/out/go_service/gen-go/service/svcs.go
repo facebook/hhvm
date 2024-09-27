@@ -138,16 +138,13 @@ var _ thrift.Struct = (*reqMyServiceQuery)(nil)
 type MyServiceQueryArgsDeprecated = reqMyServiceQuery
 
 func newReqMyServiceQuery() *reqMyServiceQuery {
-    return (&reqMyServiceQuery{}).
-        SetSNonCompat(module.NewMyStruct()).
-        SetINonCompat(includes.NewIncluded())
+    return (&reqMyServiceQuery{}).setDefaults()
 }
 
 func (x *reqMyServiceQuery) GetS() *module.MyStruct {
     if !x.IsSetS() {
         return nil
     }
-
     return x.S
 }
 
@@ -155,7 +152,6 @@ func (x *reqMyServiceQuery) GetI() *includes.Included {
     if !x.IsSetI() {
         return nil
     }
-
     return x.I
 }
 
@@ -283,7 +279,6 @@ func (x *reqMyServiceQuery) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -353,6 +348,12 @@ func (x *reqMyServiceQuery) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceQuery) setDefaults() *reqMyServiceQuery {
+    return x.
+        SetSNonCompat(module.NewMyStruct()).
+        SetINonCompat(includes.NewIncluded())
+}
+
 type respMyServiceQuery struct {
 }
 // Compile time interface enforcer
@@ -363,7 +364,7 @@ var _ thrift.WritableResult = (*respMyServiceQuery)(nil)
 type MyServiceQueryResultDeprecated = respMyServiceQuery
 
 func newRespMyServiceQuery() *respMyServiceQuery {
-    return (&respMyServiceQuery{})
+    return (&respMyServiceQuery{}).setDefaults()
 }
 
 
@@ -376,6 +377,7 @@ func (x *respMyServiceQuery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -436,6 +438,10 @@ func (x *respMyServiceQuery) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceQuery) setDefaults() *respMyServiceQuery {
+    return x
+}
+
 type reqMyServiceHasArgDocs struct {
     S *module.MyStruct `thrift:"s,1" json:"s" db:"s"`
     I *includes.Included `thrift:"i,2" json:"i" db:"i"`
@@ -447,16 +453,13 @@ var _ thrift.Struct = (*reqMyServiceHasArgDocs)(nil)
 type MyServiceHasArgDocsArgsDeprecated = reqMyServiceHasArgDocs
 
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
-    return (&reqMyServiceHasArgDocs{}).
-        SetSNonCompat(module.NewMyStruct()).
-        SetINonCompat(includes.NewIncluded())
+    return (&reqMyServiceHasArgDocs{}).setDefaults()
 }
 
 func (x *reqMyServiceHasArgDocs) GetS() *module.MyStruct {
     if !x.IsSetS() {
         return nil
     }
-
     return x.S
 }
 
@@ -464,7 +467,6 @@ func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
     if !x.IsSetI() {
         return nil
     }
-
     return x.I
 }
 
@@ -592,7 +594,6 @@ func (x *reqMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -662,6 +663,12 @@ func (x *reqMyServiceHasArgDocs) String() string {
 
     return sb.String()
 }
+func (x *reqMyServiceHasArgDocs) setDefaults() *reqMyServiceHasArgDocs {
+    return x.
+        SetSNonCompat(module.NewMyStruct()).
+        SetINonCompat(includes.NewIncluded())
+}
+
 type respMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
@@ -672,7 +679,7 @@ var _ thrift.WritableResult = (*respMyServiceHasArgDocs)(nil)
 type MyServiceHasArgDocsResultDeprecated = respMyServiceHasArgDocs
 
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
-    return (&respMyServiceHasArgDocs{})
+    return (&respMyServiceHasArgDocs{}).setDefaults()
 }
 
 
@@ -685,6 +692,7 @@ func (x *respMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceHasArgDocs"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
+
 
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
@@ -745,6 +753,10 @@ func (x *respMyServiceHasArgDocs) String() string {
 
     return sb.String()
 }
+func (x *respMyServiceHasArgDocs) setDefaults() *respMyServiceHasArgDocs {
+    return x
+}
+
 
 
 type MyServiceProcessor struct {

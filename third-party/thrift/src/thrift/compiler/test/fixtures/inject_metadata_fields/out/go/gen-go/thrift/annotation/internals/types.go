@@ -25,8 +25,7 @@ type InjectMetadataFields struct {
 var _ thrift.Struct = (*InjectMetadataFields)(nil)
 
 func NewInjectMetadataFields() *InjectMetadataFields {
-    return (&InjectMetadataFields{}).
-        SetTypeNonCompat("")
+    return (&InjectMetadataFields{}).setDefaults()
 }
 
 func (x *InjectMetadataFields) GetType() string {
@@ -146,6 +145,11 @@ func (x *InjectMetadataFields) String() string {
 
     return sb.String()
 }
+func (x *InjectMetadataFields) setDefaults() *InjectMetadataFields {
+    return x.
+        SetTypeNonCompat("")
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

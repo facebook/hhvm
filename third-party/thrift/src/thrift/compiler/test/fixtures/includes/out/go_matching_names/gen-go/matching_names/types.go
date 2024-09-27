@@ -27,15 +27,13 @@ type IncludesAlso struct {
 var _ thrift.Struct = (*IncludesAlso)(nil)
 
 func NewIncludesAlso() *IncludesAlso {
-    return (&IncludesAlso{}).
-        SetAlsoNonCompat(includesAlso.NewAlso())
+    return (&IncludesAlso{}).setDefaults()
 }
 
 func (x *IncludesAlso) GetAlso() *includesAlso.Also {
     if !x.IsSetAlso() {
         return nil
     }
-
     return x.Also
 }
 
@@ -169,6 +167,11 @@ func (x *IncludesAlso) String() string {
 
     return sb.String()
 }
+func (x *IncludesAlso) setDefaults() *IncludesAlso {
+    return x.
+        SetAlsoNonCompat(includesAlso.NewAlso())
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

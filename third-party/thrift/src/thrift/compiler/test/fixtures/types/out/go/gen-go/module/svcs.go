@@ -133,15 +133,13 @@ var _ thrift.Struct = (*reqSomeServiceBounceMap)(nil)
 type SomeServiceBounceMapArgsDeprecated = reqSomeServiceBounceMap
 
 func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
-    return (&reqSomeServiceBounceMap{}).
-        SetMNonCompat(included.NewSomeMap())
+    return (&reqSomeServiceBounceMap{}).setDefaults()
 }
 
 func (x *reqSomeServiceBounceMap) GetM() included.SomeMap {
     if !x.IsSetM() {
         return included.NewSomeMap()
     }
-
     return x.M
 }
 
@@ -263,6 +261,11 @@ func (x *reqSomeServiceBounceMap) String() string {
 
     return sb.String()
 }
+func (x *reqSomeServiceBounceMap) setDefaults() *reqSomeServiceBounceMap {
+    return x.
+        SetMNonCompat(included.NewSomeMap())
+}
+
 type respSomeServiceBounceMap struct {
     Success included.SomeMap `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -274,14 +277,13 @@ var _ thrift.WritableResult = (*respSomeServiceBounceMap)(nil)
 type SomeServiceBounceMapResultDeprecated = respSomeServiceBounceMap
 
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
-    return (&respSomeServiceBounceMap{})
+    return (&respSomeServiceBounceMap{}).setDefaults()
 }
 
 func (x *respSomeServiceBounceMap) GetSuccess() included.SomeMap {
     if !x.IsSetSuccess() {
         return included.NewSomeMap()
     }
-
     return x.Success
 }
 
@@ -411,6 +413,10 @@ func (x *respSomeServiceBounceMap) String() string {
 
     return sb.String()
 }
+func (x *respSomeServiceBounceMap) setDefaults() *respSomeServiceBounceMap {
+    return x
+}
+
 type reqSomeServiceBinaryKeyedMap struct {
     R []int64 `thrift:"r,1" json:"r" db:"r"`
 }
@@ -421,15 +427,13 @@ var _ thrift.Struct = (*reqSomeServiceBinaryKeyedMap)(nil)
 type SomeServiceBinaryKeyedMapArgsDeprecated = reqSomeServiceBinaryKeyedMap
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
-    return (&reqSomeServiceBinaryKeyedMap{}).
-        SetRNonCompat(make([]int64, 0))
+    return (&reqSomeServiceBinaryKeyedMap{}).setDefaults()
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     if !x.IsSetR() {
         return make([]int64, 0)
     }
-
     return x.R
 }
 
@@ -579,6 +583,11 @@ func (x *reqSomeServiceBinaryKeyedMap) String() string {
 
     return sb.String()
 }
+func (x *reqSomeServiceBinaryKeyedMap) setDefaults() *reqSomeServiceBinaryKeyedMap {
+    return x.
+        SetRNonCompat(make([]int64, 0))
+}
+
 type respSomeServiceBinaryKeyedMap struct {
     Success map[*TBinary]int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -590,14 +599,13 @@ var _ thrift.WritableResult = (*respSomeServiceBinaryKeyedMap)(nil)
 type SomeServiceBinaryKeyedMapResultDeprecated = respSomeServiceBinaryKeyedMap
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
-    return (&respSomeServiceBinaryKeyedMap{})
+    return (&respSomeServiceBinaryKeyedMap{}).setDefaults()
 }
 
 func (x *respSomeServiceBinaryKeyedMap) GetSuccess() map[*TBinary]int64 {
     if !x.IsSetSuccess() {
         return make(map[*TBinary]int64)
     }
-
     return x.Success
 }
 
@@ -777,6 +785,10 @@ func (x *respSomeServiceBinaryKeyedMap) String() string {
 
     return sb.String()
 }
+func (x *respSomeServiceBinaryKeyedMap) setDefaults() *respSomeServiceBinaryKeyedMap {
+    return x
+}
+
 
 
 type SomeServiceProcessor struct {

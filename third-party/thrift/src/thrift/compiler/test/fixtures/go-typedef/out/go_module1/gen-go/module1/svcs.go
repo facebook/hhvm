@@ -158,8 +158,7 @@ var _ thrift.Struct = (*reqFinderByPlate)(nil)
 type FinderByPlateArgsDeprecated = reqFinderByPlate
 
 func newReqFinderByPlate() *reqFinderByPlate {
-    return (&reqFinderByPlate{}).
-        SetPlateNonCompat(NewPlate())
+    return (&reqFinderByPlate{}).setDefaults()
 }
 
 func (x *reqFinderByPlate) GetPlate() Plate {
@@ -280,6 +279,11 @@ func (x *reqFinderByPlate) String() string {
 
     return sb.String()
 }
+func (x *reqFinderByPlate) setDefaults() *reqFinderByPlate {
+    return x.
+        SetPlateNonCompat(NewPlate())
+}
+
 type respFinderByPlate struct {
     Success *Automobile `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -291,14 +295,13 @@ var _ thrift.WritableResult = (*respFinderByPlate)(nil)
 type FinderByPlateResultDeprecated = respFinderByPlate
 
 func newRespFinderByPlate() *respFinderByPlate {
-    return (&respFinderByPlate{})
+    return (&respFinderByPlate{}).setDefaults()
 }
 
 func (x *respFinderByPlate) GetSuccess() *Automobile {
     if !x.IsSetSuccess() {
         return nil
     }
-
     return x.Success
 }
 
@@ -436,6 +439,10 @@ func (x *respFinderByPlate) String() string {
 
     return sb.String()
 }
+func (x *respFinderByPlate) setDefaults() *respFinderByPlate {
+    return x
+}
+
 type reqFinderAliasByPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
@@ -446,8 +453,7 @@ var _ thrift.Struct = (*reqFinderAliasByPlate)(nil)
 type FinderAliasByPlateArgsDeprecated = reqFinderAliasByPlate
 
 func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
-    return (&reqFinderAliasByPlate{}).
-        SetPlateNonCompat(NewPlate())
+    return (&reqFinderAliasByPlate{}).setDefaults()
 }
 
 func (x *reqFinderAliasByPlate) GetPlate() Plate {
@@ -568,6 +574,11 @@ func (x *reqFinderAliasByPlate) String() string {
 
     return sb.String()
 }
+func (x *reqFinderAliasByPlate) setDefaults() *reqFinderAliasByPlate {
+    return x.
+        SetPlateNonCompat(NewPlate())
+}
+
 type respFinderAliasByPlate struct {
     Success *Car `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -579,14 +590,13 @@ var _ thrift.WritableResult = (*respFinderAliasByPlate)(nil)
 type FinderAliasByPlateResultDeprecated = respFinderAliasByPlate
 
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
-    return (&respFinderAliasByPlate{})
+    return (&respFinderAliasByPlate{}).setDefaults()
 }
 
 func (x *respFinderAliasByPlate) GetSuccess() *Car {
     if !x.IsSetSuccess() {
         return nil
     }
-
     return x.Success
 }
 
@@ -724,6 +734,10 @@ func (x *respFinderAliasByPlate) String() string {
 
     return sb.String()
 }
+func (x *respFinderAliasByPlate) setDefaults() *respFinderAliasByPlate {
+    return x
+}
+
 type reqFinderPreviousPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
@@ -734,8 +748,7 @@ var _ thrift.Struct = (*reqFinderPreviousPlate)(nil)
 type FinderPreviousPlateArgsDeprecated = reqFinderPreviousPlate
 
 func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
-    return (&reqFinderPreviousPlate{}).
-        SetPlateNonCompat(NewPlate())
+    return (&reqFinderPreviousPlate{}).setDefaults()
 }
 
 func (x *reqFinderPreviousPlate) GetPlate() Plate {
@@ -856,6 +869,11 @@ func (x *reqFinderPreviousPlate) String() string {
 
     return sb.String()
 }
+func (x *reqFinderPreviousPlate) setDefaults() *reqFinderPreviousPlate {
+    return x.
+        SetPlateNonCompat(NewPlate())
+}
+
 type respFinderPreviousPlate struct {
     Success *Plate `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
@@ -867,14 +885,13 @@ var _ thrift.WritableResult = (*respFinderPreviousPlate)(nil)
 type FinderPreviousPlateResultDeprecated = respFinderPreviousPlate
 
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
-    return (&respFinderPreviousPlate{})
+    return (&respFinderPreviousPlate{}).setDefaults()
 }
 
 func (x *respFinderPreviousPlate) GetSuccess() Plate {
     if !x.IsSetSuccess() {
         return NewPlate()
     }
-
     return *x.Success
 }
 
@@ -1008,6 +1025,10 @@ func (x *respFinderPreviousPlate) String() string {
 
     return sb.String()
 }
+func (x *respFinderPreviousPlate) setDefaults() *respFinderPreviousPlate {
+    return x
+}
+
 
 
 type FinderProcessor struct {

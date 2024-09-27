@@ -27,8 +27,7 @@ type Fields struct {
 var _ thrift.Struct = (*Fields)(nil)
 
 func NewFields() *Fields {
-    return (&Fields{}).
-        SetInjectedFieldNonCompat("")
+    return (&Fields{}).setDefaults()
 }
 
 func (x *Fields) GetInjectedField() string {
@@ -148,6 +147,11 @@ func (x *Fields) String() string {
 
     return sb.String()
 }
+func (x *Fields) setDefaults() *Fields {
+    return x.
+        SetInjectedFieldNonCompat("")
+}
+
 
 type FieldsInjectedToEmptyStruct struct {
     InjectedField string `thrift:"injected_field,-1100" json:"injected_field" db:"injected_field"`
@@ -156,8 +160,7 @@ type FieldsInjectedToEmptyStruct struct {
 var _ thrift.Struct = (*FieldsInjectedToEmptyStruct)(nil)
 
 func NewFieldsInjectedToEmptyStruct() *FieldsInjectedToEmptyStruct {
-    return (&FieldsInjectedToEmptyStruct{}).
-        SetInjectedFieldNonCompat("")
+    return (&FieldsInjectedToEmptyStruct{}).setDefaults()
 }
 
 func (x *FieldsInjectedToEmptyStruct) GetInjectedField() string {
@@ -277,6 +280,11 @@ func (x *FieldsInjectedToEmptyStruct) String() string {
 
     return sb.String()
 }
+func (x *FieldsInjectedToEmptyStruct) setDefaults() *FieldsInjectedToEmptyStruct {
+    return x.
+        SetInjectedFieldNonCompat("")
+}
+
 
 type FieldsInjectedToStruct struct {
     InjectedField string `thrift:"injected_field,-1100" json:"injected_field" db:"injected_field"`
@@ -286,9 +294,7 @@ type FieldsInjectedToStruct struct {
 var _ thrift.Struct = (*FieldsInjectedToStruct)(nil)
 
 func NewFieldsInjectedToStruct() *FieldsInjectedToStruct {
-    return (&FieldsInjectedToStruct{}).
-        SetInjectedFieldNonCompat("").
-        SetStringFieldNonCompat("")
+    return (&FieldsInjectedToStruct{}).setDefaults()
 }
 
 func (x *FieldsInjectedToStruct) GetInjectedField() string {
@@ -389,7 +395,6 @@ func (x *FieldsInjectedToStruct) Write(p thrift.Encoder) error {
     if err := x.writeField_1100(p); err != nil {
         return err
     }
-
     if err := x.writeField1(p); err != nil {
         return err
     }
@@ -459,6 +464,12 @@ func (x *FieldsInjectedToStruct) String() string {
 
     return sb.String()
 }
+func (x *FieldsInjectedToStruct) setDefaults() *FieldsInjectedToStruct {
+    return x.
+        SetInjectedFieldNonCompat("").
+        SetStringFieldNonCompat("")
+}
+
 
 type FieldsInjectedWithIncludedStruct struct {
     InjectedUnstructuredAnnotationField *string `thrift:"injected_unstructured_annotation_field,-1102,optional" json:"injected_unstructured_annotation_field,omitempty" db:"injected_unstructured_annotation_field"`
@@ -470,16 +481,13 @@ type FieldsInjectedWithIncludedStruct struct {
 var _ thrift.Struct = (*FieldsInjectedWithIncludedStruct)(nil)
 
 func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
-    return (&FieldsInjectedWithIncludedStruct{}).
-        SetInjectedFieldNonCompat("").
-        SetStringFieldNonCompat("")
+    return (&FieldsInjectedWithIncludedStruct{}).setDefaults()
 }
 
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationField() string {
     if !x.IsSetInjectedUnstructuredAnnotationField() {
         return ""
     }
-
     return *x.InjectedUnstructuredAnnotationField
 }
 
@@ -487,7 +495,6 @@ func (x *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationField(
     if !x.IsSetInjectedStructuredAnnotationField() {
         return ""
     }
-
     return *x.InjectedStructuredAnnotationField
 }
 
@@ -693,15 +700,12 @@ func (x *FieldsInjectedWithIncludedStruct) Write(p thrift.Encoder) error {
     if err := x.writeField_1102(p); err != nil {
         return err
     }
-
     if err := x.writeField_1101(p); err != nil {
         return err
     }
-
     if err := x.writeField_1100(p); err != nil {
         return err
     }
-
     if err := x.writeField1(p); err != nil {
         return err
     }
@@ -777,6 +781,12 @@ func (x *FieldsInjectedWithIncludedStruct) String() string {
 
     return sb.String()
 }
+func (x *FieldsInjectedWithIncludedStruct) setDefaults() *FieldsInjectedWithIncludedStruct {
+    return x.
+        SetInjectedFieldNonCompat("").
+        SetStringFieldNonCompat("")
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

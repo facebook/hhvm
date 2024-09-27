@@ -324,9 +324,7 @@ type Internship struct {
 var _ thrift.Struct = (*Internship)(nil)
 
 func NewInternship() *Internship {
-    return (&Internship{}).
-        SetWeeksNonCompat(0).
-        SetTitleNonCompat("")
+    return (&Internship{}).setDefaults()
 }
 
 func (x *Internship) GetWeeks() int32 {
@@ -341,7 +339,6 @@ func (x *Internship) GetEmployer() Company {
     if !x.IsSetEmployer() {
         return 0
     }
-
     return *x.Employer
 }
 
@@ -349,7 +346,6 @@ func (x *Internship) GetCompensation() float64 {
     if !x.IsSetCompensation() {
         return 0.0
     }
-
     return *x.Compensation
 }
 
@@ -357,7 +353,6 @@ func (x *Internship) GetSchool() string {
     if !x.IsSetSchool() {
         return ""
     }
-
     return *x.School
 }
 
@@ -608,19 +603,15 @@ func (x *Internship) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
-
     if err := x.writeField5(p); err != nil {
         return err
     }
@@ -699,6 +690,12 @@ func (x *Internship) String() string {
 
     return sb.String()
 }
+func (x *Internship) setDefaults() *Internship {
+    return x.
+        SetWeeksNonCompat(0).
+        SetTitleNonCompat("")
+}
+
 
 type Range struct {
     Min int32 `thrift:"min,1,required" json:"min" db:"min"`
@@ -708,9 +705,7 @@ type Range struct {
 var _ thrift.Struct = (*Range)(nil)
 
 func NewRange() *Range {
-    return (&Range{}).
-        SetMinNonCompat(0).
-        SetMaxNonCompat(0)
+    return (&Range{}).setDefaults()
 }
 
 func (x *Range) GetMin() int32 {
@@ -811,7 +806,6 @@ func (x *Range) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -881,6 +875,12 @@ func (x *Range) String() string {
 
     return sb.String()
 }
+func (x *Range) setDefaults() *Range {
+    return x.
+        SetMinNonCompat(0).
+        SetMaxNonCompat(0)
+}
+
 
 type Struct1 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -890,9 +890,7 @@ type Struct1 struct {
 var _ thrift.Struct = (*Struct1)(nil)
 
 func NewStruct1() *Struct1 {
-    return (&Struct1{}).
-        SetANonCompat(1234567).
-        SetBNonCompat("<uninitialized>")
+    return (&Struct1{}).setDefaults()
 }
 
 func (x *Struct1) GetA() int32 {
@@ -993,7 +991,6 @@ func (x *Struct1) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -1063,6 +1060,12 @@ func (x *Struct1) String() string {
 
     return sb.String()
 }
+func (x *Struct1) setDefaults() *Struct1 {
+    return x.
+        SetANonCompat(1234567).
+        SetBNonCompat("<uninitialized>")
+}
+
 
 type Struct2 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1074,11 +1077,7 @@ type Struct2 struct {
 var _ thrift.Struct = (*Struct2)(nil)
 
 func NewStruct2() *Struct2 {
-    return (&Struct2{}).
-        SetANonCompat(0).
-        SetBNonCompat("").
-        SetCNonCompat(NewStruct1()).
-        SetDNonCompat(make([]int32, 0))
+    return (&Struct2{}).setDefaults()
 }
 
 func (x *Struct2) GetA() int32 {
@@ -1093,7 +1092,6 @@ func (x *Struct2) GetC() *Struct1 {
     if !x.IsSetC() {
         return nil
     }
-
     return x.C
 }
 
@@ -1101,7 +1099,6 @@ func (x *Struct2) GetD() []int32 {
     if !x.IsSetD() {
         return make([]int32, 0)
     }
-
     return x.D
 }
 
@@ -1325,15 +1322,12 @@ func (x *Struct2) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -1409,6 +1403,14 @@ func (x *Struct2) String() string {
 
     return sb.String()
 }
+func (x *Struct2) setDefaults() *Struct2 {
+    return x.
+        SetANonCompat(0).
+        SetBNonCompat("").
+        SetCNonCompat(NewStruct1()).
+        SetDNonCompat(make([]int32, 0))
+}
+
 
 type Struct3 struct {
     A string `thrift:"a,1" json:"a" db:"a"`
@@ -1419,10 +1421,7 @@ type Struct3 struct {
 var _ thrift.Struct = (*Struct3)(nil)
 
 func NewStruct3() *Struct3 {
-    return (&Struct3{}).
-        SetANonCompat("").
-        SetBNonCompat(0).
-        SetCNonCompat(NewStruct2())
+    return (&Struct3{}).setDefaults()
 }
 
 func (x *Struct3) GetA() string {
@@ -1437,7 +1436,6 @@ func (x *Struct3) GetC() *Struct2 {
     if !x.IsSetC() {
         return nil
     }
-
     return x.C
 }
 
@@ -1588,11 +1586,9 @@ func (x *Struct3) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -1665,6 +1661,13 @@ func (x *Struct3) String() string {
 
     return sb.String()
 }
+func (x *Struct3) setDefaults() *Struct3 {
+    return x.
+        SetANonCompat("").
+        SetBNonCompat(0).
+        SetCNonCompat(NewStruct2())
+}
+
 
 type Struct4 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1675,8 +1678,7 @@ type Struct4 struct {
 var _ thrift.Struct = (*Struct4)(nil)
 
 func NewStruct4() *Struct4 {
-    return (&Struct4{}).
-        SetANonCompat(0)
+    return (&Struct4{}).setDefaults()
 }
 
 func (x *Struct4) GetA() int32 {
@@ -1687,7 +1689,6 @@ func (x *Struct4) GetB() float64 {
     if !x.IsSetB() {
         return 0.0
     }
-
     return *x.B
 }
 
@@ -1695,7 +1696,6 @@ func (x *Struct4) GetC() int8 {
     if !x.IsSetC() {
         return 0
     }
-
     return *x.C
 }
 
@@ -1854,11 +1854,9 @@ func (x *Struct4) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
@@ -1931,6 +1929,11 @@ func (x *Struct4) String() string {
 
     return sb.String()
 }
+func (x *Struct4) setDefaults() *Struct4 {
+    return x.
+        SetANonCompat(0)
+}
+
 
 type Union1 struct {
     I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
@@ -1940,14 +1943,13 @@ type Union1 struct {
 var _ thrift.Struct = (*Union1)(nil)
 
 func NewUnion1() *Union1 {
-    return (&Union1{})
+    return (&Union1{}).setDefaults()
 }
 
 func (x *Union1) GetI() int32 {
     if !x.IsSetI() {
         return 0
     }
-
     return *x.I
 }
 
@@ -1955,7 +1957,6 @@ func (x *Union1) GetD() float64 {
     if !x.IsSetD() {
         return 0.0
     }
-
     return *x.D
 }
 
@@ -2091,7 +2092,6 @@ func (x *Union1) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
@@ -2161,6 +2161,10 @@ func (x *Union1) String() string {
 
     return sb.String()
 }
+func (x *Union1) setDefaults() *Union1 {
+    return x
+}
+
 
 type Union2 struct {
     I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
@@ -2172,14 +2176,13 @@ type Union2 struct {
 var _ thrift.Struct = (*Union2)(nil)
 
 func NewUnion2() *Union2 {
-    return (&Union2{})
+    return (&Union2{}).setDefaults()
 }
 
 func (x *Union2) GetI() int32 {
     if !x.IsSetI() {
         return 0
     }
-
     return *x.I
 }
 
@@ -2187,7 +2190,6 @@ func (x *Union2) GetD() float64 {
     if !x.IsSetD() {
         return 0.0
     }
-
     return *x.D
 }
 
@@ -2195,7 +2197,6 @@ func (x *Union2) GetS() *Struct1 {
     if !x.IsSetS() {
         return nil
     }
-
     return x.S
 }
 
@@ -2203,7 +2204,6 @@ func (x *Union2) GetU() *Union1 {
     if !x.IsSetU() {
         return nil
     }
-
     return x.U
 }
 
@@ -2459,15 +2459,12 @@ func (x *Union2) Write(p thrift.Encoder) error {
     if err := x.writeField1(p); err != nil {
         return err
     }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
-
     if err := x.writeField4(p); err != nil {
         return err
     }
@@ -2543,6 +2540,10 @@ func (x *Union2) String() string {
 
     return sb.String()
 }
+func (x *Union2) setDefaults() *Union2 {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

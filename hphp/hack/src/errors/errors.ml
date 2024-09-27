@@ -1414,6 +1414,10 @@ let filter (errors : t) ~(f : Relative_path.t -> error -> bool) : t =
       let errors = List.filter errors ~f:(f path) in
       Option.some_if (not (List.is_empty errors)) errors)
 
+let fold (errors : t) ~(init : 'acc) ~f =
+  Relative_path.Map.fold errors ~init ~f:(fun path errors acc ->
+      List.fold errors ~init:acc ~f:(fun acc error -> f path error acc))
+
 let count_errors_and_warnings (error_list : (_, _) User_error.t list) :
     int * int =
   List.fold
@@ -1438,3 +1442,17 @@ let filter_out_mergebase_warnings
             (Warnings_saved_state.mem
                (Error.hash_for_saved_state error)
                mergebase_warning_hashes))
+
+let filter_out_warnings (errors : t) : t =
+  filter errors ~f:(fun _path error ->
+      match error.User_error.severity with
+      | User_error.Err -> true
+      | User_error.Warning -> false)
+
+let make_warning_saved_state (errors : t) : Warnings_saved_state.t =
+  fold errors ~init:Warnings_saved_state.empty ~f:(fun _path error ss ->
+      match error.User_error.severity with
+      | User_error.Err -> ss
+      | User_error.Warning ->
+        let hash = Error.hash_for_saved_state error in
+        Warnings_saved_state.add hash ss)

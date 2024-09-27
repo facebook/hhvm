@@ -270,3 +270,7 @@ val filter : t -> f:(Relative_path.t -> error -> bool) -> t
 val count_errors_and_warnings : ('a, 'b) User_error.t list -> int * int
 
 val filter_out_mergebase_warnings : Warnings_saved_state.t option -> t -> t
+
+val filter_out_warnings : t -> t
+
+val make_warning_saved_state : t -> Warnings_saved_state.t

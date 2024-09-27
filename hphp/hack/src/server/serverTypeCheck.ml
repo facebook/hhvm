@@ -295,6 +295,36 @@ type type_checking_result = {
   cancel_reason: MultiThreadedCall.cancel_reason option;
 }
 
+(** If we're on a public revision, discard warnings, hash them and add the
+  hashes to the warnings saved state so that they can be ignored in future typechecks. *)
+let discard_warnings_if_public_rev env genv errors : env * Errors.t =
+  match env.init_env.mergebase_warning_hashes with
+  | None -> (env, errors)
+  | Some mergebase_warning_hashes ->
+    let warning_hashes = Errors.make_warning_saved_state errors in
+    if Warnings_saved_state.is_empty warning_hashes then
+      (env, errors)
+    else (
+      match
+        Hg.is_public_without_local_changes
+          (ServerArgs.root genv.ServerEnv.options |> Path.to_string)
+        |> Future.get
+      with
+      | Ok false
+      | Error _ ->
+        (env, errors)
+      | Ok true ->
+        let mergebase_warning_hashes =
+          Some
+            (Warnings_saved_state.union mergebase_warning_hashes warning_hashes)
+        in
+        let env =
+          { env with init_env = { env.init_env with mergebase_warning_hashes } }
+        in
+        let errors = Errors.filter_out_warnings errors in
+        (env, errors)
+    )
+
 let do_type_checking
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -877,12 +907,15 @@ let type_check_core
     else
       env.full_check_status
   in
-  let why_needed_full_check =
+  let (why_needed_full_check, env, errors) =
     match env.init_env.why_needed_full_check with
-    | Some why_needed_full_check when not (is_full_check_done full_check_status)
-      ->
-      Some why_needed_full_check
-    | _ -> None
+    | None -> (None, env, errors)
+    | Some why_needed_full_check ->
+      if is_full_check_done full_check_status then
+        let (env, errors) = discard_warnings_if_public_rev env genv errors in
+        (None, env, errors)
+      else
+        (Some why_needed_full_check, env, errors)
   in
   let env =
     {

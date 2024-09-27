@@ -7,6 +7,7 @@ package module1
 
 import (
     "fmt"
+    "reflect"
     "strings"
 
     module0 "module0"
@@ -18,6 +19,7 @@ var _ = module0.GoUnusedProtection__
 var _ = module2.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
+var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 

@@ -7,6 +7,7 @@ package matching_names
 
 import (
     "fmt"
+    "reflect"
     "strings"
 
     includesAlso "IncludesAlso"
@@ -16,6 +17,7 @@ import (
 var _ = includesAlso.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
+var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 

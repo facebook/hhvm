@@ -21,6 +21,7 @@
 import (
     "context"
     "fmt"
+    "reflect"
     "strings"
 
     {{#program:thrift_imports}}
@@ -38,6 +39,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 {{#program:gen_metadata?}}

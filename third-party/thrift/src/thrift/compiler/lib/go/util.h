@@ -99,6 +99,7 @@ class codegen_data {
       {"sync", 0},
       {"metadata", 0},
       {"maps", 0},
+      {"reflect", 0},
   };
 
   struct go_munged_names_cache_key_ {

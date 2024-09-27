@@ -9,6 +9,7 @@ package test
 import (
     "context"
     "fmt"
+    "reflect"
     "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,6 +19,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__

@@ -9,6 +9,7 @@ package module
 import (
     "context"
     "fmt"
+    "reflect"
     "strings"
 
     included "included"
@@ -20,6 +21,7 @@ var _ = included.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__

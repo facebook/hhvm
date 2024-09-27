@@ -34,14 +34,51 @@ namespace jit {
 namespace irgen {
 namespace {
 
+SSATmp* getTypeCnsClsName(IRGS& env, SSATmp* cls, const StringData* cnsName) {
+  auto const clsSpec = cls->type().clsSpec();
+  auto const cnsSlot = (clsSpec.cls()) 
+    ? clsSpec.cls()->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true) 
+    : kInvalidSlot;
+
+  auto const lookupByName = [&] () -> SSATmp* { 
+    return gen(
+      env,
+      LdTypeCnsClsName,
+      cls,
+      cns(env, cnsName)
+    );
+  };
+  
+  if (cnsSlot == kInvalidSlot) {
+    return lookupByName();
+  }
+
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const classname = gen(
+        env,
+        LdResolvedTypeCnsClsName,
+        ClsCnsSlotData { cnsName, cnsSlot },
+        cls
+      );
+      return gen(env, CheckNonNull, taken, classname);
+    },
+    [&] (SSATmp* s) { return s; },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      return lookupByName();
+    }
+  );
+}
+
 SSATmp* resolveTypeConstantChain(IRGS& env, const Func* f, SSATmp* cls,
                                  const std::vector<LowStringPtr>& types) {
   auto result = cls;
   auto const ctx = f->isMethod() ? cns(env, f->implCls()) : cns(env, nullptr);
   for (auto const type : types) {
-    auto const name =
-      gen(env, LdTypeCnsClsName, result, cns(env, type.get()));
-    result = gen(env, LdCls, LdClsFallbackData::Fatal(), name, ctx);
+    auto const clsName = getTypeCnsClsName(env, result, type.get());
+    result = gen(env, LdCls, LdClsFallbackData::Fatal(), clsName, ctx);
   }
   return result;
 }

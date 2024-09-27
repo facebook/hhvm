@@ -844,15 +844,17 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
                                  bool exact) {
 
   assertx(callCtx->isA(TCls));
+  assertx(cls);
+
+  if (callee->isStaticInPrologue()) {
+    return gen(env, AssertType, Type::SubCls(cls), callCtx);
+  };
 
   auto gen_missing_this = [&] {
-    if (!callee->isStaticInPrologue()) {
-      gen(env, ThrowMissingThis, cns(env, callee));
-    }
+    gen(env, ThrowMissingThis, cns(env, callee));
     return callCtx;
   };
 
-  if (callee->isStaticInPrologue()) return callCtx;
   if (!hasThis(env)) {
     return gen_missing_this();
   }
@@ -933,7 +935,12 @@ void optimizeProfiledCallMethod(IRGS& env,
       return ldCtxForClsMethod(env, callee, ctx,
                                cls ? cls : callee->cls(), cls != nullptr);
     }
+
+    ctx = cls ? gen(env, AssertType, Type::ExactObj(cls), ctx) 
+              : gen(env, AssertType, Type::SubObj(callee->implCls()), ctx); 
+
     if (!callee->isStaticInPrologue()) return ctx;
+
     assertx(ctx->type() <= TObj);
     auto ret = cls ? cns(env, cls) : gen(env, LdObjClass, ctx);
     decRef(env, ctx);

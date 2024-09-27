@@ -58,7 +58,7 @@ class ExportedAuthenticator {
       Buf authenticatorRequest);
 
   static Buf makeAuthenticator(
-      fizz::HasherFactory makeHasher,
+      const fizz::HasherFactoryWithMetadata* makeHasher,
       std::vector<SignatureScheme> supportedSchemes,
       const SelfCert& cert,
       Buf authenticatorRequest,
@@ -86,7 +86,7 @@ class ExportedAuthenticator {
       Buf authenticator);
 
   static folly::Optional<std::vector<CertificateEntry>> validate(
-      fizz::HasherFactory makeHasher,
+      const fizz::HasherFactoryWithMetadata* makeHasher,
       Buf authenticatorRequest,
       Buf authenticator,
       Buf handshakeContext,

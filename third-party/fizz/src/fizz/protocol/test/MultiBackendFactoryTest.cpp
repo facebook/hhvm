@@ -75,9 +75,8 @@ class MultiBackendFactoryDigestTest
 TEST_P(MultiBackendFactoryDigestTest, Test) {
   auto testCase = GetParam();
 
-  auto makeHasher = factory_.makeHasher(testCase.algorithm);
-  ASSERT_NE(makeHasher, nullptr);
-  auto hasher = makeHasher();
+  auto makeHasher = factory_.makeHasherFactory(testCase.algorithm);
+  auto hasher = makeHasher->make();
   ASSERT_NE(hasher, nullptr);
 
   std::vector<uint8_t> out;

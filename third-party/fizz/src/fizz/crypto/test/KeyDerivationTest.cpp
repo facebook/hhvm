@@ -27,10 +27,7 @@ struct KdfParams {
 
 template <typename Hash>
 inline KeyDerivationImpl createKeyDerivationImpl() {
-  return KeyDerivationImpl(
-      Hash::HashLen,
-      Hkdf(Hash::HashLen, openssl::makeHasher<Hash>),
-      Hash::BlankHash);
+  return KeyDerivationImpl(openssl::hasherFactory<Hash>());
 }
 
 class KeyDerivationTest : public ::testing::TestWithParam<KdfParams> {};
@@ -67,7 +64,7 @@ TEST(KeyDerivation, Sha256BlankHash) {
   std::vector<uint8_t> computed(createKeyDerivationImpl<Sha256>().hashLength());
   folly::IOBuf blankBuf;
   fizz::hash(
-      openssl::makeHasher<Sha256>,
+      openssl::hasherFactory<Sha256>(),
       blankBuf,
       MutableByteRange(computed.data(), computed.size()));
   EXPECT_EQ(

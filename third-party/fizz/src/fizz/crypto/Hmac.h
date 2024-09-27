@@ -16,7 +16,7 @@ namespace fizz {
  * `out` must be at least of size HashLen.
  */
 void hmac(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     folly::ByteRange key,
     const folly::IOBuf& in,
     folly::MutableByteRange out);

@@ -83,7 +83,8 @@ class Factory {
       NamedGroup group,
       KeyExchangeRole role) const = 0;
 
-  virtual HasherFactory makeHasher(HashFunction digest) const = 0;
+  virtual const HasherFactoryWithMetadata* makeHasherFactory(
+      HashFunction digest) const = 0;
 
   virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const = 0;
 

@@ -34,7 +34,7 @@ TEST_P(HkdfTest, TestHkdfSha256Expand) {
   CHECK_EQ(outputBytes, expectedOkm->length());
 
   auto actualOkm =
-      Hkdf(Sha256::HashLen, openssl::makeHasher<fizz::Sha256>)
+      Hkdf(openssl::hasherFactory<fizz::Sha256>())
           .hkdf(ikm->coalesce(), salt->coalesce(), *info, outputBytes);
   EXPECT_FALSE(actualOkm->isChained());
   EXPECT_EQ(outputBytes, actualOkm->length());

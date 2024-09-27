@@ -22,5 +22,5 @@ struct HmacTestVector {
 
 extern const std::vector<HmacTestVector> kHmacTestVectors;
 
-void runHmacTest(fizz::HashFunction digestType, fizz::HasherFactory makeHasher);
+void runHmacTest(const fizz::HasherFactoryWithMetadata* makeHasher);
 } // namespace fizz::test

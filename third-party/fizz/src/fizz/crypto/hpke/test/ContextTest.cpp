@@ -55,8 +55,7 @@ TEST_P(HpkeContextTest, TestContext) {
       toIOBuf(kExportSecret),
       std::make_unique<fizz::hpke::Hkdf>(
           kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(
-              Sha256::HashLen, &openssl::makeHasher<Sha256>)),
+          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
       suiteId->clone(),
       fizz::hpke::HpkeContext::Role::Sender);
   auto gotCiphertext = encryptContext.seal(
@@ -72,8 +71,7 @@ TEST_P(HpkeContextTest, TestContext) {
       toIOBuf(kExportSecret),
       std::make_unique<fizz::hpke::Hkdf>(
           kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(
-              Sha256::HashLen, &openssl::makeHasher<Sha256>)),
+          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
       std::move(suiteId),
       fizz::hpke::HpkeContext::Role::Receiver);
   auto gotPlaintext = decryptContext.open(
@@ -96,8 +94,7 @@ TEST_P(HpkeContextTest, TestContextRoles) {
       toIOBuf(kExportSecret),
       std::make_unique<fizz::hpke::Hkdf>(
           kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(
-              Sha256::HashLen, &openssl::makeHasher<Sha256>)),
+          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
       suiteId->clone(),
       fizz::hpke::HpkeContext::Role::Sender);
 
@@ -109,8 +106,7 @@ TEST_P(HpkeContextTest, TestContextRoles) {
       toIOBuf(kExportSecret),
       std::make_unique<fizz::hpke::Hkdf>(
           kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(
-              Sha256::HashLen, &openssl::makeHasher<Sha256>)),
+          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
       std::move(suiteId),
       fizz::hpke::HpkeContext::Role::Receiver);
 
@@ -143,8 +139,7 @@ TEST_P(HpkeContextTest, TestExportSecret) {
         toIOBuf(testParam.exporterSecret),
         std::make_unique<fizz::hpke::Hkdf>(
             kPrefix->clone(),
-            std::make_unique<::fizz::Hkdf>(
-                Sha256::HashLen, &openssl::makeHasher<Sha256>)),
+            std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
         std::move(suiteId),
         role);
     auto secret = context.exportSecret(std::move(exporterContext), 32);
@@ -172,8 +167,7 @@ TEST_P(HpkeContextTest, TestExportSecretThrow) {
         toIOBuf(testParam.exporterSecret),
         std::make_unique<fizz::hpke::Hkdf>(
             kPrefix->clone(),
-            std::make_unique<::fizz::Hkdf>(
-                Sha256::HashLen, &openssl::makeHasher<Sha256>)),
+            std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
         std::move(suiteId),
         role);
 

@@ -10,12 +10,6 @@
 
 namespace fizz {
 
-KeyDerivationImpl::KeyDerivationImpl(
-    size_t hashLength,
-    Hkdf hkdf,
-    folly::ByteRange blankHash)
-    : hashLength_(hashLength), hkdf_(hkdf), blankHash_(blankHash) {}
-
 Buf KeyDerivationImpl::expandLabel(
     folly::ByteRange secret,
     folly::StringPiece label,
@@ -39,8 +33,9 @@ std::vector<uint8_t> KeyDerivationImpl::deriveSecret(
     folly::StringPiece label,
     folly::ByteRange messageHash,
     uint16_t length) {
-  CHECK_EQ(secret.size(), hashLength_);
-  CHECK_EQ(messageHash.size(), hashLength_);
+  auto hlen = hkdf_.hasher()->hashLength();
+  CHECK_EQ(secret.size(), hlen);
+  CHECK_EQ(messageHash.size(), hlen);
   CHECK_GT(length, 0);
   // Copying the buffer to avoid violating constness of the data.
   auto hashBuf = folly::IOBuf::copyBuffer(messageHash);

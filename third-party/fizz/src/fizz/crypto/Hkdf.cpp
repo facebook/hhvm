@@ -13,9 +13,10 @@ namespace fizz {
 
 std::vector<uint8_t> Hkdf::extract(folly::ByteRange salt, folly::ByteRange ikm)
     const {
-  auto zeros = std::vector<uint8_t>(hashLength_, 0);
+  auto hlen = hashLength();
+  auto zeros = std::vector<uint8_t>(hlen, 0);
   // Extraction step HMAC-HASH(salt, IKM)
-  std::vector<uint8_t> extractedKey(hashLength_);
+  std::vector<uint8_t> extractedKey(hlen);
   salt = salt.empty() ? folly::range(zeros) : salt;
   hmac(
       makeHasher_,
@@ -29,13 +30,14 @@ std::unique_ptr<folly::IOBuf> Hkdf::expand(
     folly::ByteRange extractedKey,
     const folly::IOBuf& info,
     size_t outputBytes) const {
-  CHECK_EQ(extractedKey.size(), hashLength_);
-  if (UNLIKELY(outputBytes > 255 * hashLength_)) {
+  auto hlen = hashLength();
+  CHECK_EQ(extractedKey.size(), hlen);
+  if (UNLIKELY(outputBytes > 255 * hlen)) {
     throw std::runtime_error("Output too long");
   }
   // HDKF expansion step.
-  size_t numRounds = (outputBytes + hashLength_ - 1) / hashLength_;
-  auto expanded = folly::IOBuf::create(numRounds * hashLength_);
+  size_t numRounds = (outputBytes + hlen - 1) / hlen;
+  auto expanded = folly::IOBuf::create(numRounds * hlen);
 
   auto in = folly::IOBuf::create(0);
   for (size_t round = 1; round <= numRounds; ++round) {
@@ -48,18 +50,18 @@ std::unique_ptr<folly::IOBuf> Hkdf::expand(
     roundNum->writableData()[0] = round;
     in->prependChain(std::move(roundNum));
 
-    size_t outputStartIdx = (round - 1) * hashLength_;
+    size_t outputStartIdx = (round - 1) * hlen;
     hmac(
         makeHasher_,
         folly::range(extractedKey),
         *in,
-        {expanded->writableData() + outputStartIdx, hashLength_});
-    expanded->append(hashLength_);
+        {expanded->writableData() + outputStartIdx, hlen});
+    expanded->append(hlen);
 
     in = expanded->clone();
     in->trimStart(outputStartIdx);
   }
-  expanded->trimEnd(numRounds * hashLength_ - outputBytes);
+  expanded->trimEnd(numRounds * hlen - outputBytes);
   return expanded;
 }
 

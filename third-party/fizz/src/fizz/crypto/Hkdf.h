@@ -23,8 +23,8 @@ namespace fizz {
  */
 class Hkdf {
  public:
-  Hkdf(size_t hashLength, HasherFactory makeHasher)
-      : hashLength_(hashLength), makeHasher_(makeHasher) {}
+  explicit Hkdf(const HasherFactoryWithMetadata* makeHasher)
+      : makeHasher_(makeHasher) {}
 
   std::vector<uint8_t> extract(folly::ByteRange salt, folly::ByteRange ikm)
       const;
@@ -40,12 +40,16 @@ class Hkdf {
       const folly::IOBuf& info,
       size_t outputBytes) const;
 
+  // TODO: Deprecate. Use hasher().hashLength()
   size_t hashLength() const {
-    return hashLength_;
+    return makeHasher_->hashLength();
+  }
+
+  const HasherFactoryWithMetadata* hasher() const {
+    return makeHasher_;
   }
 
  private:
-  size_t hashLength_;
-  HasherFactory makeHasher_;
+  const HasherFactoryWithMetadata* makeHasher_;
 };
 } // namespace fizz

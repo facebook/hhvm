@@ -15,24 +15,15 @@ namespace fizz::openssl::test {
 class OpenSSLHmacTest : public ::testing::Test {};
 
 TEST(OpenSSLHmacTest, TestSha256) {
-  fizz::test::runHmacTest(
-      fizz::HashFunction::Sha256, []() -> std::unique_ptr<fizz::Hasher> {
-        return fizz::openssl::makeHasher<fizz::Sha256>();
-      });
+  fizz::test::runHmacTest(fizz::openssl::hasherFactory<fizz::Sha256>());
 }
 
 TEST(OpenSSLHmacTest, TestSha384) {
-  fizz::test::runHmacTest(
-      fizz::HashFunction::Sha384, []() -> std::unique_ptr<fizz::Hasher> {
-        return fizz::openssl::makeHasher<fizz::Sha384>();
-      });
+  fizz::test::runHmacTest(fizz::openssl::hasherFactory<fizz::Sha384>());
 }
 
 TEST(OpenSSLHmacTest, TestSha512) {
-  fizz::test::runHmacTest(
-      fizz::HashFunction::Sha512, []() -> std::unique_ptr<fizz::Hasher> {
-        return fizz::openssl::makeHasher<fizz::Sha512>();
-      });
+  fizz::test::runHmacTest(fizz::openssl::hasherFactory<fizz::Sha512>());
 }
 
 } // namespace fizz::openssl::test

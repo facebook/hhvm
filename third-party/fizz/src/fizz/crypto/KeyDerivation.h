@@ -55,14 +55,14 @@ class KeyDerivation {
 
 class KeyDerivationImpl : public KeyDerivation {
  public:
-  KeyDerivationImpl(size_t hashLength, Hkdf hkdf, folly::ByteRange blankHash);
+  explicit KeyDerivationImpl(const HasherFactoryWithMetadata* hf) : hkdf_(hf) {}
 
   size_t hashLength() const override {
-    return hashLength_;
+    return hkdf_.hashLength();
   }
 
   folly::ByteRange blankHash() const override {
-    return blankHash_;
+    return hkdf_.hasher()->blankHash();
   }
 
   Buf expandLabel(
@@ -87,12 +87,10 @@ class KeyDerivationImpl : public KeyDerivation {
 
   std::unique_ptr<KeyDerivation> clone() const override {
     return std::unique_ptr<KeyDerivation>(
-        new KeyDerivationImpl(hashLength_, hkdf_, blankHash_));
+        new KeyDerivationImpl(hkdf_.hasher()));
   }
 
  private:
-  size_t hashLength_;
   Hkdf hkdf_;
-  folly::ByteRange blankHash_;
 };
 } // namespace fizz

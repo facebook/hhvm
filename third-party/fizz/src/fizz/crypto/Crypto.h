@@ -68,6 +68,7 @@ inline folly::StringPiece toString(HashFunction hash) {
 // Please update HASH_MAX_BLOCK_SIZE if necessary if adding support for more
 // hashes.
 struct Sha256 {
+  static constexpr HashFunction HashId = HashFunction::Sha256;
   static constexpr size_t HashLen = 32;
   static constexpr size_t BlockSize = 64;
   static constexpr folly::StringPiece BlankHash{
@@ -75,6 +76,7 @@ struct Sha256 {
 };
 
 struct Sha384 {
+  static constexpr HashFunction HashId = HashFunction::Sha384;
   static constexpr size_t HashLen = 48;
   static constexpr size_t BlockSize = 128;
   static constexpr folly::StringPiece BlankHash{
@@ -82,6 +84,7 @@ struct Sha384 {
 };
 
 struct Sha512 {
+  static constexpr HashFunction HashId = HashFunction::Sha512;
   static constexpr size_t HashLen = 64;
   static constexpr size_t BlockSize = 128;
   static constexpr folly::StringPiece BlankHash{

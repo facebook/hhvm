@@ -38,7 +38,7 @@ Buf ExportedAuthenticator::getAuthenticator(
   auto cipher = transport.getCipher();
   auto hashFunction = getHashFunction(*cipher);
   auto hashLength = getHashSize(hashFunction);
-  auto makeHasher = ::fizz::DefaultFactory().makeHasher(hashFunction);
+  auto makeHasher = ::fizz::DefaultFactory().makeHasherFactory(hashFunction);
 
   auto supportedSchemes = transport.getSupportedSigSchemes();
   Buf handshakeContext;
@@ -84,7 +84,7 @@ ExportedAuthenticator::validateAuthenticator(
   auto cipher = transport.getCipher();
   auto hashFunction = getHashFunction(*cipher);
   auto hashLength = getHashSize(hashFunction);
-  auto makeHasher = ::fizz::DefaultFactory().makeHasher(hashFunction);
+  auto&& makeHasher = ::fizz::DefaultFactory().makeHasherFactory(hashFunction);
 
   Buf handshakeContext;
   Buf finishedMacKey;
@@ -110,7 +110,7 @@ ExportedAuthenticator::validateAuthenticator(
 }
 
 Buf ExportedAuthenticator::makeAuthenticator(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     std::vector<SignatureScheme> supportedSchemes,
     const SelfCert& cert,
     Buf authenticatorRequest,
@@ -162,7 +162,7 @@ Buf ExportedAuthenticator::makeAuthenticator(
 }
 
 folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     Buf authenticatorRequest,
     Buf authenticator,
     Buf handshakeContext,
@@ -260,8 +260,10 @@ std::tuple<Buf, std::vector<fizz::Extension>> decodeAuthRequest(
   return std::make_tuple(std::move(certRequestContext), std::move(exts));
 }
 
-Buf computeTranscriptHash(HasherFactory makeHasher, const Buf& toBeHashed) {
-  auto hasher = makeHasher();
+Buf computeTranscriptHash(
+    const HasherFactoryWithMetadata* makeHasher,
+    const Buf& toBeHashed) {
+  auto hasher = makeHasher->make();
 
   auto hashLength = hasher->getHashLen();
   auto data = folly::IOBuf::create(hashLength);
@@ -307,10 +309,10 @@ Buf computeFinishedTranscript(const Buf& crTranscript, const Buf& certVerify) {
 }
 
 Buf getFinishedData(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     Buf& finishedMacKey,
     const Buf& finishedTranscript) {
-  auto hashLength = makeHasher()->getHashLen();
+  auto hashLength = makeHasher->hashLength();
   auto data = folly::IOBuf::create(hashLength);
   data->append(hashLength);
   auto outRange = folly::MutableByteRange(data->writableData(), data->length());
@@ -370,7 +372,7 @@ folly::Optional<SignatureScheme> getSignatureScheme(
 }
 
 Buf getEmptyAuthenticator(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     Buf authRequest,
     Buf handshakeContext,
     Buf finishedMacKey) {

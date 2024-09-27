@@ -84,52 +84,32 @@ std::unique_ptr<Aead> MultiBackendFactory::makeAead(CipherSuite cipher) const {
   }
 }
 
-namespace detail {
-template <typename Hash>
-inline std::unique_ptr<KeyDerivation> makeKeyDerivationPtr() {
-  return std::unique_ptr<KeyDerivationImpl>(new KeyDerivationImpl(
-      Hash::HashLen,
-      Hkdf(Hash::HashLen, ::fizz::openssl::makeHasher<Hash>),
-      Hash::BlankHash));
-}
-} // namespace detail
-
+// TODO: This belongs in Factory
 std::unique_ptr<KeyDerivation> MultiBackendFactory::makeKeyDeriver(
     CipherSuite cipher) const {
-  switch (cipher) {
-    case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-    case CipherSuite::TLS_AES_128_GCM_SHA256:
-    case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-    case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return detail::makeKeyDerivationPtr<Sha256>();
-    case CipherSuite::TLS_AES_256_GCM_SHA384:
-      return detail::makeKeyDerivationPtr<Sha384>();
-    case CipherSuite::TLS_AEGIS_256_SHA512:
-      return detail::makeKeyDerivationPtr<Sha512>();
-    default:
-      throw std::runtime_error("ks: not implemented");
-  }
+  auto hasher = makeHasherFactory(getHashFunction(cipher));
+  return std::make_unique<KeyDerivationImpl>(hasher);
 }
 
-HasherFactory MultiBackendFactory::makeHasher(HashFunction digest) const {
+const HasherFactoryWithMetadata* MultiBackendFactory::makeHasherFactory(
+    HashFunction digest) const {
   switch (digest) {
     case HashFunction::Sha256:
-      return openssl::makeHasher<fizz::Sha256>;
+      return openssl::hasherFactory<fizz::Sha256>();
     case HashFunction::Sha384:
-      return openssl::makeHasher<fizz::Sha384>;
+      return openssl::hasherFactory<fizz::Sha384>();
     case HashFunction::Sha512:
-      return openssl::makeHasher<fizz::Sha512>;
+      return openssl::hasherFactory<fizz::Sha512>();
     default:
       throw std::runtime_error("makeHasher: not implemented");
   }
 }
+
+// TODO: This belongs in Factory
 std::unique_ptr<HandshakeContext> MultiBackendFactory::makeHandshakeContext(
     CipherSuite cipher) const {
-  auto hashFunction = getHashFunction(cipher);
-  auto blankHash = getBlankHash(hashFunction);
-  auto hasherFactory = makeHasher(hashFunction);
-
-  return std::make_unique<HandshakeContextImpl>(hasherFactory, blankHash);
+  auto hasherFactory = makeHasherFactory(getHashFunction(cipher));
+  return std::make_unique<HandshakeContextImpl>(hasherFactory);
 }
 
 std::unique_ptr<PeerCert> MultiBackendFactory::makePeerCert(

@@ -29,9 +29,9 @@ Buf HandshakeContextImpl::getHandshakeContext() const {
 
 Buf HandshakeContextImpl::getFinishedData(folly::ByteRange baseKey) const {
   auto context = getHandshakeContext();
-  size_t hashLen = hashState_->getHashLen();
+  auto hashLen = makeHasher_->hashLength();
   auto finishedKey =
-      KeyDerivationImpl(hashLen, Hkdf(hashLen, makeHasher_), blankHash_)
+      KeyDerivationImpl(makeHasher_)
           .expandLabel(baseKey, "finished", folly::IOBuf::create(0), hashLen);
   auto data = folly::IOBuf::create(hashLen);
   data->append(hashLen);

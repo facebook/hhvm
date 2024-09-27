@@ -57,8 +57,9 @@ class BatchSignatureFactory : public Factory {
     return original_->makeKeyDeriver(cipher);
   }
 
-  HasherFactory makeHasher(HashFunction digest) const override {
-    return original_->makeHasher(digest);
+  const HasherFactoryWithMetadata* makeHasherFactory(
+      HashFunction digest) const override {
+    return original_->makeHasherFactory(digest);
   }
 
   std::unique_ptr<HandshakeContext> makeHandshakeContext(

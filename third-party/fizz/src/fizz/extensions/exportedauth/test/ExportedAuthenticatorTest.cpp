@@ -72,16 +72,18 @@ class AuthenticatorTest : public ::testing::Test {
     cr.extensions.push_back(encodeExtension(std::move(sigAlgs)));
     auto authRequest = encode<CertificateRequest>(std::move(cr));
     authrequest_ = std::move(authRequest);
-    CipherSuite cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
-    makeHasher_ = ::fizz::DefaultFactory().makeHasher(getHashFunction(cipher));
     handshakeContext_ =
         folly::IOBuf::copyBuffer("12345678901234567890123456789012");
     finishedKey_ = folly::IOBuf::copyBuffer("12345678901234567890123456789012");
     schemes_.push_back(SignatureScheme::ecdsa_secp256r1_sha256);
   }
 
+  const HasherFactoryWithMetadata* hasher() {
+    return ::fizz::DefaultFactory().makeHasherFactory(
+        getHashFunction(CipherSuite::TLS_AEGIS_128L_SHA256));
+  }
+
  protected:
-  HasherFactory makeHasher_;
   std::vector<SignatureScheme> schemes_;
   Buf authrequest_;
   Buf handshakeContext_;
@@ -101,7 +103,7 @@ TEST_F(AuthenticatorTest, TestValidAuthenticator) {
           InvokeWithoutArgs([]() { return IOBuf::copyBuffer("signature"); }));
 
   auto reencodedAuthenticator = ExportedAuthenticator::makeAuthenticator(
-      makeHasher_,
+      hasher(),
       schemes_,
       *mockCert,
       std::move(authrequest_),
@@ -120,7 +122,7 @@ TEST_F(AuthenticatorTest, TestEmptyAuthenticator) {
           1, SignatureScheme::ecdsa_secp256r1_sha256)));
   schemes_.clear();
   auto reencodedAuthenticator = ExportedAuthenticator::makeAuthenticator(
-      makeHasher_,
+      hasher(),
       schemes_,
       *mockCert,
       std::move(authrequest_),
@@ -146,8 +148,6 @@ TEST(ExportedAuthenticatorTest, TestGetContext) {
 class ValidateAuthenticatorTest : public ::testing::Test {
  public:
   void SetUp() override {
-    CipherSuite cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
-    makeHasher_ = ::fizz::DefaultFactory().makeHasher(getHashFunction(cipher));
     schemes_.push_back(SignatureScheme::ecdsa_secp256r1_sha256);
     authrequest_ = {
         "14303132333435363738396162636465666768696a0008000d000400020403"};
@@ -155,8 +155,12 @@ class ValidateAuthenticatorTest : public ::testing::Test {
     finishedKey_ = {"12345678901234567890123456789012"};
   }
 
+  const HasherFactoryWithMetadata* hasher() {
+    return ::fizz::DefaultFactory().makeHasherFactory(
+        getHashFunction(CipherSuite::TLS_AEGIS_128L_SHA256));
+  }
+
  protected:
-  HasherFactory makeHasher_;
   std::vector<SignatureScheme> schemes_;
   StringPiece authrequest_;
   StringPiece handshakeContext_;
@@ -175,7 +179,7 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
       folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   auto finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   auto authenticator = ExportedAuthenticator::makeAuthenticator(
-      makeHasher_,
+      hasher(),
       schemes_,
       certificate,
       std::move(authenticatorRequest),
@@ -187,7 +191,7 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
   handshakeContext = folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   auto decodedCerts = ExportedAuthenticator::validate(
-      makeHasher_,
+      hasher(),
       std::move(authenticatorRequest),
       std::move(authenticator),
       std::move(handshakeContext),
@@ -213,7 +217,7 @@ TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
       folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   auto finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   auto authenticator = ExportedAuthenticator::makeAuthenticator(
-      makeHasher_,
+      hasher(),
       schemes_,
       certificate,
       std::move(authenticatorRequest),
@@ -225,7 +229,7 @@ TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
   handshakeContext = folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   auto decodedCerts = ExportedAuthenticator::validate(
-      makeHasher_,
+      hasher(),
       std::move(authenticatorRequest),
       std::move(authenticator),
       std::move(handshakeContext),

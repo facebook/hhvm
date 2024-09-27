@@ -18,7 +18,9 @@ namespace detail {
 std::tuple<Buf, std::vector<fizz::Extension>> decodeAuthRequest(
     const Buf& authRequest);
 
-Buf computeTranscriptHash(HasherFactory makeHasher, const Buf& toBeHashed);
+Buf computeTranscriptHash(
+    const HasherFactoryWithMetadata* makeHasher,
+    const Buf& toBeHashed);
 
 void writeBuf(const Buf& buf, folly::io::Appender& out);
 
@@ -30,7 +32,7 @@ Buf computeTranscript(
 Buf computeFinishedTranscript(const Buf& crTranscript, const Buf& certVerify);
 
 Buf getFinishedData(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     Buf& finishedMacKey,
     const Buf& finishedTranscript);
 
@@ -43,7 +45,7 @@ folly::Optional<SignatureScheme> getSignatureScheme(
     const std::vector<fizz::Extension>& authRequestExtensions);
 
 Buf getEmptyAuthenticator(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     Buf authRequest,
     Buf handshakeContext,
     Buf finishedMacKey);

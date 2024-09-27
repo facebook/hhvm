@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/crypto/Crypto.h>
 #include <folly/io/IOBuf.h>
 
 namespace fizz {
@@ -43,14 +44,68 @@ class Hasher {
   virtual inline size_t getBlockSize() const = 0;
 };
 
-using HasherFactory = std::unique_ptr<Hasher> (*)();
+/**
+ * HasherFactoryWithMetadata describes a hashing algorithm. It binds an
+ * implementation of a hashing algorithm along with properties of the hash.
+ *
+ * Each backend exposes a singleton instance of `HasherFactoryWithMetadata`
+ * for each hashing algorithm the backend supports.
+ */
+struct HasherFactoryWithMetadata {
+  using FactoryFn = std::unique_ptr<Hasher>();
+
+  constexpr explicit HasherFactoryWithMetadata(
+      FactoryFn* fn,
+      fizz::HashFunction id,
+      size_t hashlen,
+      size_t blocksize,
+      folly::StringPiece blankHash)
+      : fn_(fn),
+        id_(id),
+        hashlen_(hashlen),
+        blockSize_(blocksize),
+        blankHash_(blankHash) {}
+
+  template <class Hash>
+  static constexpr HasherFactoryWithMetadata bind(FactoryFn* fn) {
+    return HasherFactoryWithMetadata(
+        fn, Hash::HashId, Hash::HashLen, Hash::BlockSize, Hash::BlankHash);
+  }
+
+  std::unique_ptr<Hasher> make() const {
+    return fn_();
+  }
+
+  folly::ByteRange blankHash() const {
+    return blankHash_;
+  }
+
+  HashFunction id() const {
+    return id_;
+  }
+
+  size_t hashLength() const {
+    return hashlen_;
+  }
+
+  size_t blockSize() const {
+    return blockSize_;
+  }
+
+ private:
+  FactoryFn* fn_;
+  HashFunction id_;
+  size_t hashlen_;
+  size_t blockSize_;
+  folly::StringPiece blankHash_;
+};
 
 /**
  * Puts `Hash(in)` into `out`.
  * `out` must be at least of size HashLen.
  */
 void hash(
-    HasherFactory makeHasher,
+    const HasherFactoryWithMetadata* makeHasher,
     const folly::IOBuf& in,
     folly::MutableByteRange out);
 

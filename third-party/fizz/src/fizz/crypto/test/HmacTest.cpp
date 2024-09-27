@@ -149,23 +149,8 @@ const std::vector<HmacTestVector> kHmacTestVectors = {
     },
 };
 
-void runHmacTest(
-    fizz::HashFunction digestType,
-    fizz::HasherFactory makeHasher) {
-  size_t hashLen = 0;
-  switch (digestType) {
-    case fizz::HashFunction::Sha256:
-      hashLen = fizz::Sha256::HashLen;
-      break;
-    case fizz::HashFunction::Sha384:
-      hashLen = fizz::Sha384::HashLen;
-      break;
-    case fizz::HashFunction::Sha512:
-      hashLen = fizz::Sha512::HashLen;
-      break;
-    default:
-      throw std::runtime_error("Digest type not implemented");
-  }
+void runHmacTest(const fizz::HasherFactoryWithMetadata* makeHasher) {
+  size_t hashLen = makeHasher->hashLength();
 
   for (auto& testVector : kHmacTestVectors) {
     std::string keyStr = folly::unhexlify(testVector.key);
@@ -187,7 +172,7 @@ void runHmacTest(
       out.resize(*testVector.truncatedOutSize);
     }
 
-    ASSERT_EQ(folly::hexlify(out), testVector.hmac.at(digestType));
+    ASSERT_EQ(folly::hexlify(out), testVector.hmac.at(makeHasher->id()));
   }
 }
 } // namespace fizz::test

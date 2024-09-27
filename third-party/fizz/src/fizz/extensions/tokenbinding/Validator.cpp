@@ -81,7 +81,7 @@ void Validator::verify(
 
     std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
     fizz::hash(
-        fizz::DefaultFactory().makeHasher(fizz::HashFunction::Sha256),
+        fizz::DefaultFactory().makeHasherFactory(fizz::HashFunction::Sha256),
         *message,
         folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
     if (ECDSA_do_verify(

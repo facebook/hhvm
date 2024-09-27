@@ -47,16 +47,13 @@ class HandshakeContext {
 
 class HandshakeContextImpl : public HandshakeContext {
  public:
-  HandshakeContextImpl(HasherFactory makeHasher, folly::ByteRange blankHash)
-      : HandshakeContextImpl(makeHasher, makeHasher(), blankHash) {}
+  explicit HandshakeContextImpl(const HasherFactoryWithMetadata* makeHasher)
+      : HandshakeContextImpl(makeHasher, makeHasher->make()) {}
 
   HandshakeContextImpl(
-      HasherFactory makeHasher,
-      std::unique_ptr<Hasher> hashState,
-      folly::ByteRange blankHash)
-      : makeHasher_(makeHasher),
-        hashState_(std::move(hashState)),
-        blankHash_(blankHash) {}
+      const HasherFactoryWithMetadata* makeHasher,
+      std::unique_ptr<Hasher> hashState)
+      : makeHasher_(makeHasher), hashState_(std::move(hashState)) {}
 
   void appendToTranscript(const Buf& data) override;
 
@@ -65,17 +62,16 @@ class HandshakeContextImpl : public HandshakeContext {
   Buf getFinishedData(folly::ByteRange baseKey) const override;
 
   folly::ByteRange getBlankContext() const override {
-    return blankHash_;
+    return makeHasher_->blankHash();
   }
 
   virtual std::unique_ptr<HandshakeContext> clone() const override {
     return std::make_unique<HandshakeContextImpl>(
-        makeHasher_, hashState_->clone(), blankHash_);
+        makeHasher_, hashState_->clone());
   }
 
  private:
-  HasherFactory makeHasher_;
+  const HasherFactoryWithMetadata* makeHasher_;
   std::unique_ptr<Hasher> hashState_;
-  folly::ByteRange blankHash_;
 };
 } // namespace fizz

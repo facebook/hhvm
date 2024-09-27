@@ -266,7 +266,11 @@ class MockFactory : public ::fizz::DefaultFactory {
       makeKeyExchange,
       (NamedGroup group, KeyExchangeRole role),
       (const));
-  MOCK_METHOD(HasherFactory, makeHasher, (HashFunction), (const));
+  MOCK_METHOD(
+      const HasherFactoryWithMetadata*,
+      makeHasherFactory,
+      (HashFunction),
+      (const));
   MOCK_METHOD(std::unique_ptr<Aead>, makeAead, (CipherSuite cipher), (const));
   MOCK_METHOD(Random, makeRandom, (), (const));
   MOCK_METHOD(uint32_t, makeTicketAgeAdd, (), (const));
@@ -328,15 +332,16 @@ class MockFactory : public ::fizz::DefaultFactory {
       ret->setDefaults();
       return ret;
     }));
-    ON_CALL(*this, makeHasher(_))
-        .WillByDefault(InvokeWithoutArgs([]() -> fizz::HasherFactory {
-          auto f = []() -> std::unique_ptr<Hasher> {
-            auto hasher = std::make_unique<NiceMock<MockHasher>>();
-            hasher->setDefaults();
-            return hasher;
-          };
-          return f;
-        }));
+    ON_CALL(*this, makeHasherFactory(_))
+        .WillByDefault(
+            InvokeWithoutArgs([]() -> const fizz::HasherFactoryWithMetadata* {
+              const static HasherFactoryWithMetadata instance =
+                  HasherFactoryWithMetadata::bind<::fizz::Sha256>(
+                      []() -> std::unique_ptr<::fizz::Hasher> {
+                        return std::make_unique<NiceMock<MockHasher>>();
+                      });
+              return &instance;
+            }));
     ON_CALL(*this, makeAead(_)).WillByDefault(InvokeWithoutArgs([]() {
       auto ret = std::make_unique<NiceMock<MockAead>>();
       ret->setDefaults();

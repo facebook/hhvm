@@ -1065,7 +1065,8 @@ size_t relocateImpl(Env& env) {
      * under an alignment constraint.  This means the instruction sequence
      * cannot be optimized, and the literal will never be removed.
      */
-    always_assert(env.literalsToRemove.empty());
+    always_assert_flog(env.literalsToRemove.empty(), "first address: {}",
+                       *env.literalsToRemove.begin());
 
     bool ok = true;
     /*

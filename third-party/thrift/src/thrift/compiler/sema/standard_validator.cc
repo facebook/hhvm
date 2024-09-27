@@ -662,11 +662,15 @@ void limit_terse_write_on_experimental_mode(
 
 void validate_field_id(sema_context& ctx, const t_field& node) {
   if (node.explicit_id() != node.id()) {
-    ctx.warning(
-        node,
-        "No field id specified for `{}`, resulting protocol may have conflicts "
-        "or not be backwards compatible!",
-        node.name());
+    if (ctx.sema_parameters().forbid_implicit_field_ids) {
+      ctx.error(node, "No field id specified for `{}`", node.name());
+    } else {
+      ctx.warning(
+          node,
+          "No field id specified for `{}`, resulting protocol may have conflicts "
+          "or not be backwards compatible!",
+          node.name());
+    }
   }
 
   ctx.check(

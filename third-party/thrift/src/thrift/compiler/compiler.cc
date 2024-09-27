@@ -389,6 +389,8 @@ std::string parse_args(
       for (const auto& validator : validators) {
         if (validator == "unstructured_annotations_on_field_type") {
           sparams.forbid_unstructured_annotations_on_field_types = true;
+        } else if (validator == "implicit_field_ids") {
+          sparams.forbid_implicit_field_ids = true;
         } else {
           fprintf(
               stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());

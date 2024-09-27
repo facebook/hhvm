@@ -103,21 +103,6 @@ NamedGroup getKexGroup(KEMId kemId);
 HashFunction getHashFunctionForKEM(KEMId kemId);
 
 /**
- * fizz::hpke::makeKeyExchange returns a `fizz::KeyExchange` instance given an
- * HPKE code point.
- *
- * The constructed `KeyExchange` object does *not* have a keypair associated
- * with it yet.
- *
- * @param  kemId    An HPKE KEM code point.
- *
- * @return An instance of a `fizz::KeyExchange` object without an associated
- *         keypair
- * @throws std::runtime_error   On invalid code points.
- */
-std::unique_ptr<KeyExchange> makeKeyExchange(KEMId kemId);
-
-/**
  * fizz::hpke::nenc returns the size of the serialized public component (`enc`)
  * for a given keypair.
  *

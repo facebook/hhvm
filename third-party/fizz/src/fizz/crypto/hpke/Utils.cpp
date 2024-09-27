@@ -162,21 +162,6 @@ std::unique_ptr<::fizz::hpke::Hkdf> makeHpkeHkdf(
   }
 }
 
-std::unique_ptr<KeyExchange> makeKeyExchange(KEMId kemId) {
-  switch (kemId) {
-    case KEMId::secp256r1:
-      return openssl::makeKeyExchange<fizz::P256>();
-    case KEMId::secp384r1:
-      return openssl::makeKeyExchange<fizz::P384>();
-    case KEMId::secp521r1:
-      return openssl::makeKeyExchange<fizz::P521>();
-    case KEMId::x25519:
-      return std::make_unique<X25519KeyExchange>();
-    default:
-      throw std::runtime_error("can't make key exchange: not implemented");
-  }
-}
-
 size_t nenc(KEMId kemId) {
   // Refer to Table 2 in 7.1.  Key Encapsulation Mechanisms (KEMs)
   switch (kemId) {

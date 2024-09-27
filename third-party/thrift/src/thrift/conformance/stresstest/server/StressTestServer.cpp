@@ -25,6 +25,7 @@
 #include <rroeser/scripts/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
+#include <thrift/lib/cpp2/server/SEParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
 DEFINE_int32(port, 5000, "Server port");
@@ -44,6 +45,10 @@ DEFINE_bool(
     false,
     "Enable work stealing test without request pile or concurrency controller."
     " Implies --work_stealing and --enable_resource_pools");
+DEFINE_bool(
+    se_parallel_concurrency_controller,
+    false,
+    "Enable SEParallelConcurrencyController. Implies --enable_resource_pools");
 DEFINE_string(
     certPath,
     "folly/io/async/test/certs/tests-cert.pem",
@@ -70,7 +75,8 @@ namespace {
 bool enableResourcePools() {
   // These flags explicitly or implicitly enable resource pools.
   return FLAGS_enable_resource_pools || FLAGS_work_stealing ||
-      FLAGS_work_stealing_executor_only;
+      FLAGS_work_stealing_executor_only ||
+      FLAGS_se_parallel_concurrency_controller;
 }
 
 bool enableWorkStealing() {
@@ -168,9 +174,9 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     std::shared_ptr<folly::Executor> executor;
     std::unique_ptr<RequestPileInterface> requestPile;
     std::unique_ptr<ConcurrencyControllerInterface> concurrencyController;
+    auto t = sanitizeNumThreads(FLAGS_cpu_threads);
     if (enableWorkStealing()) {
       LOG(INFO) << "Work stealing executor enabled";
-      auto t = sanitizeNumThreads(FLAGS_cpu_threads);
       executor = std::make_shared<folly::WorkStealingExecutor>(t, 4 * t);
       if (FLAGS_work_stealing_executor_only) {
         LOG(INFO) << "Request pile and concurrency controller disabled";
@@ -181,6 +187,14 @@ std::shared_ptr<ThriftServer> createStressTestServer(
         concurrencyController = std::make_unique<ParallelConcurrencyController>(
             *requestPile.get(), *executor.get());
       }
+    } else if (FLAGS_se_parallel_concurrency_controller) {
+      LOG(INFO) << "SEParallelConcurrencyController enabled";
+      executor = std::make_shared<folly::CPUThreadPoolExecutor>(
+          t, folly::CPUThreadPoolExecutor::makeThrottledLifoSemQueue());
+      RoundRobinRequestPile::Options options;
+      requestPile = std::make_unique<RoundRobinRequestPile>(std::move(options));
+      concurrencyController = std::make_unique<SEParallelConcurrencyController>(
+          *requestPile.get(), *executor.get());
     }
 
     server->resourcePoolSet().setResourcePool(

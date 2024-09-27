@@ -370,22 +370,24 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
   using Base = BaseStringPatch<Patch, BinaryPatch>;
   using T = typename Base::value_type;
 
- public:
-  using Base::apply;
-  using Base::assign;
-  using Base::Base;
-
-  void assign(std::string s) {
+  static folly::IOBuf stringToIobuf(std::string s) {
     std::string* p = new std::string(std::move(s));
-    assign(folly::IOBuf(
+    return folly::IOBuf(
         folly::IOBuf::TAKE_OWNERSHIP,
         p->data(),
         p->size(),
         [](void*, void* userData) {
           delete static_cast<std::string*>(userData);
         },
-        static_cast<void*>(p)));
+        static_cast<void*>(p));
   }
+
+ public:
+  using Base::apply;
+  using Base::assign;
+  using Base::Base;
+
+  void assign(std::string s) { assign(stringToIobuf(std::move(s))); }
 
   template <typename T>
   BinaryPatch& operator=(T&& other) {
@@ -433,7 +435,7 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
   }
 
   void apply(std::string& val) const {
-    folly::IOBuf buf;
+    folly::IOBuf buf = stringToIobuf(std::move(val));
     apply(buf);
     val = buf.to<std::string>();
   }

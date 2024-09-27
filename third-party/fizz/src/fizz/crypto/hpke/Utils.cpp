@@ -8,9 +8,6 @@
 
 #include <fizz/crypto/hpke/Utils.h>
 
-#include <fizz/backend/openssl/OpenSSL.h>
-#include <fizz/crypto/exchange/X25519.h>
-
 namespace fizz {
 namespace hpke {
 

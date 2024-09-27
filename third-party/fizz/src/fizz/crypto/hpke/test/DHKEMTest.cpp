@@ -61,10 +61,8 @@ testEncapDecap(DHKEM dhkem, std::unique_ptr<folly::IOBuf> publicKey) {
 }
 
 DHKEM getDHKEM(std::unique_ptr<KeyExchange> actualKex, NamedGroup group) {
-  auto prefix = "HPKE-v1";
   auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
-      folly::IOBuf::copyBuffer(prefix),
-      std::make_unique<Hkdf>(openssl::hasherFactory<Sha256>()));
+      fizz::hpke::Hkdf::v1(openssl::hasherFactory<Sha256>()));
   return DHKEM(
       std::make_unique<MockKeyExchange>(std::move(actualKex)),
       group,

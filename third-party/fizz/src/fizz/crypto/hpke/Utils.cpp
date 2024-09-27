@@ -141,27 +141,6 @@ CipherSuite getCipherSuite(AeadId aeadId) {
   }
 }
 
-std::unique_ptr<::fizz::hpke::Hkdf> makeHpkeHkdf(
-    std::unique_ptr<folly::IOBuf> prefix,
-    KDFId kdfId) {
-  switch (kdfId) {
-    case KDFId::Sha256:
-      return std::make_unique<::fizz::hpke::Hkdf>(
-          std::move(prefix),
-          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>()));
-    case KDFId::Sha384:
-      return std::make_unique<::fizz::hpke::Hkdf>(
-          std::move(prefix),
-          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha384>()));
-    case KDFId::Sha512:
-      return std::make_unique<::fizz::hpke::Hkdf>(
-          std::move(prefix),
-          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha512>()));
-    default:
-      throw std::runtime_error("hkdf: not implemented");
-  }
-}
-
 size_t nenc(KEMId kemId) {
   // Refer to Table 2 in 7.1.  Key Encapsulation Mechanisms (KEMs)
   switch (kemId) {

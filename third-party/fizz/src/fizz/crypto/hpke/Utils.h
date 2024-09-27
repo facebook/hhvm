@@ -140,24 +140,6 @@ HashFunction getHashFunction(KDFId kdfId);
  */
 KDFId getKDFId(HashFunction hash);
 
-/**
- * fizz::hpke::makeHpkeHkdf constructs an `fizz::Hkdf` instance from an HPKE
- * code point.
- *
- * @param prefix  A prefix string that contextualizes the HKDF instance.
- *
- *                This prefix string is passed through *as-is*. This function
- *                does *not* add any HPKE specific prefixes.
- *
- * @param kdfId   An HPKE HKDF code point.
- *
- * @return  An instantiated `fizz::Hkdf` instance.
- * @throws std::runtime_error  On invalid code points.
- */
-std::unique_ptr<Hkdf> makeHpkeHkdf(
-    std::unique_ptr<folly::IOBuf> prefix,
-    KDFId kdfId);
-
 /*****************************
  *                           *
  * Symmetric Encryption      *

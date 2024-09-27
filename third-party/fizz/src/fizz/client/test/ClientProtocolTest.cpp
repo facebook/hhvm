@@ -16,6 +16,7 @@
 #include <fizz/compression/test/Mocks.h>
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/crypto/hpke/test/Mocks.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/clock/test/Mocks.h>
 #include <fizz/protocol/ech/ECHExtensions.h>
 #include <fizz/protocol/ech/test/TestUtil.h>
@@ -48,6 +49,12 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
     auto mockFactory = std::make_unique<MockFactory>();
     mockFactory->setDefaults();
     factory_ = mockFactory.get();
+    ON_CALL(*factory_, makeHasherFactory(_))
+        .WillByDefault(Invoke([](HashFunction digest) {
+          LOG(INFO) << "DefaultFactory makeHasher";
+          return fizz::DefaultFactory().makeHasherFactory(digest);
+        }));
+
     context_->setFactory(std::move(mockFactory));
     context_->setSupportedAlpns({"h2"});
     verifier_ = std::make_shared<MockCertificateVerifier>();

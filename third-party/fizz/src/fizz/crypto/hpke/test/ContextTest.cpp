@@ -41,9 +41,10 @@ struct Params {
 
 class HpkeContextTest : public ::testing::TestWithParam<Params> {};
 
+static folly::StringPiece prefix07("HPKE-07");
+
 TEST_P(HpkeContextTest, TestContext) {
   auto testParam = GetParam();
-  const auto kPrefix = folly::IOBuf::copyBuffer("HPKE-07");
   auto suiteId = generateHpkeSuiteId(
       NamedGroup::secp256r1, HashFunction::Sha256, testParam.cipher);
   auto encryptCipher = getCipher(testParam.cipher);
@@ -53,9 +54,8 @@ TEST_P(HpkeContextTest, TestContext) {
   HpkeContextImpl encryptContext(
       std::move(encryptCipher),
       toIOBuf(kExportSecret),
-      std::make_unique<fizz::hpke::Hkdf>(
-          kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::withPrefix(
+          prefix07, openssl::hasherFactory<Sha256>())),
       suiteId->clone(),
       fizz::hpke::HpkeContext::Role::Sender);
   auto gotCiphertext = encryptContext.seal(
@@ -69,9 +69,8 @@ TEST_P(HpkeContextTest, TestContext) {
   HpkeContextImpl decryptContext(
       std::move(decryptCipher),
       toIOBuf(kExportSecret),
-      std::make_unique<fizz::hpke::Hkdf>(
-          kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::withPrefix(
+          prefix07, openssl::hasherFactory<Sha256>())),
       std::move(suiteId),
       fizz::hpke::HpkeContext::Role::Receiver);
   auto gotPlaintext = decryptContext.open(
@@ -82,7 +81,6 @@ TEST_P(HpkeContextTest, TestContext) {
 
 TEST_P(HpkeContextTest, TestContextRoles) {
   auto testParam = GetParam();
-  const auto kPrefix = folly::IOBuf::copyBuffer("HPKE-07");
   auto suiteId = generateHpkeSuiteId(
       NamedGroup::secp256r1, HashFunction::Sha256, testParam.cipher);
   auto encryptCipher = getCipher(testParam.cipher);
@@ -92,9 +90,8 @@ TEST_P(HpkeContextTest, TestContextRoles) {
   HpkeContextImpl encryptContext(
       std::move(encryptCipher),
       toIOBuf(kExportSecret),
-      std::make_unique<fizz::hpke::Hkdf>(
-          kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::withPrefix(
+          prefix07, openssl::hasherFactory<Sha256>())),
       suiteId->clone(),
       fizz::hpke::HpkeContext::Role::Sender);
 
@@ -104,9 +101,8 @@ TEST_P(HpkeContextTest, TestContextRoles) {
   HpkeContextImpl decryptContext(
       std::move(decryptCipher),
       toIOBuf(kExportSecret),
-      std::make_unique<fizz::hpke::Hkdf>(
-          kPrefix->clone(),
-          std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::withPrefix(
+          prefix07, openssl::hasherFactory<Sha256>())),
       std::move(suiteId),
       fizz::hpke::HpkeContext::Role::Receiver);
 
@@ -129,7 +125,6 @@ TEST_P(HpkeContextTest, TestExportSecret) {
        {fizz::hpke::HpkeContext::Role::Sender,
         fizz::hpke::HpkeContext::Role::Receiver}) {
     auto testParam = GetParam();
-    const auto kPrefix = folly::IOBuf::copyBuffer("HPKE-07");
     auto exporterContext = toIOBuf(testParam.exportContext);
 
     auto suiteId = generateHpkeSuiteId(
@@ -137,9 +132,8 @@ TEST_P(HpkeContextTest, TestExportSecret) {
     HpkeContextImpl context(
         getCipher(testParam.cipher),
         toIOBuf(testParam.exporterSecret),
-        std::make_unique<fizz::hpke::Hkdf>(
-            kPrefix->clone(),
-            std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
+        std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::withPrefix(
+            prefix07, openssl::hasherFactory<Sha256>())),
         std::move(suiteId),
         role);
     auto secret = context.exportSecret(std::move(exporterContext), 32);
@@ -155,7 +149,6 @@ TEST_P(HpkeContextTest, TestExportSecretThrow) {
        {fizz::hpke::HpkeContext::Role::Sender,
         fizz::hpke::HpkeContext::Role::Receiver}) {
     auto testParam = GetParam();
-    const auto kPrefix = folly::IOBuf::copyBuffer("HPKE-07");
     auto exporterContext = toIOBuf(testParam.exportContext);
 
     auto suiteId = generateHpkeSuiteId(
@@ -165,9 +158,8 @@ TEST_P(HpkeContextTest, TestExportSecretThrow) {
     HpkeContextImpl context(
         openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(),
         toIOBuf(testParam.exporterSecret),
-        std::make_unique<fizz::hpke::Hkdf>(
-            kPrefix->clone(),
-            std::make_unique<::fizz::Hkdf>(openssl::hasherFactory<Sha256>())),
+        std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::withPrefix(
+            prefix07, openssl::hasherFactory<Sha256>())),
         std::move(suiteId),
         role);
 

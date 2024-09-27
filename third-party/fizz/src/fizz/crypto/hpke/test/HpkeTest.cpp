@@ -11,6 +11,7 @@
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/crypto/hpke/test/Mocks.h>
 #include <fizz/crypto/test/TestUtil.h>
+#include <fizz/protocol/DefaultFactory.h>
 #include <gtest/gtest.h>
 #include <list>
 
@@ -1955,8 +1956,8 @@ std::unique_ptr<KeyExchange> generateAuthKex(
 }
 
 std::unique_ptr<fizz::hpke::Hkdf> genHKDF(HashFunction f) {
-  return fizz::hpke::makeHpkeHkdf(
-      folly::IOBuf::copyBuffer("HPKE-v1"), getKDFId(f));
+  auto hasher = fizz::DefaultFactory().makeHasherFactory(f);
+  return std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasher));
 }
 
 SetupParam getSetupParam(

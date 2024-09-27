@@ -189,7 +189,6 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
 static hpke::SetupParam getSetupParam(
     const fizz::Factory& factory,
     std::unique_ptr<DHKEM> dhkem,
-    std::unique_ptr<folly::IOBuf> prefix,
     hpke::KEMId kemId,
     const HpkeSymmetricCipherSuite& cipherSuite) {
   // Get suite id
@@ -198,7 +197,8 @@ static hpke::SetupParam getSetupParam(
   auto suite = getCipherSuite(cipherSuite.aead_id);
   auto suiteId = hpke::generateHpkeSuiteId(group, hash, suite);
 
-  auto hkdf = hpke::makeHpkeHkdf(std::move(prefix), cipherSuite.kdf_id);
+  auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
+      fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash)));
 
   return hpke::SetupParam{
       std::move(dhkem),
@@ -212,15 +212,14 @@ hpke::SetupResult constructHpkeSetupResult(
     const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
     const SupportedECHConfig& supportedConfig) {
-  const std::unique_ptr<folly::IOBuf> prefix =
-      folly::IOBuf::copyBuffer("HPKE-v1");
-
   folly::io::Cursor cursor(supportedConfig.config.ech_config_content.get());
   auto config = decode<ECHConfigContentDraft>(cursor);
   auto cipherSuite = supportedConfig.cipherSuite;
+  auto hash = getHashFunction(cipherSuite.kdf_id);
 
   // Get shared secret
-  auto hkdf = hpke::makeHpkeHkdf(prefix->clone(), cipherSuite.kdf_id);
+  auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
+      fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash)));
   std::unique_ptr<DHKEM> dhkem = std::make_unique<DHKEM>(
       std::move(kex), getKexGroup(config.key_config.kem_id), std::move(hkdf));
 
@@ -234,11 +233,7 @@ hpke::SetupResult constructHpkeSetupResult(
       std::move(info),
       folly::none,
       getSetupParam(
-          factory,
-          std::move(dhkem),
-          prefix->clone(),
-          config.key_config.kem_id,
-          cipherSuite));
+          factory, std::move(dhkem), config.key_config.kem_id, cipherSuite));
 }
 
 ServerHello makeDummyServerHello(const ServerHello& shlo) {
@@ -661,18 +656,17 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<KeyExchange> kex,
     uint64_t seqNum) {
-  const std::unique_ptr<folly::IOBuf> prefix =
-      folly::IOBuf::copyBuffer("HPKE-v1");
-
   // Get crypto primitive types used for decrypting
   hpke::KDFId kdfId = cipherSuite.kdf_id;
   folly::io::Cursor echConfigCursor(echConfig.ech_config_content.get());
   auto decodedConfigContent = decode<ECHConfigContentDraft>(echConfigCursor);
   auto kemId = decodedConfigContent.key_config.kem_id;
   NamedGroup group = hpke::getKexGroup(kemId);
+  auto hash = getHashFunction(cipherSuite.kdf_id);
+  auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
+      fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash)));
 
-  auto dhkem = std::make_unique<DHKEM>(
-      std::move(kex), group, hpke::makeHpkeHkdf(prefix->clone(), kdfId));
+  auto dhkem = std::make_unique<DHKEM>(std::move(kex), group, std::move(hkdf));
   auto aeadId = cipherSuite.aead_id;
   auto suiteId = hpke::generateHpkeSuiteId(
       group, hpke::getHashFunction(kdfId), hpke::getCipherSuite(aeadId));
@@ -680,7 +674,8 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
   hpke::SetupParam setupParam{
       std::move(dhkem),
       factory.makeAead(getCipherSuite(aeadId)),
-      hpke::makeHpkeHkdf(prefix->clone(), kdfId),
+      std::make_unique<fizz::hpke::Hkdf>(
+          fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash))),
       std::move(suiteId),
       seqNum};
 

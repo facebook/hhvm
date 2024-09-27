@@ -8,14 +8,30 @@
 
 #pragma once
 
+#include <fizz/crypto/Hasher.h>
 #include <fizz/crypto/Hkdf.h>
 
 namespace fizz {
 namespace hpke {
 
 class Hkdf {
+ private:
+  Hkdf(folly::ByteRange prefix, const HasherFactoryWithMetadata* hash)
+      : prefix_(prefix), hkdf_(hash) {}
+
  public:
-  Hkdf(std::unique_ptr<folly::IOBuf> prefix, std::unique_ptr<fizz::Hkdf> hkdf);
+  /**
+   * Construct an HKDF for HPKE-v1.
+   */
+  static Hkdf v1(const HasherFactoryWithMetadata* hash);
+
+  /**
+   * Construct an HKDF with a custom prefix.
+   */
+  static Hkdf withPrefix(
+      folly::ByteRange prefix,
+      const HasherFactoryWithMetadata* hash);
+
   std::vector<uint8_t> labeledExtract(
       std::unique_ptr<folly::IOBuf> salt,
       folly::ByteRange label,
@@ -35,8 +51,8 @@ class Hkdf {
   size_t hashLength();
 
  private:
-  std::unique_ptr<folly::IOBuf> prefix_;
-  std::unique_ptr<fizz::Hkdf> hkdf_;
+  folly::ByteRange prefix_;
+  fizz::Hkdf hkdf_;
 };
 
 } // namespace hpke
